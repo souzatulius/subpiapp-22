@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +38,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -96,6 +92,28 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-poppins;
+  }
+
+  input[type="text"], input[type="password"], input[type="email"] {
+    @apply focus:outline-none focus:ring-0 focus:border-subpi-orange;
+  }
+}
+
+@layer components {
+  .login-input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-subpi-orange;
+  }
+
+  .login-button {
+    @apply w-full bg-subpi-blue hover:bg-opacity-90 text-white py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center font-medium;
+  }
+
+  .pwa-button {
+    @apply fixed bottom-6 right-6 bg-subpi-orange text-white rounded-full p-4 shadow-lg cursor-pointer hover:bg-opacity-90 transition-all duration-200 z-50;
+  }
+  
+  .loading-spinner {
+    @apply h-12 w-12 rounded-full border-4 border-subpi-blue border-t-subpi-orange border-r-white border-b-gray-300;
   }
 }
