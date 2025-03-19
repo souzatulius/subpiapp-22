@@ -1,13 +1,15 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Demanda } from '../types';
+import { formatarPerguntasRespostas } from '../utils/formatarPerguntasRespostas';
 
 export function useNotaCriacao(demandaId: string, demanda: Demanda | undefined, onClose: () => void) {
   const [titulo, setTitulo] = useState('');
   const [texto, setTexto] = useState('');
+  const [isGerandoSugestao, setIsGerandoSugestao] = useState(false);
   const queryClient = useQueryClient();
   
   const criarNotaMutation = useMutation({
@@ -48,6 +50,80 @@ export function useNotaCriacao(demandaId: string, demanda: Demanda | undefined, 
     }
   });
   
+  const gerarSugestao = async () => {
+    if (!demanda) {
+      return;
+    }
+
+    try {
+      setIsGerandoSugestao(true);
+      
+      const perguntasRespostas = formatarPerguntasRespostas(demanda, []);
+      
+      const { data, error } = await supabase.functions.invoke('generate-note-suggestion', {
+        body: {
+          demandInfo: demanda,
+          responses: perguntasRespostas
+        }
+      });
+
+      if (error) {
+        console.error('Erro ao chamar a edge function:', error);
+        throw new Error(`Erro ao chamar a Edge Function: ${error.message}`);
+      }
+      
+      if (data.error) {
+        console.error('Erro retornado pela edge function:', data.error);
+        throw new Error(data.error);
+      }
+
+      if (data.suggestion) {
+        // Try to extract a title and content from the suggestion
+        const lines = data.suggestion.split('\n');
+        let suggestedTitle = '';
+        let suggestedContent = data.suggestion;
+        
+        // Check if the first non-empty line could be a title
+        for (let i = 0; i < Math.min(5, lines.length); i++) {
+          if (lines[i].trim()) {
+            // Check if it's likely a title (short, no punctuation at end)
+            if (lines[i].length < 100 && !lines[i].endsWith('.')) {
+              suggestedTitle = lines[i].replace(/^(título:|titulo:)/i, '').trim();
+              suggestedContent = lines.slice(i + 1).join('\n').trim();
+              break;
+            }
+          }
+        }
+        
+        if (suggestedTitle) setTitulo(suggestedTitle);
+        setTexto(suggestedContent);
+        
+        toast({
+          title: "Sugestão gerada automaticamente",
+          description: "Uma sugestão de nota foi gerada com base nos dados da demanda. Você pode editá-la conforme necessário."
+        });
+      } else {
+        throw new Error("A resposta não contém uma sugestão válida");
+      }
+    } catch (error: any) {
+      console.error('Erro ao gerar sugestão:', error);
+      toast({
+        title: "Erro ao gerar sugestão",
+        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão de nota.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGerandoSugestao(false);
+    }
+  };
+
+  // Gerar sugestão automaticamente quando a demanda é carregada
+  useEffect(() => {
+    if (demanda && !texto) {
+      gerarSugestao();
+    }
+  }, [demanda]);
+  
   const handleSubmit = (userId: string) => {
     if (!titulo.trim()) {
       toast({
@@ -75,6 +151,8 @@ export function useNotaCriacao(demandaId: string, demanda: Demanda | undefined, 
     setTitulo,
     texto,
     setTexto,
+    gerarSugestao,
+    isGerandoSugestao,
     handleSubmit,
     isPending: criarNotaMutation.isPending
   };

@@ -1,13 +1,11 @@
 
-import React, { useState } from 'react';
-import { Loader2, Send, Sparkles } from 'lucide-react';
+import React from 'react';
+import { Loader2, RefreshCw, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { NotaExistente } from '../types';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 
 interface CriarNotaFormProps {
   titulo: string;
@@ -19,6 +17,8 @@ interface CriarNotaFormProps {
   notaExistente: NotaExistente | null;
   demandaInfo?: any;
   perguntasRespostas?: any[];
+  gerarSugestao?: () => Promise<void>;
+  isGerandoSugestao?: boolean;
 }
 
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
@@ -29,81 +29,9 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
   onSubmit,
   isPending,
   notaExistente,
-  demandaInfo,
-  perguntasRespostas = []
+  gerarSugestao,
+  isGerandoSugestao = false
 }) => {
-  const [isGerandoSugestao, setIsGerandoSugestao] = useState(false);
-
-  const handleGerarSugestao = async () => {
-    if (!demandaInfo) {
-      toast({
-        title: "Erro",
-        description: "Não há informações suficientes para gerar uma sugestão.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      setIsGerandoSugestao(true);
-      
-      const { data, error } = await supabase.functions.invoke('generate-note-suggestion', {
-        body: {
-          demandInfo: demandaInfo,
-          responses: perguntasRespostas
-        }
-      });
-
-      if (error) {
-        console.error('Erro ao chamar a edge function:', error);
-        throw new Error(`Erro ao chamar a Edge Function: ${error.message}`);
-      }
-      
-      if (data.error) {
-        console.error('Erro retornado pela edge function:', data.error);
-        throw new Error(data.error);
-      }
-
-      if (data.suggestion) {
-        // Try to extract a title and content from the suggestion
-        const lines = data.suggestion.split('\n');
-        let suggestedTitle = '';
-        let suggestedContent = data.suggestion;
-        
-        // Check if the first non-empty line could be a title
-        for (let i = 0; i < Math.min(5, lines.length); i++) {
-          if (lines[i].trim()) {
-            // Check if it's likely a title (short, no punctuation at end)
-            if (lines[i].length < 100 && !lines[i].endsWith('.')) {
-              suggestedTitle = lines[i].replace(/^(título:|titulo:)/i, '').trim();
-              suggestedContent = lines.slice(i + 1).join('\n').trim();
-              break;
-            }
-          }
-        }
-        
-        if (suggestedTitle) setTitulo(suggestedTitle);
-        setTexto(suggestedContent);
-        
-        toast({
-          title: "Sugestão gerada com sucesso!",
-          description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
-        });
-      } else {
-        throw new Error("A resposta não contém uma sugestão válida");
-      }
-    } catch (error: any) {
-      console.error('Erro ao gerar sugestão:', error);
-      toast({
-        title: "Erro ao gerar sugestão",
-        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão de nota.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGerandoSugestao(false);
-    }
-  };
-
   return (
     <Card>
       <CardContent className="p-6">
@@ -122,16 +50,18 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
                 <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">
                   Título da Nota
                 </label>
-                <Button
-                  onClick={handleGerarSugestao}
-                  variant="outline"
-                  size="sm"
-                  className="text-[#003570] border-[#003570] hover:bg-[#EEF2F8]"
-                  disabled={isGerandoSugestao || !demandaInfo}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {isGerandoSugestao ? "Gerando..." : "Gerar com IA"}
-                </Button>
+                {gerarSugestao && (
+                  <Button
+                    onClick={gerarSugestao}
+                    variant="outline"
+                    size="sm"
+                    className="text-[#003570] border-[#003570] hover:bg-[#EEF2F8]"
+                    disabled={isGerandoSugestao}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isGerandoSugestao ? 'animate-spin' : ''}`} />
+                    {isGerandoSugestao ? "Gerando..." : "Regenerar Sugestão"}
+                  </Button>
+                )}
               </div>
               <Input
                 id="titulo"

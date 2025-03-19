@@ -21,6 +21,8 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
     setTitulo, 
     texto, 
     setTexto, 
+    gerarSugestao,
+    isGerandoSugestao,
     handleSubmit, 
     isPending 
   } = useNotaCriacao(demandaId, demanda, onClose);
@@ -55,6 +57,8 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
         notaExistente={notaExistente}
         demandaInfo={demanda}
         perguntasRespostas={perguntasRespostas}
+        gerarSugestao={gerarSugestao}
+        isGerandoSugestao={isGerandoSugestao}
       />
     </div>
   );
