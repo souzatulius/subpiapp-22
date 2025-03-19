@@ -85,6 +85,8 @@ serve(async (req) => {
     
     // Call OpenAI API with improved error handling
     try {
+      console.log("Calling OpenAI API...");
+      
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -106,7 +108,14 @@ serve(async (req) => {
       console.log("OpenAI API response status:", responseStatus);
 
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText = '';
+        try {
+          const errorData = await response.json();
+          errorText = JSON.stringify(errorData);
+        } catch {
+          errorText = await response.text();
+        }
+        
         console.error("OpenAI API error:", errorText);
         
         // Return appropriate error based on status code
@@ -125,12 +134,13 @@ serve(async (req) => {
         );
       }
 
+      // Handle successful response
       const data = await response.json();
-      console.log("OpenAI API response received");
+      console.log("OpenAI API response received successfully");
       
       // Validate OpenAI response
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        console.error("Unexpected OpenAI API response format:", data);
+        console.error("Unexpected OpenAI API response format:", JSON.stringify(data));
         return new Response(
           JSON.stringify({ error: "Formato de resposta inesperado da OpenAI" }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
