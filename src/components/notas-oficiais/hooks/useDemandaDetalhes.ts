@@ -45,11 +45,10 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Fix for the "Type instantiation is excessively deep and possibly infinite" error
-  // We need to use a simple type without any recursive references
+  // Fix for TypeScript error - using explicit type annotation and simpler return type
   const { data: notaExistente, isLoading: isLoadingNota } = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],
-    queryFn: async () => {
+    queryFn: async (): Promise<NotaExistente | null> => {
       try {
         const { data, error } = await supabase
           .from('notas_oficiais')
@@ -58,8 +57,6 @@ export function useDemandaDetalhes(demandaId: string) {
           .maybeSingle();
         
         if (error) throw error;
-        
-        // Using a type assertion with a simple type to avoid deep inference
         return data as NotaExistente | null;
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
