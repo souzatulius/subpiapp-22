@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -60,12 +61,13 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       try {
         setIsLoading(true);
         
+        // Updated query to specify the autor column explicitly
         const { data, error } = await supabase
           .from('notas_oficiais')
           .select(`
             *,
             areas_coordenacao (descricao),
-            autor:usuarios (nome_completo)
+            autor:autor_id (nome_completo)
           `)
           .eq('status', 'pendente')
           .order('criado_em', { ascending: false });
@@ -80,9 +82,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           criado_em: item.criado_em,
           status: item.status as 'pendente' | 'aprovado' | 'rejeitado',
           areas_coordenacao: item.areas_coordenacao,
-          autor: item.autor?.nome_completo 
-            ? { nome_completo: item.autor.nome_completo } 
-            : null
+          autor: item.autor
         }));
         
         setNotas(typedData);
