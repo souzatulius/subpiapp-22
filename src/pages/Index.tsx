@@ -47,9 +47,9 @@ const Index = () => {
                       Acessar <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" className="rounded-full bg-white text-[#002855] border border-[#002855] hover:bg-gray-50 py-2 px-5">
+                  <Button asChild variant="outline" className="rounded-full bg-transparent text-[#f57c35] border border-[#f57c35] hover:bg-gray-50 py-2 px-5">
                     <Link to="/register">
-                      Solicitar Cadastro
+                      Solicitar Acesso
                     </Link>
                   </Button>
                 </>
