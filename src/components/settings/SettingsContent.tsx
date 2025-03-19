@@ -16,30 +16,40 @@ interface SettingsContentProps {
 }
 
 const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
-  switch (activeSection) {
-    case 'dashboard':
-      return <SettingsDashboard />;
-    case 'usuarios':
-      return <UsersManagement />;
-    case 'areas':
-      return <CoordinationAreas />;
-    case 'cargos':
-      return <Positions />;
-    case 'servicos':
-      return <Services />;
-    case 'tipos_midia':
-      return <MediaTypes />;
-    case 'origens_demanda':
-      return <DemandOrigins />;
-    case 'distritos_bairros':
-      return <DistrictsAndNeighborhoods />;
-    case 'comunicados':
-      return <Announcements />;
-    case 'permissoes':
-      return <AccessControl />;
-    default:
-      return <UsersManagement />;
-  }
+  // Add a default component to render when loading or when there's an issue
+  const renderContent = () => {
+    try {
+      switch (activeSection) {
+        case 'dashboard':
+          return <SettingsDashboard />;
+        case 'usuarios':
+          return <UsersManagement />;
+        case 'areas':
+          return <CoordinationAreas />;
+        case 'cargos':
+          return <Positions />;
+        case 'servicos':
+          return <Services />;
+        case 'tipos_midia':
+          return <MediaTypes />;
+        case 'origens_demanda':
+          return <DemandOrigins />;
+        case 'distritos_bairros':
+          return <DistrictsAndNeighborhoods />;
+        case 'comunicados':
+          return <Announcements />;
+        case 'permissoes':
+          return <AccessControl />;
+        default:
+          return <UsersManagement />;
+      }
+    } catch (error) {
+      console.error("Error rendering content:", error);
+      return <div className="p-4">Erro ao carregar conteúdo. Por favor, tente novamente.</div>;
+    }
+  };
+
+  return renderContent();
 };
 
 export default SettingsContent;

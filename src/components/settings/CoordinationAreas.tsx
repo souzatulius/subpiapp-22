@@ -75,7 +75,7 @@ const CoordinationAreas = () => {
     <div>
       <DataTable
         title="Áreas de Coordenação"
-        data={areas}
+        data={areas || []} {/* Ensure data is never undefined */}
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}

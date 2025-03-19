@@ -40,6 +40,8 @@ export function useCoordinationAreas() {
         description: 'Não foi possível carregar as áreas de coordenação',
         variant: 'destructive',
       });
+      // Ensure areas is always an array even in case of error
+      setAreas([]);
     } finally {
       setLoading(false);
     }
