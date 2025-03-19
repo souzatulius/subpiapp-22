@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -30,10 +31,11 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      // Process notifications and ensure each has a tipo property
+      // Check if tipo column exists in the database
+      // and apply a default value if it doesn't
       const processedNotifications = (data || []).map(notification => ({
         ...notification,
-        tipo: notification.tipo || 'comunicado'
+        tipo: notification.tipo || 'comunicado' // Set default tipo to 'comunicado' if it's missing
       }));
 
       setNotifications(processedNotifications);
