@@ -12,7 +12,7 @@ const PWAButton: React.FC = () => {
   return (
     <>
       <button 
-        className="pwa-button"
+        className="fixed bottom-6 right-6 p-3 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center"
         onClick={toggleInstructions}
         aria-label="Adicionar à tela inicial"
       >
