@@ -1,3 +1,4 @@
+
 import React from 'react';
 export interface FormStep {
   title: string;
@@ -6,10 +7,12 @@ export interface FormStep {
 interface FormStepsProps {
   steps: FormStep[];
   activeStep: number;
+  onStepClick?: (stepIndex: number) => void;
 }
 const FormSteps: React.FC<FormStepsProps> = ({
   steps,
-  activeStep
+  activeStep,
+  onStepClick
 }) => {
   return <div className="relative">
       <div className="overflow-hidden h-2 mb-4 flex bg-orange-600 rounded-2xl">
@@ -18,11 +21,18 @@ const FormSteps: React.FC<FormStepsProps> = ({
       }} />
       </div>
       <div className="flex justify-between">
-        {steps.map((_, index) => <div key={index} className={`flex items-center justify-center rounded-full transition-colors 
+        {steps.map((_, index) => (
+          <button 
+            key={index} 
+            onClick={() => onStepClick && onStepClick(index)}
+            className={`flex items-center justify-center rounded-full transition-colors cursor-pointer
               ${index <= activeStep ? 'bg-[#003570] text-white' : 'bg-gray-200 text-gray-400'}
-              h-6 w-6 text-xs`}>
+              h-6 w-6 text-xs`}
+            type="button"
+          >
             {index + 1}
-          </div>)}
+          </button>
+        ))}
       </div>
     </div>;
 };
