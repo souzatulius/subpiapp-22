@@ -37,6 +37,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Search, Trash, MessageSquarePlus, Download, Printer } from 'lucide-react';
 
+// Schema for announcement validation
 const announcementSchema = z.object({
   titulo: z.string().min(3, 'O título deve ter pelo menos 3 caracteres'),
   mensagem: z.string().min(10, 'A mensagem deve ter pelo menos 10 caracteres'),
@@ -103,6 +104,7 @@ const Announcements = () => {
           mensagem: data.mensagem,
           destinatarios: data.destinatarios,
           autor_id: user.id,
+          data_envio: new Date().toISOString(), // Ensure data_envio is set
         });
       
       if (error) throw error;
@@ -123,6 +125,8 @@ const Announcements = () => {
           .insert({
             mensagem: `Novo comunicado: ${data.titulo}`,
             usuario_id: user.id, // No sistema real, isso seria para cada destinatário
+            data: new Date().toISOString(),
+            lida: false,
           });
       } catch (notifyError) {
         console.error('Erro ao criar notificação:', notifyError);
@@ -359,7 +363,10 @@ const Announcements = () => {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setIsCreateDialogOpen(false)}
+                  onClick={() => {
+                    form.reset();
+                    setIsCreateDialogOpen(false);
+                  }}
                 >
                   Cancelar
                 </Button>

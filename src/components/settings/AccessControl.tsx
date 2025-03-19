@@ -30,61 +30,61 @@ const AccessControl = () => {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      
-      try {
-        // Fetch users
-        const { data: usersData, error: usersError } = await supabase
-          .from('usuarios')
-          .select(`
-            id, 
-            nome_completo, 
-            email
-          `);
-          
-        if (usersError) throw usersError;
-        
-        // Fetch permissions
-        const { data: permissionsData, error: permissionsError } = await supabase
-          .from('permissoes')
-          .select('id, descricao, nivel_acesso');
-          
-        if (permissionsError) throw permissionsError;
-        
-        // Fetch user permissions
-        const { data: userPermissionsData, error: userPermissionsError } = await supabase
-          .from('usuario_permissoes')
-          .select('usuario_id, permissao_id');
-          
-        if (userPermissionsError) throw userPermissionsError;
-        
-        // Process user permissions
-        const userPerms: Record<string, string[]> = {};
-        userPermissionsData?.forEach(up => {
-          if (!userPerms[up.usuario_id]) {
-            userPerms[up.usuario_id] = [];
-          }
-          userPerms[up.usuario_id].push(up.permissao_id);
-        });
-        
-        setUsers(usersData || []);
-        setPermissions(permissionsData || []);
-        setUserPermissions(userPerms);
-      } catch (error: any) {
-        console.error('Erro ao carregar dados:', error);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar os dados. Por favor, tente novamente.',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-    
     fetchData();
   }, []);
+
+  async function fetchData() {
+    setLoading(true);
+    
+    try {
+      // Fetch users
+      const { data: usersData, error: usersError } = await supabase
+        .from('usuarios')
+        .select(`
+          id, 
+          nome_completo, 
+          email
+        `);
+        
+      if (usersError) throw usersError;
+      
+      // Fetch permissions
+      const { data: permissionsData, error: permissionsError } = await supabase
+        .from('permissoes')
+        .select('id, descricao, nivel_acesso');
+        
+      if (permissionsError) throw permissionsError;
+      
+      // Fetch user permissions
+      const { data: userPermissionsData, error: userPermissionsError } = await supabase
+        .from('usuario_permissoes')
+        .select('usuario_id, permissao_id');
+        
+      if (userPermissionsError) throw userPermissionsError;
+      
+      // Process user permissions
+      const userPerms: Record<string, string[]> = {};
+      userPermissionsData?.forEach(up => {
+        if (!userPerms[up.usuario_id]) {
+          userPerms[up.usuario_id] = [];
+        }
+        userPerms[up.usuario_id].push(up.permissao_id);
+      });
+      
+      setUsers(usersData || []);
+      setPermissions(permissionsData || []);
+      setUserPermissions(userPerms);
+    } catch (error: any) {
+      console.error('Erro ao carregar dados:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os dados. Por favor, tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handlePermissionChange = async (userId: string, permissionId: string, checked: boolean) => {
     setSaving(true);
@@ -147,6 +147,17 @@ const AccessControl = () => {
     setSaving(true);
     
     try {
+      // Check if permission already exists to avoid duplicate
+      const userPerms = userPermissions[userId] || [];
+      if (userPerms.includes(permissionId)) {
+        toast({
+          title: 'Aviso',
+          description: 'Esta permissão já foi atribuída ao usuário.',
+        });
+        setSaving(false);
+        return;
+      }
+      
       // Add permission
       const { error } = await supabase
         .from('usuario_permissoes')
