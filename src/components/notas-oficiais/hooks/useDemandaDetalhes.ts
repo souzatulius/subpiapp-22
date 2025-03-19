@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Demanda, Resposta, NotaExistente } from '../types';
 
 export function useDemandaDetalhes(demandaId: string) {
-  const { data: demanda, isLoading: demandaLoading } = useQuery<Demanda>({
-    queryKey: ['demanda-detalhes', demandaId],
+  // Buscar detalhes da demanda
+  const { data: demanda, isLoading: isLoadingDemanda } = useQuery({
+    queryKey: ['demanda', demandaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('demandas')
@@ -16,53 +17,51 @@ export function useDemandaDetalhes(demandaId: string) {
           horario_publicacao,
           prazo_resposta,
           detalhes_solicitacao,
-          perguntas,
-          arquivo_url,
-          area_coordenacao:area_coordenacao_id (id, descricao),
-          autor:autor_id (nome_completo)
+          areas_coordenacao:area_coordenacao_id (id, descricao),
+          autor:autor_id (nome_completo),
+          perguntas
         `)
         .eq('id', demandaId)
         .single();
       
       if (error) throw error;
       return data as Demanda;
-    }
+    },
+    enabled: !!demandaId
   });
   
-  const { data: respostas, isLoading: respostasLoading } = useQuery<Resposta[]>({
-    queryKey: ['respostas-demanda', demandaId],
+  // Buscar respostas da demanda
+  const { data: respostas, isLoading: isLoadingRespostas } = useQuery({
+    queryKey: ['respostas', demandaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('respostas_demandas')
-        .select(`
-          id,
-          texto,
-          arquivo_url,
-          criado_em,
-          usuario:usuario_id (nome_completo)
-        `)
+        .select('id, pergunta_id, texto')
         .eq('demanda_id', demandaId);
       
       if (error) throw error;
-      return (data || []) as Resposta[];
-    }
+      return data as Resposta[];
+    },
+    enabled: !!demandaId
   });
   
-  // Fixed by explicit typecasting to break the recursive type inference
-  const { data: notaExistente } = useQuery<NotaExistente | null>({
+  // Verificar se já existe uma nota oficial para essa demanda
+  const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notas_oficiais')
-        .select('*')
-        .eq('demanda_id', demandaId);
+        .select('id, status')
+        .eq('demanda_id', demandaId)
+        .maybeSingle();
       
       if (error) throw error;
-      return data && data.length > 0 ? data[0] as NotaExistente : null;
-    }
+      return data as NotaExistente | null;
+    },
+    enabled: !!demandaId
   });
-
-  const isLoading = demandaLoading || respostasLoading;
+  
+  const isLoading = isLoadingDemanda || isLoadingRespostas || isLoadingNota;
   
   return {
     demanda,

@@ -53,6 +53,8 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
         onSubmit={() => user?.id && handleSubmit(user.id)}
         isPending={isPending}
         notaExistente={notaExistente}
+        demandaInfo={demanda}
+        perguntasRespostas={perguntasRespostas}
       />
     </div>
   );
