@@ -16,12 +16,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Fixed content */}
-        <div className="w-full md:w-1/2 bg-white p-6 md:p-12 flex flex-col justify-center px-[25px]">
+        <div className="w-full md:w-1/2 bg-white p-6 md:p-12 flex flex-col justify-center px-[25px] py-[30px]">
           {leftContent}
         </div>
 
         {/* Right side - Dynamic content */}
-        <div className="w-full md:w-1/2 bg-[#003570] p-6 flex items-center justify-center px-0">
+        <div className="w-full md:w-1/2 bg-[#003570] p-6 flex items-center justify-center py-[30px] px-[4px]">
           <div className="w-full max-w-md">
             {children}
           </div>
