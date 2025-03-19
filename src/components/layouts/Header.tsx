@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Settings, Menu, User, Check, Trash, X } from 'lucide-react';
+import { Bell, Settings, Menu, User, Check, Trash, X, UserCog, Camera, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
@@ -24,16 +26,44 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const {
-    user
+    user,
+    signOut
   } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
   useEffect(() => {
     if (user) {
       fetchNotifications();
+      fetchUserProfile();
     }
   }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select(`
+          nome_completo,
+          cargo_id,
+          area_coordenacao_id,
+          foto_perfil_url,
+          cargos:cargo_id(descricao),
+          areas_coordenacao:area_coordenacao_id(descricao)
+        `)
+        .eq('id', user?.id)
+        .single();
+
+      if (error) throw error;
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Erro ao buscar perfil do usuário:', error);
+    }
+  };
+
   const fetchNotifications = async () => {
     try {
       const {
@@ -44,10 +74,9 @@ const Header: React.FC<HeaderProps> = ({
       }).limit(10);
       if (error) throw error;
 
-      // Since 'tipo' might not exist in the returned data, add it with a default value
       const processedNotifications = (data || []).map(notification => ({
         ...notification,
-        tipo: 'comunicado' // Default tipo for all notifications if not present
+        tipo: 'comunicado'
       }));
       setNotifications(processedNotifications);
       setUnreadCount(processedNotifications.filter(n => !n.lida).length || 0);
@@ -55,6 +84,7 @@ const Header: React.FC<HeaderProps> = ({
       console.error('Erro ao carregar notificações:', error);
     }
   };
+
   const markAsRead = async (id: string) => {
     try {
       const {
@@ -75,6 +105,7 @@ const Header: React.FC<HeaderProps> = ({
       console.error('Erro ao marcar notificação como lida:', error);
     }
   };
+
   const deleteNotification = async (id: string) => {
     try {
       const {
@@ -93,6 +124,7 @@ const Header: React.FC<HeaderProps> = ({
       console.error('Erro ao excluir notificação:', error);
     }
   };
+
   const markAllAsRead = async () => {
     try {
       const unreadIds = notifications.filter(n => !n.lida).map(n => n.id);
@@ -115,6 +147,7 @@ const Header: React.FC<HeaderProps> = ({
       console.error('Erro ao marcar todas notificações como lidas:', error);
     }
   };
+
   const getNotificationIcon = (tipo: string) => {
     switch (tipo) {
       case 'demanda':
@@ -127,6 +160,7 @@ const Header: React.FC<HeaderProps> = ({
         return <div className="w-2 h-2 rounded-full bg-gray-500"></div>;
     }
   };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR', {
@@ -136,6 +170,33 @@ const Header: React.FC<HeaderProps> = ({
       minute: '2-digit'
     }).format(date);
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setIsProfileOpen(false);
+      toast({
+        description: "Você foi desconectado com sucesso"
+      });
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer logout. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getUserInitials = (name: string) => {
+    if (!name) return 'U';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  };
+
   return <header className="w-full px-6 py-3 border-b border-gray-200 flex justify-between items-center bg-white">
       <div className="flex-1 flex justify-start">
         {showControls && <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-4 px-0">
@@ -200,9 +261,85 @@ const Header: React.FC<HeaderProps> = ({
             <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
               <Settings className="h-5 w-5 text-[#003570]" />
             </Button>
-            <Button variant="ghost" size="icon" className="bg-gray-100 rounded-full">
-              <User className="h-5 w-5 text-[#003570]" />
-            </Button>
+            <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="bg-gray-100 hover:bg-gray-200 rounded-full">
+                  {userProfile?.foto_perfil_url ? (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
+                      <AvatarFallback>{getUserInitials(userProfile.nome_completo)}</AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <User className="h-5 w-5 text-[#003570]" />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0 overflow-hidden">
+                <div className="bg-gray-100 p-4">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-12 w-12">
+                      {userProfile?.foto_perfil_url ? (
+                        <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
+                      ) : (
+                        <AvatarFallback>{userProfile?.nome_completo ? getUserInitials(userProfile.nome_completo) : 'U'}</AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div>
+                      <h3 className="font-medium text-gray-900">{userProfile?.nome_completo || 'Usuário'}</h3>
+                      <p className="text-xs text-gray-500">
+                        {userProfile?.areas_coordenacao?.descricao || 'Área não definida'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {userProfile?.cargos?.descricao || 'Cargo não definido'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-1">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
+                    onClick={() => { 
+                      setIsProfileOpen(false);
+                      navigate('/settings');
+                    }}
+                  >
+                    <UserCog className="mr-2 h-4 w-4" />
+                    Editar Perfil
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
+                    onClick={() => { 
+                      setIsProfileOpen(false);
+                      navigate('/settings');
+                    }}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Ajustes da Conta
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
+                    onClick={() => { 
+                      setIsProfileOpen(false);
+                      navigate('/settings');
+                    }}
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    Trocar Foto
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sair
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>}
       </div>
     </header>;
