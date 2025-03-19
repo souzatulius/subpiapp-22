@@ -48,5 +48,5 @@ export const useAnnouncements = () => {
   };
 };
 
-// Re-export necessary types for use in other components
-export { AnnouncementFormValues, Announcement } from './types';
+// Re-export necessary types for use in other components using export type syntax
+export type { AnnouncementFormValues, Announcement } from './types';
