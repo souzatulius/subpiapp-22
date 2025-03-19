@@ -57,7 +57,7 @@ const NeighborhoodForm: React.FC<NeighborhoodFormProps> = ({
             <FormItem>
               <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input placeholder="Nome do bairro" {...field} />
+                <Input className="rounded-lg" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -75,8 +75,8 @@ const NeighborhoodForm: React.FC<NeighborhoodFormProps> = ({
                 defaultValue={field.value}
               >
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um distrito" />
+                  <SelectTrigger className="rounded-lg">
+                    <SelectValue />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -97,10 +97,11 @@ const NeighborhoodForm: React.FC<NeighborhoodFormProps> = ({
             type="button" 
             variant="outline" 
             onClick={onCancel}
+            className="rounded-lg"
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} className="rounded-lg">
             {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
           </Button>
         </DialogFooter>

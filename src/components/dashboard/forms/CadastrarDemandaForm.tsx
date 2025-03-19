@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
   const [distritos, setDistritos] = useState<any[]>([]);
   const [bairros, setBairros] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -188,13 +189,31 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
     }
   }, [selectedDistrito, bairros]);
 
+  // Filter services based on search term and selected area
+  const filteredServicesBySearch = useMemo(() => {
+    if (!serviceSearch) return filteredServicos;
+    
+    return filteredServicos.filter(service => 
+      service.descricao.toLowerCase().includes(serviceSearch.toLowerCase())
+    );
+  }, [filteredServicos, serviceSearch]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'serviceSearch') {
+      setServiceSearch(value);
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleServiceSelect = (serviceId: string) => {
+    setFormData(prev => ({ ...prev, servico_id: serviceId }));
+    setServiceSearch('');
   };
 
   const handlePerguntaChange = (index: number, value: string) => {
@@ -266,7 +285,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 name="titulo" 
                 value={formData.titulo} 
                 onChange={handleChange} 
-                placeholder="Digite um título descritivo"
               />
             </div>
             
@@ -292,22 +310,36 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
             
             {formData.area_coordenacao_id && (
               <div className="animate-fadeIn">
-                <Label htmlFor="servico_id">Serviço Relacionado</Label>
-                <Select 
-                  value={formData.servico_id} 
-                  onValueChange={(value) => handleSelectChange('servico_id', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um serviço" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredServicos.map(servico => (
-                      <SelectItem key={servico.id} value={servico.id}>
-                        {servico.descricao}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="servico_id">Serviço</Label>
+                <div className="relative">
+                  <Input 
+                    type="text"
+                    name="serviceSearch"
+                    value={serviceSearch}
+                    onChange={handleChange}
+                    className="w-full rounded-lg"
+                  />
+                  
+                  {serviceSearch && filteredServicesBySearch.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredServicesBySearch.map(service => (
+                        <div 
+                          key={service.id} 
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleServiceSelect(service.id)}
+                        >
+                          {service.descricao}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {formData.servico_id && (
+                  <div className="mt-2 p-2 bg-blue-50 rounded-lg text-sm">
+                    Serviço selecionado: {servicos.find(s => s.id === formData.servico_id)?.descricao}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -322,8 +354,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 value={formData.origem_id} 
                 onValueChange={(value) => handleSelectChange('origem_id', value)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a origem" />
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {origens.map(origem => (
@@ -341,8 +373,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 value={formData.tipo_midia_id} 
                 onValueChange={(value) => handleSelectChange('tipo_midia_id', value)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo de mídia" />
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {tiposMidia.map(tipo => (
@@ -389,6 +421,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 type="datetime-local" 
                 value={formData.prazo_resposta} 
                 onChange={handleChange} 
+                className="rounded-lg"
               />
             </div>
           </div>
@@ -404,7 +437,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 name="nome_solicitante" 
                 value={formData.nome_solicitante} 
                 onChange={handleChange} 
-                placeholder="Nome completo"
               />
             </div>
             
@@ -415,7 +447,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 name="telefone_solicitante" 
                 value={formData.telefone_solicitante} 
                 onChange={handleChange} 
-                placeholder="(11) 00000-0000"
               />
             </div>
             
@@ -427,7 +458,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 type="email" 
                 value={formData.email_solicitante} 
                 onChange={handleChange} 
-                placeholder="email@exemplo.com"
               />
             </div>
           </div>
@@ -443,7 +473,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 name="endereco" 
                 value={formData.endereco} 
                 onChange={handleChange} 
-                placeholder="Endereço completo"
               />
             </div>
             
@@ -453,8 +482,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 value={selectedDistrito} 
                 onValueChange={setSelectedDistrito}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o distrito" />
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {distritos.map(distrito => (
@@ -473,8 +502,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 onValueChange={(value) => handleSelectChange('bairro_id', value)}
                 disabled={!selectedDistrito}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o bairro" />
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredBairros.map(bairro => (
@@ -496,10 +525,9 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
               {formData.perguntas.map((pergunta, index) => (
                 <Input 
                   key={index}
-                  className="mt-2"
+                  className="mt-2 rounded-lg"
                   value={pergunta} 
                   onChange={(e) => handlePerguntaChange(index, e.target.value)} 
-                  placeholder={`Pergunta ${index + 1}`}
                 />
               ))}
             </div>
@@ -511,15 +539,15 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
                 name="detalhes_solicitacao" 
                 value={formData.detalhes_solicitacao} 
                 onChange={handleChange} 
-                placeholder="Forneça detalhes adicionais (máx. 500 caracteres)"
                 maxLength={500}
                 rows={4}
+                className="rounded-lg"
               />
             </div>
             
             <div>
               <Label>Anexar Arquivo</Label>
-              <div className="mt-2 flex items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded-md">
+              <div className="mt-2 flex items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded-lg shadow-lg">
                 <div className="space-y-1 text-center">
                   <Upload className="mx-auto h-12 w-12 text-gray-400" />
                   <div className="text-sm text-gray-600">
@@ -548,7 +576,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
         <Button 
           variant="ghost" 
           onClick={onClose}
-          className="p-1.5"
+          className="p-1.5 rounded-full"
         >
           <ArrowLeft className="h-5 w-5 text-gray-600" />
         </Button>
@@ -558,13 +586,13 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
         <Button 
           variant="ghost" 
           onClick={onClose}
-          className="p-1.5"
+          className="p-1.5 rounded-full"
         >
           <X className="h-5 w-5 text-gray-600" />
         </Button>
       </div>
       
-      <Card className="border border-gray-200">
+      <Card className="border border-gray-200 rounded-lg">
         <div className="p-6">
           <div className="mb-6">
             <h3 className="text-lg font-medium">
@@ -577,7 +605,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
           
           <div className="mb-6">
             <div className="relative">
-              <div className="overflow-hidden h-2 mb-4 flex rounded bg-gray-200">
+              <div className="overflow-hidden h-2 mb-4 flex rounded-lg bg-gray-200">
                 <div 
                   className="bg-[#003570] transition-all"
                   style={{ width: `${(activeStep / (steps.length - 1)) * 100}%` }}
@@ -605,6 +633,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
               variant="outline"
               onClick={prevStep}
               disabled={activeStep === 0}
+              className="rounded-lg"
             >
               Voltar
             </Button>
@@ -613,14 +642,14 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
               <Button 
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="bg-[#003570] hover:bg-[#002855]"
+                className="bg-[#003570] hover:bg-[#002855] rounded-lg"
               >
                 {isLoading ? "Enviando..." : "Finalizar"}
               </Button>
             ) : (
               <Button 
                 onClick={nextStep}
-                className="bg-[#003570] hover:bg-[#002855]"
+                className="bg-[#003570] hover:bg-[#002855] rounded-lg"
               >
                 Próximo
                 <ArrowRight className="ml-2 h-4 w-4" />

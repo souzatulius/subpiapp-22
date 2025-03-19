@@ -40,8 +40,8 @@ const DemandOriginForm: React.FC<DemandOriginFormProps> = ({
             <Input
               id="descricao"
               name="descricao"
-              placeholder="Nome da origem de demanda"
               autoFocus
+              className="rounded-lg"
               {...form.register('descricao')}
             />
           </div>

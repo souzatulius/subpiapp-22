@@ -47,7 +47,7 @@ const DistrictForm: React.FC<DistrictFormProps> = ({
             <FormItem>
               <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input placeholder="Nome do distrito" {...field} />
+                <Input className="rounded-lg" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -59,10 +59,11 @@ const DistrictForm: React.FC<DistrictFormProps> = ({
             type="button" 
             variant="outline" 
             onClick={onCancel}
+            className="rounded-lg"
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} className="rounded-lg">
             {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
           </Button>
         </DialogFooter>
