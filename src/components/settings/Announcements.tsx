@@ -19,11 +19,15 @@ const Announcements = () => {
     setIsDeleteDialogOpen,
     currentAnnouncement,
     setCurrentAnnouncement,
+    users,
+    areas,
+    cargos,
     form,
     handleCreateAnnouncement,
     handleDeleteAnnouncement,
     handleExportCsv,
     handlePrint,
+    formatDestination,
   } = useAnnouncements();
 
   return (
@@ -42,6 +46,7 @@ const Announcements = () => {
         filteredAnnouncements={filteredAnnouncements}
         setCurrentAnnouncement={setCurrentAnnouncement}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        formatDestination={formatDestination}
       />
       
       <CreateAnnouncementDialog
@@ -50,6 +55,9 @@ const Announcements = () => {
         form={form}
         isSubmitting={isSubmitting}
         onSubmit={handleCreateAnnouncement}
+        users={users}
+        areas={areas}
+        cargos={cargos}
       />
       
       <DeleteAnnouncementDialog
