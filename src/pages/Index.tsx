@@ -21,7 +21,7 @@ const Index = () => {
           <div className="max-w-xl">
             <h1 className="text-4xl font-bold leading-tight mb-6 px-0 md:text-8xl">
               <span className="text-[#002855]">Demandas da</span><br />
-              <span className="text-[#002855]">nossa SUB</span><br />
+              <span className="text-[#002855]">SUB</span><br />
               <span className="text-[#002855]">com </span>
               <span className="text-[#f57c35]">eficiência</span>
             </h1>
