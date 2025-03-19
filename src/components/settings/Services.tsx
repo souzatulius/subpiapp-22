@@ -69,10 +69,10 @@ const Services = () => {
     },
   ];
 
-  const renderForm = () => (
+  const renderForm = (onClose: () => void) => (
     <ServiceForm
       onSubmit={handleAdd}
-      onCancel={closeAddForm}
+      onCancel={onClose}
       areas={areas}
       isSubmitting={isSubmitting}
     />
@@ -88,7 +88,7 @@ const Services = () => {
         onEdit={openEditForm}
         onDelete={deleteService}
         filterPlaceholder="Filtrar serviços..."
-        renderForm={isAddFormOpen ? renderForm : undefined}
+        renderForm={renderForm}
         isLoading={loading}
       />
       
