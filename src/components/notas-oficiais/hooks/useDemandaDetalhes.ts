@@ -54,7 +54,7 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Using direct type annotation for notaExistente query to prevent deep type instantiation
+  // Explicitly type the query to prevent excessive type instantiation
   const notaExistenteQuery = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
