@@ -4,44 +4,15 @@ import { ptBR } from 'date-fns/locale';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage
-} from '@/components/ui/form';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {
-  AlertCircle, 
-  Clock, 
-  CheckCircle2, 
-  Archive, 
-  XCircle,
-  MapPin,
-  Phone,
-  Mail,
-  User,
-  Calendar,
-  FileText,
-  MessageSquare,
-  Loader2
-} from 'lucide-react';
-
+import { AlertCircle, Clock, CheckCircle2, Archive, XCircle, MapPin, Phone, Mail, User, Calendar, FileText, MessageSquare, Loader2 } from 'lucide-react';
 interface Demand {
   id: string;
   titulo: string;
@@ -49,12 +20,24 @@ interface Demand {
   prioridade: string;
   horario_publicacao: string;
   prazo_resposta: string;
-  area_coordenacao: { descricao: string } | null;
-  servico: { descricao: string } | null;
-  origem: { descricao: string } | null;
-  tipo_midia: { descricao: string } | null;
-  bairro: { nome: string } | null;
-  autor: { nome_completo: string } | null;
+  area_coordenacao: {
+    descricao: string;
+  } | null;
+  servico: {
+    descricao: string;
+  } | null;
+  origem: {
+    descricao: string;
+  } | null;
+  tipo_midia: {
+    descricao: string;
+  } | null;
+  bairro: {
+    nome: string;
+  } | null;
+  autor: {
+    nome_completo: string;
+  } | null;
   endereco: string | null;
   nome_solicitante: string | null;
   email_solicitante: string | null;
@@ -63,7 +46,6 @@ interface Demand {
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null;
 }
-
 interface DemandDetailProps {
   demand: Demand | null;
   isOpen: boolean;
@@ -74,23 +56,23 @@ interface DemandDetailProps {
 const formSchema = z.object({
   responses: z.record(z.string().min(1, "A resposta é obrigatória"))
 });
-
 type FormValues = z.infer<typeof formSchema>;
-
-const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) => {
+const DemandDetail: React.FC<DemandDetailProps> = ({
+  demand,
+  isOpen,
+  onClose
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
-  
+
   // Set up the form with default values based on questions
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      responses: demand?.perguntas ? 
-        Object.keys(demand.perguntas).reduce((acc, key) => {
-          acc[key] = "";
-          return acc;
-        }, {} as Record<string, string>) : 
-        {}
+      responses: demand?.perguntas ? Object.keys(demand.perguntas).reduce((acc, key) => {
+        acc[key] = "";
+        return acc;
+      }, {} as Record<string, string>) : {}
     }
   });
 
@@ -101,58 +83,52 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
         acc[key] = "";
         return acc;
       }, {} as Record<string, string>);
-      
-      form.reset({ responses: defaultResponses });
+      form.reset({
+        responses: defaultResponses
+      });
     }
   }, [demand, form]);
-
   const submitResponseMutation = useMutation({
     mutationFn: async (data: FormValues) => {
       if (!demand) throw new Error("Demanda não encontrada");
-      
-      const { data: existingResponses, error: fetchError } = await supabase
-        .from('respostas_demandas')
-        .select('*')
-        .eq('demanda_id', demand.id)
-        .limit(1);
-      
+      const {
+        data: existingResponses,
+        error: fetchError
+      } = await supabase.from('respostas_demandas').select('*').eq('demanda_id', demand.id).limit(1);
       if (fetchError) throw fetchError;
-      
+
       // Format the response text with questions and answers
-      const responseText = Object.entries(data.responses)
-        .map(([key, value]) => {
-          const question = demand.perguntas?.[key] || key;
-          return `Pergunta: ${question}\nResposta: ${value}`;
-        })
-        .join('\n\n');
-      
+      const responseText = Object.entries(data.responses).map(([key, value]) => {
+        const question = demand.perguntas?.[key] || key;
+        return `Pergunta: ${question}\nResposta: ${value}`;
+      }).join('\n\n');
+
       // If there's already a response, update it
       if (existingResponses && existingResponses.length > 0) {
-        const { error } = await supabase
-          .from('respostas_demandas')
-          .update({ texto: responseText })
-          .eq('id', existingResponses[0].id);
-          
+        const {
+          error
+        } = await supabase.from('respostas_demandas').update({
+          texto: responseText
+        }).eq('id', existingResponses[0].id);
         if (error) throw error;
       } else {
         // Otherwise, create a new response
-        const { error } = await supabase
-          .from('respostas_demandas')
-          .insert({
-            demanda_id: demand.id,
-            texto: responseText,
-            usuario_id: (await supabase.auth.getUser()).data.user?.id
-          });
-          
+        const {
+          error
+        } = await supabase.from('respostas_demandas').insert({
+          demanda_id: demand.id,
+          texto: responseText,
+          usuario_id: (await supabase.auth.getUser()).data.user?.id
+        });
         if (error) throw error;
       }
-      
+
       // Update the demand status to 'em_andamento'
-      const { error: updateError } = await supabase
-        .from('demandas')
-        .update({ status: 'em_andamento' })
-        .eq('id', demand.id);
-        
+      const {
+        error: updateError
+      } = await supabase.from('demandas').update({
+        status: 'em_andamento'
+      }).eq('id', demand.id);
       if (updateError) throw updateError;
     },
     onSuccess: () => {
@@ -161,10 +137,12 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
         description: "As respostas foram salvas com sucesso",
         variant: "default"
       });
-      queryClient.invalidateQueries({ queryKey: ['demandas'] });
+      queryClient.invalidateQueries({
+        queryKey: ['demandas']
+      });
       onClose();
     },
-    onError: (error) => {
+    onError: error => {
       console.error("Error submitting response:", error);
       toast({
         title: "Erro ao enviar respostas",
@@ -176,7 +154,6 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
       setIsSubmitting(false);
     }
   });
-
   const onSubmit = (data: FormValues) => {
     setIsSubmitting(true);
     submitResponseMutation.mutate(data);
@@ -203,12 +180,18 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
   // Helper function to get status text
   const formatStatus = (status: string) => {
     switch (status) {
-      case 'pendente': return 'Pendente';
-      case 'em_andamento': return 'Em Andamento';
-      case 'concluida': return 'Concluída';
-      case 'arquivada': return 'Arquivada';
-      case 'cancelada': return 'Cancelada';
-      default: return status;
+      case 'pendente':
+        return 'Pendente';
+      case 'em_andamento':
+        return 'Em Andamento';
+      case 'concluida':
+        return 'Concluída';
+      case 'arquivada':
+        return 'Arquivada';
+      case 'cancelada':
+        return 'Cancelada';
+      default:
+        return status;
     }
   };
 
@@ -229,18 +212,19 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
   // Helper function to format priority text
   const formatPriority = (prioridade: string) => {
     switch (prioridade) {
-      case 'alta': return 'Alta';
-      case 'media': return 'Média';
-      case 'baixa': return 'Baixa';
-      default: return prioridade;
+      case 'alta':
+        return 'Alta';
+      case 'media':
+        return 'Média';
+      case 'baixa':
+        return 'Baixa';
+      default:
+        return prioridade;
     }
   };
-
   if (!demand) return null;
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+  return <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-50">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">{demand.titulo}</DialogTitle>
           <DialogDescription className="flex items-center gap-2 text-base">
@@ -281,9 +265,9 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Data de Criação</h3>
                 <p className="text-base">
-                  {demand.horario_publicacao 
-                    ? format(new Date(demand.horario_publicacao), 'dd/MM/yyyy HH:mm', { locale: ptBR }) 
-                    : 'Não disponível'}
+                  {demand.horario_publicacao ? format(new Date(demand.horario_publicacao), 'dd/MM/yyyy HH:mm', {
+                  locale: ptBR
+                }) : 'Não disponível'}
                 </p>
               </div>
             </div>
@@ -293,9 +277,9 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Prazo</h3>
                 <p className="text-base">
-                  {demand.prazo_resposta 
-                    ? format(new Date(demand.prazo_resposta), 'dd/MM/yyyy', { locale: ptBR }) 
-                    : 'Sem prazo definido'}
+                  {demand.prazo_resposta ? format(new Date(demand.prazo_resposta), 'dd/MM/yyyy', {
+                  locale: ptBR
+                }) : 'Sem prazo definido'}
                 </p>
               </div>
             </div>
@@ -357,31 +341,26 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
                 </div>
               </div>
               
-              {demand.veiculo_imprensa && (
-                <div className="flex items-start gap-2">
+              {demand.veiculo_imprensa && <div className="flex items-start gap-2">
                   <FileText className="h-4 w-4 mt-0.5 text-gray-500" />
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Veículo de Imprensa</h3>
                     <p className="text-base">{demand.veiculo_imprensa}</p>
                   </div>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
           
-          {demand.detalhes_solicitacao && (
-            <>
+          {demand.detalhes_solicitacao && <>
               <Separator />
               <div className="space-y-2">
                 <h3 className="text-base font-medium">Detalhes da Solicitação</h3>
                 <p className="text-base whitespace-pre-line">{demand.detalhes_solicitacao}</p>
               </div>
-            </>
-          )}
+            </>}
           
           {/* Questions & Responses Section */}
-          {demand.perguntas && Object.keys(demand.perguntas).length > 0 && (
-            <>
+          {demand.perguntas && Object.keys(demand.perguntas).length > 0 && <>
               <Separator />
               <div className="space-y-4">
                 <h3 className="text-lg font-medium flex items-center gap-2">
@@ -391,51 +370,33 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
                 
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    {Object.entries(demand.perguntas).map(([key, question]) => (
-                      <FormField
-                        key={key}
-                        control={form.control}
-                        name={`responses.${key}`}
-                        render={({ field }) => (
-                          <FormItem>
+                    {Object.entries(demand.perguntas).map(([key, question]) => <FormField key={key} control={form.control} name={`responses.${key}`} render={({
+                  field
+                }) => <FormItem>
                             <FormLabel className="text-base font-medium">{question}</FormLabel>
                             <FormControl>
-                              <Textarea 
-                                {...field} 
-                                placeholder="Digite sua resposta aqui..."
-                                className="min-h-[100px]"
-                              />
+                              <Textarea {...field} placeholder="Digite sua resposta aqui..." className="min-h-[100px]" />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+                          </FormItem>} />)}
                     
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={onClose}>
                         Cancelar
                       </Button>
                       <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? (
-                          <>
+                        {isSubmitting ? <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Enviando...
-                          </>
-                        ) : (
-                          'Enviar Respostas'
-                        )}
+                          </> : 'Enviar Respostas'}
                       </Button>
                     </DialogFooter>
                   </form>
                 </Form>
               </div>
-            </>
-          )}
+            </>}
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default DemandDetail;
