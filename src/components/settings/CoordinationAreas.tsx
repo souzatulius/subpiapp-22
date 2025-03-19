@@ -63,26 +63,28 @@ const CoordinationAreas = () => {
     },
   ];
 
-  // Esta função precisa ser definida corretamente para retornar o componente do formulário
-  const renderForm = (onClose: () => void) => (
-    <CoordinationAreaForm
-      onSubmit={handleAdd}
-      onCancel={onClose || closeAddForm}
-      isSubmitting={isSubmitting}
-    />
-  );
+  // Define the renderForm function that returns a function component
+  const renderForm = (onClose: () => void) => {
+    return (
+      <CoordinationAreaForm
+        onSubmit={handleAdd}
+        onCancel={onClose}
+        isSubmitting={isSubmitting}
+      />
+    );
+  };
 
   return (
     <div>
       <DataTable
         title="Áreas de Coordenação"
-        data={areas || []} /* Ensure data is never undefined */
+        data={areas || []}
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={deleteArea}
         filterPlaceholder="Filtrar áreas..."
-        renderForm={isAddFormOpen ? renderForm : undefined}
+        renderForm={renderForm}
         isLoading={loading}
       />
       
