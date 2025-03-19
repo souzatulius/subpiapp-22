@@ -48,7 +48,21 @@ export function useDemandaDetalhes(demandaId: string) {
     }
   });
   
-  const { data: notaExistente } = useQuery({
+  // Fix the infinite type instantiation by explicitly defining the return type
+  interface NotaExistente {
+    id: string;
+    titulo: string;
+    texto: string;
+    autor_id: string;
+    area_coordenacao_id: string;
+    demanda_id: string;
+    status: string;
+    criado_em: string;
+    atualizado_em: string;
+    aprovador_id?: string;
+  }
+  
+  const { data: notaExistente } = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -57,7 +71,7 @@ export function useDemandaDetalhes(demandaId: string) {
         .eq('demanda_id', demandaId);
       
       if (error) throw error;
-      return data && data.length > 0 ? data[0] : null;
+      return data && data.length > 0 ? (data[0] as NotaExistente) : null;
     }
   });
 

@@ -6,6 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 
+// Define a proper type for the notaExistente
+interface NotaExistente {
+  id: string;
+  titulo: string;
+  texto: string;
+  status: string;
+  criado_em: string;
+  atualizado_em: string;
+  autor_id: string;
+  area_coordenacao_id: string;
+  demanda_id: string;
+  aprovador_id?: string;
+}
+
 interface CriarNotaFormProps {
   titulo: string;
   setTitulo: (value: string) => void;
@@ -13,7 +27,7 @@ interface CriarNotaFormProps {
   setTexto: (value: string) => void;
   onSubmit: () => void;
   isPending: boolean;
-  notaExistente: any | null;
+  notaExistente: NotaExistente | null;
 }
 
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
