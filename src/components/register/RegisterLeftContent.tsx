@@ -1,14 +1,11 @@
-
 import React from 'react';
 import FeatureCard from '@/components/FeatureCard';
-
 const RegisterLeftContent: React.FC = () => {
-  return (
-    <div className="max-w-xl">
-      <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
-        <span className="text-[#002855]">Demandas da</span><br />
-        <span className="text-[#002855]">nossa SUB</span><br />
-        <span className="text-[#002855]">com </span>
+  return <div className="max-w-xl">
+      <h1 className="text-4xl font-bold leading-tight mb-6 md:text-8xl">
+        <span className="text-[#002855]">Demandas</span><br />
+        <span className="text-[#002855]">da SUB com</span><br />
+        
         <span className="text-[#f57c35]">eficiência</span>
       </h1>
       
@@ -21,8 +18,6 @@ const RegisterLeftContent: React.FC = () => {
         <FeatureCard type="acoes" />
         <FeatureCard type="relatorios" />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default RegisterLeftContent;

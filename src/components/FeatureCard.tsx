@@ -1,16 +1,13 @@
 import React from 'react';
 import { ClipboardEdit, Building2, BarChart3, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-
 interface FeatureCardProps {
   type: 'demandas' | 'acoes' | 'relatorios';
 }
-
 const FeatureCard: React.FC<FeatureCardProps> = ({
   type
 }) => {
   let icon, title, description, items;
-  
   switch (type) {
     case 'demandas':
       icon = <ClipboardEdit className="h-5 w-5 text-[#003570]" />;
@@ -25,7 +22,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       items = ['Registro de atividades', 'Acompanhamento de obras', 'Controle de investimentos'];
       break;
     case 'relatorios':
-      icon = <BarChart3 className="h-5 w-5 text-[#1a5336]" />;
+      icon = <BarChart3 className="h-5 w-5 text-[#003570]" />;
       title = 'Relatórios Analíticos';
       description = 'Visualização de dados e gráficos para avaliações.';
       items = ['Gráficos interativos', 'Filtros personalizados', 'Exportação para PDF'];
@@ -36,7 +33,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       description = 'Recursos disponíveis no sistema.';
       items = ['Item 1', 'Item 2', 'Item 3'];
   }
-  
   const getIconColor = () => {
     switch (type) {
       case 'demandas':
@@ -49,7 +45,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         return 'text-[#003570]';
     }
   };
-  
   const getDotColor = () => {
     switch (type) {
       case 'demandas':
@@ -62,9 +57,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         return 'text-[#003570]';
     }
   };
-  
-  return <Card className="h-full bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg px-0 mx-0 my-0 py-0">
-      <CardContent className="p-6 px-[10px] py-[10px]">
+  return <Card className="h-full shadow-sm hover:shadow-md transition-all duration-300 rounded-lg px-0 mx-0 my-0 py-0 bg-neutral-50">
+      <CardContent className="p-6 py-[10px] px-[10px]">
         <div className="mb-5">
           <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
             {icon}
@@ -82,5 +76,4 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       </CardContent>
     </Card>;
 };
-
 export default FeatureCard;
