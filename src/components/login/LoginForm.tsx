@@ -67,9 +67,9 @@ const LoginForm = () => {
         <div className="loading-spinner animate-spin"></div>
       </div>;
   }
-  return <div className="bg-white rounded-lg shadow-lg p-8 w-full px-[15px] py-[35px]">
+  return <div className="bg-white rounded-lg shadow-lg p-8 w-full px-[15px] py-[15px]">
       <h2 className="text-2xl font-bold text-[#111827] mb-2">Entrar</h2>
-      <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar o sistema</p>
+      <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
       
       <form onSubmit={handleLogin}>
         <div className="space-y-4">
@@ -99,7 +99,7 @@ const LoginForm = () => {
             {error && <p className="mt-2 text-sm text-[#f57b35]">{error}</p>}
             
             <div className="text-right mt-2">
-              <Link to="/forgot-password" className="text-sm text-[#6B7280] hover:text-[#003570]">
+              <Link to="/forgot-password" className="text-sm text-[#f57c35] hover:text-text-[#f57c35]">
                 Esqueceu sua senha?
               </Link>
             </div>
@@ -128,7 +128,7 @@ const LoginForm = () => {
       </form>
       
       <p className="mt-6 text-center text-sm text-[#6B7280]">
-        Não tem uma conta? <Link to="/register" className="text-[#003570] hover:underline">Registre-se</Link>
+        Não tem uma conta? <Link to="/register" className="text-[#f57c35] hover:underline">Registre-se</Link>
       </p>
     </div>;
 };
