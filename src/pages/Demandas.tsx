@@ -35,7 +35,7 @@ const Demandas = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Fetch demandas data with status filter
-  const { data: demandas, isLoading, error } = useQuery({
+  const { data: demandasData, isLoading, error } = useQuery({
     queryKey: ['demandas', filterStatus],
     queryFn: async () => {
       let query = supabase
@@ -73,6 +73,15 @@ const Demandas = () => {
     }
   });
 
+  // Transform the data to ensure 'perguntas' is correctly typed
+  const demandas: Demand[] = demandasData ? demandasData.map(item => ({
+    ...item,
+    perguntas: item.perguntas ? (typeof item.perguntas === 'string' 
+      ? JSON.parse(item.perguntas) 
+      : item.perguntas as Record<string, string>)
+    : null
+  })) : [];
+
   // If there's an error, we can handle it here as well to provide a backup UI
   if (error) {
     console.error("Error loading demands:", error);
@@ -99,13 +108,13 @@ const Demandas = () => {
       
       {viewMode === 'cards' ? (
         <DemandCards 
-          demandas={demandas || []} 
+          demandas={demandas} 
           isLoading={isLoading} 
           onSelectDemand={handleSelectDemand}
         />
       ) : (
         <DemandList 
-          demandas={demandas || []} 
+          demandas={demandas} 
           isLoading={isLoading} 
           onSelectDemand={handleSelectDemand}
         />
