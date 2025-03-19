@@ -455,9 +455,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_area_coordenacao: {
+        Args: {
+          p_id: string
+        }
+        Returns: boolean
+      }
+      insert_area_coordenacao: {
+        Args: {
+          p_descricao: string
+        }
+        Returns: string
+      }
       is_admin: {
         Args: {
           user_id: string
+        }
+        Returns: boolean
+      }
+      update_area_coordenacao: {
+        Args: {
+          p_id: string
+          p_descricao: string
         }
         Returns: boolean
       }
