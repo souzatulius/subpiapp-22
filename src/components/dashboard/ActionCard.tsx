@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
-
 interface ActionCardProps {
   title: string;
   icon: string | React.ReactNode;
@@ -11,7 +9,6 @@ interface ActionCardProps {
   iconSize?: 'normal' | 'large' | 'giant';
   className?: string; // Added className prop to the interface
 }
-
 const ActionCard: React.FC<ActionCardProps> = ({
   title,
   icon,
@@ -36,7 +33,6 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'bg-gray-50 border-gray-200 hover:bg-gray-100';
     }
   };
-
   const getIconSizeClasses = () => {
     switch (iconSize) {
       case 'giant':
@@ -48,7 +44,6 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'text-4xl mb-4';
     }
   };
-
   const renderIcon = () => {
     if (typeof icon === 'string') {
       return <span className={getIconSizeClasses()}>{icon}</span>;
@@ -59,9 +54,8 @@ const ActionCard: React.FC<ActionCardProps> = ({
         {icon}
       </div>;
   };
-
   return <Card onClick={onClick} className={`${className}`}>
-      <CardContent className="p-6 flex flex-col items-center text-center rounded-3xl bg-gray-800">
+      <CardContent className="p-4 bg-gray-800 shadow-md rounded-lg hover:opacity-90 transition-all duration-300 cursor-pointer">
         {renderIcon()}
         <h3 className="text-lg font-semibold text-slate-200">
           {title}
@@ -69,5 +63,4 @@ const ActionCard: React.FC<ActionCardProps> = ({
       </CardContent>
     </Card>;
 };
-
 export default ActionCard;
