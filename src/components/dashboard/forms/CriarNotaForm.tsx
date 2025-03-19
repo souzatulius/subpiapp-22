@@ -82,6 +82,8 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
                 handleBackToSelection={handleBackToSelection}
                 handleSubmit={handleSubmit}
                 isSubmitting={isSubmitting}
+                selectedDemanda={selectedDemanda}
+                formattedResponses={formattedResponses}
               />
             </div>
           </CardContent>
