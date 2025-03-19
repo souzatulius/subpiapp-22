@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -7,21 +6,20 @@ import PWAButton from '@/components/PWAButton';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/layouts/Header';
-
 const Index = () => {
-  const { user } = useAuth();
-  
-  return (
-    <div className="min-h-screen flex flex-col">
+  const {
+    user
+  } = useAuth();
+  return <div className="min-h-screen flex flex-col">
       {/* Header */}
       <Header />
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Content */}
-        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center px-[40px]">
           <div className="max-w-xl">
-            <h1 className="text-4xl font-bold leading-tight mb-6 md:text-7xl">
+            <h1 className="text-4xl font-bold leading-tight mb-6 px-0 md:text-8xl">
               <span className="text-[#002855]">Demandas da</span><br />
               <span className="text-[#002855]">nossa SUB</span><br />
               <span className="text-[#002855]">com </span>
@@ -33,14 +31,11 @@ const Index = () => {
             </p>
             
             <div className="flex flex-wrap gap-4 mb-12">
-              {user ? 
-                <Button asChild className="rounded-full bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
+              {user ? <Button asChild className="rounded-full bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
                   <Link to="/dashboard">
                     Acessar <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
-                </Button>
-               : 
-                <>
+                </Button> : <>
                   <Button asChild className="rounded-full bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
                     <Link to="/login">
                       Acessar <ArrowRight className="ml-2 h-5 w-5" />
@@ -51,8 +46,7 @@ const Index = () => {
                       Solicitar Acesso
                     </Link>
                   </Button>
-                </>
-              }
+                </>}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -64,15 +58,13 @@ const Index = () => {
         </div>
         
         {/* Right side with blue background */}
-        <div className="w-full md:w-1/2 bg-[#003570] flex items-center justify-center p-8 md:p-12">
+        <div className="w-full md:w-1/2 bg-[#003570] flex items-center justify-center p-8 md:p-12 px-[6px]">
           <img src="/lovable-uploads/292774a8-b25d-4dc6-9555-f54295b8bd9f.png" alt="Logo SUB PI" className="w-full max-w-md" />
         </div>
       </div>
       
       {/* PWA Button */}
       <PWAButton />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
