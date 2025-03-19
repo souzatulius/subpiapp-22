@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import DataTable from './DataTable';
+import DataTable from './data-table/DataTable';
 import DemandOriginForm from './demand-origins/DemandOriginForm';
 import DemandOriginEditDialog from './demand-origins/DemandOriginEditDialog';
 import { useDemandOrigins, DemandOrigin } from '@/hooks/useDemandOrigins';

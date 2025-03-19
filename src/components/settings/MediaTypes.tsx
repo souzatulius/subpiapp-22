@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import DataTable from './DataTable';
+import DataTable from './data-table/DataTable';
 import MediaTypeForm from './media-types/MediaTypeForm';
 import MediaTypeEditDialog from './media-types/MediaTypeEditDialog';
 import { useMediaTypes, MediaType } from '@/hooks/useMediaTypes';

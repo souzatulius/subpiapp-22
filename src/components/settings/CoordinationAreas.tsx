@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import DataTable from './DataTable';
+import DataTable from './data-table/DataTable';
 import CoordinationAreaForm from './coordination-areas/CoordinationAreaForm';
 import CoordinationAreaEditDialog from './coordination-areas/CoordinationAreaEditDialog';
 import { useCoordinationAreas, Area } from '@/hooks/useCoordinationAreas';

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import DataTable from './DataTable';
+import DataTable from './data-table/DataTable';
 import ServiceForm from './services/ServiceForm';
 import ServiceEditDialog from './services/ServiceEditDialog';
 import { useServices, Service } from '@/hooks/useServices';

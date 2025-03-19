@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import DataTable from './DataTable';
+import DataTable from './data-table/DataTable';
 import PositionForm from './positions/PositionForm';
 import PositionEditDialog from './positions/PositionEditDialog';
 import { usePositions, Position } from '@/hooks/usePositions';
