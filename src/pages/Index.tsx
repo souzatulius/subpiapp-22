@@ -20,9 +20,9 @@ const Index = () => {
         <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center px-[25px] py-[30px]">
           <div className="max-w-xl">
             <h1 className="text-4xl font-bold leading-tight mb-6 px-0 md:text-8xl">
-              <span className="text-[#002855]">Demandas da</span><br />
-              <span className="text-[#002855]">SUB</span><br />
-              <span className="text-[#002855]">com </span>
+              <span className="text-[#002855]">Demandas </span><br />
+              <span className="text-[#002855]">da SUB com</span><br />
+              
               <span className="text-[#f57c35]">eficiência</span>
             </h1>
             
