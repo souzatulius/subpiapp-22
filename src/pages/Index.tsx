@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -7,12 +6,11 @@ import PWAButton from '@/components/PWAButton';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/layouts/Header';
-
 const Index = () => {
-  const { user } = useAuth();
-  
-  return (
-    <div className="min-h-screen flex flex-col">
+  const {
+    user
+  } = useAuth();
+  return <div className="min-h-screen flex flex-col">
       {/* Header - explicitly pass showControls={false} */}
       <Header showControls={false} />
 
@@ -32,9 +30,9 @@ const Index = () => {
               Sistema integrado para gerenciamento de solicitações da imprensa, controle de projetos urbanos e administração interna da Subprefeitura de Pinheiros.
             </p>
             
-            <div className="flex flex-wrap gap-4 mb-12">
+            <div className="flex flex-wrap gap-4 mb-12 px-0 mx-0">
               {user ? <Button asChild className="rounded-full bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
-                  <Link to="/dashboard">
+                  <Link to="/dashboard" className="px-[40px]">
                     Acessar <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button> : <>
@@ -67,8 +65,6 @@ const Index = () => {
       
       {/* PWA Button */}
       <PWAButton />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
