@@ -3,34 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import DataTable from './DataTable';
 import DataEntryForm from './DataEntryForm';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import EditModal from './EditModal';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 const serviceSchema = z.object({
   descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
@@ -41,30 +18,13 @@ const Services = () => {
   const [services, setServices] = useState<any[]>([]);
   const [areas, setAreas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
-
-  const editForm = useForm<z.infer<typeof serviceSchema>>({
-    resolver: zodResolver(serviceSchema),
-    defaultValues: {
-      descricao: '',
-      area_coordenacao_id: '',
-    },
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (editingService) {
-      editForm.reset({
-        descricao: editingService.descricao,
-        area_coordenacao_id: editingService.area_coordenacao_id,
-      });
-    }
-  }, [editingService, editForm]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -114,10 +74,20 @@ const Services = () => {
       
       if (error) throw error;
       
+      toast({
+        title: 'Sucesso',
+        description: 'Serviço adicionado com sucesso',
+      });
+      
       await fetchData();
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao adicionar serviço:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao adicionar o serviço',
+        variant: 'destructive',
+      });
       return Promise.reject(error);
     } finally {
       setIsSubmitting(false);
@@ -125,7 +95,7 @@ const Services = () => {
   };
 
   const handleEdit = async (data: z.infer<typeof serviceSchema>) => {
-    if (!editingService) return;
+    if (!editingService) return Promise.reject(new Error('Nenhum serviço selecionado'));
     
     setIsSubmitting(true);
     try {
@@ -140,12 +110,14 @@ const Services = () => {
       if (error) throw error;
       
       toast({
-        title: 'Serviço atualizado',
-        description: 'O serviço foi atualizado com sucesso',
+        title: 'Sucesso',
+        description: 'Serviço atualizado com sucesso',
       });
       
-      setIsEditDialogOpen(false);
       await fetchData();
+      setIsEditFormOpen(false);
+      setEditingService(null);
+      return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao editar serviço:', error);
       toast({
@@ -153,6 +125,7 @@ const Services = () => {
         description: error.message || 'Ocorreu um erro ao atualizar o serviço',
         variant: 'destructive',
       });
+      return Promise.reject(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -200,9 +173,14 @@ const Services = () => {
     }
   };
 
-  const openEditDialog = (service: any) => {
+  const openEditForm = (service: any) => {
     setEditingService(service);
-    setIsEditDialogOpen(true);
+    setIsEditFormOpen(true);
+  };
+
+  const closeEditForm = () => {
+    setIsEditFormOpen(false);
+    setEditingService(null);
   };
 
   const columns = [
@@ -231,32 +209,22 @@ const Services = () => {
         descricao: '',
         area_coordenacao_id: '',
       }}
-      renderFields={(form) => (
+      renderFields={() => (
         <div className="space-y-4">
           <div className="grid gap-2">
-            <label htmlFor="descricao" className="text-sm font-medium">
-              Descrição
-            </label>
-            <input
+            <Label htmlFor="descricao">Descrição</Label>
+            <Input
               id="descricao"
-              {...form.register('descricao')}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              name="descricao"
               placeholder="Nome do serviço"
             />
-            {form.formState.errors.descricao && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.descricao.message}
-              </p>
-            )}
           </div>
           
           <div className="grid gap-2">
-            <label htmlFor="area_coordenacao_id" className="text-sm font-medium">
-              Área de Coordenação
-            </label>
+            <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
             <select
               id="area_coordenacao_id"
-              {...form.register('area_coordenacao_id')}
+              name="area_coordenacao_id"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Selecione uma área</option>
@@ -266,11 +234,6 @@ const Services = () => {
                 </option>
               ))}
             </select>
-            {form.formState.errors.area_coordenacao_id && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.area_coordenacao_id.message}
-              </p>
-            )}
           </div>
         </div>
       )}
@@ -285,80 +248,60 @@ const Services = () => {
         data={services}
         columns={columns}
         onAdd={() => {}}
-        onEdit={openEditDialog}
+        onEdit={openEditForm}
         onDelete={handleDelete}
         filterPlaceholder="Filtrar serviços..."
         renderForm={renderForm}
         isLoading={loading}
       />
       
-      {/* Edit dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Serviço</DialogTitle>
-          </DialogHeader>
-          
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleEdit)} className="space-y-4">
-              <FormField
-                control={editForm.control}
-                name="descricao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do serviço" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <EditModal 
+        isOpen={isEditFormOpen} 
+        onClose={closeEditForm}
+        title="Editar Serviço"
+      >
+        <DataEntryForm
+          schema={serviceSchema}
+          onSubmit={handleEdit}
+          onCancel={closeEditForm}
+          defaultValues={{
+            descricao: editingService?.descricao || '',
+            area_coordenacao_id: editingService?.area_coordenacao_id || '',
+          }}
+          renderFields={() => (
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="descricao">Descrição</Label>
+                <Input
+                  id="descricao"
+                  name="descricao"
+                  defaultValue={editingService?.descricao || ''}
+                  placeholder="Nome do serviço"
+                />
+              </div>
               
-              <FormField
-                control={editForm.control}
-                name="area_coordenacao_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Área de Coordenação</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma área" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {areas.map((area) => (
-                          <SelectItem key={area.id} value={area.id}>
-                            {area.descricao}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsEditDialogOpen(false)}
+              <div className="grid gap-2">
+                <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
+                <select
+                  id="area_coordenacao_id"
+                  name="area_coordenacao_id"
+                  defaultValue={editingService?.area_coordenacao_id || ''}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                  <option value="">Selecione uma área</option>
+                  {areas.map((area) => (
+                    <option key={area.id} value={area.id}>
+                      {area.descricao}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+          isSubmitting={isSubmitting}
+          submitText="Salvar Alterações"
+        />
+      </EditModal>
     </div>
   );
 };
