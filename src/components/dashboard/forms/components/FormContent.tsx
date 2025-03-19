@@ -129,6 +129,7 @@ const FormContent: React.FC<FormContentProps> = ({
           formData={formData}
           handleChange={handleChange}
           handlePerguntaChange={handlePerguntaChange}
+          handleSelectChange={handleSelectChange}
         />
       );
     default:
