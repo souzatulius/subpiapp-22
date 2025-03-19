@@ -17,8 +17,10 @@ export const useDemandFormSubmit = (
         throw new Error("Usuário não identificado. Por favor, faça login novamente.");
       }
 
+      // Filter out empty questions
       const filteredPerguntas = formData.perguntas.filter(p => p.trim() !== '');
       
+      // Prepare demand data
       const demandaData = {
         ...formData,
         perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
@@ -28,6 +30,7 @@ export const useDemandFormSubmit = (
 
       console.log('Submitting demand data:', demandaData);
 
+      // Insert into demandas table
       const { data, error } = await supabase
         .from('demandas')
         .insert([demandaData])
