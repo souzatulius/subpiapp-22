@@ -2,6 +2,8 @@
 import React from 'react';
 import DataEntryForm from '../../DataEntryForm';
 import { neighborhoodSchema } from '../NeighborhoodForm';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface NeighborhoodAddFormProps {
   onSubmit: (data: { nome: string; distrito_id: string }) => Promise<void>;
@@ -28,14 +30,13 @@ const NeighborhoodAddForm: React.FC<NeighborhoodAddFormProps> = ({
       renderFields={(form) => (
         <div className="space-y-4">
           <div className="grid gap-2">
-            <label htmlFor="nome" className="text-sm font-medium">
+            <Label htmlFor="nome">
               Nome
-            </label>
-            <input
+            </Label>
+            <Input
               id="nome"
               {...form.register('nome')}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Nome do bairro"
+              className="rounded-lg"
             />
             {form.formState.errors.nome && (
               <p className="text-sm font-medium text-destructive">
@@ -45,17 +46,17 @@ const NeighborhoodAddForm: React.FC<NeighborhoodAddFormProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <label htmlFor="distrito_id" className="text-sm font-medium">
+            <Label htmlFor="distrito_id">
               Distrito
-            </label>
+            </Label>
             <select
               id="distrito_id"
               {...form.register('distrito_id')}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="">Selecione um distrito</option>
+              <option value="" className="bg-gray-100">Selecione um distrito</option>
               {districts.map((district) => (
-                <option key={district.id} value={district.id}>
+                <option key={district.id} value={district.id} className="bg-gray-100">
                   {district.nome}
                 </option>
               ))}
