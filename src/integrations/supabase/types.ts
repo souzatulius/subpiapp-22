@@ -245,6 +245,64 @@ export type Database = {
         }
         Relationships: []
       }
+      notas_oficiais: {
+        Row: {
+          aprovador_id: string | null
+          area_coordenacao_id: string
+          atualizado_em: string
+          autor_id: string
+          criado_em: string
+          id: string
+          status: string
+          texto: string
+          titulo: string
+        }
+        Insert: {
+          aprovador_id?: string | null
+          area_coordenacao_id: string
+          atualizado_em?: string
+          autor_id: string
+          criado_em?: string
+          id?: string
+          status?: string
+          texto: string
+          titulo: string
+        }
+        Update: {
+          aprovador_id?: string | null
+          area_coordenacao_id?: string
+          atualizado_em?: string
+          autor_id?: string
+          criado_em?: string
+          id?: string
+          status?: string
+          texto?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notas_oficiais_aprovador_id_fkey"
+            columns: ["aprovador_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_oficiais_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_oficiais_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notificacoes: {
         Row: {
           data_envio: string
@@ -315,6 +373,51 @@ export type Database = {
           nivel_acesso?: number
         }
         Relationships: []
+      }
+      respostas_demandas: {
+        Row: {
+          arquivo_url: string | null
+          atualizado_em: string
+          criado_em: string
+          demanda_id: string
+          id: string
+          texto: string
+          usuario_id: string
+        }
+        Insert: {
+          arquivo_url?: string | null
+          atualizado_em?: string
+          criado_em?: string
+          demanda_id: string
+          id?: string
+          texto: string
+          usuario_id: string
+        }
+        Update: {
+          arquivo_url?: string | null
+          atualizado_em?: string
+          criado_em?: string
+          demanda_id?: string
+          id?: string
+          texto?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respostas_demandas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_demandas_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       servicos: {
         Row: {
@@ -455,6 +558,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_approve_notes: {
+        Args: {
+          note_id: string
+          new_status: string
+          user_id: string
+        }
+        Returns: boolean
+      }
       delete_area_coordenacao: {
         Args: {
           p_id: string
