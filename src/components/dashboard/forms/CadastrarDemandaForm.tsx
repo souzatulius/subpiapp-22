@@ -1,15 +1,11 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import FormHeader from './components/FormHeader';
-import FormSteps, { FormStep } from './components/FormSteps';
+import FormSteps from './components/FormSteps';
 import FormActions from './components/FormActions';
-import IdentificationStep from './steps/IdentificationStep';
-import OriginClassificationStep from './steps/OriginClassificationStep';
-import PriorityDeadlineStep from './steps/PriorityDeadlineStep';
-import RequesterInfoStep from './steps/RequesterInfoStep';
-import LocationStep from './steps/LocationStep';
-import QuestionsDetailsStep from './steps/QuestionsDetailsStep';
+import FormContent, { FORM_STEPS } from './components/FormContent';
 import { useDemandForm } from '@/hooks/demandForm';
 
 interface CadastrarDemandaFormProps {
@@ -46,97 +42,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 
   console.log('Current user ID:', user?.id);
 
-  const steps: FormStep[] = [
-    {
-      title: "Identificação da Demanda",
-      description: "Informe os detalhes básicos da solicitação"
-    }, 
-    {
-      title: "Origem e Classificação",
-      description: "Selecione a origem e tipo de mídia"
-    }, 
-    {
-      title: "Prioridade e Prazo",
-      description: "Defina a prioridade e prazo para resposta"
-    }, 
-    {
-      title: "Dados do Solicitante",
-      description: "Informe os dados de contato (opcional)"
-    }, 
-    {
-      title: "Localização",
-      description: "Informe o endereço e bairro relacionado"
-    }, 
-    {
-      title: "Perguntas e Detalhes",
-      description: "Adicione perguntas e detalhes adicionais"
-    }
-  ];
-
-  const renderStepContent = () => {
-    switch (activeStep) {
-      case 0:
-        return (
-          <IdentificationStep 
-            formData={formData}
-            handleChange={handleChange}
-            handleSelectChange={handleSelectChange}
-            handleServiceSelect={handleServiceSelect}
-            areasCoord={areasCoord}
-            filteredServicesBySearch={filteredServicesBySearch}
-            serviceSearch={serviceSearch}
-            servicos={servicos}
-          />
-        );
-      case 1:
-        return (
-          <OriginClassificationStep 
-            formData={formData}
-            handleSelectChange={handleSelectChange}
-            origens={origens}
-            tiposMidia={tiposMidia}
-          />
-        );
-      case 2:
-        return (
-          <PriorityDeadlineStep 
-            formData={formData}
-            handleChange={handleChange}
-            handleSelectChange={handleSelectChange}
-          />
-        );
-      case 3:
-        return (
-          <RequesterInfoStep 
-            formData={formData}
-            handleChange={handleChange}
-          />
-        );
-      case 4:
-        return (
-          <LocationStep 
-            formData={formData}
-            selectedDistrito={selectedDistrito}
-            handleChange={handleChange}
-            handleSelectChange={handleSelectChange}
-            setSelectedDistrito={setSelectedDistrito}
-            distritos={distritos}
-            filteredBairros={filteredBairros}
-          />
-        );
-      case 5:
-        return (
-          <QuestionsDetailsStep 
-            formData={formData}
-            handleChange={handleChange}
-            handlePerguntaChange={handlePerguntaChange}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="animate-fade-in">
       <FormHeader 
@@ -148,23 +53,40 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
         <div className="p-6">
           <div className="mb-6">
             <h3 className="text-lg font-medium">
-              {steps[activeStep].title}
+              {FORM_STEPS[activeStep].title}
             </h3>
             <p className="text-sm text-gray-500">
-              {steps[activeStep].description}
+              {FORM_STEPS[activeStep].description}
             </p>
           </div>
           
           <div className="mb-6">
-            <FormSteps steps={steps} activeStep={activeStep} />
+            <FormSteps steps={FORM_STEPS} activeStep={activeStep} />
           </div>
           
-          {renderStepContent()}
+          <FormContent
+            activeStep={activeStep}
+            formData={formData}
+            handleChange={handleChange}
+            handleSelectChange={handleSelectChange}
+            handleServiceSelect={handleServiceSelect}
+            handlePerguntaChange={handlePerguntaChange}
+            areasCoord={areasCoord}
+            filteredServicesBySearch={filteredServicesBySearch}
+            serviceSearch={serviceSearch}
+            servicos={servicos}
+            origens={origens}
+            tiposMidia={tiposMidia}
+            selectedDistrito={selectedDistrito}
+            setSelectedDistrito={setSelectedDistrito}
+            distritos={distritos}
+            filteredBairros={filteredBairros}
+          />
           
           <FormActions 
             onPrevStep={prevStep}
             onNextStep={nextStep}
-            isLastStep={activeStep === steps.length - 1}
+            isLastStep={activeStep === FORM_STEPS.length - 1}
             isFirstStep={activeStep === 0}
             isSubmitting={isLoading}
             onSubmit={handleSubmit}
