@@ -1,32 +1,56 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send } from 'lucide-react';
-import EmailSuffix from '@/components/EmailSuffix';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import AuthLayout from '@/components/AuthLayout';
+import EmailSuffix from '@/components/EmailSuffix';
+import { supabase } from '@/integrations/supabase/client';
+import { completeEmailWithDomain } from '@/lib/authUtils';
+import { toast } from '@/components/ui/use-toast';
+import FeatureCard from '@/components/FeatureCard';
 
 const ForgotPassword = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
     if (!email.trim()) {
       setEmailError(true);
       return;
     }
     
-    // Simulate sending reset email
+    setEmailError(false);
     setLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const completeEmail = completeEmailWithDomain(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(completeEmail, {
+        redirectTo: `${window.location.origin}/resetar-senha`,
+      });
+      
+      if (error) {
+        toast({
+          title: "Erro",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setSuccess(true);
+      }
+    } catch (error: any) {
+      console.error('Erro ao enviar email de recuperação:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao enviar o email de recuperação.",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-      setSubmitted(true);
-    }, 1500);
+    }
   };
 
   const leftContent = (
@@ -62,27 +86,36 @@ const ForgotPassword = () => {
   return (
     <AuthLayout leftContent={leftContent}>
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mx-auto">
-        {submitted ? (
-          <div className="text-center">
-            <div className="bg-green-100 text-green-800 p-4 rounded-lg mb-6">
-              <p className="font-medium">E-mail enviado com sucesso!</p>
-              <p className="mt-1">Verifique sua caixa de entrada para redefinir sua senha.</p>
+        <Link to="/login" className="inline-flex items-center text-subpi-gray-secondary hover:text-subpi-blue mb-6">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao login
+        </Link>
+        
+        <h2 className="text-2xl font-bold text-subpi-gray-text mb-2">Recuperar Senha</h2>
+        
+        {success ? (
+          <div className="text-center py-6">
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg mb-4">
+              <p className="text-green-700">
+                Enviamos um e-mail para <strong>{completeEmailWithDomain(email)}</strong> com instruções para redefinir sua senha.
+              </p>
             </div>
-            <button
-              onClick={() => navigate('/login')}
-              className="text-subpi-blue hover:underline flex items-center justify-center mx-auto"
+            <p className="text-subpi-gray-secondary mb-4">
+              Verifique sua caixa de entrada e siga as instruções do e-mail para criar uma nova senha.
+            </p>
+            <Link 
+              to="/login" 
+              className="inline-flex items-center text-subpi-blue hover:underline"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" /> Voltar para o login
-            </button>
+              Voltar para a página de login
+            </Link>
           </div>
         ) : (
           <>
-            <h2 className="text-2xl font-bold text-subpi-gray-text mb-2">Esqueci minha senha</h2>
             <p className="text-subpi-gray-secondary mb-6">
-              Informe seu e-mail para receber instruções de redefinição de senha.
+              Digite seu e-mail para receber um link de recuperação de senha.
             </p>
             
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleResetPassword}>
               <div className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-subpi-gray-text mb-1">
@@ -104,19 +137,10 @@ const ForgotPassword = () => {
                 <button 
                   type="submit" 
                   className="login-button"
+                  disabled={loading}
                 >
-                  <Send className="mr-2 h-5 w-5" /> Enviar instruções
+                  Enviar link de recuperação
                 </button>
-                
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/login')}
-                    className="text-subpi-gray-secondary hover:text-subpi-blue mt-4 inline-flex items-center"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-1" /> Voltar para o login
-                  </button>
-                </div>
               </div>
             </form>
           </>
@@ -125,8 +149,5 @@ const ForgotPassword = () => {
     </AuthLayout>
   );
 };
-
-// Importing at the end to avoid circular dependency
-import FeatureCard from '@/components/FeatureCard';
 
 export default ForgotPassword;

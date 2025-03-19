@@ -9,13 +9,458 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      areas_coordenacao: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      bairros: {
+        Row: {
+          criado_em: string
+          distrito_id: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          criado_em?: string
+          distrito_id: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          criado_em?: string
+          distrito_id?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bairros_distrito_id_fkey"
+            columns: ["distrito_id"]
+            isOneToOne: false
+            referencedRelation: "distritos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cargos: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      comunicados: {
+        Row: {
+          autor_id: string
+          data_envio: string
+          destinatarios: string
+          id: string
+          mensagem: string
+          titulo: string
+        }
+        Insert: {
+          autor_id: string
+          data_envio?: string
+          destinatarios: string
+          id?: string
+          mensagem: string
+          titulo: string
+        }
+        Update: {
+          autor_id?: string
+          data_envio?: string
+          destinatarios?: string
+          id?: string
+          mensagem?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comunicados_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demandas: {
+        Row: {
+          area_coordenacao_id: string
+          arquivo_url: string | null
+          atualizado_em: string
+          autor_id: string
+          bairro_id: string | null
+          detalhes_solicitacao: string | null
+          email_solicitante: string | null
+          endereco: string | null
+          horario_publicacao: string
+          id: string
+          nome_solicitante: string | null
+          origem_id: string
+          perguntas: Json | null
+          prazo_resposta: string
+          prioridade: string
+          protocolo: string | null
+          servico_id: string | null
+          status: string
+          telefone_solicitante: string | null
+          tipo_midia_id: string | null
+          titulo: string
+          veiculo_imprensa: string | null
+        }
+        Insert: {
+          area_coordenacao_id: string
+          arquivo_url?: string | null
+          atualizado_em?: string
+          autor_id: string
+          bairro_id?: string | null
+          detalhes_solicitacao?: string | null
+          email_solicitante?: string | null
+          endereco?: string | null
+          horario_publicacao?: string
+          id?: string
+          nome_solicitante?: string | null
+          origem_id: string
+          perguntas?: Json | null
+          prazo_resposta: string
+          prioridade: string
+          protocolo?: string | null
+          servico_id?: string | null
+          status: string
+          telefone_solicitante?: string | null
+          tipo_midia_id?: string | null
+          titulo: string
+          veiculo_imprensa?: string | null
+        }
+        Update: {
+          area_coordenacao_id?: string
+          arquivo_url?: string | null
+          atualizado_em?: string
+          autor_id?: string
+          bairro_id?: string | null
+          detalhes_solicitacao?: string | null
+          email_solicitante?: string | null
+          endereco?: string | null
+          horario_publicacao?: string
+          id?: string
+          nome_solicitante?: string | null
+          origem_id?: string
+          perguntas?: Json | null
+          prazo_resposta?: string
+          prioridade?: string
+          protocolo?: string | null
+          servico_id?: string | null
+          status?: string
+          telefone_solicitante?: string | null
+          tipo_midia_id?: string | null
+          titulo?: string
+          veiculo_imprensa?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demandas_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_bairro_id_fkey"
+            columns: ["bairro_id"]
+            isOneToOne: false
+            referencedRelation: "bairros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_origem_id_fkey"
+            columns: ["origem_id"]
+            isOneToOne: false
+            referencedRelation: "origens_demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_servico_id_fkey"
+            columns: ["servico_id"]
+            isOneToOne: false
+            referencedRelation: "servicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tipo_midia_id_fkey"
+            columns: ["tipo_midia_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_midia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      distritos: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      notificacoes: {
+        Row: {
+          data_envio: string
+          id: string
+          lida: boolean
+          mensagem: string
+          usuario_id: string
+        }
+        Insert: {
+          data_envio?: string
+          id?: string
+          lida?: boolean
+          mensagem: string
+          usuario_id: string
+        }
+        Update: {
+          data_envio?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      origens_demandas: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      permissoes: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+          nivel_acesso: number
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+          nivel_acesso: number
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+          nivel_acesso?: number
+        }
+        Relationships: []
+      }
+      servicos: {
+        Row: {
+          area_coordenacao_id: string
+          criado_em: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          area_coordenacao_id: string
+          criado_em?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          area_coordenacao_id?: string
+          criado_em?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicos_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tipos_midia: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      usuario_permissoes: {
+        Row: {
+          criado_em: string
+          id: string
+          permissao_id: string
+          usuario_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          permissao_id: string
+          usuario_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          permissao_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_permissoes_permissao_id_fkey"
+            columns: ["permissao_id"]
+            isOneToOne: false
+            referencedRelation: "permissoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_permissoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios: {
+        Row: {
+          aniversario: string | null
+          area_coordenacao_id: string | null
+          cargo_id: string | null
+          criado_em: string
+          email: string
+          foto_perfil_url: string | null
+          id: string
+          nome_completo: string
+          whatsapp: string | null
+        }
+        Insert: {
+          aniversario?: string | null
+          area_coordenacao_id?: string | null
+          cargo_id?: string | null
+          criado_em?: string
+          email: string
+          foto_perfil_url?: string | null
+          id: string
+          nome_completo: string
+          whatsapp?: string | null
+        }
+        Update: {
+          aniversario?: string | null
+          area_coordenacao_id?: string | null
+          cargo_id?: string | null
+          criado_em?: string
+          email?: string
+          foto_perfil_url?: string | null
+          id?: string
+          nome_completo?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuarios_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

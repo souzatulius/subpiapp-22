@@ -6,6 +6,9 @@ import EmailSuffix from '@/components/EmailSuffix';
 import PasswordRequirements from '@/components/PasswordRequirements';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import AuthLayout from '@/components/AuthLayout';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
+import FeatureCard from '@/components/FeatureCard';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,13 +20,15 @@ const Login = () => {
     requirements 
   } = usePasswordValidation();
   
+  const { signIn, signInWithGoogle, loading: authLoading } = useAuth();
+  
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Reset errors
@@ -36,25 +41,31 @@ const Login = () => {
       return;
     }
     
-    // Simulate login
+    // Start loading
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // For demo purposes, show error for specific credentials
-      if (email === 'erro') {
-        setError('Senha incorreta, tente novamente.');
-      } else if (email === 'usado') {
-        setError('Este e-mail já está em uso.');
-      } else {
-        // Successful login
-        navigate('/dashboard');
+    
+    try {
+      const completeEmail = completeEmailWithDomain(email);
+      const { error } = await signIn(completeEmail, password);
+      
+      if (error) {
+        setError(error.message);
+        showAuthError(error);
       }
-    }, 1500);
+    } catch (err: any) {
+      console.error('Erro ao fazer login:', err);
+      setError(err.message || 'Erro ao tentar fazer login');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // Integrate with Google login via Supabase
-    alert('Login com Google será implementado com Supabase');
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error('Erro no login com Google:', error);
+    }
   };
 
   const leftContent = (
@@ -77,7 +88,7 @@ const Login = () => {
     </div>
   );
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <AuthLayout leftContent={leftContent}>
         <div className="h-full flex items-center justify-center p-8">
@@ -197,8 +208,5 @@ const Login = () => {
     </AuthLayout>
   );
 };
-
-// Importing at the end to avoid circular dependency
-import FeatureCard from '@/components/FeatureCard';
 
 export default Login;

@@ -1,0 +1,45 @@
+
+import React from 'react';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Button } from '@/components/ui/button';
+
+const Dashboard = () => {
+  const { user, signOut } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-subpi-gray-text">Painel Principal</h1>
+          <Button variant="outline" onClick={signOut}>Sair</Button>
+        </div>
+        
+        <div className="bg-subpi-blue/10 p-4 rounded-lg mb-6">
+          <p className="text-subpi-blue">
+            Bem-vindo {user?.user_metadata?.name || user?.email}! 
+            Este é o painel principal da Plataforma SUBPi.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-subpi-gray-text mb-4">Demandas Recentes</h3>
+            <p className="text-subpi-gray-secondary">Recurso em desenvolvimento...</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-subpi-gray-text mb-4">Ações em Andamento</h3>
+            <p className="text-subpi-gray-secondary">Recurso em desenvolvimento...</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-subpi-gray-text mb-4">Comunicados</h3>
+            <p className="text-subpi-gray-secondary">Recurso em desenvolvimento...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

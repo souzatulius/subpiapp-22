@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import EmailSuffix from '@/components/EmailSuffix';
@@ -7,6 +7,25 @@ import PasswordRequirements from '@/components/PasswordRequirements';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { validatePasswordsMatch, formatPhone, formatDate } from '@/lib/formValidation';
 import AuthLayout from '@/components/AuthLayout';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
+import FeatureCard from '@/components/FeatureCard';
+
+interface FormData {
+  name: string;
+  email: string;
+  birthday: string;
+  whatsapp: string;
+  role: string;
+  area: string;
+  confirmPassword: string;
+}
+
+interface SelectOption {
+  id: string;
+  value: string;
+}
 
 const Register = () => {
   const navigate = useNavigate();
@@ -19,7 +38,9 @@ const Register = () => {
     isValid: isPasswordValid 
   } = usePasswordValidation();
   
-  const [formData, setFormData] = useState({
+  const { signUp } = useAuth();
+  
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     birthday: '',
@@ -33,10 +54,78 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState<SelectOption[]>([]);
+  const [areas, setAreas] = useState<SelectOption[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(true);
   
-  // Sample data for dropdowns
-  const roles = ['Assessor', 'Coordenador', 'Analista', 'Técnico', 'Gestor'];
-  const areas = ['Gabinete', 'Comunicação', 'Administração', 'Planejamento', 'Infraestrutura'];
+  // Carregar opções de cargos e áreas do Supabase
+  useEffect(() => {
+    const fetchOptions = async () => {
+      setLoadingOptions(true);
+      try {
+        // Buscar cargos
+        const { data: cargosData, error: cargosError } = await supabase
+          .from('cargos')
+          .select('id, descricao');
+        
+        if (cargosError) throw cargosError;
+        
+        // Buscar áreas de coordenação
+        const { data: areasData, error: areasError } = await supabase
+          .from('areas_coordenacao')
+          .select('id, descricao');
+        
+        if (areasError) throw areasError;
+        
+        // Transformar dados para formato de opções
+        setRoles(cargosData.map(item => ({ id: item.id, value: item.descricao })));
+        setAreas(areasData.map(item => ({ id: item.id, value: item.descricao })));
+        
+        // Se não houver dados, adicionar alguns valores padrão
+        if (cargosData.length === 0) {
+          setRoles([
+            { id: '1', value: 'Assessor' },
+            { id: '2', value: 'Coordenador' },
+            { id: '3', value: 'Analista' },
+            { id: '4', value: 'Técnico' },
+            { id: '5', value: 'Gestor' }
+          ]);
+        }
+        
+        if (areasData.length === 0) {
+          setAreas([
+            { id: '1', value: 'Gabinete' },
+            { id: '2', value: 'Comunicação' },
+            { id: '3', value: 'Administração' },
+            { id: '4', value: 'Planejamento' },
+            { id: '5', value: 'Infraestrutura' }
+          ]);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar opções:', error);
+        // Definir valores padrão caso falhe
+        setRoles([
+          { id: '1', value: 'Assessor' },
+          { id: '2', value: 'Coordenador' },
+          { id: '3', value: 'Analista' },
+          { id: '4', value: 'Técnico' },
+          { id: '5', value: 'Gestor' }
+        ]);
+        
+        setAreas([
+          { id: '1', value: 'Gabinete' },
+          { id: '2', value: 'Comunicação' },
+          { id: '3', value: 'Administração' },
+          { id: '4', value: 'Planejamento' },
+          { id: '5', value: 'Infraestrutura' }
+        ]);
+      } finally {
+        setLoadingOptions(false);
+      }
+    };
+    
+    fetchOptions();
+  }, []);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -89,20 +178,37 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validate()) {
       return;
     }
     
-    // Simulate registration
     setLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const completeEmail = completeEmailWithDomain(formData.email);
+      
+      const { error } = await signUp(completeEmail, password, {
+        nome_completo: formData.name,
+        aniversario: formData.birthday,
+        whatsapp: formData.whatsapp,
+        cargo: formData.role,
+        area: formData.area
+      });
+      
+      if (error) {
+        showAuthError(error);
+      } else {
+        navigate('/login');
+      }
+    } catch (error: any) {
+      console.error('Erro ao registrar:', error);
+      showAuthError(error);
+    } finally {
       setLoading(false);
-      alert('Cadastro enviado com sucesso! Verifique seu e-mail para confirmar.');
-      navigate('/login');
-    }, 1500);
+    }
   };
   
   const leftContent = (
@@ -233,10 +339,11 @@ const Register = () => {
                   value={formData.role}
                   onChange={handleChange}
                   className={`login-input ${errors.role ? 'border-subpi-orange' : ''}`}
+                  disabled={loadingOptions}
                 >
                   <option value="">Selecione seu cargo</option>
                   {roles.map(role => (
-                    <option key={role} value={role}>{role}</option>
+                    <option key={role.id} value={role.value}>{role.value}</option>
                   ))}
                 </select>
                 {errors.role && (
@@ -254,10 +361,11 @@ const Register = () => {
                   value={formData.area}
                   onChange={handleChange}
                   className={`login-input ${errors.area ? 'border-subpi-orange' : ''}`}
+                  disabled={loadingOptions}
                 >
                   <option value="">Selecione sua área</option>
                   {areas.map(area => (
-                    <option key={area} value={area}>{area}</option>
+                    <option key={area.id} value={area.value}>{area.value}</option>
                   ))}
                 </select>
                 {errors.area && (
@@ -352,8 +460,5 @@ const Register = () => {
     </AuthLayout>
   );
 };
-
-// Importing at the end to avoid circular dependency
-import FeatureCard from '@/components/FeatureCard';
 
 export default Register;
