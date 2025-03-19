@@ -45,12 +45,12 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Verificar se já existe uma nota oficial para essa demanda
+  // Fix for the "Type instantiation is excessively deep and possibly infinite" error
+  // We need to use a simple type without any recursive references
   const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
-    queryFn: async (): Promise<NotaExistente | null> => {
+    queryFn: async () => {
       try {
-        // Use maybeSingle instead of single to avoid errors when no data is found
         const { data, error } = await supabase
           .from('notas_oficiais')
           .select('id, status, titulo, texto')
@@ -59,8 +59,13 @@ export function useDemandaDetalhes(demandaId: string) {
         
         if (error) throw error;
         
-        // Explicitly cast to NotaExistente | null to avoid deep type inference issues
-        return data as NotaExistente | null;
+        // Using a type assertion with a simple type to avoid deep inference
+        return data as {
+          id: string;
+          status: string;
+          titulo: string;
+          texto: string;
+        } | null;
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
         return null;

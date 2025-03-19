@@ -41,7 +41,7 @@ serve(async (req) => {
     }
     
     // Format the demand information and responses for the prompt
-    let promptContent = `Você é um especialista em comunicação institucional. Preciso que você crie uma nota oficial com base nas seguintes informações:\n\n`;
+    let promptContent = `Você é assessor de imprensa da Subprefeitura de Pinheiros. Sua tarefa é gerar uma nota de imprensa baseada nos dados da solicitação desta página. Observe as informações, perguntas cadastradas e respostas fornecidas por nossas áreas técnicas. Inicie sempre com A Subprefeitura de Pinheiros informa/esclarece/reforça/alerta ou outro verbo. Gere um texto formal, com tom informativo e objetivo.\n\n`;
     
     // Add demand information
     promptContent += `Título da Demanda: ${demandInfo.titulo}\n`;
@@ -61,7 +61,7 @@ serve(async (req) => {
       });
     }
     
-    promptContent += `Por favor, crie uma nota oficial clara e objetiva com base nas informações acima. A nota deve ter um tom formal e institucional, e deve abordar os principais pontos apresentados nas perguntas e respostas. Formate o resultado com um título sugestivo na primeira linha, seguido por um conteúdo bem estruturado.`;
+    promptContent += `Lembre-se: inicie sempre com "A Subprefeitura de Pinheiros" seguido por um verbo como informa, esclarece, reforça, alerta, etc. O tom deve ser formal, informativo e objetivo. Formate o resultado com um título sugestivo na primeira linha, seguido pelo conteúdo bem estruturado.`;
 
     console.log("Enviando prompt para OpenAI:", promptContent);
     
@@ -75,7 +75,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [
-            { role: 'system', content: 'Você é um especialista em comunicação institucional, especializado em redigir notas oficiais.' },
+            { role: 'system', content: 'Você é um assessor de imprensa especializado em comunicações oficiais para a Subprefeitura de Pinheiros.' },
             { role: 'user', content: promptContent }
           ],
           temperature: 0.7,
