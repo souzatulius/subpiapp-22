@@ -1,72 +1,114 @@
 
-export const formatDestination = (
-  destinatariosStr: string,
-  users: { id: string; nome_completo: string }[],
-  areas: { id: string; descricao: string }[],
-  cargos: { id: string; descricao: string }[]
-): string => {
-  if (destinatariosStr === 'Todos') {
-    return 'Todos os usuários';
-  }
-  
+import { Announcement } from './types';
+
+export const formatDestination = (destinatarios: string): string => {
   try {
-    const destinatariosObj = JSON.parse(destinatariosStr);
+    if (destinatarios === 'Todos') return 'Todos';
     
-    if (destinatariosObj.type === 'usuarios') {
-      const count = destinatariosObj.ids.length;
-      if (count === 1) {
-        const user = users.find(u => u.id === destinatariosObj.ids[0]);
-        return user ? `Usuário: ${user.nome_completo}` : 'Um usuário específico';
-      }
-      return `${count} usuários específicos`;
-    } else if (destinatariosObj.type === 'areas') {
-      const area = areas.find(a => a.id === destinatariosObj.ids[0]);
-      return area ? `Área: ${area.descricao}` : 'Uma área específica';
-    } else if (destinatariosObj.type === 'cargos') {
-      const cargo = cargos.find(c => c.id === destinatariosObj.ids[0]);
-      return cargo ? `Cargo: ${cargo.descricao}` : 'Um cargo específico';
+    const parsed = JSON.parse(destinatarios);
+    
+    if (parsed.type === 'usuarios') {
+      return `${parsed.ids.length} usuário(s) específico(s)`;
+    } else if (parsed.type === 'areas') {
+      return 'Área(s) específica(s)';
+    } else if (parsed.type === 'cargos') {
+      return 'Cargo(s) específico(s)';
     }
     
-    return 'Destinatários específicos';
+    return destinatarios;
   } catch (e) {
-    return destinatariosStr;
+    return destinatarios;
   }
 };
 
-export const createCsvData = (
-  announcements: any[],
-  formatDestination: (dest: string) => string
-) => {
-  // Create CSV data
-  const headers = ['Título', 'Mensagem', 'Destinatários', 'Autor', 'Data de Envio'];
-  const csvData = announcements.map(announcement => [
-    announcement.titulo,
-    announcement.mensagem.replace(/\n/g, ' '),
-    formatDestination(announcement.destinatarios),
-    announcement.autor?.nome_completo || '',
-    new Date(announcement.data_envio).toLocaleString('pt-BR')
+export const handleExportCsv = (announcements: Announcement[]) => {
+  if (announcements.length === 0) return;
+  
+  // Preparar dados para CSV
+  const headers = ['ID', 'Título', 'Mensagem', 'Destinatários', 'Data de Envio', 'Autor'];
+  const rows = announcements.map(a => [
+    a.id,
+    a.titulo,
+    a.mensagem,
+    formatDestination(a.destinatarios),
+    new Date(a.data_envio).toLocaleDateString('pt-BR'),
+    a.autor.nome_completo
   ]);
   
+  // Converter para CSV
   const csvContent = [
     headers.join(','),
-    ...csvData.map(row => row.map(cell => {
-      // Handle commas and quotes in CSV
-      if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"'))) {
-        return `"${cell.replace(/"/g, '""')}"`;
-      }
-      return cell;
-    }).join(','))
+    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
   ].join('\n');
   
-  return csvContent;
+  // Criar blob e link para download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', `comunicados_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
-export const downloadCsv = (csvContent: string, filename: string) => {
-  // Download CSV file
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(link.href);
+export const handlePrint = (announcements: Announcement[]) => {
+  if (announcements.length === 0) return;
+  
+  // Criar conteúdo para impressão
+  const printContent = `
+    <html>
+      <head>
+        <title>Comunicados</title>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          .header { text-align: center; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Relatório de Comunicados</h1>
+          <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Mensagem</th>
+              <th>Destinatários</th>
+              <th>Data de Envio</th>
+              <th>Autor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${announcements.map(a => `
+              <tr>
+                <td>${a.titulo}</td>
+                <td>${a.mensagem}</td>
+                <td>${formatDestination(a.destinatarios)}</td>
+                <td>${new Date(a.data_envio).toLocaleDateString('pt-BR')}</td>
+                <td>${a.autor.nome_completo}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+  
+  // Abrir janela de impressão
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }
 };

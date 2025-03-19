@@ -35,7 +35,7 @@ export interface Announcement {
   destinatarios: string;
   data_envio: string;
   autor_id: string;
-  autor?: {
+  autor: {
     id: string;
     nome_completo: string;
     email: string;
