@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserPermissionRow from './UserPermissionRow';
 
