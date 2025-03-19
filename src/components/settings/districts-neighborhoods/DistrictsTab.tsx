@@ -44,10 +44,20 @@ const DistrictsTab: React.FC<DistrictsTabProps> = ({
       
       if (error) throw error;
       
+      toast({
+        title: 'Distrito adicionado',
+        description: 'O distrito foi adicionado com sucesso',
+      });
+      
       await fetchDistricts();
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao adicionar distrito:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao adicionar o distrito',
+        variant: 'destructive',
+      });
       return Promise.reject(error);
     } finally {
       setIsSubmitting(false);
@@ -146,7 +156,14 @@ const DistrictsTab: React.FC<DistrictsTabProps> = ({
   // Render district form - now using the extracted component
   const renderDistrictForm = (onClose: () => void) => (
     <DistrictAddForm
-      onSubmit={handleAddDistrict}
+      onSubmit={async (data) => {
+        try {
+          await handleAddDistrict(data);
+          onClose();
+        } catch (error) {
+          console.error('Error in form submission:', error);
+        }
+      }}
       onCancel={onClose}
       isSubmitting={isSubmitting}
     />
@@ -176,12 +193,14 @@ const DistrictsTab: React.FC<DistrictsTabProps> = ({
             <DialogTitle>Editar Distrito</DialogTitle>
           </DialogHeader>
           
-          <DistrictForm
-            onSubmit={handleEditDistrict}
-            isSubmitting={isSubmitting}
-            defaultValues={editingDistrict ? { nome: editingDistrict.nome } : undefined}
-            onCancel={() => setIsEditDistrictOpen(false)}
-          />
+          {isEditDistrictOpen && editingDistrict && (
+            <DistrictForm
+              onSubmit={handleEditDistrict}
+              isSubmitting={isSubmitting}
+              defaultValues={editingDistrict ? { nome: editingDistrict.nome } : undefined}
+              onCancel={() => setIsEditDistrictOpen(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>

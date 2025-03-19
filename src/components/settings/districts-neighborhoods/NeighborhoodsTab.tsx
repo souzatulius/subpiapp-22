@@ -45,10 +45,20 @@ const NeighborhoodsTab: React.FC<NeighborhoodsTabProps> = ({
       
       if (error) throw error;
       
+      toast({
+        title: 'Bairro adicionado',
+        description: 'O bairro foi adicionado com sucesso',
+      });
+      
       await fetchNeighborhoods();
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao adicionar bairro:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao adicionar o bairro',
+        variant: 'destructive',
+      });
       return Promise.reject(error);
     } finally {
       setIsSubmitting(false);
@@ -152,7 +162,14 @@ const NeighborhoodsTab: React.FC<NeighborhoodsTabProps> = ({
   // Render neighborhood form - now using the extracted component
   const renderNeighborhoodForm = (onClose: () => void) => (
     <NeighborhoodAddForm
-      onSubmit={handleAddNeighborhood}
+      onSubmit={async (data) => {
+        try {
+          await handleAddNeighborhood(data);
+          onClose();
+        } catch (error) {
+          console.error('Error in form submission:', error);
+        }
+      }}
       onCancel={onClose}
       isSubmitting={isSubmitting}
       districts={districts}
@@ -183,20 +200,22 @@ const NeighborhoodsTab: React.FC<NeighborhoodsTabProps> = ({
             <DialogTitle>Editar Bairro</DialogTitle>
           </DialogHeader>
           
-          <NeighborhoodForm
-            onSubmit={handleEditNeighborhood}
-            isSubmitting={isSubmitting}
-            defaultValues={
-              editingNeighborhood 
-                ? { 
-                    nome: editingNeighborhood.nome,
-                    distrito_id: editingNeighborhood.distrito_id,
-                  } 
-                : undefined
-            }
-            onCancel={() => setIsEditNeighborhoodOpen(false)}
-            districts={districts}
-          />
+          {isEditNeighborhoodOpen && editingNeighborhood && (
+            <NeighborhoodForm
+              onSubmit={handleEditNeighborhood}
+              isSubmitting={isSubmitting}
+              defaultValues={
+                editingNeighborhood 
+                  ? { 
+                      nome: editingNeighborhood.nome,
+                      distrito_id: editingNeighborhood.distrito_id,
+                    } 
+                  : undefined
+              }
+              onCancel={() => setIsEditNeighborhoodOpen(false)}
+              districts={districts}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>
