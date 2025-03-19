@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -44,6 +43,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     prevStep,
     setSelectedDistrito
   } = useDemandForm(user?.id, onClose);
+
+  console.log('Current user ID:', user?.id);
 
   const steps: FormStep[] = [
     {

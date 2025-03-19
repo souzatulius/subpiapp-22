@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -53,46 +52,39 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
 
-  // Fetch data from Supabase tables
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch areas de coordenação
         const { data: areasData, error: areasError } = await supabase
           .from('areas_coordenacao')
           .select('*');
         if (areasError) throw areasError;
         setAreasCoord(areasData || []);
 
-        // Fetch serviços
         const { data: servicosData, error: servicosError } = await supabase
           .from('servicos')
           .select('*');
         if (servicosError) throw servicosError;
         setServicos(servicosData || []);
 
-        // Fetch origens
         const { data: origensData, error: origensError } = await supabase
           .from('origens_demandas')
           .select('*');
         if (origensError) throw origensError;
         setOrigens(origensData || []);
 
-        // Fetch tipos midia
         const { data: tiposMidiaData, error: tiposMidiaError } = await supabase
           .from('tipos_midia')
           .select('*');
         if (tiposMidiaError) throw tiposMidiaError;
         setTiposMidia(tiposMidiaData || []);
 
-        // Fetch distritos
         const { data: distritosData, error: distritosError } = await supabase
           .from('distritos')
           .select('*');
         if (distritosError) throw distritosError;
         setDistritos(distritosData || []);
 
-        // Fetch bairros
         const { data: bairrosData, error: bairrosError } = await supabase
           .from('bairros')
           .select('*');
@@ -110,7 +102,6 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     fetchData();
   }, []);
 
-  // Filter serviços baseado na área de coordenação selecionada
   useEffect(() => {
     if (formData.area_coordenacao_id) {
       const filtered = servicos.filter(
@@ -122,7 +113,6 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     }
   }, [formData.area_coordenacao_id, servicos]);
 
-  // Filter bairros baseado no distrito selecionado
   useEffect(() => {
     if (selectedDistrito) {
       const filtered = bairros.filter(
@@ -134,7 +124,6 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     }
   }, [selectedDistrito, bairros]);
 
-  // Filter services based on search term and selected area
   const filteredServicesBySearch = useMemo(() => {
     if (!serviceSearch) return filteredServicos;
     return filteredServicos.filter(service => 
@@ -182,8 +171,12 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     try {
       setIsLoading(true);
 
-      // Filter out empty perguntas
+      if (!userId) {
+        throw new Error("Usuário não identificado. Por favor, faça login novamente.");
+      }
+
       const filteredPerguntas = formData.perguntas.filter(p => p.trim() !== '');
+      
       const demandaData = {
         ...formData,
         perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
@@ -191,12 +184,17 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
         status: 'pendente'
       };
 
+      console.log('Submitting demand data:', demandaData);
+
       const { data, error } = await supabase
         .from('demandas')
         .insert([demandaData])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
 
       toast({
         title: "Demanda cadastrada com sucesso!",
