@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -13,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User } from './useUsersManagement';
+import { User } from './types';
 
 interface UsersTableProps {
   users: User[];

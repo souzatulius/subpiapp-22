@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,7 +28,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Area, Cargo } from './useUsersManagement';
+import { Area, Cargo } from './types';
 
 const inviteUserSchema = z.object({
   email: z.string().email('Email inválido'),

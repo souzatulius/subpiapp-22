@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Dialog, 
@@ -9,7 +8,7 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { User } from './useUsersManagement';
+import { User } from './types';
 
 interface DeleteUserDialogProps {
   open: boolean;

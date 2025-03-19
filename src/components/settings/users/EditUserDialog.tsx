@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,7 +38,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { formatPhone } from '@/lib/formValidation';
-import { Area, Cargo, User } from './useUsersManagement';
+import { Area, Cargo, User } from './types';
 
 const editUserSchema = z.object({
   email: z.string().email('Email inválido'),
