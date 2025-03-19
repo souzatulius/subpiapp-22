@@ -46,9 +46,13 @@ const Positions = () => {
   };
 
   const handleAdd = async (data: { descricao: string }) => {
-    await addPosition(data);
-    closeAddForm();
-    return Promise.resolve();
+    try {
+      await addPosition(data);
+      closeAddForm();
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   const columns = [

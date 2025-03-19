@@ -37,6 +37,7 @@ const PositionForm: React.FC<PositionFormProps> = ({
               name="descricao"
               defaultValue={defaultValue}
               placeholder="Nome do cargo"
+              autoFocus
             />
           </div>
         </div>

@@ -51,13 +51,14 @@ export function usePositions() {
     try {
       console.log('Adicionando cargo:', data);
       
-      const { data: result, error } = await supabase.rpc('insert_cargo', {
+      // Retorna o ID gerado pelo RPC corretamente
+      const { data: newId, error } = await supabase.rpc('insert_cargo', {
         p_descricao: data.descricao
-      } as any);
+      });
       
       if (error) throw error;
       
-      console.log('Cargo adicionado com sucesso:', result);
+      console.log('Cargo adicionado com sucesso:', newId);
       
       toast({
         title: 'Sucesso',
@@ -87,7 +88,7 @@ export function usePositions() {
       const { data: result, error } = await supabase.rpc('update_cargo', {
         p_id: id,
         p_descricao: data.descricao
-      } as any);
+      });
       
       if (error) throw error;
       
@@ -136,7 +137,7 @@ export function usePositions() {
       
       const { error } = await supabase.rpc('delete_cargo', {
         p_id: position.id
-      } as any);
+      });
       
       if (error) throw error;
       
