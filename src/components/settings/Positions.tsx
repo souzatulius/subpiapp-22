@@ -17,6 +17,7 @@ const Positions = () => {
   
   const [editingPosition, setEditingPosition] = useState<Position | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const openEditForm = (position: Position) => {
     setEditingPosition(position);
@@ -28,11 +29,25 @@ const Positions = () => {
     setEditingPosition(null);
   };
 
+  const openAddForm = () => {
+    setIsAddFormOpen(true);
+  };
+
+  const closeAddForm = () => {
+    setIsAddFormOpen(false);
+  };
+
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingPosition) return Promise.reject(new Error('Nenhum cargo selecionado'));
     
     await updatePosition(editingPosition.id, data);
     closeEditForm();
+    return Promise.resolve();
+  };
+
+  const handleAdd = async (data: { descricao: string }) => {
+    await addPosition(data);
+    closeAddForm();
     return Promise.resolve();
   };
 
@@ -50,7 +65,7 @@ const Positions = () => {
 
   const renderForm = (onClose: () => void) => (
     <PositionForm
-      onSubmit={addPosition}
+      onSubmit={handleAdd}
       onCancel={onClose}
       isSubmitting={isSubmitting}
     />
@@ -62,7 +77,7 @@ const Positions = () => {
         title="Cargos"
         data={positions}
         columns={columns}
-        onAdd={() => {}}
+        onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={deletePosition}
         filterPlaceholder="Filtrar cargos..."
