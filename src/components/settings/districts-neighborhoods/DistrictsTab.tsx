@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import DistrictAddForm from './district-forms/DistrictAddForm';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface DistrictsTabProps {
   districts: any[];
@@ -31,9 +32,19 @@ const DistrictsTab: React.FC<DistrictsTabProps> = ({
 }) => {
   const [isEditDistrictOpen, setIsEditDistrictOpen] = useState(false);
   const [editingDistrict, setEditingDistrict] = useState<any>(null);
+  const { user } = useAuth();
 
   // District handlers
   const handleAddDistrict = async (data: any) => {
+    if (!user) {
+      toast({
+        title: 'Erro',
+        description: 'Você precisa estar autenticado para adicionar um distrito',
+        variant: 'destructive',
+      });
+      return Promise.reject(new Error('Não autenticado'));
+    }
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase
@@ -65,7 +76,7 @@ const DistrictsTab: React.FC<DistrictsTabProps> = ({
   };
   
   const handleEditDistrict = async (data: any) => {
-    if (!editingDistrict) return;
+    if (!editingDistrict || !user) return;
     
     setIsSubmitting(true);
     try {
@@ -99,6 +110,8 @@ const DistrictsTab: React.FC<DistrictsTabProps> = ({
   };
   
   const handleDeleteDistrict = async (district: any) => {
+    if (!user) return;
+
     try {
       // Check if there are dependent neighborhoods
       const { count, error: countError } = await supabase

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export const useDistrictsAndNeighborhoods = () => {
   const [activeTab, setActiveTab] = useState('districts');
@@ -10,11 +11,14 @@ export const useDistrictsAndNeighborhoods = () => {
   const [loadingDistricts, setLoadingDistricts] = useState(true);
   const [loadingNeighborhoods, setLoadingNeighborhoods] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchDistricts();
-    fetchNeighborhoods();
-  }, []);
+    if (user) {
+      fetchDistricts();
+      fetchNeighborhoods();
+    }
+  }, [user]);
 
   const fetchDistricts = async () => {
     setLoadingDistricts(true);

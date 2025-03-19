@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import NeighborhoodAddForm from './neighborhood-forms/NeighborhoodAddForm';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface NeighborhoodsTabProps {
   neighborhoods: any[];
@@ -31,9 +32,19 @@ const NeighborhoodsTab: React.FC<NeighborhoodsTabProps> = ({
 }) => {
   const [isEditNeighborhoodOpen, setIsEditNeighborhoodOpen] = useState(false);
   const [editingNeighborhood, setEditingNeighborhood] = useState<any>(null);
+  const { user } = useAuth();
 
   // Neighborhood handlers
   const handleAddNeighborhood = async (data: any) => {
+    if (!user) {
+      toast({
+        title: 'Erro',
+        description: 'Você precisa estar autenticado para adicionar um bairro',
+        variant: 'destructive',
+      });
+      return Promise.reject(new Error('Não autenticado'));
+    }
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase
@@ -66,7 +77,7 @@ const NeighborhoodsTab: React.FC<NeighborhoodsTabProps> = ({
   };
   
   const handleEditNeighborhood = async (data: any) => {
-    if (!editingNeighborhood) return;
+    if (!editingNeighborhood || !user) return;
     
     setIsSubmitting(true);
     try {
@@ -100,6 +111,8 @@ const NeighborhoodsTab: React.FC<NeighborhoodsTabProps> = ({
   };
   
   const handleDeleteNeighborhood = async (neighborhood: any) => {
+    if (!user) return;
+
     try {
       // Check if there are dependent records
       const { count, error: countError } = await supabase
