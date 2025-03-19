@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -6,13 +7,14 @@ import PWAButton from '@/components/PWAButton';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/layouts/Header';
+
 const Index = () => {
-  const {
-    user
-  } = useAuth();
-  return <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <Header />
+  const { user } = useAuth();
+  
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Header - explicitly pass showControls={false} */}
+      <Header showControls={false} />
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
@@ -65,6 +67,8 @@ const Index = () => {
       
       {/* PWA Button */}
       <PWAButton />
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

@@ -11,8 +11,8 @@ interface AuthLayoutProps {
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children, leftContent }) => {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <Header />
+      {/* Header - explicitly pass showControls={false} for auth pages */}
+      <Header showControls={false} />
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
