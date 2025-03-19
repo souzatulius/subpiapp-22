@@ -10,6 +10,8 @@ export const useAccessControl = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     fetchData();
@@ -19,13 +21,15 @@ export const useAccessControl = () => {
     setLoading(true);
     
     try {
-      // Fetch users
+      // Fetch users with whatsapp and aniversario
       const { data: usersData, error: usersError } = await supabase
         .from('usuarios')
         .select(`
           id, 
           nome_completo, 
-          email
+          email,
+          whatsapp,
+          aniversario
         `);
         
       if (usersError) throw usersError;
@@ -154,15 +158,55 @@ export const useAccessControl = () => {
     }
   };
 
+  const handleUpdateUserInfo = async (userId: string, data: { whatsapp?: string; aniversario?: string }) => {
+    setSaving(true);
+    
+    try {
+      const { error } = await supabase
+        .from('usuarios')
+        .update(data)
+        .eq('id', userId);
+        
+      if (error) throw error;
+      
+      // Update local state
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, ...data } : user
+      ));
+      
+      toast({
+        title: 'Informações atualizadas',
+        description: 'As informações do usuário foram atualizadas com sucesso',
+      });
+      
+      // Close edit dialog
+      setIsEditDialogOpen(false);
+    } catch (error: any) {
+      console.error('Erro ao atualizar informações do usuário:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao atualizar as informações do usuário.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openEditDialog = (user: any) => {
+    setCurrentUser(user);
+    setIsEditDialogOpen(true);
+  };
+
   const handleExportCsv = () => {
     // Create CSV data
-    const headers = ['Nome', 'Email', 'Permissões'];
+    const headers = ['Nome', 'Email', 'WhatsApp', 'Aniversário', 'Permissões'];
     const csvData = users.map(user => {
       const userPerms = userPermissions[user.id] || [];
       const permissionNames = userPerms
         .map(permId => {
           const perm = permissions.find(p => p.id === permId);
-          return perm ? perm.descricao : '';
+          return perm ? `${perm.descricao} (Nível: ${perm.nivel_acesso})` : '';
         })
         .filter(Boolean)
         .join('; ');
@@ -170,6 +214,8 @@ export const useAccessControl = () => {
       return [
         user.nome_completo,
         user.email,
+        user.whatsapp || '-',
+        user.aniversario || '-',
         permissionNames
       ];
     });
@@ -215,8 +261,13 @@ export const useAccessControl = () => {
     filter,
     setFilter,
     filteredUsers,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    currentUser,
+    openEditDialog,
     handleAddPermission,
     handleRemovePermission,
+    handleUpdateUserInfo,
     handleExportCsv,
     handlePrint,
   };

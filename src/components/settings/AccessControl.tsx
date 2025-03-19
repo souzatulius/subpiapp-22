@@ -2,6 +2,7 @@
 import React from 'react';
 import AccessControlHeader from './access-control/AccessControlHeader';
 import AccessControlTable from './access-control/AccessControlTable';
+import UserInfoEditDialog from './access-control/UserInfoEditDialog';
 import { useAccessControl } from './access-control/useAccessControl';
 
 const AccessControl = () => {
@@ -15,8 +16,13 @@ const AccessControl = () => {
     filteredUsers,
     handleAddPermission,
     handleRemovePermission,
+    handleUpdateUserInfo,
     handleExportCsv,
     handlePrint,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    currentUser,
+    openEditDialog,
   } = useAccessControl();
 
   return (
@@ -37,6 +43,15 @@ const AccessControl = () => {
         filter={filter}
         handleAddPermission={handleAddPermission}
         handleRemovePermission={handleRemovePermission}
+        openEditDialog={openEditDialog}
+      />
+      
+      <UserInfoEditDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        user={currentUser}
+        onSave={handleUpdateUserInfo}
+        saving={saving}
       />
     </div>
   );
