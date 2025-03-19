@@ -1,10 +1,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Demanda, Resposta } from '../types';
+import { Demanda, Resposta, NotaExistente } from '../types';
 
 export function useDemandaDetalhes(demandaId: string) {
-  const { data: demanda, isLoading: demandaLoading } = useQuery({
+  const { data: demanda, isLoading: demandaLoading } = useQuery<Demanda>({
     queryKey: ['demanda-detalhes', demandaId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,7 +29,7 @@ export function useDemandaDetalhes(demandaId: string) {
     }
   });
   
-  const { data: respostas, isLoading: respostasLoading } = useQuery({
+  const { data: respostas, isLoading: respostasLoading } = useQuery<Resposta[]>({
     queryKey: ['respostas-demanda', demandaId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -47,20 +47,6 @@ export function useDemandaDetalhes(demandaId: string) {
       return (data || []) as Resposta[];
     }
   });
-  
-  // Fix the infinite type instantiation by explicitly defining the return type
-  interface NotaExistente {
-    id: string;
-    titulo: string;
-    texto: string;
-    autor_id: string;
-    area_coordenacao_id: string;
-    demanda_id: string;
-    status: string;
-    criado_em: string;
-    atualizado_em: string;
-    aprovador_id?: string;
-  }
   
   const { data: notaExistente } = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],

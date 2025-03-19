@@ -5,20 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-
-// Define a proper type for the notaExistente
-interface NotaExistente {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  criado_em: string;
-  atualizado_em: string;
-  autor_id: string;
-  area_coordenacao_id: string;
-  demanda_id: string;
-  aprovador_id?: string;
-}
+import { NotaExistente } from '../types';
 
 interface CriarNotaFormProps {
   titulo: string;

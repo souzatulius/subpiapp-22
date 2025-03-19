@@ -42,3 +42,16 @@ export interface PerguntaResposta {
   pergunta: string;
   resposta: string;
 }
+
+export interface NotaExistente {
+  id: string;
+  titulo: string;
+  texto: string;
+  autor_id: string;
+  area_coordenacao_id: string;
+  demanda_id: string;
+  status: string;
+  criado_em: string;
+  atualizado_em: string;
+  aprovador_id?: string;
+}
