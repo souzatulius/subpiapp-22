@@ -20,7 +20,7 @@ const Dashboard = () => {
             <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <ActionCard title="Demandas da Imprensa" icon={<ClipboardList className="h-12 w-12 bg-transparent text-[#f57c35]" />} onClick={() => window.location.href = '/demandas'} color="blue" />
+              <ActionCard title="Demandas da Imprensa" icon={<ClipboardList className="h-12 w-12 bg-transparent text-[#f57c35]" />} onClick={() => window.location.href = '/demandas'} color="blue" className="" />
               
               <ActionCard title="Notas Oficiais" icon={<FileText className="h-6 w-6" />} onClick={() => window.location.href = '/notas-oficiais'} color="green" />
               

@@ -52,7 +52,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         {icon}
       </div>;
   };
-  return <Card className={`cursor-pointer transition-all duration-300 border ${getColorClasses()} hover:shadow-lg transform hover:-translate-y-1`} onClick={onClick}>
+  return <Card onClick={onClick} className="px-">
       <CardContent className="p-6 flex flex-col items-center text-center rounded-3xl bg-gray-800">
         {renderIcon()}
         <h3 className="text-lg font-semibold text-slate-200">
