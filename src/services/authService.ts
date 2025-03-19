@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Session } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 
 // Sign up with email/password
 export const signUp = async (email: string, password: string, userData: any) => {
