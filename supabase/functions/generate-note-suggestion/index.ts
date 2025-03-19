@@ -30,7 +30,18 @@ serve(async (req) => {
       );
     }
 
-    const reqData = await req.json();
+    // Parse request data
+    let reqData;
+    try {
+      reqData = await req.json();
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { demandInfo, responses } = reqData;
     
     console.log("Received request data:", JSON.stringify({ 
@@ -40,6 +51,7 @@ serve(async (req) => {
     
     // Validate input data
     if (!demandInfo) {
+      console.error('Missing demand information in request');
       return new Response(
         JSON.stringify({ error: "Dados da demanda não fornecidos" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -61,7 +73,7 @@ serve(async (req) => {
     // Add Q&A if available
     if (responses && responses.length > 0) {
       promptContent += "Perguntas e Respostas:\n";
-      responses.forEach((qa: { pergunta: string, resposta: string }) => {
+      responses.forEach((qa) => {
         promptContent += `Pergunta: ${qa.pergunta || 'Não fornecida'}\n`;
         promptContent += `Resposta: ${qa.resposta || 'Não fornecida'}\n\n`;
       });
@@ -71,6 +83,7 @@ serve(async (req) => {
 
     console.log("Sending prompt to OpenAI:", promptContent.substring(0, 200) + "...");
     
+    // Call OpenAI API with improved error handling
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -95,8 +108,19 @@ serve(async (req) => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("OpenAI API error:", errorText);
+        
+        // Return appropriate error based on status code
+        let errorMessage = "Erro na API do OpenAI";
+        if (responseStatus === 401) {
+          errorMessage = "Erro de autenticação na API do OpenAI. Verifique a chave API.";
+        } else if (responseStatus === 429) {
+          errorMessage = "Limite de requisições excedido na API do OpenAI.";
+        } else if (responseStatus >= 500) {
+          errorMessage = "Erro no servidor da OpenAI. Tente novamente mais tarde.";
+        }
+        
         return new Response(
-          JSON.stringify({ error: `Erro na API do OpenAI: ${responseStatus} - ${errorText}` }),
+          JSON.stringify({ error: `${errorMessage}: ${responseStatus} - ${errorText}` }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -104,7 +128,8 @@ serve(async (req) => {
       const data = await response.json();
       console.log("OpenAI API response received");
       
-      if (!data.choices || !data.choices[0]) {
+      // Validate OpenAI response
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
         console.error("Unexpected OpenAI API response format:", data);
         return new Response(
           JSON.stringify({ error: "Formato de resposta inesperado da OpenAI" }),

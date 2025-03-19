@@ -45,10 +45,10 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Fix for TypeScript error - using explicit type annotation and simpler return type
-  const { data: notaExistente, isLoading: isLoadingNota } = useQuery<NotaExistente | null>({
+  // Fixed TypeScript error - using an explicit type instead of letting TypeScript infer it
+  const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
-    queryFn: async (): Promise<NotaExistente | null> => {
+    queryFn: async () => {
       try {
         const { data, error } = await supabase
           .from('notas_oficiais')
@@ -57,6 +57,7 @@ export function useDemandaDetalhes(demandaId: string) {
           .maybeSingle();
         
         if (error) throw error;
+        // Using a simpler type assertion to avoid infinite type instantiation
         return data as NotaExistente | null;
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
