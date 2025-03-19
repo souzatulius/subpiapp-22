@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
-
 interface ActionCardProps {
   title: string;
   icon: string | React.ReactNode;
@@ -10,11 +8,10 @@ interface ActionCardProps {
   color: 'blue' | 'green' | 'orange' | 'purple' | 'dark-blue';
   iconSize?: 'normal' | 'large' | 'giant';
 }
-
-const ActionCard: React.FC<ActionCardProps> = ({ 
-  title, 
-  icon, 
-  onClick, 
+const ActionCard: React.FC<ActionCardProps> = ({
+  title,
+  icon,
+  onClick,
   color,
   iconSize = 'normal'
 }) => {
@@ -34,7 +31,6 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'bg-gray-50 border-gray-200 hover:bg-gray-100';
     }
   };
-
   const getIconSizeClasses = () => {
     switch (iconSize) {
       case 'giant':
@@ -46,33 +42,23 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'text-4xl mb-4';
     }
   };
-
   const renderIcon = () => {
     if (typeof icon === 'string') {
       return <span className={getIconSizeClasses()}>{icon}</span>;
     }
-    
-    // If it's a React component (like a Lucide icon)
-    return (
-      <div className={`${getIconSizeClasses()} flex justify-center items-center`}>
-        {icon}
-      </div>
-    );
-  };
 
-  return (
-    <Card 
-      className={`cursor-pointer transition-all duration-300 border ${getColorClasses()} hover:shadow-lg transform hover:-translate-y-1`}
-      onClick={onClick}
-    >
-      <CardContent className="p-6 flex flex-col items-center text-center">
+    // If it's a React component (like a Lucide icon)
+    return <div className={`${getIconSizeClasses()} flex justify-center items-center`}>
+        {icon}
+      </div>;
+  };
+  return <Card className={`cursor-pointer transition-all duration-300 border ${getColorClasses()} hover:shadow-lg transform hover:-translate-y-1`} onClick={onClick}>
+      <CardContent className="p-6 flex flex-col items-center text-center rounded-3xl bg-gray-800">
         {renderIcon()}
         <h3 className={`font-semibold ${color === 'dark-blue' ? 'text-white' : 'text-[#003570]'}`}>
           {title}
         </h3>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default ActionCard;
