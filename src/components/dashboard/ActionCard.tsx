@@ -55,7 +55,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   return <Card className={`cursor-pointer transition-all duration-300 border ${getColorClasses()} hover:shadow-lg transform hover:-translate-y-1`} onClick={onClick}>
       <CardContent className="p-6 flex flex-col items-center text-center rounded-3xl bg-gray-800">
         {renderIcon()}
-        <h3 className={`font-semibold ${color === 'dark-blue' ? 'text-white' : 'text-[#003570]'}`}>
+        <h3 className="text-lg font-semibold text-slate-200">
           {title}
         </h3>
       </CardContent>
