@@ -1,7 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, ArrowUpRight, Briefcase, Map, FileText, MessageSquare, Bell } from 'lucide-react';
+import { Users, ArrowUpRight, Briefcase, Map, FileText, MessageSquare, Bell, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+
 const SettingsDashboard = () => {
   const [stats, setStats] = useState({
     users: 0,
@@ -14,6 +18,9 @@ const SettingsDashboard = () => {
     notifications: 0
   });
   const [loading, setLoading] = useState(true);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const navigate = useNavigate();
+  
   useEffect(() => {
     async function fetchStats() {
       try {
@@ -34,6 +41,8 @@ const SettingsDashboard = () => {
           count: announcementsCount
         }, {
           count: notificationsCount
+        }, {
+          count: unreadNotificationsCount
         }] = await Promise.all([supabase.from('usuarios').select('*', {
           count: 'exact',
           head: true
@@ -58,7 +67,11 @@ const SettingsDashboard = () => {
         }), supabase.from('notificacoes').select('*', {
           count: 'exact',
           head: true
-        })]);
+        }), supabase.from('notificacoes').select('*', {
+          count: 'exact',
+          head: true
+        }).eq('lida', false)]);
+        
         setStats({
           users: usersCount || 0,
           areas: areasCount || 0,
@@ -69,6 +82,8 @@ const SettingsDashboard = () => {
           announcements: announcementsCount || 0,
           notifications: notificationsCount || 0
         });
+        
+        setUnreadNotifications(unreadNotificationsCount || 0);
       } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
       } finally {
@@ -77,43 +92,121 @@ const SettingsDashboard = () => {
     }
     fetchStats();
   }, []);
+  
   const StatCard = ({
     title,
     value,
     icon,
-    description
+    description,
+    onClick,
+    highlight = false
   }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     description: string;
-  }) => <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{loading ? '...' : value}</div>
-        <CardDescription>{description}</CardDescription>
-      </CardContent>
-    </Card>;
+    onClick?: () => void;
+    highlight?: boolean;
+  }) => {
+    const CardComponent = (
+      <Card className={`${highlight ? 'border-blue-400' : ''} ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          {icon}
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold flex items-center">
+            {loading ? '...' : value}
+            {highlight && value > 0 && (
+              <span className="ml-2 text-xs py-1 px-2 bg-blue-100 text-blue-800 rounded-full">
+                {unreadNotifications} não lidas
+              </span>
+            )}
+          </div>
+          <CardDescription className="flex items-center justify-between">
+            {description}
+            {onClick && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+          </CardDescription>
+        </CardContent>
+      </Card>
+    );
+    
+    if (onClick) {
+      return (
+        <div onClick={onClick}>
+          {CardComponent}
+        </div>
+      );
+    }
+    
+    return CardComponent;
+  };
+  
   return <div className="space-y-6">
       <h2 className="text-xl font-semibold">Visão Geral da Plataforma</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Usuários" value={stats.users} icon={<Users className="h-4 w-4 text-muted-foreground" />} description="Total de usuários cadastrados" />
-        <StatCard title="Áreas de Coordenação" value={stats.areas} icon={<ArrowUpRight className="h-4 w-4 text-muted-foreground" />} description="Áreas de coordenação registradas" />
-        <StatCard title="Cargos" value={stats.positions} icon={<Briefcase className="h-4 w-4 text-muted-foreground" />} description="Tipos de cargos disponíveis" />
-        <StatCard title="Serviços" value={stats.services} icon={<FileText className="h-4 w-4 text-muted-foreground" />} description="Serviços registrados" />
+        <StatCard 
+          title="Usuários" 
+          value={stats.users} 
+          icon={<Users className="h-4 w-4 text-muted-foreground" />} 
+          description="Total de usuários cadastrados"
+          onClick={() => navigate('/settings?tab=users')}
+        />
+        <StatCard 
+          title="Áreas de Coordenação" 
+          value={stats.areas} 
+          icon={<ArrowUpRight className="h-4 w-4 text-muted-foreground" />} 
+          description="Áreas de coordenação registradas"
+          onClick={() => navigate('/settings?tab=coordination-areas')}
+        />
+        <StatCard 
+          title="Cargos" 
+          value={stats.positions} 
+          icon={<Briefcase className="h-4 w-4 text-muted-foreground" />} 
+          description="Tipos de cargos disponíveis"
+          onClick={() => navigate('/settings?tab=positions')}
+        />
+        <StatCard 
+          title="Serviços" 
+          value={stats.services} 
+          icon={<FileText className="h-4 w-4 text-muted-foreground" />} 
+          description="Serviços registrados"
+          onClick={() => navigate('/settings?tab=services')}
+        />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Distritos" value={stats.districts} icon={<Map className="h-4 w-4 text-muted-foreground" />} description="Distritos registrados" />
-        <StatCard title="Bairros" value={stats.neighborhoods} icon={<Map className="h-4 w-4 text-muted-foreground" />} description="Bairros cadastrados" />
-        <StatCard title="Comunicados" value={stats.announcements} icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />} description="Comunicados enviados" />
-        <StatCard title="Notificações" value={stats.notifications} icon={<Bell className="h-4 w-4 text-muted-foreground" />} description="Notificações geradas" />
+        <StatCard 
+          title="Distritos" 
+          value={stats.districts} 
+          icon={<Map className="h-4 w-4 text-muted-foreground" />} 
+          description="Distritos registrados"
+          onClick={() => navigate('/settings?tab=districts-neighborhoods')}
+        />
+        <StatCard 
+          title="Bairros" 
+          value={stats.neighborhoods} 
+          icon={<Map className="h-4 w-4 text-muted-foreground" />} 
+          description="Bairros cadastrados"
+          onClick={() => navigate('/settings?tab=districts-neighborhoods')}
+        />
+        <StatCard 
+          title="Comunicados" 
+          value={stats.announcements} 
+          icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />} 
+          description="Comunicados enviados"
+          onClick={() => navigate('/settings?tab=announcements')}
+        />
+        <StatCard 
+          title="Notificações" 
+          value={stats.notifications} 
+          icon={<Bell className="h-4 w-4 text-muted-foreground" />} 
+          description="Notificações geradas"
+          onClick={() => navigate('/settings?tab=notifications')}
+          highlight={true}
+        />
       </div>
-      
       
     </div>;
 };
