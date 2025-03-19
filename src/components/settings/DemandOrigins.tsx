@@ -40,9 +40,13 @@ const DemandOrigins = () => {
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingOrigin) return Promise.reject(new Error('Nenhuma origem de demanda selecionada'));
     
-    await updateDemandOrigin(editingOrigin.id, data);
-    closeEditForm();
-    return Promise.resolve();
+    try {
+      await updateDemandOrigin(editingOrigin.id, data);
+      closeEditForm();
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   const handleAdd = async (data: { descricao: string }) => {
@@ -89,13 +93,15 @@ const DemandOrigins = () => {
         isLoading={loading}
       />
       
-      <DemandOriginEditDialog
-        isOpen={isEditFormOpen}
-        onClose={closeEditForm}
-        demandOrigin={editingOrigin}
-        onSubmit={handleEdit}
-        isSubmitting={isSubmitting}
-      />
+      {editingOrigin && (
+        <DemandOriginEditDialog
+          isOpen={isEditFormOpen}
+          onClose={closeEditForm}
+          demandOrigin={editingOrigin}
+          onSubmit={handleEdit}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   );
 };

@@ -40,9 +40,13 @@ const MediaTypes = () => {
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingMediaType) return Promise.reject(new Error('Nenhum tipo de mídia selecionado'));
     
-    await updateMediaType(editingMediaType.id, data);
-    closeEditForm();
-    return Promise.resolve();
+    try {
+      await updateMediaType(editingMediaType.id, data);
+      closeEditForm();
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   const handleAdd = async (data: { descricao: string }) => {
@@ -89,13 +93,15 @@ const MediaTypes = () => {
         isLoading={loading}
       />
       
-      <MediaTypeEditDialog
-        isOpen={isEditFormOpen}
-        onClose={closeEditForm}
-        mediaType={editingMediaType}
-        onSubmit={handleEdit}
-        isSubmitting={isSubmitting}
-      />
+      {editingMediaType && (
+        <MediaTypeEditDialog
+          isOpen={isEditFormOpen}
+          onClose={closeEditForm}
+          mediaType={editingMediaType}
+          onSubmit={handleEdit}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   );
 };

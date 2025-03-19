@@ -40,9 +40,13 @@ const Positions = () => {
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingPosition) return Promise.reject(new Error('Nenhum cargo selecionado'));
     
-    await updatePosition(editingPosition.id, data);
-    closeEditForm();
-    return Promise.resolve();
+    try {
+      await updatePosition(editingPosition.id, data);
+      closeEditForm();
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   const handleAdd = async (data: { descricao: string }) => {
@@ -89,13 +93,15 @@ const Positions = () => {
         isLoading={loading}
       />
       
-      <PositionEditDialog
-        isOpen={isEditFormOpen}
-        onClose={closeEditForm}
-        position={editingPosition}
-        onSubmit={handleEdit}
-        isSubmitting={isSubmitting}
-      />
+      {editingPosition && (
+        <PositionEditDialog
+          isOpen={isEditFormOpen}
+          onClose={closeEditForm}
+          position={editingPosition}
+          onSubmit={handleEdit}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   );
 };
