@@ -17,7 +17,7 @@ const Index = () => {
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Content */}
-        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center px-[40px]">
+        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center px-[25px] py-[30px]">
           <div className="max-w-xl">
             <h1 className="text-4xl font-bold leading-tight mb-6 px-0 md:text-8xl">
               <span className="text-[#002855]">Demandas da</span><br />
@@ -58,7 +58,7 @@ const Index = () => {
         </div>
         
         {/* Right side with blue background */}
-        <div className="w-full md:w-1/2 bg-[#003570] flex items-center justify-center p-8 md:p-12 px-[6px]">
+        <div className="w-full md:w-1/2 bg-[#003570] flex items-center justify-center p-8 md:p-12 px-0 py-[30px]">
           <img src="/lovable-uploads/292774a8-b25d-4dc6-9555-f54295b8bd9f.png" alt="Logo SUB PI" className="w-full max-w-md" />
         </div>
       </div>
