@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { SelectOption } from '@/components/register/RegisterForm';
+import { SelectOption } from '@/components/register/types';
 
 export const useRegisterOptions = () => {
   const [roles, setRoles] = useState<SelectOption[]>([]);

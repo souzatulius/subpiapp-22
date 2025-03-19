@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SelectOption } from '../RegisterForm';
+import { SelectOption } from '../types';
 
 interface PositionFieldsProps {
   role: string;
