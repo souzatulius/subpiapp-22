@@ -34,7 +34,7 @@ export interface Demanda {
   detalhes_solicitacao?: string;
   perguntas?: Record<string, string>;
   arquivo_url?: string;
-  area_coordenacao?: AreaCoordenacao;
+  areas_coordenacao?: AreaCoordenacao;
   autor?: Autor;
 }
 
@@ -47,11 +47,6 @@ export interface NotaExistente {
   id: string;
   titulo: string;
   texto: string;
-  autor_id: string;
-  area_coordenacao_id: string;
-  demanda_id: string;
   status: string;
-  criado_em: string;
-  atualizado_em: string;
-  aprovador_id?: string;
+  demanda_id?: string;
 }
