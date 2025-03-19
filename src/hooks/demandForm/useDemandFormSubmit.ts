@@ -37,7 +37,7 @@ export const useDemandFormSubmit = (
         prioridade: normalizedPrioridade,
         perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
         autor_id: userId,
-        status: 'pendente'
+        status: 'pendente' // Ensuring we use a valid status from the constraint
       };
 
       console.log('Submitting demand data:', demandaData);
