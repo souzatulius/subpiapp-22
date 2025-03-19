@@ -1,15 +1,24 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Demanda, Resposta } from '../types';
+import { Demanda, Resposta, NotaExistente } from '../types';
 
-// Simplified interface for notaExistente to avoid excessive type depth
-interface NotaExistente {
-  id: string;
-  status: string;
-  titulo: string;
-  texto: string;
-  demanda_id?: string;
+// Function to fetch nota oficial with explicit return type to prevent type recursion
+async function fetchNotaOficial(demandaId: string): Promise<NotaExistente | null> {
+  try {
+    const { data, error } = await supabase
+      .from('notas_oficiais')
+      .select('id, status, titulo, texto')
+      .eq('demanda_id', demandaId)
+      .maybeSingle();
+    
+    if (error) throw error;
+    
+    return data as NotaExistente | null;
+  } catch (error) {
+    console.error("Erro ao buscar nota existente:", error);
+    return null;
+  }
 }
 
 export function useDemandaDetalhes(demandaId: string) {
@@ -31,7 +40,7 @@ export function useDemandaDetalhes(demandaId: string) {
           perguntas
         `)
         .eq('id', demandaId)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data as Demanda;
@@ -54,34 +63,19 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Explicitly type the query to prevent excessive type instantiation
-  const notaExistenteQuery = useQuery<NotaExistente | null>({
+  // Breaking out the query function to prevent excessive type instantiation
+  const { data: notaExistente, isLoading: isLoadingNota } = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('notas_oficiais')
-          .select('id, status, titulo, texto')
-          .eq('demanda_id', demandaId)
-          .maybeSingle();
-        
-        if (error) throw error;
-        
-        return data as NotaExistente | null;
-      } catch (error) {
-        console.error("Erro ao buscar nota existente:", error);
-        return null;
-      }
-    },
+    queryFn: () => fetchNotaOficial(demandaId),
     enabled: !!demandaId
   });
   
-  const isLoading = isLoadingDemanda || isLoadingRespostas || notaExistenteQuery.isLoading;
+  const isLoading = isLoadingDemanda || isLoadingRespostas || isLoadingNota;
   
   return {
     demanda,
     respostas,
-    notaExistente: notaExistenteQuery.data,
+    notaExistente,
     isLoading
   };
 }
