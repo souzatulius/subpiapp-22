@@ -14,16 +14,27 @@ interface Demand {
   horario_publicacao: string;
   prazo_resposta: string;
   area_coordenacao: { descricao: string } | null;
+  servico: { descricao: string } | null;
   origem: { descricao: string } | null;
+  tipo_midia: { descricao: string } | null;
+  bairro: { nome: string } | null;
   autor: { nome_completo: string } | null;
+  endereco: string | null;
+  nome_solicitante: string | null;
+  email_solicitante: string | null;
+  telefone_solicitante: string | null;
+  veiculo_imprensa: string | null;
+  detalhes_solicitacao: string | null;
+  perguntas: Record<string, string> | null;
 }
 
 interface DemandCardsProps {
   demandas: Demand[];
   isLoading: boolean;
+  onSelectDemand: (demand: Demand) => void;
 }
 
-const DemandCards: React.FC<DemandCardsProps> = ({ demandas, isLoading }) => {
+const DemandCards: React.FC<DemandCardsProps> = ({ demandas, isLoading, onSelectDemand }) => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -113,7 +124,11 @@ const DemandCards: React.FC<DemandCardsProps> = ({ demandas, isLoading }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {demandas.map((demanda) => (
-        <Card key={demanda.id} className="bg-white border shadow-sm hover:shadow-md transition-all cursor-pointer">
+        <Card 
+          key={demanda.id} 
+          className="bg-white border shadow-sm hover:shadow-md transition-all cursor-pointer"
+          onClick={() => onSelectDemand(demanda)}
+        >
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-2">
               <h3 className="font-semibold text-lg line-clamp-2">{demanda.titulo}</h3>

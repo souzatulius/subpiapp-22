@@ -21,16 +21,27 @@ interface Demand {
   horario_publicacao: string;
   prazo_resposta: string;
   area_coordenacao: { descricao: string } | null;
+  servico: { descricao: string } | null;
   origem: { descricao: string } | null;
+  tipo_midia: { descricao: string } | null;
+  bairro: { nome: string } | null;
   autor: { nome_completo: string } | null;
+  endereco: string | null;
+  nome_solicitante: string | null;
+  email_solicitante: string | null;
+  telefone_solicitante: string | null;
+  veiculo_imprensa: string | null;
+  detalhes_solicitacao: string | null;
+  perguntas: Record<string, string> | null;
 }
 
 interface DemandListProps {
   demandas: Demand[];
   isLoading: boolean;
+  onSelectDemand: (demand: Demand) => void;
 }
 
-const DemandList: React.FC<DemandListProps> = ({ demandas, isLoading }) => {
+const DemandList: React.FC<DemandListProps> = ({ demandas, isLoading, onSelectDemand }) => {
   // Helper function to get status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -143,7 +154,11 @@ const DemandList: React.FC<DemandListProps> = ({ demandas, isLoading }) => {
         </TableHeader>
         <TableBody>
           {demandas.map((demanda) => (
-            <TableRow key={demanda.id} className="hover:bg-gray-50 cursor-pointer">
+            <TableRow 
+              key={demanda.id} 
+              className="hover:bg-gray-50 cursor-pointer"
+              onClick={() => onSelectDemand(demanda)}
+            >
               <TableCell className="font-medium">{demanda.titulo}</TableCell>
               <TableCell>{demanda.area_coordenacao?.descricao}</TableCell>
               <TableCell>
