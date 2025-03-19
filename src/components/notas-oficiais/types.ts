@@ -43,7 +43,7 @@ export interface PerguntaResposta {
   resposta: string;
 }
 
-// Simplified to avoid recursive type references
+// Define NotaExistente without any recursive references
 export interface NotaExistente {
   id: string;
   titulo: string;

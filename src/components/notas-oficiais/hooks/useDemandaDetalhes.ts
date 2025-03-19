@@ -48,8 +48,9 @@ export function useDemandaDetalhes(demandaId: string) {
   // Verificar se já existe uma nota oficial para essa demanda
   const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
-    queryFn: async (): Promise<NotaExistente | null> => {
+    queryFn: async () => {
       try {
+        // Use maybeSingle instead of single to avoid errors when no data is found
         const { data, error } = await supabase
           .from('notas_oficiais')
           .select('id, status, titulo, texto')
@@ -58,7 +59,8 @@ export function useDemandaDetalhes(demandaId: string) {
         
         if (error) throw error;
         
-        return data as NotaExistente | null;
+        // Explicitly cast the result to break the deep type inference
+        return data as (NotaExistente | null);
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
         return null;
