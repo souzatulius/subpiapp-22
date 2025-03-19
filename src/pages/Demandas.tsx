@@ -5,6 +5,9 @@ import { Layout, DemandFilter, DemandList, DemandCards } from '@/components/dema
 import DemandDetail from '@/components/demandas/DemandDetail';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import Header from '@/components/layouts/Header';
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Demand {
   id: string;
@@ -33,6 +36,7 @@ const Demandas = () => {
   const [filterStatus, setFilterStatus] = useState<string>('pendente');
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Fetch demandas data with status filter
   const { data: demandasData, isLoading, error } = useQuery({
@@ -97,35 +101,59 @@ const Demandas = () => {
     setSelectedDemand(null);
   };
 
-  return (
-    <Layout>
-      <DemandFilter 
-        viewMode={viewMode} 
-        setViewMode={setViewMode} 
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-      />
-      
-      {viewMode === 'cards' ? (
-        <DemandCards 
-          demandas={demandas} 
-          isLoading={isLoading} 
-          onSelectDemand={handleSelectDemand}
-        />
-      ) : (
-        <DemandList 
-          demandas={demandas} 
-          isLoading={isLoading} 
-          onSelectDemand={handleSelectDemand}
-        />
-      )}
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
-      <DemandDetail 
-        demand={selectedDemand}
-        isOpen={isDetailOpen}
-        onClose={handleCloseDetail}
-      />
-    </Layout>
+  return (
+    <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
+      {/* Header */}
+      <Header showControls={true} toggleSidebar={toggleSidebar} />
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <DashboardSidebar isOpen={sidebarOpen} />
+
+        {/* Main content */}
+        <Layout>
+          <Card className="bg-white shadow-sm">
+            <CardHeader className="pb-2 border-b">
+              <CardTitle className="text-2xl font-bold text-[#003570]">
+                Gerenciamento de Demandas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <DemandFilter 
+                viewMode={viewMode} 
+                setViewMode={setViewMode} 
+                filterStatus={filterStatus}
+                setFilterStatus={setFilterStatus}
+              />
+              
+              {viewMode === 'cards' ? (
+                <DemandCards 
+                  demandas={demandas} 
+                  isLoading={isLoading} 
+                  onSelectDemand={handleSelectDemand}
+                />
+              ) : (
+                <DemandList 
+                  demandas={demandas} 
+                  isLoading={isLoading} 
+                  onSelectDemand={handleSelectDemand}
+                />
+              )}
+
+              <DemandDetail 
+                demand={selectedDemand}
+                isOpen={isDetailOpen}
+                onClose={handleCloseDetail}
+              />
+            </CardContent>
+          </Card>
+        </Layout>
+      </div>
+    </div>
   );
 };
 
