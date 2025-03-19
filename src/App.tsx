@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 
@@ -34,6 +35,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               } 
             />

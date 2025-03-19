@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -11,7 +13,15 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-subpi-gray-text">Painel Principal</h1>
-          <Button variant="outline" onClick={signOut}>Sair</Button>
+          <div className="flex gap-2">
+            <Link to="/settings">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Ajustes da Plataforma
+              </Button>
+            </Link>
+            <Button variant="outline" onClick={signOut}>Sair</Button>
+          </div>
         </div>
         
         <div className="bg-subpi-blue/10 p-4 rounded-lg mb-6">
