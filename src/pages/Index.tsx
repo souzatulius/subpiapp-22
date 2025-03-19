@@ -73,7 +73,7 @@ const Index = () => {
         {/* Right side with blue background */}
         <div className="w-full md:w-1/2 bg-[#003570] flex items-center justify-center p-8 md:p-12">
           <img 
-            src="/lovable-uploads/b69ca206-0419-42aa-99d1-b672e2e69483.png" 
+            src="/lovable-uploads/292774a8-b25d-4dc6-9555-f54295b8bd9f.png" 
             alt="Logo SUB PI" 
             className="w-full max-w-md"
           />
