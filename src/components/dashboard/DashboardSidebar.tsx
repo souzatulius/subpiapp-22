@@ -28,7 +28,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     label: 'Usuários',
     path: '/usuarios'
   }, {
-    icon: <Settings size={20} className="px-0 mx-[13px]" />,
+    icon: <Settings size={20} className="px-0 mx-0" />,
     label: 'Ajustes',
     path: '/settings'
   }];
