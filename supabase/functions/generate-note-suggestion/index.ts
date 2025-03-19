@@ -3,7 +3,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const ALLOWED_MODEL = 'gpt-4-turbo'; // Modelo correto da OpenAI
+const ALLOWED_MODEL = 'gpt-3.5-turbo'; // Modelo atualizado para gpt-3.5-turbo
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -94,7 +94,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: ALLOWED_MODEL, // Modelo correto
+          model: ALLOWED_MODEL, // Modelo atualizado para gpt-3.5-turbo
           messages: [
             { role: 'system', content: 'Você é um assessor de imprensa especializado em comunicações oficiais para a Subprefeitura de Pinheiros.' },
             { role: 'user', content: promptContent }
