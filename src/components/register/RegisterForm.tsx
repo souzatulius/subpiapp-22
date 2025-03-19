@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
@@ -148,7 +149,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <label htmlFor="name" className="block text-sm font-medium text-[#111827] mb-1">
               Nome Completo
             </label>
-            <input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className={`w-full px-4 py-2 border ${errors.name ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} placeholder="Digite seu nome completo" />
+            <input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className={`w-full px-4 py-2 border ${errors.name ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} />
             {errors.name && <p className="mt-1 text-sm text-[#f57b35]">Nome é obrigatório</p>}
           </div>
           
@@ -163,7 +164,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                 value
               }
             } as React.ChangeEvent<HTMLInputElement>);
-          }} suffix="@smsub.prefeitura.sp.gov.br" error={errors.email} placeholder="seu.email" />
+          }} suffix="@smsub.prefeitura.sp.gov.br" error={errors.email} placeholder="" />
             {errors.email && <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>}
           </div>
           
@@ -191,7 +192,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                 Cargo
               </label>
               <select id="role" name="role" value={formData.role} onChange={handleChange} className={`w-full px-4 py-2 border ${errors.role ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} disabled={loadingOptions}>
-                <option value="">Selecione seu cargo</option>
+                <option value="">Selecione</option>
                 {roles.map(role => <option key={role.id} value={role.value}>{role.value}</option>)}
               </select>
               {errors.role && <p className="mt-1 text-sm text-[#f57b35]">Cargo é obrigatório</p>}
@@ -202,7 +203,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                 Área de Coordenação
               </label>
               <select id="area" name="area" value={formData.area} onChange={handleChange} className={`w-full px-4 py-2 border ${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} disabled={loadingOptions}>
-                <option value="">Selecione sua área</option>
+                <option value="">Selecione</option>
                 {areas.map(area => <option key={area.id} value={area.value}>{area.value}</option>)}
               </select>
               {errors.area && <p className="mt-1 text-sm text-[#f57b35]">Área é obrigatória</p>}
