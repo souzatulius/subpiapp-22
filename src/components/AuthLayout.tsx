@@ -16,7 +16,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Fixed content */}
-        <div className="w-full md:w-1/2 bg-white p-6 md:p-12 flex flex-col justify-center py-[30px] px-[24px]">
+        <div className="w-full md:w-1/2 bg-white p-6 md:p-12 flex flex-col justify-center py-[30px] px-[25px]">
           {leftContent}
         </div>
 
