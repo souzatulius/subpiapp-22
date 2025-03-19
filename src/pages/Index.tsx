@@ -37,7 +37,7 @@ const Index = () => {
                   </Link>
                 </Button> : <>
                   <Button asChild className="rounded-full bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
-                    <Link to="/login">
+                    <Link to="/login" className="px-[46px]">
                       Acessar <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
