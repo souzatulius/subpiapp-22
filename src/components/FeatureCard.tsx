@@ -63,13 +63,13 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
             {icon}
           </div>
-          <h3 className="font-semibold text-lg text-gray-800 mb-1">{title}</h3>
+          <h3 className="font-semibold text-lg mb-1 text-gray-800">{title}</h3>
           <p className="text-sm text-gray-600">{description}</p>
         </div>
         
         <div className="space-y-2">
           {items.map((item, index) => <div key={index} className="flex items-center">
-              <Check className="h-4 w-4 mr-2 flex-shrink-0 text-[#f57c35]" />
+              <Check className="h-4 w-4 mr-2 flex-shrink-0 text-[#f57c35] bg-transparent" />
               <span className="text-sm text-gray-700">{item}</span>
             </div>)}
         </div>
