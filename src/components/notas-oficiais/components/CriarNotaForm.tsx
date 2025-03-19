@@ -54,9 +54,13 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao chamar a edge function:', error);
+        throw new Error(`Erro ao chamar a Edge Function: ${error.message}`);
+      }
       
       if (data.error) {
+        console.error('Erro retornado pela edge function:', data.error);
         throw new Error(data.error);
       }
 
@@ -73,8 +77,8 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
             if (lines[i].length < 100 && !lines[i].endsWith('.')) {
               suggestedTitle = lines[i].replace(/^(título:|titulo:)/i, '').trim();
               suggestedContent = lines.slice(i + 1).join('\n').trim();
+              break;
             }
-            break;
           }
         }
         
@@ -85,6 +89,8 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
           title: "Sugestão gerada com sucesso!",
           description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
         });
+      } else {
+        throw new Error("A resposta não contém uma sugestão válida");
       }
     } catch (error: any) {
       console.error('Erro ao gerar sugestão:', error);

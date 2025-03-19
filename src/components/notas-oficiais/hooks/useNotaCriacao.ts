@@ -12,7 +12,7 @@ export function useNotaCriacao(demandaId: string, demanda: Demanda | undefined, 
   
   const criarNotaMutation = useMutation({
     mutationFn: async (userId: string) => {
-      if (!demanda?.area_coordenacao?.id) {
+      if (!demanda?.areas_coordenacao?.id) {
         throw new Error('Dados insuficientes para criar a nota oficial');
       }
       
@@ -22,7 +22,7 @@ export function useNotaCriacao(demandaId: string, demanda: Demanda | undefined, 
           titulo,
           texto,
           autor_id: userId,
-          area_coordenacao_id: demanda.area_coordenacao.id,
+          area_coordenacao_id: demanda.areas_coordenacao.id,
           demanda_id: demandaId,
           status: 'pendente'
         }])

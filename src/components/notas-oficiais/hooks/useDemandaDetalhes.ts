@@ -49,14 +49,19 @@ export function useDemandaDetalhes(demandaId: string) {
   const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('notas_oficiais')
-        .select('id, status, titulo, texto')
-        .eq('demanda_id', demandaId)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data as NotaExistente | null;
+      try {
+        const { data, error } = await supabase
+          .from('notas_oficiais')
+          .select('id, status, titulo, texto')
+          .eq('demanda_id', demandaId)
+          .maybeSingle();
+        
+        if (error) throw error;
+        return data as NotaExistente | null;
+      } catch (error) {
+        console.error("Erro ao buscar nota existente:", error);
+        return null;
+      }
     },
     enabled: !!demandaId
   });
