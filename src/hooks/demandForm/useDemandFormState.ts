@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
@@ -12,7 +11,7 @@ export const useDemandFormState = (
     servico_id: '',
     origem_id: '',
     tipo_midia_id: '',
-    prioridade: 'média',
+    prioridade: 'media',
     prazo_resposta: '',
     nome_solicitante: '',
     telefone_solicitante: '',
@@ -30,7 +29,6 @@ export const useDemandFormState = (
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
 
-  // Filter services based on selected area
   useEffect(() => {
     if (formData.area_coordenacao_id) {
       const filtered = servicos.filter(
@@ -42,7 +40,6 @@ export const useDemandFormState = (
     }
   }, [formData.area_coordenacao_id, servicos]);
 
-  // Filter bairros based on selected distrito
   useEffect(() => {
     if (selectedDistrito) {
       const filtered = bairros.filter(
@@ -54,7 +51,6 @@ export const useDemandFormState = (
     }
   }, [selectedDistrito, bairros]);
 
-  // Filter services based on search term
   const filteredServicesBySearch = useMemo(() => {
     if (!serviceSearch) return filteredServicos;
     return filteredServicos.filter(service => 

@@ -20,9 +20,21 @@ export const useDemandFormSubmit = (
       // Filter out empty questions
       const filteredPerguntas = formData.perguntas.filter(p => p.trim() !== '');
       
-      // Prepare demand data
+      // Prepare demand data - ensuring prioridade value is compatible with constraint
+      // Converting 'média' to 'media' to match the constraint
+      let normalizedPrioridade = formData.prioridade.toLowerCase();
+      if (normalizedPrioridade === 'média') {
+        normalizedPrioridade = 'media';
+      }
+      
+      // Ensure it's one of the allowed values
+      if (!['alta', 'media', 'baixa'].includes(normalizedPrioridade)) {
+        normalizedPrioridade = 'media'; // Default to media if invalid
+      }
+      
       const demandaData = {
         ...formData,
+        prioridade: normalizedPrioridade,
         perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
         autor_id: userId,
         status: 'pendente'
