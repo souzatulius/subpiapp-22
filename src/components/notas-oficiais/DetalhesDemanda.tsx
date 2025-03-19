@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,13 +17,46 @@ interface DetalhesDemandaProps {
   onClose: () => void;
 }
 
+interface AreaCoordenacao {
+  id: string;
+  descricao: string;
+}
+
+interface Autor {
+  nome_completo: string;
+}
+
+interface Usuario {
+  nome_completo: string;
+}
+
+interface Resposta {
+  id: string;
+  texto: string;
+  arquivo_url?: string;
+  criado_em: string;
+  usuario?: Usuario;
+}
+
+interface Demanda {
+  id: string;
+  titulo: string;
+  status: string;
+  horario_publicacao: string;
+  prazo_resposta: string;
+  detalhes_solicitacao?: string;
+  perguntas?: Record<string, string>;
+  arquivo_url?: string;
+  area_coordenacao?: AreaCoordenacao;
+  autor?: Autor;
+}
+
 const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [titulo, setTitulo] = useState('');
   const [texto, setTexto] = useState('');
   
-  // Buscar detalhes da demanda
   const { data: demanda, isLoading: demandaLoading } = useQuery({
     queryKey: ['demanda-detalhes', demandaId],
     queryFn: async () => {
@@ -46,11 +78,10 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
         .single();
       
       if (error) throw error;
-      return data;
+      return data as Demanda;
     }
   });
   
-  // Buscar respostas da demanda
   const { data: respostas, isLoading: respostasLoading } = useQuery({
     queryKey: ['respostas-demanda', demandaId],
     queryFn: async () => {
@@ -66,11 +97,10 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
         .eq('demanda_id', demandaId);
       
       if (error) throw error;
-      return data || [];
+      return (data || []) as Resposta[];
     }
   });
   
-  // Verificar se já existe uma nota oficial para essa demanda
   const { data: notaExistente } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
@@ -84,7 +114,6 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
     }
   });
   
-  // Criar nota oficial
   const criarNotaMutation = useMutation({
     mutationFn: async () => {
       if (!demanda?.area_coordenacao?.id || !user?.id) {
@@ -166,15 +195,12 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
     );
   }
   
-  // Formatar as perguntas e respostas para exibição
   const formatarPerguntasRespostas = () => {
-    if (!demanda.perguntas) return [];
+    if (!demanda?.perguntas) return [];
     
     return Object.entries(demanda.perguntas as Record<string, string>).map(([key, pergunta]) => {
-      // Encontrar a resposta correspondente no texto da resposta
       const respostaTexto = respostas && respostas.length > 0 ? respostas[0].texto : '';
       
-      // Simples parser para extrair a resposta da pergunta específica
       const perguntaIndex = respostaTexto.indexOf(`Pergunta: ${pergunta}`);
       let resposta = '';
       

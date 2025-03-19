@@ -11,7 +11,7 @@ import Demandas from '@/pages/Demandas';
 import NotasOficiais from '@/pages/NotasOficiais';
 import Settings from '@/pages/Settings';
 import AuthCallback from '@/components/AuthCallback';
-import AuthProvider from '@/providers/AuthProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import ProtectedRoute from '@/components/layouts/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
