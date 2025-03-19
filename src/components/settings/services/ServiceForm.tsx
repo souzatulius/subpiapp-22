@@ -34,22 +34,25 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       onSubmit={onSubmit}
       onCancel={onCancel}
       defaultValues={defaultValues}
-      renderFields={() => (
+      renderFields={({ register, formState }) => (
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="descricao">Descrição</Label>
             <Input
               id="descricao"
-              name="descricao"
+              {...register("descricao")}
               placeholder="Nome do serviço"
             />
+            {formState.errors.descricao && (
+              <p className="text-sm text-red-500">{formState.errors.descricao.message}</p>
+            )}
           </div>
           
           <div className="grid gap-2">
             <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
             <select
               id="area_coordenacao_id"
-              name="area_coordenacao_id"
+              {...register("area_coordenacao_id")}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Selecione uma área</option>
@@ -59,6 +62,9 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 </option>
               ))}
             </select>
+            {formState.errors.area_coordenacao_id && (
+              <p className="text-sm text-red-500">{formState.errors.area_coordenacao_id.message}</p>
+            )}
           </div>
         </div>
       )}

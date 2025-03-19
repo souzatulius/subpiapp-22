@@ -18,6 +18,7 @@ const Services = () => {
   
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const openEditForm = (service: Service) => {
     setEditingService(service);
@@ -29,11 +30,25 @@ const Services = () => {
     setEditingService(null);
   };
 
+  const openAddForm = () => {
+    setIsAddFormOpen(true);
+  };
+
+  const closeAddForm = () => {
+    setIsAddFormOpen(false);
+  };
+
   const handleEdit = async (data: { descricao: string; area_coordenacao_id: string }) => {
     if (!editingService) return Promise.reject(new Error('Nenhum serviço selecionado'));
     
     await updateService(editingService.id, data);
     closeEditForm();
+    return Promise.resolve();
+  };
+
+  const handleAdd = async (data: { descricao: string; area_coordenacao_id: string }) => {
+    await addService(data);
+    closeAddForm();
     return Promise.resolve();
   };
 
@@ -54,10 +69,10 @@ const Services = () => {
     },
   ];
 
-  const renderForm = (onClose: () => void) => (
+  const renderForm = () => (
     <ServiceForm
-      onSubmit={addService}
-      onCancel={onClose}
+      onSubmit={handleAdd}
+      onCancel={closeAddForm}
       areas={areas}
       isSubmitting={isSubmitting}
     />
@@ -69,11 +84,11 @@ const Services = () => {
         title="Serviços"
         data={services}
         columns={columns}
-        onAdd={() => {}}
+        onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={deleteService}
         filterPlaceholder="Filtrar serviços..."
-        renderForm={renderForm}
+        renderForm={isAddFormOpen ? renderForm : undefined}
         isLoading={loading}
       />
       

@@ -17,6 +17,7 @@ const CoordinationAreas = () => {
   
   const [editingArea, setEditingArea] = useState<Area | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const openEditForm = (area: Area) => {
     setEditingArea(area);
@@ -28,11 +29,25 @@ const CoordinationAreas = () => {
     setEditingArea(null);
   };
 
+  const openAddForm = () => {
+    setIsAddFormOpen(true);
+  };
+
+  const closeAddForm = () => {
+    setIsAddFormOpen(false);
+  };
+
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingArea) return Promise.reject(new Error('Nenhuma área selecionada'));
     
     await updateArea(editingArea.id, data);
     closeEditForm();
+    return Promise.resolve();
+  };
+
+  const handleAdd = async (data: { descricao: string }) => {
+    await addArea(data);
+    closeAddForm();
     return Promise.resolve();
   };
 
@@ -48,10 +63,10 @@ const CoordinationAreas = () => {
     },
   ];
 
-  const renderForm = (onClose: () => void) => (
+  const renderForm = () => (
     <CoordinationAreaForm
-      onSubmit={addArea}
-      onCancel={onClose}
+      onSubmit={handleAdd}
+      onCancel={closeAddForm}
       isSubmitting={isSubmitting}
     />
   );
@@ -62,11 +77,11 @@ const CoordinationAreas = () => {
         title="Áreas de Coordenação"
         data={areas}
         columns={columns}
-        onAdd={() => {}}
+        onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={deleteArea}
         filterPlaceholder="Filtrar áreas..."
-        renderForm={renderForm}
+        renderForm={isAddFormOpen ? renderForm : undefined}
         isLoading={loading}
       />
       

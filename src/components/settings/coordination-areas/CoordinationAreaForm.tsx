@@ -28,16 +28,18 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
       defaultValues={{
         descricao: defaultValue,
       }}
-      renderFields={() => (
+      renderFields={({ register, formState }) => (
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="descricao">Descrição</Label>
             <Input
               id="descricao"
-              name="descricao"
-              defaultValue={defaultValue}
+              {...register("descricao")}
               placeholder="Nome da área de coordenação"
             />
+            {formState.errors.descricao && (
+              <p className="text-sm text-red-500">{formState.errors.descricao.message}</p>
+            )}
           </div>
         </div>
       )}
