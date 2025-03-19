@@ -52,7 +52,7 @@ const Positions = () => {
       
       const { data: result, error } = await supabase.rpc('insert_cargo', {
         p_descricao: data.descricao
-      });
+      } as any);
       
       if (error) throw error;
       
@@ -88,7 +88,7 @@ const Positions = () => {
       const { data: result, error } = await supabase.rpc('update_cargo', {
         p_id: editingPosition.id,
         p_descricao: data.descricao
-      });
+      } as any);
       
       if (error) throw error;
       
@@ -139,7 +139,7 @@ const Positions = () => {
       
       const { error } = await supabase.rpc('delete_cargo', {
         p_id: position.id
-      });
+      } as any);
       
       if (error) throw error;
       

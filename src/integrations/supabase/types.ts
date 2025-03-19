@@ -461,7 +461,56 @@ export type Database = {
         }
         Returns: boolean
       }
+      delete_cargo: {
+        Args: {
+          p_id: string
+        }
+        Returns: boolean
+      }
+      delete_origem_demanda: {
+        Args: {
+          p_id: string
+        }
+        Returns: boolean
+      }
+      delete_servico: {
+        Args: {
+          p_id: string
+        }
+        Returns: boolean
+      }
+      delete_tipo_midia: {
+        Args: {
+          p_id: string
+        }
+        Returns: boolean
+      }
       insert_area_coordenacao: {
+        Args: {
+          p_descricao: string
+        }
+        Returns: string
+      }
+      insert_cargo: {
+        Args: {
+          p_descricao: string
+        }
+        Returns: string
+      }
+      insert_origem_demanda: {
+        Args: {
+          p_descricao: string
+        }
+        Returns: string
+      }
+      insert_servico: {
+        Args: {
+          p_descricao: string
+          p_area_coordenacao_id: string
+        }
+        Returns: string
+      }
+      insert_tipo_midia: {
         Args: {
           p_descricao: string
         }
@@ -474,6 +523,35 @@ export type Database = {
         Returns: boolean
       }
       update_area_coordenacao: {
+        Args: {
+          p_id: string
+          p_descricao: string
+        }
+        Returns: boolean
+      }
+      update_cargo: {
+        Args: {
+          p_id: string
+          p_descricao: string
+        }
+        Returns: boolean
+      }
+      update_origem_demanda: {
+        Args: {
+          p_id: string
+          p_descricao: string
+        }
+        Returns: boolean
+      }
+      update_servico: {
+        Args: {
+          p_id: string
+          p_descricao: string
+          p_area_coordenacao_id: string
+        }
+        Returns: boolean
+      }
+      update_tipo_midia: {
         Args: {
           p_id: string
           p_descricao: string

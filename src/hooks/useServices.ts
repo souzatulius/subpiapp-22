@@ -19,7 +19,11 @@ export type Service = {
   id: string;
   descricao: string;
   area_coordenacao_id: string;
-  areas_coordenacao?: Area;
+  areas_coordenacao?: {
+    id: string;
+    descricao: string;
+    criado_em?: string;
+  };
   criado_em: string;
 };
 
@@ -61,7 +65,14 @@ export function useServices() {
         .order('descricao', { ascending: true });
       
       if (error) throw error;
-      setServices(data || []);
+      
+      // Transform the data to match our Service type
+      const transformedData: Service[] = (data || []).map((item: any) => ({
+        ...item,
+        areas_coordenacao: item.areas_coordenacao
+      }));
+      
+      setServices(transformedData);
     } catch (error: any) {
       console.error('Erro ao carregar serviços:', error);
       toast({

@@ -52,7 +52,7 @@ const DemandOrigins = () => {
       
       const { data: result, error } = await supabase.rpc('insert_origem_demanda', {
         p_descricao: data.descricao
-      });
+      } as any);
       
       if (error) throw error;
       
@@ -88,7 +88,7 @@ const DemandOrigins = () => {
       const { data: result, error } = await supabase.rpc('update_origem_demanda', {
         p_id: editingOrigin.id,
         p_descricao: data.descricao
-      });
+      } as any);
       
       if (error) throw error;
       
@@ -139,7 +139,7 @@ const DemandOrigins = () => {
       
       const { error } = await supabase.rpc('delete_origem_demanda', {
         p_id: origin.id
-      });
+      } as any);
       
       if (error) throw error;
       
