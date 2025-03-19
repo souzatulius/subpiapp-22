@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash } from 'lucide-react';
+import TableLoadingState from './TableLoadingState';
+import TableEmptyState from './TableEmptyState';
 
 interface Column {
   key: string;
@@ -45,18 +47,9 @@ const TableContent: React.FC<TableContentProps> = ({
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length + 1} className="text-center py-8">
-                <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-current border-r-transparent border-[#003570] align-[-0.125em]" />
-                <p className="mt-2 text-[#6B7280]">Carregando...</p>
-              </TableCell>
-            </TableRow>
+            <TableLoadingState colSpan={columns.length + 1} />
           ) : data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length + 1} className="text-center py-8 text-[#6B7280]">
-                Nenhum registro encontrado
-              </TableCell>
-            </TableRow>
+            <TableEmptyState colSpan={columns.length + 1} />
           ) : (
             data.map((item, index) => (
               <TableRow key={item.id || index} className="hover:bg-gray-50">

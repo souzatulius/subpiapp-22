@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { z } from 'zod';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import DataTable from './DataTable';
+import DataTable from './data-table/DataTable';
 import DataEntryForm from './DataEntryForm';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
