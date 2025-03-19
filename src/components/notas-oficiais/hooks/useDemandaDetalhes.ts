@@ -47,7 +47,7 @@ export function useDemandaDetalhes(demandaId: string) {
   
   // Fix for the "Type instantiation is excessively deep and possibly infinite" error
   // We need to use a simple type without any recursive references
-  const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
+  const { data: notaExistente, isLoading: isLoadingNota } = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
       try {
@@ -60,12 +60,7 @@ export function useDemandaDetalhes(demandaId: string) {
         if (error) throw error;
         
         // Using a type assertion with a simple type to avoid deep inference
-        return data as {
-          id: string;
-          status: string;
-          titulo: string;
-          texto: string;
-        } | null;
+        return data as NotaExistente | null;
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
         return null;
