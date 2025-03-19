@@ -309,6 +309,7 @@ export type Database = {
           id: string
           lida: boolean
           mensagem: string
+          tipo: string | null
           usuario_id: string
         }
         Insert: {
@@ -316,6 +317,7 @@ export type Database = {
           id?: string
           lida?: boolean
           mensagem: string
+          tipo?: string | null
           usuario_id: string
         }
         Update: {
@@ -323,6 +325,7 @@ export type Database = {
           id?: string
           lida?: boolean
           mensagem?: string
+          tipo?: string | null
           usuario_id?: string
         }
         Relationships: [
