@@ -1,9 +1,10 @@
 
-import React from 'react';
-import { Grid2X2, List, Filter, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Grid2X2, List, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useNavigate } from 'react-router-dom';
+import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaForm';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface DemandFilterProps {
   viewMode: 'cards' | 'list';
@@ -18,12 +19,14 @@ const DemandFilter: React.FC<DemandFilterProps> = ({
   filterStatus, 
   setFilterStatus 
 }) => {
-  const navigate = useNavigate();
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const handleCreateDemand = () => {
-    // TODO: Implement navigation to create demand form
-    // For now, we'll just alert
-    alert('Função para criar demanda será implementada em breve!');
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
   };
 
   return (
@@ -69,6 +72,13 @@ const DemandFilter: React.FC<DemandFilterProps> = ({
           Nova Demanda
         </Button>
       </div>
+
+      {/* Modal para criar nova demanda */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-[900px] p-0">
+          <CadastrarDemandaForm onClose={handleCloseForm} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

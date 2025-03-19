@@ -48,6 +48,7 @@ export function useDemandaDetalhes(demandaId: string) {
     }
   });
   
+  // Fixed by explicit typecasting to break the recursive type inference
   const { data: notaExistente } = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
@@ -57,7 +58,7 @@ export function useDemandaDetalhes(demandaId: string) {
         .eq('demanda_id', demandaId);
       
       if (error) throw error;
-      return data && data.length > 0 ? (data[0] as NotaExistente) : null;
+      return data && data.length > 0 ? data[0] as NotaExistente : null;
     }
   });
 
