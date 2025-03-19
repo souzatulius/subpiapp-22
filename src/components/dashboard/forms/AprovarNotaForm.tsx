@@ -75,7 +75,13 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         
         if (error) throw error;
         
-        setNotas(data || []);
+        // Explicitly cast the status field to ensure it matches the NotaOficial type
+        const typedData = data?.map(item => ({
+          ...item,
+          status: item.status as 'pendente' | 'aprovado' | 'rejeitado'
+        })) || [];
+        
+        setNotas(typedData);
       } catch (error) {
         console.error('Erro ao carregar notas:', error);
         toast({
