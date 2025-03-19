@@ -17,6 +17,7 @@ const DemandOrigins = () => {
   
   const [editingOrigin, setEditingOrigin] = useState<DemandOrigin | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const openEditForm = (origin: DemandOrigin) => {
     setEditingOrigin(origin);
@@ -28,12 +29,30 @@ const DemandOrigins = () => {
     setEditingOrigin(null);
   };
 
+  const openAddForm = () => {
+    setIsAddFormOpen(true);
+  };
+
+  const closeAddForm = () => {
+    setIsAddFormOpen(false);
+  };
+
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingOrigin) return Promise.reject(new Error('Nenhuma origem de demanda selecionada'));
     
     await updateDemandOrigin(editingOrigin.id, data);
     closeEditForm();
     return Promise.resolve();
+  };
+
+  const handleAdd = async (data: { descricao: string }) => {
+    try {
+      await addDemandOrigin(data);
+      closeAddForm();
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   const columns = [
@@ -50,7 +69,7 @@ const DemandOrigins = () => {
 
   const renderForm = (onClose: () => void) => (
     <DemandOriginForm
-      onSubmit={addDemandOrigin}
+      onSubmit={handleAdd}
       onCancel={onClose}
       isSubmitting={isSubmitting}
     />
@@ -62,7 +81,7 @@ const DemandOrigins = () => {
         title="Origens de Demandas"
         data={origins}
         columns={columns}
-        onAdd={() => {}}
+        onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={deleteDemandOrigin}
         filterPlaceholder="Filtrar origens de demandas..."

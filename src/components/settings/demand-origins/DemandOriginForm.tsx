@@ -42,6 +42,7 @@ const DemandOriginForm: React.FC<DemandOriginFormProps> = ({
               name="descricao"
               defaultValue={defaultValue}
               placeholder="Nome da origem de demanda"
+              autoFocus
             />
           </div>
         </div>

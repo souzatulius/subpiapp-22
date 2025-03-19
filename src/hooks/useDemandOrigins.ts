@@ -46,13 +46,13 @@ export function useDemandOrigins() {
     try {
       console.log('Adicionando origem de demanda:', data);
       
-      const { data: result, error } = await supabase.rpc('insert_origem_demanda', {
+      const { data: newId, error } = await supabase.rpc('insert_origem_demanda', {
         p_descricao: data.descricao
-      } as any);
+      });
       
       if (error) throw error;
       
-      console.log('Origem de demanda adicionada com sucesso:', result);
+      console.log('Origem de demanda adicionada com sucesso:', newId);
       
       toast({
         title: 'Sucesso',
