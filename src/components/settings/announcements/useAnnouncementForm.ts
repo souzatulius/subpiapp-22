@@ -114,7 +114,7 @@ export const useAnnouncementForm = (
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     currentAnnouncement,
-    setCurrentAnnouncement,
+    setCurrentAnnouncement: (announcement: Announcement) => setCurrentAnnouncement(announcement),
     form,
     handleCreateAnnouncement,
     handleDeleteAnnouncement,

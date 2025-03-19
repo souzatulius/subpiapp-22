@@ -5,19 +5,7 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-interface Announcement {
-  id: string;
-  titulo: string;
-  mensagem: string;
-  destinatarios: string;
-  data_envio: string;
-  autor: {
-    id: string;
-    nome_completo: string;
-    email: string;
-  };
-}
+import { Announcement } from './types';
 
 interface AnnouncementsListProps {
   loading: boolean;
