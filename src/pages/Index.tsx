@@ -1,9 +1,12 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import FeatureCard from '@/components/FeatureCard';
 import PWAButton from '@/components/PWAButton';
 import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
 const Index = () => {
   const {
     user
@@ -31,16 +34,26 @@ const Index = () => {
             </p>
             
             <div className="flex flex-wrap gap-4 mb-12">
-              {user ? <Link to="/dashboard" className="bg-[#003570] text-white px-6 py-3 rounded-md hover:bg-blue-900 transition-all duration-200 flex items-center">
-                  Acessar <ArrowRight className="ml-2 h-5 w-5" />
-                </Link> : <>
-                  <Link to="/login" className="bg-[#003570] text-white px-6 py-3 rounded-md hover:bg-blue-900 transition-all duration-200 flex items-center">
+              {user ? 
+                <Button asChild className="rounded-md bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
+                  <Link to="/dashboard">
                     Acessar <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
-                  <Link to="/register" className="border border-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-50 transition-all duration-200">
-                    Solicitar Cadastro
-                  </Link>
-                </>}
+                </Button>
+               : 
+                <>
+                  <Button asChild className="rounded-md bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
+                    <Link to="/login">
+                      Acessar <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="rounded-md bg-white text-[#002855] border border-[#002855] hover:bg-gray-50 py-2 px-5">
+                    <Link to="/register">
+                      Solicitar Cadastro
+                    </Link>
+                  </Button>
+                </>
+              }
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
