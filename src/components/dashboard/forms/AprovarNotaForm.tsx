@@ -54,7 +54,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           .select(`
             *,
             areas_coordenacao (descricao),
-            autor:autor_id (nome_completo)
+            autor:usuarios!notas_oficiais_autor_id_fkey (nome_completo)
           `)
           .eq('status', 'pendente')
           .order('criado_em', { ascending: false });
