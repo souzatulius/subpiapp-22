@@ -9,6 +9,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Define the only allowed model
+const ALLOWED_MODEL = 'gpt-4o-mini';
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -85,7 +88,7 @@ serve(async (req) => {
     
     // Call OpenAI API with improved error handling
     try {
-      console.log("Calling OpenAI API...");
+      console.log(`Calling OpenAI API with model: ${ALLOWED_MODEL}...`);
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -94,7 +97,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: ALLOWED_MODEL, // Enforcing the use of gpt-4o-mini only
           messages: [
             { role: 'system', content: 'Você é um assessor de imprensa especializado em comunicações oficiais para a Subprefeitura de Pinheiros.' },
             { role: 'user', content: promptContent }
@@ -112,11 +115,11 @@ serve(async (req) => {
         try {
           const errorData = await response.json();
           errorText = JSON.stringify(errorData);
-        } catch {
+          console.error("OpenAI API error details:", errorData);
+        } catch (error) {
           errorText = await response.text();
+          console.error("OpenAI API error text:", errorText);
         }
-        
-        console.error("OpenAI API error:", errorText);
         
         // Return appropriate error based on status code
         let errorMessage = "Erro na API do OpenAI";
@@ -126,6 +129,8 @@ serve(async (req) => {
           errorMessage = "Limite de requisições excedido na API do OpenAI.";
         } else if (responseStatus >= 500) {
           errorMessage = "Erro no servidor da OpenAI. Tente novamente mais tarde.";
+        } else if (responseStatus === 400) {
+          errorMessage = "Requisição inválida para a API da OpenAI. Verifique os parâmetros.";
         }
         
         return new Response(

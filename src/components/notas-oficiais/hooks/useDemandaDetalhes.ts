@@ -45,8 +45,8 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Fixed the TypeScript error by avoiding type inference completely
-  const { data: notaExistente, isLoading: isLoadingNota } = useQuery<NotaExistente | null>({
+  // Using a simple interface type declaration to avoid TypeScript deep instantiation error
+  const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
       try {
@@ -58,8 +58,8 @@ export function useDemandaDetalhes(demandaId: string) {
         
         if (error) throw error;
         
-        // Convert the data to our explicit type to avoid TypeScript issues
-        return data as NotaExistente | null;
+        // Simple return without complex type assertions
+        return data;
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
         return null;
