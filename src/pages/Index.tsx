@@ -42,7 +42,7 @@ const Index = () => {
                     </Link>
                   </Button>
                   <Button asChild variant="outline" className="rounded-full bg-transparent text-[#f57c35] border border-[#f57c35] hover:bg-gray-50 py-2 px-5">
-                    <Link to="/register">
+                    <Link to="/register" className="px-[41px]">
                       Solicitar Acesso
                     </Link>
                   </Button>
