@@ -6,6 +6,8 @@ import PasswordRequirements from '@/components/PasswordRequirements';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
+import { toast } from '@/components/ui/use-toast';
+
 const LoginForm = () => {
   const {
     password,
@@ -24,6 +26,7 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState(false);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -47,14 +50,25 @@ const LoginForm = () => {
       if (error) {
         setError(error.message);
         showAuthError(error);
+      } else {
+        toast({
+          title: "Login efetuado",
+          description: "Você foi autenticado com sucesso.",
+        });
       }
     } catch (err: any) {
       console.error('Erro ao fazer login:', err);
       setError(err.message || 'Erro ao tentar fazer login');
+      toast({
+        title: "Erro de login",
+        description: err.message || 'Erro ao tentar fazer login',
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
+
   const handleGoogleLogin = async () => {
     try {
       await signInWithGoogle();
@@ -62,11 +76,13 @@ const LoginForm = () => {
       console.error('Erro no login com Google:', error);
     }
   };
+
   if (loading || authLoading) {
     return <div className="h-full flex items-center justify-center p-8">
         <div className="loading-spinner animate-spin"></div>
       </div>;
   }
+
   return <div className="bg-white rounded-lg shadow-lg p-8 w-full px-[15px] py-[15px]">
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
       <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
@@ -132,4 +148,5 @@ const LoginForm = () => {
       </p>
     </div>;
 };
+
 export default LoginForm;

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,9 +30,12 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Area, Cargo } from './types';
+import EmailSuffix from '@/components/EmailSuffix';
+import { toast } from '@/components/ui/use-toast';
+import { completeEmailWithDomain } from '@/lib/authUtils';
 
 const inviteUserSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().min(1, 'Email é obrigatório'),
   nome_completo: z.string().min(3, 'Nome completo é obrigatório'),
   cargo_id: z.string().optional(),
   area_coordenacao_id: z.string().optional(),
@@ -65,8 +69,17 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
   });
 
   const handleSubmit = async (data: FormValues) => {
-    await onSubmit(data);
-    form.reset();
+    try {
+      await onSubmit(data);
+      form.reset();
+    } catch (error) {
+      console.error('Erro ao convidar usuário:', error);
+      toast({
+        title: "Erro ao convidar usuário",
+        description: "Ocorreu um erro ao enviar o convite. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -102,10 +115,11 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="email@smsub.prefeitura.sp.gov.br" 
-                      type="email" 
-                      {...field} 
+                    <EmailSuffix 
+                      value={field.value} 
+                      onChange={field.onChange} 
+                      suffix="@smsub.prefeitura.sp.gov.br" 
+                      placeholder="email.usuario" 
                     />
                   </FormControl>
                   <FormMessage />
