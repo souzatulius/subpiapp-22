@@ -40,6 +40,7 @@ export function useMediaTypes() {
         description: 'Não foi possível carregar os tipos de mídia',
         variant: 'destructive',
       });
+      setMediaTypes([]);
     } finally {
       setLoading(false);
     }
@@ -48,18 +49,21 @@ export function useMediaTypes() {
   const addMediaType = async (data: { descricao: string }) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('tipos_midia')
-        .insert({
-          descricao: data.descricao,
-        });
+      console.log('Adicionando tipo de mídia:', data);
+      
+      const { data: result, error } = await supabase.rpc('insert_tipo_midia', {
+        p_descricao: data.descricao
+      });
       
       if (error) throw error;
+      
+      console.log('Tipo de mídia adicionado com sucesso:', result);
       
       toast({
         title: 'Sucesso',
         description: 'Tipo de mídia adicionado com sucesso',
       });
+      
       await fetchMediaTypes();
       return Promise.resolve();
     } catch (error: any) {
@@ -78,19 +82,22 @@ export function useMediaTypes() {
   const updateMediaType = async (id: string, data: { descricao: string }) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('tipos_midia')
-        .update({
-          descricao: data.descricao,
-        })
-        .eq('id', id);
+      console.log('Atualizando tipo de mídia:', id, data);
+      
+      const { data: result, error } = await supabase.rpc('update_tipo_midia', {
+        p_id: id,
+        p_descricao: data.descricao
+      });
       
       if (error) throw error;
+      
+      console.log('Tipo de mídia atualizado com sucesso:', result);
       
       toast({
         title: 'Sucesso',
         description: 'Tipo de mídia atualizado com sucesso',
       });
+      
       await fetchMediaTypes();
       return Promise.resolve();
     } catch (error: any) {
@@ -108,7 +115,9 @@ export function useMediaTypes() {
 
   const deleteMediaType = async (mediaType: MediaType) => {
     try {
-      // Check if there are dependent records
+      console.log('Excluindo tipo de mídia:', mediaType.id);
+      
+      // Verificar se há registros dependentes
       const { count, error: countError } = await supabase
         .from('demandas')
         .select('*', { count: 'exact', head: true })
@@ -125,10 +134,9 @@ export function useMediaTypes() {
         return;
       }
       
-      const { error } = await supabase
-        .from('tipos_midia')
-        .delete()
-        .eq('id', mediaType.id);
+      const { error } = await supabase.rpc('delete_tipo_midia', {
+        p_id: mediaType.id
+      });
       
       if (error) throw error;
       
@@ -152,7 +160,6 @@ export function useMediaTypes() {
     mediaTypes,
     loading,
     isSubmitting,
-    fetchMediaTypes,
     addMediaType,
     updateMediaType,
     deleteMediaType

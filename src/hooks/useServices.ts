@@ -9,20 +9,18 @@ export const serviceSchema = z.object({
   area_coordenacao_id: z.string().min(1, 'Selecione uma área de coordenação'),
 });
 
+export type Area = {
+  id: string;
+  descricao: string;
+  criado_em: string;
+};
+
 export type Service = {
   id: string;
   descricao: string;
   area_coordenacao_id: string;
-  areas_coordenacao: {
-    id: string;
-    descricao: string;
-  };
+  areas_coordenacao?: Area;
   criado_em: string;
-};
-
-export type Area = {
-  id: string;
-  descricao: string;
 };
 
 export function useServices() {
@@ -32,14 +30,29 @@ export function useServices() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    fetchServices();
+    fetchAreas();
   }, []);
 
-  const fetchData = async () => {
+  const fetchAreas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('areas_coordenacao')
+        .select('*')
+        .order('descricao', { ascending: true });
+      
+      if (error) throw error;
+      setAreas(data || []);
+    } catch (error: any) {
+      console.error('Erro ao carregar áreas:', error);
+      setAreas([]);
+    }
+  };
+
+  const fetchServices = async () => {
     setLoading(true);
     try {
-      // Fetch services
-      const { data: servicesData, error: servicesError } = await supabase
+      const { data, error } = await supabase
         .from('servicos')
         .select(`
           *,
@@ -47,48 +60,41 @@ export function useServices() {
         `)
         .order('descricao', { ascending: true });
       
-      if (servicesError) throw servicesError;
-      
-      // Fetch areas
-      const { data: areasData, error: areasError } = await supabase
-        .from('areas_coordenacao')
-        .select('*')
-        .order('descricao', { ascending: true });
-      
-      if (areasError) throw areasError;
-      
-      setServices(servicesData || []);
-      setAreas(areasData || []);
+      if (error) throw error;
+      setServices(data || []);
     } catch (error: any) {
-      console.error('Erro ao carregar dados:', error);
+      console.error('Erro ao carregar serviços:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível carregar os dados',
+        description: 'Não foi possível carregar os serviços',
         variant: 'destructive',
       });
+      setServices([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const addService = async (data: z.infer<typeof serviceSchema>) => {
+  const addService = async (data: { descricao: string; area_coordenacao_id: string }) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('servicos')
-        .insert({
-          descricao: data.descricao,
-          area_coordenacao_id: data.area_coordenacao_id,
-        });
+      console.log('Adicionando serviço:', data);
+      
+      const { data: result, error } = await supabase.rpc('insert_servico', {
+        p_descricao: data.descricao,
+        p_area_coordenacao_id: data.area_coordenacao_id
+      });
       
       if (error) throw error;
+      
+      console.log('Serviço adicionado com sucesso:', result);
       
       toast({
         title: 'Sucesso',
         description: 'Serviço adicionado com sucesso',
       });
       
-      await fetchData();
+      await fetchServices();
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao adicionar serviço:', error);
@@ -103,25 +109,27 @@ export function useServices() {
     }
   };
 
-  const updateService = async (id: string, data: z.infer<typeof serviceSchema>) => {
+  const updateService = async (id: string, data: { descricao: string; area_coordenacao_id: string }) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('servicos')
-        .update({
-          descricao: data.descricao,
-          area_coordenacao_id: data.area_coordenacao_id,
-        })
-        .eq('id', id);
+      console.log('Atualizando serviço:', id, data);
+      
+      const { data: result, error } = await supabase.rpc('update_servico', {
+        p_id: id,
+        p_descricao: data.descricao,
+        p_area_coordenacao_id: data.area_coordenacao_id
+      });
       
       if (error) throw error;
+      
+      console.log('Serviço atualizado com sucesso:', result);
       
       toast({
         title: 'Sucesso',
         description: 'Serviço atualizado com sucesso',
       });
       
-      await fetchData();
+      await fetchServices();
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao editar serviço:', error);
@@ -138,7 +146,9 @@ export function useServices() {
 
   const deleteService = async (service: Service) => {
     try {
-      // Check if there are dependent records
+      console.log('Excluindo serviço:', service.id);
+      
+      // Verificar se há demandas associadas a este serviço
       const { count, error: countError } = await supabase
         .from('demandas')
         .select('*', { count: 'exact', head: true })
@@ -155,10 +165,9 @@ export function useServices() {
         return;
       }
       
-      const { error } = await supabase
-        .from('servicos')
-        .delete()
-        .eq('id', service.id);
+      const { error } = await supabase.rpc('delete_servico', {
+        p_id: service.id
+      });
       
       if (error) throw error;
       
@@ -167,7 +176,7 @@ export function useServices() {
         description: 'O serviço foi excluído com sucesso',
       });
       
-      await fetchData();
+      await fetchServices();
     } catch (error: any) {
       console.error('Erro ao excluir serviço:', error);
       toast({
@@ -183,7 +192,6 @@ export function useServices() {
     areas,
     loading,
     isSubmitting,
-    fetchData,
     addService,
     updateService,
     deleteService

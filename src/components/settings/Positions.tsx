@@ -48,19 +48,22 @@ const Positions = () => {
   const handleAdd = async (data: any) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('cargos')
-        .insert({
-          descricao: data.descricao,
-        });
+      console.log('Adicionando cargo:', data);
+      
+      const { data: result, error } = await supabase.rpc('insert_cargo', {
+        p_descricao: data.descricao
+      });
       
       if (error) throw error;
       
-      await fetchPositions();
+      console.log('Cargo adicionado com sucesso:', result);
+      
       toast({
         title: 'Sucesso',
         description: 'Cargo adicionado com sucesso',
       });
+      
+      await fetchPositions();
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao adicionar cargo:', error);
@@ -80,22 +83,25 @@ const Positions = () => {
     
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('cargos')
-        .update({
-          descricao: data.descricao,
-        })
-        .eq('id', editingPosition.id);
+      console.log('Editando cargo:', editingPosition.id, data);
+      
+      const { data: result, error } = await supabase.rpc('update_cargo', {
+        p_id: editingPosition.id,
+        p_descricao: data.descricao
+      });
       
       if (error) throw error;
       
-      await fetchPositions();
-      setIsEditFormOpen(false);
-      setEditingPosition(null);
+      console.log('Cargo atualizado com sucesso:', result);
+      
       toast({
         title: 'Sucesso',
         description: 'Cargo atualizado com sucesso',
       });
+      
+      await fetchPositions();
+      setIsEditFormOpen(false);
+      setEditingPosition(null);
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao editar cargo:', error);
@@ -129,10 +135,11 @@ const Positions = () => {
         return;
       }
       
-      const { error } = await supabase
-        .from('cargos')
-        .delete()
-        .eq('id', position.id);
+      console.log('Excluindo cargo:', position.id);
+      
+      const { error } = await supabase.rpc('delete_cargo', {
+        p_id: position.id
+      });
       
       if (error) throw error;
       

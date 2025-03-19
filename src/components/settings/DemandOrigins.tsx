@@ -48,18 +48,21 @@ const DemandOrigins = () => {
   const handleAdd = async (data: any) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('origens_demandas')
-        .insert({
-          descricao: data.descricao,
-        });
+      console.log('Adicionando origem de demanda:', data);
+      
+      const { data: result, error } = await supabase.rpc('insert_origem_demanda', {
+        p_descricao: data.descricao
+      });
       
       if (error) throw error;
+      
+      console.log('Origem de demanda adicionada com sucesso:', result);
       
       toast({
         title: 'Sucesso',
         description: 'Origem de demanda adicionada com sucesso',
       });
+      
       await fetchOrigins();
       return Promise.resolve();
     } catch (error: any) {
@@ -80,19 +83,22 @@ const DemandOrigins = () => {
     
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('origens_demandas')
-        .update({
-          descricao: data.descricao,
-        })
-        .eq('id', editingOrigin.id);
+      console.log('Editando origem de demanda:', editingOrigin.id, data);
+      
+      const { data: result, error } = await supabase.rpc('update_origem_demanda', {
+        p_id: editingOrigin.id,
+        p_descricao: data.descricao
+      });
       
       if (error) throw error;
+      
+      console.log('Origem de demanda atualizada com sucesso:', result);
       
       toast({
         title: 'Sucesso',
         description: 'Origem de demanda atualizada com sucesso',
       });
+      
       await fetchOrigins();
       setIsEditFormOpen(false);
       setEditingOrigin(null);
@@ -129,10 +135,11 @@ const DemandOrigins = () => {
         return;
       }
       
-      const { error } = await supabase
-        .from('origens_demandas')
-        .delete()
-        .eq('id', origin.id);
+      console.log('Excluindo origem de demanda:', origin.id);
+      
+      const { error } = await supabase.rpc('delete_origem_demanda', {
+        p_id: origin.id
+      });
       
       if (error) throw error;
       
