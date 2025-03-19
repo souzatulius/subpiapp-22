@@ -6,7 +6,7 @@ import SettingsContent from '@/components/settings/SettingsContent';
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeSection, setActiveSection] = useState('dashboard');
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -18,14 +18,17 @@ const Settings = () => {
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
-        <SettingsSidebar 
-          isOpen={sidebarOpen} 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-        />
+        <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+          sidebarOpen ? 'w-56' : 'w-16'
+        } flex-shrink-0 overflow-x-hidden p-4`}>
+          <SettingsSidebar 
+            activeSection={activeSection} 
+            setActiveSection={setActiveSection} 
+          />
+        </div>
         
         <main className="flex-1 overflow-auto p-6">
-          <SettingsContent activeTab={activeTab} />
+          <SettingsContent activeSection={activeSection} />
         </main>
       </div>
     </div>
