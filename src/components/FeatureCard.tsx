@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { ClipboardEdit, Building2, BarChart3 } from 'lucide-react';
+import { ClipboardEdit, Building2, BarChart3, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface FeatureCardProps {
@@ -84,9 +83,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ type }) => {
         <div className="space-y-2">
           {items.map((item, index) => (
             <div key={index} className="flex items-center">
-              <div className={`${getDotColor()} mr-2 flex-shrink-0 w-4 h-4 flex items-center justify-center`}>
-                <div className={`${getDotColor()} w-1.5 h-1.5 rounded-full`}></div>
-              </div>
+              <Check className="h-4 w-4 mr-2 flex-shrink-0 text-[#f57c35]" />
               <span className="text-sm text-gray-700">{item}</span>
             </div>
           ))}
