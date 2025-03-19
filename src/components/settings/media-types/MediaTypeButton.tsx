@@ -1,19 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Video, 
-  Image, 
-  Music, 
-  FileText, 
-  Newspaper, 
-  Radio, 
-  Tv, 
-  Youtube,
-  MessageSquare,
-  File
-} from 'lucide-react';
 import { MediaType } from '@/hooks/useMediaTypes';
+import { useMediaTypeIcon } from '@/hooks/useMediaTypeIcon';
 
 interface MediaTypeButtonProps {
   mediaType: MediaType;
@@ -26,23 +15,8 @@ const MediaTypeButton: React.FC<MediaTypeButtonProps> = ({
   isSelected,
   onClick
 }) => {
-  // Function to get the appropriate icon based on media type description
-  const getIcon = () => {
-    const description = mediaType.descricao.toLowerCase();
-    
-    if (description.includes('vídeo')) return <Video className="h-8 w-8" />;
-    if (description.includes('imagem') || description.includes('foto')) return <Image className="h-8 w-8" />;
-    if (description.includes('áudio') || description.includes('audio')) return <Music className="h-8 w-8" />;
-    if (description.includes('jornal')) return <Newspaper className="h-8 w-8" />;
-    if (description.includes('documento') || description.includes('pdf')) return <FileText className="h-8 w-8" />;
-    if (description.includes('rádio') || description.includes('radio')) return <Radio className="h-8 w-8" />;
-    if (description.includes('tv') || description.includes('televisão')) return <Tv className="h-8 w-8" />;
-    if (description.includes('youtube') || description.includes('vídeo online')) return <Youtube className="h-8 w-8" />;
-    if (description.includes('rede') || description.includes('social')) return <MessageSquare className="h-8 w-8" />;
-    
-    // Default icon
-    return <File className="h-8 w-8" />;
-  };
+  // Use our custom hook to get the icon
+  const icon = useMediaTypeIcon(mediaType);
 
   return (
     <Button
@@ -53,7 +27,7 @@ const MediaTypeButton: React.FC<MediaTypeButtonProps> = ({
       `}
       onClick={onClick}
     >
-      {getIcon()}
+      {icon}
       <span className="text-sm font-semibold text-center">{mediaType.descricao}</span>
     </Button>
   );
