@@ -37,6 +37,7 @@ const MediaTypeForm: React.FC<MediaTypeFormProps> = ({
               name="descricao"
               defaultValue={defaultValue}
               placeholder="Nome do tipo de mídia"
+              autoFocus
             />
           </div>
         </div>

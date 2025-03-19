@@ -17,6 +17,7 @@ const MediaTypes = () => {
   
   const [editingMediaType, setEditingMediaType] = useState<MediaType | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const openEditForm = (mediaType: MediaType) => {
     setEditingMediaType(mediaType);
@@ -28,12 +29,30 @@ const MediaTypes = () => {
     setEditingMediaType(null);
   };
 
+  const openAddForm = () => {
+    setIsAddFormOpen(true);
+  };
+
+  const closeAddForm = () => {
+    setIsAddFormOpen(false);
+  };
+
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingMediaType) return Promise.reject(new Error('Nenhum tipo de mídia selecionado'));
     
     await updateMediaType(editingMediaType.id, data);
     closeEditForm();
     return Promise.resolve();
+  };
+
+  const handleAdd = async (data: { descricao: string }) => {
+    try {
+      await addMediaType(data);
+      closeAddForm();
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   const columns = [
@@ -50,7 +69,7 @@ const MediaTypes = () => {
 
   const renderForm = (onClose: () => void) => (
     <MediaTypeForm
-      onSubmit={addMediaType}
+      onSubmit={handleAdd}
       onCancel={onClose}
       isSubmitting={isSubmitting}
     />
@@ -62,7 +81,7 @@ const MediaTypes = () => {
         title="Tipos de Mídia"
         data={mediaTypes}
         columns={columns}
-        onAdd={() => {}}
+        onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={deleteMediaType}
         filterPlaceholder="Filtrar tipos de mídia..."

@@ -51,13 +51,13 @@ export function useMediaTypes() {
     try {
       console.log('Adicionando tipo de mídia:', data);
       
-      const { data: result, error } = await supabase.rpc('insert_tipo_midia', {
+      const { data: newId, error } = await supabase.rpc('insert_tipo_midia', {
         p_descricao: data.descricao
       });
       
       if (error) throw error;
       
-      console.log('Tipo de mídia adicionado com sucesso:', result);
+      console.log('Tipo de mídia adicionado com sucesso:', newId);
       
       toast({
         title: 'Sucesso',
