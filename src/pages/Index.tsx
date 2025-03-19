@@ -6,16 +6,15 @@ import FeatureCard from '@/components/FeatureCard';
 import PWAButton from '@/components/PWAButton';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Header from '@/components/layouts/Header';
 
 const Index = () => {
-  const {
-    user
-  } = useAuth();
-  return <div className="min-h-screen flex flex-col">
+  const { user } = useAuth();
+  
+  return (
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="w-full px-6 py-3 border-b border-gray-200 flex justify-center">
-        <img src="/lovable-uploads/a1cc6031-8d9a-4b53-b579-c990a3156837.png" alt="Logo Prefeitura de São Paulo" className="h-10" />
-      </header>
+      <Header />
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
@@ -72,6 +71,8 @@ const Index = () => {
       
       {/* PWA Button */}
       <PWAButton />
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

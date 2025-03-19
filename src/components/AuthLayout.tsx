@@ -1,6 +1,7 @@
 
 import React from 'react';
 import PWAButton from './PWAButton';
+import Header from '@/components/layouts/Header';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -11,13 +12,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, leftContent }) => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="w-full px-6 py-3 border-b border-gray-200 flex justify-center">
-        <img 
-          src="/lovable-uploads/a1cc6031-8d9a-4b53-b579-c990a3156837.png" 
-          alt="Logo Prefeitura de São Paulo" 
-          className="h-10"
-        />
-      </header>
+      <Header />
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">

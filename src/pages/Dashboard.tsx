@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
-import { Bell, Settings, Menu, User, ClipboardList, CheckSquare, FileText, ClipboardCheck } from 'lucide-react';
+import { ClipboardList, CheckSquare, FileText, ClipboardCheck } from 'lucide-react';
+import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import ActionCard from '@/components/dashboard/ActionCard';
 import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaForm';
@@ -52,43 +52,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 py-3 px-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleSidebar}
-            className="mr-4"
-          >
-            <Menu className="h-5 w-5 text-[#003570]" />
-          </Button>
-          <img 
-            src="/lovable-uploads/292774a8-b25d-4dc6-9555-f54295b8bd9f.png" 
-            alt="Logo SUB PI" 
-            className="h-8" 
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5 text-[#003570]" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-[#f57c35] rounded-full"></span>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/settings')}
-          >
-            <Settings className="h-5 w-5 text-[#003570]" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="bg-gray-100 rounded-full"
-          >
-            <User className="h-5 w-5 text-[#003570]" />
-          </Button>
-        </div>
-      </header>
+      <Header showControls={true} toggleSidebar={toggleSidebar} />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
