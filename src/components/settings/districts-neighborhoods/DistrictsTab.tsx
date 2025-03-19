@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import DataEntryForm from '../DataEntryForm';
+import DistrictAddForm from './district-forms/DistrictAddForm';
 
 interface DistrictsTabProps {
   districts: any[];
@@ -142,31 +142,12 @@ const DistrictsTab: React.FC<DistrictsTabProps> = ({
       render: (row: any) => new Date(row.criado_em).toLocaleDateString('pt-BR'),
     },
   ];
-  
-  // Render district form
+
+  // Render district form - now using the extracted component
   const renderDistrictForm = (onClose: () => void) => (
-    <DataEntryForm
-      schema={districtSchema}
+    <DistrictAddForm
       onSubmit={handleAddDistrict}
       onCancel={onClose}
-      defaultValues={{
-        nome: '',
-      }}
-      renderFields={() => (
-        <div className="space-y-4">
-          <div className="grid gap-2">
-            <label htmlFor="nome" className="text-sm font-medium">
-              Nome
-            </label>
-            <input
-              id="nome"
-              name="nome"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Nome do distrito"
-            />
-          </div>
-        </div>
-      )}
       isSubmitting={isSubmitting}
     />
   );
