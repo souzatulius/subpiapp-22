@@ -9,6 +9,7 @@ interface NotaExistente {
   status: string;
   titulo: string;
   texto: string;
+  demanda_id?: string;
 }
 
 export function useDemandaDetalhes(demandaId: string) {
