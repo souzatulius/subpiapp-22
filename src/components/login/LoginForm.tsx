@@ -99,7 +99,7 @@ const LoginForm = () => {
             {error && <p className="mt-2 text-sm text-[#f57b35]">{error}</p>}
             
             <div className="text-right mt-2">
-              <Link to="/forgot-password" className="text-sm font-semibold text-[#f57c35] hover:text-[#f57c35]\n">
+              <Link to="/forgot-password" className="text-[#f57c35] font-semibold hover:underline">
                 Esqueceu sua senha?
               </Link>
             </div>
