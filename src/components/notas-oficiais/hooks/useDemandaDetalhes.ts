@@ -45,7 +45,7 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Fixed TypeScript error - using an explicit type instead of letting TypeScript infer it
+  // Fixing the TypeScript error by explicitly providing a return type
   const { data: notaExistente, isLoading: isLoadingNota } = useQuery({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
@@ -57,8 +57,9 @@ export function useDemandaDetalhes(demandaId: string) {
           .maybeSingle();
         
         if (error) throw error;
-        // Using a simpler type assertion to avoid infinite type instantiation
-        return data as NotaExistente | null;
+        
+        // Return the data as is, without type assertion
+        return data;
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
         return null;
