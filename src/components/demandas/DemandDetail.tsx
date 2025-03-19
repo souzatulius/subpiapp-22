@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -13,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { AlertCircle, Clock, CheckCircle2, Archive, XCircle, MapPin, Phone, Mail, User, Calendar, FileText, MessageSquare, Loader2 } from 'lucide-react';
+
 interface Demand {
   id: string;
   titulo: string;
@@ -46,6 +48,7 @@ interface Demand {
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null;
 }
+
 interface DemandDetailProps {
   demand: Demand | null;
   isOpen: boolean;
@@ -56,7 +59,9 @@ interface DemandDetailProps {
 const formSchema = z.object({
   responses: z.record(z.string().min(1, "A resposta é obrigatória"))
 });
+
 type FormValues = z.infer<typeof formSchema>;
+
 const DemandDetail: React.FC<DemandDetailProps> = ({
   demand,
   isOpen,
@@ -88,13 +93,16 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
       });
     }
   }, [demand, form]);
+
   const submitResponseMutation = useMutation({
     mutationFn: async (data: FormValues) => {
       if (!demand) throw new Error("Demanda não encontrada");
+      
       const {
         data: existingResponses,
         error: fetchError
       } = await supabase.from('respostas_demandas').select('*').eq('demanda_id', demand.id).limit(1);
+      
       if (fetchError) throw fetchError;
 
       // Format the response text with questions and answers
@@ -110,6 +118,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
         } = await supabase.from('respostas_demandas').update({
           texto: responseText
         }).eq('id', existingResponses[0].id);
+        
         if (error) throw error;
       } else {
         // Otherwise, create a new response
@@ -120,6 +129,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
           texto: responseText,
           usuario_id: (await supabase.auth.getUser()).data.user?.id
         });
+        
         if (error) throw error;
       }
 
@@ -129,6 +139,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
       } = await supabase.from('demandas').update({
         status: 'em_andamento'
       }).eq('id', demand.id);
+      
       if (updateError) throw updateError;
     },
     onSuccess: () => {
@@ -154,6 +165,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
       setIsSubmitting(false);
     }
   });
+
   const onSubmit = (data: FormValues) => {
     setIsSubmitting(true);
     submitResponseMutation.mutate(data);
@@ -222,8 +234,11 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
         return prioridade;
     }
   };
+
   if (!demand) return null;
-  return <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+
+  return (
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-50">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">{demand.titulo}</DialogTitle>
@@ -341,26 +356,31 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
                 </div>
               </div>
               
-              {demand.veiculo_imprensa && <div className="flex items-start gap-2">
+              {demand.veiculo_imprensa && (
+                <div className="flex items-start gap-2">
                   <FileText className="h-4 w-4 mt-0.5 text-gray-500" />
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Veículo de Imprensa</h3>
                     <p className="text-base">{demand.veiculo_imprensa}</p>
                   </div>
-                </div>}
+                </div>
+              )}
             </div>
           </div>
           
-          {demand.detalhes_solicitacao && <>
+          {demand.detalhes_solicitacao && (
+            <>
               <Separator />
               <div className="space-y-2">
                 <h3 className="text-base font-medium">Detalhes da Solicitação</h3>
                 <p className="text-base whitespace-pre-line">{demand.detalhes_solicitacao}</p>
               </div>
-            </>}
+            </>
+          )}
           
           {/* Questions & Responses Section */}
-          {demand.perguntas && Object.keys(demand.perguntas).length > 0 && <>
+          {demand.perguntas && Object.keys(demand.perguntas).length > 0 && (
+            <>
               <Separator />
               <div className="space-y-4">
                 <h3 className="text-lg font-medium flex items-center gap-2">
@@ -370,33 +390,49 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
                 
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    {Object.entries(demand.perguntas).map(([key, question]) => <FormField key={key} control={form.control} name={`responses.${key}`} render={({
-                  field
-                }) => <FormItem>
+                    {Object.entries(demand.perguntas).map(([key, question]) => (
+                      <FormField
+                        key={key}
+                        control={form.control}
+                        name={`responses.${key}`}
+                        render={({ field }) => (
+                          <FormItem>
                             <FormLabel className="text-base font-medium">{question}</FormLabel>
                             <FormControl>
-                              <Textarea {...field} placeholder="Digite sua resposta aqui..." className="min-h-[100px]" />
+                              <Textarea
+                                {...field}
+                                placeholder="Digite sua resposta aqui..."
+                                className="min-h-[100px]"
+                              />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>} />)}
+                          </FormItem>
+                        )}
+                      />
+                    ))}
                     
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={onClose}>
                         Cancelar
                       </Button>
                       <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? <>
+                        {isSubmitting ? (
+                          <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Enviando...
-                          </> : 'Enviar Respostas'}
+                          </>
+                        ) : 'Enviar Respostas'}
                       </Button>
                     </DialogFooter>
                   </form>
                 </Form>
               </div>
-            </>}
+            </>
+          )}
         </div>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
+
 export default DemandDetail;
