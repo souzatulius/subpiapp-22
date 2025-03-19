@@ -55,13 +55,14 @@ const ForgotPassword = () => {
 
   const leftContent = (
     <div className="max-w-xl">
-      <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
-        <span className="text-subpi-blue">Demandas da nossa SUB</span>
-        <br />
-        <span className="text-subpi-orange">com eficiência</span>
+      <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+        <span className="text-[#002855]">Demandas da</span><br />
+        <span className="text-[#002855]">nossa SUB</span><br />
+        <span className="text-[#002855]">com </span>
+        <span className="text-[#f57c35]">eficiência</span>
       </h1>
       
-      <p className="text-subpi-gray-secondary text-lg mb-8">
+      <p className="text-gray-600 text-lg mb-8">
         Sistema integrado para gerenciamento de solicitações da imprensa, controle de projetos urbanos e administração interna da Subprefeitura de Pinheiros.
       </p>
       
@@ -85,12 +86,12 @@ const ForgotPassword = () => {
 
   return (
     <AuthLayout leftContent={leftContent}>
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mx-auto">
-        <Link to="/login" className="inline-flex items-center text-subpi-gray-secondary hover:text-subpi-blue mb-6">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full">
+        <Link to="/login" className="inline-flex items-center text-[#6B7280] hover:text-[#003570] mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao login
         </Link>
         
-        <h2 className="text-2xl font-bold text-subpi-gray-text mb-2">Recuperar Senha</h2>
+        <h2 className="text-2xl font-bold text-[#111827] mb-2">Recuperar Senha</h2>
         
         {success ? (
           <div className="text-center py-6">
@@ -99,26 +100,26 @@ const ForgotPassword = () => {
                 Enviamos um e-mail para <strong>{completeEmailWithDomain(email)}</strong> com instruções para redefinir sua senha.
               </p>
             </div>
-            <p className="text-subpi-gray-secondary mb-4">
+            <p className="text-[#6B7280] mb-4">
               Verifique sua caixa de entrada e siga as instruções do e-mail para criar uma nova senha.
             </p>
             <Link 
               to="/login" 
-              className="inline-flex items-center text-subpi-blue hover:underline"
+              className="inline-flex items-center text-[#003570] hover:underline"
             >
               Voltar para a página de login
             </Link>
           </div>
         ) : (
           <>
-            <p className="text-subpi-gray-secondary mb-6">
+            <p className="text-[#6B7280] mb-6">
               Digite seu e-mail para receber um link de recuperação de senha.
             </p>
             
             <form onSubmit={handleResetPassword}>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-subpi-gray-text mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-[#111827] mb-1">
                     E-mail
                   </label>
                   <EmailSuffix
@@ -130,13 +131,13 @@ const ForgotPassword = () => {
                     placeholder="seu.email"
                   />
                   {emailError && (
-                    <p className="mt-1 text-sm text-subpi-orange">E-mail é obrigatório</p>
+                    <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>
                   )}
                 </div>
                 
                 <button 
                   type="submit" 
-                  className="login-button"
+                  className="w-full bg-[#003570] text-white py-3 px-4 rounded-lg hover:bg-blue-900 transition-all duration-200 flex items-center justify-center font-medium"
                   disabled={loading}
                 >
                   Enviar link de recuperação

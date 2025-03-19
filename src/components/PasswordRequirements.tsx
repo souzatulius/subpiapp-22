@@ -15,8 +15,8 @@ const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({ requirement
   if (!visible) return null;
 
   return (
-    <div className="mt-2 p-3 bg-white border border-gray-200 rounded-lg shadow-sm text-sm">
-      <p className="font-medium mb-2 text-subpi-gray-text">Requisitos da senha:</p>
+    <div className="mt-2 p-3 bg-white border border-gray-200 rounded-lg shadow-sm text-sm animate-fade-in">
+      <p className="font-medium mb-2 text-[#111827]">Requisitos da senha:</p>
       <ul className="space-y-1">
         <li className="flex items-center">
           {requirements.min ? (
@@ -24,7 +24,7 @@ const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({ requirement
           ) : (
             <X className="h-4 w-4 text-red-500 mr-2" />
           )}
-          <span className={requirements.min ? 'text-green-700' : 'text-subpi-gray-secondary'}>
+          <span className={requirements.min ? 'text-green-700' : 'text-[#6B7280]'}>
             Entre 5 e 12 caracteres
           </span>
         </li>
@@ -34,7 +34,7 @@ const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({ requirement
           ) : (
             <X className="h-4 w-4 text-red-500 mr-2" />
           )}
-          <span className={requirements.uppercase ? 'text-green-700' : 'text-subpi-gray-secondary'}>
+          <span className={requirements.uppercase ? 'text-green-700' : 'text-[#6B7280]'}>
             Pelo menos 1 letra maiúscula
           </span>
         </li>
@@ -44,7 +44,7 @@ const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({ requirement
           ) : (
             <X className="h-4 w-4 text-red-500 mr-2" />
           )}
-          <span className={requirements.number ? 'text-green-700' : 'text-subpi-gray-secondary'}>
+          <span className={requirements.number ? 'text-green-700' : 'text-[#6B7280]'}>
             Pelo menos 1 número
           </span>
         </li>

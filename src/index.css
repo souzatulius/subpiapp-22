@@ -11,9 +11,15 @@
   --subpi-bg-light: #F9FAFB;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 body {
   font-family: 'Poppins', sans-serif;
   @apply bg-gray-50;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow-x: hidden;
 }
 
 @layer base {
@@ -57,6 +63,12 @@ body {
     @apply w-10 h-10 border-4 border-gray-300 rounded-full;
     border-top-color: var(--subpi-blue);
     border-right-color: var(--subpi-orange);
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   @keyframes fade-in {
@@ -92,9 +104,38 @@ body {
   .settings-button-action {
     @apply bg-subpi-orange text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-all duration-200;
   }
+
+  /* Feature card styles */
+  .feature-card {
+    @apply bg-white rounded-lg shadow-sm p-6 transition-all duration-300 hover:shadow-md;
+  }
+
+  .feature-card-icon {
+    @apply text-subpi-blue mb-4;
+  }
+
+  .feature-card-title {
+    @apply text-lg font-semibold text-subpi-gray-text mb-2;
+  }
+
+  .feature-card-description {
+    @apply text-sm text-subpi-gray-secondary mb-4;
+  }
+
+  .feature-card-list {
+    @apply mt-4 space-y-2;
+  }
+
+  .feature-card-list-item {
+    @apply flex items-start text-xs text-subpi-gray-secondary;
+  }
+
+  .feature-card-list-item-icon {
+    @apply text-subpi-orange mr-2 flex-shrink-0 mt-0.5;
+  }
 }
 
-/* Mobile optimizations */
+/* Responsive media queries */
 @media (max-width: 768px) {
   .settings-sidebar {
     @apply w-full;
@@ -108,3 +149,10 @@ body {
     @apply w-full justify-center;
   }
 }
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+

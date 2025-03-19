@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import EmailSuffix from '@/components/EmailSuffix';
 import PasswordRequirements from '@/components/PasswordRequirements';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
@@ -73,14 +74,14 @@ const LoginForm = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-bold text-subpi-gray-text mb-2">Entrar</h2>
-      <p className="text-subpi-gray-secondary mb-6">Digite seu e-mail e senha para acessar o sistema</p>
+    <div className="bg-white rounded-lg shadow-lg p-8 w-full">
+      <h2 className="text-2xl font-bold text-[#111827] mb-2">Entrar</h2>
+      <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar o sistema</p>
       
       <form onSubmit={handleLogin}>
         <div className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-subpi-gray-text mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-[#111827] mb-1">
               E-mail
             </label>
             <EmailSuffix
@@ -92,13 +93,13 @@ const LoginForm = () => {
               placeholder="seu.email"
             />
             {emailError && (
-              <p className="mt-1 text-sm text-subpi-orange">E-mail é obrigatório</p>
+              <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>
             )}
           </div>
           
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label htmlFor="password" className="block text-sm font-medium text-subpi-gray-text">
+              <label htmlFor="password" className="block text-sm font-medium text-[#111827]">
                 Senha
               </label>
             </div>
@@ -109,7 +110,7 @@ const LoginForm = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onFocus={() => setShowRequirements(true)}
-                className="login-input pr-10"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200 pr-10"
                 placeholder="••••••••"
               />
               <button
@@ -131,22 +132,22 @@ const LoginForm = () => {
             />
             
             {error && (
-              <p className="mt-2 text-sm text-subpi-orange">{error}</p>
+              <p className="mt-2 text-sm text-[#f57b35]">{error}</p>
             )}
             
             <div className="text-right mt-2">
-              <a 
-                href="/forgot-password" 
-                className="text-sm text-subpi-gray-secondary hover:text-subpi-blue"
+              <Link 
+                to="/forgot-password" 
+                className="text-sm text-[#6B7280] hover:text-[#003570]"
               >
                 Esqueceu sua senha?
-              </a>
+              </Link>
             </div>
           </div>
           
           <button 
             type="submit" 
-            className="login-button"
+            className="w-full bg-[#003570] text-white py-3 px-4 rounded-lg hover:bg-blue-900 transition-all duration-200 flex items-center justify-center font-medium"
             disabled={loading}
           >
             <LogIn className="mr-2 h-5 w-5" /> Entrar
@@ -154,14 +155,14 @@ const LoginForm = () => {
           
           <div className="relative flex items-center justify-center mt-4">
             <hr className="w-full border-gray-300" />
-            <span className="px-3 text-xs uppercase text-subpi-gray-secondary bg-white">OU CONTINUE COM</span>
+            <span className="px-3 text-xs uppercase text-[#6B7280] bg-white">OU CONTINUE COM</span>
             <hr className="w-full border-gray-300" />
           </div>
           
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full bg-white border border-gray-300 text-subpi-gray-text py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center"
+            className="w-full bg-white border border-gray-300 text-[#111827] py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center"
           >
             <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="mr-2">
               <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
@@ -174,8 +175,8 @@ const LoginForm = () => {
         </div>
       </form>
       
-      <p className="mt-6 text-center text-sm text-subpi-gray-secondary">
-        Não tem uma conta? <a href="/register" className="text-subpi-blue hover:underline">Registre-se</a>
+      <p className="mt-6 text-center text-sm text-[#6B7280]">
+        Não tem uma conta? <Link to="/register" className="text-[#003570] hover:underline">Registre-se</Link>
       </p>
     </div>
   );

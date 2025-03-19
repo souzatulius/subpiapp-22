@@ -13,7 +13,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, leftContent }) => {
       {/* Header */}
       <header className="w-full px-6 py-3 border-b border-gray-200 flex justify-center">
         <img 
-          src="/lovable-uploads/68db2d5a-d2b5-4bd5-98dd-09f54064eb10.png" 
+          src="/lovable-uploads/a1cc6031-8d9a-4b53-b579-c990a3156837.png" 
           alt="Logo Prefeitura de São Paulo" 
           className="h-10"
         />
@@ -27,7 +27,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, leftContent }) => {
         </div>
 
         {/* Right side - Dynamic content */}
-        <div className="w-full md:w-1/2 bg-subpi-blue p-6 flex items-center justify-center">
+        <div className="w-full md:w-1/2 bg-[#003570] p-6 flex items-center justify-center">
           <div className="w-full max-w-md">
             {children}
           </div>

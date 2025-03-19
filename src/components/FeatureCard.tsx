@@ -1,61 +1,68 @@
 
 import React from 'react';
-import { FileCog, LineChart, Building } from 'lucide-react';
+import { ClipboardEdit, Building2, BarChart3, Circle } from 'lucide-react';
 
 interface FeatureCardProps {
   type: 'demandas' | 'acoes' | 'relatorios';
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({
-  type
-}) => {
-  const getCardContent = () => {
-    switch (type) {
-      case 'demandas':
-        return {
-          icon: <FileCog className="h-6 w-6 text-[#002855]" />,
-          title: 'Demandas da Comunicação',
-          description: 'Responda solicitações da imprensa e aprove a nota oficial.',
-          items: ['Cadastro de demandas', 'Respostas técnicas', 'Elaboração de notas oficiais']
-        };
-      case 'acoes':
-        return {
-          icon: <Building className="h-6 w-6 text-[#002855]" />,
-          title: 'Ações em Andamento',
-          description: 'Cadastre e acompanhamento de projetos e obras realizadas pela Subprefeitura.',
-          items: ['Registro de atividades', 'Acompanhamento de obras', 'Controle de investimentos']
-        };
-      case 'relatorios':
-        return {
-          icon: <LineChart className="h-6 w-6 text-[#002855]" />,
-          title: 'Relatórios Analíticos',
-          description: 'Visualização de dados e gráficos para avaliações.',
-          items: ['Gráficos interativos', 'Filtros personalizados', 'Exportação para PDF']
-        };
-      default:
-        return {
-          icon: <FileCog className="h-6 w-6 text-[#002855]" />,
-          title: 'Feature',
-          description: 'Description',
-          items: ['Item 1', 'Item 2', 'Item 3']
-        };
-    }
-  };
+const FeatureCard: React.FC<FeatureCardProps> = ({ type }) => {
+  let icon, title, description, items;
 
-  const content = getCardContent();
+  switch (type) {
+    case 'demandas':
+      icon = <ClipboardEdit className="h-8 w-8 text-[#003570]" />;
+      title = 'Demandas da Comunicação';
+      description = 'Responda solicitações da imprensa e aprove a nota oficial.';
+      items = [
+        'Cadastro de demandas',
+        'Respostas técnicas',
+        'Elaboração de notas oficiais'
+      ];
+      break;
+    case 'acoes':
+      icon = <Building2 className="h-8 w-8 text-[#003570]" />;
+      title = 'Ações em Andamento';
+      description = 'Cadastre e acompanhamento de projetos e obras realizadas pela Subprefeitura.';
+      items = [
+        'Registro de atividades',
+        'Acompanhamento de obras',
+        'Controle de investimentos'
+      ];
+      break;
+    case 'relatorios':
+      icon = <BarChart3 className="h-8 w-8 text-[#003570]" />;
+      title = 'Relatórios Analíticos';
+      description = 'Visualização de dados e gráficos para avaliações.';
+      items = [
+        'Gráficos interativos',
+        'Filtros personalizados',
+        'Exportação para PDF'
+      ];
+      break;
+    default:
+      icon = <ClipboardEdit className="h-8 w-8 text-[#003570]" />;
+      title = 'Recursos';
+      description = 'Recursos disponíveis no sistema.';
+      items = [
+        'Item 1',
+        'Item 2',
+        'Item 3'
+      ];
+  }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-      <div className="mb-4">
-        {content.icon}
+    <div className="feature-card">
+      <div className="feature-card-icon">
+        {icon}
       </div>
-      <h3 className="font-semibold text-[#002855] mb-2">{content.title}</h3>
-      <p className="text-gray-600 text-sm mb-4">{content.description}</p>
-      <ul className="mt-auto space-y-2">
-        {content.items.map((item, index) => (
-          <li key={index} className="flex items-start text-sm">
-            <span className="text-[#f57c35] mr-2">•</span>
-            <span className="text-gray-600">{item}</span>
+      <h3 className="feature-card-title">{title}</h3>
+      <p className="feature-card-description">{description}</p>
+      <ul className="feature-card-list">
+        {items.map((item, index) => (
+          <li key={index} className="feature-card-list-item">
+            <Circle className="h-3 w-3 feature-card-list-item-icon" />
+            <span>{item}</span>
           </li>
         ))}
       </ul>
