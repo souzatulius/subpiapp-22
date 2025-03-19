@@ -19,10 +19,11 @@ interface HeaderProps {
 
 interface Notification {
   id: string;
-  tipo: string;
+  tipo?: string; // Make tipo optional
   mensagem: string;
   data_envio: string;
   lida: boolean;
+  usuario_id?: string; // Add usuario_id as optional
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -52,8 +53,14 @@ const Header: React.FC<HeaderProps> = ({
 
       if (error) throw error;
       
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.lida).length || 0);
+      // Map the data to ensure all notifications have a tipo property
+      const notificationsWithTipo = data?.map(n => ({
+        ...n,
+        tipo: n.tipo || 'comunicado' // Default to 'comunicado' if tipo is not present
+      })) || [];
+      
+      setNotifications(notificationsWithTipo);
+      setUnreadCount(notificationsWithTipo.filter(n => !n.lida).length || 0);
     } catch (error) {
       console.error('Erro ao carregar notificações:', error);
     }
@@ -198,7 +205,7 @@ const Header: React.FC<HeaderProps> = ({
                           key={notification.id} 
                           className={`p-3 border-b flex hover:bg-gray-50 transition-colors ${!notification.lida ? 'bg-blue-50' : ''}`}
                         >
-                          <div className="mr-3 mt-1">{getNotificationIcon(notification.tipo)}</div>
+                          <div className="mr-3 mt-1">{getNotificationIcon(notification.tipo || 'comunicado')}</div>
                           <div className="flex-grow">
                             <p className="text-sm">{notification.mensagem}</p>
                             <p className="text-xs text-gray-500">{formatDate(notification.data_envio)}</p>
