@@ -5,11 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, X, Search } from 'lucide-react';
+import { ArrowLeft, X, Search, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 interface CriarNotaFormProps {
   onClose: () => void;
@@ -20,50 +20,31 @@ interface Demand {
   titulo: string;
   status: string;
   area_coordenacao: {
+    id: string;
     descricao: string;
   } | null;
+  detalhes_solicitacao: string | null;
+  perguntas: Record<string, string> | null;
+}
+
+interface DemandResponse {
+  demanda_id: string;
+  texto: string;
 }
 
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
   const { user } = useAuth();
-  const [areasCoord, setAreasCoord] = useState<any[]>([]);
   const [demandas, setDemandas] = useState<Demand[]>([]);
   const [filteredDemandas, setFilteredDemandas] = useState<Demand[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDemandaId, setSelectedDemandaId] = useState('');
+  const [selectedDemanda, setSelectedDemanda] = useState<Demand | null>(null);
+  const [demandaResponse, setDemandaResponse] = useState<string | null>(null);
   const [titulo, setTitulo] = useState('');
   const [texto, setTexto] = useState('');
-  const [areaCoordId, setAreaCoordId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<'select-demand' | 'create-note'>('select-demand');
-
-  // Fetch areas de coordenação
-  useEffect(() => {
-    const fetchAreas = async () => {
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('areas_coordenacao')
-          .select('*')
-          .order('descricao');
-        
-        if (error) throw error;
-        setAreasCoord(data || []);
-      } catch (error) {
-        console.error('Erro ao carregar áreas de coordenação:', error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Não foi possível carregar as áreas de coordenação.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAreas();
-  }, []);
 
   // Fetch demandas
   useEffect(() => {
@@ -76,7 +57,9 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
             id,
             titulo,
             status,
-            area_coordenacao:area_coordenacao_id(descricao)
+            detalhes_solicitacao,
+            perguntas,
+            area_coordenacao:area_coordenacao_id(id, descricao)
           `)
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
@@ -115,19 +98,40 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
     setFilteredDemandas(filtered);
   }, [searchTerm, demandas]);
 
+  const fetchDemandResponse = async (demandaId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('respostas_demandas')
+        .select('*')
+        .eq('demanda_id', demandaId)
+        .limit(1);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setDemandaResponse(data[0].texto);
+      } else {
+        setDemandaResponse(null);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar respostas da demanda:', error);
+      toast({
+        title: "Erro ao carregar respostas",
+        description: "Não foi possível carregar as respostas da demanda.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleDemandaSelect = (demandaId: string) => {
     setSelectedDemandaId(demandaId);
     
-    // Find the selected demand to pre-fill area
-    const selectedDemanda = demandas.find(d => d.id === demandaId);
-    if (selectedDemanda && selectedDemanda.area_coordenacao) {
-      // Find the area id based on the description
-      const area = areasCoord.find(a => 
-        a.descricao === selectedDemanda.area_coordenacao.descricao
-      );
-      if (area) {
-        setAreaCoordId(area.id);
-      }
+    // Find the selected demand
+    const selected = demandas.find(d => d.id === demandaId);
+    if (selected) {
+      setSelectedDemanda(selected);
+      // Fetch responses for this demand
+      fetchDemandResponse(demandaId);
     }
     
     setStep('create-note');
@@ -135,6 +139,8 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
 
   const handleBackToSelection = () => {
     setStep('select-demand');
+    setSelectedDemanda(null);
+    setDemandaResponse(null);
   };
 
   const handleSubmit = async () => {
@@ -157,19 +163,10 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
       return;
     }
 
-    if (!areaCoordId) {
+    if (!selectedDemanda || !selectedDemanda.area_coordenacao) {
       toast({
-        title: "Área de coordenação obrigatória",
-        description: "Por favor, selecione uma área de coordenação.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!selectedDemandaId) {
-      toast({
-        title: "Demanda obrigatória",
-        description: "Por favor, selecione uma demanda para associar à nota oficial.",
+        title: "Demanda inválida",
+        description: "A demanda selecionada não possui área de coordenação.",
         variant: "destructive"
       });
       return;
@@ -183,7 +180,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
         .insert([{
           titulo,
           texto,
-          area_coordenacao_id: areaCoordId,
+          area_coordenacao_id: selectedDemanda.area_coordenacao.id,
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId
@@ -209,6 +206,26 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
       setIsSubmitting(false);
     }
   };
+
+  // Helper function to format the responses text
+  const formatResponses = (responseText: string | null) => {
+    if (!responseText) return [];
+    
+    // Split by double newlines to get question-answer pairs
+    const pairs = responseText.split('\n\n');
+    return pairs.map(pair => {
+      const lines = pair.split('\n');
+      if (lines.length >= 2) {
+        // Extract question and answer
+        const question = lines[0].replace('Pergunta: ', '');
+        const answer = lines[1].replace('Resposta: ', '');
+        return { question, answer };
+      }
+      return { question: '', answer: '' };
+    }).filter(qa => qa.question && qa.answer);
+  };
+
+  const formattedResponses = formatResponses(demandaResponse);
 
   return (
     <div className="animate-fade-in">
@@ -293,6 +310,60 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
                 Voltar para seleção
               </Button>
               
+              {selectedDemanda && (
+                <div className="space-y-4 p-4 bg-slate-50 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-lg">Informações da Demanda</h3>
+                      <p className="text-sm text-gray-500">
+                        {selectedDemanda.area_coordenacao?.descricao || 'Área não especificada'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium">Título da Demanda</h4>
+                    <p>{selectedDemanda.titulo}</p>
+                  </div>
+
+                  {selectedDemanda.detalhes_solicitacao && (
+                    <div>
+                      <h4 className="font-medium">Detalhes da Solicitação</h4>
+                      <p className="whitespace-pre-line">{selectedDemanda.detalhes_solicitacao}</p>
+                    </div>
+                  )}
+                  
+                  {selectedDemanda.perguntas && Object.keys(selectedDemanda.perguntas).length > 0 && (
+                    <div>
+                      <h4 className="font-medium">Perguntas</h4>
+                      <div className="space-y-2 mt-2">
+                        {Object.entries(selectedDemanda.perguntas).map(([key, question]) => (
+                          <div key={key} className="bg-white p-3 rounded border">
+                            <p className="font-medium">{question}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {formattedResponses.length > 0 && (
+                    <div>
+                      <h4 className="font-medium">Respostas</h4>
+                      <div className="space-y-3 mt-2">
+                        {formattedResponses.map((resp, index) => (
+                          <div key={index} className="bg-white p-3 rounded border">
+                            <p className="font-medium">{resp.question}</p>
+                            <Separator className="my-2" />
+                            <p className="text-gray-700">{resp.answer}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div>
                 <Label htmlFor="titulo">Título da Nota Oficial</Label>
                 <Input 
@@ -301,26 +372,6 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({ onClose }) => {
                   onChange={(e) => setTitulo(e.target.value)} 
                   placeholder="Informe um título claro e objetivo"
                 />
-              </div>
-              
-              <div>
-                <Label htmlFor="area">Área de Coordenação</Label>
-                <Select 
-                  value={areaCoordId} 
-                  onValueChange={setAreaCoordId}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma área" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {areasCoord.map(area => (
-                      <SelectItem key={area.id} value={area.id}>
-                        {area.descricao}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               
               <div>
