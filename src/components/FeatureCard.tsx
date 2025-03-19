@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ClipboardEdit, Building2, BarChart3, Circle } from 'lucide-react';
+import { ClipboardEdit, Building2, BarChart3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface FeatureCardProps {
@@ -12,7 +12,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ type }) => {
 
   switch (type) {
     case 'demandas':
-      icon = <ClipboardEdit className="h-6 w-6" />;
+      icon = <ClipboardEdit className="h-5 w-5 text-[#003570]" />;
       title = 'Demandas da Comunicação';
       description = 'Responda solicitações da imprensa e aprove a nota oficial.';
       items = [
@@ -22,7 +22,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ type }) => {
       ];
       break;
     case 'acoes':
-      icon = <Building2 className="h-6 w-6" />;
+      icon = <Building2 className="h-5 w-5 text-[#f57c35]" />;
       title = 'Ações em Andamento';
       description = 'Cadastre e acompanhamento de projetos e obras realizadas pela Subprefeitura.';
       items = [
@@ -32,7 +32,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ type }) => {
       ];
       break;
     case 'relatorios':
-      icon = <BarChart3 className="h-6 w-6" />;
+      icon = <BarChart3 className="h-5 w-5 text-[#1a5336]" />;
       title = 'Relatórios Analíticos';
       description = 'Visualização de dados e gráficos para avaliações.';
       items = [
@@ -42,7 +42,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ type }) => {
       ];
       break;
     default:
-      icon = <ClipboardEdit className="h-6 w-6" />;
+      icon = <ClipboardEdit className="h-5 w-5 text-[#003570]" />;
       title = 'Recursos';
       description = 'Recursos disponíveis no sistema.';
       items = [
@@ -52,32 +52,41 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ type }) => {
       ];
   }
 
-  const getCardColor = () => {
+  const getIconColor = () => {
     switch (type) {
-      case 'demandas': return 'bg-[#003570]';
-      case 'acoes': return 'bg-[#f57c35]';
-      case 'relatorios': return 'bg-[#1a5336]';
-      default: return 'bg-[#003570]';
+      case 'demandas': return 'text-[#003570]';
+      case 'acoes': return 'text-[#f57c35]';
+      case 'relatorios': return 'text-[#1a5336]';
+      default: return 'text-[#003570]';
+    }
+  };
+
+  const getDotColor = () => {
+    switch (type) {
+      case 'demandas': return 'text-[#003570]';
+      case 'acoes': return 'text-[#f57c35]';
+      case 'relatorios': return 'text-[#1a5336]';
+      default: return 'text-[#003570]';
     }
   };
 
   return (
-    <Card className="h-full overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-      <div className={`${getCardColor()} h-2`}></div>
-      <CardContent className="p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`rounded-md p-2 ${getCardColor()} bg-opacity-10`}>
-            {React.cloneElement(icon, { className: `${getCardColor()} text-opacity-100` })}
+    <Card className="h-full bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg">
+      <CardContent className="p-6">
+        <div className="mb-5">
+          <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            {icon}
           </div>
-          <h3 className="font-semibold text-lg text-gray-800 truncate">{title}</h3>
+          <h3 className="font-semibold text-lg text-gray-800 mb-1">{title}</h3>
+          <p className="text-sm text-gray-600">{description}</p>
         </div>
-        
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{description}</p>
         
         <div className="space-y-2">
           {items.map((item, index) => (
-            <div key={index} className="flex items-start">
-              <Circle className="h-1.5 w-1.5 flex-shrink-0 mt-1.5 mr-2 text-gray-400" />
+            <div key={index} className="flex items-center">
+              <div className={`${getDotColor()} mr-2 flex-shrink-0 w-4 h-4 flex items-center justify-center`}>
+                <div className={`${getDotColor()} w-1.5 h-1.5 rounded-full`}></div>
+              </div>
               <span className="text-sm text-gray-700">{item}</span>
             </div>
           ))}
