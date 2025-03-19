@@ -5,13 +5,14 @@ import FeatureCard from '@/components/FeatureCard';
 const RegisterLeftContent: React.FC = () => {
   return (
     <div className="max-w-xl">
-      <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
-        <span className="text-subpi-blue">Demandas da nossa SUB</span>
-        <br />
-        <span className="text-subpi-orange">com eficiência</span>
+      <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+        <span className="text-[#002855]">Demandas da</span><br />
+        <span className="text-[#002855]">nossa SUB</span><br />
+        <span className="text-[#002855]">com </span>
+        <span className="text-[#f57c35]">eficiência</span>
       </h1>
       
-      <p className="text-subpi-gray-secondary text-lg mb-8">
+      <p className="text-gray-600 text-lg mb-8">
         Sistema integrado para gerenciamento de solicitações da imprensa, controle de projetos urbanos e administração interna da Subprefeitura de Pinheiros.
       </p>
       

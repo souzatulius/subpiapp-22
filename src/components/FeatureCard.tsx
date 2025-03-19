@@ -1,8 +1,11 @@
+
 import React from 'react';
 import { FileCog, LineChart, Building } from 'lucide-react';
+
 interface FeatureCardProps {
   type: 'demandas' | 'acoes' | 'relatorios';
 }
+
 const FeatureCard: React.FC<FeatureCardProps> = ({
   type
 }) => {
@@ -10,47 +13,54 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
     switch (type) {
       case 'demandas':
         return {
-          icon: <FileCog className="h-6 w-6 text-subpi-blue" />,
+          icon: <FileCog className="h-6 w-6 text-[#002855]" />,
           title: 'Demandas da Comunicação',
           description: 'Responda solicitações da imprensa e aprove a nota oficial.',
           items: ['Cadastro de demandas', 'Respostas técnicas', 'Elaboração de notas oficiais']
         };
       case 'acoes':
         return {
-          icon: <Building className="h-6 w-6 text-subpi-blue" />,
+          icon: <Building className="h-6 w-6 text-[#002855]" />,
           title: 'Ações em Andamento',
           description: 'Cadastre e acompanhamento de projetos e obras realizadas pela Subprefeitura.',
           items: ['Registro de atividades', 'Acompanhamento de obras', 'Controle de investimentos']
         };
       case 'relatorios':
         return {
-          icon: <LineChart className="h-6 w-6 text-subpi-blue" />,
+          icon: <LineChart className="h-6 w-6 text-[#002855]" />,
           title: 'Relatórios Analíticos',
           description: 'Visualização de dados e gráficos para avaliações.',
           items: ['Gráficos interativos', 'Filtros personalizados', 'Exportação para PDF']
         };
       default:
         return {
-          icon: <FileCog className="h-6 w-6 text-subpi-blue" />,
+          icon: <FileCog className="h-6 w-6 text-[#002855]" />,
           title: 'Feature',
           description: 'Description',
           items: ['Item 1', 'Item 2', 'Item 3']
         };
     }
   };
+
   const content = getCardContent();
-  return <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col h-full animate-fade-in">
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
       <div className="mb-4">
         {content.icon}
       </div>
-      <h3 className="font-semibold text-subpi-gray-text mb-2 text-base">{content.title}</h3>
-      <p className="text-subpi-gray-secondary text-sm mb-4">{content.description}</p>
-      <ul className="mt-auto">
-        {content.items.map((item, index) => <li key={index} className="flex items-start text-sm mb-2">
-            <span className="text-subpi-orange mr-2">•</span>
-            <span className="text-subpi-gray-secondary">{item}</span>
-          </li>)}
+      <h3 className="font-semibold text-[#002855] mb-2">{content.title}</h3>
+      <p className="text-gray-600 text-sm mb-4">{content.description}</p>
+      <ul className="mt-auto space-y-2">
+        {content.items.map((item, index) => (
+          <li key={index} className="flex items-start text-sm">
+            <span className="text-[#f57c35] mr-2">•</span>
+            <span className="text-gray-600">{item}</span>
+          </li>
+        ))}
       </ul>
-    </div>;
+    </div>
+  );
 };
+
 export default FeatureCard;
