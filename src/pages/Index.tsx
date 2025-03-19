@@ -35,19 +35,19 @@ const Index = () => {
             
             <div className="flex flex-wrap gap-4 mb-12">
               {user ? 
-                <Button asChild className="rounded-md bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
+                <Button asChild className="rounded-full bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
                   <Link to="/dashboard">
                     Acessar <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                : 
                 <>
-                  <Button asChild className="rounded-md bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
+                  <Button asChild className="rounded-full bg-[#002855] hover:bg-[#001f40] text-white py-2 px-5 flex items-center">
                     <Link to="/login">
                       Acessar <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" className="rounded-md bg-white text-[#002855] border border-[#002855] hover:bg-gray-50 py-2 px-5">
+                  <Button asChild variant="outline" className="rounded-full bg-white text-[#002855] border border-[#002855] hover:bg-gray-50 py-2 px-5">
                     <Link to="/register">
                       Solicitar Cadastro
                     </Link>
