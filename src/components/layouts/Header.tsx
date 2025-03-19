@@ -53,14 +53,14 @@ const Header: React.FC<HeaderProps> = ({
 
       if (error) throw error;
       
-      // Map the data to ensure all notifications have a tipo property
-      const notificationsWithTipo = data?.map(n => ({
-        ...n,
-        tipo: n.tipo || 'comunicado' // Default to 'comunicado' if tipo is not present
-      })) || [];
+      // Since 'tipo' might not exist in the returned data, add it with a default value
+      const processedNotifications = (data || []).map(notification => ({
+        ...notification,
+        tipo: 'comunicado' // Default tipo for all notifications if not present
+      }));
       
-      setNotifications(notificationsWithTipo);
-      setUnreadCount(notificationsWithTipo.filter(n => !n.lida).length || 0);
+      setNotifications(processedNotifications);
+      setUnreadCount(processedNotifications.filter(n => !n.lida).length || 0);
     } catch (error) {
       console.error('Erro ao carregar notificações:', error);
     }
