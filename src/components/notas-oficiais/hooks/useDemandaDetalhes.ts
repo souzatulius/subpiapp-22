@@ -36,7 +36,7 @@ export function useDemandaDetalhes(demandaId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('respostas_demandas')
-        .select('id, pergunta_id, texto')
+        .select('id, texto, criado_em, usuario:usuario_id (nome_completo)')
         .eq('demanda_id', demandaId);
       
       if (error) throw error;
@@ -51,7 +51,7 @@ export function useDemandaDetalhes(demandaId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notas_oficiais')
-        .select('id, status')
+        .select('id, status, titulo, texto')
         .eq('demanda_id', demandaId)
         .maybeSingle();
       
