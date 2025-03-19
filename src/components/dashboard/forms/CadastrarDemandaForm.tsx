@@ -10,7 +10,7 @@ import PriorityDeadlineStep from './steps/PriorityDeadlineStep';
 import RequesterInfoStep from './steps/RequesterInfoStep';
 import LocationStep from './steps/LocationStep';
 import QuestionsDetailsStep from './steps/QuestionsDetailsStep';
-import { useDemandForm } from '@/hooks/useDemandForm';
+import { useDemandForm } from '@/hooks/demandForm';
 
 interface CadastrarDemandaFormProps {
   onClose: () => void;
