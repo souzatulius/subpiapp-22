@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 interface TableAddFormProps {
   title: string;
@@ -24,12 +23,7 @@ const TableAddForm: React.FC<TableAddFormProps> = ({
         <SheetHeader>
           <SheetTitle className="text-[#003570]">Adicionar {title}</SheetTitle>
         </SheetHeader>
-        {renderForm(handleClose)}
-        <SheetFooter className="mt-4">
-          <Button variant="outline" onClick={handleClose}>
-            Cancelar
-          </Button>
-        </SheetFooter>
+        {isOpen && renderForm(handleClose)}
       </SheetContent>
     </Sheet>
   );

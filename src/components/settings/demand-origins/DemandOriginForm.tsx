@@ -33,16 +33,16 @@ const DemandOriginForm: React.FC<DemandOriginFormProps> = ({
       defaultValues={{
         descricao: defaultValue,
       }}
-      renderFields={() => (
+      renderFields={(form) => (
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="descricao">Descrição</Label>
             <Input
               id="descricao"
               name="descricao"
-              defaultValue={defaultValue}
               placeholder="Nome da origem de demanda"
               autoFocus
+              {...form.register('descricao')}
             />
           </div>
         </div>

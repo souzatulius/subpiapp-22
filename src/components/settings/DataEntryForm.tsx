@@ -37,12 +37,8 @@ const DataEntryForm: React.FC<DataEntryFormProps> = ({
     try {
       await onSubmit(data);
       form.reset();
-      toast({
-        title: 'Sucesso',
-        description: 'Operação realizada com sucesso!',
-      });
     } catch (error: any) {
-      console.error(error);
+      console.error('Form submission error:', error);
       toast({
         title: 'Erro',
         description: error.message || 'Ocorreu um erro ao processar a solicitação.',
