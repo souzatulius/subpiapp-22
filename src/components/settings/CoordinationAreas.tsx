@@ -63,10 +63,11 @@ const CoordinationAreas = () => {
     },
   ];
 
-  const renderForm = () => (
+  // Esta função precisa ser definida corretamente para retornar o componente do formulário
+  const renderForm = (onClose: () => void) => (
     <CoordinationAreaForm
       onSubmit={handleAdd}
-      onCancel={closeAddForm}
+      onCancel={onClose || closeAddForm}
       isSubmitting={isSubmitting}
     />
   );
