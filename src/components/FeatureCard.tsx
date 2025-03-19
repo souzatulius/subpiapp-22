@@ -58,7 +58,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
     }
   };
   return <Card className="h-full shadow-sm hover:shadow-md transition-all duration-300 rounded-lg px-0 mx-0 my-0 py-0 bg-neutral-50">
-      <CardContent className="p-6 py-[10px] px-[10px]">
+      <CardContent className="p-6 py-[10px] px-[10px] bg-neutral-50">
         <div className="mb-5">
           <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
             {icon}
