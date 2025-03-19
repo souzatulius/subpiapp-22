@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,18 +45,36 @@ import {
   Edit, 
   Download, 
   Search,
-  Printer
+  Printer,
+  CalendarIcon
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { completeEmailWithDomain } from '@/lib/authUtils';
+import { formatPhone, formatDate } from '@/lib/formValidation';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 const inviteUserSchema = z.object({
   email: z.string().email('Email inválido'),
   nome_completo: z.string().min(3, 'Nome completo é obrigatório'),
   cargo_id: z.string().optional(),
   area_coordenacao_id: z.string().optional(),
+});
+
+const editUserSchema = z.object({
+  email: z.string().email('Email inválido'),
+  nome_completo: z.string().min(3, 'Nome completo é obrigatório'),
+  cargo_id: z.string().optional(),
+  area_coordenacao_id: z.string().optional(),
+  whatsapp: z.string().optional(),
+  aniversario: z.date().optional(),
 });
 
 const UsersManagement = () => {
@@ -81,13 +98,15 @@ const UsersManagement = () => {
     },
   });
 
-  const editForm = useForm({
-    resolver: zodResolver(inviteUserSchema),
+  const editForm = useForm<z.infer<typeof editUserSchema>>({
+    resolver: zodResolver(editUserSchema),
     defaultValues: {
       email: '',
       nome_completo: '',
       cargo_id: undefined,
       area_coordenacao_id: undefined,
+      whatsapp: '',
+      aniversario: undefined,
     },
   });
 
@@ -96,7 +115,6 @@ const UsersManagement = () => {
       setLoading(true);
       
       try {
-        // Fetch users
         const { data: usersData, error: usersError } = await supabase
           .from('usuarios')
           .select(`
@@ -114,14 +132,12 @@ const UsersManagement = () => {
           
         if (usersError) throw usersError;
         
-        // Fetch areas
         const { data: areasData, error: areasError } = await supabase
           .from('areas_coordenacao')
           .select('id, descricao');
           
         if (areasError) throw areasError;
         
-        // Fetch cargos
         const { data: cargosData, error: cargosError } = await supabase
           .from('cargos')
           .select('id, descricao');
@@ -150,10 +166,9 @@ const UsersManagement = () => {
     try {
       const email = completeEmailWithDomain(data.email);
       
-      // Create user in Supabase Auth
       const { error: authError } = await supabase.auth.signUp({
         email,
-        password: Math.random().toString(36).substring(2, 12), // Random password that will be reset
+        password: Math.random().toString(36).substring(2, 12),
         options: {
           data: {
             name: data.nome_completo,
@@ -164,7 +179,6 @@ const UsersManagement = () => {
       
       if (authError) throw authError;
 
-      // Update user data in the usuarios table
       const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .select('id')
@@ -191,11 +205,9 @@ const UsersManagement = () => {
         description: `Um convite foi enviado para ${email}`,
       });
       
-      // Reset form and close dialog
       inviteForm.reset();
       setIsInviteDialogOpen(false);
       
-      // Refresh user list
       const { data: updatedUsers } = await supabase
         .from('usuarios')
         .select(`
@@ -224,17 +236,27 @@ const UsersManagement = () => {
     }
   };
 
-  const handleEditUser = async (data: any) => {
+  const handleEditUser = async (data: z.infer<typeof editUserSchema>) => {
     try {
       if (!currentUser) return;
       
+      const updateData: any = {
+        nome_completo: data.nome_completo,
+        cargo_id: data.cargo_id || null,
+        area_coordenacao_id: data.area_coordenacao_id || null,
+      };
+      
+      if (data.whatsapp !== undefined) {
+        updateData.whatsapp = data.whatsapp || null;
+      }
+      
+      if (data.aniversario) {
+        updateData.aniversario = format(data.aniversario, 'yyyy-MM-dd');
+      }
+      
       const { error } = await supabase
         .from('usuarios')
-        .update({
-          nome_completo: data.nome_completo,
-          cargo_id: data.cargo_id || null,
-          area_coordenacao_id: data.area_coordenacao_id || null,
-        })
+        .update(updateData)
         .eq('id', currentUser.id);
         
       if (error) throw error;
@@ -244,11 +266,9 @@ const UsersManagement = () => {
         description: 'Os dados do usuário foram atualizados com sucesso',
       });
       
-      // Reset form and close dialog
       editForm.reset();
       setIsEditDialogOpen(false);
       
-      // Refresh user list
       const { data: updatedUsers } = await supabase
         .from('usuarios')
         .select(`
@@ -281,7 +301,6 @@ const UsersManagement = () => {
     try {
       if (!currentUser) return;
       
-      // Delete the user from auth.users (this will also delete from usuarios due to cascade)
       const { error } = await supabase.auth.admin.deleteUser(currentUser.id);
       
       if (error) throw error;
@@ -291,10 +310,8 @@ const UsersManagement = () => {
         description: 'O usuário foi excluído com sucesso',
       });
       
-      // Close dialog
       setIsDeleteDialogOpen(false);
       
-      // Refresh user list
       const { data: updatedUsers } = await supabase
         .from('usuarios')
         .select(`
@@ -347,12 +364,18 @@ const UsersManagement = () => {
 
   const openEditDialog = (user: any) => {
     setCurrentUser(user);
+    
+    const aniversario = user.aniversario ? new Date(user.aniversario) : undefined;
+    
     editForm.reset({
       email: user.email,
       nome_completo: user.nome_completo,
       cargo_id: user.cargo_id || undefined,
       area_coordenacao_id: user.area_coordenacao_id || undefined,
+      whatsapp: user.whatsapp || '',
+      aniversario: aniversario,
     });
+    
     setIsEditDialogOpen(true);
   };
 
@@ -372,7 +395,6 @@ const UsersManagement = () => {
   });
 
   const handleExportCsv = () => {
-    // Create CSV data
     const headers = ['Nome', 'Email', 'Cargo', 'Área de Coordenação', 'WhatsApp', 'Aniversário'];
     const csvData = filteredUsers.map(user => [
       user.nome_completo,
@@ -386,7 +408,6 @@ const UsersManagement = () => {
     const csvContent = [
       headers.join(','),
       ...csvData.map(row => row.map(cell => {
-        // Handle commas and quotes in CSV
         if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"'))) {
           return `"${cell.replace(/"/g, '""')}"`;
         }
@@ -394,7 +415,6 @@ const UsersManagement = () => {
       }).join(','))
     ].join('\n');
     
-    // Download CSV file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -405,6 +425,12 @@ const UsersManagement = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatPhone(value);
+    editForm.setValue('whatsapp', formattedValue);
   };
 
   return (
@@ -449,20 +475,21 @@ const UsersManagement = () => {
               <TableHead>Email</TableHead>
               <TableHead>Cargo</TableHead>
               <TableHead>Área de Coordenação</TableHead>
+              <TableHead>Contato</TableHead>
               <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em]" />
                   <p className="mt-2">Carregando usuários...</p>
                 </TableCell>
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                   {filter ? 'Nenhum usuário encontrado para a busca' : 'Nenhum usuário cadastrado'}
                 </TableCell>
               </TableRow>
@@ -477,17 +504,21 @@ const UsersManagement = () => {
                       </Avatar>
                       <div>
                         <p className="font-medium">{user.nome_completo}</p>
-                        <p className="text-xs text-gray-500">
-                          {user.aniversario 
-                            ? format(new Date(user.aniversario), 'dd/MM/yyyy', { locale: pt }) 
-                            : 'Sem data de aniversário'}
-                        </p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.cargos?.descricao || '-'}</TableCell>
                   <TableCell>{user.areas_coordenacao?.descricao || '-'}</TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <p>WhatsApp: {user.whatsapp || '-'}</p>
+                      <p>Aniversário: {user.aniversario 
+                        ? format(new Date(user.aniversario), 'dd/MM/yyyy', { locale: pt }) 
+                        : '-'}
+                      </p>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button 
@@ -526,7 +557,6 @@ const UsersManagement = () => {
         </Table>
       </div>
       
-      {/* Invite user dialog */}
       <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -640,7 +670,6 @@ const UsersManagement = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Edit user dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -741,6 +770,65 @@ const UsersManagement = () => {
                 )}
               />
               
+              <FormField
+                control={editForm.control}
+                name="whatsapp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>WhatsApp</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="(99) 99999-9999" 
+                        {...field} 
+                        onChange={(e) => handleWhatsAppChange(e)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="aniversario"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Data de Aniversário</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, 'dd/MM/yyyy', { locale: pt })
+                            ) : (
+                              <span>Selecione uma data</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          locale={pt}
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                   Cancelar
@@ -754,7 +842,6 @@ const UsersManagement = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Delete user confirmation dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>

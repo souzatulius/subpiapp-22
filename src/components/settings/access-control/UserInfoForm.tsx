@@ -3,7 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { User } from './types';
+import { formatPhone } from '@/lib/formValidation';
 
 export const formSchema = z.object({
   whatsapp: z.string().optional(),
@@ -62,6 +63,13 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
     }
   }, [user, form]);
 
+  // Format WhatsApp number as the user types
+  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatPhone(value);
+    form.setValue('whatsapp', formattedValue);
+  };
+
   const handleSubmit = async (data: FormValues) => {
     await onSubmit(data);
   };
@@ -84,6 +92,9 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
                 <Input 
                   placeholder="(99) 99999-9999" 
                   {...field} 
+                  onChange={(e) => {
+                    handleWhatsAppChange(e);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -122,6 +133,7 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
                     selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
+                    locale={pt}
                     className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
