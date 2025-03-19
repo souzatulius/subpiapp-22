@@ -4,6 +4,7 @@ import DataTable from './DataTable';
 import CoordinationAreaForm from './coordination-areas/CoordinationAreaForm';
 import CoordinationAreaEditDialog from './coordination-areas/CoordinationAreaEditDialog';
 import { useCoordinationAreas, Area } from '@/hooks/useCoordinationAreas';
+import { toast } from '@/components/ui/use-toast';
 
 const CoordinationAreas = () => {
   const {
@@ -40,15 +41,31 @@ const CoordinationAreas = () => {
   const handleEdit = async (data: { descricao: string }) => {
     if (!editingArea) return Promise.reject(new Error('Nenhuma área selecionada'));
     
-    await updateArea(editingArea.id, data);
-    closeEditForm();
-    return Promise.resolve();
+    try {
+      await updateArea(editingArea.id, data);
+      closeEditForm();
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error in handleEdit:', error);
+      return Promise.reject(error);
+    }
   };
 
   const handleAdd = async (data: { descricao: string }) => {
-    await addArea(data);
-    closeAddForm();
-    return Promise.resolve();
+    try {
+      console.log('CoordinationAreas handling add:', data);
+      await addArea(data);
+      closeAddForm();
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error in handleAdd:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível adicionar a área. Tente novamente.',
+        variant: 'destructive',
+      });
+      return Promise.reject(error);
+    }
   };
 
   const columns = [

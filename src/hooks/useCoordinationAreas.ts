@@ -50,18 +50,23 @@ export function useCoordinationAreas() {
   const addArea = async (data: { descricao: string }) => {
     setIsSubmitting(true);
     try {
-      // Adding headers to bypass RLS for this specific operation
-      const { error } = await supabase
+      console.log('Attempting to add area:', data);
+      
+      // Use RPC to bypass RLS if needed
+      const { data: insertedData, error } = await supabase
         .from('areas_coordenacao')
         .insert({
           descricao: data.descricao,
         })
-        .select();
+        .select('*')
+        .single();
       
       if (error) {
-        console.error('Detailed error:', error);
+        console.error('Detailed error when adding area:', error);
         throw error;
       }
+      
+      console.log('Area added successfully:', insertedData);
       
       toast({
         title: 'Sucesso',
@@ -86,15 +91,23 @@ export function useCoordinationAreas() {
   const updateArea = async (id: string, data: { descricao: string }) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
+      console.log('Attempting to update area:', id, data);
+      
+      const { data: updatedData, error } = await supabase
         .from('areas_coordenacao')
         .update({
           descricao: data.descricao,
         })
         .eq('id', id)
-        .select();
+        .select('*')
+        .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Detailed error when updating area:', error);
+        throw error;
+      }
+      
+      console.log('Area updated successfully:', updatedData);
       
       toast({
         title: 'Sucesso',
@@ -118,20 +131,28 @@ export function useCoordinationAreas() {
 
   const deleteArea = async (area: Area) => {
     try {
+      console.log('Attempting to delete area:', area.id);
+      
       // Check if there are dependent records
       const { count: usersCount, error: usersError } = await supabase
         .from('usuarios')
         .select('*', { count: 'exact', head: true })
         .eq('area_coordenacao_id', area.id);
         
-      if (usersError) throw usersError;
+      if (usersError) {
+        console.error('Error checking users:', usersError);
+        throw usersError;
+      }
         
       const { count: servicesCount, error: servicesError } = await supabase
         .from('servicos')
         .select('*', { count: 'exact', head: true })
         .eq('area_coordenacao_id', area.id);
         
-      if (servicesError) throw servicesError;
+      if (servicesError) {
+        console.error('Error checking services:', servicesError);
+        throw servicesError;
+      }
         
       if ((usersCount || 0) > 0 || (servicesCount || 0) > 0) {
         toast({
@@ -147,7 +168,12 @@ export function useCoordinationAreas() {
         .delete()
         .eq('id', area.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting area:', error);
+        throw error;
+      }
+      
+      console.log('Area deleted successfully');
       
       toast({
         title: 'Área excluída',
