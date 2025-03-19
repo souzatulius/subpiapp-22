@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
-import { Bell, Settings, Menu, User } from 'lucide-react';
+import { Bell, Settings, Menu, User, ClipboardList, CheckSquare, FileText, ClipboardCheck } from 'lucide-react';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import ActionCard from '@/components/dashboard/ActionCard';
 import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaForm';
@@ -112,30 +112,34 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <ActionCard 
                   title="Cadastrar nova solicitação"
-                  icon="📄"
+                  icon={<ClipboardList className="h-16 w-16 text-white" />}
                   onClick={() => handleActionClick('cadastrar')}
-                  color="blue"
+                  color="dark-blue"
+                  iconSize="giant"
                 />
                 
                 <ActionCard 
                   title="Responder demandas"
-                  icon="✅"
+                  icon={<CheckSquare className="h-16 w-16 text-white" />}
                   onClick={() => handleActionClick('responder')}
-                  color="green"
+                  color="dark-blue"
+                  iconSize="giant"
                 />
                 
                 <ActionCard 
                   title="Criar nota oficial"
-                  icon="✏️"
+                  icon={<FileText className="h-16 w-16 text-white" />}
                   onClick={() => handleActionClick('criar-nota')}
-                  color="orange"
+                  color="dark-blue"
+                  iconSize="giant"
                 />
                 
                 <ActionCard 
                   title="Aprovar notas"
-                  icon="📝"
+                  icon={<ClipboardCheck className="h-16 w-16 text-white" />}
                   onClick={() => handleActionClick('aprovar-nota')}
-                  color="purple"
+                  color="dark-blue"
+                  iconSize="giant"
                 />
               </div>
             </div>

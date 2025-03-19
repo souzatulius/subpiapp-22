@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,7 +24,7 @@ interface NotaOficial {
   };
   autor?: {
     nome_completo: string;
-  };
+  } | null;
 }
 
 const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
@@ -36,7 +35,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Verificar se o usuário é admin
   useEffect(() => {
     const checkIsAdmin = async () => {
       try {
@@ -57,7 +55,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     checkIsAdmin();
   }, [user]);
 
-  // Buscar notas pendentes
   useEffect(() => {
     const fetchNotas = async () => {
       try {
@@ -75,11 +72,18 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         
         if (error) throw error;
         
-        // Explicitly cast the status field to ensure it matches the NotaOficial type
-        const typedData = data?.map(item => ({
-          ...item,
-          status: item.status as 'pendente' | 'aprovado' | 'rejeitado'
-        })) || [];
+        const typedData: NotaOficial[] = (data || []).map(item => ({
+          id: item.id,
+          titulo: item.titulo,
+          texto: item.texto,
+          autor_id: item.autor_id,
+          criado_em: item.criado_em,
+          status: item.status as 'pendente' | 'aprovado' | 'rejeitado',
+          areas_coordenacao: item.areas_coordenacao,
+          autor: item.autor?.nome_completo 
+            ? { nome_completo: item.autor.nome_completo } 
+            : null
+        }));
         
         setNotas(typedData);
       } catch (error) {
@@ -129,7 +133,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           "A nota oficial foi rejeitada.",
       });
       
-      // Atualizar lista de notas
       setNotas(notas.filter(n => n.id !== selectedNota.id));
       setSelectedNota(null);
       
