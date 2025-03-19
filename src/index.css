@@ -1,158 +1,49 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --subpi-blue: #003570;
-  --subpi-orange: #f57b35;
-  --subpi-gray-text: #111827;
-  --subpi-gray-secondary: #6B7280;
-  --subpi-bg-light: #F9FAFB;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-body {
-  font-family: 'Poppins', sans-serif;
-  @apply bg-gray-50;
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  overflow-x: hidden;
-}
-
 @layer base {
-  .login-input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:border-transparent transition-all duration-200;
+  * {
+    @apply antialiased;
   }
-
-  .login-button {
-    @apply w-full bg-subpi-blue text-white py-3 px-4 rounded-lg hover:bg-blue-900 transition-all duration-200 flex items-center justify-center font-medium;
-  }
-
-  .checkbox-container {
-    @apply relative flex items-center;
-  }
-
-  .checkbox-container input {
-    @apply absolute opacity-0 w-0 h-0;
-  }
-
-  .checkbox-container label {
-    @apply relative pl-7 cursor-pointer text-sm text-subpi-gray-secondary;
-  }
-
-  .checkbox-container label:before {
-    @apply content-[''] absolute left-0 top-0 w-5 h-5 border border-gray-300 rounded;
-  }
-
-  .checkbox-container input:checked + label:before {
-    @apply bg-subpi-blue border-subpi-blue;
-  }
-
-  .checkbox-container label:after {
-    @apply content-[''] absolute left-[5px] top-[2px] w-[6px] h-[10px] border-r-2 border-b-2 border-white rotate-45 opacity-0;
-  }
-
-  .checkbox-container input:checked + label:after {
-    @apply opacity-100;
-  }
-
-  .loading-spinner {
-    @apply w-10 h-10 border-4 border-gray-300 rounded-full;
-    border-top-color: var(--subpi-blue);
-    border-right-color: var(--subpi-orange);
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  @keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out forwards;
-  }
-  
-  /* Custom styles for the settings page */
-  .settings-sidebar {
-    @apply bg-white border-r border-gray-200 min-h-screen w-64;
-  }
-  
-  .settings-card {
-    @apply bg-white rounded-lg shadow-sm p-4;
-  }
-  
-  .settings-card-title {
-    @apply text-lg font-semibold text-subpi-blue mb-4;
-  }
-  
-  .settings-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:border-transparent;
-  }
-  
-  .settings-button-primary {
-    @apply bg-subpi-blue text-white px-4 py-2 rounded-md hover:bg-blue-900 transition-all duration-200;
-  }
-  
-  .settings-button-action {
-    @apply bg-subpi-orange text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-all duration-200;
-  }
-
-  /* Feature card styles */
-  .feature-card {
-    @apply bg-white rounded-lg shadow-sm p-6 transition-all duration-300 hover:shadow-md;
-  }
-
-  .feature-card-icon {
-    @apply text-subpi-blue mb-4;
-  }
-
-  .feature-card-title {
-    @apply text-lg font-semibold text-subpi-gray-text mb-2;
-  }
-
-  .feature-card-description {
-    @apply text-sm text-subpi-gray-secondary mb-4;
-  }
-
-  .feature-card-list {
-    @apply mt-4 space-y-2;
-  }
-
-  .feature-card-list-item {
-    @apply flex items-start text-xs text-subpi-gray-secondary;
-  }
-
-  .feature-card-list-item-icon {
-    @apply text-subpi-orange mr-2 flex-shrink-0 mt-0.5;
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-/* Responsive media queries */
-@media (max-width: 768px) {
-  .settings-sidebar {
-    @apply w-full;
+.dark {
+  --background: 0 0% 5%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 10%;
+  --popover-foreground: 0 0% 95%;
+  --primary: 0 0% 90%;
+  --primary-foreground: 0 0% 10%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 0 0% 20%;
+  --accent-foreground: 0 0% 90%;
+  --destructive: 0 80% 50%;
+  --destructive-foreground: 0 0% 95%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 0 0% 90%;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  
-  .settings-card {
-    @apply p-3;
-  }
-  
-  .settings-button-primary, .settings-button-action {
-    @apply w-full justify-center;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out forwards;
 }
-

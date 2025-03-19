@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, ArrowRight, X, Upload } from 'lucide-react';
+import { ArrowLeft, ArrowRight, X, Upload, Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, LayoutDashboard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface CadastrarDemandaFormProps {
   onClose: () => void;
@@ -80,6 +82,22 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
       description: "Adicione perguntas e detalhes adicionais"
     }
   ];
+
+  // Map ícones para áreas de coordenação
+  const getAreaIcon = (descricao: string) => {
+    const iconMap: {[key: string]: React.ReactNode} = {
+      "Administrativa": <Briefcase className="h-6 w-6" />,
+      "Educação": <Book className="h-6 w-6" />,
+      "Saúde": <Heart className="h-6 w-6" />,
+      "Comunicação": <Mail className="h-6 w-6" />,
+      "Habitação": <Home className="h-6 w-6" />,
+      "Tecnologia": <Code className="h-6 w-6" />,
+      "Inovação": <Lightbulb className="h-6 w-6" />,
+      "Social": <Users className="h-6 w-6" />
+    };
+
+    return iconMap[descricao] || <LayoutDashboard className="h-6 w-6" />;
+  };
 
   // Fetch data from Supabase tables
   useEffect(() => {
@@ -253,43 +271,45 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
             </div>
             
             <div>
-              <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
-              <Select 
-                value={formData.area_coordenacao_id} 
-                onValueChange={(value) => handleSelectChange('area_coordenacao_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma área" />
-                </SelectTrigger>
-                <SelectContent>
-                  {areasCoord.map(area => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="block mb-2">Área de Coordenação</Label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {areasCoord.map(area => (
+                  <Button
+                    key={area.id}
+                    type="button"
+                    variant={formData.area_coordenacao_id === area.id ? "default" : "outline"}
+                    className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
+                      formData.area_coordenacao_id === area.id ? "ring-2 ring-[#003570]" : ""
+                    }`}
+                    onClick={() => handleSelectChange('area_coordenacao_id', area.id)}
+                  >
+                    {getAreaIcon(area.descricao)}
+                    <span className="text-xs font-medium">{area.descricao}</span>
+                  </Button>
+                ))}
+              </div>
             </div>
             
-            <div>
-              <Label htmlFor="servico_id">Serviço Relacionado</Label>
-              <Select 
-                value={formData.servico_id} 
-                onValueChange={(value) => handleSelectChange('servico_id', value)}
-                disabled={!formData.area_coordenacao_id}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um serviço" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredServicos.map(servico => (
-                    <SelectItem key={servico.id} value={servico.id}>
-                      {servico.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {formData.area_coordenacao_id && (
+              <div className="animate-fadeIn">
+                <Label htmlFor="servico_id">Serviço Relacionado</Label>
+                <Select 
+                  value={formData.servico_id} 
+                  onValueChange={(value) => handleSelectChange('servico_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um serviço" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredServicos.map(servico => (
+                      <SelectItem key={servico.id} value={servico.id}>
+                        {servico.descricao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         );
       
@@ -340,20 +360,25 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({ onClose }) 
         return (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="prioridade">Prioridade</Label>
-              <Select 
+              <Label htmlFor="prioridade" className="block mb-2">Prioridade</Label>
+              <RadioGroup 
                 value={formData.prioridade} 
                 onValueChange={(value) => handleSelectChange('prioridade', value)}
+                className="flex gap-4"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a prioridade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="média">Média</SelectItem>
-                  <SelectItem value="baixa">Baixa</SelectItem>
-                </SelectContent>
-              </Select>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="alta" id="alta" />
+                  <Label htmlFor="alta" className="text-red-600 font-medium">Alta</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="média" id="media" />
+                  <Label htmlFor="media" className="text-yellow-600 font-medium">Média</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="baixa" id="baixa" />
+                  <Label htmlFor="baixa" className="text-green-600 font-medium">Baixa</Label>
+                </div>
+              </RadioGroup>
             </div>
             
             <div>
