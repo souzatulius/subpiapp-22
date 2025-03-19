@@ -3,7 +3,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const ALLOWED_MODEL = 'gpt-4o-mini'; // Only allow this model
+const ALLOWED_MODEL = 'gpt-4-turbo'; // Modelo correto da OpenAI
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -85,7 +85,7 @@ serve(async (req) => {
 
     console.log("Prompt prepared, contacting OpenAI API");
     
-    // Call OpenAI API with improved error handling
+    // Call OpenAI API with improved error handling and correct structure
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -94,7 +94,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: ALLOWED_MODEL, // Only use gpt-4o-mini
+          model: ALLOWED_MODEL, // Modelo correto
           messages: [
             { role: 'system', content: 'Você é um assessor de imprensa especializado em comunicações oficiais para a Subprefeitura de Pinheiros.' },
             { role: 'user', content: promptContent }
