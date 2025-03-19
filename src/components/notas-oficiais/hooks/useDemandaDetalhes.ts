@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda, Resposta } from '../types';
 
-// Interface simplificada para nota existente para evitar erros de tipo
-interface SimpleNotaExistente {
+// Simplified interface for notaExistente to avoid excessive type depth
+interface NotaExistente {
   id: string;
   status: string;
   titulo: string;
@@ -53,8 +53,8 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  // Usando interface simplificada para evitar erro de tipo de instanciação profunda
-  const { data: notaExistente, isLoading: isLoadingNota } = useQuery<SimpleNotaExistente | null>({
+  // Using direct type annotation for notaExistente query to prevent deep type instantiation
+  const notaExistenteQuery = useQuery<NotaExistente | null>({
     queryKey: ['nota-oficial-existente', demandaId],
     queryFn: async () => {
       try {
@@ -66,7 +66,7 @@ export function useDemandaDetalhes(demandaId: string) {
         
         if (error) throw error;
         
-        return data as SimpleNotaExistente | null;
+        return data as NotaExistente | null;
       } catch (error) {
         console.error("Erro ao buscar nota existente:", error);
         return null;
@@ -75,12 +75,12 @@ export function useDemandaDetalhes(demandaId: string) {
     enabled: !!demandaId
   });
   
-  const isLoading = isLoadingDemanda || isLoadingRespostas || isLoadingNota;
+  const isLoading = isLoadingDemanda || isLoadingRespostas || notaExistenteQuery.isLoading;
   
   return {
     demanda,
     respostas,
-    notaExistente,
+    notaExistente: notaExistenteQuery.data,
     isLoading
   };
 }
