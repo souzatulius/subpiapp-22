@@ -67,4 +67,44 @@ body {
   .animate-fade-in {
     animation: fade-in 0.3s ease-out forwards;
   }
+  
+  /* Custom styles for the settings page */
+  .settings-sidebar {
+    @apply bg-white border-r border-gray-200 min-h-screen w-64;
+  }
+  
+  .settings-card {
+    @apply bg-white rounded-lg shadow-sm p-4;
+  }
+  
+  .settings-card-title {
+    @apply text-lg font-semibold text-subpi-blue mb-4;
+  }
+  
+  .settings-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:border-transparent;
+  }
+  
+  .settings-button-primary {
+    @apply bg-subpi-blue text-white px-4 py-2 rounded-md hover:bg-blue-900 transition-all duration-200;
+  }
+  
+  .settings-button-action {
+    @apply bg-subpi-orange text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-all duration-200;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .settings-sidebar {
+    @apply w-full;
+  }
+  
+  .settings-card {
+    @apply p-3;
+  }
+  
+  .settings-button-primary, .settings-button-action {
+    @apply w-full justify-center;
+  }
 }

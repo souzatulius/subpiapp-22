@@ -54,7 +54,7 @@ const DataEntryForm: React.FC<DataEntryFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {title && <h3 className="text-lg font-medium">{title}</h3>}
+        {title && <h3 className="text-lg font-medium text-[#003570]">{title}</h3>}
         
         {renderFields(form)}
         
@@ -62,7 +62,7 @@ const DataEntryForm: React.FC<DataEntryFormProps> = ({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} variant="action">
             {isSubmitting ? 'Processando...' : submitText}
           </Button>
         </div>

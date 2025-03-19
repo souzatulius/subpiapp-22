@@ -5,6 +5,8 @@ import { toast } from '@/components/ui/use-toast';
 import { z } from 'zod';
 import DataTable from './DataTable';
 import DataEntryForm from './DataEntryForm';
+import EditModal from './EditModal';
+import { Input } from '@/components/ui/input';
 
 const positionSchema = z.object({
   descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
@@ -55,9 +57,18 @@ const Positions = () => {
       if (error) throw error;
       
       await fetchPositions();
+      toast({
+        title: 'Sucesso',
+        description: 'Cargo adicionado com sucesso',
+      });
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao adicionar cargo:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao adicionar o cargo',
+        variant: 'destructive',
+      });
       return Promise.reject(error);
     } finally {
       setIsSubmitting(false);
@@ -81,9 +92,18 @@ const Positions = () => {
       await fetchPositions();
       setIsEditFormOpen(false);
       setEditingPosition(null);
+      toast({
+        title: 'Sucesso',
+        description: 'Cargo atualizado com sucesso',
+      });
       return Promise.resolve();
     } catch (error: any) {
       console.error('Erro ao editar cargo:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao atualizar o cargo',
+        variant: 'destructive',
+      });
       return Promise.reject(error);
     } finally {
       setIsSubmitting(false);
@@ -168,10 +188,10 @@ const Positions = () => {
             <label htmlFor="descricao" className="text-sm font-medium">
               Descrição
             </label>
-            <input
+            <Input
               id="descricao"
               name="descricao"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full"
               placeholder="Nome do cargo"
             />
           </div>
@@ -195,41 +215,38 @@ const Positions = () => {
         isLoading={loading}
       />
       
-      {/* Edit form modal */}
-      {isEditFormOpen && editingPosition && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">Editar Cargo</h3>
-            
-            <DataEntryForm
-              schema={positionSchema}
-              onSubmit={handleEdit}
-              onCancel={closeEditForm}
-              defaultValues={{
-                descricao: editingPosition.descricao,
-              }}
-              renderFields={() => (
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <label htmlFor="descricao" className="text-sm font-medium">
-                      Descrição
-                    </label>
-                    <input
-                      id="descricao"
-                      name="descricao"
-                      defaultValue={editingPosition.descricao}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      placeholder="Nome do cargo"
-                    />
-                  </div>
-                </div>
-              )}
-              isSubmitting={isSubmitting}
-              submitText="Salvar Alterações"
-            />
-          </div>
-        </div>
-      )}
+      <EditModal 
+        isOpen={isEditFormOpen} 
+        onClose={closeEditForm}
+        title="Editar Cargo"
+      >
+        <DataEntryForm
+          schema={positionSchema}
+          onSubmit={handleEdit}
+          onCancel={closeEditForm}
+          defaultValues={{
+            descricao: editingPosition?.descricao || '',
+          }}
+          renderFields={() => (
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <label htmlFor="descricao" className="text-sm font-medium">
+                  Descrição
+                </label>
+                <Input
+                  id="descricao"
+                  name="descricao"
+                  defaultValue={editingPosition?.descricao || ''}
+                  className="w-full"
+                  placeholder="Nome do cargo"
+                />
+              </div>
+            </div>
+          )}
+          isSubmitting={isSubmitting}
+          submitText="Salvar Alterações"
+        />
+      </EditModal>
     </div>
   );
 };
