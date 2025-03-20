@@ -338,6 +338,42 @@ export type Database = {
           },
         ]
       }
+      ordens_servico: {
+        Row: {
+          bairro: string | null
+          classificacao: string | null
+          criado_em: string | null
+          dias: number | null
+          distrito: string | null
+          id: number
+          ordem_servico: string
+          status: string | null
+          ultima_atualizacao: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          classificacao?: string | null
+          criado_em?: string | null
+          dias?: number | null
+          distrito?: string | null
+          id?: number
+          ordem_servico: string
+          status?: string | null
+          ultima_atualizacao?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          classificacao?: string | null
+          criado_em?: string | null
+          dias?: number | null
+          distrito?: string | null
+          id?: number
+          ordem_servico?: string
+          status?: string | null
+          ultima_atualizacao?: string | null
+        }
+        Relationships: []
+      }
       origens_demandas: {
         Row: {
           criado_em: string
@@ -466,6 +502,33 @@ export type Database = {
           criado_em?: string
           descricao?: string
           id?: string
+        }
+        Relationships: []
+      }
+      uploads_ordens_servico: {
+        Row: {
+          data_upload: string | null
+          id: number
+          nome_arquivo: string | null
+          registros_atualizados: number | null
+          registros_inseridos: number | null
+          usuario_id: string
+        }
+        Insert: {
+          data_upload?: string | null
+          id?: number
+          nome_arquivo?: string | null
+          registros_atualizados?: number | null
+          registros_inseridos?: number | null
+          usuario_id: string
+        }
+        Update: {
+          data_upload?: string | null
+          id?: number
+          nome_arquivo?: string | null
+          registros_atualizados?: number | null
+          registros_inseridos?: number | null
+          usuario_id?: string
         }
         Relationships: []
       }

@@ -10,6 +10,7 @@ import NotFound from '@/pages/NotFound';
 import Demandas from '@/pages/Demandas';
 import NotasOficiais from '@/pages/NotasOficiais';
 import Settings from '@/pages/Settings';
+import RankingSubprefeituras from '@/pages/RankingSubprefeituras';
 import AuthCallback from '@/components/AuthCallback';
 import { AuthProvider } from '@/providers/AuthProvider';
 import ProtectedRoute from '@/components/layouts/ProtectedRoute';
@@ -32,6 +33,7 @@ function App() {
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/demandas" element={<ProtectedRoute><Demandas /></ProtectedRoute>} />
             <Route path="/notas-oficiais" element={<ProtectedRoute><NotasOficiais /></ProtectedRoute>} />
+            <Route path="/ranking-subprefeituras" element={<ProtectedRoute><RankingSubprefeituras /></ProtectedRoute>} />
             <Route path="/settings/*" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

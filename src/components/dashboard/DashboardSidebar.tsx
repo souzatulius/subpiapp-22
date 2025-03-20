@@ -1,9 +1,12 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, ClipboardList, FileText, BarChart2, Users, Settings } from 'lucide-react';
+import { Home, ClipboardList, FileText, BarChart2, Users, Settings, LineChart } from 'lucide-react';
+
 interface DashboardSidebarProps {
   isOpen: boolean;
 }
+
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   isOpen
 }) => {
@@ -24,6 +27,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     label: 'Relatórios',
     path: '/relatorios'
   }, {
+    icon: <LineChart size={20} />,
+    label: 'Ranking das Subs',
+    path: '/ranking-subprefeituras'
+  }, {
     icon: <Users size={20} />,
     label: 'Usuários',
     path: '/usuarios'
@@ -32,19 +39,23 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     label: 'Ajustes',
     path: '/settings'
   }];
-  return <aside className={`bg-white border-r border-gray-200 transition-all duration-300 ${isOpen ? 'w-56' : 'w-16'} flex-shrink-0 overflow-x-hidden`}>
+
+  return (
+    <aside className={`bg-white border-r border-gray-200 transition-all duration-300 ${isOpen ? 'w-56' : 'w-16'} flex-shrink-0 overflow-x-hidden`}>
       <nav className="py-4">
         <ul className="space-y-2">
-          {navItems.map((item, index) => <li key={index}>
-              <NavLink to={item.path} className={({
-            isActive
-          }) => `flex items-center px-4 py-2 ${isActive ? 'text-[#003570] bg-blue-50' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}>
+          {navItems.map((item, index) => (
+            <li key={index}>
+              <NavLink to={item.path} className={({isActive}) => `flex items-center px-4 py-2 ${isActive ? 'text-[#003570] bg-blue-50' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}>
                 <div className="flex-shrink-0">{item.icon}</div>
                 <span className={`ml-3 ${isOpen ? 'block' : 'hidden'}`}>{item.label}</span>
               </NavLink>
-            </li>)}
+            </li>
+          ))}
         </ul>
       </nav>
-    </aside>;
+    </aside>
+  );
 };
+
 export default DashboardSidebar;
