@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BarChart2, FileText } from 'lucide-react';
+import { BarChart2, FileText, Home, PlusCircle, List, Users } from 'lucide-react';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -17,37 +18,37 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   const sidebarItems = [
     {
       name: 'Dashboard',
-      icon: null,
+      icon: <Home className="h-5 w-5 mr-2" />,
       href: '/dashboard',
       role: ['Admin', 'Subprefeito', 'Time de Comunicação', 'Gestores', 'Técnico']
     },
     {
       name: 'Cadastrar Demanda',
-      icon: null,
+      icon: <PlusCircle className="h-5 w-5 mr-2" />,
       href: '/cadastrar-demanda',
       role: ['Admin', 'Subprefeito', 'Time de Comunicação', 'Gestores', 'Técnico']
     },
     {
       name: 'Minhas Demandas',
-      icon: null,
+      icon: <List className="h-5 w-5 mr-2" />,
       href: '/demandas',
       role: ['Admin', 'Subprefeito', 'Time de Comunicação', 'Gestores', 'Técnico']
     },
     {
       name: 'Gerenciar Usuários',
-      icon: null,
+      icon: <Users className="h-5 w-5 mr-2" />,
       href: '/gerenciar-usuarios',
       role: ['Admin', 'Subprefeito']
     },
     {
       name: 'Relatórios',
-      icon: <FileText className="h-5 w-5" />,
+      icon: <FileText className="h-5 w-5 mr-2" />,
       href: '/relatorios',
       role: ['Admin', 'Subprefeito', 'Time de Comunicação', 'Gestores']
     },
     {
       name: 'Ranking das Subs',
-      icon: <BarChart2 className="h-5 w-5" />,
+      icon: <BarChart2 className="h-5 w-5 mr-2" />,
       href: '/ranking-subs',
       role: ['Admin', 'Subprefeito']
     },
@@ -63,8 +64,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
     <>
       {/* Sidebar para telas maiores */}
       <aside
-        className={`hidden lg:flex flex-col w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+        className={`hidden lg:flex flex-col w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
           <span className="text-lg font-semibold text-[#003570]">Menu</span>
@@ -87,11 +87,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
           </ul>
         </nav>
         <div className="p-4 border-t border-gray-200">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
-            <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <p className="mt-2 text-sm text-gray-500">{user?.email}</p>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+          </div>
         </div>
       </aside>
 
@@ -122,11 +124,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
             </ul>
           </nav>
           <div className="p-4 border-t border-gray-200">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <p className="mt-2 text-sm text-gray-500">{user?.email}</p>
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.user_metadata?.avatar_url} />
+                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
