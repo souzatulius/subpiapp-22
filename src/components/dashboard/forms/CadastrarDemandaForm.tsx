@@ -11,6 +11,7 @@ import { useDemandForm } from '@/hooks/demandForm';
 import { ValidationError, validateDemandForm } from '@/lib/formValidationUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CadastrarDemandaFormProps {
   onClose: () => void;
@@ -21,6 +22,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const navigate = useNavigate();
   
   const {
     formData,
@@ -42,75 +44,60 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     handleSubmit: submitForm,
     nextStep,
     prevStep,
-    setSelectedDistrito
+    setSelectedDistrito,
+    resetForm
   } = useDemandForm(user?.id, onClose);
 
   console.log('Current user ID:', user?.id);
 
   const handleStepClick = (stepIndex: number) => {
-    // Check if we're trying to go past the current step
-    if (stepIndex > activeStep) {
-      // Validate current step before allowing to proceed
-      const errors = validateDemandForm(formData, activeStep);
-      if (errors.length > 0) {
-        setValidationErrors(errors);
-        toast({
-          title: "Campos obrigatórios",
-          description: "Preencha todos os campos obrigatórios antes de avançar.",
-          variant: "destructive"
-        });
-        return;
-      }
-    }
-    // Allow going to any previous step without validation
+    // Allow going to any step since no validation is required
     if (stepIndex <= activeStep) {
-      // Set active step to the clicked step
+      // Set active step to the clicked step (going backward)
       for (let i = activeStep; i > stepIndex; i--) {
         prevStep();
       }
     } else {
-      // If we're moving forward, go one step at a time with validation
-      nextStep();
+      // Going forward
+      for (let i = activeStep; i < stepIndex; i++) {
+        nextStep();
+      }
     }
   };
 
   const handleNextStep = () => {
-    const errors = validateDemandForm(formData, activeStep);
-    if (errors.length > 0) {
-      setValidationErrors(errors);
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha todos os campos obrigatórios antes de avançar.",
-        variant: "destructive"
-      });
-      return;
-    }
-    setValidationErrors([]);
     nextStep();
   };
 
-  const handleSubmit = () => {
-    const errors = validateDemandForm(formData, 5); // Validate all fields on submit
-    if (errors.length > 0) {
-      setValidationErrors(errors);
+  const handleSubmit = async () => {
+    try {
+      await submitForm();
+      
+      // Instead of closing, redirect to add a new demand
       toast({
-        title: "Campos obrigatórios não preenchidos",
-        description: "Preencha todos os campos obrigatórios antes de finalizar.",
+        title: "Demanda cadastrada com sucesso!",
+        description: "Iniciando cadastro de uma nova demanda."
+      });
+      
+      // Reset the form for a new demand
+      resetForm();
+      
+      // Go back to first step
+      while (activeStep > 0) {
+        prevStep();
+      }
+      
+    } catch (error: any) {
+      toast({
+        title: "Erro ao cadastrar demanda",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
         variant: "destructive"
       });
-      return;
     }
-    submitForm();
   };
 
   return (
     <div className="animate-fade-in">
-      <FormHeader 
-        title="Cadastrar Nova Solicitação" 
-        onClose={onClose} 
-        showTitleAndClose={false}
-      />
-      
       <Card className="border border-gray-200 rounded-lg">
         <div className="p-6">
           <div className="mb-6">

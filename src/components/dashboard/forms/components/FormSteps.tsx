@@ -28,7 +28,8 @@ const FormSteps: React.FC<FormStepsProps> = ({ steps, activeStep, onStepClick })
           <button 
             key={index} 
             className={`flex items-center justify-center rounded-full transition-colors cursor-pointer
-              ${index <= activeStep ? 'bg-[#003570] text-white' : 'bg-gray-200 text-gray-400'}
+              ${index === activeStep ? 'bg-orange-500 text-white' : 
+                index < activeStep ? 'bg-[#003570] text-white' : 'bg-gray-200 text-gray-400 hover:bg-orange-200'}
               h-6 w-6 text-xs`}
             onClick={() => onStepClick && onStepClick(index)}
             aria-label={`Ir para etapa ${index + 1}`}

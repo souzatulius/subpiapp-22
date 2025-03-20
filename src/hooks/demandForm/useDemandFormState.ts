@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
@@ -5,7 +6,7 @@ export const useDemandFormState = (
   servicos: any[],
   bairros: any[]
 ) => {
-  const [formData, setFormData] = useState<DemandFormData>({
+  const initialFormState: DemandFormData = {
     titulo: '',
     area_coordenacao_id: '',
     servico_id: '',
@@ -21,8 +22,9 @@ export const useDemandFormState = (
     perguntas: ['', '', '', '', ''],
     detalhes_solicitacao: '',
     arquivo_url: ''
-  });
+  };
 
+  const [formData, setFormData] = useState<DemandFormData>(initialFormState);
   const [serviceSearch, setServiceSearch] = useState('');
   const [filteredServicos, setFilteredServicos] = useState<any[]>([]);
   const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
@@ -106,6 +108,13 @@ export const useDemandFormState = (
     }
   };
 
+  const resetForm = () => {
+    setFormData(initialFormState);
+    setServiceSearch('');
+    setSelectedDistrito('');
+    setActiveStep(0);
+  };
+
   return {
     formData,
     serviceSearch,
@@ -120,6 +129,7 @@ export const useDemandFormState = (
     handlePerguntaChange,
     nextStep,
     prevStep,
-    setSelectedDistrito
+    setSelectedDistrito,
+    resetForm
   };
 };

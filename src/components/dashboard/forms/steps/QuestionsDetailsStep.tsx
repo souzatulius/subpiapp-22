@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import FileUpload from '../components/FileUpload';
 import { ValidationError } from '@/lib/formValidationUtils';
 
@@ -27,22 +27,26 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
   handleSelectChange,
   errors = []
 }) => {
-  const [visibleQuestions, setVisibleQuestions] = useState<number[]>(
-    formData.perguntas.filter(p => p.trim() !== '').length > 0 
-      ? [0] 
-      : []
-  );
+  const [activeQuestions, setActiveQuestions] = useState<number>(0);
 
-  const handleAddQuestion = () => {
-    const currentIndex = visibleQuestions.length;
-    if (currentIndex < 5) {
-      setVisibleQuestions([...visibleQuestions, currentIndex]);
+  useEffect(() => {
+    // Determine how many question fields should be visible
+    let count = 0;
+    for (let i = 0; i < formData.perguntas.length; i++) {
+      if (formData.perguntas[i]?.trim()) {
+        count = i + 1;
+      }
     }
-  };
+    // Show one more empty field if all are filled
+    if (count === formData.perguntas.length || count === 0) {
+      setActiveQuestions(Math.min(count + 1, 5));
+    } else {
+      setActiveQuestions(count + 1);
+    }
+  }, [formData.perguntas]);
 
-  const handleRemoveQuestion = (index: number) => {
-    handlePerguntaChange(index, '');
-    setVisibleQuestions(visibleQuestions.filter(i => i !== index));
+  const handleQuestionChange = (index: number, value: string) => {
+    handlePerguntaChange(index, value);
   };
 
   const handleFileChange = (fileUrl: string) => {
@@ -58,44 +62,27 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
   return (
     <div className="space-y-4">
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <Label>Perguntas</Label>
-          {visibleQuestions.length < 5 && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddQuestion}
-              className="flex items-center"
-            >
-              <Plus className="h-4 w-4 mr-1" /> Adicionar pergunta
-            </Button>
-          )}
-        </div>
+        <Label>Perguntas</Label>
         
-        {visibleQuestions.length === 0 && (
-          <div className="text-sm text-gray-500 italic mb-2">
-            Clique no botão acima para adicionar perguntas.
-          </div>
-        )}
-        
-        {visibleQuestions.map((questionIndex) => (
-          <div key={questionIndex} className="flex items-center gap-2 mb-2">
+        {Array.from({ length: activeQuestions }).map((_, index) => (
+          <div key={index} className="flex items-center gap-2 mb-2">
             <Input 
-              className="flex-1 rounded-lg" 
-              value={formData.perguntas[questionIndex] || ''} 
-              onChange={e => handlePerguntaChange(questionIndex, e.target.value)}
-              placeholder="Digite a pergunta aqui" 
+              className="flex-1 rounded-lg"
+              value={formData.perguntas[index] || ''}
+              onChange={e => handleQuestionChange(index, e.target.value)}
+              placeholder={`Pergunta ${index + 1}`}
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => handleRemoveQuestion(questionIndex)}
-              className="flex-shrink-0"
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
+            {index === activeQuestions - 1 && activeQuestions < 5 && formData.perguntas[index]?.trim() && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setActiveQuestions(prev => Math.min(prev + 1, 5))}
+                className="flex-shrink-0"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         ))}
       </div>
@@ -105,7 +92,7 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
           htmlFor="detalhes_solicitacao" 
           className={`block ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Detalhes da Solicitação {hasError('detalhes_solicitacao') && <span className="text-orange-500">*</span>}
+          Detalhes da Solicitação
         </Label>
         <Textarea 
           id="detalhes_solicitacao" 
