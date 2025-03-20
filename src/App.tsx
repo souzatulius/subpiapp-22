@@ -18,6 +18,11 @@ import Relatorios from "./pages/comunicacao/Relatorios";
 import RankingSubs from "./pages/zeladoria/RankingSubs";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
+import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
+import ResponderDemandas from './pages/dashboard/comunicacao/ResponderDemandas';
+import CriarNotaOficial from './pages/dashboard/comunicacao/CriarNotaOficial';
+import AprovarNotaOficial from './pages/dashboard/comunicacao/AprovarNotaOficial';
+import RelatoriosDashboard from './pages/dashboard/comunicacao/Relatorios';
 
 const queryClient = new QueryClient();
 
@@ -45,7 +50,49 @@ const App = () => (
               } 
             />
             
-            {/* Comunicação Routes */}
+            {/* Dashboard Communication Section Routes */}
+            <Route 
+              path="/dashboard/comunicacao/cadastrar" 
+              element={
+                <ProtectedRoute>
+                  <CadastrarDemanda />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/comunicacao/responder" 
+              element={
+                <ProtectedRoute>
+                  <ResponderDemandas />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/comunicacao/criar-nota" 
+              element={
+                <ProtectedRoute>
+                  <CriarNotaOficial />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/comunicacao/aprovar-nota" 
+              element={
+                <ProtectedRoute>
+                  <AprovarNotaOficial />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/comunicacao/relatorios" 
+              element={
+                <ProtectedRoute>
+                  <RelatoriosDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Comunicação Routes (Legacy) */}
             <Route 
               path="/comunicacao/demandas" 
               element={
@@ -72,6 +119,14 @@ const App = () => (
             />
             
             {/* Zeladoria Routes */}
+            <Route 
+              path="/dashboard/zeladoria/ranking-subs" 
+              element={
+                <ProtectedRoute>
+                  <RankingSubs />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/zeladoria/ranking-subs" 
               element={
