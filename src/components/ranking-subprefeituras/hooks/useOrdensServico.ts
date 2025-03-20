@@ -1,25 +1,82 @@
-
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { OrdemServico, OrdensStats, ChartFilters, ChartData } from '../types';
-import { toast } from '@/components/ui/use-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { useToast } from "@/components/ui/use-toast"
+import {
+  OrdemServico,
+  UploadLog,
+  ChartData,
+  ChartFilters,
+  OrdensStats,
+} from '../types';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSession } from '@supabase/auth-helpers-react';
+import * as XLSX from 'xlsx';
 import { v4 as uuidv4 } from 'uuid';
 
-export const useOrdensServico = () => {
+const defaultChartData: ChartData[] = [
+  {
+    id: 'tempo-medio-resolucao',
+    title: 'Tempo Médio de Resolução',
+    description: 'Média de dias para resolução das ordens de serviço',
+    type: 'indicator',
+    data: { total: '0', details: [{ label: 'Média', value: '0' }, { label: 'Mediana', value: '0' }] },
+    visible: true,
+  },
+  {
+    id: 'ordens-por-distrito',
+    title: 'Ordens de Serviço por Distrito',
+    type: 'horizontalBar',
+    data: { datasets: [] },
+    visible: true,
+  },
+  {
+    id: 'ordens-por-bairro',
+    title: 'Ordens de Serviço por Bairro',
+    type: 'bar',
+    data: { labels: [], datasets: [] },
+    visible: true,
+  },
+  {
+    id: 'ordens-por-classificacao',
+    title: 'Ordens de Serviço por Classificação',
+    type: 'pie',
+    data: { labels: [], datasets: [] },
+    visible: true,
+  },
+  {
+    id: 'ordens-por-status',
+    title: 'Ordens de Serviço por Status',
+    type: 'pie',
+    data: { labels: [], datasets: [] },
+    visible: true,
+  },
+  {
+    id: 'ordens-criadas-por-mes',
+    title: 'Ordens de Serviço Criadas por Mês',
+    type: 'line',
+    data: { labels: [], datasets: [] },
+    visible: true,
+  },
+];
+
+const useOrdensServico = () => {
+  const supabase = useSupabaseClient();
+  const session = useSession();
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [uploadLogs, setUploadLogs] = useState<UploadLog[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>(defaultChartData);
   const [stats, setStats] = useState<OrdensStats | null>(null);
   const [filters, setFilters] = useState<ChartFilters>({});
-  const [charts, setCharts] = useState<ChartData[]>([]);
-  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  // Fetch service orders
-  const fetchOrdens = async (filters: ChartFilters = {}) => {
+  const fetchOrdens = useCallback(async () => {
     setLoading(true);
     try {
-      let query = supabase.from('ordens_servico').select('*');
-      
-      // Apply filters
+      let query = supabase
+        .from('ordens_servico')
+        .select('*')
+        .order('criado_em', { ascending: false });
+
       if (filters.distrito) {
         query = query.eq('distrito', filters.distrito);
       }
@@ -39,406 +96,556 @@ export const useOrdensServico = () => {
         query = query.lte('criado_em', filters.dataAte);
       }
 
-      const { data, error } = await query.order('criado_em', { ascending: false });
+      const { data, error } = await query;
 
       if (error) {
-        throw error;
+        console.error('Erro ao buscar ordens:', error);
+        toast({
+          title: "Erro ao buscar ordens de serviço!",
+          description: "Ocorreu um problema ao carregar os dados.",
+          variant: "destructive",
+        })
       }
 
-      setOrdens(data || []);
-      
-      // Fetch last update
-      const { data: uploadData, error: uploadError } = await supabase
-        .from('uploads_ordens_servico')
-        .select('data_upload')
-        .order('data_upload', { ascending: false })
-        .limit(1);
-        
-      if (!uploadError && uploadData && uploadData.length > 0) {
-        setLastUpdate(new Date(uploadData[0].data_upload).toLocaleString('pt-BR'));
+      if (data) {
+        setOrdens(data);
       }
-      
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, filters, toast]);
+
+  const fetchUploadLogs = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('upload_logs')
+        .select('*')
+        .order('data_upload', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar logs de upload:', error);
+        toast({
+          title: "Erro ao buscar logs de upload!",
+          description: "Ocorreu um problema ao carregar os logs de upload.",
+          variant: "destructive",
+        })
+      }
+
+      if (data) {
+        setUploadLogs(data);
+      }
     } catch (error) {
-      console.error('Erro ao buscar ordens de serviço:', error);
+      console.error('Erro inesperado ao buscar logs de upload:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar as ordens de serviço.',
-        variant: 'destructive',
-      });
+        title: "Erro inesperado!",
+        description: "Ocorreu um problema inesperado ao carregar os logs de upload.",
+        variant: "destructive",
+      })
+    }
+  }, [supabase, toast]);
+
+  const parseExcel = async (file: File): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Extract headers from the first row
+        const headers = jsonData[0] as string[];
+
+        // Extract data starting from the second row
+        const dataRows = jsonData.slice(1) as any[][];
+
+        // Transform the data into an array of objects
+        const transformedData = dataRows.map(row => {
+          const rowObject: any = {};
+          headers.forEach((header, index) => {
+            rowObject[header] = row[index];
+          });
+          return rowObject;
+        });
+
+        resolve(transformedData);
+      };
+
+      reader.onerror = (error) => {
+        reject(error);
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const uploadExcel = async (file: File) => {
+    setLoading(true);
+    try {
+      const parsedData = await parseExcel(file);
+      if (!parsedData || parsedData.length === 0) {
+        toast({
+          title: "Erro ao processar o arquivo!",
+          description: "O arquivo está vazio ou em formato incorreto.",
+          variant: "destructive",
+        })
+        return;
+      }
+
+      // Function to check if a record already exists
+      const recordExists = async (ordemServico: string): Promise<boolean> => {
+        const { data, error } = await supabase
+          .from('ordens_servico')
+          .select('id')
+          .eq('ordem_servico', ordemServico)
+          .single();
+
+        if (error) {
+          console.error('Erro ao verificar se a ordem existe:', error);
+          return false;
+        }
+
+        return !!data;
+      };
+
+      let insertedCount = 0;
+      let updatedCount = 0;
+
+      for (const record of parsedData) {
+        // Check if 'ordem_servico' property exists in the record
+        if (!record.hasOwnProperty('ordem_servico')) {
+          console.warn('Skipping record due to missing "ordem_servico" property:', record);
+          continue; // Skip to the next record
+        }
+
+        const ordemServico = record.ordem_servico;
+
+        // Check if the record already exists
+        const exists = await recordExists(ordemServico);
+
+        if (exists) {
+          // Update the existing record
+          const { error } = await supabase
+            .from('ordens_servico')
+            .update(record)
+            .eq('ordem_servico', ordemServico);
+
+          if (error) {
+            console.error('Erro ao atualizar ordem de serviço:', error);
+          } else {
+            updatedCount++;
+          }
+        } else {
+          // Insert the new record
+          const { error } = await supabase
+            .from('ordens_servico')
+            .insert([record]);
+
+          if (error) {
+            console.error('Erro ao inserir ordem de serviço:', error);
+          } else {
+            insertedCount++;
+          }
+        }
+      }
+
+      // Log the upload
+      const uploadLog = {
+        usuario_id: session?.user.id,
+        nome_arquivo: file.name,
+        registros_inseridos: insertedCount,
+        registros_atualizados: updatedCount,
+        data_upload: new Date().toISOString(),
+      };
+
+      const { error: logError } = await supabase
+        .from('upload_logs')
+        .insert([uploadLog]);
+
+      if (logError) {
+        console.error('Erro ao inserir log de upload:', logError);
+        toast({
+          title: "Erro ao inserir log de upload!",
+          description: "Ocorreu um problema ao salvar o log de upload.",
+          variant: "destructive",
+        })
+      }
+
+      toast({
+        title: "Sucesso!",
+        description: `Arquivo ${file.name} processado. Inseridos: ${insertedCount}, Atualizados: ${updatedCount}.`,
+      })
+
+      // Refresh data
+      fetchOrdens();
+      fetchUploadLogs();
+    } catch (error: any) {
+      console.error('Erro durante o upload:', error);
+      toast({
+        title: "Erro durante o upload!",
+        description: error.message || "Ocorreu um erro inesperado durante o upload.",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false);
     }
   };
 
-  // Process data and generate statistics
-  const processData = () => {
-    if (!ordens.length) return;
+  const calculateStats = useCallback(async () => {
+    try {
+      const { data: allOrdens, error: allOrdensError } = await supabase
+        .from('ordens_servico')
+        .select('*');
 
-    // Extract districts of Subprefeitura de Pinheiros
-    const distritosPinheiros = ['Itaim Bibi', 'Pinheiros', 'Alto de Pinheiros', 'Jardim Paulista'];
-    
-    // Basic counts
-    const totalOrdens = ordens.length;
-    
-    // Calculate average resolution time
-    const tempoMedioResolucao = ordens.reduce((acc, ordem) => {
-      return acc + (ordem.dias || 0);
-    }, 0) / (ordens.filter(o => o.dias !== null).length || 1);
-    
-    // Count by district
-    const totalPorDistrito = ordens.reduce((acc, ordem) => {
-      const distrito = ordem.distrito || 'Não especificado';
-      acc[distrito] = (acc[distrito] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    // Count by classification
-    const totalPorClassificacao = ordens.reduce((acc, ordem) => {
-      const classificacao = ordem.classificacao || 'Não especificado';
-      acc[classificacao] = (acc[classificacao] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    // Count by status
-    const totalPorStatus = ordens.reduce((acc, ordem) => {
-      const status = ordem.status || 'Não especificado';
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    // Count by neighborhood
-    const totalPorBairro = ordens.reduce((acc, ordem) => {
-      const bairro = ordem.bairro || 'Não especificado';
-      acc[bairro] = (acc[bairro] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    setStats({
-      totalOrdens,
-      tempoMedioResolucao,
-      totalPorDistrito,
-      totalPorClassificacao,
-      totalPorStatus,
-      totalPorBairro
-    });
-    
-    // Generate charts
-    generateCharts(distritosPinheiros, {
-      totalPorDistrito,
-      totalPorClassificacao,
-      totalPorStatus,
-      totalPorBairro,
-      tempoMedioResolucao
-    });
-  };
-  
-  // Generate the required charts
-  const generateCharts = (
-    distritosPinheiros: string[], 
-    data: {
-      totalPorDistrito: Record<string, number>,
-      totalPorClassificacao: Record<string, number>,
-      totalPorStatus: Record<string, number>,
-      totalPorBairro: Record<string, number>,
-      tempoMedioResolucao: number
-    }
-  ) => {
-    const newCharts: ChartData[] = [];
-    
-    // 1. Distribuição de Ocorrências na Subprefeitura de Pinheiros
-    const distribuicaoPorDistrito = {
-      id: uuidv4(),
-      title: 'Distribuição de Ocorrências na Subprefeitura de Pinheiros',
-      type: 'bar' as const,
-      visible: true,
-      data: {
-        labels: distritosPinheiros,
-        datasets: [{
-          label: 'Número de ocorrências',
-          data: distritosPinheiros.map(distrito => data.totalPorDistrito[distrito] || 0),
-          backgroundColor: [
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(153, 102, 255, 0.6)'
-          ]
-        }]
-      }
-    };
-    newCharts.push(distribuicaoPorDistrito);
-    
-    // 2. Tipos de Serviços Mais Demandados - Comparação
-    // Get top 5 services
-    const topServicos = Object.entries(data.totalPorClassificacao)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([servico]) => servico);
-      
-    const servicosPinheiros = ordens
-      .filter(ordem => distritosPinheiros.includes(ordem.distrito || ''))
-      .reduce((acc, ordem) => {
-        const classificacao = ordem.classificacao || 'Não especificado';
-        acc[classificacao] = (acc[classificacao] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-    const servicosOutros = ordens
-      .filter(ordem => !distritosPinheiros.includes(ordem.distrito || ''))
-      .reduce((acc, ordem) => {
-        const classificacao = ordem.classificacao || 'Não especificado';
-        acc[classificacao] = (acc[classificacao] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-    const servicosComparacao = {
-      id: uuidv4(),
-      title: 'Tipos de Serviços Mais Demandados - Comparação',
-      type: 'groupedBar' as const,
-      visible: true,
-      data: {
-        labels: topServicos,
-        datasets: [
-          {
-            label: 'Subprefeitura Pinheiros',
-            data: topServicos.map(servico => servicosPinheiros[servico] || 0),
-            backgroundColor: 'rgba(54, 162, 235, 0.6)'
-          },
-          {
-            label: 'Outros Distritos',
-            data: topServicos.map(servico => servicosOutros[servico] || 0),
-            backgroundColor: 'rgba(255, 99, 132, 0.6)'
-          }
-        ]
-      }
-    };
-    newCharts.push(servicosComparacao);
-    
-    // 3. Tempo Médio de Resolução (em dias)
-    const tempoMedioPorDistrito = distritosPinheiros.reduce((acc, distrito) => {
-      const ordensDoDistrito = ordens.filter(o => o.distrito === distrito && o.dias !== null);
-      if (ordensDoDistrito.length) {
-        acc[distrito] = ordensDoDistrito.reduce((sum, o) => sum + (o.dias || 0), 0) / ordensDoDistrito.length;
-      } else {
-        acc[distrito] = 0;
-      }
-      return acc;
-    }, {} as Record<string, number>);
-    
-    const tempoMedioResolucao = {
-      id: uuidv4(),
-      title: 'Tempo Médio de Resolução (em dias)',
-      type: 'indicator' as const,
-      visible: true,
-      data: {
-        total: data.tempoMedioResolucao.toFixed(1),
-        details: Object.entries(tempoMedioPorDistrito).map(([distrito, tempo]) => ({
-          label: distrito,
-          value: tempo.toFixed(1)
-        }))
-      }
-    };
-    newCharts.push(tempoMedioResolucao);
-    
-    // 4. Distribuição das Ocorrências por Bairros da Subprefeitura
-    const bairrosPinheiros = Object.keys(data.totalPorBairro).filter(bairro => {
-      return ordens.some(o => o.bairro === bairro && distritosPinheiros.includes(o.distrito || ''));
-    });
-    
-    const ocorrenciasPorBairro = bairrosPinheiros.reduce((acc, bairro) => {
-      acc[bairro] = ordens.filter(o => o.bairro === bairro && distritosPinheiros.includes(o.distrito || '')).length;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    const topBairros = Object.entries(ocorrenciasPorBairro)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .reduce((acc, [bairro, count]) => {
-        acc[bairro] = count;
-        return acc;
-      }, {} as Record<string, number>);
-    
-    const distribuicaoPorBairro = {
-      id: uuidv4(),
-      title: 'Distribuição das Ocorrências por Bairros da Subprefeitura',
-      type: 'pie' as const,
-      visible: true,
-      data: {
-        labels: Object.keys(topBairros),
-        datasets: [{
-          data: Object.values(topBairros),
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
-            'rgba(255, 159, 64, 0.6)',
-            'rgba(199, 199, 199, 0.6)',
-            'rgba(83, 102, 255, 0.6)',
-            'rgba(40, 159, 64, 0.6)',
-            'rgba(210, 199, 199, 0.6)'
-          ]
-        }]
-      }
-    };
-    newCharts.push(distribuicaoPorBairro);
-    
-    // 5. Serviços Mais Frequentes nos Distritos da Subprefeitura de Pinheiros
-    const servicosPorDistrito = distritosPinheiros.reduce((acc, distrito) => {
-      const servicosDistrito = ordens
-        .filter(o => o.distrito === distrito)
-        .reduce((servAcc, ordem) => {
-          const servico = ordem.classificacao || 'Não especificado';
-          servAcc[servico] = (servAcc[servico] || 0) + 1;
-          return servAcc;
-        }, {} as Record<string, number>);
-        
-      // Get top 3 services for this district
-      const topServicosDistrito = Object.entries(servicosDistrito)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([servico, count]) => ({ servico, count }));
-        
-      acc[distrito] = topServicosDistrito;
-      return acc;
-    }, {} as Record<string, Array<{servico: string, count: number}>>);
-    
-    // Prepare data for horizontal bar chart
-    const servicosMaisFrequentes = {
-      id: uuidv4(),
-      title: 'Serviços Mais Frequentes nos Distritos da Subprefeitura de Pinheiros',
-      type: 'horizontalBar' as const,
-      visible: true,
-      data: {
-        datasets: distritosPinheiros.flatMap(distrito => {
-          return (servicosPorDistrito[distrito] || []).map(({ servico, count }, index) => ({
-            label: `${distrito} - ${servico}`,
-            data: [count],
-            backgroundColor: [
-              distrito === 'Itaim Bibi' ? 'rgba(255, 99, 132, 0.6)' :
-              distrito === 'Pinheiros' ? 'rgba(54, 162, 235, 0.6)' :
-              distrito === 'Alto de Pinheiros' ? 'rgba(255, 206, 86, 0.6)' :
-              'rgba(75, 192, 192, 0.6)'
-            ]
-          }));
+      if (allOrdensError) {
+        console.error('Erro ao buscar todas as ordens:', allOrdensError);
+        toast({
+          title: "Erro ao buscar todas as ordens!",
+          description: "Ocorreu um problema ao carregar os dados.",
+          variant: "destructive",
         })
+        return;
       }
-    };
-    newCharts.push(servicosMaisFrequentes);
-    
-    // 6. Comparação de Status entre Geral e Subprefeitura de Pinheiros
-    const statusPinheiros = ordens
-      .filter(ordem => distritosPinheiros.includes(ordem.distrito || ''))
-      .reduce((acc, ordem) => {
-        const status = ordem.status || 'Não especificado';
+
+      const totalOrdens = allOrdens.length;
+
+      // Calcula o tempo médio de resolução
+      const ordensResolvidas = allOrdens.filter(ordem => ordem.dias !== null);
+      const tempoTotalResolucao = ordensResolvidas.reduce((acc, ordem) => acc + (ordem.dias || 0), 0);
+      const tempoMedioResolucao = ordensResolvidas.length > 0 ? tempoTotalResolucao / ordensResolvidas.length : 0;
+
+      // Calcula o total por distrito
+      const totalPorDistrito: Record<string, number> = allOrdens.reduce((acc: Record<string, number>, ordem) => {
+        const distrito = ordem.distrito || 'Desconhecido';
+        acc[distrito] = (acc[distrito] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Calcula o total por classificação
+      const totalPorClassificacao: Record<string, number> = allOrdens.reduce((acc: Record<string, number>, ordem) => {
+        const classificacao = ordem.classificacao || 'Não Classificado';
+        acc[classificacao] = (acc[classificacao] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Calcula o total por status
+      const totalPorStatus: Record<string, number> = allOrdens.reduce((acc: Record<string, number>, ordem) => {
+        const status = ordem.status || 'Sem Status';
         acc[status] = (acc[status] || 0) + 1;
         return acc;
-      }, {} as Record<string, number>);
-      
-    const statusGeral = data.totalPorStatus;
-    
-    // Get all unique statuses
-    const allStatuses = [...new Set([...Object.keys(statusPinheiros), ...Object.keys(statusGeral)])];
-    
-    const comparacaoStatus = {
-      id: uuidv4(),
-      title: 'Comparação de Status entre Geral e Subprefeitura de Pinheiros',
-      type: 'groupedBar' as const,
-      visible: true,
-      data: {
-        labels: allStatuses,
-        datasets: [
-          {
-            label: 'Subprefeitura Pinheiros',
-            data: allStatuses.map(status => statusPinheiros[status] || 0),
-            backgroundColor: 'rgba(54, 162, 235, 0.6)'
-          },
-          {
-            label: 'Geral',
-            data: allStatuses.map(status => statusGeral[status] || 0),
-            backgroundColor: 'rgba(255, 99, 132, 0.6)'
-          }
-        ]
-      }
-    };
-    newCharts.push(comparacaoStatus);
-    
-    setCharts(newCharts);
-  };
-  
-  // Handle file upload
-  const handleFileUpload = async (file: File) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/process-xls-upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: formData
+      }, {});
+
+      // Calcula o total por bairro
+      const totalPorBairro: Record<string, number> = allOrdens.reduce((acc: Record<string, number>, ordem) => {
+        const bairro = ordem.bairro || 'Não Informado';
+        acc[bairro] = (acc[bairro] || 0) + 1;
+        return acc;
+      }, {});
+
+      setStats({
+        totalOrdens,
+        tempoMedioResolucao,
+        totalPorDistrito,
+        totalPorClassificacao,
+        totalPorStatus,
+        totalPorBairro,
       });
-      
-      const result = await response.json();
-      
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      
+
+    } catch (error) {
+      console.error('Erro ao calcular estatísticas:', error);
       toast({
-        title: 'Upload concluído',
-        description: result.message,
-      });
-      
-      // Reload data
-      fetchOrdens(filters);
-      
+        title: "Erro ao calcular estatísticas!",
+        description: "Ocorreu um problema ao calcular as estatísticas.",
+        variant: "destructive",
+      })
+    }
+  }, [supabase, toast]);
+
+  const updateChartData = useCallback(() => {
+    setChartData(prevChartData => {
+      const newChartData = [...prevChartData];
+
+      // Tempo Médio de Resolução
+      const tempoMedioResolucaoChart = newChartData.find(chart => chart.id === 'tempo-medio-resolucao');
+      if (tempoMedioResolucaoChart && stats) {
+        tempoMedioResolucaoChart.data = {
+          total: stats.tempoMedioResolucao.toFixed(1),
+          details: [
+            { label: 'Média', value: stats.tempoMedioResolucao.toFixed(1) },
+            { label: 'Mediana', value: '0' }
+          ]
+        };
+      }
+
+      // Ordens por Distrito (Horizontal Bar)
+      const ordensPorDistritoChart = newChartData.find(chart => chart.id === 'ordens-por-distrito');
+      if (ordensPorDistritoChart && stats) {
+        const labels = Object.keys(stats.totalPorDistrito);
+        const data = Object.values(stats.totalPorDistrito);
+        const backgroundColor = generateColors(labels.length);
+
+        ordensPorDistritoChart.data = {
+          datasets: labels.map((label, index) => ({
+            label: label,
+            data: [data[index]],
+            backgroundColor: [backgroundColor[index]],
+          }))
+        };
+      }
+
+      // Ordens por Bairro (Bar)
+      const ordensPorBairroChart = newChartData.find(chart => chart.id === 'ordens-por-bairro');
+      if (ordensPorBairroChart && stats) {
+        const labels = Object.keys(stats.totalPorBairro);
+        const data = Object.values(stats.totalPorBairro);
+        const backgroundColor = generateColors(labels.length);
+
+        ordensPorBairroChart.data = {
+          labels: labels,
+          datasets: [{
+            label: 'Total',
+            data: data,
+            backgroundColor: backgroundColor,
+          }]
+        };
+      }
+
+      // Ordens por Classificação (Pie)
+      const ordensPorClassificacaoChart = newChartData.find(chart => chart.id === 'ordens-por-classificacao');
+      if (ordensPorClassificacaoChart && stats) {
+        const labels = Object.keys(stats.totalPorClassificacao);
+        const data = Object.values(stats.totalPorClassificacao);
+        const backgroundColor = generateColors(labels.length);
+
+        ordensPorClassificacaoChart.data = {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: backgroundColor,
+          }]
+        };
+      }
+
+      // Ordens por Status (Pie)
+      const ordensPorStatusChart = newChartData.find(chart => chart.id === 'ordens-por-status');
+      if (ordensPorStatusChart && stats) {
+        const labels = Object.keys(stats.totalPorStatus);
+        const data = Object.values(stats.totalPorStatus);
+        const backgroundColor = generateColors(labels.length);
+
+        ordensPorStatusChart.data = {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: backgroundColor,
+          }]
+        };
+      }
+
+      // Ordens Criadas por Mês (Line)
+      const ordensCriadasPorMesChart = newChartData.find(chart => chart.id === 'ordens-criadas-por-mes');
+      if (ordensCriadasPorMesChart) {
+        // Agrupar ordens por mês
+        const ordensPorMes = ordens.reduce((acc: Record<string, number>, ordem) => {
+          if (ordem.criado_em) {
+            const mes = new Date(ordem.criado_em).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+            acc[mes] = (acc[mes] || 0) + 1;
+          }
+          return acc;
+        }, {});
+
+        const labels = Object.keys(ordensPorMes).sort();
+        const data = labels.map(mes => ordensPorMes[mes]);
+        const borderColor = '#4f46e5';
+        const backgroundColor = '#c7d2fe';
+
+        ordensCriadasPorMesChart.data = {
+          labels: labels,
+          datasets: [{
+            label: 'Ordens Criadas',
+            data: data,
+            borderColor: borderColor,
+            backgroundColor: backgroundColor,
+          }]
+        };
+      }
+
+      return newChartData;
+    });
+  }, [stats, ordens]);
+
+  // Function to generate a list of distinct colors
+  const generateColors = (count: number): string[] => {
+    const colors: string[] = [];
+    for (let i = 0; i < count; i++) {
+      // Generate a HSL color
+      const hue = (i * (360 / count)) % 360;
+      const saturation = 60;
+      const lightness = 60;
+      colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+    }
+    return colors;
+  };
+
+  const downloadExcel = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('excel')
+        .createSignedUrl('modelo_ordens_servico.xlsx', 60)
+
+      if (error) {
+        console.error('Erro ao gerar URL assinada:', error);
+        toast({
+          title: "Erro ao gerar URL assinada!",
+          description: "Ocorreu um problema ao gerar o link para download.",
+          variant: "destructive",
+        })
+        return;
+      }
+
+      if (data) {
+        // Trigger the download using the signed URL
+        const link = document.createElement('a');
+        link.href = data.signedUrl;
+        link.download = 'modelo_ordens_servico.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Erro ao fazer download do Excel:', error);
+      toast({
+        title: "Erro ao fazer download do Excel!",
+        description: "Ocorreu um problema ao baixar o arquivo.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadUploadedFile = async (publicUrl: string, filename: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('uploads')
+        .createSignedUrl(publicUrl, 60)
+
+      if (error) {
+        console.error('Erro ao gerar URL assinada:', error);
+        toast({
+          title: "Erro ao gerar URL assinada!",
+          description: "Ocorreu um problema ao gerar o link para download.",
+          variant: "destructive",
+        })
+        return;
+      }
+
+      if (data) {
+        const link = document.createElement('a');
+        link.href = data.signedUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Erro ao fazer download do arquivo:', error);
+      toast({
+        title: "Erro ao fazer download do arquivo!",
+        description: "Ocorreu um problema ao baixar o arquivo.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const uploadFile = async (file: File) => {
+    setLoading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = fileName;
+
+      const { data, error } = await supabase
+        .storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) {
+        console.error('Erro ao fazer upload do arquivo:', error);
+        toast({
+          title: "Erro ao fazer upload do arquivo!",
+          description: "Ocorreu um problema ao enviar o arquivo.",
+          variant: "destructive",
+        })
+        return;
+      }
+
+      if (data) {
+        const { data: publicUrlData } = supabase
+          .storage
+          .from('uploads')
+          .getPublicUrl(filePath)
+
+        if (publicUrlData) {
+          toast({
+            title: "Sucesso!",
+            description: `Arquivo ${file.name} enviado com sucesso!`,
+          })
+        }
+      }
     } catch (error) {
       console.error('Erro ao fazer upload do arquivo:', error);
       toast({
-        title: 'Erro',
-        description: `Falha ao processar o arquivo: ${error.message}`,
-        variant: 'destructive',
-      });
+        title: "Erro ao fazer upload do arquivo!",
+        description: "Ocorreu um problema ao enviar o arquivo.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false);
     }
   };
-  
-  // Generate updated charts with new filters
-  const generateUpdatedCharts = (newFilters: ChartFilters) => {
-    setFilters(newFilters);
-    fetchOrdens(newFilters);
-  };
-  
-  // Toggle chart visibility
-  const toggleChartVisibility = (chartId: string) => {
-    setCharts(prev => prev.map(chart => 
-      chart.id === chartId ? { ...chart, visible: !chart.visible } : chart
-    ));
-  };
-  
-  // Effect to process data when ordens change
+
   useEffect(() => {
-    if (!loading && ordens.length > 0) {
-      processData();
+    fetchOrdens();
+    fetchUploadLogs();
+  }, [fetchOrdens, fetchUploadLogs]);
+
+  useEffect(() => {
+    calculateStats();
+  }, [calculateStats, ordens]);
+
+  useEffect(() => {
+    if (stats) {
+      updateChartData();
     }
-  }, [ordens, loading]);
-  
-  // Initial fetch
-  useEffect(() => {
-    fetchOrdens(filters);
-  }, []);
-  
+  }, [stats, updateChartData]);
+
   return {
     ordens,
-    stats,
-    charts,
     loading,
+    uploadLogs,
+    chartData,
+    setChartData,
     filters,
-    lastUpdate,
+    setFilters,
     fetchOrdens,
-    handleFileUpload,
-    generateUpdatedCharts,
-    toggleChartVisibility
+    uploadExcel,
+    calculateStats,
+    downloadExcel,
+    downloadUploadedFile,
+    uploadFile
   };
 };
+
+export default useOrdensServico;
