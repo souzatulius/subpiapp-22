@@ -53,10 +53,30 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        // Use explicit type casting to avoid recursive type issues
-        setDemanda(demandaData as unknown as Demanda);
-        setRespostas(respostasData as Resposta[] || []);
-        setNotaExistente(notaData as NotaExistente || null);
+        // Break the type reference chain with explicit casting
+        const processedDemanda = {
+          ...demandaData,
+          areas_coordenacao: demandaData?.areas_coordenacao || null,
+          autor: demandaData?.autor || null,
+          perguntas: demandaData?.perguntas || null
+        } as Demanda;
+        
+        const processedRespostas = (respostasData || []).map(resposta => ({
+          ...resposta,
+          usuario: resposta.usuario || null
+        })) as Resposta[];
+        
+        const processedNota = notaData ? {
+          id: notaData.id,
+          titulo: notaData.titulo,
+          texto: notaData.texto,
+          status: notaData.status,
+          demanda_id: notaData.demanda_id
+        } as NotaExistente : null;
+
+        setDemanda(processedDemanda);
+        setRespostas(processedRespostas);
+        setNotaExistente(processedNota);
       } catch (error: any) {
         console.error('Erro ao buscar detalhes da demanda:', error);
         setError(error.message || "Não foi possível carregar os detalhes da demanda.");
@@ -76,39 +96,45 @@ export const useDemandaDetalhes = (demandaId: string) => {
     }
   }, [demandaId, toast]);
 
-  // Fix the formatarPerguntasRespostas function to avoid recursive types
+  // Completely rewritten function to avoid recursive type issues
   const formatarPerguntasRespostas = (): PerguntaResposta[] => {
-    if (!demanda?.perguntas) return [];
+    if (!demanda || !demanda.perguntas) return [];
     
     const result: PerguntaResposta[] = [];
     
-    // Safely convert perguntas to a Record type, avoiding deep recursion
-    const perguntasObj: Record<string, string> = {};
-    
-    if (typeof demanda.perguntas === 'object' && demanda.perguntas !== null) {
-      // Copy only the string values to avoid deep type recursion
-      Object.entries(demanda.perguntas).forEach(([key, value]) => {
-        if (typeof value === 'string') {
-          perguntasObj[key] = value;
-        }
-      });
-    }
-    
-    // Create PerguntaResposta objects from the perguntasObj
-    for (const [key, pergunta] of Object.entries(perguntasObj)) {
-      // Find a matching resposta in the respostas array
-      const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
+    try {
+      // Safely handle the perguntas object to avoid circular references
+      const perguntasEntries: [string, string][] = [];
       
-      result.push({ 
-        pergunta, 
-        resposta 
-      });
+      if (typeof demanda.perguntas === 'object' && demanda.perguntas !== null) {
+        // Extract only key-value string pairs
+        Object.entries(demanda.perguntas as Record<string, unknown>).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            perguntasEntries.push([key, value]);
+          }
+        });
+      }
+      
+      // Create the pergunta-resposta pairs
+      for (const [_, pergunta] of perguntasEntries) {
+        // Get simple resposta text
+        const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
+        
+        result.push({
+          pergunta,
+          resposta
+        });
+      }
+    } catch (err) {
+      console.error('Error in formatarPerguntasRespostas:', err);
+      // Return empty array on error to prevent UI from breaking
+      return [];
     }
     
     return result;
   };
 
-  const perguntasRespostas = demanda?.perguntas ? formatarPerguntasRespostas() : [];
+  const perguntasRespostas = formatarPerguntasRespostas();
 
   return {
     demanda,
