@@ -115,11 +115,11 @@ const useOrdensServico = () => {
 
   const fetchUploadLogs = useCallback(async () => {
     try {
-      // Note: This is a custom table that might not exist yet in the Supabase schema
+      // Use uploads_ordens_servico table which exists in the database schema
       const { data, error } = await supabase
-        .from('ordens_logs')
+        .from('uploads_ordens_servico')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('data_upload', { ascending: false });
 
       if (error) {
         console.error('Erro ao buscar logs de upload:', error);
@@ -264,12 +264,12 @@ const useOrdensServico = () => {
         nome_arquivo: file.name,
         registros_inseridos: insertedCount,
         registros_atualizados: updatedCount,
-        created_at: new Date().toISOString(),
+        data_upload: new Date().toISOString(),
       };
 
-      // Use ordens_logs table instead of a custom upload_logs table
+      // Use uploads_ordens_servico table which exists in the schema
       const { error: logError } = await supabase
-        .from('ordens_logs')
+        .from('uploads_ordens_servico')
         .insert([uploadLog]);
 
       if (logError) {
