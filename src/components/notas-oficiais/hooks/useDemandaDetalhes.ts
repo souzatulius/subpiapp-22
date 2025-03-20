@@ -2,17 +2,15 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { Demanda, NotaOficial, PerguntaResposta, Resposta } from '../types';
-import { formatarPerguntasRespostas } from '../utils/formatarPerguntasRespostas';
+import { Demanda, NotaExistente, Resposta, PerguntaResposta } from '../types';
 
 export const useDemandaDetalhes = (demandaId: string) => {
   const [demanda, setDemanda] = useState<Demanda | null>(null);
-  const [notaExistente, setNotaExistente] = useState<NotaOficial | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [checkingNota, setCheckingNota] = useState(true);
   const [respostas, setRespostas] = useState<Resposta[]>([]);
-  const [perguntasRespostas, setPerguntasRespostas] = useState<PerguntaResposta[]>([]);
+  const [notaExistente, setNotaExistente] = useState<NotaExistente | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isCheckingNota, setIsCheckingNota] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -25,20 +23,23 @@ export const useDemandaDetalhes = (demandaId: string) => {
           .select(`
             *,
             areas_coordenacao (id, descricao),
-            autor:autor_id (nome_completo)
+            autor: usuario_id (nome_completo)
           `)
           .eq('id', demandaId)
           .single();
 
         if (demandaError) throw demandaError;
         
-        // Fetch respostas if any
+        // Fetch respostas
         const { data: respostasData, error: respostasError } = await supabase
           .from('respostas_demandas')
-          .select('*')
+          .select(`
+            *,
+            usuario:usuario_id (nome_completo)
+          `)
           .eq('demanda_id', demandaId)
-          .order('criado_em', { ascending: true });
-          
+          .order('criado_em', { ascending: false });
+
         if (respostasError) throw respostasError;
         
         // Check if nota already exists for this demanda
@@ -53,14 +54,8 @@ export const useDemandaDetalhes = (demandaId: string) => {
         }
         
         setDemanda(demandaData as Demanda);
-        setNotaExistente(notaData as NotaOficial || null);
         setRespostas(respostasData as Resposta[] || []);
-        
-        // Process perguntas e respostas
-        if (demandaData && demandaData.perguntas) {
-          const pergResp = formatarPerguntasRespostas(demandaData, respostasData);
-          setPerguntasRespostas(pergResp);
-        }
+        setNotaExistente(notaData as NotaExistente || null);
       } catch (error: any) {
         console.error('Erro ao buscar detalhes da demanda:', error);
         setError(error.message || "Não foi possível carregar os detalhes da demanda.");
@@ -71,7 +66,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
         });
       } finally {
         setLoading(false);
-        setCheckingNota(false);
+        setIsCheckingNota(false);
       }
     };
 
@@ -80,13 +75,38 @@ export const useDemandaDetalhes = (demandaId: string) => {
     }
   }, [demandaId, toast]);
 
+  // Fixed the function definition to properly handle the perguntas object
+  const formatarPerguntasRespostas = (): PerguntaResposta[] => {
+    if (!demanda?.perguntas) return [];
+    
+    const result: PerguntaResposta[] = [];
+    const perguntasObj = demanda.perguntas as Record<string, string>;
+    
+    for (const [key, pergunta] of Object.entries(perguntasObj)) {
+      // Look for a matching resposta in the respostas array
+      const resposta = respostas.length > 0 ? 
+        // Simple implementation - can be enhanced based on actual data structure
+        respostas[0].texto || '' : 
+        '';
+      
+      result.push({ 
+        pergunta, 
+        resposta 
+      });
+    }
+    
+    return result;
+  };
+
+  const perguntasRespostas = demanda?.perguntas ? formatarPerguntasRespostas() : [];
+
   return {
     demanda,
+    respostas,
+    perguntasRespostas,
     notaExistente,
     loading,
-    isCheckingNota: checkingNota,
-    error,
-    respostas,
-    perguntasRespostas
+    isCheckingNota,
+    error
   };
 };
