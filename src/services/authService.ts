@@ -6,7 +6,7 @@ import { Session, User } from '@supabase/supabase-js';
 // Sign up with email/password
 export const signUp = async (email: string, password: string, userData: any) => {
   try {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -17,7 +17,7 @@ export const signUp = async (email: string, password: string, userData: any) => 
           role: userData.cargo,
           area: userData.area,
         },
-        emailRedirectTo: `${window.location.origin}/login`,
+        emailRedirectTo: `${window.location.origin}/email-verified`,
       }
     });
 
@@ -26,7 +26,7 @@ export const signUp = async (email: string, password: string, userData: any) => 
         title: "Cadastro enviado com sucesso!",
         description: "Verifique seu e-mail para confirmar o cadastro.",
       });
-      return { error: null };
+      return { error: null, data };
     }
     
     return { error };
@@ -39,13 +39,13 @@ export const signUp = async (email: string, password: string, userData: any) => 
 // Login with email/password
 export const signIn = async (email: string, password: string) => {
   try {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (!error) {
-      return { error: null };
+      return { error: null, data };
     }
 
     return { error };

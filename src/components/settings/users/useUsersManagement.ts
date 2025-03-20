@@ -1,53 +1,64 @@
 
 import { useUsersData } from './useUsersData';
 import { useUsersFilter } from './useUsersFilter';
+import { useUserInvite } from './hooks/useUserInvite';
+import { useUserEdit } from './hooks/useUserEdit';
+import { useUserDelete } from './hooks/useUserDelete';
+import { usePasswordReset } from './hooks/usePasswordReset';
 import { useUserActions } from './useUserActions';
-import { handleExportCsv, handlePrint } from './userExportUtils';
-export type { User, Area, Cargo } from './types';
+import { useUserApproval } from './hooks/useUserApproval';
 
 export const useUsersManagement = () => {
+  // Fetch users data
   const { users, areas, cargos, loading, fetchData } = useUsersData();
+  
+  // Filter users
   const { filter, setFilter, filteredUsers } = useUsersFilter(users);
-  const {
-    isInviteDialogOpen,
-    setIsInviteDialogOpen,
-    isEditDialogOpen,
+  
+  // User invite functionality
+  const { isInviteDialogOpen, setIsInviteDialogOpen, handleInviteUser } = useUserInvite(fetchData);
+  
+  // User edit functionality
+  const { isEditDialogOpen, setIsEditDialogOpen, selectedUser, setSelectedUser, handleEditUser } = useUserEdit(fetchData);
+  
+  // User delete functionality
+  const { isDeleteDialogOpen, setIsDeleteDialogOpen, userToDelete, setUserToDelete, handleDeleteUser } = useUserDelete(fetchData);
+  
+  // Password reset functionality
+  const { resetPassword } = usePasswordReset();
+  
+  // User approval functionality
+  const { approving, approveUser } = useUserApproval(fetchData);
+  
+  // User actions
+  const userActions = useUserActions({
     setIsEditDialogOpen,
-    isDeleteDialogOpen,
+    setSelectedUser,
     setIsDeleteDialogOpen,
-    currentUser,
-    handleInviteUser,
-    handleEditUser,
-    handleDeleteUser,
-    handleSendPasswordReset,
-    openEditDialog,
-    openDeleteDialog,
-  } = useUserActions(fetchData);
-
-  const exportCsv = () => handleExportCsv(filteredUsers);
-
+    setUserToDelete,
+    resetPassword,
+    approveUser
+  });
+  
   return {
-    users,
-    areas,
-    cargos,
+    users: filteredUsers,
     loading,
     filter,
     setFilter,
+    areas,
+    cargos,
     isInviteDialogOpen,
     setIsInviteDialogOpen,
+    handleInviteUser,
     isEditDialogOpen,
     setIsEditDialogOpen,
+    selectedUser,
+    handleEditUser,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
-    currentUser,
-    filteredUsers,
-    handleInviteUser,
-    handleEditUser,
+    userToDelete,
     handleDeleteUser,
-    handleSendPasswordReset,
-    openEditDialog,
-    openDeleteDialog,
-    handleExportCsv: exportCsv,
-    handlePrint,
+    userActions,
+    approving
   };
 };

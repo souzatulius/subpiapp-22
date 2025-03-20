@@ -3,87 +3,61 @@ import React from 'react';
 import UsersHeader from './UsersHeader';
 import UsersTable from './UsersTable';
 import UsersDialogs from './UsersDialogs';
-import { User, Area, Cargo } from './types';
 
-interface UsersLayoutProps {
-  areas: Area[];
-  cargos: Cargo[];
-  loading: boolean;
-  filter: string;
-  setFilter: (value: string) => void;
-  isInviteDialogOpen: boolean;
-  setIsInviteDialogOpen: (value: boolean) => void;
-  isEditDialogOpen: boolean;
-  setIsEditDialogOpen: (value: boolean) => void;
-  isDeleteDialogOpen: boolean;
-  setIsDeleteDialogOpen: (value: boolean) => void;
-  currentUser: User | null;
-  filteredUsers: User[];
-  handleInviteUser: (data: any) => Promise<void>;
-  handleEditUser: (data: any) => Promise<void>;
-  handleDeleteUser: () => Promise<void>;
-  handleSendPasswordReset: (email: string) => Promise<void>;
-  openEditDialog: (user: User) => void;
-  openDeleteDialog: (user: User) => void;
-  handleExportCsv: () => void;
-  handlePrint: () => void;
-}
+const UsersLayout = (props: any) => {
+  const {
+    users,
+    loading,
+    filter,
+    setFilter,
+    areas,
+    cargos,
+    isInviteDialogOpen,
+    setIsInviteDialogOpen,
+    handleInviteUser,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    selectedUser,
+    handleEditUser,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    userToDelete,
+    handleDeleteUser,
+    userActions
+  } = props;
 
-const UsersLayout: React.FC<UsersLayoutProps> = ({
-  areas,
-  cargos,
-  loading,
-  filter,
-  setFilter,
-  isInviteDialogOpen,
-  setIsInviteDialogOpen,
-  isEditDialogOpen,
-  setIsEditDialogOpen,
-  isDeleteDialogOpen,
-  setIsDeleteDialogOpen,
-  currentUser,
-  filteredUsers,
-  handleInviteUser,
-  handleEditUser,
-  handleDeleteUser,
-  handleSendPasswordReset,
-  openEditDialog,
-  openDeleteDialog,
-  handleExportCsv,
-  handlePrint,
-}) => {
   return (
     <div className="space-y-6">
-      <UsersHeader 
+      <UsersHeader
         filter={filter}
         setFilter={setFilter}
-        onExportCsv={handleExportCsv}
-        onPrint={handlePrint}
-        onInvite={() => setIsInviteDialogOpen(true)}
+        onOpenInviteDialog={() => setIsInviteDialogOpen(true)}
       />
       
-      <UsersTable 
-        users={filteredUsers}
+      <UsersTable
+        users={users}
         loading={loading}
         filter={filter}
-        onEdit={openEditDialog}
-        onDelete={openDeleteDialog}
-        onPasswordReset={handleSendPasswordReset}
+        onEdit={userActions.handleEdit}
+        onDelete={userActions.handleDelete}
+        onResetPassword={userActions.handleResetPassword}
+        onApprove={userActions.handleApprove}
       />
       
       <UsersDialogs
-        areas={areas}
-        cargos={cargos}
         isInviteDialogOpen={isInviteDialogOpen}
         setIsInviteDialogOpen={setIsInviteDialogOpen}
+        handleInviteUser={handleInviteUser}
         isEditDialogOpen={isEditDialogOpen}
         setIsEditDialogOpen={setIsEditDialogOpen}
+        selectedUser={selectedUser}
+        handleEditUser={handleEditUser}
         isDeleteDialogOpen={isDeleteDialogOpen}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-        currentUser={currentUser}
-        handleInviteUser={handleInviteUser}
-        handleEditUser={handleEditUser}
+        userToDelete={userToDelete}
         handleDeleteUser={handleDeleteUser}
+        areas={areas}
+        cargos={cargos}
       />
     </div>
   );

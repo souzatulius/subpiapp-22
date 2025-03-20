@@ -1,17 +1,17 @@
+
 import React from 'react';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
-import { Edit, Mail, Trash } from 'lucide-react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CheckCircle, Edit, Trash, SendHorizontal, XCircle } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 import { User } from './types';
 
 interface UsersTableProps {
@@ -20,7 +20,8 @@ interface UsersTableProps {
   filter: string;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
-  onPasswordReset: (email: string) => Promise<void>;
+  onResetPassword: (user: User) => void;
+  onApprove: (user: User) => void;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({
@@ -29,91 +30,102 @@ const UsersTable: React.FC<UsersTableProps> = ({
   filter,
   onEdit,
   onDelete,
-  onPasswordReset,
+  onResetPassword,
+  onApprove
 }) => {
+  // Function to determine if a user needs approval (no permissions assigned)
+  const needsApproval = (user: User) => {
+    // Check if the user has permission records in the userPermissions array
+    return !user.permissoes || user.permissoes.length === 0;
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Usuário</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Nome</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Cargo</TableHead>
-            <TableHead>Área de Coordenação</TableHead>
-            <TableHead>Contato</TableHead>
-            <TableHead>Ações</TableHead>
+            <TableHead>Área</TableHead>
+            <TableHead>Cadastro</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8">
-                <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em]" />
-                <p className="mt-2">Carregando usuários...</p>
+              <TableCell colSpan={7} className="h-24 text-center">
+                <div className="flex justify-center items-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
               </TableCell>
             </TableRow>
           ) : users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                {filter ? 'Nenhum usuário encontrado para a busca' : 'Nenhum usuário cadastrado'}
+              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                {filter ? 'Nenhum usuário encontrado com este filtro.' : 'Nenhum usuário cadastrado.'}
               </TableCell>
             </TableRow>
           ) : (
             users.map((user) => (
-              <TableRow key={user.id}>
+              <TableRow key={user.id} className={needsApproval(user) ? "bg-yellow-50" : ""}>
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={user.foto_perfil_url} alt={user.nome_completo} />
-                      <AvatarFallback>{user.nome_completo.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user.nome_completo}</p>
-                    </div>
-                  </div>
+                  {needsApproval(user) ? (
+                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+                      Aguardando Aprovação
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                      Ativo
+                    </Badge>
+                  )}
                 </TableCell>
+                <TableCell>{user.nome_completo}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.cargos?.descricao || '-'}</TableCell>
                 <TableCell>{user.areas_coordenacao?.descricao || '-'}</TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    <p>WhatsApp: {user.whatsapp || '-'}</p>
-                    <p>Aniversário: {user.aniversario 
-                      ? format(new Date(user.aniversario), 'dd/MM/yyyy', { locale: pt }) 
-                      : '-'}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
+                <TableCell>{user.criado_em ? formatDateTime(user.criado_em) : '-'}</TableCell>
+                <TableCell className="text-right space-x-1">
+                  {needsApproval(user) ? (
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => onPasswordReset(user.email)}
-                      title="Enviar email de redefinição de senha"
+                      onClick={() => onApprove(user)}
+                      className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
                     >
-                      <Mail className="h-4 w-4" />
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Aprovar
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => onEdit(user)}
-                      title="Editar usuário"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => onDelete(user)}
-                      title="Excluir usuário"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  ) : (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => onEdit(user)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => onResetPassword(user)}
+                      >
+                        <SendHorizontal className="h-4 w-4 mr-1" />
+                        Redefinir Senha
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => onDelete(user)} 
+                        className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <Trash className="h-4 w-4 mr-1" />
+                      </Button>
+                    </>
+                  )}
                 </TableCell>
               </TableRow>
             ))

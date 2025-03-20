@@ -1,5 +1,6 @@
 
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const formatAuthError = (error: any): string => {
   const errorMessage = error?.message || 'Ocorreu um erro. Tente novamente.';
@@ -15,6 +16,7 @@ export const formatAuthError = (error: any): string => {
     'Too many requests': 'Muitas tentativas. Tente novamente mais tarde',
     'Password recovery mail sent recently': 'E-mail de recuperação enviado recentemente',
     'Service unavailable': 'Serviço indisponível no momento',
+    'User not approved': 'Seu cadastro está em aprovação. Aguarde a liberação do acesso por um administrador.',
   };
 
   // Verificar se há uma tradução para o erro ou usar a mensagem original
@@ -35,4 +37,62 @@ export const completeEmailWithDomain = (email: string): string => {
   if (!email) return '';
   if (email.includes('@')) return email;
   return `${email}@smsub.prefeitura.sp.gov.br`;
+};
+
+export const isUserApproved = async (userId: string): Promise<boolean> => {
+  try {
+    // Check if user has been assigned any permissions in usuario_permissoes table
+    const { data, error } = await supabase
+      .from('usuario_permissoes')
+      .select('id')
+      .eq('usuario_id', userId)
+      .limit(1);
+      
+    if (error) throw error;
+    
+    // If user has any permissions, they are considered approved
+    return data && data.length > 0;
+  } catch (error) {
+    console.error('Erro ao verificar status de aprovação:', error);
+    return false;
+  }
+};
+
+export const createAdminNotification = async (userId: string, userName: string, userEmail: string): Promise<void> => {
+  try {
+    // Get all admin users
+    const { data: admins, error: adminsError } = await supabase.rpc('get_users_with_permission', {
+      permission_desc: 'Admin'
+    });
+    
+    if (adminsError) throw adminsError;
+    
+    // Create notification for each admin
+    if (admins && admins.length > 0) {
+      for (const admin of admins) {
+        await supabase
+          .from('notificacoes')
+          .insert({
+            usuario_id: admin.id,
+            mensagem: `Novo usuário ${userName} (${userEmail}) aguardando aprovação.`,
+            tipo: 'aprovacao'
+          });
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao criar notificações para admins:', error);
+  }
+};
+
+export const sendApprovalEmail = async (userId: string): Promise<void> => {
+  try {
+    // Invoke the edge function to send approval email
+    const { error } = await supabase.functions.invoke('send-approval-email', {
+      body: { userId }
+    });
+    
+    if (error) throw error;
+  } catch (error) {
+    console.error('Erro ao enviar e-mail de aprovação:', error);
+  }
 };

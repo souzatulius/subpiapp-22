@@ -1,0 +1,10 @@
+
+# project_id is optional, however, when deploying it to the Supabase Platform it's required
+# when you don't set project_id, the Edge Function will still run directly with the CLI
+project_id = "mapjrbfzurpjmianfnev"
+
+[functions.get_users_with_permission]
+verify_jwt = true
+
+[functions.send-approval-email]
+verify_jwt = true

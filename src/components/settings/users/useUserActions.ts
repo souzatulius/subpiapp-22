@@ -1,51 +1,49 @@
 
 import { User } from './types';
-import { useUserInvite } from './hooks/useUserInvite';
-import { useUserEdit } from './hooks/useUserEdit';
-import { useUserDelete } from './hooks/useUserDelete';
-import { usePasswordReset } from './hooks/usePasswordReset';
 
-export const useUserActions = (fetchData: () => Promise<void>) => {
-  const {
-    isInviteDialogOpen,
-    setIsInviteDialogOpen,
-    handleInviteUser
-  } = useUserInvite(fetchData);
+interface UserActionsProps {
+  setIsEditDialogOpen: (open: boolean) => void;
+  setSelectedUser: (user: User | null) => void;
+  setIsDeleteDialogOpen: (open: boolean) => void;
+  setUserToDelete: (user: User | null) => void;
+  resetPassword: (userId: string, userEmail: string) => Promise<void>;
+  approveUser: (userId: string, userName: string, userEmail: string) => Promise<void>;
+}
 
-  const {
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    currentUser: editUser,
-    handleEditUser,
-    openEditDialog
-  } = useUserEdit(fetchData);
+export const useUserActions = ({
+  setIsEditDialogOpen,
+  setSelectedUser,
+  setIsDeleteDialogOpen,
+  setUserToDelete,
+  resetPassword,
+  approveUser
+}: UserActionsProps) => {
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    setIsEditDialogOpen(true);
+  };
 
-  const {
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    currentUser: deleteUser,
-    handleDeleteUser,
-    openDeleteDialog
-  } = useUserDelete(fetchData);
+  const handleDelete = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
+  };
 
-  const { handleSendPasswordReset } = usePasswordReset();
+  const handleResetPassword = async (user: User) => {
+    if (user.id && user.email) {
+      await resetPassword(user.id, user.email);
+    }
+  };
 
-  // Combine current user from edit and delete hooks
-  const currentUser = editUser || deleteUser;
+  const handleApprove = async (user: User) => {
+    if (user.id && user.nome_completo && user.email) {
+      await approveUser(user.id, user.nome_completo, user.email);
+    }
+  };
 
   return {
-    isInviteDialogOpen,
-    setIsInviteDialogOpen,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    currentUser,
-    handleInviteUser,
-    handleEditUser,
-    handleDeleteUser,
-    handleSendPasswordReset,
-    openEditDialog,
-    openDeleteDialog,
+    handleEdit,
+    handleDelete,
+    handleResetPassword,
+    handleApprove
   };
 };

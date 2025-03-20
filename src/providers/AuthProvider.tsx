@@ -4,6 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import * as authService from '@/services/authService';
+import { isUserApproved, createAdminNotification } from '@/lib/authUtils';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isApproved, setIsApproved] = useState<boolean | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,10 +27,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(currentSession);
         setUser(currentSession?.user || null);
 
+        // Verifica se o usuário está aprovado
+        if (currentSession?.user) {
+          const approved = await isUserApproved(currentSession.user.id);
+          setIsApproved(approved);
+        }
+
         // Configura ouvinte para mudanças de autenticação
-        const subscription = await authService.setupAuthListener((newSession) => {
+        const subscription = await authService.setupAuthListener(async (newSession) => {
           setSession(newSession);
           setUser(newSession?.user || null);
+          
+          // Verifica aprovação quando a sessão muda
+          if (newSession?.user) {
+            const approved = await isUserApproved(newSession.user.id);
+            setIsApproved(approved);
+          } else {
+            setIsApproved(null);
+          }
         });
 
         return () => {
@@ -46,14 +62,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Sign up wrapper
   const signUp = async (email: string, password: string, userData: any) => {
-    return authService.signUp(email, password, userData);
+    const result = await authService.signUp(email, password, userData);
+    
+    if (!result.error) {
+      // Notify admins about new user registration
+      if (result.data?.user) {
+        await createAdminNotification(
+          result.data.user.id, 
+          userData.nome_completo,
+          email
+        );
+      }
+    }
+    
+    return result;
   };
 
   // Sign in wrapper
   const signIn = async (email: string, password: string) => {
     const result = await authService.signIn(email, password);
     
-    if (!result.error) {
+    if (!result.error && result.data?.user) {
+      // Check if user is approved
+      const approved = await isUserApproved(result.data.user.id);
+      setIsApproved(approved);
+      
+      if (!approved) {
+        // Create custom error for non-approved users
+        return { 
+          error: { 
+            message: 'User not approved'
+          } 
+        };
+      }
+      
       navigate('/dashboard');
     }
     
@@ -68,6 +110,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign out wrapper
   const signOut = async () => {
     await authService.signOut();
+    setIsApproved(null);
     navigate('/login');
   };
 
@@ -84,6 +127,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     session,
     user,
     loading,
+    isApproved,
     signUp,
     signIn,
     signInWithGoogle,
