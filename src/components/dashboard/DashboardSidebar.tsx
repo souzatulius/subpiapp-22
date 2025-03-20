@@ -1,58 +1,91 @@
-
 import React from 'react';
+import {
+  HomeIcon,
+  BarChartIcon,
+  SettingsIcon,
+  PlusSquare,
+  FileText as FileTextIcon,
+  UsersIcon
+} from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import { Home, ClipboardList, FileText, BarChart2, Users, Settings, LineChart } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface DashboardSidebarProps {
-  isOpen: boolean;
+interface NavItem {
+  title: string;
+  icon: React.ReactNode;
+  path: string;
 }
 
-const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
-  isOpen
-}) => {
-  const navItems = [{
-    icon: <Home size={20} />,
-    label: 'Início',
-    path: '/dashboard'
-  }, {
-    icon: <ClipboardList size={20} />,
-    label: 'Demandas',
-    path: '/demandas'
-  }, {
-    icon: <FileText size={20} />,
-    label: 'Notas Oficiais',
-    path: '/notas-oficiais'
-  }, {
-    icon: <BarChart2 size={20} />,
-    label: 'Relatórios',
-    path: '/relatorios'
-  }, {
-    icon: <LineChart size={20} />,
-    label: 'Ranking das Subs',
-    path: '/ranking-subprefeituras'
-  }, {
-    icon: <Users size={20} />,
-    label: 'Usuários',
-    path: '/usuarios'
-  }, {
-    icon: <Settings size={20} className="px-0 mx-0" />,
-    label: 'Ajustes',
-    path: '/settings'
-  }];
+const DashboardSidebar: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
+  const { user } = useAuth();
+
+  const navigationItems: NavItem[] = [
+    {
+      title: 'Dashboard',
+      icon: <HomeIcon className="h-5 w-5" />,
+      path: '/dashboard',
+    },
+    {
+      title: 'Ranking Subprefeituras',
+      icon: <BarChartIcon className="h-5 w-5" />,
+      path: '/ranking-subprefeituras',
+    },
+    {
+      title: 'Cadastrar Solicitação',
+      icon: <PlusSquare className="h-5 w-5" />,
+      path: '/cadastrar-demanda',
+    },
+    {
+      title: 'Notas Oficiais',
+      icon: <FileTextIcon className="h-5 w-5" />,
+      path: '/notas-oficiais',
+    },
+    {
+      title: 'Comunicações Oficiais',
+      icon: <FileTextIcon className="h-5 w-5" />,
+      path: '/comunicacoes-oficiais',
+    },
+  ];
+
+  if (user?.email === 'admin@email.com') {
+    navigationItems.push({
+      title: 'Controle de Acesso',
+      icon: <UsersIcon className="h-5 w-5" />,
+      path: '/access-control',
+    });
+    navigationItems.push({
+      title: 'Configurações',
+      icon: <SettingsIcon className="h-5 w-5" />,
+      path: '/settings',
+    });
+  }
 
   return (
-    <aside className={`bg-white border-r border-gray-200 transition-all duration-300 ${isOpen ? 'w-56' : 'w-16'} flex-shrink-0 overflow-x-hidden`}>
+    <aside
+      className={`bg-white border-r border-gray-200 transition-transform duration-300 transform ${
+        isOpen ? 'w-64 translate-x-0' : '-translate-x-full w-0'
+      } fixed top-0 left-0 h-full lg:translate-x-0 lg:w-64 z-10`}
+    >
+      <div className="p-4">
+        <h1 className="text-lg font-semibold text-gray-900">
+          Painel Administrativo
+        </h1>
+      </div>
       <nav className="py-4">
-        <ul className="space-y-2">
-          {navItems.map((item, index) => (
-            <li key={index}>
-              <NavLink to={item.path} className={({isActive}) => `flex items-center px-4 py-2 ${isActive ? 'text-[#003570] bg-blue-50' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}>
-                <div className="flex-shrink-0">{item.icon}</div>
-                <span className={`ml-3 ${isOpen ? 'block' : 'hidden'}`}>{item.label}</span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        {navigationItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-100 ${
+                isActive ? 'bg-gray-100 font-medium' : ''
+              }`
+            }
+          >
+            {item.icon}
+            <span>{item.title}</span>
+          </NavLink>
+        ))}
       </nav>
     </aside>
   );

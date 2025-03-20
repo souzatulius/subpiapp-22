@@ -52,9 +52,9 @@ const useOrdensServico = () => {
   // Callback for when an upload is successful
   function handleUploadSuccess(inserted: number, updated: number) {
     console.log(`Upload success: ${inserted} inserted, ${updated} updated`);
-    // Just fetch the upload logs for now, but don't auto-refresh charts
-    // This allows users to use the explicit refresh buttons
+    // Fetch upload logs and refresh data
     fetchUploadLogs();
+    fetchOrdens();
   }
 
   // Wrapper for uploadExcel to handle the new success callback
@@ -74,7 +74,19 @@ const useOrdensServico = () => {
     }
     
     setFilters(cleanedFilters);
-  }, [setFilters]);
+    
+    // Automatically update when filters are applied
+    setTimeout(() => {
+      fetchOrdens();
+    }, 100);
+  }, [setFilters, fetchOrdens]);
+
+  // Update the UI with fresh chart data
+  const updateDashboard = useCallback(() => {
+    fetchOrdens();
+    calculateStats();
+    updateChartData();
+  }, [fetchOrdens, calculateStats, updateChartData]);
 
   // Determine loading state
   const loading = ordensLoading || logsLoading || statsLoading || uploadLoading;
@@ -91,7 +103,8 @@ const useOrdensServico = () => {
     fetchOrdens,
     uploadExcel,
     calculateStats,
-    downloadExcel
+    downloadExcel,
+    updateDashboard
   };
 };
 

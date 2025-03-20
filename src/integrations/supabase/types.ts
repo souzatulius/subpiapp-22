@@ -74,6 +74,60 @@ export type Database = {
         }
         Relationships: []
       }
+      comunicacoes_oficiais: {
+        Row: {
+          aprovador_id: string | null
+          area_coordenacao_id: string
+          atualizado_em: string
+          autor_id: string
+          criado_em: string
+          demanda_id: string | null
+          id: string
+          status: string
+          texto: string
+          titulo: string
+        }
+        Insert: {
+          aprovador_id?: string | null
+          area_coordenacao_id: string
+          atualizado_em?: string
+          autor_id: string
+          criado_em?: string
+          demanda_id?: string | null
+          id?: string
+          status?: string
+          texto: string
+          titulo: string
+        }
+        Update: {
+          aprovador_id?: string | null
+          area_coordenacao_id?: string
+          atualizado_em?: string
+          autor_id?: string
+          criado_em?: string
+          demanda_id?: string | null
+          id?: string
+          status?: string
+          texto?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comunicacoes_oficiais_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comunicacoes_oficiais_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comunicados: {
         Row: {
           autor_id: string

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChartFilters } from '../types';
@@ -17,6 +16,16 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
   bairros, 
   onFilterChange 
 }) => {
+  const [filteredBairros, setFilteredBairros] = useState<string[]>(bairros);
+  
+  useEffect(() => {
+    if (filters.distrito) {
+      setFilteredBairros(bairros);
+    } else {
+      setFilteredBairros(bairros);
+    }
+  }, [filters.distrito, bairros]);
+  
   return (
     <>
       {/* District filter */}
@@ -52,7 +61,7 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="_all">Todos os bairros</SelectItem>
-            {bairros.map((bairro) => (
+            {filteredBairros.map((bairro) => (
               <SelectItem key={bairro} value={bairro}>
                 {bairro}
               </SelectItem>
