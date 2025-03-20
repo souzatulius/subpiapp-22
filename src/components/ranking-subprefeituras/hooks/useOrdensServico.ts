@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -110,14 +111,15 @@ const useOrdensServico = () => {
     } finally {
       setLoading(false);
     }
-  }, [supabase, filters, toast]);
+  }, [filters, toast]);
 
   const fetchUploadLogs = useCallback(async () => {
     try {
+      // Note: This is a custom table that might not exist yet in the Supabase schema
       const { data, error } = await supabase
-        .from('upload_logs')
+        .from('ordens_logs')
         .select('*')
-        .order('data_upload', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Erro ao buscar logs de upload:', error);
@@ -139,7 +141,7 @@ const useOrdensServico = () => {
         variant: "destructive",
       });
     }
-  }, [supabase, toast]);
+  }, [toast]);
 
   const parseExcel = async (file: File): Promise<any[]> => {
     return new Promise((resolve, reject) => {
@@ -253,17 +255,21 @@ const useOrdensServico = () => {
         }
       }
 
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
       // Log the upload
       const uploadLog = {
-        usuario_id: supabase.auth.getUser().then(data => data.data.user?.id) || null,
+        usuario_id: user ? user.id : null,
         nome_arquivo: file.name,
         registros_inseridos: insertedCount,
         registros_atualizados: updatedCount,
-        data_upload: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       };
 
+      // Use ordens_logs table instead of a custom upload_logs table
       const { error: logError } = await supabase
-        .from('upload_logs')
+        .from('ordens_logs')
         .insert([uploadLog]);
 
       if (logError) {
@@ -363,7 +369,7 @@ const useOrdensServico = () => {
         variant: "destructive",
       });
     }
-  }, [supabase, toast]);
+  }, [toast]);
 
   const updateChartData = useCallback(() => {
     setChartData(prevChartData => {
@@ -638,6 +644,7 @@ const useOrdensServico = () => {
     uploadLogs,
     chartData,
     setChartData,
+    stats,
     filters,
     setFilters,
     fetchOrdens,
