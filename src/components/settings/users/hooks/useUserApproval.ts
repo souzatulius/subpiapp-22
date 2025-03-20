@@ -21,8 +21,29 @@ export const useUserApproval = (fetchUsers: () => Promise<void>) => {
         
       if (permissionError) throw permissionError;
       
+      let permissionId;
+      
+      // If permission doesn't exist, create it
       if (!permission) {
-        throw new Error('Permissão "Restrito" não encontrada');
+        console.log('Permission "Restrito" not found, creating it...');
+        
+        // Insert the 'Restrito' permission with nivel_acesso 10
+        const { data: newPermission, error: createError } = await supabase
+          .from('permissoes')
+          .insert({
+            descricao: 'Restrito',
+            nivel_acesso: 10
+          })
+          .select('id')
+          .single();
+        
+        if (createError) throw createError;
+        if (!newPermission) throw new Error('Não foi possível criar a permissão "Restrito"');
+        
+        permissionId = newPermission.id;
+        console.log('Created "Restrito" permission with ID:', permissionId);
+      } else {
+        permissionId = permission.id;
       }
       
       // Assign permission to user
@@ -30,7 +51,7 @@ export const useUserApproval = (fetchUsers: () => Promise<void>) => {
         .from('usuario_permissoes')
         .insert({
           usuario_id: userId,
-          permissao_id: permission.id
+          permissao_id: permissionId
         });
         
       if (assignError) throw assignError;
