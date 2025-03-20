@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx';
 /**
  * Hook for handling file upload and download functionality
  */
-export const useFileUpload = (onSuccess: () => void) => {
+export const useFileUpload = (onSuccess: (inserted: number, updated: number) => void) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -44,13 +44,16 @@ export const useFileUpload = (onSuccess: () => void) => {
         throw new Error(`Erro no processamento: ${data.error}`);
       }
 
+      const inserted = data.inseridos || 0;
+      const updated = data.atualizados || 0;
+
       toast({
         title: "Upload concluído com sucesso!",
-        description: `${data.inserted} registros inseridos e ${data.updated} registros atualizados.`,
+        description: `${inserted} registros inseridos e ${updated} registros atualizados.`,
       });
 
       // Call success callback to refresh data
-      onSuccess();
+      onSuccess(inserted, updated);
       
       return data;
     } catch (error: any) {

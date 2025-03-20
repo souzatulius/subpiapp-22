@@ -38,23 +38,31 @@ const useOrdensServico = () => {
   // Generate chart data based on statistics and orders
   const { 
     chartData, 
-    setChartData 
+    setChartData,
+    updateChartData
   } = useChartData(ordens, stats);
   
   // File upload functionalities
   const { 
     loading: uploadLoading, 
-    uploadExcel, 
+    uploadExcel: uploadExcelOriginal, 
     downloadExcel, 
     downloadUploadedFile, 
     uploadFile 
   } = useFileUpload(handleUploadSuccess);
 
   // Callback for when an upload is successful
-  function handleUploadSuccess() {
-    fetchOrdens();
+  function handleUploadSuccess(inserted: number, updated: number) {
+    console.log(`Upload success: ${inserted} inserted, ${updated} updated`);
+    // Just fetch the upload logs for now, but don't auto-refresh charts
+    // This allows users to use the explicit refresh buttons
     fetchUploadLogs();
   }
+
+  // Wrapper for uploadExcel to handle the new success callback
+  const uploadExcel = useCallback(async (file: File) => {
+    return await uploadExcelOriginal(file);
+  }, [uploadExcelOriginal]);
 
   // Apply filters and fetch orders
   const applyFilters = useCallback((newFilters: ChartFilters) => {

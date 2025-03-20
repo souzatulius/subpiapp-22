@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import useOrdensServico from './hooks/useOrdensServico';
 import RankingFileUpload from './RankingFileUpload';
@@ -5,9 +6,10 @@ import RankingFilters from './RankingFilters';
 import ChartCard from './charts/ChartCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileSpreadsheet, Download, RefreshCw } from 'lucide-react';
+import { FileSpreadsheet, Download, RefreshCw, BarChart4, ListFilter } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+
 const RankingDashboard: React.FC = () => {
   const {
     chartData,
@@ -18,22 +20,53 @@ const RankingDashboard: React.FC = () => {
     uploadFile,
     fetchOrdens,
     setFilters,
-    stats
+    stats,
+    calculateStats
   } = useOrdensServico();
+
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadSuccess, setIsUploadSuccess] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [isUpdatingStats, setIsUpdatingStats] = useState(false);
+  const [isUpdatingCharts, setIsUpdatingCharts] = useState(false);
+
   const dashboardRef = React.useRef<HTMLDivElement>(null);
+
   const handleUpload = async (file: File) => {
     setIsUploading(true);
+    setIsUploadSuccess(false);
     try {
       await uploadExcel(file);
+      setIsUploadSuccess(true);
+      setUploadedFileName(file.name);
     } finally {
       setIsUploading(false);
     }
   };
+
   const toggleChartVisibility = (chartId: string) => {
     // This is a placeholder for the toggleChartVisibility function
     console.log('Toggle visibility for chart:', chartId);
   };
+
+  const handleUpdateStats = async () => {
+    setIsUpdatingStats(true);
+    try {
+      await calculateStats();
+    } finally {
+      setIsUpdatingStats(false);
+    }
+  };
+
+  const handleUpdateCharts = async () => {
+    setIsUpdatingCharts(true);
+    try {
+      await fetchOrdens();
+    } finally {
+      setIsUpdatingCharts(false);
+    }
+  };
+
   const handleExportAllToPDF = async () => {
     if (!dashboardRef.current) return;
     try {
@@ -80,11 +113,14 @@ const RankingDashboard: React.FC = () => {
       console.error('Erro ao exportar para PDF:', error);
     }
   };
+
   const generateUpdatedCharts = (newFilters: any) => {
     setFilters(newFilters);
     fetchOrdens();
   };
-  return <div className="space-y-6" ref={dashboardRef}>
+
+  return (
+    <div className="space-y-6" ref={dashboardRef}>
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-[#003570]">Ranking das Subprefeituras</h2>
@@ -101,7 +137,44 @@ const RankingDashboard: React.FC = () => {
         </div>
       </div>
       
-      <RankingFileUpload onFileUpload={handleUpload} lastUpdate={new Date().toLocaleDateString('pt-BR')} isUploading={isUploading} />
+      <RankingFileUpload 
+        onFileUpload={handleUpload} 
+        lastUpdate={new Date().toLocaleDateString('pt-BR')} 
+        isUploading={isUploading}
+        isSuccess={isUploadSuccess}
+        successFileName={uploadedFileName}
+      />
+      
+      {isUploadSuccess && (
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button 
+            onClick={handleUpdateStats} 
+            disabled={isUpdatingStats}
+            variant="secondary"
+            className="flex-1"
+          >
+            {isUpdatingStats ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <ListFilter className="mr-2 h-4 w-4" />
+            )}
+            Atualizar Apenas Números
+          </Button>
+          
+          <Button 
+            onClick={handleUpdateCharts}
+            disabled={isUpdatingCharts}
+            className="flex-1"
+          >
+            {isUpdatingCharts ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <BarChart4 className="mr-2 h-4 w-4" />
+            )}
+            Atualizar Gráficos
+          </Button>
+        </div>
+      )}
       
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-4">
@@ -128,12 +201,15 @@ const RankingDashboard: React.FC = () => {
       
       <RankingFilters onFilterChange={generateUpdatedCharts} />
       
-      {loading ? <div className="grid place-items-center h-40">
+      {loading ? (
+        <div className="grid place-items-center h-40">
           <div className="flex flex-col items-center">
             <RefreshCw className="h-10 w-10 text-blue-500 animate-spin" />
             <p className="mt-2 text-gray-500">Carregando dados...</p>
           </div>
-        </div> : chartData.length === 0 ? <Card>
+        </div>
+      ) : chartData.length === 0 ? (
+        <Card>
           <CardContent className="p-6 text-center">
             <FileSpreadsheet className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-700 mb-1">Nenhum dado disponível</h3>
@@ -141,11 +217,18 @@ const RankingDashboard: React.FC = () => {
               Carregue uma planilha com dados de ordens de serviço para visualizar os gráficos.
             </p>
           </CardContent>
-        </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {chartData.map(chart => <div key={chart.id} className={`chart-card ${chart.visible ? '' : 'hidden'}`}>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {chartData.map(chart => (
+            <div key={chart.id} className={`chart-card ${chart.visible ? '' : 'hidden'}`}>
               <ChartCard chart={chart} onToggleVisibility={() => toggleChartVisibility(chart.id)} />
-            </div>)}
-        </div>}
-    </div>;
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
+
 export default RankingDashboard;

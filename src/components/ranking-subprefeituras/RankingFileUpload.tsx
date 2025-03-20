@@ -1,7 +1,7 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, AlertTriangle, FileSpreadsheet } from 'lucide-react';
+import { UploadCloud, AlertTriangle, FileSpreadsheet, CheckCircle, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -10,12 +10,16 @@ interface RankingFileUploadProps {
   onFileUpload: (file: File) => Promise<void>;
   lastUpdate: string | null;
   isUploading?: boolean;
+  isSuccess?: boolean;
+  successFileName?: string;
 }
 
 const RankingFileUpload: React.FC<RankingFileUploadProps> = ({ 
   onFileUpload, 
   lastUpdate,
-  isUploading = false
+  isUploading = false,
+  isSuccess = false,
+  successFileName = ''
 }) => {
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -49,6 +53,7 @@ const RankingFileUpload: React.FC<RankingFileUploadProps> = ({
           className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
             ${isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'}
             ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
+            ${isSuccess ? 'border-green-400 bg-green-50' : ''}
           `}
         >
           <input {...getInputProps()} />
@@ -56,6 +61,8 @@ const RankingFileUpload: React.FC<RankingFileUploadProps> = ({
           <div className="flex flex-col items-center justify-center space-y-3">
             {isUploading ? (
               <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
+            ) : isSuccess ? (
+              <CheckCircle className="h-10 w-10 text-green-500" />
             ) : (
               <UploadCloud className="h-10 w-10 text-blue-500" />
             )}
@@ -66,21 +73,38 @@ const RankingFileUpload: React.FC<RankingFileUploadProps> = ({
                   ? 'Solte o arquivo aqui' 
                   : isUploading 
                     ? 'Processando arquivo...' 
-                    : 'Carregar Planilha de Ordens de Serviço'
+                    : isSuccess
+                      ? 'Arquivo carregado com sucesso!'
+                      : 'Carregar Planilha de Ordens de Serviço'
                 }
               </h3>
               
-              {!isUploading && (
+              {!isUploading && !isSuccess && (
                 <p className="text-sm text-gray-500">
                   Arraste e solte um arquivo Excel ou clique para selecionar
+                </p>
+              )}
+              
+              {isSuccess && successFileName && (
+                <p className="text-sm text-gray-600">
+                  {successFileName}
                 </p>
               )}
             </div>
             
             {!isUploading && (
               <Button className="mt-2" disabled={isUploading}>
-                <FileSpreadsheet className="mr-2 h-4 w-4" />
-                Selecionar Arquivo
+                {isSuccess ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Carregar novo arquivo
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    Selecionar Arquivo
+                  </>
+                )}
               </Button>
             )}
           </div>
