@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Demanda, NotaExistente, Resposta, PerguntaResposta } from '../types';
 
 export const useDemandaDetalhes = (demandaId: string) => {
+  // Break the deep type inference by using more explicit types
   const [demanda, setDemanda] = useState<Demanda | null>(null);
   const [respostas, setRespostas] = useState<Resposta[]>([]);
   const [notaExistente, setNotaExistente] = useState<NotaExistente | null>(null);
@@ -54,10 +55,12 @@ export const useDemandaDetalhes = (demandaId: string) => {
         }
         
         // Safe type conversion - construct new objects with explicit properties
-        const perguntasObj = typeof demandaData.perguntas === 'object' && demandaData.perguntas !== null 
-          ? demandaData.perguntas 
+        // Breaking the deep type inference by casting to a simple object first
+        const perguntasObj: Record<string, string> = typeof demandaData.perguntas === 'object' && demandaData.perguntas !== null 
+          ? demandaData.perguntas as Record<string, string> 
           : {};
           
+        // Explicitly construct the processed demanda with all properties typed
         const processedDemanda: Demanda = {
           id: demandaData.id,
           titulo: demandaData.titulo,
@@ -68,13 +71,16 @@ export const useDemandaDetalhes = (demandaId: string) => {
           protocolo: demandaData.protocolo || undefined,
           prioridade: demandaData.prioridade,
           arquivo_url: demandaData.arquivo_url || undefined,
-          perguntas: perguntasObj as Record<string, string>,
+          perguntas: perguntasObj,
           areas_coordenacao: demandaData.areas_coordenacao,
           autor: {
-            nome_completo: demandaData.autor?.nome_completo || 'Não especificado'
+            nome_completo: demandaData.autor && typeof demandaData.autor === 'object' 
+              ? (demandaData.autor as {nome_completo?: string}).nome_completo || 'Não especificado'
+              : 'Não especificado'
           }
         };
         
+        // Explicitly construct the respostas array with simpler types
         const processedRespostas: Resposta[] = (respostasData || []).map(resposta => ({
           id: resposta.id,
           texto: resposta.texto,
@@ -85,6 +91,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
             : null
         }));
         
+        // Explicitly construct the nota with a simpler type
         const processedNota: NotaExistente | null = notaData ? {
           id: notaData.id,
           titulo: notaData.titulo,
@@ -126,8 +133,8 @@ export const useDemandaDetalhes = (demandaId: string) => {
       const perguntasObj = demanda.perguntas;
       
       if (typeof perguntasObj === 'object' && perguntasObj !== null) {
-        // Extract key-value pairs safely
-        Object.entries(perguntasObj).forEach(([_, value]) => {
+        // Extract key-value pairs safely - breaking the deep type inference
+        Object.entries(perguntasObj as Record<string, string>).forEach(([_, value]) => {
           if (typeof value === 'string') {
             // Get resposta text from the first resposta if available
             const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
