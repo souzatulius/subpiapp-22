@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast"
 import {
@@ -148,8 +149,8 @@ const useOrdensServico = () => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
-      reader.onload = (e: any) => {
-        const data = new Uint8Array(e.target.result);
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];

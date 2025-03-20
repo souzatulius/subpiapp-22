@@ -2,9 +2,9 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
+import { ChartStyle } from './chart-style'
 import { ChartConfig } from './chart-types'
 import { ChartContext } from './chart-utils'
-import { ChartStyle } from './chart-style'
 
 export const ChartContainer = React.forwardRef<
   HTMLDivElement,

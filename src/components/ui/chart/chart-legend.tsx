@@ -2,7 +2,8 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
-import { useChart, getPayloadConfigFromPayload } from './chart-utils'
+import { useChart } from "./chart-utils"
+import { getPayloadConfigFromPayload } from "./chart-utils"
 
 export const ChartLegend = RechartsPrimitive.Legend
 
