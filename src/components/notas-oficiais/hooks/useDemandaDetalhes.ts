@@ -54,22 +54,24 @@ export const useDemandaDetalhes = (demandaId: string) => {
         }
         
         // Safe type conversion - construct new objects with explicit properties
+        const perguntasObj = typeof demandaData.perguntas === 'object' && demandaData.perguntas !== null 
+          ? demandaData.perguntas 
+          : {};
+          
         const processedDemanda: Demanda = {
           id: demandaData.id,
           titulo: demandaData.titulo,
           status: demandaData.status,
           horario_publicacao: demandaData.horario_publicacao,
           prazo_resposta: demandaData.prazo_resposta,
-          detalhes_solicitacao: demandaData.detalhes_solicitacao,
-          protocolo: demandaData.protocolo,
+          detalhes_solicitacao: demandaData.detalhes_solicitacao || undefined,
+          protocolo: demandaData.protocolo || undefined,
           prioridade: demandaData.prioridade,
-          arquivo_url: demandaData.arquivo_url,
-          perguntas: demandaData.perguntas,
+          arquivo_url: demandaData.arquivo_url || undefined,
+          perguntas: perguntasObj as Record<string, string>,
           areas_coordenacao: demandaData.areas_coordenacao,
           autor: {
-            nome_completo: typeof demandaData.autor === 'object' && demandaData.autor !== null 
-              ? demandaData.autor.nome_completo || 'Não especificado'
-              : 'Não especificado'
+            nome_completo: demandaData.autor?.nome_completo || 'Não especificado'
           }
         };
         
@@ -120,12 +122,12 @@ export const useDemandaDetalhes = (demandaId: string) => {
     const result: PerguntaResposta[] = [];
     
     try {
-      // Safely handle the perguntas object to avoid circular references
+      // Safely handle the perguntas object
       const perguntasObj = demanda.perguntas;
       
       if (typeof perguntasObj === 'object' && perguntasObj !== null) {
         // Extract key-value pairs safely
-        Object.entries(perguntasObj as Record<string, unknown>).forEach(([_, value]) => {
+        Object.entries(perguntasObj).forEach(([_, value]) => {
           if (typeof value === 'string') {
             // Get resposta text from the first resposta if available
             const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
