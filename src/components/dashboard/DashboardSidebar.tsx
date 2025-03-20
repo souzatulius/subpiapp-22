@@ -64,19 +64,25 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
     <>
       {/* Sidebar para telas maiores */}
       <aside
-        className={`hidden lg:flex flex-col w-64 bg-gray-50 border-r border-gray-200 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`hidden lg:flex flex-col h-full bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out ${
+          isOpen ? 'w-64' : 'w-0 -translate-x-full'
+        }`}
       >
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
           <span className="text-lg font-semibold text-[#003570]">Menu</span>
         </div>
-        <nav className="flex-1 p-4">
-          <ul>
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <ul className="space-y-1">
             {filteredSidebarItems.map((item) => (
-              <li key={item.name} className="mb-2">
+              <li key={item.name}>
                 <NavLink
                   to={item.href}
                   className={({ isActive }) =>
-                    `flex items-center p-2 rounded-md hover:bg-gray-100 ${isActive ? 'bg-gray-100 font-semibold' : ''}`
+                    `flex items-center p-2 rounded-md transition-colors ${
+                      isActive 
+                        ? 'bg-[#003570]/10 text-[#003570] font-medium' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`
                   }
                 >
                   {item.icon}
@@ -106,14 +112,18 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
           <div className="flex items-center justify-center h-16 border-b border-gray-200">
             <span className="text-lg font-semibold text-[#003570]">Menu</span>
           </div>
-          <nav className="flex-1 p-4">
-            <ul>
+          <nav className="flex-1 p-4 overflow-y-auto">
+            <ul className="space-y-1">
               {filteredSidebarItems.map((item) => (
-                <li key={item.name} className="mb-2">
+                <li key={item.name}>
                   <NavLink
                     to={item.href}
                     className={({ isActive }) =>
-                      `flex items-center p-2 rounded-md hover:bg-gray-100 ${isActive ? 'bg-gray-100 font-semibold' : ''}`
+                      `flex items-center p-2 rounded-md transition-colors ${
+                        isActive 
+                          ? 'bg-[#003570]/10 text-[#003570] font-medium' 
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`
                     }
                   >
                     {item.icon}
