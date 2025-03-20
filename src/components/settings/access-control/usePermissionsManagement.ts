@@ -16,14 +16,26 @@ export const usePermissionsManagement = (
     setSaving(true);
     
     try {
-      const { error } = await supabase
+      // Log para depuração
+      console.log('Inserindo permissão com dados:', {
+        usuario_id: userId,
+        permissao_id: permissionId
+      });
+      
+      const { data, error } = await supabase
         .from('usuario_permissoes')
         .insert({
           usuario_id: userId,
           permissao_id: permissionId
-        });
+        })
+        .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao adicionar permissão:', error);
+        throw error;
+      }
+      
+      console.log('Resposta da inserção:', data);
       
       // Update local state
       setUserPermissions(prev => {
@@ -62,13 +74,25 @@ export const usePermissionsManagement = (
     setSaving(true);
     
     try {
-      const { error } = await supabase
+      // Log para depuração
+      console.log('Removendo permissão com filtros:', {
+        usuario_id: userId,
+        permissao_id: permissionId
+      });
+      
+      const { data, error } = await supabase
         .from('usuario_permissoes')
         .delete()
         .eq('usuario_id', userId)
-        .eq('permissao_id', permissionId);
+        .eq('permissao_id', permissionId)
+        .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao remover permissão:', error);
+        throw error;
+      }
+      
+      console.log('Resposta da remoção:', data);
       
       // Update local state
       setUserPermissions(prev => {

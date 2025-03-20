@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import NotaCard from './NotaCard';
-import { LoadingState, EmptyState, NoAccessState } from './NotasListStates';
+import { LoadingState, EmptyState, NoAccessState, SearchEmptyState } from './NotasListStates';
 import { NotaOficial } from '../types';
 
 interface NotasListProps {
@@ -56,9 +56,7 @@ const NotasList: React.FC<NotasListProps> = ({
       </div>
       
       {filteredNotas.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Nenhuma nota encontrada com os critérios de busca.</p>
-        </div>
+        <SearchEmptyState />
       ) : (
         filteredNotas.map((nota) => (
           <NotaCard

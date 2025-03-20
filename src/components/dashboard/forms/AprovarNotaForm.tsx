@@ -59,6 +59,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       } catch (error) {
         console.error('Erro ao verificar permissões:', error);
         setIsAdmin(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -82,6 +84,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           .order('criado_em', { ascending: sortOrder === 'asc' });
         
         if (error) {
+          console.error('Erro ao carregar notas:', error);
           toast({
             title: "Erro ao carregar notas",
             description: error.message || "Não foi possível carregar as notas pendentes.",
