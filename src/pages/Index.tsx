@@ -10,23 +10,23 @@ const Index = () => {
   const {
     user
   } = useAuth();
-  return <div className="">
+  return <div className="min-h-screen flex flex-col">
       {/* Header - explicitly pass showControls={false} */}
       <Header showControls={false} />
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col2 md:flex-row px-0">
+      <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Content */}
-        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center px-0 mx-0 py-0 ">
-          <div className="max-w-xl px-0">
-            <h1 className="text-4xl font-bold leading-tight mb-6 px-0 text-left md:text-8xl">
+        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center px-[25px] py-[30px]">
+          <div className="max-w-xl">
+            <h1 className="text-4xl font-bold leading-tight mb-6 px-0 md:text-8xl">
               <span className="text-[#002855]">Demandas </span><br />
               <span className="text-[#002855]">da SUB com</span><br />
               
               <span className="text-[#f57c35]">eficiência</span>
             </h1>
             
-            <p className="text-gray-600 text-lg mb-8 text-left">
+            <p className="text-gray-600 text-lg mb-8">
               Sistema integrado para gerenciamento de solicitações da imprensa, controle de projetos urbanos e administração interna da Subprefeitura de Pinheiros.
             </p>
             
@@ -58,7 +58,7 @@ const Index = () => {
         </div>
         
         {/* Right side with blue background */}
-        <div className="w-full md:w-1/2 bg-[#003570] flex items-center justify-center p-8 md:p-12 py-[30px] px-0 mx-0">
+        <div className="w-full md:w-1/2 bg-[#003570] flex items-center justify-center p-8 md:p-12 px-0 py-[30px]">
           <img src="/lovable-uploads/292774a8-b25d-4dc6-9555-f54295b8bd9f.png" alt="Logo SUB PI" className="w-full max-w-md" />
         </div>
       </div>

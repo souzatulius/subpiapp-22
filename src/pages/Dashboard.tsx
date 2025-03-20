@@ -42,21 +42,21 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="page-container bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header - explicitly pass showControls={true} */}
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
-      <div className="content-container">
+      <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar isOpen={sidebarOpen} />
         
-        <main className="flex-1 w-full overflow-auto p-6">
-          <div className="max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-auto p-6">
+          <div className="max-w-7xl mx-auto">
             <div className="mb-6">
               <h3 className="mb-2 text-3xl font-bold text-slate-950">Olá, {firstName || 'Usuário'}!</h3>
               <h1 className="text-2xl font-bold text-gray-800"></h1>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <ActionCard 
                 title="Demandas da Imprensa" 
                 icon={<ClipboardList className="h-12 w-12 text-[#f57c35]" />} 

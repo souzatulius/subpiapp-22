@@ -1,49 +1,44 @@
 
 import React from 'react';
-import { Loader2, RefreshCw, Send } from 'lucide-react';
+import { Loader2, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { NotaOficial, Demanda } from '../types';
+
+// Define a proper type for the notaExistente
+interface NotaExistente {
+  id: string;
+  titulo: string;
+  texto: string;
+  status: string;
+  criado_em: string;
+  atualizado_em: string;
+  autor_id: string;
+  area_coordenacao_id: string;
+  demanda_id: string;
+  aprovador_id?: string;
+}
 
 interface CriarNotaFormProps {
-  titulo?: string;
-  setTitulo?: (value: string) => void;
-  texto?: string;
-  setTexto?: (value: string) => void;
-  onSubmit?: () => void;
-  isPending?: boolean;
-  notaExistente?: NotaOficial | null;
-  demanda?: Demanda;
-  isCheckingNota?: boolean;
-  gerarSugestao?: () => Promise<void>;
-  isGerandoSugestao?: boolean;
+  titulo: string;
+  setTitulo: (value: string) => void;
+  texto: string;
+  setTexto: (value: string) => void;
+  onSubmit: () => void;
+  isPending: boolean;
+  notaExistente: NotaExistente | null;
 }
 
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
-  titulo = '',
-  setTitulo = () => {},
-  texto = '',
-  setTexto = () => {},
-  onSubmit = () => {},
-  isPending = false,
-  notaExistente = null,
-  isCheckingNota = false,
-  gerarSugestao,
-  isGerandoSugestao = false
+  titulo,
+  setTitulo,
+  texto,
+  setTexto,
+  onSubmit,
+  isPending,
+  notaExistente
 }) => {
-  if (isCheckingNota) {
-    return (
-      <Card>
-        <CardContent className="p-6 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-          <span>Verificando nota existente...</span>
-        </CardContent>
-      </Card>
-    );
-  }
-  
   return (
     <Card>
       <CardContent className="p-6">
@@ -58,23 +53,9 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
         ) : (
           <div className="space-y-4">
             <div>
-              <div className="flex justify-between items-center mb-1">
-                <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">
-                  Título da Nota
-                </label>
-                {gerarSugestao && (
-                  <Button
-                    onClick={gerarSugestao}
-                    variant="outline"
-                    size="sm"
-                    className="text-[#003570] border-[#003570] hover:bg-[#EEF2F8]"
-                    disabled={isGerandoSugestao}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${isGerandoSugestao ? 'animate-spin' : ''}`} />
-                    {isGerandoSugestao ? "Gerando..." : "Regenerar Sugestão"}
-                  </Button>
-                )}
-              </div>
+              <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 mb-1">
+                Título da Nota
+              </label>
               <Input
                 id="titulo"
                 placeholder="Insira um título para a nota oficial"

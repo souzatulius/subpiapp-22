@@ -9,14 +9,14 @@ import { Demanda, Resposta, PerguntaResposta } from '../types';
 
 interface DemandaInfoCardProps {
   demanda: Demanda;
-  perguntasRespostas?: PerguntaResposta[];
-  respostas?: Resposta[];
+  perguntasRespostas: PerguntaResposta[];
+  respostas: Resposta[] | undefined;
 }
 
 const DemandaInfoCard: React.FC<DemandaInfoCardProps> = ({ 
   demanda, 
-  perguntasRespostas = [], 
-  respostas = [] 
+  perguntasRespostas, 
+  respostas 
 }) => {
   return (
     <Card>
@@ -26,7 +26,7 @@ const DemandaInfoCard: React.FC<DemandaInfoCardProps> = ({
             <User className="h-5 w-5 text-gray-400" />
             <div>
               <p className="text-sm font-medium text-gray-500">Autor</p>
-              <p>{demanda.autor?.nome_completo || 'Não especificado'}</p>
+              <p>{demanda.autor?.nome_completo}</p>
             </div>
           </div>
           

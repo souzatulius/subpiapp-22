@@ -7,16 +7,9 @@
   * {
     @apply antialiased;
   }
-  
-  html, body {
-    @apply w-full overflow-x-hidden;
-    width: 100vw;
-  }
-  
   body {
     @apply bg-background text-foreground;
   }
-  
   option {
     @apply bg-gray-100;
   }
@@ -57,17 +50,4 @@
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in-out forwards;
-}
-
-/* Layout helpers */
-.full-width-container {
-  @apply w-full max-w-full;
-}
-
-.page-container {
-  @apply min-h-screen flex flex-col w-full;
-}
-
-.content-container {
-  @apply flex-grow w-full flex;
 }

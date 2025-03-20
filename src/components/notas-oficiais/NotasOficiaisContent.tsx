@@ -85,10 +85,7 @@ const NotasOficiaisContent = () => {
       </div>
       
       {selectedDemandaId ? (
-        <DetalhesDemanda 
-          demandaId={selectedDemandaId} 
-          onClose={handleClose} 
-        />
+        <DetalhesDemanda demandaId={selectedDemandaId} onClose={handleClose} />
       ) : (
         <DemandasList 
           demandas={demandas || []} 

@@ -34,34 +34,11 @@ export interface Demanda {
   detalhes_solicitacao?: string;
   perguntas?: Record<string, string>;
   arquivo_url?: string;
-  areas_coordenacao?: AreaCoordenacao;
+  area_coordenacao?: AreaCoordenacao;
   autor?: Autor;
-  protocolo?: string;
-  prioridade?: string;
 }
 
 export interface PerguntaResposta {
   pergunta: string;
   resposta: string;
-}
-
-// Define NotaExistente without any recursive references
-export interface NotaExistente {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  demanda_id?: string;
-}
-
-// Add NotaOficial interface that was missing
-export interface NotaOficial {
-  id: string;
-  titulo: string;
-  texto: string;
-  autor_id: string;
-  criado_em: string;
-  atualizado_em: string;
-  status: 'pendente' | 'aprovado' | 'rejeitado';
-  demanda_id?: string;
 }

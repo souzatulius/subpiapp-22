@@ -12,12 +12,12 @@ const NotasOficiais = () => {
   };
 
   return (
-    <div className="page-container bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
-      <div className="content-container">
+      <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar isOpen={sidebarOpen} />
-        <main className="flex-1 w-full overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6">
           <NotasOficiaisContent />
         </main>
       </div>
