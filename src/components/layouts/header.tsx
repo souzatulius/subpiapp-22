@@ -3,8 +3,8 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import NotificationsPopover from './header/NotificationsPopover';
-import ProfileMenu from './header/ProfileMenu';
+import { NotificationsPopover } from './header/NotificationsPopover';
+import { ProfileMenu } from './header/ProfileMenu';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface HeaderProps {
