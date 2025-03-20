@@ -8,7 +8,7 @@ import { Demanda, NotaOficial } from '../types';
 export interface DetalhesResult {
   demanda: Demanda | null;
   respostas: NotaOficial[];
-  notaExistente: boolean;
+  notaExistente: NotaOficial | null;
   isLoading: boolean;
   error: string | null;
   refreshData: () => Promise<void>;
@@ -20,7 +20,7 @@ export interface DetalhesResult {
 export const useDemandaDetalhes = (demandaId: string): DetalhesResult => {
   const [demanda, setDemanda] = useState<Demanda | null>(null);
   const [respostas, setRespostas] = useState<NotaOficial[]>([]);
-  const [notaExistente, setNotaExistente] = useState(false);
+  const [notaExistente, setNotaExistente] = useState<NotaOficial | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -85,7 +85,8 @@ export const useDemandaDetalhes = (demandaId: string): DetalhesResult => {
 
       if (notasData) {
         setRespostas(notasData as NotaOficial[]);
-        setNotaExistente(notasData.length > 0);
+        // Instead of setting a boolean, set the first nota or null
+        setNotaExistente(notasData.length > 0 ? notasData[0] as NotaOficial : null);
       }
     } catch (error) {
       console.error('Erro inesperado:', error);

@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { NotaExistente } from '../types';
+import { NotaOficial } from '../types';
 
 interface CriarNotaFormProps {
   titulo: string;
@@ -14,7 +14,7 @@ interface CriarNotaFormProps {
   setTexto: (value: string) => void;
   onSubmit: () => void;
   isPending: boolean;
-  notaExistente: NotaExistente | null;
+  notaExistente: NotaOficial | null;
   demandaInfo?: any;
   perguntasRespostas?: any[];
   gerarSugestao?: () => Promise<void>;
