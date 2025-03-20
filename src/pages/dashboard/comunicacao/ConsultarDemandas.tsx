@@ -11,9 +11,20 @@ import { Search, Filter } from 'lucide-react';
 const ConsultarDemandas = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  // State for selected demand and mock data
+  const [selectedDemand, setSelectedDemand] = useState(null);
+
+  // Mock data for demandas
+  const mockDemandas = [];
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  // Handler for when a demand is selected
+  const handleSelectDemand = (demand) => {
+    setSelectedDemand(demand);
+    // Additional logic for handling selected demand can be added here
   };
 
   return (
@@ -49,7 +60,11 @@ const ConsultarDemandas = () => {
                   </Button>
                 </div>
                 
-                <DemandList />
+                <DemandList 
+                  demandas={mockDemandas} 
+                  isLoading={false} 
+                  onSelectDemand={handleSelectDemand} 
+                />
               </CardContent>
             </Card>
           </div>

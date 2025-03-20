@@ -120,7 +120,7 @@ const ConsultarNotas = () => {
                           <TableCell>{nota.autor}</TableCell>
                           <TableCell>
                             <Badge 
-                              variant={nota.status === "Aprovada" ? "success" : "outline"}
+                              variant={nota.status === "Aprovada" ? "outline" : "outline"}
                               className={
                                 nota.status === "Aprovada" 
                                   ? "bg-green-100 text-green-800 hover:bg-green-100" 
