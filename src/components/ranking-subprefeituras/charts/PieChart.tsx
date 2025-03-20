@@ -14,7 +14,7 @@ interface PieChartProps {
     labels: string[];
     datasets: {
       data: number[];
-      backgroundColor: string[];
+      backgroundColor?: string[];
     }[];
   };
 }
@@ -25,14 +25,18 @@ interface TransformedDataItem {
 }
 
 const PieChart: React.FC<PieChartProps> = ({ data }) => {
+  // Default colors if backgroundColor is undefined
+  const defaultColors = ['#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', '#ec4899', '#f97316', '#eab308', '#22c55e'];
+  const backgroundColors = data.datasets[0]?.backgroundColor || defaultColors;
+  
   // Transform data for Recharts
   const transformedData: TransformedDataItem[] = data.labels.map((label, index) => ({
     name: label,
-    value: data.datasets[0].data[index]
+    value: data.datasets[0]?.data[index] || 0
   }));
   
   const config = data.labels.reduce((acc, label, index) => {
-    acc[label] = { color: data.datasets[0].backgroundColor[index] || '#d1d5db' };
+    acc[label] = { color: backgroundColors[index % backgroundColors.length] || '#d1d5db' };
     return acc;
   }, {} as Record<string, { color: string }>);
   
@@ -54,7 +58,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
             {transformedData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
-                fill={data.datasets[0].backgroundColor[index % data.datasets[0].backgroundColor.length]} 
+                fill={backgroundColors[index % backgroundColors.length]} 
               />
             ))}
           </Pie>
