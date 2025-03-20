@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import ActionCard from '@/components/dashboard/ActionCard';
-import { ClipboardList, FileText, BarChart2, Users } from 'lucide-react';
+import { ClipboardList, MessageSquareReply, FileCheck, BarChart2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -58,30 +58,30 @@ const Dashboard = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <ActionCard 
-                title="Demandas da Imprensa" 
+                title="Nova Demanda" 
                 icon={<ClipboardList className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/demandas'} 
+                onClick={() => window.location.href = '/dashboard/comunicacao/cadastrar'} 
                 color="blue" 
               />
               
               <ActionCard 
-                title="Notas Oficiais" 
-                icon={<FileText className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/notas-oficiais'} 
+                title="Responder Demandas" 
+                icon={<MessageSquareReply className="h-6 w-6" />} 
+                onClick={() => window.location.href = '/dashboard/comunicacao/responder'} 
                 color="green" 
               />
               
               <ActionCard 
-                title="Relatórios" 
-                icon={<BarChart2 className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/relatorios'} 
+                title="Aprovar Nota" 
+                icon={<FileCheck className="h-6 w-6" />} 
+                onClick={() => window.location.href = '/dashboard/comunicacao/aprovar-nota'} 
                 color="orange" 
               />
               
               <ActionCard 
-                title="Usuários" 
-                icon={<Users className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/usuarios'} 
+                title="Números da Comunicação" 
+                icon={<BarChart2 className="h-6 w-6" />} 
+                onClick={() => window.location.href = '/dashboard/comunicacao/relatorios'} 
                 color="purple" 
               />
             </div>

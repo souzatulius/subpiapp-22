@@ -73,11 +73,11 @@ const ConsultarNotas = () => {
         aprovador_id: item.aprovador_id,
         area_coordenacao_id: item.area_coordenacao_id,
         demanda_id: item.demanda_id,
-        autor: item.autor && typeof item.autor === 'object' ? 
-          { nome_completo: item.autor.nome_completo || 'Não informado' } : 
+        autor: item.autor ? 
+          { nome_completo: typeof item.autor === 'object' && item.autor.nome_completo ? item.autor.nome_completo : 'Não informado' } : 
           { nome_completo: 'Não informado' },
-        areas_coordenacao: item.areas_coordenacao && typeof item.areas_coordenacao === 'object' ? 
-          { descricao: item.areas_coordenacao.descricao || 'Não informada' } : 
+        areas_coordenacao: item.areas_coordenacao ? 
+          { descricao: typeof item.areas_coordenacao === 'object' && item.areas_coordenacao.descricao ? item.areas_coordenacao.descricao : 'Não informada' } : 
           { descricao: 'Não informada' }
       })) || [];
       

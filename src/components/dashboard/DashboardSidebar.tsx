@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Home, 
@@ -14,6 +14,8 @@ import {
   Search,
   BookOpen
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -29,6 +31,29 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     relatorios: true,
     zeladoria: true
   });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      const checkAdminStatus = async () => {
+        try {
+          // Check if user has admin privileges
+          const { data, error } = await supabase.rpc('is_admin', {
+            user_id: user.id
+          });
+          
+          if (error) throw error;
+          setIsAdmin(!!data);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
+      };
+      
+      checkAdminStatus();
+    }
+  }, [user]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -128,13 +153,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         }
       ]
     },
-    // Seção 5: Ajustes
+    // Seção 5: Ajustes (only shown to admins)
     {
       id: 'ajustes',
       icon: <Settings size={20} />,
       label: 'Ajustes',
       path: '/settings',
-      isSection: false
+      isSection: false,
+      adminOnly: true
     }
   ];
 
@@ -142,7 +168,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     <aside className={`bg-white border-r border-gray-200 transition-all duration-300 ${isOpen ? 'w-56' : 'w-16'} flex-shrink-0 overflow-x-hidden`}>
       <nav className="py-4">
         <ul className="space-y-1">
-          {navSections.map((section) => (
+          {navSections.filter(section => !section.adminOnly || isAdmin).map((section) => (
             <li key={section.id} className="flex flex-col">
               {section.isSection ? (
                 <>
