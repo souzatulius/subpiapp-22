@@ -27,12 +27,20 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     const checkIsAdmin = async () => {
       try {
         if (user) {
+          // Log to help debug permission issues
+          console.log("Checking admin privileges for user:", user.id);
+          
           const { data, error } = await supabase.rpc('is_admin', {
             user_id: user.id
           });
           
-          if (error) throw error;
-          setIsAdmin(data || false);
+          if (error) {
+            console.error('Erro ao verificar permissões:', error);
+            throw error;
+          }
+          
+          console.log("Admin check result:", data);
+          setIsAdmin(!!data); // Ensure boolean conversion
         }
       } catch (error) {
         console.error('Erro ao verificar permissões:', error);
@@ -61,20 +69,22 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         
         if (error) throw error;
         
+        console.log("Fetched pending notes:", data);
+        
         // Properly cast the data to match the NotaOficial interface
-        const typedData: NotaOficial[] = (data || []).map(item => ({
+        const typedData: NotaOficial[] = data?.map(item => ({
           id: item.id,
           titulo: item.titulo,
           texto: item.texto,
           autor_id: item.autor_id,
           criado_em: item.criado_em,
           status: item.status,
-          area_coordenacao_id: item.area_coordenacao_id, // Add the missing property
+          area_coordenacao_id: item.area_coordenacao_id,
           demanda_id: item.demanda_id,
           aprovador_id: item.aprovador_id,
           areas_coordenacao: item.areas_coordenacao,
           autor: item.autor
-        }));
+        })) || [];
         
         setNotas(typedData);
       } catch (error) {
