@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -45,7 +46,7 @@ const RelatoriosContent = () => {
     cardStats 
   } = useReportsData(filters);
 
-  const toggleChartVisibility = chartName => {
+  const toggleChartVisibility = (chartName) => {
     setChartVisibility({
       ...chartVisibility,
       [chartName]: !chartVisibility[chartName]
@@ -311,7 +312,8 @@ const RelatoriosContent = () => {
           </Card>
           
           <div className="grid gap-4 md:grid-cols-2">
-            {chartVisibility.district && <Card className="col-span-1">
+            {chartVisibility.district && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Distribuição por Distrito</CardTitle>
                   <CardDescription>
@@ -321,12 +323,15 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart data={districtData} margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5
-                  }}>
+                      <RechartsBarChart 
+                        data={districtData} 
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5
+                        }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -337,9 +342,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.neighborhood && <Card className="col-span-1">
+            {chartVisibility.neighborhood && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Bairros Mais Demandantes</CardTitle>
                   <CardDescription>
@@ -349,12 +356,16 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart layout="vertical" data={neighborhoodData.slice(0, 5)} margin={{
-                    top: 5,
-                    right: 30,
-                    left: 100,
-                    bottom: 5
-                  }}>
+                      <RechartsBarChart 
+                        layout="vertical" 
+                        data={neighborhoodData.slice(0, 5)} 
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 100,
+                          bottom: 5
+                        }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" />
                         <YAxis type="category" dataKey="name" />
@@ -365,9 +376,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.origin && <Card className="col-span-1">
+            {chartVisibility.origin && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Origem das Demandas</CardTitle>
                   <CardDescription>
@@ -378,11 +391,19 @@ const RelatoriosContent = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
-                        <Pie data={originData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
-                      name,
-                      percent
-                    }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                          {originData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                        <Pie 
+                          data={originData} 
+                          cx="50%" 
+                          cy="50%" 
+                          labelLine={false} 
+                          outerRadius={80} 
+                          fill="#8884d8" 
+                          dataKey="value" 
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {originData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
                         </Pie>
                         <Tooltip />
                         <Legend />
@@ -390,9 +411,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.mediaType && <Card className="col-span-1">
+            {chartVisibility.mediaType && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Tipos de Mídia</CardTitle>
                   <CardDescription>
@@ -402,12 +425,15 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart data={mediaTypeData} margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5
-                  }}>
+                      <RechartsBarChart 
+                        data={mediaTypeData} 
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5
+                        }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -418,9 +444,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.responseTime && <Card className="col-span-1">
+            {chartVisibility.responseTime && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Tempo Médio de Resposta</CardTitle>
                   <CardDescription>
@@ -430,27 +458,36 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsLineChart data={responseTimeData} margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5
-                  }}>
+                      <RechartsLineChart 
+                        data={responseTimeData} 
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5
+                        }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{
-                      r: 8
-                    }} name="Horas" />
+                        <Line 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#8884d8" 
+                          activeDot={{ r: 8 }} 
+                          name="Horas" 
+                        />
                       </RechartsLineChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.services && <Card className="col-span-1">
+            {chartVisibility.services && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Principais Serviços Solicitados</CardTitle>
                   <CardDescription>
@@ -460,12 +497,15 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart data={servicesData} margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5
-                  }}>
+                      <RechartsBarChart 
+                        data={servicesData} 
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5
+                        }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -476,9 +516,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.coordination && <Card className="col-span-1">
+            {chartVisibility.coordination && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Áreas de Coordenação Mais Acionadas</CardTitle>
                   <CardDescription>
@@ -488,12 +530,15 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart data={coordinationData} margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5
-                  }}>
+                      <RechartsBarChart 
+                        data={coordinationData} 
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5
+                        }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -504,9 +549,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.status && <Card className="col-span-1">
+            {chartVisibility.status && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Status das Solicitações</CardTitle>
                   <CardDescription>
@@ -517,11 +564,19 @@ const RelatoriosContent = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
-                        <Pie data={statusData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
-                      name,
-                      percent
-                    }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                          {statusData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                        <Pie 
+                          data={statusData} 
+                          cx="50%" 
+                          cy="50%" 
+                          labelLine={false} 
+                          outerRadius={80} 
+                          fill="#8884d8" 
+                          dataKey="value" 
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {statusData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
                         </Pie>
                         <Tooltip />
                         <Legend />
@@ -529,9 +584,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.responsible && <Card className="col-span-1">
+            {chartVisibility.responsible && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Responsáveis pelo Atendimento</CardTitle>
                   <CardDescription>
@@ -541,12 +598,16 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart layout="vertical" data={responsibleData} margin={{
-                    top: 5,
-                    right: 30,
-                    left: 100,
-                    bottom: 5
-                  }}>
+                      <RechartsBarChart 
+                        layout="vertical" 
+                        data={responsibleData} 
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 100,
+                          bottom: 5
+                        }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" />
                         <YAxis type="category" dataKey="name" />
@@ -557,9 +618,11 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
-            {chartVisibility.approval && <Card className="col-span-1">
+            {chartVisibility.approval && (
+              <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Aprovações da Nota Oficial</CardTitle>
                   <CardDescription>
@@ -570,11 +633,19 @@ const RelatoriosContent = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
-                        <Pie data={approvalData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
-                      name,
-                      percent
-                    }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                          {approvalData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                        <Pie 
+                          data={approvalData} 
+                          cx="50%" 
+                          cy="50%" 
+                          labelLine={false} 
+                          outerRadius={80} 
+                          fill="#8884d8" 
+                          dataKey="value" 
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {approvalData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
                         </Pie>
                         <Tooltip />
                         <Legend />
@@ -582,7 +653,8 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
           </div>
         </TabsContent>
         
@@ -604,11 +676,19 @@ const RelatoriosContent = () => {
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <RechartsPieChart>
-                          <Pie data={originData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
-                          name,
-                          percent
-                        }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                            {originData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                          <Pie 
+                            data={originData} 
+                            cx="50%" 
+                            cy="50%" 
+                            labelLine={false} 
+                            outerRadius={80} 
+                            fill="#8884d8" 
+                            dataKey="value" 
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {originData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
                           </Pie>
                           <Tooltip />
                           <Legend />
@@ -625,22 +705,26 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart data={originData.map(item => ({
-                        ...item,
-                        responseTime: Math.round(Math.random() * 48 + 12)
-                      }))} margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5
-                      }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="responseTime" fill="#8884d8" name="Horas" />
-                      </RechartsBarChart>
+                        <RechartsBarChart 
+                          data={originData.map(item => ({
+                            ...item,
+                            responseTime: Math.round(Math.random() * 48 + 12)
+                          }))} 
+                          margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="responseTime" fill="#8884d8" name="Horas" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
@@ -667,11 +751,19 @@ const RelatoriosContent = () => {
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <RechartsPieChart>
-                          <Pie data={approvalData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
-                          name,
-                          percent
-                        }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                            {approvalData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                          <Pie 
+                            data={approvalData} 
+                            cx="50%" 
+                            cy="50%" 
+                            labelLine={false} 
+                            outerRadius={80} 
+                            fill="#8884d8" 
+                            dataKey="value" 
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {approvalData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
                           </Pie>
                           <Tooltip />
                           <Legend />
@@ -688,19 +780,23 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart data={coordinationData} margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5
-                      }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="value" fill="#00C49F" name="Notas" />
-                      </RechartsBarChart>
+                        <RechartsBarChart 
+                          data={coordinationData} 
+                          margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill="#00C49F" name="Notas" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
@@ -726,19 +822,24 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart layout="vertical" data={responsibleData} margin={{
-                        top: 5,
-                        right: 30,
-                        left: 100,
-                        bottom: 5
-                      }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis type="category" dataKey="name" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="value" fill="#82ca9d" name="Demandas atendidas" />
-                      </RechartsBarChart>
+                        <RechartsBarChart 
+                          layout="vertical" 
+                          data={responsibleData} 
+                          margin={{
+                            top: 5,
+                            right: 30,
+                            left: 100,
+                            bottom: 5
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis type="number" />
+                          <YAxis type="category" dataKey="name" />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill="#82ca9d" name="Demandas atendidas" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
@@ -750,22 +851,27 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart layout="vertical" data={responsibleData.map(item => ({
-                        ...item,
-                        responseTime: Math.round(Math.random() * 48 + 12)
-                      }))} margin={{
-                        top: 5,
-                        right: 30,
-                        left: 100,
-                        bottom: 5
-                      }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis type="category" dataKey="name" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="responseTime" fill="#FF8042" name="Horas" />
-                      </RechartsBarChart>
+                        <RechartsBarChart 
+                          layout="vertical" 
+                          data={responsibleData.map(item => ({
+                            ...item,
+                            responseTime: Math.round(Math.random() * 48 + 12)
+                          }))} 
+                          margin={{
+                            top: 5,
+                            right: 30,
+                            left: 100,
+                            bottom: 5
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis type="number" />
+                          <YAxis type="category" dataKey="name" />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="responseTime" fill="#FF8042" name="Horas" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
@@ -791,19 +897,23 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart data={districtData} margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5
-                      }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="value" fill="#0088FE" name="Demandas" />
-                      </RechartsBarChart>
+                        <RechartsBarChart 
+                          data={districtData} 
+                          margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill="#0088FE" name="Demandas" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
@@ -815,19 +925,24 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart layout="vertical" data={neighborhoodData.slice(0, 5)} margin={{
-                        top: 5,
-                        right: 30,
-                        left: 100,
-                        bottom: 5
-                      }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis type="category" dataKey="name" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="value" fill="#00C49F" name="Demandas" />
-                      </RechartsBarChart>
+                        <RechartsBarChart 
+                          layout="vertical" 
+                          data={neighborhoodData.slice(0, 5)} 
+                          margin={{
+                            top: 5,
+                            right: 30,
+                            left: 100,
+                            bottom: 5
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis type="number" />
+                          <YAxis type="category" dataKey="name" />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill="#00C49F" name="Demandas" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
