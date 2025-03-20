@@ -15,10 +15,10 @@ const Relatorios = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         <DashboardSidebar isOpen={sidebarOpen} />
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className={`flex-1 p-6 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : ''}`}>
           <div className="max-w-7xl mx-auto">
             <RelatoriosContent />
           </div>

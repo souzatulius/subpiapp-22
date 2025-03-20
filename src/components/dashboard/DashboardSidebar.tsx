@@ -64,41 +64,43 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
     <>
       {/* Sidebar para telas maiores */}
       <aside
-        className={`hidden lg:flex flex-col h-full bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out ${
-          isOpen ? 'w-64' : 'w-0 -translate-x-full'
+        className={`fixed left-0 top-[60px] bottom-0 hidden lg:block transition-all duration-300 ease-in-out ${
+          isOpen ? 'w-64' : 'w-0 overflow-hidden'
         }`}
       >
-        <div className="flex items-center justify-center h-16 border-b border-gray-200">
-          <span className="text-lg font-semibold text-[#003570]">Menu</span>
-        </div>
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-1">
-            {filteredSidebarItems.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.href}
-                  className={({ isActive }) =>
-                    `flex items-center p-2 rounded-md transition-colors ${
-                      isActive 
-                        ? 'bg-[#003570]/10 text-[#003570] font-medium' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`
-                  }
-                >
-                  {item.icon}
-                  <span>{item.name}</span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+        <div className="h-full flex flex-col bg-gray-50 border-r border-gray-200">
+          <div className="flex items-center justify-center h-16 border-b border-gray-200">
+            <span className="text-lg font-semibold text-[#003570]">Menu</span>
+          </div>
+          <nav className="flex-1 p-4 overflow-y-auto">
+            <ul className="space-y-1">
+              {filteredSidebarItems.map((item) => (
+                <li key={item.name}>
+                  <NavLink
+                    to={item.href}
+                    className={({ isActive }) =>
+                      `flex items-center p-2 rounded-md transition-colors ${
+                        isActive 
+                          ? 'bg-[#003570]/10 text-[#003570] font-medium' 
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`
+                    }
+                  >
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.user_metadata?.avatar_url} />
+                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+            </div>
           </div>
         </div>
       </aside>
