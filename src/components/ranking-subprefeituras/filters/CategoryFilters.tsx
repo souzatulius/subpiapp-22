@@ -30,7 +30,7 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
             <SelectValue placeholder="Selecione uma classificação" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as classificações</SelectItem>
+            <SelectItem value="_all">Todas as classificações</SelectItem>
             {classificacoes.map((classificacao) => (
               <SelectItem key={classificacao} value={classificacao}>
                 {classificacao}
@@ -51,7 +51,7 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
             <SelectValue placeholder="Selecione um status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos os status</SelectItem>
+            <SelectItem value="_all">Todos os status</SelectItem>
             {statusOptions.map((status) => (
               <SelectItem key={status} value={status}>
                 {status}

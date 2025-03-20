@@ -30,7 +30,7 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
             <SelectValue placeholder="Selecione um distrito" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos os distritos</SelectItem>
+            <SelectItem value="_all">Todos os distritos</SelectItem>
             {distritos.map((distrito) => (
               <SelectItem key={distrito} value={distrito}>
                 {distrito}
@@ -51,7 +51,7 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
             <SelectValue placeholder="Selecione um bairro" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos os bairros</SelectItem>
+            <SelectItem value="_all">Todos os bairros</SelectItem>
             {bairros.map((bairro) => (
               <SelectItem key={bairro} value={bairro}>
                 {bairro}
