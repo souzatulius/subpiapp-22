@@ -19,6 +19,15 @@ interface BarChartProps {
 }
 
 const BarChart: React.FC<BarChartProps> = ({ data }) => {
+  // Handle empty or invalid data
+  if (!data || !data.labels || !data.datasets || data.datasets.length === 0) {
+    return (
+      <div className="w-full h-[240px] flex items-center justify-center bg-gray-50">
+        <p className="text-gray-400">Sem dados disponíveis</p>
+      </div>
+    );
+  }
+
   // Transform data for Recharts
   const transformedData = data.labels.map((label, index) => ({
     name: label,
