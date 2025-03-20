@@ -23,6 +23,8 @@ import ResponderDemandas from './pages/dashboard/comunicacao/ResponderDemandas';
 import CriarNotaOficial from './pages/dashboard/comunicacao/CriarNotaOficial';
 import AprovarNotaOficial from './pages/dashboard/comunicacao/AprovarNotaOficial';
 import RelatoriosDashboard from './pages/dashboard/comunicacao/Relatorios';
+import ConsultarDemandas from './pages/dashboard/comunicacao/ConsultarDemandas';
+import ConsultarNotas from './pages/dashboard/comunicacao/ConsultarNotas';
 
 const queryClient = new QueryClient();
 
@@ -50,12 +52,20 @@ const App = () => (
               } 
             />
             
-            {/* Dashboard Communication Section Routes */}
+            {/* Dashboard Communication Section Routes - Updated Structure */}
             <Route 
               path="/dashboard/comunicacao/cadastrar" 
               element={
                 <ProtectedRoute>
                   <CadastrarDemanda />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/comunicacao/consultar-demandas" 
+              element={
+                <ProtectedRoute>
+                  <ConsultarDemandas />
                 </ProtectedRoute>
               } 
             />
@@ -80,6 +90,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AprovarNotaOficial />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/comunicacao/consultar-notas" 
+              element={
+                <ProtectedRoute>
+                  <ConsultarNotas />
                 </ProtectedRoute>
               } 
             />
