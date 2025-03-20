@@ -1,4 +1,2 @@
 
-import RelatoriosContent from './RelatoriosContent';
-
-export { RelatoriosContent };
+export { default as RelatoriosContent } from './RelatoriosContent';
