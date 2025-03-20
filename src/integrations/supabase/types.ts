@@ -696,6 +696,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_default_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       delete_area_coordenacao: {
         Args: {
           p_id: string

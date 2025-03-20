@@ -9,6 +9,7 @@ export const useAccessControlData = () => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [userPermissions, setUserPermissions] = useState<UserPermissionMapping>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -16,8 +17,11 @@ export const useAccessControlData = () => {
 
   async function fetchData() {
     setLoading(true);
+    setError(null);
     
     try {
+      console.log('Fetching access control data...');
+      
       // Fetch users with whatsapp and aniversario
       const { data: usersData, error: usersError } = await supabase
         .from('usuarios')
@@ -34,24 +38,49 @@ export const useAccessControlData = () => {
       // Fetch permissions
       const { data: permissionsData, error: permissionsError } = await supabase
         .from('permissoes')
-        .select('id, descricao, nivel_acesso');
+        .select('id, descricao, nivel_acesso')
+        .order('nivel_acesso', { ascending: false });
         
-      if (permissionsError) throw permissionsError;
+      if (permissionsError) {
+        console.error('Error fetching permissions:', permissionsError);
+        throw permissionsError;
+      }
       
-      // If no permissions found, check if we need to create default ones
+      console.log('Permissions fetched:', permissionsData?.length || 0, 'items', permissionsData);
+      
+      // Create default permissions if none exist using the function we created
       if (!permissionsData || permissionsData.length === 0) {
-        console.log('No permissions found, checking if we need to create default ones');
-        await createDefaultPermissionsIfNeeded();
-        
-        // Fetch permissions again after creating defaults
-        const { data: newPermissionsData, error: newPermissionsError } = await supabase
-          .from('permissoes')
-          .select('id, descricao, nivel_acesso');
+        console.log('No permissions found, creating defaults...');
+        try {
+          // Try to create default permissions using our new function
+          const { error: createError } = await supabase.rpc('create_default_permissions');
           
-        if (newPermissionsError) throw newPermissionsError;
-        
-        if (newPermissionsData) {
-          setPermissions(newPermissionsData);
+          if (createError) {
+            console.error('Error creating default permissions:', createError);
+            throw createError;
+          }
+          
+          // Fetch permissions again after creating defaults
+          const { data: newPermissionsData, error: newPermissionsError } = await supabase
+            .from('permissoes')
+            .select('id, descricao, nivel_acesso')
+            .order('nivel_acesso', { ascending: false });
+            
+          if (newPermissionsError) throw newPermissionsError;
+          
+          if (newPermissionsData && newPermissionsData.length > 0) {
+            console.log('Default permissions created successfully:', newPermissionsData.length, 'items');
+            setPermissions(newPermissionsData);
+          } else {
+            throw new Error('Failed to create default permissions');
+          }
+        } catch (error) {
+          console.error('Failed to create/fetch default permissions:', error);
+          toast({
+            title: 'Erro nas permissões',
+            description: 'Não foi possível criar ou buscar as permissões padrão. Por favor, contate o administrador.',
+            variant: 'destructive',
+          });
         }
       } else {
         setPermissions(permissionsData);
@@ -75,60 +104,18 @@ export const useAccessControlData = () => {
       
       setUsers(usersData || []);
       setUserPermissions(userPerms);
+      console.log('Access control data loaded successfully');
     } catch (error: any) {
-      console.error('Erro ao carregar dados:', error);
+      const errorMessage = error.message || 'Erro desconhecido';
+      console.error('Erro ao carregar dados de controle de acesso:', error);
+      setError(errorMessage);
       toast({
         title: 'Erro',
-        description: 'Não foi possível carregar os dados. Por favor, tente novamente.',
+        description: `Não foi possível carregar os dados de controle de acesso: ${errorMessage}`,
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
-    }
-  }
-
-  // Function to create default permissions if none exist
-  async function createDefaultPermissionsIfNeeded() {
-    const defaultPermissions = [
-      { descricao: 'Admin', nivel_acesso: 100 },
-      { descricao: 'Subprefeito', nivel_acesso: 90 },
-      { descricao: 'Time de Comunicação', nivel_acesso: 80 },
-      { descricao: 'Gestores', nivel_acesso: 70 },
-      { descricao: 'Restrito', nivel_acesso: 10 }
-    ];
-    
-    try {
-      // Check if permissions already exist
-      const { count, error } = await supabase
-        .from('permissoes')
-        .select('id', { count: 'exact', head: true });
-        
-      if (error) throw error;
-      
-      // If no permissions exist, create the defaults
-      if (count === 0) {
-        console.log('Creating default permissions');
-        
-        for (const perm of defaultPermissions) {
-          const { error } = await supabase
-            .from('permissoes')
-            .insert(perm);
-            
-          if (error) throw error;
-        }
-        
-        toast({
-          title: 'Permissões criadas',
-          description: 'As permissões padrão foram criadas com sucesso.',
-        });
-      }
-    } catch (error: any) {
-      console.error('Erro ao criar permissões padrão:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível criar as permissões padrão.',
-        variant: 'destructive',
-      });
     }
   }
 
@@ -139,6 +126,7 @@ export const useAccessControlData = () => {
     userPermissions,
     setUserPermissions,
     loading,
+    error,
     fetchData
   };
 };

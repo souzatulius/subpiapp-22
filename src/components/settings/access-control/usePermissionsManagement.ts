@@ -40,6 +40,11 @@ export const usePermissionsManagement = (
       // Fetch fresh data to ensure we have the latest state
       await fetchData();
       
+      toast({
+        title: 'Sucesso',
+        description: 'Permissão adicionada com sucesso',
+      });
+      
     } catch (error: any) {
       console.error('Erro ao adicionar permissão:', error);
       toast({
@@ -78,6 +83,11 @@ export const usePermissionsManagement = (
       
       // Fetch fresh data to ensure we have the latest state
       await fetchData();
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Permissão removida com sucesso',
+      });
       
     } catch (error: any) {
       console.error('Erro ao remover permissão:', error);

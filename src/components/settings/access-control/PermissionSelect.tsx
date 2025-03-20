@@ -27,6 +27,7 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
   disabled = false,
 }) => {
   const [selectedPermission, setSelectedPermission] = React.useState<string>('');
+  const [isAddingPermission, setIsAddingPermission] = React.useState(false);
   
   // Filter out permissions that the user already has
   const availablePermissions = permissions.filter(
@@ -40,6 +41,7 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
 
   const handleAddPermission = async () => {
     if (selectedPermission) {
+      setIsAddingPermission(true);
       try {
         await onAddPermission(userId, selectedPermission);
         setSelectedPermission('');
@@ -54,6 +56,8 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
           description: "Não foi possível adicionar a permissão",
           variant: "destructive",
         });
+      } finally {
+        setIsAddingPermission(false);
       }
     }
   };
@@ -72,7 +76,7 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
       console.warn('Nenhuma permissão disponível no sistema');
     }
     
-    if (availablePermissions.length === 0) {
+    if (availablePermissions.length === 0 && permissions.length > 0) {
       console.log('Usuário já possui todas as permissões disponíveis');
     }
   }, [permissions, userPermissions, userId, availablePermissions.length, disabled]);
@@ -82,9 +86,9 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
       <Select
         value={selectedPermission}
         onValueChange={setSelectedPermission}
-        disabled={disabled}
+        disabled={disabled || isAddingPermission}
       >
-        <SelectTrigger className="w-[200px]">
+        <SelectTrigger className="w-[250px]">
           <SelectValue placeholder="Adicionar permissão" />
         </SelectTrigger>
         <SelectContent>
@@ -105,10 +109,10 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
       </Select>
       <Button 
         onClick={handleAddPermission} 
-        disabled={disabled || !selectedPermission}
+        disabled={disabled || isAddingPermission || !selectedPermission}
         variant="outline"
       >
-        Adicionar
+        {isAddingPermission ? "Adicionando..." : "Adicionar"}
       </Button>
     </div>
   );

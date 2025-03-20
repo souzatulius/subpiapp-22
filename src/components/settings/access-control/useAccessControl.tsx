@@ -30,6 +30,7 @@ export const useAccessControl = () => {
     userPermissions,
     setUserPermissions,
     loading,
+    error,
     fetchData,
   } = useAccessControlData();
 
@@ -68,6 +69,7 @@ export const useAccessControl = () => {
     permissions,
     userPermissions,
     loading,
+    error,
     saving,
     filter,
     setFilter,
