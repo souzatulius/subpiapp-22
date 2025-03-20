@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 interface DemandaDetalhes {
   id: string;
@@ -51,15 +52,26 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
             status,
             detalhes_solicitacao,
             perguntas,
-            area_coordenacao (
-              id,
-              descricao
-            )
+            area_coordenacao_id
           `)
           .eq('id', demandaId)
           .single();
           
         if (demandaError) throw demandaError;
+        
+        // Fetch area_coordenacao separately to avoid relation errors
+        let areaCoordenacao = null;
+        if (data.area_coordenacao_id) {
+          const { data: areaData, error: areaError } = await supabase
+            .from('areas_coordenacao')
+            .select('id, descricao')
+            .eq('id', data.area_coordenacao_id)
+            .maybeSingle();
+            
+          if (!areaError && areaData) {
+            areaCoordenacao = areaData;
+          }
+        }
         
         // Fetch responses for this demanda
         const { data: respostasData, error: respostasError } = await supabase
@@ -67,7 +79,7 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
           .select(`
             texto,
             criado_em,
-            usuarios!inner (
+            usuarios (
               nome_completo
             )
           `)
@@ -77,7 +89,7 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
         if (respostasError) throw respostasError;
         
         // Format responses
-        const respostas = [];
+        const respostas: Array<{texto: string; criado_em: string; autor: {nome_completo: string}}> = [];
         if (respostasData) {
           for (let i = 0; i < respostasData.length; i++) {
             const item = respostasData[i];
@@ -93,7 +105,12 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
         
         // Combine data
         const demandaWithRespostas: DemandaDetalhes = {
-          ...data,
+          id: data.id,
+          titulo: data.titulo,
+          status: data.status,
+          area_coordenacao: areaCoordenacao,
+          detalhes_solicitacao: data.detalhes_solicitacao,
+          perguntas: data.perguntas as Record<string, string> | null,
           respostas: respostas
         };
         
@@ -120,12 +137,11 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
     if (!perguntas) return [];
     
     const formatted: FormattedQA[] = [];
-    const perguntasObj = perguntas as Record<string, string>;
     
-    for (const key of Object.keys(perguntasObj)) {
+    for (const key of Object.keys(perguntas)) {
       formatted.push({
         question: key,
-        answer: perguntasObj[key]
+        answer: perguntas[key]
       });
     }
     
