@@ -114,39 +114,22 @@ export const useReportsData = (filters: any) => {
   const fetchCardStats = async () => {
     try {
       // Buscar total de demandas
-      const { data: demandas, error: demandasError } = await supabase
+      const { data: demandasData, error: demandasError } = await supabase
         .from('demandas')
         .select('count', { count: 'exact' });
       
       if (demandasError) throw demandasError;
       
       // Buscar total de notas oficiais
-      const { data: notas, error: notasError } = await supabase
+      const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
         .select('count', { count: 'exact' });
       
       if (notasError) throw notasError;
       
-      // Buscar tempo médio de resposta (em dias)
-      const { data: tempoResposta, error: tempoError } = await supabase
-        .from('demandas')
-        .select('data_criacao, data_resposta')
-        .not('data_resposta', 'is', null);
-      
-      if (tempoError) throw tempoError;
-      
-      // Calcular tempo médio em dias
-      let tempoMedio = 0;
-      if (tempoResposta && tempoResposta.length > 0) {
-        const tempoTotal = tempoResposta.reduce((acc, item) => {
-          const criacao = new Date(item.data_criacao);
-          const resposta = new Date(item.data_resposta);
-          const diffTime = Math.abs(resposta.getTime() - criacao.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return acc + diffDays;
-        }, 0);
-        tempoMedio = Number((tempoTotal / tempoResposta.length).toFixed(1));
-      }
+      // Como não temos as colunas data_criacao e data_resposta, vamos usar valores simulados
+      // para o tempo médio de resposta
+      let tempoMedio = 2.5; // Valor simulado em dias
       
       // Buscar taxa de aprovação (notas aprovadas / total de notas)
       const { data: notasAprovadas, error: aprovacaoError } = await supabase
@@ -156,13 +139,14 @@ export const useReportsData = (filters: any) => {
       
       if (aprovacaoError) throw aprovacaoError;
       
-      const totalNotas = notas?.count || 0;
-      const aprovadas = notasAprovadas?.count || 0;
+      const totalDemandas = demandasData?.[0]?.count || 0;
+      const totalNotas = notasData?.[0]?.count || 0;
+      const aprovadas = notasAprovadas?.[0]?.count || 0;
       const taxaAprovacao = totalNotas > 0 ? Math.round((aprovadas / totalNotas) * 100) : 0;
 
       // Atualizar os dados dos cards
       setCardStats({
-        totalDemandas: demandas?.count || 0,
+        totalDemandas: totalDemandas,
         demandasVariacao: 12, // Valor simulado
         totalNotas: totalNotas,
         notasVariacao: 4, // Valor simulado
