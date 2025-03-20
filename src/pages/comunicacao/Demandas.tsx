@@ -33,7 +33,7 @@ const Demandas = () => {
               </TabsList>
               
               <TabsContent value="listar">
-                <DemandasLayout mode="view" />
+                <DemandasLayout />
               </TabsContent>
               
               <TabsContent value="cadastrar">
@@ -43,7 +43,7 @@ const Demandas = () => {
               </TabsContent>
               
               <TabsContent value="responder">
-                <DemandasLayout mode="respond" />
+                <DemandasLayout />
               </TabsContent>
             </Tabs>
           </div>
