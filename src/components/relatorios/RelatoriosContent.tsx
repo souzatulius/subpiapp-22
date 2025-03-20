@@ -1,127 +1,205 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BarChart, LineChart, PieChart, Activity, Users, Calendar, Download, 
-  Printer, ChevronDown, Filter, BarChartBig, PieChartIcon, 
-  Clock, FileQuestion, Building2, CheckCircle2, UserCheck
-} from 'lucide-react';
+import { BarChart, LineChart, PieChart, Activity, Users, Calendar, Download, Printer, ChevronDown, Filter, BarChartBig, PieChartIcon, Clock, FileQuestion, Building2, CheckCircle2, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  ChartContainer, 
-  ChartTooltip, 
-  ChartTooltipContent
-} from '@/components/ui/chart';
-import {
-  BarChart as RechartsBarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Pie,
-  LineChart as RechartsLineChart,
-  Line
-} from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { BarChart as RechartsBarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPieChart, Pie, LineChart as RechartsLineChart, Line } from 'recharts';
 
 // Dados de exemplo para os gráficos
-const districtData = [
-  { name: 'Itaim Bibi', value: 78 },
-  { name: 'Pinheiros', value: 65 },
-  { name: 'Jardim Paulista', value: 42 },
-  { name: 'Alto de Pinheiros', value: 35 }
-];
-
-const neighborhoodData = [
-  { name: 'Vila Olímpia', district: 'Itaim Bibi', value: 32 },
-  { name: 'Vila Nova Conceição', district: 'Itaim Bibi', value: 28 },
-  { name: 'Brooklin', district: 'Itaim Bibi', value: 18 },
-  { name: 'Pinheiros Centro', district: 'Pinheiros', value: 30 },
-  { name: 'Vila Madalena', district: 'Pinheiros', value: 35 },
-  { name: 'Jardins', district: 'Jardim Paulista', value: 25 },
-  { name: 'Cerqueira César', district: 'Jardim Paulista', value: 17 },
-  { name: 'Alto de Pinheiros Centro', district: 'Alto de Pinheiros', value: 20 },
-  { name: 'Vila Beatriz', district: 'Alto de Pinheiros', value: 15 }
-];
-
-const originData = [
-  { name: 'Imprensa', value: 45 },
-  { name: 'Vereadores', value: 20 },
-  { name: 'Políticos', value: 15 },
-  { name: 'Demandas Internas', value: 25 },
-  { name: 'SECOM', value: 10 },
-  { name: 'Ministério Público', value: 8 },
-  { name: 'Ouvidoria', value: 12 }
-];
-
-const mediaTypeData = [
-  { name: 'Jornal Impresso', value: 25 },
-  { name: 'Portal de Notícias', value: 42 },
-  { name: 'Jornal Online', value: 38 },
-  { name: 'Podcast', value: 15 },
-  { name: 'Rádio', value: 22 },
-  { name: 'TV', value: 30 }
-];
-
-const responseTimeData = [
-  { name: 'Jan', value: 48 },
-  { name: 'Fev', value: 42 },
-  { name: 'Mar', value: 36 },
-  { name: 'Abr', value: 24 },
-  { name: 'Mai', value: 30 },
-  { name: 'Jun', value: 26 },
-  { name: 'Jul', value: 20 }
-];
-
-const servicesData = [
-  { name: 'Zeladoria', value: 65 },
-  { name: 'Infraestrutura', value: 50 },
-  { name: 'Saúde', value: 30 },
-  { name: 'Transporte', value: 45 },
-  { name: 'Educação', value: 25 },
-  { name: 'Eventos', value: 35 }
-];
-
-const coordinationData = [
-  { name: 'Zeladoria', value: 85 },
-  { name: 'Comunicação', value: 60 },
-  { name: 'Gabinete', value: 45 },
-  { name: 'Jurídico', value: 30 },
-  { name: 'Planejamento', value: 55 }
-];
-
-const statusData = [
-  { name: 'Pendentes', value: 35 },
-  { name: 'Em andamento', value: 45 },
-  { name: 'Concluídas', value: 120 }
-];
-
-const responsibleData = [
-  { name: 'Ana Silva', value: 45 },
-  { name: 'Carlos Santos', value: 38 },
-  { name: 'Patrícia Lima', value: 52 },
-  { name: 'Roberto Costa', value: 30 },
-  { name: 'Juliana Ferreira', value: 25 }
-];
-
-const approvalData = [
-  { name: 'Aprovadas pelo Subprefeito', value: 68 },
-  { name: 'Rejeitadas e reeditadas', value: 12 },
-  { name: 'Aprovadas sem edição', value: 45 },
-  { name: 'Aguardando aprovação', value: 25 }
-];
+const districtData = [{
+  name: 'Itaim Bibi',
+  value: 78
+}, {
+  name: 'Pinheiros',
+  value: 65
+}, {
+  name: 'Jardim Paulista',
+  value: 42
+}, {
+  name: 'Alto de Pinheiros',
+  value: 35
+}];
+const neighborhoodData = [{
+  name: 'Vila Olímpia',
+  district: 'Itaim Bibi',
+  value: 32
+}, {
+  name: 'Vila Nova Conceição',
+  district: 'Itaim Bibi',
+  value: 28
+}, {
+  name: 'Brooklin',
+  district: 'Itaim Bibi',
+  value: 18
+}, {
+  name: 'Pinheiros Centro',
+  district: 'Pinheiros',
+  value: 30
+}, {
+  name: 'Vila Madalena',
+  district: 'Pinheiros',
+  value: 35
+}, {
+  name: 'Jardins',
+  district: 'Jardim Paulista',
+  value: 25
+}, {
+  name: 'Cerqueira César',
+  district: 'Jardim Paulista',
+  value: 17
+}, {
+  name: 'Alto de Pinheiros Centro',
+  district: 'Alto de Pinheiros',
+  value: 20
+}, {
+  name: 'Vila Beatriz',
+  district: 'Alto de Pinheiros',
+  value: 15
+}];
+const originData = [{
+  name: 'Imprensa',
+  value: 45
+}, {
+  name: 'Vereadores',
+  value: 20
+}, {
+  name: 'Políticos',
+  value: 15
+}, {
+  name: 'Demandas Internas',
+  value: 25
+}, {
+  name: 'SECOM',
+  value: 10
+}, {
+  name: 'Ministério Público',
+  value: 8
+}, {
+  name: 'Ouvidoria',
+  value: 12
+}];
+const mediaTypeData = [{
+  name: 'Jornal Impresso',
+  value: 25
+}, {
+  name: 'Portal de Notícias',
+  value: 42
+}, {
+  name: 'Jornal Online',
+  value: 38
+}, {
+  name: 'Podcast',
+  value: 15
+}, {
+  name: 'Rádio',
+  value: 22
+}, {
+  name: 'TV',
+  value: 30
+}];
+const responseTimeData = [{
+  name: 'Jan',
+  value: 48
+}, {
+  name: 'Fev',
+  value: 42
+}, {
+  name: 'Mar',
+  value: 36
+}, {
+  name: 'Abr',
+  value: 24
+}, {
+  name: 'Mai',
+  value: 30
+}, {
+  name: 'Jun',
+  value: 26
+}, {
+  name: 'Jul',
+  value: 20
+}];
+const servicesData = [{
+  name: 'Zeladoria',
+  value: 65
+}, {
+  name: 'Infraestrutura',
+  value: 50
+}, {
+  name: 'Saúde',
+  value: 30
+}, {
+  name: 'Transporte',
+  value: 45
+}, {
+  name: 'Educação',
+  value: 25
+}, {
+  name: 'Eventos',
+  value: 35
+}];
+const coordinationData = [{
+  name: 'Zeladoria',
+  value: 85
+}, {
+  name: 'Comunicação',
+  value: 60
+}, {
+  name: 'Gabinete',
+  value: 45
+}, {
+  name: 'Jurídico',
+  value: 30
+}, {
+  name: 'Planejamento',
+  value: 55
+}];
+const statusData = [{
+  name: 'Pendentes',
+  value: 35
+}, {
+  name: 'Em andamento',
+  value: 45
+}, {
+  name: 'Concluídas',
+  value: 120
+}];
+const responsibleData = [{
+  name: 'Ana Silva',
+  value: 45
+}, {
+  name: 'Carlos Santos',
+  value: 38
+}, {
+  name: 'Patrícia Lima',
+  value: 52
+}, {
+  name: 'Roberto Costa',
+  value: 30
+}, {
+  name: 'Juliana Ferreira',
+  value: 25
+}];
+const approvalData = [{
+  name: 'Aprovadas pelo Subprefeito',
+  value: 68
+}, {
+  name: 'Rejeitadas e reeditadas',
+  value: 12
+}, {
+  name: 'Aprovadas sem edição',
+  value: 45
+}, {
+  name: 'Aguardando aprovação',
+  value: 25
+}];
 
 // Cores para os gráficos
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
-
 const RelatoriosContent = () => {
   const [activeTab, setActiveTab] = useState('geral');
   const [period, setPeriod] = useState('mensal');
@@ -137,21 +215,16 @@ const RelatoriosContent = () => {
     responsible: true,
     approval: true
   });
-
-  const toggleChartVisibility = (chartName) => {
+  const toggleChartVisibility = chartName => {
     setChartVisibility({
       ...chartVisibility,
       [chartName]: !chartVisibility[chartName]
     });
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
-        <p className="text-muted-foreground mt-2">
-          Visualize dados e estatísticas sobre as atividades da plataforma.
-        </p>
+        
+        
       </div>
 
       {/* Filtros e controles */}
@@ -269,103 +342,43 @@ const RelatoriosContent = () => {
             <div className="mb-2 font-medium">Gerenciamento de Exibição</div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-district" 
-                  checked={chartVisibility.district}
-                  onChange={() => toggleChartVisibility('district')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-district" checked={chartVisibility.district} onChange={() => toggleChartVisibility('district')} className="rounded" />
                 <label htmlFor="chart-district" className="text-sm">Distritos</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-neighborhood" 
-                  checked={chartVisibility.neighborhood}
-                  onChange={() => toggleChartVisibility('neighborhood')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-neighborhood" checked={chartVisibility.neighborhood} onChange={() => toggleChartVisibility('neighborhood')} className="rounded" />
                 <label htmlFor="chart-neighborhood" className="text-sm">Bairros</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-origin" 
-                  checked={chartVisibility.origin}
-                  onChange={() => toggleChartVisibility('origin')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-origin" checked={chartVisibility.origin} onChange={() => toggleChartVisibility('origin')} className="rounded" />
                 <label htmlFor="chart-origin" className="text-sm">Origem</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-mediaType" 
-                  checked={chartVisibility.mediaType}
-                  onChange={() => toggleChartVisibility('mediaType')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-mediaType" checked={chartVisibility.mediaType} onChange={() => toggleChartVisibility('mediaType')} className="rounded" />
                 <label htmlFor="chart-mediaType" className="text-sm">Mídia</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-responseTime" 
-                  checked={chartVisibility.responseTime}
-                  onChange={() => toggleChartVisibility('responseTime')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-responseTime" checked={chartVisibility.responseTime} onChange={() => toggleChartVisibility('responseTime')} className="rounded" />
                 <label htmlFor="chart-responseTime" className="text-sm">Tempo de Resposta</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-services" 
-                  checked={chartVisibility.services}
-                  onChange={() => toggleChartVisibility('services')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-services" checked={chartVisibility.services} onChange={() => toggleChartVisibility('services')} className="rounded" />
                 <label htmlFor="chart-services" className="text-sm">Serviços</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-coordination" 
-                  checked={chartVisibility.coordination}
-                  onChange={() => toggleChartVisibility('coordination')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-coordination" checked={chartVisibility.coordination} onChange={() => toggleChartVisibility('coordination')} className="rounded" />
                 <label htmlFor="chart-coordination" className="text-sm">Coordenação</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-status" 
-                  checked={chartVisibility.status}
-                  onChange={() => toggleChartVisibility('status')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-status" checked={chartVisibility.status} onChange={() => toggleChartVisibility('status')} className="rounded" />
                 <label htmlFor="chart-status" className="text-sm">Status</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-responsible" 
-                  checked={chartVisibility.responsible}
-                  onChange={() => toggleChartVisibility('responsible')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-responsible" checked={chartVisibility.responsible} onChange={() => toggleChartVisibility('responsible')} className="rounded" />
                 <label htmlFor="chart-responsible" className="text-sm">Responsáveis</label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="chart-approval" 
-                  checked={chartVisibility.approval}
-                  onChange={() => toggleChartVisibility('approval')}
-                  className="rounded"
-                />
+                <input type="checkbox" id="chart-approval" checked={chartVisibility.approval} onChange={() => toggleChartVisibility('approval')} className="rounded" />
                 <label htmlFor="chart-approval" className="text-sm">Aprovações</label>
               </div>
             </div>
@@ -374,8 +387,7 @@ const RelatoriosContent = () => {
           {/* Gráficos */}
           <div className="grid gap-4 md:grid-cols-2">
             {/* 1. Distribuição por Distrito */}
-            {chartVisibility.district && (
-              <Card className="col-span-1">
+            {chartVisibility.district && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Distribuição por Distrito</CardTitle>
                   <CardDescription>
@@ -385,15 +397,12 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        data={districtData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
+                      <RechartsBarChart data={districtData} margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5
+                  }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -404,12 +413,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 2. Bairros mais demandantes */}
-            {chartVisibility.neighborhood && (
-              <Card className="col-span-1">
+            {chartVisibility.neighborhood && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Bairros Mais Demandantes</CardTitle>
                   <CardDescription>
@@ -419,16 +426,12 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        layout="vertical"
-                        data={neighborhoodData.slice(0, 5)}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 100,
-                          bottom: 5,
-                        }}
-                      >
+                      <RechartsBarChart layout="vertical" data={neighborhoodData.slice(0, 5)} margin={{
+                    top: 5,
+                    right: 30,
+                    left: 100,
+                    bottom: 5
+                  }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" />
                         <YAxis type="category" dataKey="name" />
@@ -439,12 +442,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 3. Origem das Demandas */}
-            {chartVisibility.origin && (
-              <Card className="col-span-1">
+            {chartVisibility.origin && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Origem das Demandas</CardTitle>
                   <CardDescription>
@@ -455,19 +456,11 @@ const RelatoriosContent = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
-                        <Pie
-                          data={originData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {originData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
+                        <Pie data={originData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
+                      name,
+                      percent
+                    }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                          {originData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
                         <Tooltip />
                         <Legend />
@@ -475,12 +468,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 4. Tipos de Mídia */}
-            {chartVisibility.mediaType && (
-              <Card className="col-span-1">
+            {chartVisibility.mediaType && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Tipos de Mídia</CardTitle>
                   <CardDescription>
@@ -490,15 +481,12 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        data={mediaTypeData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
+                      <RechartsBarChart data={mediaTypeData} margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5
+                  }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -509,12 +497,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 5. Tempo Médio de Resposta */}
-            {chartVisibility.responseTime && (
-              <Card className="col-span-1">
+            {chartVisibility.responseTime && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Tempo Médio de Resposta</CardTitle>
                   <CardDescription>
@@ -524,31 +510,28 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsLineChart
-                        data={responseTimeData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
+                      <RechartsLineChart data={responseTimeData} margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5
+                  }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} name="Horas" />
+                        <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{
+                      r: 8
+                    }} name="Horas" />
                       </RechartsLineChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 6. Principais Serviços Solicitados */}
-            {chartVisibility.services && (
-              <Card className="col-span-1">
+            {chartVisibility.services && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Principais Serviços Solicitados</CardTitle>
                   <CardDescription>
@@ -558,15 +541,12 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        data={servicesData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
+                      <RechartsBarChart data={servicesData} margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5
+                  }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -577,12 +557,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 7. Áreas de Coordenação Mais Acionadas */}
-            {chartVisibility.coordination && (
-              <Card className="col-span-1">
+            {chartVisibility.coordination && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Áreas de Coordenação</CardTitle>
                   <CardDescription>
@@ -592,15 +570,12 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        data={coordinationData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
+                      <RechartsBarChart data={coordinationData} margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5
+                  }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
@@ -611,12 +586,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 8. Status das Solicitações */}
-            {chartVisibility.status && (
-              <Card className="col-span-1">
+            {chartVisibility.status && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Status das Solicitações</CardTitle>
                   <CardDescription>
@@ -627,19 +600,11 @@ const RelatoriosContent = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
+                        <Pie data={statusData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
+                      name,
+                      percent
+                    }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                          {statusData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
                         <Tooltip />
                         <Legend />
@@ -647,12 +612,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 9. Responsáveis pelo Atendimento */}
-            {chartVisibility.responsible && (
-              <Card className="col-span-1">
+            {chartVisibility.responsible && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Responsáveis pelo Atendimento</CardTitle>
                   <CardDescription>
@@ -662,16 +625,12 @@ const RelatoriosContent = () => {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        layout="vertical"
-                        data={responsibleData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 100,
-                          bottom: 5,
-                        }}
-                      >
+                      <RechartsBarChart layout="vertical" data={responsibleData} margin={{
+                    top: 5,
+                    right: 30,
+                    left: 100,
+                    bottom: 5
+                  }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" />
                         <YAxis type="category" dataKey="name" />
@@ -682,12 +641,10 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* 10. Aprovações da Nota Oficial */}
-            {chartVisibility.approval && (
-              <Card className="col-span-1">
+            {chartVisibility.approval && <Card className="col-span-1">
                 <CardHeader>
                   <CardTitle>Aprovações da Nota Oficial</CardTitle>
                   <CardDescription>
@@ -698,19 +655,11 @@ const RelatoriosContent = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
-                        <Pie
-                          data={approvalData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {approvalData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
+                        <Pie data={approvalData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
+                      name,
+                      percent
+                    }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                          {approvalData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
                         <Tooltip />
                         <Legend />
@@ -718,8 +667,7 @@ const RelatoriosContent = () => {
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
           </div>
         </TabsContent>
         
@@ -741,19 +689,11 @@ const RelatoriosContent = () => {
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <RechartsPieChart>
-                          <Pie
-                            data={originData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          >
-                            {originData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
+                          <Pie data={originData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
+                          name,
+                          percent
+                        }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                            {originData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                           </Pie>
                           <Tooltip />
                           <Legend />
@@ -770,15 +710,15 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart
-                          data={originData.map(item => ({...item, responseTime: Math.round(Math.random() * 48 + 12)}))}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                          }}
-                        >
+                        <RechartsBarChart data={originData.map(item => ({
+                        ...item,
+                        responseTime: Math.round(Math.random() * 48 + 12)
+                      }))} margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5
+                      }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
                           <YAxis />
@@ -813,19 +753,11 @@ const RelatoriosContent = () => {
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <RechartsPieChart>
-                          <Pie
-                            data={approvalData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          >
-                            {approvalData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
+                          <Pie data={approvalData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({
+                          name,
+                          percent
+                        }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                            {approvalData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                           </Pie>
                           <Tooltip />
                           <Legend />
@@ -842,15 +774,12 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart
-                          data={coordinationData}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                          }}
-                        >
+                        <RechartsBarChart data={coordinationData} margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5
+                      }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
                           <YAxis />
@@ -884,16 +813,12 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart
-                          layout="vertical"
-                          data={responsibleData}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 100,
-                            bottom: 5,
-                          }}
-                        >
+                        <RechartsBarChart layout="vertical" data={responsibleData} margin={{
+                        top: 5,
+                        right: 30,
+                        left: 100,
+                        bottom: 5
+                      }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis type="number" />
                           <YAxis type="category" dataKey="name" />
@@ -913,16 +838,15 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart
-                          layout="vertical"
-                          data={responsibleData.map(item => ({...item, responseTime: Math.round(Math.random() * 48 + 12)}))}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 100,
-                            bottom: 5,
-                          }}
-                        >
+                        <RechartsBarChart layout="vertical" data={responsibleData.map(item => ({
+                        ...item,
+                        responseTime: Math.round(Math.random() * 48 + 12)
+                      }))} margin={{
+                        top: 5,
+                        right: 30,
+                        left: 100,
+                        bottom: 5
+                      }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis type="number" />
                           <YAxis type="category" dataKey="name" />
@@ -956,15 +880,12 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart
-                          data={districtData}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                          }}
-                        >
+                        <RechartsBarChart data={districtData} margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5
+                      }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
                           <YAxis />
@@ -984,16 +905,12 @@ const RelatoriosContent = () => {
                   <CardContent>
                     <div className="h-[300px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart
-                          layout="vertical"
-                          data={neighborhoodData.slice(0, 5)}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 100,
-                            bottom: 5,
-                          }}
-                        >
+                        <RechartsBarChart layout="vertical" data={neighborhoodData.slice(0, 5)} margin={{
+                        top: 5,
+                        right: 30,
+                        left: 100,
+                        bottom: 5
+                      }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis type="number" />
                           <YAxis type="category" dataKey="name" />
@@ -1010,8 +927,6 @@ const RelatoriosContent = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default RelatoriosContent;
