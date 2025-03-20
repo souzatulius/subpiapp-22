@@ -477,6 +477,80 @@ export type Database = {
         }
         Relationships: []
       }
+      ranking_ordens_servico: {
+        Row: {
+          bairro: string | null
+          criado_em: string | null
+          data_abertura: string | null
+          data_conclusao: string | null
+          distrito: string | null
+          id: string
+          numero_os: string
+          status: string | null
+          tempo_resolucao: number | null
+          tipo_servico: string | null
+          upload_id: string
+        }
+        Insert: {
+          bairro?: string | null
+          criado_em?: string | null
+          data_abertura?: string | null
+          data_conclusao?: string | null
+          distrito?: string | null
+          id?: string
+          numero_os: string
+          status?: string | null
+          tempo_resolucao?: number | null
+          tipo_servico?: string | null
+          upload_id: string
+        }
+        Update: {
+          bairro?: string | null
+          criado_em?: string | null
+          data_abertura?: string | null
+          data_conclusao?: string | null
+          distrito?: string | null
+          id?: string
+          numero_os?: string
+          status?: string | null
+          tempo_resolucao?: number | null
+          tipo_servico?: string | null
+          upload_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_ordens_servico_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_uploads: {
+        Row: {
+          data_upload: string | null
+          id: string
+          nome_arquivo: string
+          processado: boolean | null
+          usuario_id: string
+        }
+        Insert: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo: string
+          processado?: boolean | null
+          usuario_id: string
+        }
+        Update: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo?: string
+          processado?: boolean | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       respostas_demandas: {
         Row: {
           arquivo_url: string | null

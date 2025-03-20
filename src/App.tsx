@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Demandas from "./pages/Demandas";
 import NotasOficiais from "./pages/NotasOficiais";
+import RankingSubs from "./pages/RankingSubs";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 
@@ -61,6 +62,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <NotasOficiais />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/ranking-subs" 
+              element={
+                <ProtectedRoute>
+                  <RankingSubs />
                 </ProtectedRoute>
               } 
             />
