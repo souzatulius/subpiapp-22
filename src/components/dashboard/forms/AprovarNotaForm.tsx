@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, SortDesc, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -21,6 +21,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Check if user is admin
   useEffect(() => {
@@ -36,11 +37,24 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           
           if (error) {
             console.error('Erro ao verificar permissões:', error);
+            toast({
+              title: "Erro de permissão",
+              description: "Não foi possível verificar suas permissões de administrador.",
+              variant: "destructive"
+            });
             throw error;
           }
           
           console.log("Admin check result:", data);
           setIsAdmin(!!data); // Ensure boolean conversion
+          
+          if (!data) {
+            toast({
+              title: "Acesso restrito",
+              description: "Você não tem permissão para aprovar notas oficiais.",
+              variant: "destructive"
+            });
+          }
         }
       } catch (error) {
         console.error('Erro ao verificar permissões:', error);
@@ -65,9 +79,16 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
             autor:usuarios!notas_oficiais_autor_id_fkey (nome_completo)
           `)
           .eq('status', 'pendente')
-          .order('criado_em', { ascending: false });
+          .order('criado_em', { ascending: sortOrder === 'asc' });
         
-        if (error) throw error;
+        if (error) {
+          toast({
+            title: "Erro ao carregar notas",
+            description: error.message || "Não foi possível carregar as notas pendentes.",
+            variant: "destructive"
+          });
+          throw error;
+        }
         
         console.log("Fetched pending notes:", data);
         
@@ -89,11 +110,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         setNotas(typedData);
       } catch (error) {
         console.error('Erro ao carregar notas:', error);
-        toast({
-          title: "Erro ao carregar notas",
-          description: "Não foi possível carregar as notas pendentes.",
-          variant: "destructive"
-        });
       } finally {
         setIsLoading(false);
       }
@@ -104,7 +120,11 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     } else {
       setIsLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, sortOrder]);
+
+  const handleToggleSortOrder = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   const handleSelectNota = (nota: NotaOficial) => {
     setSelectedNota(nota);
@@ -125,7 +145,14 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         })
         .eq('id', selectedNota.id);
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Erro ao processar nota",
+          description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+          variant: "destructive"
+        });
+        throw error;
+      }
       
       toast({
         title: status === 'aprovado' ? "Nota aprovada com sucesso!" : "Nota rejeitada",
@@ -139,11 +166,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
     } catch (error: any) {
       console.error('Erro ao processar nota:', error);
-      toast({
-        title: "Erro ao processar nota",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
     } finally {
       setIsSubmitting(false);
     }
@@ -173,6 +195,20 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       <Card className="border border-gray-200">
         <CardContent className="p-6">
+          {!isAdmin && !isLoading && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+              <div className="flex">
+                <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800">Acesso restrito</h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Você não tem permissão para aprovar notas oficiais. Entre em contato com um administrador para obter acesso.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {selectedNota ? (
             <NotaDetail
               nota={selectedNota}
@@ -182,13 +218,29 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
               isSubmitting={isSubmitting}
             />
           ) : (
-            <NotasList
-              notas={notas}
-              selectedNota={selectedNota}
-              onSelectNota={handleSelectNota}
-              isAdmin={isAdmin}
-              isLoading={isLoading}
-            />
+            <>
+              {isAdmin && !isLoading && notas.length > 0 && (
+                <div className="mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleToggleSortOrder}
+                    className="flex items-center text-sm"
+                  >
+                    <SortDesc className="h-4 w-4 mr-1" />
+                    Ordenar por {sortOrder === 'desc' ? 'mais recentes' : 'mais antigas'}
+                  </Button>
+                </div>
+              )}
+              
+              <NotasList
+                notas={notas}
+                selectedNota={selectedNota}
+                onSelectNota={handleSelectNota}
+                isAdmin={isAdmin}
+                isLoading={isLoading}
+              />
+            </>
           )}
         </CardContent>
       </Card>

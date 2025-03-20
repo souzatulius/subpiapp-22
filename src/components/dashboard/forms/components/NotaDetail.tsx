@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, XCircle, User } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotaOficial } from '../types';
@@ -33,32 +34,63 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
         </Button>
         
         <div className="mt-4">
-          <h3 className="text-xl font-medium">{nota.titulo}</h3>
+          <h3 className="text-xl font-medium text-[#003570]">{nota.titulo}</h3>
           
-          <div className="mt-2 text-sm text-gray-500">
-            <div className="flex items-center mb-1">
-              <User className="h-4 w-4 mr-1" />
-              <span>{nota.autor?.nome_completo || 'Autor desconhecido'}</span>
-            </div>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="p-4 bg-gray-50 border border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Informações da Nota</h4>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center">
+                  <User className="h-4 w-4 mr-2 text-gray-500" />
+                  <span className="font-medium mr-1">Autor:</span>
+                  <span>{nota.autor?.nome_completo || 'Autor desconhecido'}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <FileText className="h-4 w-4 mr-2 text-gray-500" />
+                  <span className="font-medium mr-1">Área:</span>
+                  <span>{nota.areas_coordenacao?.descricao || 'Não informada'}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                  <span className="font-medium mr-1">Data:</span>
+                  <span>{nota.criado_em ? format(
+                    new Date(nota.criado_em), 
+                    "dd 'de' MMMM 'de' yyyy", 
+                    { locale: ptBR }
+                  ) : 'Data desconhecida'}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-2 text-gray-500" />
+                  <span className="font-medium mr-1">Horário:</span>
+                  <span>{nota.criado_em ? format(
+                    new Date(nota.criado_em), 
+                    "HH:mm", 
+                    { locale: ptBR }
+                  ) : 'Horário desconhecido'}</span>
+                </div>
+              </div>
+            </Card>
             
-            <div className="mb-1">
-              <span className="font-medium">Área:</span>{' '}
-              {nota.areas_coordenacao?.descricao || 'Não informada'}
-            </div>
-            
-            <div>
-              <span className="font-medium">Criada em:</span>{' '}
-              {nota.criado_em ? format(
-                new Date(nota.criado_em), 
-                "dd/MM/yyyy 'às' HH:mm", 
-                { locale: ptBR }
-              ) : 'Data desconhecida'}
-            </div>
+            {nota.demanda_id && (
+              <Card className="p-4 bg-gray-50 border border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Vinculada à Demanda</h4>
+                <p className="text-sm text-gray-600">
+                  Esta nota oficial foi criada a partir de uma demanda da imprensa.
+                </p>
+              </Card>
+            )}
           </div>
         </div>
         
-        <div className="mt-8 border-t pt-4">
-          <div className="text-sm whitespace-pre-line">{nota.texto}</div>
+        <div className="mt-6">
+          <h4 className="text-base font-medium text-gray-700 mb-2">Conteúdo da Nota</h4>
+          <Card className="p-4 border border-gray-200">
+            <div className="text-sm whitespace-pre-line leading-relaxed">{nota.texto}</div>
+          </Card>
         </div>
         
         <div className="mt-8 flex justify-end space-x-4">
