@@ -25,7 +25,7 @@ serve(async (req) => {
     // Get the authorization header from the request
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Não autorizado' }), { 
+      return new Response(JSON.stringify({ error: 'Não autorizado', inseridos: 0, atualizados: 0 }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -37,7 +37,7 @@ serve(async (req) => {
     // Verify the token and get the user
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'Usuário não autorizado' }), { 
+      return new Response(JSON.stringify({ error: 'Usuário não autorizado', inseridos: 0, atualizados: 0 }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -48,7 +48,7 @@ serve(async (req) => {
     const file = formData.get('file');
     
     if (!file || !(file instanceof File)) {
-      return new Response(JSON.stringify({ error: 'Nenhum arquivo enviado' }), { 
+      return new Response(JSON.stringify({ error: 'Nenhum arquivo enviado', inseridos: 0, atualizados: 0 }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -64,7 +64,7 @@ serve(async (req) => {
     const data = XLSX.utils.sheet_to_json(worksheet);
     
     if (!data || data.length === 0) {
-      return new Response(JSON.stringify({ error: 'Arquivo vazio ou formato inválido' }), { 
+      return new Response(JSON.stringify({ error: 'Arquivo vazio ou formato inválido', inseridos: 0, atualizados: 0 }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -169,7 +169,11 @@ serve(async (req) => {
   } catch (error) {
     console.error('Erro ao processar arquivo:', error);
     return new Response(
-      JSON.stringify({ error: `Erro ao processar arquivo: ${error.message}` }),
+      JSON.stringify({ 
+        error: `Erro ao processar arquivo: ${error.message}`, 
+        inseridos: 0, 
+        atualizados: 0 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

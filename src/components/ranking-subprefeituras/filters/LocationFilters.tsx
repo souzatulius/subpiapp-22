@@ -23,8 +23,8 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
       <div className="space-y-2">
         <Label htmlFor="distrito">Distrito</Label>
         <Select
-          value={filters.distrito || ""}
-          onValueChange={(value) => onFilterChange('distrito', value || null)}
+          value={filters.distrito || "_all"}
+          onValueChange={(value) => onFilterChange('distrito', value === "_all" ? null : value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecione um distrito" />
@@ -44,8 +44,8 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
       <div className="space-y-2">
         <Label htmlFor="bairro">Bairro</Label>
         <Select
-          value={filters.bairro || ""}
-          onValueChange={(value) => onFilterChange('bairro', value || null)}
+          value={filters.bairro || "_all"}
+          onValueChange={(value) => onFilterChange('bairro', value === "_all" ? null : value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecione um bairro" />

@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { FileSpreadsheet, Download, RefreshCw, BarChart4, ListFilter } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import LoadingState from '@/components/notas-oficiais/components/LoadingState';
+import EmptyState from '@/components/notas-oficiais/components/EmptyState';
 
 const RankingDashboard: React.FC = () => {
   const {
@@ -16,8 +18,6 @@ const RankingDashboard: React.FC = () => {
     loading,
     uploadExcel,
     downloadExcel,
-    downloadUploadedFile,
-    uploadFile,
     fetchOrdens,
     setFilters,
     stats,
@@ -44,9 +44,9 @@ const RankingDashboard: React.FC = () => {
     }
   };
 
-  const toggleChartVisibility = (chartId: string) => {
-    // This is a placeholder for the toggleChartVisibility function
-    console.log('Toggle visibility for chart:', chartId);
+  const handleRemoveFile = () => {
+    setIsUploadSuccess(false);
+    setUploadedFileName('');
   };
 
   const handleUpdateStats = async () => {
@@ -62,6 +62,8 @@ const RankingDashboard: React.FC = () => {
     setIsUpdatingCharts(true);
     try {
       await fetchOrdens();
+    } catch (error) {
+      console.error('Erro ao atualizar gráficos:', error);
     } finally {
       setIsUpdatingCharts(false);
     }
@@ -114,9 +116,9 @@ const RankingDashboard: React.FC = () => {
     }
   };
 
-  const generateUpdatedCharts = (newFilters: any) => {
+  const applyFilters = (newFilters: any) => {
     setFilters(newFilters);
-    fetchOrdens();
+    handleUpdateCharts();
   };
 
   return (
@@ -139,6 +141,7 @@ const RankingDashboard: React.FC = () => {
       
       <RankingFileUpload 
         onFileUpload={handleUpload} 
+        onFileRemove={handleRemoveFile}
         lastUpdate={new Date().toLocaleDateString('pt-BR')} 
         isUploading={isUploading}
         isSuccess={isUploadSuccess}
@@ -199,30 +202,25 @@ const RankingDashboard: React.FC = () => {
         </CardContent>
       </Card>
       
-      <RankingFilters onFilterChange={generateUpdatedCharts} />
+      <RankingFilters onFilterChange={applyFilters} />
       
       {loading ? (
-        <div className="grid place-items-center h-40">
-          <div className="flex flex-col items-center">
-            <RefreshCw className="h-10 w-10 text-blue-500 animate-spin" />
-            <p className="mt-2 text-gray-500">Carregando dados...</p>
-          </div>
-        </div>
+        <LoadingState message="Carregando dados..." />
       ) : chartData.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
             <FileSpreadsheet className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-1">Nenhum dado disponível</h3>
-            <p className="text-gray-500">
-              Carregue uma planilha com dados de ordens de serviço para visualizar os gráficos.
-            </p>
+            <EmptyState 
+              title="Nenhum dado disponível"
+              description="Carregue uma planilha com dados de ordens de serviço para visualizar os gráficos."
+            />
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {chartData.map(chart => (
             <div key={chart.id} className={`chart-card ${chart.visible ? '' : 'hidden'}`}>
-              <ChartCard chart={chart} onToggleVisibility={() => toggleChartVisibility(chart.id)} />
+              <ChartCard chart={chart} onToggleVisibility={() => {}} />
             </div>
           ))}
         </div>

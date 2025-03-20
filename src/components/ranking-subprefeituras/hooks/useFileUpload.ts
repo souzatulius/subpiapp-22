@@ -44,6 +44,7 @@ export const useFileUpload = (onSuccess: (inserted: number, updated: number) => 
         throw new Error(`Erro no processamento: ${data.error}`);
       }
 
+      // Ensure these are numbers, not undefined
       const inserted = data.inseridos || 0;
       const updated = data.atualizados || 0;
 
@@ -55,7 +56,7 @@ export const useFileUpload = (onSuccess: (inserted: number, updated: number) => 
       // Call success callback to refresh data
       onSuccess(inserted, updated);
       
-      return data;
+      return { inserted, updated };
     } catch (error: any) {
       console.error('Erro ao fazer upload:', error);
       toast({
@@ -63,6 +64,7 @@ export const useFileUpload = (onSuccess: (inserted: number, updated: number) => 
         description: error.message || "Ocorreu um problema ao processar o arquivo.",
         variant: "destructive",
       });
+      return { inserted: 0, updated: 0 };
     } finally {
       setLoading(false);
     }
@@ -108,66 +110,9 @@ export const useFileUpload = (onSuccess: (inserted: number, updated: number) => 
     }
   }, [toast]);
 
-  // Download the uploaded file
-  const downloadUploadedFile = useCallback(async (fileName: string) => {
-    try {
-      // Implementation for downloading previously uploaded file would go here
-      // This would typically involve fetching from storage or generating a new file based on data
-      
-      toast({
-        title: "Funcionalidade não implementada",
-        description: "O download de arquivos enviados ainda não está disponível.",
-      });
-    } catch (error) {
-      console.error('Erro ao baixar arquivo:', error);
-      toast({
-        title: "Erro ao baixar arquivo",
-        description: "Não foi possível baixar o arquivo solicitado.",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
-  // Generic file upload function
-  const uploadFile = useCallback(async (file: File, path: string) => {
-    if (!user?.id) {
-      toast({
-        title: "Usuário não autenticado",
-        description: "É necessário estar autenticado para enviar arquivos.",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    setLoading(true);
-    try {
-      // Implementation for generic file upload would go here
-      // This would typically involve storing in Supabase Storage
-      
-      toast({
-        title: "Funcionalidade não implementada",
-        description: "O upload genérico de arquivos ainda não está disponível.",
-      });
-      
-      return null;
-    } catch (error: any) {
-      console.error('Erro ao fazer upload:', error);
-      toast({
-        title: "Erro ao fazer upload",
-        description: error.message || "Ocorreu um problema ao enviar o arquivo.",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [user, toast]);
-
   return {
     loading,
     uploadExcel,
-    downloadExcel,
-    downloadUploadedFile,
-    uploadFile
+    downloadExcel
   };
 };

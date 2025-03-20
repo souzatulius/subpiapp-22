@@ -23,8 +23,8 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       <div className="space-y-2">
         <Label htmlFor="classificacao">Classificação</Label>
         <Select
-          value={filters.classificacao || ""}
-          onValueChange={(value) => onFilterChange('classificacao', value || null)}
+          value={filters.classificacao || "_all"}
+          onValueChange={(value) => onFilterChange('classificacao', value === "_all" ? null : value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecione uma classificação" />
@@ -44,8 +44,8 @@ const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       <div className="space-y-2">
         <Label htmlFor="status">Status</Label>
         <Select
-          value={filters.status || ""}
-          onValueChange={(value) => onFilterChange('status', value || null)}
+          value={filters.status || "_all"}
+          onValueChange={(value) => onFilterChange('status', value === "_all" ? null : value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecione um status" />

@@ -46,9 +46,7 @@ const useOrdensServico = () => {
   const { 
     loading: uploadLoading, 
     uploadExcel: uploadExcelOriginal, 
-    downloadExcel, 
-    downloadUploadedFile, 
-    uploadFile 
+    downloadExcel
   } = useFileUpload(handleUploadSuccess);
 
   // Callback for when an upload is successful
@@ -66,7 +64,16 @@ const useOrdensServico = () => {
 
   // Apply filters and fetch orders
   const applyFilters = useCallback((newFilters: ChartFilters) => {
-    setFilters(newFilters);
+    // Remove any _all values which mean "all items selected"
+    const cleanedFilters: ChartFilters = {};
+    
+    for (const [key, value] of Object.entries(newFilters)) {
+      if (value !== '_all' && value !== null && value !== undefined) {
+        cleanedFilters[key as keyof ChartFilters] = value;
+      }
+    }
+    
+    setFilters(cleanedFilters);
   }, [setFilters]);
 
   // Determine loading state
@@ -84,9 +91,7 @@ const useOrdensServico = () => {
     fetchOrdens,
     uploadExcel,
     calculateStats,
-    downloadExcel,
-    downloadUploadedFile,
-    uploadFile
+    downloadExcel
   };
 };
 

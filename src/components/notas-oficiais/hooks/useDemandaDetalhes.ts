@@ -1,84 +1,89 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useEffect } from 'react';
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { Demanda, NotaOficial } from '../types';
+import { Demanda, NotaExistente, Resposta } from '../types';
+import { formatarPerguntasRespostas } from '../utils/formatarPerguntasRespostas';
 
-interface UseDemandaDetalhesReturn {
-  demanda: Demanda | null;
-  loading: boolean;
-  error: string | null;
-  notaExistente: NotaOficial | null;
-  checkingNota: boolean;
-}
-
-export const useDemandaDetalhes = (demandaId: string): UseDemandaDetalhesReturn => {
+export const useDemandaDetalhes = (demandaId: string) => {
   const [demanda, setDemanda] = useState<Demanda | null>(null);
+  const [respostas, setRespostas] = useState<Resposta[]>([]);
+  const [notaExistente, setNotaExistente] = useState<NotaExistente | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [notaExistente, setNotaExistente] = useState<NotaOficial | null>(null);
-  const [checkingNota, setCheckingNota] = useState(true);
+  const [isCheckingNota, setIsCheckingNota] = useState(true);
   const { toast } = useToast();
-  
-  const fetchDemandaDetalhes = useCallback(async () => {
-    if (!demandaId) {
-      setLoading(false);
-      return;
-    }
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Fetch demand details
-      const { data, error } = await supabase
-        .from('demandas')
-        .select('*, areas_coordenacao:area_coordenacao_id(*), autor:autor_id(*)')
-        .eq('id', demandaId)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data) {
-        // Cast to the Demanda type
-        setDemanda(data as unknown as Demanda);
+
+  useEffect(() => {
+    const fetchDemandaDetalhes = async () => {
+      setLoading(true);
+      try {
+        // Fetch demanda data
+        const { data: demandaData, error: demandaError } = await supabase
+          .from('demandas')
+          .select(`
+            *,
+            areas_coordenacao (id, descricao),
+            autor: usuario_id (nome_completo)
+          `)
+          .eq('id', demandaId)
+          .single();
+
+        if (demandaError) throw demandaError;
         
-        // Check if a press release already exists for this demand
+        // Fetch respostas
+        const { data: respostasData, error: respostasError } = await supabase
+          .from('respostas_demandas')
+          .select(`
+            *,
+            usuario:usuario_id (nome_completo)
+          `)
+          .eq('demanda_id', demandaId)
+          .order('criado_em', { ascending: false });
+
+        if (respostasError) throw respostasError;
+        
+        // Check if nota already exists for this demanda
         const { data: notaData, error: notaError } = await supabase
           .from('notas_oficiais')
           .select('*')
           .eq('demanda_id', demandaId)
           .maybeSingle();
-        
+          
         if (notaError) {
-          console.error('Erro ao verificar nota existente:', notaError);
+          console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        setNotaExistente(notaData as NotaOficial | null);
-        setCheckingNota(false);
+        setDemanda(demandaData);
+        setRespostas(respostasData || []);
+        setNotaExistente(notaData || null);
+      } catch (error: any) {
+        console.error('Erro ao buscar detalhes da demanda:', error);
+        toast({
+          title: "Erro ao carregar detalhes",
+          description: error.message || "Não foi possível carregar os detalhes da demanda.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+        setIsCheckingNota(false);
       }
-    } catch (err) {
-      const errorMsg = (err as Error).message || 'Falha ao carregar detalhes da demanda';
-      setError(errorMsg);
-      toast({
-        title: 'Erro!',
-        description: errorMsg,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
+    };
+
+    if (demandaId) {
+      fetchDemandaDetalhes();
     }
   }, [demandaId, toast]);
-  
-  useEffect(() => {
-    fetchDemandaDetalhes();
-  }, [fetchDemandaDetalhes]);
-  
+
+  const perguntasRespostas = demanda?.perguntas 
+    ? formatarPerguntasRespostas(demanda.perguntas)
+    : [];
+
   return {
     demanda,
-    loading,
-    error,
+    respostas,
+    perguntasRespostas,
     notaExistente,
-    checkingNota
+    loading,
+    isCheckingNota
   };
 };
