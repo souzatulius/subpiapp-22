@@ -3,9 +3,11 @@ import React from 'react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
+import { Edit, Shield, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { User, Permission } from './types';
 import UserPermissionRow from './UserPermissionRow';
+import PermissionSelect from './PermissionSelect';
 
 interface UserRowProps {
   user: User;
@@ -41,18 +43,44 @@ const UserRow: React.FC<UserRowProps> = ({
         </div>
       </td>
       
-      {permissions.map((permission) => (
-        <td key={permission.id} className="px-4 py-3 text-center">
-          <UserPermissionRow
-            user={user}
-            permission={permission}
-            userPermissions={userPermissions || []}
-            saving={saving}
-            handleAddPermission={handleAddPermission}
-            handleRemovePermission={handleRemovePermission}
+      <td className="px-4 py-3">
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {userPermissions.length > 0 ? (
+              permissions
+                .filter(p => userPermissions.includes(p.id))
+                .map(permission => (
+                  <Badge 
+                    key={permission.id} 
+                    className="flex items-center gap-1 bg-blue-100 text-blue-800 hover:bg-blue-200"
+                  >
+                    <Shield className="h-3 w-3" />
+                    {permission.descricao}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 text-blue-800 hover:bg-blue-200 hover:text-blue-900"
+                      onClick={() => handleRemovePermission(user.id, permission.id)}
+                      disabled={saving}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))
+            ) : (
+              <span className="text-gray-500 text-sm">Sem permissões</span>
+            )}
+          </div>
+          
+          <PermissionSelect
+            permissions={permissions}
+            userPermissions={userPermissions}
+            userId={user.id}
+            onAddPermission={handleAddPermission}
+            disabled={saving}
           />
-        </td>
-      ))}
+        </div>
+      </td>
       
       <td className="px-4 py-3 text-center">
         <Button 

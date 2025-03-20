@@ -16,13 +16,14 @@ export const useAccessControl = () => {
     userPermissions,
     setUserPermissions,
     loading,
+    fetchData,
   } = useAccessControlData();
 
   const {
     saving: permissionSaving,
     handleAddPermission,
     handleRemovePermission
-  } = usePermissionsManagement(userPermissions, setUserPermissions);
+  } = usePermissionsManagement(userPermissions, setUserPermissions, fetchData);
 
   const {
     isEditDialogOpen,
@@ -66,5 +67,6 @@ export const useAccessControl = () => {
     handleUpdateUserInfo,
     handleExportCsv,
     handlePrint,
+    fetchData,
   };
 };

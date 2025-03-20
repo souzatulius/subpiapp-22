@@ -6,7 +6,8 @@ import { UserPermissionMapping } from './types';
 
 export const usePermissionsManagement = (
   userPermissions: UserPermissionMapping,
-  setUserPermissions: React.Dispatch<React.SetStateAction<UserPermissionMapping>>
+  setUserPermissions: React.Dispatch<React.SetStateAction<UserPermissionMapping>>,
+  refreshData?: () => Promise<void>
 ) => {
   const [saving, setSaving] = useState(false);
 
@@ -47,6 +48,11 @@ export const usePermissionsManagement = (
         title: 'Permissão adicionada',
         description: 'A permissão foi adicionada com sucesso',
       });
+      
+      // Refresh data if function is provided
+      if (refreshData) {
+        await refreshData();
+      }
     } catch (error: any) {
       console.error('Erro ao adicionar permissão:', error);
       toast({
@@ -84,6 +90,11 @@ export const usePermissionsManagement = (
         title: 'Permissão removida',
         description: 'A permissão foi removida com sucesso',
       });
+      
+      // Refresh data if function is provided
+      if (refreshData) {
+        await refreshData();
+      }
     } catch (error: any) {
       console.error('Erro ao remover permissão:', error);
       toast({

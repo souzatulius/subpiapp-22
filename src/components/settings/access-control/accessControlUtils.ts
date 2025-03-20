@@ -1,58 +1,116 @@
 
 import { User, Permission } from './types';
 
-export const filterUsers = (users: User[], filter: string) => {
-  return users.filter(user => {
-    const searchTerms = filter.toLowerCase();
-    return (
-      user.nome_completo?.toLowerCase().includes(searchTerms) ||
-      user.email?.toLowerCase().includes(searchTerms)
-    );
-  });
+// Filter users by search term
+export const filterUsers = (users: User[], filter: string): User[] => {
+  if (!filter.trim()) return users;
+  
+  const searchTerm = filter.toLowerCase();
+  
+  return users.filter(user => 
+    user.nome_completo.toLowerCase().includes(searchTerm) ||
+    user.email.toLowerCase().includes(searchTerm) ||
+    (user.whatsapp && user.whatsapp.toLowerCase().includes(searchTerm))
+  );
 };
 
-export const exportToCsv = (users: User[], permissions: Permission[], userPermissions: Record<string, string[]>) => {
-  // Create CSV data
+// Export user permissions to CSV
+export const exportToCsv = (
+  users: User[], 
+  permissions: Permission[],
+  userPermissions: Record<string, string[]>
+) => {
+  // Create CSV header
   const headers = ['Nome', 'Email', 'WhatsApp', 'Aniversário', 'Permissões'];
-  const csvData = users.map(user => {
+  
+  // Create CSV rows
+  const rows = users.map(user => {
     const userPerms = userPermissions[user.id] || [];
-    const permissionNames = userPerms
-      .map(permId => {
-        const perm = permissions.find(p => p.id === permId);
-        return perm ? `${perm.descricao} (Nível: ${perm.nivel_acesso})` : '';
-      })
-      .filter(Boolean)
-      .join('; ');
+    const permissionsText = permissions
+      .filter(p => userPerms.includes(p.id))
+      .map(p => p.descricao)
+      .join(', ');
     
     return [
       user.nome_completo,
       user.email,
-      user.whatsapp || '-',
-      user.aniversario || '-',
-      permissionNames
+      user.whatsapp || '',
+      user.aniversario || '',
+      permissionsText
     ];
   });
   
+  // Combine headers and rows
   const csvContent = [
     headers.join(','),
-    ...csvData.map(row => row.map(cell => {
-      // Handle commas and quotes in CSV
-      if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"'))) {
-        return `"${cell.replace(/"/g, '""')}"`;
-      }
-      return cell;
-    }).join(','))
+    ...rows.map(row => row.map(cell => `"${(cell || '').toString().replace(/"/g, '""')}"`).join(','))
   ].join('\n');
   
-  // Download CSV file
+  // Create and trigger download
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'controle_acesso.csv';
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'user_permissions.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(link.href);
+  document.body.removeChild(link);
 };
 
+// Format and print access control table
 export const printAccessControl = () => {
-  window.print();
+  const printWindow = window.open('', '_blank');
+  
+  if (!printWindow) {
+    alert('Por favor, permita popups para imprimir.');
+    return;
+  }
+  
+  const tableElement = document.querySelector('.rounded-md.border.overflow-hidden');
+  
+  if (!tableElement) {
+    alert('Não foi possível encontrar a tabela para imprimir.');
+    printWindow.close();
+    return;
+  }
+  
+  const style = `
+    <style>
+      body { font-family: system, -apple-system, sans-serif; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background-color: #f3f4f6; }
+      h1 { color: #1e40af; }
+      .print-header { margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+      @media print {
+        body { -webkit-print-color-adjust: exact; }
+      }
+    </style>
+  `;
+  
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Controle de Acesso - Permissões de Usuários</title>
+      ${style}
+    </head>
+    <body>
+      <div class="print-header">
+        <h1>Controle de Acesso - Permissões de Usuários</h1>
+        <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+      </div>
+      ${tableElement.outerHTML}
+    </body>
+    </html>
+  `);
+  
+  printWindow.document.close();
+  
+  // Wait for the content to load, then print
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 500);
 };
