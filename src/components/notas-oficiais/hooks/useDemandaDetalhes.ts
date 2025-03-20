@@ -53,9 +53,8 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        // First convert to 'unknown' as suggested by TypeScript error
-        // Break the type reference chain with explicit casting
-        const processedDemanda = {
+        // Safe type conversion - construct new objects with explicit properties
+        const processedDemanda: Demanda = {
           id: demandaData.id,
           titulo: demandaData.titulo,
           status: demandaData.status,
@@ -68,27 +67,29 @@ export const useDemandaDetalhes = (demandaId: string) => {
           perguntas: demandaData.perguntas,
           areas_coordenacao: demandaData.areas_coordenacao,
           autor: {
-            nome_completo: demandaData.autor?.nome_completo || 'Não especificado'
+            nome_completo: typeof demandaData.autor === 'object' && demandaData.autor !== null 
+              ? demandaData.autor.nome_completo || 'Não especificado'
+              : 'Não especificado'
           }
-        } as Demanda;
+        };
         
-        const processedRespostas = (respostasData || []).map(resposta => ({
+        const processedRespostas: Resposta[] = (respostasData || []).map(resposta => ({
           id: resposta.id,
           texto: resposta.texto,
           arquivo_url: resposta.arquivo_url,
           criado_em: resposta.criado_em,
-          usuario: resposta.usuario 
-            ? { nome_completo: resposta.usuario.nome_completo } 
+          usuario: typeof resposta.usuario === 'object' && resposta.usuario !== null
+            ? { nome_completo: resposta.usuario.nome_completo }
             : null
-        })) as Resposta[];
+        }));
         
-        const processedNota = notaData ? {
+        const processedNota: NotaExistente | null = notaData ? {
           id: notaData.id,
           titulo: notaData.titulo,
           texto: notaData.texto,
           status: notaData.status,
-          demanda_id: demandaId // Explicitly add demanda_id that's missing
-        } as NotaExistente : null;
+          demanda_id: demandaId
+        } : null;
 
         setDemanda(processedDemanda);
         setRespostas(processedRespostas);
@@ -112,7 +113,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
     }
   }, [demandaId, toast]);
 
-  // Completely rewritten function to avoid recursive type issues
+  // Safe implementation to avoid recursive type issues
   const formatarPerguntasRespostas = (): PerguntaResposta[] => {
     if (!demanda || !demanda.perguntas) return [];
     
@@ -120,25 +121,20 @@ export const useDemandaDetalhes = (demandaId: string) => {
     
     try {
       // Safely handle the perguntas object to avoid circular references
-      const perguntasEntries: [string, string][] = [];
+      const perguntasObj = demanda.perguntas;
       
-      if (typeof demanda.perguntas === 'object' && demanda.perguntas !== null) {
-        // Extract only key-value string pairs
-        Object.entries(demanda.perguntas as Record<string, unknown>).forEach(([key, value]) => {
+      if (typeof perguntasObj === 'object' && perguntasObj !== null) {
+        // Extract key-value pairs safely
+        Object.entries(perguntasObj as Record<string, unknown>).forEach(([_, value]) => {
           if (typeof value === 'string') {
-            perguntasEntries.push([key, value]);
+            // Get resposta text from the first resposta if available
+            const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
+            
+            result.push({
+              pergunta: value,
+              resposta
+            });
           }
-        });
-      }
-      
-      // Create the pergunta-resposta pairs
-      for (const [_, pergunta] of perguntasEntries) {
-        // Get simple resposta text
-        const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
-        
-        result.push({
-          pergunta,
-          resposta
         });
       }
     } catch (err) {
