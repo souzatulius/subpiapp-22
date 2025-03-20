@@ -93,23 +93,31 @@ const SettingsDashboard = () => {
     fetchStats();
   }, []);
   
+  const handleSectionClick = (section: string) => {
+    // Navigate to the specific settings section
+    navigate(`/settings?tab=${section}`);
+  };
+  
   const StatCard = ({
     title,
     value,
     icon,
     description,
-    onClick,
+    section,
     highlight = false
   }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     description: string;
-    onClick?: () => void;
+    section: string;
     highlight?: boolean;
   }) => {
-    const CardComponent = (
-      <Card className={`${highlight ? 'border-blue-400' : ''} ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}>
+    return (
+      <Card 
+        className={`${highlight ? 'border-blue-400' : ''} cursor-pointer hover:shadow-md transition-shadow`}
+        onClick={() => handleSectionClick(section)}
+      >
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">{title}</CardTitle>
           {icon}
@@ -125,21 +133,11 @@ const SettingsDashboard = () => {
           </div>
           <CardDescription className="flex items-center justify-between">
             {description}
-            {onClick && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </CardDescription>
         </CardContent>
       </Card>
     );
-    
-    if (onClick) {
-      return (
-        <div onClick={onClick}>
-          {CardComponent}
-        </div>
-      );
-    }
-    
-    return CardComponent;
   };
   
   return <div className="space-y-6">
@@ -151,28 +149,28 @@ const SettingsDashboard = () => {
           value={stats.users} 
           icon={<Users className="h-4 w-4 text-muted-foreground" />} 
           description="Total de usuários cadastrados"
-          onClick={() => navigate('/settings?tab=users')}
+          section="usuarios"
         />
         <StatCard 
           title="Áreas de Coordenação" 
           value={stats.areas} 
           icon={<ArrowUpRight className="h-4 w-4 text-muted-foreground" />} 
           description="Áreas de coordenação registradas"
-          onClick={() => navigate('/settings?tab=coordination-areas')}
+          section="areas"
         />
         <StatCard 
           title="Cargos" 
           value={stats.positions} 
           icon={<Briefcase className="h-4 w-4 text-muted-foreground" />} 
           description="Tipos de cargos disponíveis"
-          onClick={() => navigate('/settings?tab=positions')}
+          section="cargos"
         />
         <StatCard 
           title="Serviços" 
           value={stats.services} 
           icon={<FileText className="h-4 w-4 text-muted-foreground" />} 
           description="Serviços registrados"
-          onClick={() => navigate('/settings?tab=services')}
+          section="servicos"
         />
       </div>
       
@@ -182,28 +180,28 @@ const SettingsDashboard = () => {
           value={stats.districts} 
           icon={<Map className="h-4 w-4 text-muted-foreground" />} 
           description="Distritos registrados"
-          onClick={() => navigate('/settings?tab=districts-neighborhoods')}
+          section="distritos_bairros"
         />
         <StatCard 
           title="Bairros" 
           value={stats.neighborhoods} 
           icon={<Map className="h-4 w-4 text-muted-foreground" />} 
           description="Bairros cadastrados"
-          onClick={() => navigate('/settings?tab=districts-neighborhoods')}
+          section="distritos_bairros"
         />
         <StatCard 
           title="Comunicados" 
           value={stats.announcements} 
           icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />} 
           description="Comunicados enviados"
-          onClick={() => navigate('/settings?tab=announcements')}
+          section="comunicados"
         />
         <StatCard 
           title="Notificações" 
           value={stats.notifications} 
           icon={<Bell className="h-4 w-4 text-muted-foreground" />} 
           description="Notificações geradas"
-          onClick={() => navigate('/settings?tab=notifications')}
+          section="notifications"
           highlight={true}
         />
       </div>

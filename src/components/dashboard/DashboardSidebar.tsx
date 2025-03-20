@@ -30,7 +30,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     // Seção 2: Comunicação
     {
       icon: <PlusCircle size={20} />,
-      label: 'Nova Solicitação',
+      label: 'Cadastrar Demanda',
       path: '/demandas/nova'
     }, 
     {
