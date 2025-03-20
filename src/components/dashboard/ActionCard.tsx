@@ -1,21 +1,23 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { LucideIcon } from 'lucide-react';
+
 interface ActionCardProps {
   title: string;
   icon: string | React.ReactNode;
   onClick: () => void;
   color: 'blue' | 'green' | 'orange' | 'purple' | 'dark-blue';
   iconSize?: 'normal' | 'large' | 'giant';
-  className?: string; // Added className prop to the interface
+  className?: string;
 }
+
 const ActionCard: React.FC<ActionCardProps> = ({
   title,
   icon,
   onClick,
   color,
   iconSize = 'normal',
-  className = '' // Provide default empty string
+  className = ''
 }) => {
   const getColorClasses = () => {
     switch (color) {
@@ -33,6 +35,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'bg-gray-50 border-gray-200 hover:bg-gray-100';
     }
   };
+
   const getIconSizeClasses = () => {
     switch (iconSize) {
       case 'giant':
@@ -44,23 +47,32 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'text-4xl mb-4';
     }
   };
+
   const renderIcon = () => {
     if (typeof icon === 'string') {
       return <span className={getIconSizeClasses()}>{icon}</span>;
     }
 
     // If it's a React component (like a Lucide icon)
-    return <div className={`${getIconSizeClasses()} flex justify-center items-center`}>
+    return (
+      <div className={`${getIconSizeClasses()} flex justify-center items-center`}>
         {icon}
-      </div>;
+      </div>
+    );
   };
-  return <Card onClick={onClick} className="">
-      <CardContent className="p-4 bg-gray-800 shadow-md hover:opacity-90 transition-all duration-300 cursor-pointer rounded-2xl mx-0 my-0 px-0 py-[40px]">
-        {renderIcon()}
-        <h3 className="text-lg font-semibold text-slate-200 text-center">
+
+  return (
+    <Card onClick={onClick} className="cursor-pointer">
+      <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+        <div className="mb-4 p-3 rounded-full bg-gray-100">
+          {renderIcon()}
+        </div>
+        <h3 className="text-lg font-semibold">
           {title}
         </h3>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default ActionCard;

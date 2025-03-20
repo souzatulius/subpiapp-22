@@ -74,6 +74,60 @@ export type Database = {
         }
         Relationships: []
       }
+      comunicacoes_oficiais: {
+        Row: {
+          aprovador_id: string | null
+          area_coordenacao_id: string
+          atualizado_em: string
+          autor_id: string
+          criado_em: string
+          demanda_id: string | null
+          id: string
+          status: string
+          texto: string
+          titulo: string
+        }
+        Insert: {
+          aprovador_id?: string | null
+          area_coordenacao_id: string
+          atualizado_em?: string
+          autor_id: string
+          criado_em?: string
+          demanda_id?: string | null
+          id?: string
+          status?: string
+          texto: string
+          titulo: string
+        }
+        Update: {
+          aprovador_id?: string | null
+          area_coordenacao_id?: string
+          atualizado_em?: string
+          autor_id?: string
+          criado_em?: string
+          demanda_id?: string | null
+          id?: string
+          status?: string
+          texto?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comunicacoes_oficiais_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comunicacoes_oficiais_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comunicados: {
         Row: {
           autor_id: string
@@ -338,6 +392,42 @@ export type Database = {
           },
         ]
       }
+      ordens_servico: {
+        Row: {
+          bairro: string | null
+          classificacao: string | null
+          criado_em: string | null
+          dias: number | null
+          distrito: string | null
+          id: number
+          ordem_servico: string
+          status: string | null
+          ultima_atualizacao: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          classificacao?: string | null
+          criado_em?: string | null
+          dias?: number | null
+          distrito?: string | null
+          id?: number
+          ordem_servico: string
+          status?: string | null
+          ultima_atualizacao?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          classificacao?: string | null
+          criado_em?: string | null
+          dias?: number | null
+          distrito?: string | null
+          id?: number
+          ordem_servico?: string
+          status?: string | null
+          ultima_atualizacao?: string | null
+        }
+        Relationships: []
+      }
       origens_demandas: {
         Row: {
           criado_em: string
@@ -466,6 +556,33 @@ export type Database = {
           criado_em?: string
           descricao?: string
           id?: string
+        }
+        Relationships: []
+      }
+      uploads_ordens_servico: {
+        Row: {
+          data_upload: string | null
+          id: number
+          nome_arquivo: string | null
+          registros_atualizados: number | null
+          registros_inseridos: number | null
+          usuario_id: string
+        }
+        Insert: {
+          data_upload?: string | null
+          id?: number
+          nome_arquivo?: string | null
+          registros_atualizados?: number | null
+          registros_inseridos?: number | null
+          usuario_id: string
+        }
+        Update: {
+          data_upload?: string | null
+          id?: number
+          nome_arquivo?: string | null
+          registros_atualizados?: number | null
+          registros_inseridos?: number | null
+          usuario_id?: string
         }
         Relationships: []
       }
