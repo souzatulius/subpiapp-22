@@ -30,12 +30,12 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   if (!hasActiveFilters) return null;
 
   const renderFilterBadges = (
-    filterType: keyof FilterOptions, 
+    filterType: keyof Omit<FilterOptions, 'dateRange'>, 
     label: string
   ) => {
     if (filters[filterType][0] === 'Todos') return null;
     
-    return filters[filterType].map(value => (
+    return (filters[filterType] as string[]).map(value => (
       <Badge key={`${filterType}-${value}`} variant="secondary" className="flex items-center gap-1">
         <span>{label}: {value}</span>
         <Button 

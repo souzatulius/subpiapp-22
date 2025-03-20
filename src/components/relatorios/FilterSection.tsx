@@ -30,28 +30,31 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
   
   const handleFilterChange = (filterType: keyof FilterOptions, value: string) => {
-    let newValues = [...filters[filterType]];
-    
-    if (value === 'Todos') {
-      newValues = ['Todos'];
-    } else {
-      // Remove 'Todos' se estiver presente
-      newValues = newValues.filter(v => v !== 'Todos');
+    // We need to ensure we're only dealing with string array properties
+    if (filterType !== 'dateRange') {
+      let newValues = [...filters[filterType] as string[]];
       
-      // Adiciona ou remove o valor
-      if (newValues.includes(value)) {
-        newValues = newValues.filter(v => v !== value);
-      } else {
-        newValues.push(value);
-      }
-      
-      // Se não houver nenhum valor, adiciona 'Todos'
-      if (newValues.length === 0) {
+      if (value === 'Todos') {
         newValues = ['Todos'];
+      } else {
+        // Remove 'Todos' se estiver presente
+        newValues = newValues.filter(v => v !== 'Todos');
+        
+        // Adiciona ou remove o valor
+        if (newValues.includes(value)) {
+          newValues = newValues.filter(v => v !== value);
+        } else {
+          newValues.push(value);
+        }
+        
+        // Se não houver nenhum valor, adiciona 'Todos'
+        if (newValues.length === 0) {
+          newValues = ['Todos'];
+        }
       }
+      
+      onFiltersChange({ [filterType]: newValues } as any);
     }
-    
-    onFiltersChange({ [filterType]: newValues } as any);
   };
   
   const clearFilters = () => {
