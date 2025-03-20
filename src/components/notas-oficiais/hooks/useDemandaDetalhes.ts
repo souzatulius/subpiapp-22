@@ -53,7 +53,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        // Use type assertion to handle the Supabase response
+        // Use explicit type casting to avoid recursive type issues
         setDemanda(demandaData as unknown as Demanda);
         setRespostas(respostasData as Resposta[] || []);
         setNotaExistente(notaData as NotaExistente || null);
@@ -76,22 +76,28 @@ export const useDemandaDetalhes = (demandaId: string) => {
     }
   }, [demandaId, toast]);
 
-  // Fix the formatarPerguntasRespostas function
+  // Fix the formatarPerguntasRespostas function to avoid recursive types
   const formatarPerguntasRespostas = (): PerguntaResposta[] => {
     if (!demanda?.perguntas) return [];
     
     const result: PerguntaResposta[] = [];
-    // Convert perguntas to a Record<string, string> type
-    const perguntasObj = typeof demanda.perguntas === 'object' 
-      ? demanda.perguntas as Record<string, string>
-      : {};
     
+    // Safely convert perguntas to a Record type, avoiding deep recursion
+    const perguntasObj: Record<string, string> = {};
+    
+    if (typeof demanda.perguntas === 'object' && demanda.perguntas !== null) {
+      // Copy only the string values to avoid deep type recursion
+      Object.entries(demanda.perguntas).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          perguntasObj[key] = value;
+        }
+      });
+    }
+    
+    // Create PerguntaResposta objects from the perguntasObj
     for (const [key, pergunta] of Object.entries(perguntasObj)) {
-      // Look for a matching resposta in the respostas array
-      const resposta = respostas.length > 0 ? 
-        // Simple implementation - can be enhanced based on actual data structure
-        respostas[0].texto || '' : 
-        '';
+      // Find a matching resposta in the respostas array
+      const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
       
       result.push({ 
         pergunta, 
