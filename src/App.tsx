@@ -59,7 +59,23 @@ const App = () => (
               } 
             />
             <Route 
+              path="/demandas/nova" 
+              element={
+                <ProtectedRoute>
+                  <Demandas />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/notas-oficiais" 
+              element={
+                <ProtectedRoute>
+                  <NotasOficiais />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/notas-oficiais/nova" 
               element={
                 <ProtectedRoute>
                   <NotasOficiais />

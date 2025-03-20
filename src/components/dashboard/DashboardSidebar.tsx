@@ -1,7 +1,17 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, ClipboardList, FileText, BarChart2, Users, Settings, TrendingUp } from 'lucide-react';
+import { 
+  Home, 
+  ClipboardList, 
+  FileText, 
+  BarChart2, 
+  Settings, 
+  TrendingUp,
+  PlusCircle,
+  MessageCircle,
+  CheckCircle 
+} from 'lucide-react';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -11,36 +21,45 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   isOpen
 }) => {
   const navItems = [
+    // Seção 1: Página Principal
     {
       icon: <Home size={20} />,
       label: 'Início',
       path: '/dashboard'
+    },
+    // Seção 2: Comunicação
+    {
+      icon: <PlusCircle size={20} />,
+      label: 'Nova Solicitação',
+      path: '/demandas/nova'
     }, 
     {
-      icon: <ClipboardList size={20} />,
-      label: 'Demandas',
+      icon: <MessageCircle size={20} />,
+      label: 'Responder Demandas',
       path: '/demandas'
     }, 
     {
       icon: <FileText size={20} />,
-      label: 'Notas Oficiais',
-      path: '/notas-oficiais'
-    }, 
+      label: 'Criar Nota Oficial',
+      path: '/notas-oficiais/nova'
+    },
     {
-      icon: <TrendingUp size={20} />,
-      label: 'Ranking das Subs',
-      path: '/ranking-subs'
+      icon: <CheckCircle size={20} />,
+      label: 'Aprovar Nota',
+      path: '/notas-oficiais'
     },
     {
       icon: <BarChart2 size={20} />,
       label: 'Relatórios',
       path: '/relatorios'
     }, 
+    // Seção 3: Ranking das Subs
     {
-      icon: <Users size={20} />,
-      label: 'Usuários',
-      path: '/usuarios'
-    }, 
+      icon: <TrendingUp size={20} />,
+      label: 'Ranking das Subs',
+      path: '/ranking-subs'
+    },
+    // Seção 4: Ajustes
     {
       icon: <Settings size={20} className="px-0 mx-0" />,
       label: 'Ajustes',
