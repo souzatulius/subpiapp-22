@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast";
 import {
   OrdemServico,
   UploadLog,
@@ -8,8 +7,7 @@ import {
   ChartFilters,
   OrdensStats,
 } from '../types';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useSession } from '@supabase/auth-helpers-react';
+import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -60,8 +58,6 @@ const defaultChartData: ChartData[] = [
 ];
 
 const useOrdensServico = () => {
-  const supabase = useSupabaseClient();
-  const session = useSession();
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadLogs, setUploadLogs] = useState<UploadLog[]>([]);
@@ -105,11 +101,11 @@ const useOrdensServico = () => {
           title: "Erro ao buscar ordens de serviço!",
           description: "Ocorreu um problema ao carregar os dados.",
           variant: "destructive",
-        })
+        });
       }
 
       if (data) {
-        setOrdens(data);
+        setOrdens(data as OrdemServico[]);
       }
     } finally {
       setLoading(false);
@@ -129,19 +125,19 @@ const useOrdensServico = () => {
           title: "Erro ao buscar logs de upload!",
           description: "Ocorreu um problema ao carregar os logs de upload.",
           variant: "destructive",
-        })
+        });
       }
 
       if (data) {
-        setUploadLogs(data);
+        setUploadLogs(data as UploadLog[]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro inesperado ao buscar logs de upload:', error);
       toast({
         title: "Erro inesperado!",
         description: "Ocorreu um problema inesperado ao carregar os logs de upload.",
         variant: "destructive",
-      })
+      });
     }
   }, [supabase, toast]);
 
@@ -150,7 +146,12 @@ const useOrdensServico = () => {
       const reader = new FileReader();
 
       reader.onload = (e: ProgressEvent<FileReader>) => {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        if (!e.target?.result) {
+          reject(new Error("Failed to read file"));
+          return;
+        }
+        
+        const data = new Uint8Array(e.target.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
@@ -191,7 +192,7 @@ const useOrdensServico = () => {
           title: "Erro ao processar o arquivo!",
           description: "O arquivo está vazio ou em formato incorreto.",
           variant: "destructive",
-        })
+        });
         return;
       }
 
@@ -254,7 +255,7 @@ const useOrdensServico = () => {
 
       // Log the upload
       const uploadLog = {
-        usuario_id: session?.user.id,
+        usuario_id: supabase.auth.getUser().then(data => data.data.user?.id) || null,
         nome_arquivo: file.name,
         registros_inseridos: insertedCount,
         registros_atualizados: updatedCount,
@@ -271,13 +272,13 @@ const useOrdensServico = () => {
           title: "Erro ao inserir log de upload!",
           description: "Ocorreu um problema ao salvar o log de upload.",
           variant: "destructive",
-        })
+        });
       }
 
       toast({
         title: "Sucesso!",
         description: `Arquivo ${file.name} processado. Inseridos: ${insertedCount}, Atualizados: ${updatedCount}.`,
-      })
+      });
 
       // Refresh data
       fetchOrdens();
@@ -288,7 +289,7 @@ const useOrdensServico = () => {
         title: "Erro durante o upload!",
         description: error.message || "Ocorreu um erro inesperado durante o upload.",
         variant: "destructive",
-      })
+      });
     } finally {
       setLoading(false);
     }
@@ -306,7 +307,7 @@ const useOrdensServico = () => {
           title: "Erro ao buscar todas as ordens!",
           description: "Ocorreu um problema ao carregar os dados.",
           variant: "destructive",
-        })
+        });
         return;
       }
 
@@ -360,7 +361,7 @@ const useOrdensServico = () => {
         title: "Erro ao calcular estatísticas!",
         description: "Ocorreu um problema ao calcular as estatísticas.",
         variant: "destructive",
-      })
+      });
     }
   }, [supabase, toast]);
 
@@ -477,7 +478,6 @@ const useOrdensServico = () => {
     });
   }, [stats, ordens]);
 
-  // Function to generate a list of distinct colors
   const generateColors = (count: number): string[] => {
     const colors: string[] = [];
     for (let i = 0; i < count; i++) {
@@ -496,7 +496,7 @@ const useOrdensServico = () => {
       const { data, error } = await supabase
         .storage
         .from('excel')
-        .createSignedUrl('modelo_ordens_servico.xlsx', 60)
+        .createSignedUrl('modelo_ordens_servico.xlsx', 60);
 
       if (error) {
         console.error('Erro ao gerar URL assinada:', error);
@@ -504,7 +504,7 @@ const useOrdensServico = () => {
           title: "Erro ao gerar URL assinada!",
           description: "Ocorreu um problema ao gerar o link para download.",
           variant: "destructive",
-        })
+        });
         return;
       }
 
@@ -523,7 +523,7 @@ const useOrdensServico = () => {
         title: "Erro ao fazer download do Excel!",
         description: "Ocorreu um problema ao baixar o arquivo.",
         variant: "destructive",
-      })
+      });
     } finally {
       setLoading(false);
     }
@@ -535,7 +535,7 @@ const useOrdensServico = () => {
       const { data, error } = await supabase
         .storage
         .from('uploads')
-        .createSignedUrl(publicUrl, 60)
+        .createSignedUrl(publicUrl, 60);
 
       if (error) {
         console.error('Erro ao gerar URL assinada:', error);
@@ -543,7 +543,7 @@ const useOrdensServico = () => {
           title: "Erro ao gerar URL assinada!",
           description: "Ocorreu um problema ao gerar o link para download.",
           variant: "destructive",
-        })
+        });
         return;
       }
 
@@ -561,7 +561,7 @@ const useOrdensServico = () => {
         title: "Erro ao fazer download do arquivo!",
         description: "Ocorreu um problema ao baixar o arquivo.",
         variant: "destructive",
-      })
+      });
     } finally {
       setLoading(false);
     }
@@ -580,7 +580,7 @@ const useOrdensServico = () => {
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
-        })
+        });
 
       if (error) {
         console.error('Erro ao fazer upload do arquivo:', error);
@@ -588,7 +588,7 @@ const useOrdensServico = () => {
           title: "Erro ao fazer upload do arquivo!",
           description: "Ocorreu um problema ao enviar o arquivo.",
           variant: "destructive",
-        })
+        });
         return;
       }
 
@@ -596,13 +596,13 @@ const useOrdensServico = () => {
         const { data: publicUrlData } = supabase
           .storage
           .from('uploads')
-          .getPublicUrl(filePath)
+          .getPublicUrl(filePath);
 
         if (publicUrlData) {
           toast({
             title: "Sucesso!",
             description: `Arquivo ${file.name} enviado com sucesso!`,
-          })
+          });
         }
       }
     } catch (error) {
@@ -611,7 +611,7 @@ const useOrdensServico = () => {
         title: "Erro ao fazer upload do arquivo!",
         description: "Ocorreu um problema ao enviar o arquivo.",
         variant: "destructive",
-      })
+      });
     } finally {
       setLoading(false);
     }

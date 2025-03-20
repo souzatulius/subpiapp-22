@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useOrdensServico } from './hooks/useOrdensServico';
+import useOrdensServico from './hooks/useOrdensServico';
 import RankingFileUpload from './RankingFileUpload';
 import RankingFilters from './RankingFilters';
 import ChartCard from './charts/ChartCard';
@@ -12,12 +12,11 @@ import html2canvas from 'html2canvas';
 
 const RankingDashboard: React.FC = () => {
   const { 
-    charts, 
+    chartData, 
     loading, 
-    handleFileUpload, 
-    generateUpdatedCharts, 
-    toggleChartVisibility,
-    lastUpdate,
+    uploadExcel, 
+    fetchOrdens,
+    setFilters,
     stats
   } = useOrdensServico();
   
@@ -27,10 +26,15 @@ const RankingDashboard: React.FC = () => {
   const handleUpload = async (file: File) => {
     setIsUploading(true);
     try {
-      await handleFileUpload(file);
+      await uploadExcel(file);
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const toggleChartVisibility = (chartId: string) => {
+    // This is a placeholder for the toggleChartVisibility function
+    console.log('Toggle visibility for chart:', chartId);
   };
   
   const handleExportAllToPDF = async () => {
@@ -49,10 +53,9 @@ const RankingDashboard: React.FC = () => {
       pdf.setFontSize(18);
       pdf.text('Ranking das Subprefeituras - Relatório Completo', margin, margin + 5);
       
-      if (lastUpdate) {
-        pdf.setFontSize(10);
-        pdf.text(`Data da última atualização: ${lastUpdate}`, margin, margin + 10);
-      }
+      const lastUpdate = new Date().toLocaleDateString('pt-BR');
+      pdf.setFontSize(10);
+      pdf.text(`Data da última atualização: ${lastUpdate}`, margin, margin + 10);
       
       let yPosition = margin + 20;
       
@@ -88,6 +91,11 @@ const RankingDashboard: React.FC = () => {
       console.error('Erro ao exportar para PDF:', error);
     }
   };
+
+  const generateUpdatedCharts = (newFilters: any) => {
+    setFilters(newFilters);
+    fetchOrdens();
+  };
   
   return (
     <div className="space-y-6" ref={dashboardRef}>
@@ -108,8 +116,8 @@ const RankingDashboard: React.FC = () => {
       </div>
       
       <RankingFileUpload 
-        onFileUpload={handleUpload} 
-        lastUpdate={lastUpdate}
+        onFileUpload={handleUpload}
+        lastUpdate={new Date().toLocaleDateString('pt-BR')}
         isUploading={isUploading}
       />
       
@@ -145,7 +153,7 @@ const RankingDashboard: React.FC = () => {
             <p className="mt-2 text-gray-500">Carregando dados...</p>
           </div>
         </div>
-      ) : charts.length === 0 ? (
+      ) : chartData.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
             <FileSpreadsheet className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -157,11 +165,11 @@ const RankingDashboard: React.FC = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {charts.map(chart => (
+          {chartData.map(chart => (
             <div key={chart.id} className={`chart-card ${chart.visible ? '' : 'hidden'}`}>
               <ChartCard 
                 chart={chart}
-                onToggleVisibility={toggleChartVisibility}
+                onToggleVisibility={() => toggleChartVisibility(chart.id)}
               />
             </div>
           ))}

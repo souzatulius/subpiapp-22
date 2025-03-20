@@ -1,7 +1,15 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { Demanda, Resposta, NotaOficial } from '../types'
+import { Demanda, Resposta } from '../types'
+
+export interface NotaOficial {
+  id: string;
+  titulo: string;
+  texto: string;
+  status: string;
+  demanda_id?: string;
+}
 
 export const useDemandaDetalhes = (demandaId: string) => {
   const [demanda, setDemanda] = useState<Demanda | null>(null)
@@ -46,9 +54,9 @@ export const useDemandaDetalhes = (demandaId: string) => {
 
         if (notaError) throw notaError
 
-        setDemanda(demandaData)
+        setDemanda(demandaData as Demanda)
         setRespostas(respostasData || [])
-        setNotaExistente(notaData)
+        setNotaExistente(notaData as NotaOficial | null)
       } catch (error) {
         console.error('Erro ao carregar detalhes da demanda:', error)
       } finally {
