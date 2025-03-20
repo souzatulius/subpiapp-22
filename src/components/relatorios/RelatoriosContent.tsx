@@ -235,8 +235,8 @@ const RelatoriosContent = () => {
               <SelectValue placeholder="Período" />
             </SelectTrigger>
             <SelectContent>
-              <div className="space-y-1 p-2">
-                <div className="px-2 py-1.5 cursor-pointer hover:bg-muted rounded-sm" onClick={() => setPeriod('semanal')}>Semanal</div>
+              <div className="space-y-1 p-2 bg-gray-50">
+                <div onClick={() => setPeriod('semanal')} className="px-2 py-1.5 cursor-pointer rounded-sm bg-zinc-300">Semanal</div>
                 <div className="px-2 py-1.5 cursor-pointer hover:bg-muted rounded-sm" onClick={() => setPeriod('mensal')}>Mensal</div>
                 <div className="px-2 py-1.5 cursor-pointer hover:bg-muted rounded-sm" onClick={() => setPeriod('trimestral')}>Trimestral</div>
                 <div className="px-2 py-1.5 cursor-pointer hover:bg-muted rounded-sm" onClick={() => setPeriod('anual')}>Anual</div>
