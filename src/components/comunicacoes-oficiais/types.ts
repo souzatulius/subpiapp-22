@@ -56,8 +56,10 @@ export interface DetalhesDemandaProps {
 }
 
 export interface EmptyStateProps {
-  message: string;
+  title: string;
   description?: string;
+  action?: React.ReactNode;
+  message?: string; // Keep the message property for backward compatibility
 }
 
 export interface LoadingStateProps {
