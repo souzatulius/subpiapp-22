@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,13 +8,15 @@ import { toast } from '@/components/ui/use-toast';
 import NotasList from './components/NotasList';
 import NotaDetail from './components/NotaDetail';
 import { NotaOficial } from './types';
-
 interface AprovarNotaFormProps {
   onClose: () => void;
 }
-
-const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
-  const { user } = useAuth();
+const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({
+  onClose
+}) => {
+  const {
+    user
+  } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [notas, setNotas] = useState<NotaOficial[]>([]);
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
@@ -30,11 +31,12 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         if (user) {
           // Log to help debug permission issues
           console.log("Checking admin privileges for user:", user.id);
-          
-          const { data, error } = await supabase.rpc('is_admin', {
+          const {
+            data,
+            error
+          } = await supabase.rpc('is_admin', {
             user_id: user.id
           });
-          
           if (error) {
             console.error('Erro ao verificar permissões:', error);
             toast({
@@ -44,10 +46,9 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
             });
             throw error;
           }
-          
           console.log("Admin check result:", data);
           setIsAdmin(!!data); // Ensure boolean conversion
-          
+
           if (!data) {
             toast({
               title: "Acesso restrito",
@@ -63,7 +64,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         setIsLoading(false);
       }
     };
-
     checkIsAdmin();
   }, [user]);
 
@@ -72,17 +72,16 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     const fetchNotas = async () => {
       try {
         setIsLoading(true);
-        
-        const { data, error } = await supabase
-          .from('notas_oficiais')
-          .select(`
+        const {
+          data,
+          error
+        } = await supabase.from('notas_oficiais').select(`
             *,
             areas_coordenacao (descricao),
             autor:usuarios!notas_oficiais_autor_id_fkey (nome_completo)
-          `)
-          .eq('status', 'pendente')
-          .order('criado_em', { ascending: sortOrder === 'asc' });
-        
+          `).eq('status', 'pendente').order('criado_em', {
+          ascending: sortOrder === 'asc'
+        });
         if (error) {
           console.error('Erro ao carregar notas:', error);
           toast({
@@ -92,9 +91,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           });
           throw error;
         }
-        
         console.log("Fetched pending notes:", data);
-        
+
         // Properly cast the data to match the NotaOficial interface
         const typedData: NotaOficial[] = data?.map(item => ({
           id: item.id,
@@ -109,7 +107,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           areas_coordenacao: item.areas_coordenacao,
           autor: item.autor
         })) || [];
-        
         setNotas(typedData);
       } catch (error) {
         console.error('Erro ao carregar notas:', error);
@@ -117,37 +114,29 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         setIsLoading(false);
       }
     };
-
     if (isAdmin) {
       fetchNotas();
     } else {
       setIsLoading(false);
     }
   }, [isAdmin, sortOrder]);
-
   const handleToggleSortOrder = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
-
   const handleSelectNota = (nota: NotaOficial) => {
     setSelectedNota(nota);
   };
-
   const handleAprovarRejeitar = async (status: 'aprovado' | 'rejeitado') => {
     if (!selectedNota) return;
-    
     try {
       setIsSubmitting(true);
-      
-      const { error } = await supabase
-        .from('notas_oficiais')
-        .update({ 
-          status, 
-          aprovador_id: user?.id,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', selectedNota.id);
-      
+      const {
+        error
+      } = await supabase.from('notas_oficiais').update({
+        status,
+        aprovador_id: user?.id,
+        atualizado_em: new Date().toISOString()
+      }).eq('id', selectedNota.id);
       if (error) {
         toast({
           title: "Erro ao processar nota",
@@ -156,50 +145,24 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         });
         throw error;
       }
-      
       toast({
         title: status === 'aprovado' ? "Nota aprovada com sucesso!" : "Nota rejeitada",
-        description: status === 'aprovado' ? 
-          "A nota oficial foi aprovada e está pronta para publicação." : 
-          "A nota oficial foi rejeitada.",
+        description: status === 'aprovado' ? "A nota oficial foi aprovada e está pronta para publicação." : "A nota oficial foi rejeitada."
       });
-      
       setNotas(notas.filter(n => n.id !== selectedNota.id));
       setSelectedNota(null);
-      
     } catch (error: any) {
       console.error('Erro ao processar nota:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <Button 
-          variant="ghost" 
-          onClick={onClose}
-          className="p-1.5"
-        >
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </Button>
-        <h2 className="text-xl font-semibold text-[#003570]">
-          Aprovar Notas Oficiais
-        </h2>
-        <Button 
-          variant="ghost" 
-          onClick={onClose}
-          className="p-1.5"
-        >
-          <X className="h-5 w-5 text-gray-600" />
-        </Button>
-      </div>
+  return <div className="animate-fade-in">
+      
       
       <Card className="border border-gray-200">
         <CardContent className="p-6">
-          {!isAdmin && !isLoading && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+          {!isAdmin && !isLoading && <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
               <div className="flex">
                 <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
                 <div>
@@ -209,46 +172,20 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
                   </p>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
           
-          {selectedNota ? (
-            <NotaDetail
-              nota={selectedNota}
-              onBack={() => setSelectedNota(null)}
-              onAprovar={() => handleAprovarRejeitar('aprovado')}
-              onRejeitar={() => handleAprovarRejeitar('rejeitado')}
-              isSubmitting={isSubmitting}
-            />
-          ) : (
-            <>
-              {isAdmin && !isLoading && notas.length > 0 && (
-                <div className="mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleToggleSortOrder}
-                    className="flex items-center text-sm"
-                  >
+          {selectedNota ? <NotaDetail nota={selectedNota} onBack={() => setSelectedNota(null)} onAprovar={() => handleAprovarRejeitar('aprovado')} onRejeitar={() => handleAprovarRejeitar('rejeitado')} isSubmitting={isSubmitting} /> : <>
+              {isAdmin && !isLoading && notas.length > 0 && <div className="mb-4">
+                  <Button variant="outline" size="sm" onClick={handleToggleSortOrder} className="flex items-center text-sm">
                     <SortDesc className="h-4 w-4 mr-1" />
                     Ordenar por {sortOrder === 'desc' ? 'mais recentes' : 'mais antigas'}
                   </Button>
-                </div>
-              )}
+                </div>}
               
-              <NotasList
-                notas={notas}
-                selectedNota={selectedNota}
-                onSelectNota={handleSelectNota}
-                isAdmin={isAdmin}
-                isLoading={isLoading}
-              />
-            </>
-          )}
+              <NotasList notas={notas} selectedNota={selectedNota} onSelectNota={handleSelectNota} isAdmin={isAdmin} isLoading={isLoading} />
+            </>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default AprovarNotaForm;
