@@ -26,3 +26,4 @@ ChartJS.register(
 );
 
 // This is just a registration file, not a component
+
