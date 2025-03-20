@@ -3,6 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ValidationError } from '@/lib/formValidationUtils';
 
 interface LocationStepProps {
   formData: {
@@ -15,6 +16,7 @@ interface LocationStepProps {
   setSelectedDistrito: (value: string) => void;
   distritos: any[];
   filteredBairros: any[];
+  errors?: ValidationError[];
 }
 
 const LocationStep: React.FC<LocationStepProps> = ({
@@ -24,8 +26,15 @@ const LocationStep: React.FC<LocationStepProps> = ({
   handleSelectChange,
   setSelectedDistrito,
   distritos,
-  filteredBairros
+  filteredBairros,
+  errors = []
 }) => {
+  const hasError = (field: string) => errors.some(err => err.field === field);
+  const getErrorMessage = (field: string) => {
+    const error = errors.find(err => err.field === field);
+    return error ? error.message : '';
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -55,13 +64,18 @@ const LocationStep: React.FC<LocationStepProps> = ({
       </div>
       
       <div>
-        <Label htmlFor="bairro_id">Bairro</Label>
+        <Label 
+          htmlFor="bairro_id"
+          className={`block ${hasError('bairro_id') ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Bairro {hasError('bairro_id') && <span className="text-orange-500">*</span>}
+        </Label>
         <Select 
           value={formData.bairro_id} 
           onValueChange={value => handleSelectChange('bairro_id', value)} 
           disabled={!selectedDistrito}
         >
-          <SelectTrigger className="rounded-lg">
+          <SelectTrigger className={`rounded-lg ${hasError('bairro_id') ? 'border-orange-500 ring-orange-500' : ''}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -72,6 +86,9 @@ const LocationStep: React.FC<LocationStepProps> = ({
             ))}
           </SelectContent>
         </Select>
+        {hasError('bairro_id') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('bairro_id')}</p>
+        )}
       </div>
     </div>
   );

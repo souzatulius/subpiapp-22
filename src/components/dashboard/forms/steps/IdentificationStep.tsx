@@ -4,10 +4,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
-  Road, 
+  LayoutDashboard,
   Droplet, 
   Trash2, 
-  Tree, 
+  Trees, 
   AlertTriangle, 
   MessageSquare, 
   Briefcase, 
@@ -17,8 +17,7 @@ import {
   Heart, 
   Home, 
   Code, 
-  Lightbulb, 
-  LayoutDashboard 
+  Lightbulb
 } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 
@@ -54,10 +53,10 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
     const iconMap: {
       [key: string]: React.ReactNode;
     } = {
-      "Manutenção Viária": <Road className="h-6 w-6" />,
+      "Manutenção Viária": <LayoutDashboard className="h-6 w-6" />, // Changed from Road to LayoutDashboard
       "Drenagem": <Droplet className="h-6 w-6" />,
       "Limpeza Pública": <Trash2 className="h-6 w-6" />,
-      "Áreas Verdes": <Tree className="h-6 w-6" />,
+      "Áreas Verdes": <Trees className="h-6 w-6" />, // Changed from Tree to Trees
       "Fiscalização": <AlertTriangle className="h-6 w-6" />,
       "Comunicação": <MessageSquare className="h-6 w-6" />,
       "Administrativa": <Briefcase className="h-6 w-6" />,

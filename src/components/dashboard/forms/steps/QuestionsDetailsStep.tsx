@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
 import FileUpload from '../components/FileUpload';
+import { ValidationError } from '@/lib/formValidationUtils';
 
 interface QuestionsDetailsStepProps {
   formData: {
@@ -16,13 +17,15 @@ interface QuestionsDetailsStepProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handlePerguntaChange: (index: number, value: string) => void;
   handleSelectChange: (name: string, value: string) => void;
+  errors?: ValidationError[];
 }
 
 const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
   formData,
   handleChange,
   handlePerguntaChange,
-  handleSelectChange
+  handleSelectChange,
+  errors = []
 }) => {
   const [visibleQuestions, setVisibleQuestions] = useState<number[]>(
     formData.perguntas.filter(p => p.trim() !== '').length > 0 
@@ -44,6 +47,12 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
 
   const handleFileChange = (fileUrl: string) => {
     handleSelectChange('arquivo_url', fileUrl);
+  };
+
+  const hasError = (field: string) => errors.some(err => err.field === field);
+  const getErrorMessage = (field: string) => {
+    const error = errors.find(err => err.field === field);
+    return error ? error.message : '';
   };
 
   return (
@@ -92,7 +101,12 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
       </div>
       
       <div>
-        <Label htmlFor="detalhes_solicitacao">Detalhes da Solicitação</Label>
+        <Label 
+          htmlFor="detalhes_solicitacao" 
+          className={`block ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Detalhes da Solicitação {hasError('detalhes_solicitacao') && <span className="text-orange-500">*</span>}
+        </Label>
         <Textarea 
           id="detalhes_solicitacao" 
           name="detalhes_solicitacao" 
@@ -100,8 +114,11 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
           onChange={handleChange} 
           maxLength={500} 
           rows={4} 
-          className="rounded-lg" 
+          className={`rounded-lg ${hasError('detalhes_solicitacao') ? 'border-orange-500 ring-orange-500' : ''}`} 
         />
+        {hasError('detalhes_solicitacao') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
+        )}
       </div>
       
       <FileUpload 

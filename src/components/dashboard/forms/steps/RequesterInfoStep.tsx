@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { ValidationError } from '@/lib/formValidationUtils';
 
 interface RequesterInfoStepProps {
   formData: {
@@ -10,9 +11,20 @@ interface RequesterInfoStepProps {
     email_solicitante: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  errors?: ValidationError[];
 }
 
-const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({ formData, handleChange }) => {
+const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({ 
+  formData, 
+  handleChange,
+  errors = [] 
+}) => {
+  const hasError = (field: string) => errors.some(err => err.field === field);
+  const getErrorMessage = (field: string) => {
+    const error = errors.find(err => err.field === field);
+    return error ? error.message : '';
+  };
+
   return (
     <div className="space-y-4">
       <div>
