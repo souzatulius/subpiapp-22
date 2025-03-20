@@ -22,6 +22,7 @@ const AccessControl = () => {
     isEditDialogOpen,
     setIsEditDialogOpen,
     currentUser,
+    currentUserId,
     openEditDialog,
   } = useAccessControl();
 
@@ -41,6 +42,7 @@ const AccessControl = () => {
         loading={loading}
         saving={saving}
         filter={filter}
+        currentUserId={currentUserId}
         handleAddPermission={handleAddPermission}
         handleRemovePermission={handleRemovePermission}
         openEditDialog={openEditDialog}

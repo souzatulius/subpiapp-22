@@ -39,22 +39,36 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
     }
   };
 
+  // Mostrar mensagem de debug no console
+  console.log('PermissionSelect props:', {
+    permissions,
+    userPermissions,
+    availablePermissions,
+    disabled
+  });
+
   return (
     <div className="flex gap-2 mt-2">
       <Select
         value={selectedPermission}
         onValueChange={setSelectedPermission}
-        disabled={disabled || availablePermissions.length === 0}
+        disabled={disabled}
       >
         <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="Adicionar permissão" />
         </SelectTrigger>
         <SelectContent>
-          {availablePermissions.map((permission) => (
-            <SelectItem key={permission.id} value={permission.id}>
-              {permission.descricao}
+          {availablePermissions.length > 0 ? (
+            availablePermissions.map((permission) => (
+              <SelectItem key={permission.id} value={permission.id}>
+                {permission.descricao}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="no-permissions" disabled>
+              Não há permissões disponíveis
             </SelectItem>
-          ))}
+          )}
         </SelectContent>
       </Select>
       <Button 

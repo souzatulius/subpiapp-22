@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Edit, Shield, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { User, Permission } from './types';
-import UserPermissionRow from './UserPermissionRow';
 import PermissionSelect from './PermissionSelect';
 
 interface UserRowProps {
@@ -14,6 +13,7 @@ interface UserRowProps {
   permissions: Permission[];
   userPermissions: string[];
   saving: boolean;
+  currentUserId: string | null;
   handleAddPermission: (userId: string, permissionId: string) => Promise<void>;
   handleRemovePermission: (userId: string, permissionId: string) => Promise<void>;
   openEditDialog: (user: User) => void;
@@ -24,15 +24,26 @@ const UserRow: React.FC<UserRowProps> = ({
   permissions,
   userPermissions,
   saving,
+  currentUserId,
   handleAddPermission,
   handleRemovePermission,
   openEditDialog,
 }) => {
+  const isCurrentUser = user.id === currentUserId;
+  
+  // Adicionar log para depuração
+  console.log('UserRow:', {
+    userId: user.id,
+    isCurrentUser,
+    userPermissions,
+    permissionsLength: permissions.length
+  });
+
   return (
     <tr key={user.id}>
       <td className="px-4 py-3 text-sm">
         <div>
-          <p className="font-medium">{user.nome_completo}</p>
+          <p className="font-medium">{user.nome_completo} {isCurrentUser && "(Você)"}</p>
           <p className="text-xs text-gray-500">{user.email}</p>
         </div>
       </td>

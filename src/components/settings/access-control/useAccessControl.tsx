@@ -1,13 +1,27 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from './types';
 import { useAccessControlData } from './useAccessControlData';
 import { usePermissionsManagement } from './usePermissionsManagement';
 import { useUserInfo } from './useUserInfo';
 import { filterUsers, exportToCsv, printAccessControl } from './accessControlUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useAccessControl = () => {
   const [filter, setFilter] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  
+  // Fetch current user on mount
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        setCurrentUserId(data.user.id);
+        console.log('Current user ID:', data.user.id);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
   
   const {
     users,
@@ -61,6 +75,7 @@ export const useAccessControl = () => {
     isEditDialogOpen,
     setIsEditDialogOpen,
     currentUser,
+    currentUserId,
     openEditDialog,
     handleAddPermission,
     handleRemovePermission,

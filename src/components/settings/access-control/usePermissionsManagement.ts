@@ -15,6 +15,7 @@ export const usePermissionsManagement = (
     if (!permissionId) return;
     
     setSaving(true);
+    console.log('Adding permission:', { userId, permissionId });
     
     try {
       // Check if permission already exists to avoid duplicate
@@ -36,7 +37,10 @@ export const usePermissionsManagement = (
           permissao_id: permissionId,
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding permission:', error);
+        throw error;
+      }
       
       // Update local state
       setUserPermissions(prev => ({
@@ -67,6 +71,7 @@ export const usePermissionsManagement = (
 
   const handleRemovePermission = async (userId: string, permissionId: string) => {
     setSaving(true);
+    console.log('Removing permission:', { userId, permissionId });
     
     try {
       // Remove permission
@@ -78,7 +83,10 @@ export const usePermissionsManagement = (
           permissao_id: permissionId,
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error removing permission:', error);
+        throw error;
+      }
       
       // Update local state
       setUserPermissions(prev => ({

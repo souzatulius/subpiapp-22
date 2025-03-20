@@ -13,6 +13,7 @@ export interface AccessControlTableProps {
   loading: boolean;
   saving: boolean;
   filter: string;
+  currentUserId: string | null;
   handleAddPermission: (userId: string, permissionId: string) => Promise<void>;
   handleRemovePermission: (userId: string, permissionId: string) => Promise<void>;
   openEditDialog: (user: User) => void;
@@ -25,10 +26,19 @@ const AccessControlTable: React.FC<AccessControlTableProps> = ({
   loading,
   saving,
   filter,
+  currentUserId,
   handleAddPermission,
   handleRemovePermission,
   openEditDialog,
 }) => {
+  // Adicionar log para depuração
+  console.log('AccessControlTable props:', { 
+    userCount: filteredUsers.length,
+    permissionCount: permissions.length,
+    userPermissionsCount: Object.keys(userPermissions).length,
+    currentUserId
+  });
+
   if (loading) {
     return (
       <div className="rounded-md border">
@@ -54,6 +64,7 @@ const AccessControlTable: React.FC<AccessControlTableProps> = ({
                 permissions={permissions}
                 userPermissions={userPermissions[user.id] || []}
                 saving={saving}
+                currentUserId={currentUserId}
                 handleAddPermission={handleAddPermission}
                 handleRemovePermission={handleRemovePermission}
                 openEditDialog={openEditDialog}
