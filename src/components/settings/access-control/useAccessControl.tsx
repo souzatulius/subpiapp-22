@@ -1,28 +1,13 @@
 
-import { useState, useEffect } from 'react';
-import { User } from './types';
 import { useAccessControlData } from './useAccessControlData';
 import { usePermissionsManagement } from './usePermissionsManagement';
-import { useUserInfo } from './useUserInfo';
-import { filterUsers, exportToCsv, printAccessControl } from './accessControlUtils';
-import { supabase } from '@/integrations/supabase/client';
+import { useAccessControlUserInfo } from './hooks/useAccessControlUserInfo';
+import { useAccessControlFilter } from './hooks/useAccessControlFilter';
+import { useAccessControlExport } from './hooks/useAccessControlExport';
+import { useCurrentUser } from './hooks/useCurrentUser';
 
 export const useAccessControl = () => {
-  const [filter, setFilter] = useState('');
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  
-  // Fetch current user on mount
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        setCurrentUserId(data.user.id);
-        console.log('Current user ID:', data.user.id);
-      }
-    };
-    fetchCurrentUser();
-  }, []);
-  
+  // Fetch data including users, permissions, and user permissions
   const {
     users,
     setUsers,
@@ -34,12 +19,17 @@ export const useAccessControl = () => {
     fetchData,
   } = useAccessControlData();
 
+  // Current user information
+  const { currentUserId } = useCurrentUser();
+
+  // Permission management (add/remove)
   const {
     saving: permissionSaving,
     handleAddPermission,
     handleRemovePermission
   } = usePermissionsManagement(userPermissions, setUserPermissions, fetchData);
 
+  // User information management (edit dialog, update)
   const {
     isEditDialogOpen,
     setIsEditDialogOpen,
@@ -47,23 +37,20 @@ export const useAccessControl = () => {
     saving: userInfoSaving,
     openEditDialog,
     handleUpdateUserInfo
-  } = useUserInfo(users, setUsers);
+  } = useAccessControlUserInfo(users, setUsers, fetchData);
+
+  // User filtering
+  const { filter, setFilter, filteredUsers } = useAccessControlFilter(users);
+
+  // Export and print functionality
+  const { handleExportCsv, handlePrint } = useAccessControlExport(
+    users,
+    permissions,
+    userPermissions
+  );
 
   // Combined saving state from both hooks
   const saving = permissionSaving || userInfoSaving;
-
-  // Filter users based on search term
-  const filteredUsers = filterUsers(users, filter);
-
-  // Export to CSV
-  const handleExportCsv = () => {
-    exportToCsv(users, permissions, userPermissions);
-  };
-
-  // Print
-  const handlePrint = () => {
-    printAccessControl();
-  };
 
   return {
     permissions,

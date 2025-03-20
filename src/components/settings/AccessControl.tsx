@@ -1,10 +1,8 @@
-
 import React, { useEffect } from 'react';
 import AccessControlHeader from './access-control/AccessControlHeader';
 import AccessControlTable from './access-control/AccessControlTable';
 import UserInfoEditDialog from './access-control/UserInfoEditDialog';
 import { useAccessControl } from './access-control/useAccessControl';
-import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,7 +30,6 @@ const AccessControl = () => {
     fetchData,
   } = useAccessControl();
 
-  // Add debug information
   useEffect(() => {
     console.log('AccessControl component:', {
       permissionsCount: permissions.length,
