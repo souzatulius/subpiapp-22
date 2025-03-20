@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,7 @@ import NotasOficiais from "./pages/NotasOficiais";
 import RankingSubs from "./pages/RankingSubs";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
+import Relatorios from '@/pages/Relatorios';
 
 const queryClient = new QueryClient();
 
@@ -73,6 +73,11 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route path="/relatorios" element={
+              <ProtectedRoute redirectTo="/login">
+                <Relatorios />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
