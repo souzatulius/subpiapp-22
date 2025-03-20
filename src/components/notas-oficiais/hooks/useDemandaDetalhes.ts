@@ -62,9 +62,7 @@ export const useDemandaDetalhes = (demandaId: string): DetalhesResult => {
       }
 
       if (demandaData) {
-        // We need to properly type cast the data to match Demanda type
-        const formattedDemanda = demandaData as unknown as Demanda;
-        setDemanda(formattedDemanda);
+        setDemanda(demandaData as unknown as Demanda);
       }
 
       // Fetch notas oficiais relacionadas
@@ -86,9 +84,7 @@ export const useDemandaDetalhes = (demandaId: string): DetalhesResult => {
       }
 
       if (notasData) {
-        // We need to properly type cast the data to match NotaOficial type
-        const formattedNotas = notasData as unknown as NotaOficial[];
-        setRespostas(formattedNotas);
+        setRespostas(notasData as NotaOficial[]);
         setNotaExistente(notasData.length > 0);
       }
     } catch (error) {

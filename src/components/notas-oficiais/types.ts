@@ -1,4 +1,3 @@
-
 export interface DetalhesDemandaProps {
   demandaId: string;
   onClose: () => void;
@@ -49,5 +48,17 @@ export interface NotaExistente {
   titulo: string;
   texto: string;
   status: string;
+  demanda_id?: string;
+}
+
+// Add NotaOficial interface that was missing
+export interface NotaOficial {
+  id: string;
+  titulo: string;
+  texto: string;
+  autor_id: string;
+  criado_em: string;
+  atualizado_em: string;
+  status: 'pendente' | 'aprovado' | 'rejeitado';
   demanda_id?: string;
 }
