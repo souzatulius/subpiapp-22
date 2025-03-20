@@ -3,7 +3,24 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, LayoutDashboard } from 'lucide-react';
+import { 
+  Road, 
+  Droplet, 
+  Trash2, 
+  Tree, 
+  AlertTriangle, 
+  MessageSquare, 
+  Briefcase, 
+  Book, 
+  Users, 
+  Mail, 
+  Heart, 
+  Home, 
+  Code, 
+  Lightbulb, 
+  LayoutDashboard 
+} from 'lucide-react';
+import { ValidationError } from '@/lib/formValidationUtils';
 
 interface IdentificationStepProps {
   formData: {
@@ -18,6 +35,7 @@ interface IdentificationStepProps {
   filteredServicesBySearch: any[];
   serviceSearch: string;
   servicos: any[];
+  errors?: ValidationError[];
 }
 
 const IdentificationStep: React.FC<IdentificationStepProps> = ({
@@ -28,17 +46,23 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   areasCoord,
   filteredServicesBySearch,
   serviceSearch,
-  servicos
+  servicos,
+  errors = []
 }) => {
   // Function to get the appropriate icon based on area description
   const getAreaIcon = (descricao: string) => {
     const iconMap: {
       [key: string]: React.ReactNode;
     } = {
+      "Manutenção Viária": <Road className="h-6 w-6" />,
+      "Drenagem": <Droplet className="h-6 w-6" />,
+      "Limpeza Pública": <Trash2 className="h-6 w-6" />,
+      "Áreas Verdes": <Tree className="h-6 w-6" />,
+      "Fiscalização": <AlertTriangle className="h-6 w-6" />,
+      "Comunicação": <MessageSquare className="h-6 w-6" />,
       "Administrativa": <Briefcase className="h-6 w-6" />,
       "Educação": <Book className="h-6 w-6" />,
       "Saúde": <Heart className="h-6 w-6" />,
-      "Comunicação": <Mail className="h-6 w-6" />,
       "Habitação": <Home className="h-6 w-6" />,
       "Tecnologia": <Code className="h-6 w-6" />,
       "Inovação": <Lightbulb className="h-6 w-6" />,
@@ -47,22 +71,50 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
     return iconMap[descricao] || <LayoutDashboard className="h-6 w-6" />;
   };
 
+  const hasError = (field: string) => errors.some(err => err.field === field);
+  const getErrorMessage = (field: string) => {
+    const error = errors.find(err => err.field === field);
+    return error ? error.message : '';
+  };
+
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="titulo">Título da Demanda</Label>
-        <Input id="titulo" name="titulo" value={formData.titulo} onChange={handleChange} />
+        <Label 
+          htmlFor="titulo" 
+          className={`block ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
+        </Label>
+        <Input 
+          id="titulo" 
+          name="titulo" 
+          value={formData.titulo} 
+          onChange={handleChange} 
+          className={`${hasError('titulo') ? 'border-orange-500 ring-orange-500' : ''}`}
+        />
+        {hasError('titulo') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>
+        )}
       </div>
       
       <div>
-        <Label className="block mb-2">Área de Coordenação</Label>
+        <Label 
+          className={`block mb-2 ${hasError('area_coordenacao_id') ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Área de Coordenação {hasError('area_coordenacao_id') && <span className="text-orange-500">*</span>}
+        </Label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {areasCoord.map(area => (
             <Button 
               key={area.id} 
               type="button" 
               variant={formData.area_coordenacao_id === area.id ? "default" : "outline"} 
-              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${formData.area_coordenacao_id === area.id ? "ring-2 ring-[#003570]" : ""}`} 
+              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
+                formData.area_coordenacao_id === area.id ? "ring-2 ring-[#003570]" : ""
+              } ${
+                hasError('area_coordenacao_id') ? 'border-orange-500' : ''
+              }`} 
               onClick={() => handleSelectChange('area_coordenacao_id', area.id)}
             >
               {getAreaIcon(area.descricao)}
@@ -70,18 +122,27 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
             </Button>
           ))}
         </div>
+        {hasError('area_coordenacao_id') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('area_coordenacao_id')}</p>
+        )}
       </div>
       
       {formData.area_coordenacao_id && (
         <div className="animate-fadeIn">
-          <Label htmlFor="servico_id">Serviço</Label>
+          <Label 
+            htmlFor="servico_id" 
+            className={`block ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Serviço {hasError('servico_id') && <span className="text-orange-500">*</span>}
+          </Label>
           <div className="relative">
             <Input 
               type="text" 
               name="serviceSearch" 
               value={serviceSearch} 
               onChange={handleChange} 
-              className="w-full rounded-lg" 
+              className={`w-full rounded-lg ${hasError('servico_id') ? 'border-orange-500 ring-orange-500' : ''}`} 
+              placeholder="Pesquisar serviço"
             />
             
             {serviceSearch && filteredServicesBySearch.length > 0 && (
@@ -99,10 +160,12 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
             )}
           </div>
           
-          {formData.servico_id && (
+          {formData.servico_id ? (
             <div className="mt-2 p-2 bg-blue-50 rounded-lg text-sm">
               Serviço selecionado: {servicos.find(s => s.id === formData.servico_id)?.descricao}
             </div>
+          ) : hasError('servico_id') && (
+            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>
           )}
         </div>
       )}

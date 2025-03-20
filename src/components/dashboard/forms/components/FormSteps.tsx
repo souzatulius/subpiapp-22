@@ -9,9 +9,10 @@ export interface FormStep {
 interface FormStepsProps {
   steps: FormStep[];
   activeStep: number;
+  onStepClick?: (stepIndex: number) => void;
 }
 
-const FormSteps: React.FC<FormStepsProps> = ({ steps, activeStep }) => {
+const FormSteps: React.FC<FormStepsProps> = ({ steps, activeStep, onStepClick }) => {
   return (
     <div className="relative">
       <div className="overflow-hidden h-2 mb-4 flex rounded-lg bg-gray-200">
@@ -24,14 +25,16 @@ const FormSteps: React.FC<FormStepsProps> = ({ steps, activeStep }) => {
       </div>
       <div className="flex justify-between">
         {steps.map((_, index) => (
-          <div 
+          <button 
             key={index} 
-            className={`flex items-center justify-center rounded-full transition-colors 
+            className={`flex items-center justify-center rounded-full transition-colors cursor-pointer
               ${index <= activeStep ? 'bg-[#003570] text-white' : 'bg-gray-200 text-gray-400'}
               h-6 w-6 text-xs`}
+            onClick={() => onStepClick && onStepClick(index)}
+            aria-label={`Ir para etapa ${index + 1}`}
           >
             {index + 1}
-          </div>
+          </button>
         ))}
       </div>
     </div>

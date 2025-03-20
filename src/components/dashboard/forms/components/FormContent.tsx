@@ -8,6 +8,7 @@ import LocationStep from '../steps/LocationStep';
 import QuestionsDetailsStep from '../steps/QuestionsDetailsStep';
 import { FormStep } from './FormSteps';
 import { DemandFormData } from '@/hooks/demandForm';
+import { ValidationError } from '@/lib/formValidationUtils';
 
 interface FormContentProps {
   activeStep: number;
@@ -26,6 +27,7 @@ interface FormContentProps {
   setSelectedDistrito: (value: string) => void;
   distritos: any[];
   filteredBairros: any[];
+  errors?: ValidationError[];
 }
 
 export const FORM_STEPS: FormStep[] = [
@@ -71,7 +73,8 @@ const FormContent: React.FC<FormContentProps> = ({
   selectedDistrito,
   setSelectedDistrito,
   distritos,
-  filteredBairros
+  filteredBairros,
+  errors = []
 }) => {
   switch (activeStep) {
     case 0:
@@ -85,6 +88,7 @@ const FormContent: React.FC<FormContentProps> = ({
           filteredServicesBySearch={filteredServicesBySearch}
           serviceSearch={serviceSearch}
           servicos={servicos}
+          errors={errors}
         />
       );
     case 1:
@@ -94,6 +98,7 @@ const FormContent: React.FC<FormContentProps> = ({
           handleSelectChange={handleSelectChange}
           origens={origens}
           tiposMidia={tiposMidia}
+          errors={errors}
         />
       );
     case 2:
@@ -102,6 +107,7 @@ const FormContent: React.FC<FormContentProps> = ({
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
+          errors={errors}
         />
       );
     case 3:
@@ -109,6 +115,7 @@ const FormContent: React.FC<FormContentProps> = ({
         <RequesterInfoStep 
           formData={formData}
           handleChange={handleChange}
+          errors={errors}
         />
       );
     case 4:
@@ -121,6 +128,7 @@ const FormContent: React.FC<FormContentProps> = ({
           setSelectedDistrito={setSelectedDistrito}
           distritos={distritos}
           filteredBairros={filteredBairros}
+          errors={errors}
         />
       );
     case 5:
@@ -130,6 +138,7 @@ const FormContent: React.FC<FormContentProps> = ({
           handleChange={handleChange}
           handlePerguntaChange={handlePerguntaChange}
           handleSelectChange={handleSelectChange}
+          errors={errors}
         />
       );
     default:
