@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Demanda, NotaExistente, Resposta, PerguntaResposta } from '../types';
 
 export const useDemandaDetalhes = (demandaId: string) => {
-  // Break the deep type inference by using more explicit types
+  // Use explicit types to prevent deep inference
   const [demanda, setDemanda] = useState<Demanda | null>(null);
   const [respostas, setRespostas] = useState<Resposta[]>([]);
   const [notaExistente, setNotaExistente] = useState<NotaExistente | null>(null);
@@ -44,21 +44,26 @@ export const useDemandaDetalhes = (demandaId: string) => {
         if (respostasError) throw respostasError;
         
         // Check if nota already exists for this demanda
-        const { data: notaData, error: notaError } = await supabase
+        // Break the deep inference chain by using explicit type assertions
+        const notaResult: {data: any, error: any} = await supabase
           .from('notas_oficiais')
           .select('*')
           .eq('demanda_id', demandaId)
           .maybeSingle();
           
+        const { data: notaData, error: notaError } = notaResult;
+          
         if (notaError) {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        // Safe type conversion - construct new objects with explicit properties
-        // Breaking the deep type inference by casting to a simple object first
-        const perguntasObj: Record<string, string> = typeof demandaData.perguntas === 'object' && demandaData.perguntas !== null 
-          ? demandaData.perguntas as Record<string, string> 
-          : {};
+        // Extract perguntas safely with explicit type casting
+        let perguntasObj: Record<string, string> = {};
+        
+        if (demandaData.perguntas && typeof demandaData.perguntas === 'object') {
+          // Force the type to avoid deep inference
+          perguntasObj = demandaData.perguntas as Record<string, string>;
+        }
           
         // Explicitly construct the processed demanda with all properties typed
         const processedDemanda: Demanda = {
@@ -80,25 +85,34 @@ export const useDemandaDetalhes = (demandaId: string) => {
           }
         };
         
-        // Explicitly construct the respostas array with simpler types
-        const processedRespostas: Resposta[] = (respostasData || []).map(resposta => ({
-          id: resposta.id,
-          texto: resposta.texto,
-          arquivo_url: resposta.arquivo_url,
-          criado_em: resposta.criado_em,
-          usuario: typeof resposta.usuario === 'object' && resposta.usuario !== null
-            ? { nome_completo: resposta.usuario.nome_completo }
-            : null
-        }));
+        // Explicitly construct respostas with simple types
+        const processedRespostas: Resposta[] = [];
         
-        // Explicitly construct the nota with a simpler type
-        const processedNota: NotaExistente | null = notaData ? {
-          id: notaData.id,
-          titulo: notaData.titulo,
-          texto: notaData.texto,
-          status: notaData.status,
-          demanda_id: demandaId
-        } : null;
+        // Process each resposta individually to avoid type inference issues
+        if (Array.isArray(respostasData)) {
+          for (const resposta of respostasData) {
+            processedRespostas.push({
+              id: resposta.id,
+              texto: resposta.texto,
+              arquivo_url: resposta.arquivo_url,
+              criado_em: resposta.criado_em,
+              usuario: resposta.usuario ? { nome_completo: resposta.usuario.nome_completo } : null
+            });
+          }
+        }
+        
+        // Explicitly construct nota with simple type
+        let processedNota: NotaExistente | null = null;
+        
+        if (notaData) {
+          processedNota = {
+            id: notaData.id,
+            titulo: notaData.titulo,
+            texto: notaData.texto,
+            status: notaData.status,
+            demanda_id: demandaId
+          };
+        }
 
         setDemanda(processedDemanda);
         setRespostas(processedRespostas);
@@ -129,22 +143,20 @@ export const useDemandaDetalhes = (demandaId: string) => {
     const result: PerguntaResposta[] = [];
     
     try {
-      // Safely handle the perguntas object
-      const perguntasObj = demanda.perguntas;
+      // Safely handle the perguntas object with explicit typing to break inference chain
+      const perguntasObj = demanda.perguntas as Record<string, string>;
       
-      if (typeof perguntasObj === 'object' && perguntasObj !== null) {
-        // Extract key-value pairs safely - breaking the deep type inference
-        Object.entries(perguntasObj as Record<string, string>).forEach(([_, value]) => {
-          if (typeof value === 'string') {
-            // Get resposta text from the first resposta if available
-            const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
-            
-            result.push({
-              pergunta: value,
-              resposta
-            });
-          }
-        });
+      // Use a simple for-of loop to avoid type inference issues
+      for (const [key, value] of Object.entries(perguntasObj)) {
+        if (typeof value === 'string') {
+          // Get resposta text from the first resposta if available
+          const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
+          
+          result.push({
+            pergunta: value,
+            resposta
+          });
+        }
       }
     } catch (err) {
       console.error('Error in formatarPerguntasRespostas:', err);
