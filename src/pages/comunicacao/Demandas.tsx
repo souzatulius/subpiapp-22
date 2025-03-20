@@ -1,56 +1,67 @@
 
 import React, { useState } from 'react';
-import Header from '@/components/layouts/Header';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Layout as DemandasLayout } from '@/components/demandas';
-import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Layout,
+  DemandList,
+  DemandFilter,
+  DemandCards,
+  DemandDetail
+} from '@/components/demandas';
 
-const Demandas = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('listar');
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+const DemandasPage = () => {
+  const [selectedDemand, setSelectedDemand] = useState(null);
+  const [filter, setFilter] = useState({
+    status: 'all',
+    priority: 'all',
+    search: '',
+    dateRange: { from: undefined, to: undefined }
+  });
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header showControls={true} toggleSidebar={toggleSidebar} />
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Gerenciamento de Demandas</h1>
       
-      <div className="flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} />
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="list">Lista de Demandas</TabsTrigger>
+          <TabsTrigger value="cards">Visão em Cards</TabsTrigger>
+        </TabsList>
         
-        <main className="flex-1 overflow-auto p-6">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Gerenciar Demandas</h1>
-            
-            <Tabs defaultValue="listar" value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="mb-6">
-                <TabsTrigger value="listar">Listar Demandas</TabsTrigger>
-                <TabsTrigger value="cadastrar">Cadastrar Demanda</TabsTrigger>
-                <TabsTrigger value="responder">Responder Demandas</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="listar">
-                <DemandasLayout />
-              </TabsContent>
-              
-              <TabsContent value="cadastrar">
-                <CadastrarDemandaForm 
-                  onClose={() => setActiveTab('listar')}
-                />
-              </TabsContent>
-              
-              <TabsContent value="responder">
-                <DemandasLayout />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-      </div>
+        <TabsContent value="list">
+          <Layout>
+            <DemandFilter filter={filter} setFilter={setFilter} />
+            <DemandList 
+              filter={filter} 
+              onSelectDemand={setSelectedDemand} 
+            />
+            {selectedDemand && (
+              <DemandDetail 
+                demand={selectedDemand} 
+                onClose={() => setSelectedDemand(null)} 
+              />
+            )}
+          </Layout>
+        </TabsContent>
+        
+        <TabsContent value="cards">
+          <Layout>
+            <DemandFilter filter={filter} setFilter={setFilter} />
+            <DemandCards 
+              filter={filter} 
+              onSelectDemand={setSelectedDemand} 
+            />
+            {selectedDemand && (
+              <DemandDetail 
+                demand={selectedDemand} 
+                onClose={() => setSelectedDemand(null)} 
+              />
+            )}
+          </Layout>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
 
-export default Demandas;
+export default DemandasPage;
