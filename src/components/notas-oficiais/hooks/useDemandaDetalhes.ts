@@ -53,17 +53,33 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
+        // First convert to 'unknown' as suggested by TypeScript error
         // Break the type reference chain with explicit casting
         const processedDemanda = {
-          ...demandaData,
-          areas_coordenacao: demandaData?.areas_coordenacao || null,
-          autor: demandaData?.autor || null,
-          perguntas: demandaData?.perguntas || null
+          id: demandaData.id,
+          titulo: demandaData.titulo,
+          status: demandaData.status,
+          horario_publicacao: demandaData.horario_publicacao,
+          prazo_resposta: demandaData.prazo_resposta,
+          detalhes_solicitacao: demandaData.detalhes_solicitacao,
+          protocolo: demandaData.protocolo,
+          prioridade: demandaData.prioridade,
+          arquivo_url: demandaData.arquivo_url,
+          perguntas: demandaData.perguntas,
+          areas_coordenacao: demandaData.areas_coordenacao,
+          autor: {
+            nome_completo: demandaData.autor?.nome_completo || 'Não especificado'
+          }
         } as Demanda;
         
         const processedRespostas = (respostasData || []).map(resposta => ({
-          ...resposta,
-          usuario: resposta.usuario || null
+          id: resposta.id,
+          texto: resposta.texto,
+          arquivo_url: resposta.arquivo_url,
+          criado_em: resposta.criado_em,
+          usuario: resposta.usuario 
+            ? { nome_completo: resposta.usuario.nome_completo } 
+            : null
         })) as Resposta[];
         
         const processedNota = notaData ? {
@@ -71,7 +87,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
           titulo: notaData.titulo,
           texto: notaData.texto,
           status: notaData.status,
-          demanda_id: notaData.demanda_id
+          demanda_id: demandaId // Explicitly add demanda_id that's missing
         } as NotaExistente : null;
 
         setDemanda(processedDemanda);
