@@ -15,6 +15,9 @@ const RankingDashboard: React.FC = () => {
     chartData, 
     loading, 
     uploadExcel, 
+    downloadExcel,
+    downloadUploadedFile,
+    uploadFile,
     fetchOrdens,
     setFilters,
     stats

@@ -1,120 +1,125 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { Demanda, NotaOficial } from '../types';
 
-// Define the NotaOficial type
-interface NotaOficial {
-  id: string;
-  demanda_id: string;
-  conteudo: string;
-  criado_em: string;
-  criado_por: string;
-  status: string;
-  ultima_atualizacao: string;
-}
-
-// Define the Demanda type
-interface Demanda {
-  id: string;
-  titulo: string;
-  descricao: string;
-  solicitante_id: string | null;
-  solicitante_nome: string | null;
-  solicitante_email: string | null;
-  solicitante_telefone: string | null;
-  criado_em: string;
-  ultima_atualizacao: string;
-  status: string;
-  prazo: string | null;
-  origem_id: string | null;
-  servico_id: string | null;
-  tipo_midia_id: string | null;
-  prioridade: string | null;
-  distrito_id: string | null;
-  bairro_id: string | null;
-  local: string | null;
-  perguntas: Record<string, any>[] | null;
-}
-
+// Define a proper return type for the hook to avoid excessive type instantiation
 export interface DetalhesResult {
   demanda: Demanda | null;
-  notas: NotaOficial[];
-  loading: boolean;
+  respostas: NotaOficial[];
+  notaExistente: boolean;
+  isLoading: boolean;
   error: string | null;
+  refreshData: () => Promise<void>;
 }
 
 /**
- * Hook for fetching and managing details for a specific demand
+ * Hook for fetching and managing demanda details
  */
 export const useDemandaDetalhes = (demandaId: string): DetalhesResult => {
   const [demanda, setDemanda] = useState<Demanda | null>(null);
-  const [notas, setNotas] = useState<NotaOficial[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [respostas, setRespostas] = useState<NotaOficial[]>([]);
+  const [notaExistente, setNotaExistente] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchDemandaDetalhes = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch demanda details
-        const { data: demandaData, error: demandaError } = await supabase
-          .from('demandas')
-          .select('*')
-          .eq('id', demandaId)
-          .single();
+  const fetchDemandaDetalhes = useCallback(async () => {
+    if (!demandaId) {
+      setIsLoading(false);
+      return;
+    }
 
-        if (demandaError) {
-          console.error('Erro ao buscar detalhes da demanda:', demandaError);
-          setError('Erro ao buscar detalhes da demanda');
-          toast({
-            title: "Erro ao buscar detalhes da demanda",
-            description: demandaError.message,
-            variant: "destructive",
-          });
-          return;
-        }
+    setIsLoading(true);
+    setError(null);
 
-        setDemanda(demandaData as Demanda);
+    try {
+      // Fetch demanda details
+      const { data: demandaData, error: demandaError } = await supabase
+        .from('demandas')
+        .select(`
+          *,
+          origem:origem_demanda_id(descricao),
+          area:area_coordenacao_id(descricao),
+          distrito:distrito_id(nome),
+          bairro:bairro_id(nome),
+          autor:autor_id(nome_completo, email),
+          servico:servico_id(descricao)
+        `)
+        .eq('id', demandaId)
+        .single();
 
-        // Fetch notas oficiais related to the demanda
-        const { data: notasData, error: notasError } = await supabase
-          .from('notas_oficiais')
-          .select('*')
-          .eq('demanda_id', demandaId)
-          .order('criado_em', { ascending: false });
-
-        if (notasError) {
-          console.error('Erro ao buscar notas oficiais:', notasError);
-          toast({
-            title: "Erro ao buscar notas oficiais",
-            description: notasError.message,
-            variant: "destructive",
-          });
-        } else {
-          setNotas(notasData as NotaOficial[]);
-        }
-      } catch (err: any) {
-        console.error('Erro inesperado:', err);
-        setError('Erro inesperado ao buscar detalhes');
+      if (demandaError) {
+        console.error('Erro ao buscar detalhes da demanda:', demandaError);
+        setError('Erro ao buscar detalhes da demanda.');
         toast({
-          title: "Erro inesperado",
-          description: err.message || "Ocorreu um erro ao buscar os detalhes da demanda",
+          title: "Erro ao buscar detalhes",
+          description: "Não foi possível carregar os detalhes da demanda.",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    if (demandaId) {
-      fetchDemandaDetalhes();
+      if (demandaData) {
+        // We need to properly type cast the data to match Demanda type
+        const formattedDemanda = demandaData as unknown as Demanda;
+        setDemanda(formattedDemanda);
+      }
+
+      // Fetch notas oficiais relacionadas
+      const { data: notasData, error: notasError } = await supabase
+        .from('notas_oficiais')
+        .select('*')
+        .eq('demanda_id', demandaId)
+        .order('criado_em', { ascending: false });
+
+      if (notasError) {
+        console.error('Erro ao buscar notas oficiais:', notasError);
+        setError('Erro ao buscar notas oficiais relacionadas.');
+        toast({
+          title: "Erro ao buscar notas",
+          description: "Não foi possível carregar as notas oficiais relacionadas.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (notasData) {
+        // We need to properly type cast the data to match NotaOficial type
+        const formattedNotas = notasData as unknown as NotaOficial[];
+        setRespostas(formattedNotas);
+        setNotaExistente(notasData.length > 0);
+      }
+    } catch (error) {
+      console.error('Erro inesperado:', error);
+      setError('Ocorreu um erro inesperado.');
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um problema ao carregar os dados.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   }, [demandaId, toast]);
 
-  return { demanda, notas, loading, error };
-};
+  // Refresh data function
+  const refreshData = useCallback(async () => {
+    await fetchDemandaDetalhes();
+  }, [fetchDemandaDetalhes]);
 
-export default useDemandaDetalhes;
+  // Fetch data on component mount and when demandaId changes
+  useEffect(() => {
+    fetchDemandaDetalhes();
+  }, [fetchDemandaDetalhes]);
+
+  return {
+    demanda,
+    respostas,
+    notaExistente,
+    isLoading,
+    error,
+    refreshData
+  };
+};
