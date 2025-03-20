@@ -12,12 +12,12 @@ export const useUserApproval = (fetchUsers: () => Promise<void>) => {
     setApproving(true);
     
     try {
-      // Get 'Restrito' permission ID
+      // Get 'Restrito' permission ID - using maybeSingle() instead of single()
       const { data: permission, error: permissionError } = await supabase
         .from('permissoes')
         .select('id')
         .eq('descricao', 'Restrito')
-        .single();
+        .maybeSingle();
         
       if (permissionError) throw permissionError;
       

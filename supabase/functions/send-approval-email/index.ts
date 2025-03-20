@@ -27,12 +27,12 @@ serve(async (req) => {
       throw new Error("User ID is required");
     }
     
-    // Get user details
+    // Get user details - using maybeSingle() instead of single()
     const { data: userData, error: userError } = await supabase
       .from("usuarios")
       .select("id, nome_completo, email")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
       
     if (userError) throw userError;
     if (!userData) throw new Error("User not found");
