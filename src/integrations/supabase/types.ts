@@ -306,6 +306,7 @@ export type Database = {
           atualizado_em: string
           autor_id: string
           criado_em: string
+          demanda_id: string | null
           id: string
           status: string
           texto: string
@@ -317,6 +318,7 @@ export type Database = {
           atualizado_em?: string
           autor_id: string
           criado_em?: string
+          demanda_id?: string | null
           id?: string
           status?: string
           texto: string
@@ -328,6 +330,7 @@ export type Database = {
           atualizado_em?: string
           autor_id?: string
           criado_em?: string
+          demanda_id?: string | null
           id?: string
           status?: string
           texto?: string
@@ -353,6 +356,13 @@ export type Database = {
             columns: ["autor_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_oficiais_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
             referencedColumns: ["id"]
           },
         ]
