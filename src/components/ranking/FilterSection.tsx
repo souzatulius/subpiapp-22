@@ -21,7 +21,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { FilterOptions, ChartVisibility } from './RankingContent';
+import { FilterOptions, ChartVisibility } from './types';
 
 interface FilterSectionProps {
   filters: FilterOptions;

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChartVisibility } from './RankingContent';
+import { ChartVisibility } from './types';
 import {
   Chart as ChartJS,
   CategoryScale,

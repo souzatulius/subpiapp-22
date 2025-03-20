@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Trash2, RefreshCw, Clock } from 'lucide-react';
-import { UploadInfo } from './RankingContent';
+import { UploadInfo } from './types';
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
