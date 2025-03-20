@@ -29,7 +29,7 @@ const ComunicacoesOficiaisContent = () => {
       
       if (demandasError) throw demandasError;
       
-      return demandasData as Demand[] || [];
+      return demandasData as unknown as Demand[] || [];
     }
   });
   

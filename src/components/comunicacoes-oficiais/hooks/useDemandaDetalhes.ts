@@ -40,8 +40,14 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar comunicação oficial:', comunicacaoError);
         }
         
-        setDemanda(demandaData as Demand);
-        setComunicacaoExistente(comunicacaoData as ComunicacaoOficial || null);
+        // Cast the data to the correct types
+        setDemanda(demandaData as unknown as Demand);
+        if (comunicacaoData) {
+          setComunicacaoExistente({
+            ...comunicacaoData,
+            status: comunicacaoData.status as 'pendente' | 'aprovado' | 'rejeitado'
+          });
+        }
       } catch (error: any) {
         console.error('Erro ao buscar detalhes da demanda:', error);
         setError(error.message || "Não foi possível carregar os detalhes da demanda.");
