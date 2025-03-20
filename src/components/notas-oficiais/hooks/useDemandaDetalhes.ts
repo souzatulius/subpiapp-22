@@ -44,7 +44,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
         if (respostasError) throw respostasError;
         
         // Check if nota already exists for this demanda
-        // Break the deep inference chain by using explicit type assertions
+        // Break the inference chain by using any
         const notaResult: {data: any, error: any} = await supabase
           .from('notas_oficiais')
           .select('*')
@@ -57,7 +57,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        // Extract perguntas safely with explicit type casting
+        // Extract perguntas safely with explicit type assertion
         let perguntasObj: Record<string, string> = {};
         
         if (demandaData.perguntas && typeof demandaData.perguntas === 'object') {
@@ -85,12 +85,12 @@ export const useDemandaDetalhes = (demandaId: string) => {
           }
         };
         
-        // Explicitly construct respostas with simple types
+        // Process respostas with simple types and explicit loop
         const processedRespostas: Resposta[] = [];
         
-        // Process each resposta individually to avoid type inference issues
         if (Array.isArray(respostasData)) {
-          for (const resposta of respostasData) {
+          for (let i = 0; i < respostasData.length; i++) {
+            const resposta = respostasData[i];
             processedRespostas.push({
               id: resposta.id,
               texto: resposta.texto,
@@ -101,7 +101,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
           }
         }
         
-        // Explicitly construct nota with simple type
+        // Process nota with explicit type
         let processedNota: NotaExistente | null = null;
         
         if (notaData) {
@@ -136,33 +136,24 @@ export const useDemandaDetalhes = (demandaId: string) => {
     }
   }, [demandaId, toast]);
 
-  // Safe implementation to avoid recursive type issues
+  // Implementation to avoid recursive type issues
   const formatarPerguntasRespostas = (): PerguntaResposta[] => {
     if (!demanda || !demanda.perguntas) return [];
     
     const result: PerguntaResposta[] = [];
     
-    try {
-      // Safely handle the perguntas object with explicit typing to break inference chain
-      const perguntasObj = demanda.perguntas as Record<string, string>;
-      
-      // Use a simple for-of loop to avoid type inference issues
-      for (const [key, value] of Object.entries(perguntasObj)) {
-        if (typeof value === 'string') {
-          // Get resposta text from the first resposta if available
-          const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
-          
-          result.push({
-            pergunta: value,
-            resposta
-          });
-        }
+    // Use Object.entries with explicit typing to prevent deep inference
+    Object.entries(demanda.perguntas as Record<string, string>).forEach(([_, value]) => {
+      if (typeof value === 'string') {
+        // Get resposta text from the first resposta if available
+        const resposta = respostas.length > 0 ? respostas[0].texto || '' : '';
+        
+        result.push({
+          pergunta: value,
+          resposta
+        });
       }
-    } catch (err) {
-      console.error('Error in formatarPerguntasRespostas:', err);
-      // Return empty array on error to prevent UI from breaking
-      return [];
-    }
+    });
     
     return result;
   };
