@@ -15,6 +15,7 @@ import AuthCallback from '@/components/AuthCallback';
 import { AuthProvider } from '@/providers/AuthProvider';
 import ProtectedRoute from '@/components/layouts/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ComunicacoesOficiais from './pages/ComunicacoesOficiais';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ function App() {
             <Route path="/notas-oficiais" element={<ProtectedRoute><NotasOficiais /></ProtectedRoute>} />
             <Route path="/ranking-subprefeituras" element={<ProtectedRoute><RankingSubprefeituras /></ProtectedRoute>} />
             <Route path="/settings/*" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/comunicacoes-oficiais" element={<ProtectedRoute><ComunicacoesOficiais /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
