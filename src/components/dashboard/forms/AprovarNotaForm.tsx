@@ -68,7 +68,10 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           texto: item.texto,
           autor_id: item.autor_id,
           criado_em: item.criado_em,
-          status: item.status as 'pendente' | 'aprovado' | 'rejeitado',
+          status: item.status,
+          area_coordenacao_id: item.area_coordenacao_id, // Add the missing property
+          demanda_id: item.demanda_id,
+          aprovador_id: item.aprovador_id,
           areas_coordenacao: item.areas_coordenacao,
           autor: item.autor
         }));
