@@ -11,12 +11,19 @@ import {
 
 const DemandasPage = () => {
   const [selectedDemand, setSelectedDemand] = useState(null);
-  const [filter, setFilter] = useState({
-    status: 'all',
-    priority: 'all',
-    search: '',
-    dateRange: { from: undefined, to: undefined }
-  });
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('cards');
+  const [filterStatus, setFilterStatus] = useState('pendente');
+
+  const handleSelectDemand = (demand) => {
+    setSelectedDemand(demand);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedDemand(null);
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -30,15 +37,22 @@ const DemandasPage = () => {
         
         <TabsContent value="list">
           <Layout>
-            <DemandFilter filter={filter} setFilter={setFilter} />
+            <DemandFilter 
+              viewMode={viewMode === 'cards' ? 'cards' : 'list'} 
+              setViewMode={(mode) => setViewMode(mode)}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+            />
             <DemandList 
-              filter={filter} 
-              onSelectDemand={setSelectedDemand} 
+              demandas={[]} 
+              isLoading={false}
+              onSelectDemand={handleSelectDemand} 
             />
             {selectedDemand && (
               <DemandDetail 
                 demand={selectedDemand} 
-                onClose={() => setSelectedDemand(null)} 
+                isOpen={isDetailOpen}
+                onClose={handleCloseDetail} 
               />
             )}
           </Layout>
@@ -46,15 +60,22 @@ const DemandasPage = () => {
         
         <TabsContent value="cards">
           <Layout>
-            <DemandFilter filter={filter} setFilter={setFilter} />
+            <DemandFilter 
+              viewMode={viewMode === 'cards' ? 'cards' : 'list'} 
+              setViewMode={(mode) => setViewMode(mode)}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+            />
             <DemandCards 
-              filter={filter} 
-              onSelectDemand={setSelectedDemand} 
+              demandas={[]} 
+              isLoading={false}
+              onSelectDemand={handleSelectDemand} 
             />
             {selectedDemand && (
               <DemandDetail 
                 demand={selectedDemand} 
-                onClose={() => setSelectedDemand(null)} 
+                isOpen={isDetailOpen}
+                onClose={handleCloseDetail} 
               />
             )}
           </Layout>
