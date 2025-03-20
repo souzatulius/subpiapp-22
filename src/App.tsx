@@ -12,10 +12,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
-import Demandas from "./pages/Demandas";
-import NotasOficiais from "./pages/NotasOficiais";
-import RankingSubs from "./pages/RankingSubs";
-import Relatorios from "./pages/Relatorios";
+import Demandas from "./pages/comunicacao/Demandas";
+import NotasOficiais from "./pages/comunicacao/NotasOficiais";
+import Relatorios from "./pages/comunicacao/Relatorios";
+import RankingSubs from "./pages/zeladoria/RankingSubs";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 
@@ -34,6 +34,8 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            
+            {/* Protected Routes */}
             <Route 
               path="/dashboard" 
               element={
@@ -42,6 +44,44 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Comunicação Routes */}
+            <Route 
+              path="/comunicacao/demandas" 
+              element={
+                <ProtectedRoute>
+                  <Demandas />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/comunicacao/notas-oficiais" 
+              element={
+                <ProtectedRoute>
+                  <NotasOficiais />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/comunicacao/relatorios" 
+              element={
+                <ProtectedRoute>
+                  <Relatorios />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Zeladoria Routes */}
+            <Route 
+              path="/zeladoria/ranking-subs" 
+              element={
+                <ProtectedRoute>
+                  <RankingSubs />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Settings Route */}
             <Route 
               path="/settings" 
               element={
@@ -50,6 +90,8 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Legacy routes for redirect purposes */}
             <Route 
               path="/demandas" 
               element={
@@ -83,14 +125,6 @@ const App = () => (
               } 
             />
             <Route 
-              path="/ranking-subs" 
-              element={
-                <ProtectedRoute>
-                  <RankingSubs />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
               path="/relatorios" 
               element={
                 <ProtectedRoute>
@@ -98,7 +132,16 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route 
+              path="/ranking-subs" 
+              element={
+                <ProtectedRoute>
+                  <RankingSubs />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

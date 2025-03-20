@@ -1,15 +1,33 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import SettingsContent from '@/components/settings/SettingsContent';
+import SettingsDashboard from '@/components/settings/SettingsDashboard';
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeSection, setActiveSection] = useState('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Get tab from URL query parameter
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveSection(tab);
+    }
+  }, [location.search]);
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+  
+  const handleBackToDashboard = () => {
+    setActiveSection('dashboard');
+    navigate('/settings');
   };
   
   return (
@@ -21,7 +39,35 @@ const Settings = () => {
         
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-7xl mx-auto">
-            <SettingsContent activeSection={activeSection} />
+            {activeSection === 'dashboard' ? (
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">Ajustes</h1>
+                <SettingsDashboard />
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center mb-6">
+                  <button 
+                    onClick={handleBackToDashboard}
+                    className="mr-3 text-blue-600 hover:text-blue-800"
+                  >
+                    ← Voltar para Dashboard
+                  </button>
+                  <h1 className="text-2xl font-bold text-gray-800">
+                    {activeSection === 'usuarios' && 'Usuários'}
+                    {activeSection === 'areas' && 'Áreas de Coordenação'}
+                    {activeSection === 'cargos' && 'Cargos'}
+                    {activeSection === 'servicos' && 'Serviços'}
+                    {activeSection === 'tipos_midia' && 'Tipos de Mídia'}
+                    {activeSection === 'origens_demanda' && 'Origem das Demandas'}
+                    {activeSection === 'distritos_bairros' && 'Distritos e Bairros'}
+                    {activeSection === 'comunicados' && 'Comunicados'}
+                    {activeSection === 'permissoes' && 'Permissões'}
+                  </h1>
+                </div>
+                <SettingsContent activeSection={activeSection} />
+              </div>
+            )}
           </div>
         </main>
       </div>

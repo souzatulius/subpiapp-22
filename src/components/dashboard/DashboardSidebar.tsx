@@ -3,14 +3,11 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Home, 
-  ClipboardList, 
+  MessageCircle, 
   FileText, 
   BarChart2, 
   Settings, 
-  TrendingUp,
-  PlusCircle,
-  MessageCircle,
-  CheckCircle 
+  TrendingUp
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -29,35 +26,25 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     },
     // Seção 2: Comunicação
     {
-      icon: <PlusCircle size={20} />,
-      label: 'Cadastrar Demanda',
-      path: '/demandas/nova'
-    }, 
-    {
       icon: <MessageCircle size={20} />,
-      label: 'Responder Demandas',
-      path: '/demandas'
+      label: 'Gerenciar Demandas',
+      path: '/comunicacao/demandas'
     }, 
     {
       icon: <FileText size={20} />,
-      label: 'Criar Nota Oficial',
-      path: '/notas-oficiais/nova'
-    },
-    {
-      icon: <CheckCircle size={20} />,
-      label: 'Aprovar Nota',
-      path: '/notas-oficiais'
+      label: 'Notas Oficiais',
+      path: '/comunicacao/notas-oficiais'
     },
     {
       icon: <BarChart2 size={20} />,
       label: 'Relatórios',
-      path: '/relatorios'
+      path: '/comunicacao/relatorios'
     }, 
-    // Seção 3: Ranking das Subs
+    // Seção 3: Zeladoria
     {
       icon: <TrendingUp size={20} />,
       label: 'Ranking das Subs',
-      path: '/ranking-subs'
+      path: '/zeladoria/ranking-subs'
     },
     // Seção 4: Ajustes
     {
