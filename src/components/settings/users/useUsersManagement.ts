@@ -7,6 +7,7 @@ import { useUserDelete } from './hooks/useUserDelete';
 import { usePasswordReset } from './hooks/usePasswordReset';
 import { useUserActions } from './useUserActions';
 import { useUserApproval } from './hooks/useUserApproval';
+import { User } from './types';
 
 export const useUsersManagement = () => {
   // Fetch users data
@@ -18,14 +19,28 @@ export const useUsersManagement = () => {
   // User invite functionality
   const { isInviteDialogOpen, setIsInviteDialogOpen, handleInviteUser } = useUserInvite(fetchData);
   
-  // User edit functionality
-  const { isEditDialogOpen, setIsEditDialogOpen, selectedUser, setSelectedUser, handleEditUser } = useUserEdit(fetchData);
+  // User edit functionality  
+  const { 
+    isEditDialogOpen, 
+    setIsEditDialogOpen, 
+    currentUser: selectedUser, 
+    setCurrentUser: setSelectedUser,
+    handleEditUser,
+    openEditDialog
+  } = useUserEdit(fetchData);
   
   // User delete functionality
-  const { isDeleteDialogOpen, setIsDeleteDialogOpen, userToDelete, setUserToDelete, handleDeleteUser } = useUserDelete(fetchData);
+  const { 
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    currentUser: userToDelete,
+    setCurrentUser: setUserToDelete,
+    handleDeleteUser,
+    openDeleteDialog
+  } = useUserDelete(fetchData);
   
   // Password reset functionality
-  const { resetPassword } = usePasswordReset();
+  const { handleSendPasswordReset: resetPassword } = usePasswordReset();
   
   // User approval functionality
   const { approving, approveUser } = useUserApproval(fetchData);
@@ -33,9 +48,9 @@ export const useUsersManagement = () => {
   // User actions
   const userActions = useUserActions({
     setIsEditDialogOpen,
-    setSelectedUser,
+    setSelectedUser: setSelectedUser,
     setIsDeleteDialogOpen,
-    setUserToDelete,
+    setUserToDelete: setUserToDelete,
     resetPassword,
     approveUser
   });

@@ -14,7 +14,8 @@ interface UsersDialogsProps {
   setIsEditDialogOpen: (value: boolean) => void;
   isDeleteDialogOpen: boolean;
   setIsDeleteDialogOpen: (value: boolean) => void;
-  currentUser: User | null;
+  selectedUser: User | null;
+  userToDelete: User | null;
   handleInviteUser: (data: any) => Promise<void>;
   handleEditUser: (data: any) => Promise<void>;
   handleDeleteUser: () => Promise<void>;
@@ -29,7 +30,8 @@ const UsersDialogs: React.FC<UsersDialogsProps> = ({
   setIsEditDialogOpen,
   isDeleteDialogOpen,
   setIsDeleteDialogOpen,
-  currentUser,
+  selectedUser,
+  userToDelete,
   handleInviteUser,
   handleEditUser,
   handleDeleteUser,
@@ -47,7 +49,7 @@ const UsersDialogs: React.FC<UsersDialogsProps> = ({
       <EditUserDialog 
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        user={currentUser}
+        user={selectedUser}
         onSubmit={handleEditUser}
         areas={areas}
         cargos={cargos}
@@ -56,7 +58,7 @@ const UsersDialogs: React.FC<UsersDialogsProps> = ({
       <DeleteUserDialog 
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        user={currentUser}
+        user={userToDelete}
         onDelete={handleDeleteUser}
       />
     </>

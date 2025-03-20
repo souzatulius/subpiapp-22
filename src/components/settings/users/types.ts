@@ -16,6 +16,8 @@ export interface User {
     id: string;
     descricao: string;
   };
+  criado_em?: string;
+  permissoes?: any[];
 }
 
 export interface Area {

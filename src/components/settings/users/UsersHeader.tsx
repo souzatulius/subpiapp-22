@@ -7,17 +7,17 @@ import { Button } from '@/components/ui/button';
 interface UsersHeaderProps {
   filter: string;
   setFilter: (value: string) => void;
-  onExportCsv: () => void;
-  onPrint: () => void;
-  onInvite: () => void;
+  onOpenInviteDialog: () => void;
+  onExportCsv?: () => void;
+  onPrint?: () => void;
 }
 
 const UsersHeader: React.FC<UsersHeaderProps> = ({
   filter,
   setFilter,
-  onExportCsv,
-  onPrint,
-  onInvite,
+  onOpenInviteDialog,
+  onExportCsv = () => {},
+  onPrint = () => {},
 }) => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -44,7 +44,7 @@ const UsersHeader: React.FC<UsersHeaderProps> = ({
             <Printer className="h-4 w-4" />
           </Button>
           
-          <Button onClick={onInvite}>
+          <Button onClick={onOpenInviteDialog}>
             <UserPlus className="h-4 w-4 mr-2" />
             Convidar Usuário
           </Button>

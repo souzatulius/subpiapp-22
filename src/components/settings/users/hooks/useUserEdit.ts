@@ -1,51 +1,45 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { User, UserFormData } from '../types';
-import { format } from 'date-fns';
 
 export const useUserEdit = (fetchData: () => Promise<void>) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const handleEditUser = async (data: UserFormData) => {
+    if (!currentUser?.id) return;
+    
     try {
-      if (!currentUser) return;
-      
-      const updateData: any = {
-        nome_completo: data.nome_completo,
-        cargo_id: data.cargo_id || null,
-        area_coordenacao_id: data.area_coordenacao_id || null,
-      };
-      
-      if (data.whatsapp !== undefined) {
-        updateData.whatsapp = data.whatsapp || null;
-      }
-      
-      if (data.aniversario) {
-        updateData.aniversario = format(data.aniversario, 'yyyy-MM-dd');
-      }
-      
       const { error } = await supabase
         .from('usuarios')
-        .update(updateData)
+        .update({
+          nome_completo: data.nome_completo,
+          cargo_id: data.cargo_id || null,
+          area_coordenacao_id: data.area_coordenacao_id || null,
+          whatsapp: data.whatsapp || null,
+          aniversario: data.aniversario ? data.aniversario.toISOString() : null,
+        })
         .eq('id', currentUser.id);
-        
+      
       if (error) throw error;
       
       toast({
         title: 'Usuário atualizado',
-        description: 'Os dados do usuário foram atualizados com sucesso',
+        description: 'As informações do usuário foram atualizadas com sucesso.',
       });
       
+      // Refresh users data
+      await fetchData();
+      
+      // Close dialog
       setIsEditDialogOpen(false);
-      fetchData();
     } catch (error: any) {
-      console.error('Erro ao atualizar usuário:', error);
+      console.error('Erro ao editar usuário:', error);
       toast({
-        title: 'Erro ao atualizar usuário',
-        description: error.message || 'Ocorreu um erro ao atualizar os dados do usuário.',
+        title: 'Erro',
+        description: error.message || 'Não foi possível atualizar o usuário. Por favor, tente novamente.',
         variant: 'destructive',
       });
     }
@@ -60,7 +54,8 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
     isEditDialogOpen,
     setIsEditDialogOpen,
     currentUser,
+    setCurrentUser,
     handleEditUser,
-    openEditDialog
+    openEditDialog,
   };
 };

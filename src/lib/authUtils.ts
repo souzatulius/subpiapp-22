@@ -60,15 +60,15 @@ export const isUserApproved = async (userId: string): Promise<boolean> => {
 
 export const createAdminNotification = async (userId: string, userName: string, userEmail: string): Promise<void> => {
   try {
-    // Get all admin users
-    const { data: admins, error: adminsError } = await supabase.rpc('get_users_with_permission', {
-      permission_desc: 'Admin'
+    // Get all admin users by invoking the edge function
+    const { data: admins, error: adminsError } = await supabase.functions.invoke('get_users_with_permission', {
+      body: { permission_desc: 'Admin' }
     });
     
     if (adminsError) throw adminsError;
     
     // Create notification for each admin
-    if (admins && admins.length > 0) {
+    if (admins && Array.isArray(admins) && admins.length > 0) {
       for (const admin of admins) {
         await supabase
           .from('notificacoes')
