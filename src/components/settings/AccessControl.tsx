@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import AccessControlHeader from './access-control/AccessControlHeader';
 import AccessControlTable from './access-control/AccessControlTable';
 import UserInfoEditDialog from './access-control/UserInfoEditDialog';
 import { useAccessControl } from './access-control/useAccessControl';
+import { toast } from '@/components/ui/use-toast';
 
 const AccessControl = () => {
   const {
@@ -24,7 +25,23 @@ const AccessControl = () => {
     currentUser,
     currentUserId,
     openEditDialog,
+    fetchData,
   } = useAccessControl();
+
+  // Add debug information
+  useEffect(() => {
+    console.log('AccessControl component:', {
+      permissionsCount: permissions.length,
+      permissions: permissions,
+      userPermissionsCount: Object.keys(userPermissions).length,
+      currentUserId
+    });
+    
+    if (permissions.length === 0) {
+      console.warn('Nenhuma permissão disponível. Verificando dados...');
+      fetchData();
+    }
+  }, [permissions, userPermissions, currentUserId, fetchData]);
 
   return (
     <div className="space-y-6">

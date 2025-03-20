@@ -38,6 +38,25 @@ export const useAccessControlData = () => {
         
       if (permissionsError) throw permissionsError;
       
+      // If no permissions found, check if we need to create default ones
+      if (!permissionsData || permissionsData.length === 0) {
+        console.log('No permissions found, checking if we need to create default ones');
+        await createDefaultPermissionsIfNeeded();
+        
+        // Fetch permissions again after creating defaults
+        const { data: newPermissionsData, error: newPermissionsError } = await supabase
+          .from('permissoes')
+          .select('id, descricao, nivel_acesso');
+          
+        if (newPermissionsError) throw newPermissionsError;
+        
+        if (newPermissionsData) {
+          setPermissions(newPermissionsData);
+        }
+      } else {
+        setPermissions(permissionsData);
+      }
+      
       // Fetch user permissions
       const { data: userPermissionsData, error: userPermissionsError } = await supabase
         .from('usuario_permissoes')
@@ -55,7 +74,6 @@ export const useAccessControlData = () => {
       });
       
       setUsers(usersData || []);
-      setPermissions(permissionsData || []);
       setUserPermissions(userPerms);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
@@ -66,6 +84,51 @@ export const useAccessControlData = () => {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Function to create default permissions if none exist
+  async function createDefaultPermissionsIfNeeded() {
+    const defaultPermissions = [
+      { descricao: 'Admin', nivel_acesso: 100 },
+      { descricao: 'Subprefeito', nivel_acesso: 90 },
+      { descricao: 'Time de Comunicação', nivel_acesso: 80 },
+      { descricao: 'Gestores', nivel_acesso: 70 },
+      { descricao: 'Restrito', nivel_acesso: 10 }
+    ];
+    
+    try {
+      // Check if permissions already exist
+      const { count, error } = await supabase
+        .from('permissoes')
+        .select('id', { count: 'exact', head: true });
+        
+      if (error) throw error;
+      
+      // If no permissions exist, create the defaults
+      if (count === 0) {
+        console.log('Creating default permissions');
+        
+        for (const perm of defaultPermissions) {
+          const { error } = await supabase
+            .from('permissoes')
+            .insert(perm);
+            
+          if (error) throw error;
+        }
+        
+        toast({
+          title: 'Permissões criadas',
+          description: 'As permissões padrão foram criadas com sucesso.',
+        });
+      }
+    } catch (error: any) {
+      console.error('Erro ao criar permissões padrão:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível criar as permissões padrão.',
+        variant: 'destructive',
+      });
     }
   }
 

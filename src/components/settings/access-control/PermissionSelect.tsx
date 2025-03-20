@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Select, 
   SelectContent, 
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Permission } from './types';
+import { toast } from '@/components/ui/use-toast';
 
 interface PermissionSelectProps {
   permissions: Permission[];
@@ -32,20 +33,49 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
     permission => !userPermissions.includes(permission.id)
   );
 
+  // Sort permissions by nivel_acesso (highest to lowest)
+  const sortedAvailablePermissions = [...availablePermissions].sort(
+    (a, b) => b.nivel_acesso - a.nivel_acesso
+  );
+
   const handleAddPermission = async () => {
     if (selectedPermission) {
-      await onAddPermission(userId, selectedPermission);
-      setSelectedPermission('');
+      try {
+        await onAddPermission(userId, selectedPermission);
+        setSelectedPermission('');
+        toast({
+          title: "Sucesso",
+          description: "Permissão adicionada com sucesso",
+        });
+      } catch (error) {
+        console.error("Erro ao adicionar permissão:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível adicionar a permissão",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  // Mostrar mensagem de debug no console
-  console.log('PermissionSelect props:', {
-    permissions,
-    userPermissions,
-    availablePermissions,
-    disabled
-  });
+  // Log debugging information
+  useEffect(() => {
+    console.log('PermissionSelect props:', {
+      userId,
+      permissionsCount: permissions.length,
+      userPermissionsCount: userPermissions.length,
+      availablePermissionsCount: availablePermissions.length,
+      disabled
+    });
+    
+    if (permissions.length === 0) {
+      console.warn('Nenhuma permissão disponível no sistema');
+    }
+    
+    if (availablePermissions.length === 0) {
+      console.log('Usuário já possui todas as permissões disponíveis');
+    }
+  }, [permissions, userPermissions, userId, availablePermissions.length, disabled]);
 
   return (
     <div className="flex gap-2 mt-2">
@@ -58,15 +88,17 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
           <SelectValue placeholder="Adicionar permissão" />
         </SelectTrigger>
         <SelectContent>
-          {availablePermissions.length > 0 ? (
-            availablePermissions.map((permission) => (
+          {sortedAvailablePermissions.length > 0 ? (
+            sortedAvailablePermissions.map((permission) => (
               <SelectItem key={permission.id} value={permission.id}>
-                {permission.descricao}
+                {permission.descricao} (Nível {permission.nivel_acesso})
               </SelectItem>
             ))
           ) : (
             <SelectItem value="no-permissions" disabled>
-              Não há permissões disponíveis
+              {permissions.length === 0 
+                ? "Nenhuma permissão cadastrada" 
+                : "Não há permissões disponíveis"}
             </SelectItem>
           )}
         </SelectContent>

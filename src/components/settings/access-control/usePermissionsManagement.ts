@@ -7,61 +7,44 @@ import { UserPermissionMapping } from './types';
 export const usePermissionsManagement = (
   userPermissions: UserPermissionMapping,
   setUserPermissions: React.Dispatch<React.SetStateAction<UserPermissionMapping>>,
-  refreshData?: () => Promise<void>
+  fetchData: () => Promise<void>
 ) => {
   const [saving, setSaving] = useState(false);
 
   const handleAddPermission = async (userId: string, permissionId: string) => {
-    if (!permissionId) return;
-    
+    console.log(`Adding permission ${permissionId} to user ${userId}`);
     setSaving(true);
-    console.log('Adding permission:', { userId, permissionId });
     
     try {
-      // Check if permission already exists to avoid duplicate
-      const userPerms = userPermissions[userId] || [];
-      if (userPerms.includes(permissionId)) {
-        toast({
-          title: 'Aviso',
-          description: 'Esta permissão já foi atribuída ao usuário.',
-        });
-        setSaving(false);
-        return;
-      }
-      
-      // Add permission
       const { error } = await supabase
         .from('usuario_permissoes')
         .insert({
           usuario_id: userId,
-          permissao_id: permissionId,
+          permissao_id: permissionId
         });
         
-      if (error) {
-        console.error('Error adding permission:', error);
-        throw error;
-      }
+      if (error) throw error;
       
       // Update local state
-      setUserPermissions(prev => ({
-        ...prev,
-        [userId]: [...(prev[userId] || []), permissionId],
-      }));
-      
-      toast({
-        title: 'Permissão adicionada',
-        description: 'A permissão foi adicionada com sucesso',
+      setUserPermissions(prev => {
+        const updated = { ...prev };
+        if (!updated[userId]) {
+          updated[userId] = [];
+        }
+        updated[userId] = [...updated[userId], permissionId];
+        return updated;
       });
       
-      // Refresh data if function is provided
-      if (refreshData) {
-        await refreshData();
-      }
+      console.log(`Permission ${permissionId} added successfully to user ${userId}`);
+      
+      // Fetch fresh data to ensure we have the latest state
+      await fetchData();
+      
     } catch (error: any) {
       console.error('Erro ao adicionar permissão:', error);
       toast({
         title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao adicionar a permissão.',
+        description: `Não foi possível adicionar a permissão: ${error.message}`,
         variant: 'destructive',
       });
     } finally {
@@ -70,44 +53,37 @@ export const usePermissionsManagement = (
   };
 
   const handleRemovePermission = async (userId: string, permissionId: string) => {
+    console.log(`Removing permission ${permissionId} from user ${userId}`);
     setSaving(true);
-    console.log('Removing permission:', { userId, permissionId });
     
     try {
-      // Remove permission
       const { error } = await supabase
         .from('usuario_permissoes')
         .delete()
-        .match({
-          usuario_id: userId,
-          permissao_id: permissionId,
-        });
+        .eq('usuario_id', userId)
+        .eq('permissao_id', permissionId);
         
-      if (error) {
-        console.error('Error removing permission:', error);
-        throw error;
-      }
+      if (error) throw error;
       
       // Update local state
-      setUserPermissions(prev => ({
-        ...prev,
-        [userId]: (prev[userId] || []).filter(id => id !== permissionId),
-      }));
-      
-      toast({
-        title: 'Permissão removida',
-        description: 'A permissão foi removida com sucesso',
+      setUserPermissions(prev => {
+        const updated = { ...prev };
+        if (updated[userId]) {
+          updated[userId] = updated[userId].filter(id => id !== permissionId);
+        }
+        return updated;
       });
       
-      // Refresh data if function is provided
-      if (refreshData) {
-        await refreshData();
-      }
+      console.log(`Permission ${permissionId} removed successfully from user ${userId}`);
+      
+      // Fetch fresh data to ensure we have the latest state
+      await fetchData();
+      
     } catch (error: any) {
       console.error('Erro ao remover permissão:', error);
       toast({
         title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao remover a permissão.',
+        description: `Não foi possível remover a permissão: ${error.message}`,
         variant: 'destructive',
       });
     } finally {
