@@ -21,21 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-
-interface NotaOficial {
-  id: string;
-  titulo: string;
-  autor_id: string;
-  area_coordenacao_id: string;
-  status: string;
-  criado_em: string;
-  autor?: {
-    nome_completo: string;
-  };
-  areas_coordenacao?: {
-    descricao: string;
-  };
-}
+import { NotaOficial } from '@/components/dashboard/forms/types';
 
 const ConsultarNotas = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -76,7 +62,26 @@ const ConsultarNotas = () => {
         throw error;
       }
       
-      setNotasOficiais(data || []);
+      // Transform the data to match the NotaOficial interface
+      const transformedData: NotaOficial[] = data?.map(item => ({
+        id: item.id,
+        titulo: item.titulo,
+        texto: item.texto,
+        status: item.status,
+        criado_em: item.criado_em,
+        autor_id: item.autor_id,
+        aprovador_id: item.aprovador_id,
+        area_coordenacao_id: item.area_coordenacao_id,
+        demanda_id: item.demanda_id,
+        autor: item.autor && typeof item.autor === 'object' ? 
+          { nome_completo: item.autor.nome_completo || 'Não informado' } : 
+          { nome_completo: 'Não informado' },
+        areas_coordenacao: item.areas_coordenacao && typeof item.areas_coordenacao === 'object' ? 
+          { descricao: item.areas_coordenacao.descricao || 'Não informada' } : 
+          { descricao: 'Não informada' }
+      })) || [];
+      
+      setNotasOficiais(transformedData);
     } catch (error) {
       console.error('Erro ao buscar notas:', error);
       toast({
