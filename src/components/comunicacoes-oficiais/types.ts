@@ -44,3 +44,22 @@ export interface ComunicacaoFormData {
   titulo: string;
   texto: string;
 }
+
+export interface PerguntaResposta {
+  pergunta: string;
+  resposta: string;
+}
+
+export interface DetalhesDemandaProps {
+  demandaId: string;
+  onClose: () => void;
+}
+
+export interface EmptyStateProps {
+  message: string;
+  description?: string;
+}
+
+export interface LoadingStateProps {
+  message?: string;
+}

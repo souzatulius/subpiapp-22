@@ -53,7 +53,8 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        setDemanda(demandaData as Demanda);
+        // Use type assertion to handle the Supabase response
+        setDemanda(demandaData as unknown as Demanda);
         setRespostas(respostasData as Resposta[] || []);
         setNotaExistente(notaData as NotaExistente || null);
       } catch (error: any) {
@@ -75,12 +76,15 @@ export const useDemandaDetalhes = (demandaId: string) => {
     }
   }, [demandaId, toast]);
 
-  // Fixed the function definition to properly handle the perguntas object
+  // Fix the formatarPerguntasRespostas function
   const formatarPerguntasRespostas = (): PerguntaResposta[] => {
     if (!demanda?.perguntas) return [];
     
     const result: PerguntaResposta[] = [];
-    const perguntasObj = demanda.perguntas as Record<string, string>;
+    // Convert perguntas to a Record<string, string> type
+    const perguntasObj = typeof demanda.perguntas === 'object' 
+      ? demanda.perguntas as Record<string, string>
+      : {};
     
     for (const [key, pergunta] of Object.entries(perguntasObj)) {
       // Look for a matching resposta in the respostas array
