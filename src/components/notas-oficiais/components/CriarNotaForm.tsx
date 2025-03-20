@@ -5,33 +5,45 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { NotaOficial } from '../types';
+import { NotaOficial, Demanda } from '../types';
 
 interface CriarNotaFormProps {
-  titulo: string;
-  setTitulo: (value: string) => void;
-  texto: string;
-  setTexto: (value: string) => void;
-  onSubmit: () => void;
-  isPending: boolean;
-  notaExistente: NotaOficial | null;
-  demandaInfo?: any;
-  perguntasRespostas?: any[];
+  titulo?: string;
+  setTitulo?: (value: string) => void;
+  texto?: string;
+  setTexto?: (value: string) => void;
+  onSubmit?: () => void;
+  isPending?: boolean;
+  notaExistente?: NotaOficial | null;
+  demanda?: Demanda;
+  isCheckingNota?: boolean;
   gerarSugestao?: () => Promise<void>;
   isGerandoSugestao?: boolean;
 }
 
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
-  titulo,
-  setTitulo,
-  texto,
-  setTexto,
-  onSubmit,
-  isPending,
-  notaExistente,
+  titulo = '',
+  setTitulo = () => {},
+  texto = '',
+  setTexto = () => {},
+  onSubmit = () => {},
+  isPending = false,
+  notaExistente = null,
+  isCheckingNota = false,
   gerarSugestao,
   isGerandoSugestao = false
 }) => {
+  if (isCheckingNota) {
+    return (
+      <Card>
+        <CardContent className="p-6 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+          <span>Verificando nota existente...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card>
       <CardContent className="p-6">

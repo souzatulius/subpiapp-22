@@ -36,6 +36,8 @@ export interface Demanda {
   arquivo_url?: string;
   areas_coordenacao?: AreaCoordenacao;
   autor?: Autor;
+  protocolo?: string;
+  prioridade?: string;
 }
 
 export interface PerguntaResposta {

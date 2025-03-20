@@ -33,13 +33,14 @@ export const useDemandaDetalhes = (demandaId: string): UseDemandaDetalhesReturn 
       // Fetch demand details
       const { data, error } = await supabase
         .from('demandas')
-        .select('*, demanda_perguntas(*), demanda_arquivos(*)')
+        .select('*, areas_coordenacao:area_coordenacao_id(*), autor:autor_id(*)')
         .eq('id', demandaId)
         .single();
       
       if (error) throw error;
       
       if (data) {
+        // Cast to the Demanda type
         setDemanda(data as unknown as Demanda);
         
         // Check if a press release already exists for this demand
