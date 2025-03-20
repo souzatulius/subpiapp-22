@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DemandasList from './DemandasList';
 import DetalhesDemanda from './DetalhesDemanda';
 import { Loader2 } from 'lucide-react';
+import { Demand } from './types';
 
 const ComunicacoesOficiaisContent = () => {
   const [selectedDemandaId, setSelectedDemandaId] = useState<string | null>(null);
@@ -21,14 +22,14 @@ const ComunicacoesOficiaisContent = () => {
           status,
           horario_publicacao,
           prazo_resposta,
-          areas_coordenacao:area_coordenacao_id (descricao),
+          areas_coordenacao:area_coordenacao_id (id, descricao),
           autor:autor_id (nome_completo)
         `)
         .order('horario_publicacao', { ascending: false });
       
       if (demandasError) throw demandasError;
       
-      return demandasData || [];
+      return demandasData as Demand[] || [];
     }
   });
   

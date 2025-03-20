@@ -16,8 +16,8 @@ const DemandaHeader: React.FC<DemandaHeaderProps> = ({
   const getBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case 'aberta': return 'default';
-      case 'em_atendimento': return 'warning';
-      case 'concluida': return 'success';
+      case 'em_atendimento': return 'secondary';
+      case 'concluida': return 'default';
       case 'cancelada': return 'destructive';
       default: return 'outline';
     }

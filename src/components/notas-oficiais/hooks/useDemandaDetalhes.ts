@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda, NotaExistente, Resposta } from '../types';
-import { formatarPerguntasRespostas } from '../utils/formatarPerguntasRespostas';
 
 export const useDemandaDetalhes = (demandaId: string) => {
   const [demanda, setDemanda] = useState<Demanda | null>(null);
@@ -11,6 +10,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
   const [notaExistente, setNotaExistente] = useState<NotaExistente | null>(null);
   const [loading, setLoading] = useState(true);
   const [isCheckingNota, setIsCheckingNota] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,11 +53,12 @@ export const useDemandaDetalhes = (demandaId: string) => {
           console.error('Erro ao buscar nota oficial:', notaError);
         }
         
-        setDemanda(demandaData);
-        setRespostas(respostasData || []);
-        setNotaExistente(notaData || null);
+        setDemanda(demandaData as Demanda);
+        setRespostas(respostasData as Resposta[] || []);
+        setNotaExistente(notaData as NotaExistente || null);
       } catch (error: any) {
         console.error('Erro ao buscar detalhes da demanda:', error);
+        setError(error.message || "Não foi possível carregar os detalhes da demanda.");
         toast({
           title: "Erro ao carregar detalhes",
           description: error.message || "Não foi possível carregar os detalhes da demanda.",
@@ -74,9 +75,18 @@ export const useDemandaDetalhes = (demandaId: string) => {
     }
   }, [demandaId, toast]);
 
-  const perguntasRespostas = demanda?.perguntas 
-    ? formatarPerguntasRespostas(demanda.perguntas)
-    : [];
+  const formatarPerguntasRespostas = (demanda?.perguntas || {}) => {
+    if (!demanda?.perguntas) return [];
+    
+    const result = [];
+    for (const [pergunta, resposta] of Object.entries(demanda.perguntas)) {
+      result.push({ pergunta, resposta });
+    }
+    
+    return result;
+  };
+
+  const perguntasRespostas = demanda?.perguntas ? formatarPerguntasRespostas() : [];
 
   return {
     demanda,
@@ -84,6 +94,7 @@ export const useDemandaDetalhes = (demandaId: string) => {
     perguntasRespostas,
     notaExistente,
     loading,
-    isCheckingNota
+    isCheckingNota,
+    error
   };
 };

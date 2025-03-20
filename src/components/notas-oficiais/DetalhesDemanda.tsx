@@ -15,7 +15,7 @@ import { formatarPerguntasRespostas } from './utils/formatarPerguntasRespostas';
 import { DetalhesDemandaProps } from './types';
 
 const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose }) => {
-  const { demanda, loading, error, notaExistente, checkingNota } = useDemandaDetalhes(demandaId);
+  const { demanda, loading, error, notaExistente, isCheckingNota } = useDemandaDetalhes(demandaId);
   const { user } = useAuth();
   const { 
     titulo, 
@@ -88,8 +88,8 @@ const DetalhesDemanda: React.FC<DetalhesDemandaProps> = ({ demandaId, onClose })
               setTexto={setTexto}
               onSubmit={() => user?.id && handleSubmit(user.id)}
               isPending={isPending}
-              notaExistente={notaExistente}
-              isCheckingNota={checkingNota}
+              notaExistente={notaExistente as any}
+              isCheckingNota={isCheckingNota}
               demanda={demanda}
               gerarSugestao={gerarSugestao}
               isGerandoSugestao={isGerandoSugestao}
