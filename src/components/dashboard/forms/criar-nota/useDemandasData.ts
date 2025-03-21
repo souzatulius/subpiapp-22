@@ -16,7 +16,7 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
         
-        // Primeiro, buscar todas as demandas
+        // First, fetch all demandas
         const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
           .select(`
@@ -32,18 +32,22 @@ export const useDemandasData = () => {
         
         if (demandasError) throw demandasError;
         
-        // Buscar todas as notas oficiais para verificar quais demandas já têm notas
+        // Fetch all notas oficiais to check which demandas already have notas
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
           .select('demanda_id');
         
         if (notasError) throw notasError;
         
-        // Criar um conjunto de IDs de demandas que já têm notas
-        const demandasComNotas = new Set(notasData.map(nota => nota.demanda_id));
+        // Create a set of demanda IDs that already have notas
+        const demandasComNotas = new Set(notasData.map(nota => nota.demanda_id).filter(Boolean));
         
-        // Filtrar para incluir apenas demandas que não têm notas associadas
+        // Filter to include only demandas that don't have notas associated
         const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
+        
+        console.log('All demandas:', allDemandas.length);
+        console.log('Demandas with notas:', demandasComNotas.size);
+        console.log('Demandas without notas:', demandasSemNotas.length);
         
         // Make sure the perguntas field is properly typed
         const typedData = demandasSemNotas?.map(item => ({

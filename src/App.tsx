@@ -13,10 +13,6 @@ import EmailVerified from "./pages/EmailVerified";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
-import Demandas from "./pages/comunicacao/Demandas";
-import NotasOficiais from "./pages/comunicacao/NotasOficiais";
-import Relatorios from "./pages/comunicacao/Relatorios";
-import RankingSubs from "./pages/dashboard/zeladoria/RankingSubs";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
@@ -26,6 +22,7 @@ import AprovarNotaOficial from './pages/dashboard/comunicacao/AprovarNotaOficial
 import RelatoriosPage from './pages/dashboard/comunicacao/Relatorios';
 import ConsultarDemandas from './pages/dashboard/comunicacao/ConsultarDemandas';
 import ConsultarNotas from './pages/dashboard/comunicacao/ConsultarNotas';
+import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 
 const queryClient = new QueryClient();
 
@@ -47,11 +44,6 @@ const App = () => (
             {/* Dashboard routes */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-            {/* Comunicação routes */}
-            <Route path="/comunicacao/demandas" element={<ProtectedRoute><Demandas /></ProtectedRoute>} />
-            <Route path="/comunicacao/notas-oficiais" element={<ProtectedRoute><NotasOficiais /></ProtectedRoute>} />
-            <Route path="/comunicacao/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
-
             {/* Dashboard Comunicação routes */}
             <Route path="/dashboard/comunicacao/cadastrar" element={<ProtectedRoute><CadastrarDemanda /></ProtectedRoute>} />
             <Route path="/dashboard/comunicacao/responder" element={<ProtectedRoute><ResponderDemandas /></ProtectedRoute>} />
@@ -61,11 +53,8 @@ const App = () => (
             <Route path="/dashboard/comunicacao/consultar-notas" element={<ProtectedRoute><ConsultarNotas /></ProtectedRoute>} />
             <Route path="/dashboard/comunicacao/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
 
-            {/* Zeladoria routes - Make sure only this is used */}
+            {/* Zeladoria routes */}
             <Route path="/dashboard/zeladoria/ranking-subs" element={<ProtectedRoute><RankingSubs /></ProtectedRoute>} />
-
-            {/* Remove or redirect old route */}
-            <Route path="/zeladoria/ranking-subs" element={<ProtectedRoute><RankingSubs /></ProtectedRoute>} />
 
             {/* Settings route */}
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -36,7 +35,6 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
   const [prioridadeFilter, setPrioridadeFilter] = useState<string>('');
   const [areas, setAreas] = useState<{id: string, descricao: string}[]>([]);
 
-  // Fetch areas from Supabase
   useEffect(() => {
     const fetchAreas = async () => {
       try {
@@ -55,7 +53,6 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
     fetchAreas();
   }, []);
 
-  // Fetch demandas from Supabase
   useEffect(() => {
     const fetchDemandas = async () => {
       try {
@@ -69,14 +66,29 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
             origens_demandas (descricao),
             tipos_midia (descricao),
             servicos (descricao)
-          `).eq('status', 'pendente').order('prioridade', {
-          ascending: false
-        }).order('prazo_resposta', {
-          ascending: true
-        });
+          `)
+          .eq('status', 'pendente')
+          .order('prioridade', {
+            ascending: false
+          })
+          .order('prazo_resposta', {
+            ascending: true
+          });
+          
         if (error) throw error;
-        setDemandas(data || []);
-        setFilteredDemandas(data || []);
+        
+        const { data: notasData, error: notasError } = await supabase
+          .from('notas_oficiais')
+          .select('demanda_id');
+          
+        if (notasError) throw notasError;
+        
+        const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
+        
+        const filteredDemandas = data?.filter(demanda => !demandasComNotas.has(demanda.id)) || [];
+        
+        setDemandas(filteredDemandas);
+        setFilteredDemandas(filteredDemandas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
         toast({
@@ -91,21 +103,17 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
     fetchDemandas();
   }, []);
 
-  // Apply filters when they change
   useEffect(() => {
     let filtered = [...demandas];
     
-    // Apply area filter if selected
     if (areaFilter) {
       filtered = filtered.filter(demanda => demanda.areas_coordenacao?.id === areaFilter);
     }
     
-    // Apply priority filter if selected
     if (prioridadeFilter) {
       filtered = filtered.filter(demanda => demanda.prioridade === prioridadeFilter);
     }
     
-    // Apply search term filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -138,7 +146,6 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
     try {
       setIsLoading(true);
 
-      // Insert resposta
       const {
         error: respostaError
       } = await supabase.from('respostas_demandas').insert([{
@@ -148,20 +155,20 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
       }]);
       if (respostaError) throw respostaError;
 
-      // Update demanda status
       const {
         error: statusError
       } = await supabase.from('demandas').update({
         status: 'respondida'
       }).eq('id', selectedDemanda.id);
       if (statusError) throw statusError;
+      
       toast({
         title: "Resposta enviada com sucesso!",
         description: "A demanda foi respondida e seu status foi atualizado."
       });
 
-      // Remove respondida demanda da lista
       setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
+      setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
       setSelectedDemanda(null);
       setResposta('');
     } catch (error: any) {

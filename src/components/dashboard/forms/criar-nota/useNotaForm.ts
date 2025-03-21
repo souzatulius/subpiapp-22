@@ -92,6 +92,7 @@ export const useNotaForm = (onClose: () => void) => {
     try {
       setIsSubmitting(true);
       
+      // Create the note
       const { data, error } = await supabase
         .from('notas_oficiais')
         .insert([{
@@ -105,6 +106,17 @@ export const useNotaForm = (onClose: () => void) => {
         .select();
       
       if (error) throw error;
+      
+      // Update the demand status to reflect that a note has been created
+      const { error: updateError } = await supabase
+        .from('demandas')
+        .update({ status: 'respondida' })
+        .eq('id', selectedDemandaId);
+        
+      if (updateError) {
+        console.error('Error updating demand status:', updateError);
+        // Don't throw here, we still want to show success for the note creation
+      }
       
       toast({
         title: "Nota oficial criada com sucesso!",
