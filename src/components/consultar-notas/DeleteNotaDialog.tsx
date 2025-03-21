@@ -16,11 +16,9 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
   hasDemanda
 }) => {
   return <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="bg-gray-50">
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl text-red-600 flex items-center gap-2">
-            <Trash className="h-5 w-5" /> Excluir nota
-          </AlertDialogTitle>
+          
           <AlertDialogDescription className="text-gray-700">
             <p className="mb-4">
               Você tem certeza que deseja excluir a nota <strong>"{notaTitle}"</strong>?
