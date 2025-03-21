@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ActionCard from '@/components/dashboard/ActionCard';
 import { ActionCardItem } from './CardGrid';
+import { X, Pencil } from 'lucide-react';
 
 interface SortableActionCardProps {
   card: ActionCardItem;
@@ -26,6 +27,41 @@ export const getWidthClasses = (width: string = '25') => {
     default:
       return 'col-span-1';
   }
+};
+
+// Control buttons component for card actions
+const Controls: React.FC<{
+  cardId: string;
+  onEdit: () => void;
+  onDelete?: (id: string) => void;
+  isCustom?: boolean;
+}> = ({ cardId, onEdit, onDelete, isCustom }) => {
+  return (
+    <div className="flex space-x-1">
+      <button 
+        className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-blue-500 transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit();
+        }}
+        aria-label="Editar card"
+      >
+        <Pencil className="h-4 w-4" />
+      </button>
+      {onDelete && isCustom && (
+        <button 
+          className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(cardId);
+          }}
+          aria-label="Remover card"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
 };
 
 const SortableActionCard: React.FC<SortableActionCardProps> = ({ 
@@ -56,7 +92,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
       {children ? (
         <div className="w-full h-full relative group">
           <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ActionCard.Controls 
+            <Controls 
               cardId={card.id} 
               onEdit={handleEdit} 
               onDelete={onDelete} 
@@ -83,5 +119,8 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
     </div>
   );
 };
+
+// Adicionando Controls como uma propriedade estática para que possa ser acessado como ActionCard.Controls
+SortableActionCard.Controls = Controls;
 
 export default SortableActionCard;

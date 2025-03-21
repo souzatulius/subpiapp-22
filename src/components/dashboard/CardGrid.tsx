@@ -1,14 +1,8 @@
-
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
 import { toast } from '@/hooks/use-toast';
-import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
-import SortableActionCard from './SortableActionCard';
-import QuickDemandCard from './QuickDemandCard';
-import SmartSearchCard from './SmartSearchCard';
-import OverdueDemandsCard from './cards/OverdueDemandsCard';
-import PendingActionsCard from './cards/PendingActionsCard';
+import CardsContainer from './grid/CardsContainer';
+import { ActionCardItem } from './CardGrid';
 
 // Define action card data type
 export interface ActionCardItem {
@@ -102,92 +96,21 @@ const CardGrid: React.FC<CardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={cards.map(card => card.id)}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
-          {cards.map((card) => {
-            if (card.isQuickDemand) {
-              return (
-                <SortableActionCard 
-                  key={card.id} 
-                  card={card} 
-                  onEdit={onEditCard}
-                  onDelete={onDeleteCard}
-                >
-                  <QuickDemandCard 
-                    title={card.title}
-                    value={quickDemandTitle}
-                    onChange={onQuickDemandTitleChange}
-                    onSubmit={onQuickDemandSubmit}
-                  />
-                </SortableActionCard>
-              );
-            }
-            
-            if (card.isSearch) {
-              return (
-                <SortableActionCard 
-                  key={card.id} 
-                  card={card} 
-                  onEdit={onEditCard}
-                  onDelete={onDeleteCard}
-                >
-                  <SmartSearchCard
-                    placeholder={card.title}
-                    onSearch={onSearchSubmit}
-                  />
-                </SortableActionCard>
-              );
-            }
-            
-            if (card.isOverdueDemands) {
-              return (
-                <div 
-                  key={card.id}
-                  className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
-                >
-                  <OverdueDemandsCard
-                    id={card.id}
-                    overdueCount={specialCardsData.overdueCount}
-                    overdueItems={specialCardsData.overdueItems}
-                  />
-                </div>
-              );
-            }
-            
-            if (card.isPendingActions) {
-              return (
-                <div 
-                  key={card.id}
-                  className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
-                >
-                  <PendingActionsCard
-                    id={card.id}
-                    notesToApprove={specialCardsData.notesToApprove}
-                    responsesToDo={specialCardsData.responsesToDo}
-                  />
-                </div>
-              );
-            }
-            
-            return (
-              <SortableActionCard 
-                key={card.id} 
-                card={card} 
-                onEdit={onEditCard}
-                onDelete={onDeleteCard}
-              />
-            );
-          })}
-          
-          {/* Add NotificationsEnabler after the cards */}
-          <NotificationsEnabler />
-        </div>
-      </SortableContext>
+      <CardsContainer 
+        cards={cards}
+        onEditCard={onEditCard}
+        onDeleteCard={onDeleteCard}
+        quickDemandTitle={quickDemandTitle}
+        onQuickDemandTitleChange={onQuickDemandTitleChange}
+        onQuickDemandSubmit={onQuickDemandSubmit}
+        onSearchSubmit={onSearchSubmit}
+        specialCardsData={specialCardsData}
+      />
     </DndContext>
   );
 };
 
-// Function to get width classes
+// Function to get width classes - mantido para compatibilidade com código existente
 const getWidthClasses = (width: string = '25') => {
   switch (width) {
     case '25':
