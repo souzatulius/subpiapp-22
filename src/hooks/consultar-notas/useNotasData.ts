@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { startOfDay, endOfDay, isAfter, isBefore, isEqual } from 'date-fns';
+import { useCurrentUser } from '@/components/settings/access-control/hooks/useCurrentUser';
 
 export const useNotasData = () => {
   const [notas, setNotas] = useState<any[]>([]);
@@ -12,10 +14,28 @@ export const useNotasData = () => {
   const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
   const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const { currentUserId } = useCurrentUser();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Verificar se o usuário atual é admin
+    const checkIfAdmin = async () => {
+      if (!currentUserId) return;
+      
+      const { data, error } = await supabase
+        .rpc('is_admin', { user_id: currentUserId });
+        
+      if (!error && data) {
+        setIsAdmin(data);
+      }
+    };
+    
+    checkIfAdmin();
+  }, [currentUserId]);
 
   useEffect(() => {
     fetchNotas();
-  }, [statusFilter, areaFilter, dataInicioFilter, dataFimFilter]);
+  }, [statusFilter, areaFilter, dataInicioFilter, dataFimFilter, isAdmin]);
 
   const fetchNotas = async () => {
     setLoading(true);
@@ -28,6 +48,7 @@ export const useNotasData = () => {
           aprovador:aprovador_id(id, nome_completo),
           area_coordenacao:area_coordenacao_id(id, descricao)
         `)
+        .neq('status', 'excluida') // Ignorar notas excluídas
         .order('criado_em', { ascending: false });
 
       if (statusFilter !== 'all') {
@@ -83,6 +104,7 @@ export const useNotasData = () => {
         if (demandaError) throw demandaError;
       }
 
+      // Atualizar status para 'excluida' em vez de excluir o registro
       const { error } = await supabase
         .from('notas_oficiais')
         .update({ status: 'excluida' })
@@ -90,14 +112,13 @@ export const useNotasData = () => {
 
       if (error) throw error;
 
-      setNotas(notas.filter(n => n.id !== notaId));
-
       toast({
         title: 'Nota excluída',
         description: 'A nota foi excluída com sucesso.',
         variant: 'default',
       });
       
+      // Atualizar lista de notas
       fetchNotas();
       
     } catch (error: any) {
@@ -178,6 +199,7 @@ export const useNotasData = () => {
     formatDate,
     refetch: fetchNotas,
     deleteNota,
-    deleteLoading
+    deleteLoading,
+    isAdmin
   };
 };

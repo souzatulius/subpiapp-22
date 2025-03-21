@@ -126,6 +126,13 @@ export type Database = {
             referencedRelation: "demandas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "comunicacoes_oficiais_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas_visiveis"
+            referencedColumns: ["id"]
+          },
         ]
       }
       comunicados: {
@@ -365,6 +372,13 @@ export type Database = {
             referencedRelation: "demandas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notas_oficiais_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas_visiveis"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notificacoes: {
@@ -588,6 +602,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "respostas_demandas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas_visiveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "respostas_demandas_usuario_id_fkey"
             columns: ["usuario_id"]
             isOneToOne: false
@@ -783,7 +804,124 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      demandas_visiveis: {
+        Row: {
+          area_coordenacao_id: string | null
+          arquivo_url: string | null
+          atualizado_em: string | null
+          autor_id: string | null
+          bairro_id: string | null
+          detalhes_solicitacao: string | null
+          email_solicitante: string | null
+          endereco: string | null
+          horario_publicacao: string | null
+          id: string | null
+          nome_solicitante: string | null
+          origem_id: string | null
+          perguntas: Json | null
+          prazo_resposta: string | null
+          prioridade: string | null
+          protocolo: string | null
+          servico_id: string | null
+          status: string | null
+          telefone_solicitante: string | null
+          tipo_midia_id: string | null
+          titulo: string | null
+          veiculo_imprensa: string | null
+        }
+        Insert: {
+          area_coordenacao_id?: string | null
+          arquivo_url?: string | null
+          atualizado_em?: string | null
+          autor_id?: string | null
+          bairro_id?: string | null
+          detalhes_solicitacao?: string | null
+          email_solicitante?: string | null
+          endereco?: string | null
+          horario_publicacao?: string | null
+          id?: string | null
+          nome_solicitante?: string | null
+          origem_id?: string | null
+          perguntas?: Json | null
+          prazo_resposta?: string | null
+          prioridade?: string | null
+          protocolo?: string | null
+          servico_id?: string | null
+          status?: string | null
+          telefone_solicitante?: string | null
+          tipo_midia_id?: string | null
+          titulo?: string | null
+          veiculo_imprensa?: string | null
+        }
+        Update: {
+          area_coordenacao_id?: string | null
+          arquivo_url?: string | null
+          atualizado_em?: string | null
+          autor_id?: string | null
+          bairro_id?: string | null
+          detalhes_solicitacao?: string | null
+          email_solicitante?: string | null
+          endereco?: string | null
+          horario_publicacao?: string | null
+          id?: string | null
+          nome_solicitante?: string | null
+          origem_id?: string | null
+          perguntas?: Json | null
+          prazo_resposta?: string | null
+          prioridade?: string | null
+          protocolo?: string | null
+          servico_id?: string | null
+          status?: string | null
+          telefone_solicitante?: string | null
+          tipo_midia_id?: string | null
+          titulo?: string | null
+          veiculo_imprensa?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demandas_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_bairro_id_fkey"
+            columns: ["bairro_id"]
+            isOneToOne: false
+            referencedRelation: "bairros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_origem_id_fkey"
+            columns: ["origem_id"]
+            isOneToOne: false
+            referencedRelation: "origens_demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_servico_id_fkey"
+            columns: ["servico_id"]
+            isOneToOne: false
+            referencedRelation: "servicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tipo_midia_id_fkey"
+            columns: ["tipo_midia_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_midia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       can_approve_notes: {

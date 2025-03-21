@@ -3,17 +3,42 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Demand } from './types';
+import { useCurrentUser } from '@/components/settings/access-control/hooks/useCurrentUser';
+import { useState, useEffect } from 'react';
 
 export const useDemandasQuery = () => {
+  const { currentUserId } = useCurrentUser();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Verificar se o usuário é administrador
+  useEffect(() => {
+    const checkIfAdmin = async () => {
+      if (!currentUserId) return;
+      
+      const { data, error } = await supabase
+        .rpc('is_admin', { user_id: currentUserId });
+        
+      if (!error && data) {
+        setIsAdmin(data);
+      }
+    };
+    
+    checkIfAdmin();
+  }, [currentUserId]);
+
   return useQuery({
-    queryKey: ['demandas'],
+    queryKey: ['demandas', isAdmin],
     queryFn: async () => {
-      console.log('Fetching demandas');
-      // First fetch all demandas
+      console.log('Fetching demandas, isAdmin:', isAdmin);
+      
+      // Use a tabela 'demandas' para admins e 'demandas_visiveis' para usuários comuns
+      const tableName = isAdmin ? 'demandas' : 'demandas_visiveis';
+      
+      // Fetch all demandas or only visible demandas based on admin status
       const {
         data: allDemandas,
         error: demandasError
-      } = await supabase.from('demandas').select(`
+      } = await supabase.from(tableName).select(`
           *,
           area_coordenacao:area_coordenacao_id(descricao),
           servico:servico_id(descricao),
@@ -33,7 +58,8 @@ export const useDemandasQuery = () => {
       // Now fetch all notas to update the demandas that have notas
       const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
-        .select('id, demanda_id, status');
+        .select('id, demanda_id, status')
+        .neq('status', 'excluida'); // Ignorar notas excluídas
         
       if (notasError) {
         console.error('Error fetching notas:', notasError);
