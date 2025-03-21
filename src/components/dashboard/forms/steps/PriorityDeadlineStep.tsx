@@ -87,7 +87,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar mode="single" selected={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined} onSelect={handleDateSelect} initialFocus className="p-3 pointer-events-auto" />
+                <Calendar mode="single" selected={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined} onSelect={handleDateSelect} initialFocus className="p-3 pointer-events-auto bg-gray-50" />
               </PopoverContent>
             </Popover>
           </div>
