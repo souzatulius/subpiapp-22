@@ -6,6 +6,15 @@ import { toast } from '@/hooks/use-toast';
 import { ActionCardItem } from '@/components/dashboard/CardGrid';
 import { useNavigate } from 'react-router-dom';
 
+// Define interface for our user_dashboard table
+interface UserDashboard {
+  id: string;
+  user_id: string;
+  cards_config: string; // JSON stored as string
+  created_at: string;
+  updated_at: string;
+}
+
 export const useDashboardState = (userId?: string) => {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
@@ -99,10 +108,10 @@ export const useDashboardState = (userId?: string) => {
 
           // Fetch saved dashboard configuration
           const { data: dashboardData, error: dashboardError } = await supabase
-            .from('user_dashboard')
+            .from<UserDashboard>('user_dashboard')
             .select('cards_config')
             .eq('user_id', userId)
-            .single();
+            .maybeSingle();
 
           if (dashboardError && dashboardError.code !== 'PGRST116') {
             // PGRST116 is "no rows returned" error, which is expected for first-time users
@@ -192,16 +201,19 @@ export const useDashboardState = (userId?: string) => {
             };
           });
           
-          // Upsert the configuration
+          // Convert to JSON string to store in the database
+          const cardsConfigString = JSON.stringify(serializableCards);
+          
+          // Upsert the configuration using explicit types
           const { error } = await supabase
-            .from('user_dashboard')
-            .upsert(
-              { 
-                user_id: userId, 
-                cards_config: JSON.stringify(serializableCards) 
-              },
-              { onConflict: 'user_id' }
-            );
+            .from<UserDashboard>('user_dashboard')
+            .upsert({ 
+              user_id: userId, 
+              cards_config: cardsConfigString 
+            }, 
+            { 
+              onConflict: 'user_id'
+            });
             
           if (error) throw error;
           
@@ -328,3 +340,4 @@ export const useDashboardState = (userId?: string) => {
     handleSearchSubmit
   };
 };
+
