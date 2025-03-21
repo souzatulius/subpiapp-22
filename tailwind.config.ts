@@ -108,6 +108,16 @@ export default {
 						transform: 'translateY(0)'
 					}
 				},
+				'fade-in-right': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateX(20px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateX(0)'
+					}
+				},
 				'spin': {
 					'0%': { transform: 'rotate(0deg)' },
 					'100%': { transform: 'rotate(360deg)' }
@@ -117,6 +127,7 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-in-right': 'fade-in-right 0.4s ease-out',
 				'spin': 'spin 1s linear infinite'
 			}
 		}
