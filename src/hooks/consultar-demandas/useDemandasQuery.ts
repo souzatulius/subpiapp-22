@@ -31,14 +31,20 @@ export const useDemandasQuery = () => {
     queryFn: async () => {
       console.log('Fetching demandas, isAdmin:', isAdmin);
       
-      // Use a tabela 'demandas' para admins e 'demandas_visiveis' para usuários comuns
-      const tableName = isAdmin ? 'demandas' : 'demandas_visiveis';
+      // Buscar demandas com base no status admin
+      let demandaQuery;
       
-      // Fetch all demandas or only visible demandas based on admin status
-      const {
-        data: allDemandas,
-        error: demandasError
-      } = await supabase.from(tableName).select(`
+      if (isAdmin) {
+        // Administradores podem ver todas as demandas, incluindo ocultas
+        demandaQuery = supabase.from('demandas');
+      } else {
+        // Usuários normais só veem demandas não-ocultas
+        demandaQuery = supabase.from('demandas_visiveis');
+      }
+      
+      // Executar a consulta com as seleções de campos relevantes
+      const { data: allDemandas, error: demandasError } = await demandaQuery
+        .select(`
           *,
           area_coordenacao:area_coordenacao_id(descricao),
           servico:servico_id(descricao),
@@ -46,9 +52,8 @@ export const useDemandasQuery = () => {
           tipo_midia:tipo_midia_id(descricao),
           bairro:bairro_id(nome),
           autor:autor_id(nome_completo)
-        `).order('horario_publicacao', {
-        ascending: false
-      });
+        `)
+        .order('horario_publicacao', { ascending: false });
       
       if (demandasError) {
         console.error('Error fetching demandas:', demandasError);
@@ -68,6 +73,7 @@ export const useDemandasQuery = () => {
       
       // Create a map of demanda_id to nota status for quick lookup
       const demandaToNotaStatus = new Map();
+      
       notasData?.forEach(nota => {
         if (nota.demanda_id) {
           // If there are multiple notas for a demanda, use the most "advanced" status
@@ -107,6 +113,8 @@ export const useDemandasQuery = () => {
       });
       
       console.log('Demandas data:', updatedDemandas);
+      
+      // Parse perguntas JSON if it's a string
       const processedData = updatedDemandas?.map(item => {
         if (typeof item.perguntas === 'string') {
           try {
