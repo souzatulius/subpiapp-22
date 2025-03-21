@@ -9,6 +9,22 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 16px;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium;
+  }
+  h1 {
+    font-size: 1.875rem; /* 30px */
+  }
+  h2 {
+    font-size: 1.5rem; /* 24px */
+  }
+  h3 {
+    font-size: 1.25rem; /* 20px */
+  }
+  p {
+    font-size: 1rem; /* 16px */
   }
   option {
     @apply bg-gray-100;
@@ -51,3 +67,17 @@
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in-out forwards;
 }
+
+/* Custom styles for modern UI */
+.interactive-card {
+  @apply bg-white rounded-xl shadow-md border border-gray-100 transition-all duration-200 hover:shadow-lg;
+}
+
+.modern-input-group {
+  @apply space-y-1.5;
+}
+
+.modern-label {
+  @apply text-base font-medium text-gray-700;
+}
+

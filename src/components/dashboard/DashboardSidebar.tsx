@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import SidebarSection from './sidebar/SidebarSection';
 import { getNavigationSections } from './sidebar/navigationConfig';
@@ -19,9 +19,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const navSections = getNavigationSections();
 
   return (
-    <aside className={`bg-white border-r border-gray-200 transition-all duration-300 ${isOpen ? 'w-56' : 'w-16'} flex-shrink-0 overflow-x-hidden`}>
-      <nav className="py-4">
-        <ul className="space-y-1">
+    <aside className={`bg-[#051b2c] transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'} flex-shrink-0 overflow-x-hidden`}>
+      <nav className="py-6">
+        <ul className="space-y-2 px-3">
           {navSections.filter(section => !section.adminOnly || isAdmin).map((section) => (
             <li key={section.id} className="flex flex-col">
               <SidebarSection
