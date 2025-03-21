@@ -27,9 +27,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
         <div 
           className="w-full md:w-1/2 bg-[#003570] p-8 flex flex-col items-center justify-center relative"
           style={{
-            backgroundImage: 'url("/lovable-uploads/4a180a95-2659-4b91-a791-bc7fcd795823.png")',
+            backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'left center',
             backgroundRepeat: 'no-repeat'
           }}
         >
