@@ -52,7 +52,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
       reset({
         nome_completo: userProfile.nome_completo || '',
         whatsapp: userProfile.whatsapp || '',
-        aniversario: userProfile.aniversario ? new Date(userProfile.aniversario).toISOString().split('T')[0] : '',
+        aniversario: userProfile.aniversario ? userProfile.aniversario.split('T')[0] : '',
         cargo_id: userProfile.cargo_id || '',
         area_coordenacao_id: userProfile.area_coordenacao_id || '',
       });

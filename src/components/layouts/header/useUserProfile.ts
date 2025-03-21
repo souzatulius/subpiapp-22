@@ -8,6 +8,8 @@ interface UserProfile {
   cargo_id: string;
   area_coordenacao_id: string;
   foto_perfil_url?: string;
+  whatsapp?: string;
+  aniversario?: string;
   cargos?: {
     descricao: string;
   };
@@ -31,6 +33,8 @@ export const useUserProfile = () => {
           cargo_id,
           area_coordenacao_id,
           foto_perfil_url,
+          whatsapp,
+          aniversario,
           cargos:cargo_id(descricao),
           areas_coordenacao:area_coordenacao_id(descricao)
         `)
