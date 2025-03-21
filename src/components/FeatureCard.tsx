@@ -39,7 +39,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   }
 
   return (
-    <Card className="border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group h-full overflow-hidden">
+    <Card className="border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 group h-full overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4 group-hover:scale-110 transition-transform duration-300">
           {icon}
