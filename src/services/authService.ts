@@ -58,6 +58,12 @@ export const signIn = async (email: string, password: string) => {
 // Login with Google
 export const signInWithGoogle = async () => {
   try {
+    // Log the configuration to help with debugging
+    console.log('Initiating Google sign-in with domain restriction', {
+      redirectUrl: `${window.location.origin}/auth/callback`,
+      domain: 'smsub.prefeitura.sp.gov.br'
+    });
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -70,7 +76,10 @@ export const signInWithGoogle = async () => {
       }
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Google sign-in error:', error);
+      throw error;
+    }
     
     return { data, error: null };
   } catch (error) {

@@ -72,11 +72,11 @@ const LoginForm = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithGoogle();
       toast({
-        title: "Redirecting to Google",
-        description: "You'll be redirected to Google for authentication.",
+        title: "Redirecionando para o Google",
+        description: "Você será redirecionado para autenticação com Google. Use uma conta @smsub.prefeitura.sp.gov.br.",
       });
+      await signInWithGoogle();
     } catch (error) {
       console.error('Erro no login com Google:', error);
       toast({
