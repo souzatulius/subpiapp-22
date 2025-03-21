@@ -112,6 +112,5 @@ export const getDefaultCards = (): ActionCardItem[] => [
     color: 'orange-light',
     width: '25',
     height: '1',
-    isNewCardButton: true
   }
 ];

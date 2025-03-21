@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ActionCard from '@/components/dashboard/ActionCard';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +19,7 @@ interface ActionCardItem {
   title: string;
   icon: React.ReactNode;
   path: string;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
+  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
   width?: '25' | '50' | '75' | '100';
   height?: '1' | '2';
 }
@@ -55,7 +54,7 @@ const NotasDashboard: React.FC = () => {
       title: 'Relatórios',
       icon: <BarChart2 className="h-12 w-12" />,
       path: '/dashboard/comunicacao/relatorios',
-      color: 'purple',
+      color: 'gray-light',
     }
   ]);
 

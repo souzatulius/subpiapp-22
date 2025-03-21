@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
@@ -14,12 +13,13 @@ export interface ActionCardItem {
   title: string;
   icon: React.ReactNode;
   path: string;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
+  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
   isCustom?: boolean;
   width?: '25' | '50' | '75' | '100';
   height?: '1' | '2';
   isQuickDemand?: boolean;
   isSearch?: boolean;
+  isNewCardButton?: boolean;
 }
 
 interface CardGridProps {

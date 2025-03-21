@@ -22,6 +22,7 @@ export interface SerializableCard {
   isCustom?: boolean;
   isQuickDemand?: boolean;
   isSearch?: boolean;
+  isNewCardButton?: boolean;
 }
 
 // Interface for dashboard hook return values
@@ -52,10 +53,11 @@ export interface ActionCardItem {
   title: string;
   icon: ReactNode;
   path: string;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
+  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
   isCustom?: boolean;
   width?: '25' | '50' | '75' | '100';
   height?: '1' | '2';
   isQuickDemand?: boolean;
   isSearch?: boolean;
+  isNewCardButton?: boolean;
 }
