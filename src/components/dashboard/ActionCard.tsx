@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-
 interface ActionCardProps {
   title: string;
   icon: string | React.ReactNode;
@@ -10,7 +8,6 @@ interface ActionCardProps {
   iconSize?: 'normal' | 'large' | 'giant';
   className?: string;
 }
-
 const ActionCard: React.FC<ActionCardProps> = ({
   title,
   icon,
@@ -35,7 +32,6 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'bg-gray-50 border-gray-200 hover:bg-gray-100';
     }
   };
-
   const getIconSizeClasses = () => {
     switch (iconSize) {
       case 'giant':
@@ -47,32 +43,25 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return 'text-4xl mb-4';
     }
   };
-
   const renderIcon = () => {
     if (typeof icon === 'string') {
       return <span className={getIconSizeClasses()}>{icon}</span>;
     }
 
     // If it's a React component (like a Lucide icon)
-    return (
-      <div className={`${getIconSizeClasses()} flex justify-center items-center`}>
+    return <div className={`${getIconSizeClasses()} flex justify-center items-center`}>
         {icon}
-      </div>
-    );
+      </div>;
   };
-
-  return (
-    <Card onClick={onClick} className="cursor-pointer">
-      <CardContent className="p-6 flex flex-col items-center justify-center text-center">
-        <div className="mb-4 p-3 rounded-full bg-gray-100">
+  return <Card onClick={onClick} className="cursor-pointer rounded-2xl">
+      <CardContent className="p-6 flex flex-col items-center justify-center text-center bg-orange-500 rounded-2xl">
+        <div className="mb-2 p-3 rounded-full bg-transparent">
           {renderIcon()}
         </div>
         <h3 className="text-lg font-semibold">
           {title}
         </h3>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default ActionCard;

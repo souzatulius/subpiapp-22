@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -7,24 +6,22 @@ import { ClipboardList, MessageSquareReply, FileCheck, BarChart2 } from 'lucide-
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
-
 const Dashboard = () => {
   // Start with sidebar collapsed
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [firstName, setFirstName] = useState('');
-  const { user } = useAuth();
-
+  const {
+    user
+  } = useAuth();
   useEffect(() => {
     // Extract the first name from the user's full name
     if (user) {
       const fetchUserName = async () => {
         try {
-          const { data: userData, error } = await supabase
-            .from('usuarios')
-            .select('nome_completo')
-            .eq('id', user.id)
-            .single();
-            
+          const {
+            data: userData,
+            error
+          } = await supabase.from('usuarios').select('nome_completo').eq('id', user.id).single();
           if (error) throw error;
 
           // Get the first name only
@@ -38,13 +35,10 @@ const Dashboard = () => {
       fetchUserName();
     }
   }, [user]);
-
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+  return <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header - explicitly pass showControls={true} */}
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
@@ -62,39 +56,17 @@ const Dashboard = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <ActionCard 
-                title="Nova Demanda" 
-                icon={<ClipboardList className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/dashboard/comunicacao/cadastrar'} 
-                color="blue" 
-              />
+              <ActionCard title="Nova Demanda" icon={<ClipboardList className="h-12 w-12" />} onClick={() => window.location.href = '/dashboard/comunicacao/cadastrar'} color="blue" />
               
-              <ActionCard 
-                title="Responder Demandas" 
-                icon={<MessageSquareReply className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/dashboard/comunicacao/responder'} 
-                color="green" 
-              />
+              <ActionCard title="Responder Demandas" icon={<MessageSquareReply className="h-12 w-12" />} onClick={() => window.location.href = '/dashboard/comunicacao/responder'} color="green" />
               
-              <ActionCard 
-                title="Aprovar Nota" 
-                icon={<FileCheck className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/dashboard/comunicacao/aprovar-nota'} 
-                color="orange" 
-              />
+              <ActionCard title="Aprovar Nota" icon={<FileCheck className="h-12 w-12" />} onClick={() => window.location.href = '/dashboard/comunicacao/aprovar-nota'} color="orange" />
               
-              <ActionCard 
-                title="Números da Comunicação" 
-                icon={<BarChart2 className="h-6 w-6" />} 
-                onClick={() => window.location.href = '/dashboard/comunicacao/relatorios'} 
-                color="purple" 
-              />
+              <ActionCard title="Números da Comunicação" icon={<BarChart2 className="h-12 w-12" />} onClick={() => window.location.href = '/dashboard/comunicacao/relatorios'} color="purple" />
             </div>
           </div>
         </main>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
