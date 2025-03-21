@@ -5,8 +5,7 @@ import DemandasSearchBar from './DemandasSearchBar';
 import DemandasTable from './DemandasTable';
 import DeleteDemandDialog from './DeleteDemandDialog';
 import DemandDetail from '@/components/demandas/DemandDetail';
-import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
-import { Demand } from '@/components/dashboard/forms/types';
+import { useDemandasData, type Demand } from '@/hooks/consultar-demandas/useDemandasData';
 
 const ConsultarDemandasContent: React.FC = () => {
   const {
@@ -54,7 +53,7 @@ const ConsultarDemandasContent: React.FC = () => {
           />
           
           <DemandasTable 
-            demandas={filteredDemandas as Demand[]} 
+            demandas={filteredDemandas} 
             isLoading={isLoading} 
             onViewDemand={handleViewDemand}
             onRespondDemand={handleRespondDemand}
