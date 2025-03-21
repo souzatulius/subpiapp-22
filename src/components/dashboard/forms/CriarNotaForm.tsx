@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +8,8 @@ import { useNotaForm } from './criar-nota/useNotaForm';
 import DemandaSelection from './criar-nota/DemandaSelection';
 import DemandaInfo from './criar-nota/DemandaInfo';
 import NotaForm from './criar-nota/NotaForm';
-import { CriarNotaFormProps } from './criar-nota/types';
+import { CriarNotaFormProps } from './types';
+
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
   onClose
 }) => {

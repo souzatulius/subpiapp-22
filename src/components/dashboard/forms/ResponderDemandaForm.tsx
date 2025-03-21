@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -230,7 +231,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
             <SelectValue placeholder="Filtrar por área" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as áreas</SelectItem>
+            <SelectItem value="all">Todas as áreas</SelectItem>
             {areas.map(area => (
               <SelectItem key={area.id} value={area.id}>{area.descricao}</SelectItem>
             ))}
@@ -242,7 +243,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
             <SelectValue placeholder="Filtrar por prioridade" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Qualquer prioridade</SelectItem>
+            <SelectItem value="all">Qualquer prioridade</SelectItem>
             <SelectItem value="alta">Alta</SelectItem>
             <SelectItem value="média">Média</SelectItem>
             <SelectItem value="baixa">Baixa</SelectItem>
