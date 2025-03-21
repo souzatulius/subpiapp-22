@@ -54,7 +54,7 @@ export function Toaster() {
             <div className="flex-1 grid gap-1">
               {title && <ToastTitle className="font-semibold">{title}</ToastTitle>}
               {description && (
-                <ToastDescription>{description}</ToastDescription>
+                <ToastDescription className="whitespace-normal break-words">{description}</ToastDescription>
               )}
             </div>
             {action}

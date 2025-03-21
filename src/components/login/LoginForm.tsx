@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -49,17 +50,18 @@ const LoginForm = () => {
         error
       } = await signIn(completeEmail, password);
       if (error) {
-        setError(error.message);
+        setError(null); // Remove the error message text since we show it as a toast
         showAuthError(error);
       } else {
         toast({
           title: "Login efetuado",
-          description: "Você foi autenticado com sucesso."
+          description: "Você foi autenticado com sucesso.",
+          variant: "success"
         });
       }
     } catch (err: any) {
       console.error('Erro ao fazer login:', err);
-      setError(err.message || 'Erro ao tentar fazer login');
+      setError(null); // Remove the error message text
       toast({
         title: "Erro de login",
         description: err.message || 'Erro ao tentar fazer login',
@@ -121,8 +123,6 @@ const LoginForm = () => {
             </div>
             
             <PasswordRequirements requirements={requirements} visible={showRequirements && password.length > 0} />
-            
-            {error && <p className="mt-2 text-sm text-[#f57b35]">{error}</p>}
             
             <div className="mt-2">
               <Link to="/forgot-password" className="text-[#f57c35] font-semibold hover:underline">
