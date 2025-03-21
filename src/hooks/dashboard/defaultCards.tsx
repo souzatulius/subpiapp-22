@@ -1,6 +1,15 @@
 
 import { ActionCardItem } from './types';
-import { ClipboardList, MessageSquareReply, FileCheck, BarChart2, PlusCircleIcon, Search } from 'lucide-react';
+import { 
+  ClipboardList, 
+  MessageSquareReply, 
+  FileCheck, 
+  BarChart2, 
+  PlusCircleIcon, 
+  Search,
+  Clock,
+  AlertTriangle
+} from 'lucide-react';
 import React from 'react';
 
 // Map icon string IDs to components
@@ -18,6 +27,10 @@ export const getIconComponentFromId = (iconId: string) => {
       return <PlusCircleIcon className="h-12 w-12" />;
     case 'search':
       return <Search className="h-12 w-12" />;
+    case 'clock':
+      return <Clock className="h-12 w-12" />;
+    case 'alert-triangle':
+      return <AlertTriangle className="h-12 w-12" />;
     default:
       return <ClipboardList className="h-12 w-12" />;
   }
@@ -35,6 +48,8 @@ export const getIconIdFromComponent = (component: React.ReactNode): string => {
   if (componentStr.includes('BarChart2')) return 'bar-chart-2';
   if (componentStr.includes('PlusCircle')) return 'plus-circle';
   if (componentStr.includes('Search')) return 'search';
+  if (componentStr.includes('Clock')) return 'clock';
+  if (componentStr.includes('AlertTriangle')) return 'alert-triangle';
   
   return 'clipboard-list'; // Default
 };
@@ -52,6 +67,32 @@ export const getDefaultCards = (): ActionCardItem[] => [
     height: '1',
     isCustom: false,
     isSearch: true,
+  },
+  
+  // After search - PendingActions card 
+  {
+    id: 'pending-actions',
+    title: 'Você precisa agir',
+    icon: <AlertTriangle className="h-12 w-12" />,
+    path: '',
+    color: 'orange-light',
+    width: '25',
+    height: '1',
+    isCustom: false,
+    isPendingActions: true,
+  },
+  
+  // OverdueDemands card
+  {
+    id: 'overdue-demands',
+    title: 'Demandas em Atraso',
+    icon: <Clock className="h-12 w-12" />,
+    path: '',
+    color: 'orange',
+    width: '25',
+    height: '2',
+    isCustom: false,
+    isOverdueDemands: true,
   },
   
   // Second Row - Standard operational cards

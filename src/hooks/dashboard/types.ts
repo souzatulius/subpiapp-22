@@ -23,6 +23,8 @@ export interface SerializableCard {
   isQuickDemand?: boolean;
   isSearch?: boolean;
   isNewCardButton?: boolean;
+  isOverdueDemands?: boolean;
+  isPendingActions?: boolean;
 }
 
 // Interface for dashboard hook return values
@@ -45,9 +47,17 @@ export interface DashboardStateReturn {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   handleSearchSubmit: (query: string) => void;
+  // Special cards data
+  specialCardsData: {
+    overdueCount: number;
+    overdueItems: { title: string; id: string }[];
+    notesToApprove: number;
+    responsesToDo: number;
+    isLoading: boolean;
+  };
 }
 
-// Import ActionCardItem to avoid circular dependency
+// Define ActionCardItem interface
 export interface ActionCardItem {
   id: string;
   title: string;
@@ -60,4 +70,6 @@ export interface ActionCardItem {
   isQuickDemand?: boolean;
   isSearch?: boolean;
   isNewCardButton?: boolean;
+  isOverdueDemands?: boolean;
+  isPendingActions?: boolean;
 }

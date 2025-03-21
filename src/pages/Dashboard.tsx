@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -29,7 +30,9 @@ const Dashboard = () => {
     setNewDemandTitle,
     handleQuickDemandSubmit,
     // Search functionality
-    handleSearchSubmit
+    handleSearchSubmit,
+    // Special cards data
+    specialCardsData
   } = useDashboardState(user?.id);
 
   const toggleSidebar = () => {
@@ -59,6 +62,7 @@ const Dashboard = () => {
               onQuickDemandTitleChange={setNewDemandTitle}
               onQuickDemandSubmit={handleQuickDemandSubmit}
               onSearchSubmit={handleSearchSubmit}
+              specialCardsData={specialCardsData}
             />
           </div>
         </main>

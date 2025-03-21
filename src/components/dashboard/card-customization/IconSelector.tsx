@@ -1,46 +1,31 @@
 
 import React from 'react';
-import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UseFormReturn } from 'react-hook-form';
-import { FormSchema } from './types';
-import { availableIcons } from './utils';
+import { FormControl } from '@/components/ui/form';
+import { iconsData } from './utils';
 
 interface IconSelectorProps {
-  form: UseFormReturn<FormSchema>;
   selectedIconId: string;
-  setSelectedIconId: (id: string) => void;
+  onSelectIcon: (iconId: string) => void;
 }
 
-const IconSelector: React.FC<IconSelectorProps> = ({ 
-  form, 
-  selectedIconId, 
-  setSelectedIconId 
-}) => {
+const IconSelector: React.FC<IconSelectorProps> = ({ selectedIconId, onSelectIcon }) => {
   return (
-    <FormItem>
-      <FormLabel>Ícone</FormLabel>
-      <div className="grid grid-cols-4 gap-2 max-h-[280px] overflow-y-auto p-1">
-        {availableIcons.map((icon) => (
+    <FormControl>
+      <div className="grid grid-cols-5 gap-3">
+        {iconsData.map((icon) => (
           <div
             key={icon.id}
-            className={`cursor-pointer p-2 rounded-md border-2 ${
-              form.watch('iconId') === icon.id
-                ? 'border-gray-900 shadow-md'
-                : 'border-transparent'
-            }`}
-            onClick={() => {
-              form.setValue('iconId', icon.id);
-              setSelectedIconId(icon.id);
-            }}
+            className={`flex items-center justify-center h-12 rounded-md cursor-pointer transition-all duration-200
+              ${selectedIconId === icon.id 
+                ? 'bg-subpi-blue text-white' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            onClick={() => onSelectIcon(icon.id)}
           >
-            <div className="flex items-center justify-center">
-              {icon.component}
-            </div>
+            {icon.component}
           </div>
         ))}
       </div>
-      <FormMessage />
-    </FormItem>
+    </FormControl>
   );
 };
 

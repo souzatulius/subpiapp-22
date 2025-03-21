@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
@@ -6,6 +7,8 @@ import NotificationsEnabler from '@/components/notifications/NotificationsEnable
 import SortableActionCard from './SortableActionCard';
 import QuickDemandCard from './QuickDemandCard';
 import SmartSearchCard from './SmartSearchCard';
+import OverdueDemandsCard from './cards/OverdueDemandsCard';
+import PendingActionsCard from './cards/PendingActionsCard';
 
 // Define action card data type
 export interface ActionCardItem {
@@ -20,6 +23,8 @@ export interface ActionCardItem {
   isQuickDemand?: boolean;
   isSearch?: boolean;
   isNewCardButton?: boolean;
+  isOverdueDemands?: boolean;
+  isPendingActions?: boolean;
 }
 
 interface CardGridProps {
@@ -32,6 +37,14 @@ interface CardGridProps {
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
+  // Special cards data
+  specialCardsData?: {
+    overdueCount: number;
+    overdueItems: { title: string; id: string }[];
+    notesToApprove: number;
+    responsesToDo: number;
+    isLoading: boolean;
+  };
 }
 
 const CardGrid: React.FC<CardGridProps> = ({ 
@@ -42,7 +55,14 @@ const CardGrid: React.FC<CardGridProps> = ({
   quickDemandTitle = "",
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
-  onSearchSubmit = () => {}
+  onSearchSubmit = () => {},
+  specialCardsData = {
+    overdueCount: 0,
+    overdueItems: [],
+    notesToApprove: 0,
+    responsesToDo: 0,
+    isLoading: false
+  }
 }) => {
   // Set up DnD sensors
   const sensors = useSensors(
@@ -111,6 +131,36 @@ const CardGrid: React.FC<CardGridProps> = ({
                   <SmartSearchCard
                     placeholder={card.title}
                     onSearch={onSearchSubmit}
+                  />
+                </div>
+              );
+            }
+            
+            if (card.isOverdueDemands) {
+              return (
+                <div 
+                  key={card.id}
+                  className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+                >
+                  <OverdueDemandsCard
+                    id={card.id}
+                    overdueCount={specialCardsData.overdueCount}
+                    overdueItems={specialCardsData.overdueItems}
+                  />
+                </div>
+              );
+            }
+            
+            if (card.isPendingActions) {
+              return (
+                <div 
+                  key={card.id}
+                  className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+                >
+                  <PendingActionsCard
+                    id={card.id}
+                    notesToApprove={specialCardsData.notesToApprove}
+                    responsesToDo={specialCardsData.responsesToDo}
                   />
                 </div>
               );

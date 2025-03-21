@@ -2,6 +2,7 @@
 import { useDashboardData } from './dashboard/useDashboardData';
 import { useCardActions } from './dashboard/useCardActions';
 import { useSpecialCardActions } from './dashboard/useSpecialCardActions';
+import { useSpecialCardsData } from './dashboard/useSpecialCardsData';
 import { DashboardStateReturn } from './dashboard/types';
 
 export const useDashboardState = (userId?: string): DashboardStateReturn => {
@@ -28,6 +29,9 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
     setSearchQuery,
     handleSearchSubmit
   } = useSpecialCardActions();
+  
+  // Fetch data for special cards
+  const specialCardsData = useSpecialCardsData();
 
   return {
     firstName,
@@ -45,6 +49,7 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
     handleQuickDemandSubmit,
     searchQuery,
     setSearchQuery,
-    handleSearchSubmit
+    handleSearchSubmit,
+    specialCardsData
   };
 };

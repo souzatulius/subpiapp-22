@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -50,25 +51,6 @@ const getColorClasses = (color: string) => {
     default:
       return 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100';
   }
-};
-
-const getWidthClasses = (width: string = '25') => {
-  switch (width) {
-    case '25':
-      return 'col-span-1';
-    case '50':
-      return 'col-span-1 md:col-span-2';
-    case '75':
-      return 'col-span-1 md:col-span-3';
-    case '100':
-      return 'col-span-1 md:col-span-4';
-    default:
-      return 'col-span-1';
-  }
-};
-
-const getHeightClasses = (height: string = '1') => {
-  return height === '2' ? 'row-span-2' : '';
 };
 
 const ActionCard: React.FC<ActionCardProps> = ({

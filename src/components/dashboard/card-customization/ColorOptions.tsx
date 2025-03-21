@@ -1,42 +1,27 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
-import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UseFormReturn } from 'react-hook-form';
-import { FormSchema } from './types';
-import { colorOptions } from './utils';
+import { FormControl } from '@/components/ui/form';
+import { colorData } from './utils';
 
 interface ColorOptionsProps {
-  form: UseFormReturn<FormSchema>;
+  selectedColor: string;
+  onSelectColor: (color: string) => void;
 }
 
-const ColorOptions: React.FC<ColorOptionsProps> = ({ form }) => {
+const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColor }) => {
   return (
-    <FormItem>
-      <FormLabel>Cor</FormLabel>
+    <FormControl>
       <div className="grid grid-cols-4 gap-2">
-        {colorOptions.map((color) => (
+        {colorData.map((color) => (
           <div
             key={color.id}
-            className={`cursor-pointer p-2 rounded-md border-2 ${
-              form.watch('color') === color.value
-                ? 'border-gray-900 shadow-md'
-                : 'border-transparent'
-            }`}
-            onClick={() => form.setValue('color', color.value as any)}
-          >
-            <div
-              className={`w-full h-8 ${color.bgClass} rounded-md flex items-center justify-center`}
-            >
-              {form.watch('color') === color.value && (
-                <Check className="h-4 w-4 text-gray-600" />
-              )}
-            </div>
-          </div>
+            className={`h-10 rounded-md cursor-pointer transition-all duration-200 ${color.class} 
+              ${selectedColor === color.id ? 'ring-2 ring-offset-2 ring-subpi-blue' : 'hover:opacity-80'}`}
+            onClick={() => onSelectColor(color.id)}
+          />
         ))}
       </div>
-      <FormMessage />
-    </FormItem>
+    </FormControl>
   );
 };
 
