@@ -40,7 +40,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
     setIsFocused(true);
     inputRef.current?.focus();
   }}>
-      <input id={id} ref={inputRef} type="text" value={value} onChange={handleChange} onFocus={() => setIsFocused(true)} placeholder={placeholder} className="px-4 py-2 w-full focus:outline-none border-none" />
+      <input id={id} ref={inputRef} type="text" value={value} onChange={handleChange} onFocus={() => setIsFocused(true)} placeholder={placeholder} className="px-4 py-2 w-full border border-gray-300 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200" />
       <div className="bg-gray-100 py-2 text-subpi-gray-secondary flex items-center px-[7px]">
         {suffix}
       </div>
