@@ -6,7 +6,7 @@ import React from 'react';
 export const formSchema = z.object({
   title: z.string().min(1, "O título é obrigatório").max(50, "O título deve ter no máximo 50 caracteres"),
   path: z.string().min(1, "O caminho é obrigatório"),
-  color: z.enum(['blue', 'green', 'orange', 'purple', 'red', 'gray-light', 'gray-dark', 'blue-dark', 'orange-light']),
+  color: z.enum(['blue', 'green', 'orange', 'gray-light', 'gray-dark', 'blue-dark', 'orange-light', 'gray-ultra-light']),
   iconId: z.string().min(1, "Selecione um ícone"),
   width: z.enum(['25', '50', '75', '100']),
   height: z.enum(['1', '2']),
@@ -22,7 +22,7 @@ export interface CardCustomizationModalProps {
     title: string; 
     icon: React.ReactNode; 
     path: string; 
-    color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
+    color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
     width?: '25' | '50' | '75' | '100';
     height?: '1' | '2';
   }) => void;
@@ -31,7 +31,7 @@ export interface CardCustomizationModalProps {
     title: string;
     icon: React.ReactNode;
     path: string;
-    color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
+    color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
     width?: '25' | '50' | '75' | '100';
     height?: '1' | '2';
   };

@@ -41,17 +41,7 @@ export const getIconIdFromComponent = (component: React.ReactNode): string => {
 
 // Default cards configuration
 export const getDefaultCards = (): ActionCardItem[] => [
-  {
-    id: 'quick-demand',
-    title: 'Iniciar nova demanda',
-    icon: <PlusCircleIcon className="h-12 w-12" />,
-    path: '/dashboard/comunicacao/cadastrar',
-    color: 'blue-dark',
-    width: '50',
-    height: '2',
-    isCustom: false,
-    isQuickDemand: true,
-  },
+  // First row - Search card
   {
     id: 'smart-search',
     title: 'O que você deseja fazer?',
@@ -63,6 +53,8 @@ export const getDefaultCards = (): ActionCardItem[] => [
     isCustom: false,
     isSearch: true,
   },
+  
+  // Second Row - Standard operational cards
   {
     id: '1',
     title: 'Nova Demanda',
@@ -74,18 +66,18 @@ export const getDefaultCards = (): ActionCardItem[] => [
   },
   {
     id: '2',
-    title: 'Responder Demandas',
-    icon: <MessageSquareReply className="h-12 w-12" />,
-    path: '/dashboard/comunicacao/responder',
+    title: 'Aprovar Nota',
+    icon: <FileCheck className="h-12 w-12" />,
+    path: '/dashboard/comunicacao/aprovar-nota',
     color: 'green',
     width: '25',
     height: '1'
   },
   {
     id: '3',
-    title: 'Aprovar Nota',
-    icon: <FileCheck className="h-12 w-12" />,
-    path: '/dashboard/comunicacao/aprovar-nota',
+    title: 'Responder Demandas',
+    icon: <MessageSquareReply className="h-12 w-12" />,
+    path: '/dashboard/comunicacao/responder',
     color: 'orange',
     width: '25',
     height: '1'
@@ -95,8 +87,31 @@ export const getDefaultCards = (): ActionCardItem[] => [
     title: 'Números da Comunicação',
     icon: <BarChart2 className="h-12 w-12" />,
     path: '/dashboard/comunicacao/relatorios',
-    color: 'purple',
+    color: 'gray-light',
     width: '25',
     height: '1'
+  },
+  
+  // Last row - Quick demand and New card
+  {
+    id: 'quick-demand',
+    title: 'Iniciar nova demanda',
+    icon: <PlusCircleIcon className="h-12 w-12" />,
+    path: '/dashboard/comunicacao/cadastrar',
+    color: 'blue-dark',
+    width: '25',
+    height: '1',
+    isCustom: false,
+    isQuickDemand: true,
+  },
+  {
+    id: 'new-card',
+    title: '+ Novo Card',
+    icon: <PlusCircleIcon className="h-12 w-12" />,
+    path: '',
+    color: 'orange-light',
+    width: '25',
+    height: '1',
+    isNewCardButton: true
   }
 ];

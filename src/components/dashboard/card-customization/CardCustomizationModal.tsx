@@ -14,7 +14,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   onSave,
   initialData,
 }) => {
-  const [selectedIconId, setSelectedIconId] = useState<string>('clipboard');
+  const [selectedIconId, setSelectedIconId] = useState<string>('clipboard-list');
   
   // Set up form with validation
   const form = useForm<FormSchema>({
@@ -23,7 +23,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       title: '',
       path: '',
       color: 'blue',
-      iconId: 'clipboard',
+      iconId: 'clipboard-list',
       width: '25',
       height: '1',
     },
@@ -50,11 +50,11 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
         title: '',
         path: '',
         color: 'blue',
-        iconId: 'clipboard',
+        iconId: 'clipboard-list',
         width: '25',
         height: '1',
       });
-      setSelectedIconId('clipboard');
+      setSelectedIconId('clipboard-list');
     }
   }, [initialData, form, isOpen]);
 
@@ -70,6 +70,9 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       height: data.height,
     });
   };
+
+  // Use form's handleSubmit function
+  const onSubmitForm = form.handleSubmit(handleSubmit);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

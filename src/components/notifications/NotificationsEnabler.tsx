@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,6 @@ const NotificationsEnabler: React.FC = () => {
   const [dismissed, setDismissed] = useState(false);
   const [showConfirmDismiss, setShowConfirmDismiss] = useState(false);
 
-  // Check if notifications were previously dismissed in this session
   useEffect(() => {
     const wasDismissed = localStorage.getItem('notifications_card_dismissed');
     if (wasDismissed === 'true') {
@@ -38,7 +36,6 @@ const NotificationsEnabler: React.FC = () => {
     }
   }, []);
 
-  // Handle successful setup
   const handleEnableNotifications = async () => {
     const result = await requestPermissionAndRegisterToken();
     if (result) {
@@ -49,7 +46,6 @@ const NotificationsEnabler: React.FC = () => {
     }
   };
 
-  // Show error toast when there's an error
   useEffect(() => {
     if (error) {
       toast({
@@ -60,7 +56,6 @@ const NotificationsEnabler: React.FC = () => {
     }
   }, [error]);
 
-  // Handler to dismiss notification message
   const handleDismiss = () => {
     setShowConfirmDismiss(true);
   };
@@ -71,16 +66,13 @@ const NotificationsEnabler: React.FC = () => {
     setShowConfirmDismiss(false);
   };
 
-  // Don't show anything if user isn't logged in or banner was dismissed
-  // Also don't show if notifications are already granted
   if (!user || dismissed || notificationsPermission === 'granted') return null;
 
-  // Show unsupported message
   if (isNotificationsSupported === false) {
     return (
-      <div className="col-span-1 md:col-span-2 lg:col-span-4">
+      <div className="col-span-1 md:col-span-2 lg:col-span-4 overflow-hidden">
         <Card className="cursor-pointer transition-all duration-300 border border-gray-200 
-          rounded-xl shadow-md hover:shadow-xl hover:scale-105 
+          rounded-xl shadow-md hover:shadow-xl transform-gpu hover:scale-[1.03] 
           bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100 group">
           <CardContent className="relative flex flex-col items-center justify-center p-6 md:p-4 h-full">
             <button 
@@ -121,17 +113,15 @@ const NotificationsEnabler: React.FC = () => {
     );
   }
 
-  // Still checking support or not initialized
   if (isNotificationsSupported === null) {
     return null;
   }
 
-  // Denied permission
   if (notificationsPermission === 'denied') {
     return (
-      <div className="col-span-1 md:col-span-2 lg:col-span-4">
+      <div className="col-span-1 md:col-span-2 lg:col-span-4 overflow-hidden">
         <Card className="cursor-pointer transition-all duration-300 border border-gray-200 
-          rounded-xl shadow-md hover:shadow-xl hover:scale-105 
+          rounded-xl shadow-md hover:shadow-xl transform-gpu hover:scale-[1.03] 
           bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-100 group">
           <CardContent className="relative flex flex-col items-center justify-center p-6 md:p-4 h-full">
             <button 
@@ -172,11 +162,10 @@ const NotificationsEnabler: React.FC = () => {
     );
   }
 
-  // Default - request permission
   return (
-    <div className="col-span-1 md:col-span-2 lg:col-span-4">
+    <div className="col-span-1 md:col-span-2 lg:col-span-4 overflow-hidden">
       <Card className="cursor-pointer transition-all duration-300 border border-gray-200 
-        rounded-xl shadow-md hover:shadow-xl hover:scale-105 
+        rounded-xl shadow-md hover:shadow-xl transform-gpu hover:scale-[1.03] 
         bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100 group">
         <CardContent className="relative flex flex-col items-center justify-center p-6 md:p-4 h-full">
           <button 

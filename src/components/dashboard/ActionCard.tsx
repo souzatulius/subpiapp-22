@@ -19,7 +19,7 @@ interface ActionCardProps {
   title: string;
   icon: React.ReactNode;
   onClick?: () => void;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
+  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
   path?: string;
   id: string;
   onDelete?: (id: string) => void;
@@ -50,6 +50,8 @@ const getColorClasses = (color: string) => {
       return 'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100';
     case 'gray-dark':
       return 'bg-gray-700 text-white border-gray-600 hover:bg-gray-800';
+    case 'gray-ultra-light':
+      return 'bg-gray-25 text-gray-600 border-gray-50 hover:bg-gray-50';
     default:
       return 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100';
   }
@@ -127,12 +129,12 @@ const ActionCard: React.FC<ActionCardProps> = ({
     <>
       <Card 
         className={`cursor-pointer transition-all duration-300 border border-gray-200 
-          rounded-xl shadow-md hover:shadow-xl hover:scale-105 
+          rounded-xl shadow-md hover:shadow-xl overflow-hidden 
           ${getColorClasses(color)} ${isDraggable ? 'touch-action-none' : ''} group`}
         onClick={handleClick}
         data-card-id={id}
       >
-        <CardContent className={`relative flex flex-col items-center justify-center p-6 md:p-4 h-full ${height === '2' ? 'min-h-[240px]' : ''}`}>
+        <CardContent className={`relative flex flex-col items-center justify-center p-6 md:p-4 h-full ${height === '2' ? 'min-h-[240px]' : ''} transform-gpu hover:scale-[1.03]`}>
           {onDelete && (
             <button 
               className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"

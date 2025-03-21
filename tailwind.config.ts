@@ -79,7 +79,10 @@ export default {
 						text: '#111827',
 						secondary: '#6B7280'
 					}
-				}
+				},
+                gray: {
+                    '25': '#FCFCFD' // Adding ultra-light gray color
+                }
 			},
 			fontFamily: {
 				'poppins': ['Poppins', 'sans-serif'],

@@ -19,7 +19,7 @@ const IconSelector: React.FC<IconSelectorProps> = ({
   return (
     <FormItem>
       <FormLabel>Ícone</FormLabel>
-      <div className="grid grid-cols-3 gap-2 max-h-[280px] overflow-y-auto p-1">
+      <div className="grid grid-cols-4 gap-2 max-h-[280px] overflow-y-auto p-1">
         {availableIcons.map((icon) => (
           <div
             key={icon.id}
@@ -33,11 +33,8 @@ const IconSelector: React.FC<IconSelectorProps> = ({
               setSelectedIconId(icon.id);
             }}
           >
-            <div className="flex flex-col items-center">
-              <div className="text-gray-600">{icon.component}</div>
-              <span className="mt-1 text-xs text-center">
-                {icon.label}
-              </span>
+            <div className="flex items-center justify-center">
+              {icon.component}
             </div>
           </div>
         ))}

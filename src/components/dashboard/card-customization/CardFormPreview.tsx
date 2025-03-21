@@ -16,7 +16,7 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
       <Label>Preview</Label>
       <div className="mt-2 flex justify-center">
         <div 
-          className={`cursor-pointer transition-all duration-300 border rounded-xl shadow-md hover:shadow-xl hover:scale-105 p-6 flex flex-col items-center justify-center 
+          className={`cursor-pointer transition-all duration-300 border rounded-xl shadow-md p-6 flex flex-col items-center justify-center overflow-hidden
             ${height === '2' ? 'h-[220px]' : 'h-[140px]'} 
             ${width === '100' ? 'w-[280px]' : 
               width === '75' ? 'w-[240px]' : 

@@ -14,7 +14,7 @@ const ColorOptions: React.FC<ColorOptionsProps> = ({ form }) => {
   return (
     <FormItem>
       <FormLabel>Cor</FormLabel>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {colorOptions.map((color) => (
           <div
             key={color.id}
@@ -29,12 +29,9 @@ const ColorOptions: React.FC<ColorOptionsProps> = ({ form }) => {
               className={`w-full h-8 ${color.bgClass} rounded-md flex items-center justify-center`}
             >
               {form.watch('color') === color.value && (
-                <Check className="h-4 w-4 text-white" />
+                <Check className="h-4 w-4 text-gray-600" />
               )}
             </div>
-            <span className="mt-1 text-xs text-center block">
-              {color.label}
-            </span>
           </div>
         ))}
       </div>
