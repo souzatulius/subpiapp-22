@@ -6,6 +6,7 @@ import DemandasTable from './DemandasTable';
 import DeleteDemandDialog from './DeleteDemandDialog';
 import DemandDetail from '@/components/demandas/DemandDetail';
 import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
+import { Demand } from '@/components/dashboard/forms/types';
 
 const ConsultarDemandasContent: React.FC = () => {
   const {
@@ -23,17 +24,17 @@ const ConsultarDemandasContent: React.FC = () => {
     handleDeleteConfirm
   } = useDemandasData();
 
-  const handleViewDemand = (demand: any) => {
+  const handleViewDemand = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
   };
 
-  const handleRespondDemand = (demand: any) => {
+  const handleRespondDemand = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
   };
 
-  const handleDeleteClick = (demand: any) => {
+  const handleDeleteClick = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDeleteDialogOpen(true);
   };
@@ -53,7 +54,7 @@ const ConsultarDemandasContent: React.FC = () => {
           />
           
           <DemandasTable 
-            demandas={filteredDemandas} 
+            demandas={filteredDemandas as Demand[]} 
             isLoading={isLoading} 
             onViewDemand={handleViewDemand}
             onRespondDemand={handleRespondDemand}

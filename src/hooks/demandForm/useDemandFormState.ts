@@ -17,6 +17,7 @@ export const useDemandFormState = (
     nome_solicitante: '',
     telefone_solicitante: '',
     email_solicitante: '',
+    veiculo_imprensa: '', // Added the missing field
     endereco: '',
     bairro_id: '',
     perguntas: ['', '', '', '', ''],
