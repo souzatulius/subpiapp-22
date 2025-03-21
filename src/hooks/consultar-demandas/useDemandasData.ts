@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -129,7 +130,7 @@ export const useDemandasData = () => {
         toast({
           title: "Atenção",
           description: "Esta demanda possui notas oficiais associadas que também serão excluídas.",
-          variant: "warning"
+          variant: "default" // Changed from "warning" to "default" as "warning" is not a supported variant
         });
         
         const { error: deleteNotesError } = await supabase
