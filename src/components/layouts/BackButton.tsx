@@ -8,17 +8,21 @@ interface BackButtonProps {
   destination?: string;
   className?: string;
   title?: string;
+  onClick?: () => void;
 }
 
 const BackButton: React.FC<BackButtonProps> = ({ 
   destination, 
   className,
-  title = "Voltar"
+  title = "Voltar",
+  onClick
 }) => {
   const navigate = useNavigate();
   
   const handleClick = () => {
-    if (destination) {
+    if (onClick) {
+      onClick();
+    } else if (destination) {
       navigate(destination);
     } else {
       navigate(-1);

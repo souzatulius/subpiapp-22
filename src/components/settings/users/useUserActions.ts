@@ -8,6 +8,7 @@ interface UserActionsProps {
   setUserToDelete: (user: User | null) => void;
   resetPassword: (userId: string, userEmail: string) => Promise<void>;
   approveUser: (userId: string, userName: string, userEmail: string, permissionLevel?: string) => Promise<void>;
+  removeAccess?: (userId: string, userName: string) => Promise<void>;
 }
 
 export const useUserActions = ({
@@ -16,7 +17,8 @@ export const useUserActions = ({
   setIsDeleteDialogOpen,
   setUserToDelete,
   resetPassword,
-  approveUser
+  approveUser,
+  removeAccess
 }: UserActionsProps) => {
   const handleEdit = (user: User) => {
     setSelectedUser(user);
@@ -40,10 +42,17 @@ export const useUserActions = ({
     }
   };
 
+  const handleRemoveAccess = async (user: User) => {
+    if (user.id && user.nome_completo && removeAccess) {
+      await removeAccess(user.id, user.nome_completo);
+    }
+  };
+
   return {
     handleEdit,
     handleDelete,
     handleResetPassword,
-    handleApprove
+    handleApprove,
+    handleRemoveAccess
   };
 };

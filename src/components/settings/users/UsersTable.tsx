@@ -9,7 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Edit, Trash, SendHorizontal, XCircle } from 'lucide-react';
+import { CheckCircle, Edit, Trash, SendHorizontal, XCircle, Shield } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { User } from './types';
@@ -23,6 +23,7 @@ interface UsersTableProps {
   onDelete: (user: User) => void;
   onResetPassword: (user: User) => void;
   onApprove: (user: User, permissionLevel?: string) => void;
+  onRemoveAccess?: (user: User) => void;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({
@@ -32,7 +33,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onEdit,
   onDelete,
   onResetPassword,
-  onApprove
+  onApprove,
+  onRemoveAccess
 }) => {
   // Filter users that need approval - users without permissions
   const pendingUsers = users.filter(user => !user.permissoes || user.permissoes.length === 0);
@@ -201,6 +203,17 @@ const UsersTable: React.FC<UsersTableProps> = ({
                       <SendHorizontal className="h-4 w-4 mr-1" />
                       Senha
                     </Button>
+                    {onRemoveAccess && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => onRemoveAccess(user)}
+                        className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
+                      >
+                        <Shield className="h-4 w-4 mr-1" />
+                        Acesso
+                      </Button>
+                    )}
                     <Button 
                       variant="outline" 
                       size="sm" 

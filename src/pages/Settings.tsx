@@ -25,6 +25,12 @@ const Settings = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  const handleBackClick = () => {
+    // Navigate back to the main settings dashboard
+    navigate('/settings');
+    setActiveSection('dashboard');
+  };
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -35,7 +41,10 @@ const Settings = () => {
         
         <main className="flex-1 overflow-auto p-6 relative">
           {activeSection !== 'dashboard' && (
-            <BackButton destination="/settings" />
+            <BackButton 
+              onClick={handleBackClick}
+              className="absolute top-6 left-6 z-10"
+            />
           )}
           
           <div className="max-w-7xl mx-auto">
