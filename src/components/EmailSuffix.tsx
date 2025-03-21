@@ -21,6 +21,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   className = ''
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Handle outside click
@@ -40,7 +41,13 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
     onChange(e.target.value);
   };
 
-  const borderColor = error ? 'border-subpi-orange' : isFocused ? 'border-subpi-orange' : 'border-gray-300';
+  const borderColor = error 
+    ? 'border-subpi-orange' 
+    : isFocused 
+      ? 'border-subpi-orange' 
+      : isHovered 
+        ? 'border-gray-400' 
+        : 'border-gray-300';
 
   return (
     <div 
@@ -49,6 +56,8 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
         setIsFocused(true);
         inputRef.current?.focus();
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <input 
         id={id} 
@@ -58,9 +67,13 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
         onChange={handleChange} 
         onFocus={() => setIsFocused(true)} 
         placeholder="usuario" 
-        className="px-4 py-2 w-full border border-gray-300 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200" 
+        className={`px-4 py-2 w-full border ${isHovered && !isFocused ? 'border-gray-400' : 'border-gray-300'} rounded-l-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)} 
       />
-      <div className="bg-gray-100 w-full px-4 py-2 border border-gray-300 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200 pr-1">
+      <div 
+        className={`bg-gray-100 w-full px-4 py-2 border ${isHovered && !isFocused ? 'border-gray-400' : 'border-gray-300'} rounded-r-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200 pr-1`}
+      >
         {suffix}
       </div>
     </div>
