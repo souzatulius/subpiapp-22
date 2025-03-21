@@ -146,8 +146,8 @@ const LoginForm = () => {
             </button>
             
             <div className="p-3 rounded-md text-sm text-blue-700 bg-orange-50">
-              <p className="font-medium">Importante:</p>
-              <p>Você precisa usar uma conta do domínio @smsub.prefeitura.sp.gov.br para acessar o sistema.</p>
+              <p className="font-medium text-gray-600">Importante:</p>
+              <p className="text-gray-600">Você precisa usar uma conta do domínio @smsub.prefeitura.sp.gov.br para acessar o sistema.</p>
             </div>
           </div>
         </div>
