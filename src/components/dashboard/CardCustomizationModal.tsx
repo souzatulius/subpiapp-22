@@ -141,6 +141,44 @@ interface CardCustomizationModalProps {
   };
 }
 
+// Helper function to identify which icon is being used
+const identifyIconComponent = (iconElement: React.ReactNode): string => {
+  // This is a new helper function that identifies icons by their props
+  if (!iconElement || typeof iconElement !== 'object') return 'clipboard';
+  
+  // Need to check if element has properties and type
+  const element = iconElement as any;
+  
+  if (!element.type || !element.props || !element.props.className) return 'clipboard';
+  
+  // For Lucide icons, we can use the component's displayName or check properties
+  if (element.props.className.includes('h-12 w-12')) {
+    // Check each Lucide icon's display name
+    if (element.type === ClipboardList) return 'clipboard';
+    if (element.type === MessageSquareReply) return 'message';
+    if (element.type === FileCheck) return 'check';
+    if (element.type === BarChart2) return 'chart';
+    if (element.type === FileText) return 'file';
+    if (element.type === Search) return 'search';
+    if (element.type === BookOpen) return 'book';
+    if (element.type === Bell) return 'bell';
+    if (element.type === Calendar) return 'calendar';
+    if (element.type === Users) return 'users';
+    if (element.type === Camera) return 'camera';
+    if (element.type === Image) return 'image';
+    if (element.type === Flag) return 'flag';
+    if (element.type === Map) return 'map';
+    if (element.type === Home) return 'home';
+    if (element.type === Settings) return 'settings';
+    if (element.type === LayoutDashboard) return 'dashboard';
+    if (element.type === PieChart) return 'pie';
+    if (element.type === AlertTriangle) return 'alert';
+  }
+  
+  // Default to clipboard if we can't identify the icon
+  return 'clipboard';
+};
+
 const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   isOpen,
   onClose,
@@ -171,12 +209,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   // Update form when initialData changes
   useEffect(() => {
     if (initialData) {
-      // Find the icon ID based on the component
-      const iconIdMatch = availableIcons.findIndex(icon => 
-        JSON.stringify(icon.component) === JSON.stringify(initialData.icon)
-      );
-      
-      const iconId = iconIdMatch >= 0 ? availableIcons[iconIdMatch].id : 'clipboard';
+      // Find the icon ID based on the component type - now using our safer method
+      const iconId = identifyIconComponent(initialData.icon);
       
       form.reset({
         title: initialData.title,
@@ -474,3 +508,4 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
 };
 
 export default CardCustomizationModal;
+
