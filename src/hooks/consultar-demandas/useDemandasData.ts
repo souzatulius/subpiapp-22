@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -158,12 +159,12 @@ export const useDemandasData = () => {
 
   const handleDeleteConfirm = async () => {
     if (!selectedDemand) return;
+    
     setDeleteLoading(true);
     console.log('Deleting demand:', selectedDemand.id);
     
     try {
-      // Delete the demand itself
-      console.log('Deleting the demand:', selectedDemand.id);
+      // Delete the demand itself - related data is already deleted in the DeleteDemandDialog
       const { error: deleteDemandError } = await supabase
         .from('demandas')
         .delete()
@@ -185,7 +186,7 @@ export const useDemandasData = () => {
       console.error('Error in delete process:', error);
       toast({
         title: "Erro ao excluir demanda",
-        description: error.message,
+        description: error.message || "Ocorreu um erro desconhecido ao excluir a demanda.",
         variant: "destructive"
       });
     } finally {

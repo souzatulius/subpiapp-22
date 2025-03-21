@@ -29,7 +29,7 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
   isLoading,
   demandId
 }) => {
-  // Função para excluir a demanda e a nota relacionada
+  // Função para excluir a demanda e seus dados relacionados
   const handleDelete = async () => {
     if (!demandId) {
       toast({
@@ -75,7 +75,8 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
         return;
       }
       
-      // Depois de excluir as notas e respostas, continuamos com a exclusão da demanda via onConfirm
+      // Depois de excluir todos os dados relacionados, continuamos com a exclusão da demanda
+      // A função onConfirm não precisa mais se preocupar com dados relacionados
       await onConfirm();
       
     } catch (error: any) {
