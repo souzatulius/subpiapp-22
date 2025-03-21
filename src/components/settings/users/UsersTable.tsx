@@ -8,7 +8,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Edit, Trash, SendHorizontal, XCircle, Shield } from 'lucide-react';
+import { CheckCircle, Edit, Trash, SendHorizontal, Shield, XCircle } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { User } from './types';
@@ -35,12 +35,9 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onApprove,
   onRemoveAccess
 }) => {
-  // Atualização da lógica para identificar usuários pendentes e ativos
-  // Um usuário é considerado pendente apenas se ele não tiver permissões ou as permissões forem um array vazio
   const pendingUsers = users.filter(user => !user.permissoes || user.permissoes.length === 0);
   const activeUsers = users.filter(user => user.permissoes && user.permissoes.length > 0);
 
-  // Function to render the approval permission selection
   const renderApprovalSection = (user: User) => {
     const [selectedPermission, setSelectedPermission] = React.useState("Restrito");
     
@@ -75,7 +72,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
     );
   };
 
-  // Function to render the pending users table
   const renderPendingUsersTable = () => {
     if (pendingUsers.length === 0) return null;
     
@@ -120,7 +116,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
     );
   };
 
-  // Function to render the active users table
   const renderActiveUsersTable = () => {
     if (activeUsers.length === 0 && pendingUsers.length === 0) {
       return (
@@ -133,7 +128,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 <TableHead>Email</TableHead>
                 <TableHead>Cargo</TableHead>
                 <TableHead>Área</TableHead>
-                <TableHead>Cadastro</TableHead>
+                <TableHead>Permissões</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -189,38 +184,41 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   <TableCell className="text-right space-x-1">
                     <Button 
                       variant="outline" 
-                      size="sm" 
+                      size="icon" 
+                      className="h-8 w-8"
                       onClick={() => onEdit(user)}
+                      title="Editar"
                     >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Editar
+                      <Edit className="h-4 w-4" />
                     </Button>
                     <Button 
                       variant="outline" 
-                      size="sm" 
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => onResetPassword(user)}
+                      title="Redefinir Senha"
                     >
-                      <SendHorizontal className="h-4 w-4 mr-1" />
-                      Senha
+                      <SendHorizontal className="h-4 w-4" />
                     </Button>
                     {onRemoveAccess && (
                       <Button 
                         variant="outline" 
-                        size="sm" 
+                        size="icon"
+                        className="h-8 w-8 text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
                         onClick={() => onRemoveAccess(user)}
-                        className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
+                        title="Gerenciar Acesso"
                       >
-                        <Shield className="h-4 w-4 mr-1" />
-                        Acesso
+                        <Shield className="h-4 w-4" />
                       </Button>
                     )}
                     <Button 
                       variant="outline" 
-                      size="sm" 
-                      onClick={() => onDelete(user)} 
-                      className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      size="icon"
+                      className="h-8 w-8 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      onClick={() => onDelete(user)}
+                      title="Excluir"
                     >
-                      <Trash className="h-4 w-4 mr-1" />
+                      <Trash className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -270,3 +268,4 @@ const UsersTable: React.FC<UsersTableProps> = ({
 };
 
 export default UsersTable;
+
