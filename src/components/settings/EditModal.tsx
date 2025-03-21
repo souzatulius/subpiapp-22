@@ -8,9 +8,10 @@ interface EditModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  footerContent?: React.ReactNode;
 }
 
-const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, title, children }) => {
+const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, title, children, footerContent }) => {
   if (!isOpen) return null;
 
   return (
@@ -30,6 +31,11 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, title, children 
         <div className="p-4">
           {children}
         </div>
+        {footerContent && (
+          <div className="p-4 border-t border-gray-200 flex justify-end space-x-2">
+            {footerContent}
+          </div>
+        )}
       </div>
     </div>
   );
