@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { User, UserCog, Settings, Camera, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,18 +16,12 @@ export const ProfileMenu: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { userProfile, fetchUserProfile } = useUserProfile();
+  const { userProfile } = useUserProfile();
   
   // Modal states
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showAccountSettings, setShowAccountSettings] = useState(false);
   const [showChangePhoto, setShowChangePhoto] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      fetchUserProfile();
-    }
-  }, [user, fetchUserProfile]);
 
   const handleLogout = async () => {
     try {
@@ -92,7 +86,7 @@ export const ProfileMenu: React.FC = () => {
                 {userProfile?.foto_perfil_url ? (
                   <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
                 ) : (
-                  <AvatarFallback className="text-orange-600 bg-gray-900">
+                  <AvatarFallback className="text-white bg-subpi-blue">
                     {userProfile?.nome_completo ? getUserInitials(userProfile.nome_completo) : 'U'}
                   </AvatarFallback>
                 )}

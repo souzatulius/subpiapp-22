@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, ChangeEvent } from 'react';
+import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useUserProfile } from '@/components/layouts/header/useUserProfile';
@@ -17,11 +17,19 @@ interface ChangePhotoModalProps {
 
 const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const { userProfile, fetchUserProfile } = useUserProfile();
+  const { userProfile, fetchUserProfile, loading: profileLoading } = useUserProfile();
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setPreviewUrl(null);
+      setSelectedFile(null);
+    }
+  }, [isOpen]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -159,14 +167,14 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
 
   const footerContent = (
     <>
-      <Button variant="outline" onClick={onClose} disabled={loading}>
+      <Button variant="outline" onClick={onClose} disabled={loading || profileLoading}>
         Cancelar
       </Button>
       {selectedFile && (
         <Button 
           variant="default" 
           onClick={handleSavePhoto} 
-          disabled={loading}
+          disabled={loading || profileLoading}
         >
           {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</> : 'Salvar'}
         </Button>
@@ -181,56 +189,62 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
       title="Alterar Foto de Perfil"
       footerContent={footerContent}
     >
-      <div className="flex flex-col items-center space-y-4">
-        <Avatar className="h-32 w-32 border-4 border-gray-200">
-          {previewUrl ? (
-            <AvatarImage src={previewUrl} alt="Preview" />
-          ) : userProfile?.foto_perfil_url ? (
-            <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
-          ) : (
-            <AvatarFallback className="text-3xl bg-subpi-blue text-white">
-              {userProfile?.nome_completo ? getUserInitials(userProfile.nome_completo) : 'U'}
-            </AvatarFallback>
-          )}
-        </Avatar>
-        
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="image/*"
-          className="hidden"
-        />
-        
-        <div className="flex space-x-3">
-          <Button
-            onClick={handleUploadClick}
-            variant="outline"
-            size="sm"
-            disabled={loading}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Selecionar Imagem
-          </Button>
+      {profileLoading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-subpi-blue" />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center space-y-4">
+          <Avatar className="h-32 w-32 border-4 border-gray-200">
+            {previewUrl ? (
+              <AvatarImage src={previewUrl} alt="Preview" />
+            ) : userProfile?.foto_perfil_url ? (
+              <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
+            ) : (
+              <AvatarFallback className="text-3xl bg-subpi-blue text-white">
+                {userProfile?.nome_completo ? getUserInitials(userProfile.nome_completo) : 'U'}
+              </AvatarFallback>
+            )}
+          </Avatar>
           
-          {(userProfile?.foto_perfil_url || previewUrl) && (
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          
+          <div className="flex space-x-3">
             <Button
-              onClick={handleRemovePhoto}
+              onClick={handleUploadClick}
               variant="outline"
               size="sm"
               disabled={loading}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Remover Foto
+              <Upload className="h-4 w-4 mr-2" />
+              Selecionar Imagem
             </Button>
-          )}
+            
+            {(userProfile?.foto_perfil_url || previewUrl) && (
+              <Button
+                onClick={handleRemovePhoto}
+                variant="outline"
+                size="sm"
+                disabled={loading}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Remover Foto
+              </Button>
+            )}
+          </div>
+          
+          <div className="text-sm text-gray-500 text-center mt-2">
+            <p>Tamanho máximo: 5MB</p>
+            <p>Formatos aceitos: JPG, PNG, GIF</p>
+          </div>
         </div>
-        
-        <div className="text-sm text-gray-500 text-center mt-2">
-          <p>Tamanho máximo: 5MB</p>
-          <p>Formatos aceitos: JPG, PNG, GIF</p>
-        </div>
-      </div>
+      )}
     </EditModal>
   );
 };

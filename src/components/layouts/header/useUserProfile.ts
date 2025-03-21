@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
@@ -21,10 +21,12 @@ interface UserProfile {
 export const useUserProfile = () => {
   const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchUserProfile = useCallback(async () => {
     if (!user) return;
 
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('usuarios')
@@ -45,11 +47,21 @@ export const useUserProfile = () => {
       setUserProfile(data);
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
+    } finally {
+      setLoading(false);
     }
   }, [user]);
 
+  // Automatically fetch profile when user changes
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user, fetchUserProfile]);
+
   return {
     userProfile,
-    fetchUserProfile
+    fetchUserProfile,
+    loading
   };
 };

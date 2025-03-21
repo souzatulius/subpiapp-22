@@ -26,25 +26,43 @@ interface EditProfileModalProps {
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) => {
   const { updateProfile, user } = useAuth();
-  const { userProfile, fetchUserProfile } = useUserProfile();
-  const [loading, setLoading] = useState(false);
+  const { userProfile, fetchUserProfile, loading: profileLoading } = useUserProfile();
+  const [submitting, setSubmitting] = useState(false);
   const [areas, setAreas] = useState<any[]>([]);
   const [cargos, setCargos] = useState<any[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>();
 
   // Fetch areas and cargos on mount
   useEffect(() => {
     const fetchOptions = async () => {
-      const { data: areasData } = await supabase.from('areas_coordenacao').select('*');
-      const { data: cargosData } = await supabase.from('cargos').select('*');
-      
-      if (areasData) setAreas(areasData);
-      if (cargosData) setCargos(cargosData);
+      setLoadingOptions(true);
+      try {
+        const { data: areasData, error: areasError } = await supabase.from('areas_coordenacao').select('*').order('descricao');
+        const { data: cargosData, error: cargosError } = await supabase.from('cargos').select('*').order('descricao');
+        
+        if (areasError) throw areasError;
+        if (cargosError) throw cargosError;
+        
+        if (areasData) setAreas(areasData);
+        if (cargosData) setCargos(cargosData);
+      } catch (error) {
+        console.error('Erro ao buscar opções:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar as opções de áreas e cargos.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingOptions(false);
+      }
     };
 
-    fetchOptions();
-  }, []);
+    if (isOpen) {
+      fetchOptions();
+    }
+  }, [isOpen]);
 
   // Reset form when profile data changes
   useEffect(() => {
@@ -62,7 +80,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) return;
     
-    setLoading(true);
+    setSubmitting(true);
     try {
       await updateProfile(data);
       await fetchUserProfile();
@@ -79,17 +97,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
+  const isLoading = profileLoading || loadingOptions || submitting;
+
   const footerContent = (
     <>
-      <Button variant="outline" onClick={onClose} disabled={loading}>
+      <Button variant="outline" onClick={onClose} disabled={isLoading}>
         Cancelar
       </Button>
-      <Button type="submit" form="profileForm" disabled={loading}>
-        {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</> : 'Salvar'}
+      <Button type="submit" form="profileForm" disabled={isLoading}>
+        {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</> : 'Salvar'}
       </Button>
     </>
   );
@@ -101,68 +121,76 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
       title="Editar Perfil"
       footerContent={footerContent}
     >
-      <form id="profileForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="nome_completo">Nome Completo</Label>
-          <Input
-            id="nome_completo"
-            {...register('nome_completo', { required: 'Nome é obrigatório' })}
-          />
-          {errors.nome_completo && (
-            <p className="text-sm text-red-500">{errors.nome_completo.message}</p>
-          )}
+      {profileLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-subpi-blue" />
         </div>
+      ) : (
+        <form id="profileForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="nome_completo">Nome Completo</Label>
+            <Input
+              id="nome_completo"
+              {...register('nome_completo', { required: 'Nome é obrigatório' })}
+            />
+            {errors.nome_completo && (
+              <p className="text-sm text-red-500">{errors.nome_completo.message}</p>
+            )}
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="whatsapp">WhatsApp</Label>
-          <Input
-            id="whatsapp"
-            {...register('whatsapp')}
-            placeholder="(11) 98765-4321"
-          />
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="whatsapp">WhatsApp</Label>
+            <Input
+              id="whatsapp"
+              {...register('whatsapp')}
+              placeholder="(11) 98765-4321"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="aniversario">Data de Aniversário</Label>
-          <Input
-            id="aniversario"
-            type="date"
-            {...register('aniversario')}
-          />
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="aniversario">Data de Aniversário</Label>
+            <Input
+              id="aniversario"
+              type="date"
+              {...register('aniversario')}
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="cargo_id">Cargo</Label>
-          <select
-            id="cargo_id"
-            {...register('cargo_id')}
-            className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm transition-all duration-300"
-          >
-            <option value="">Selecione um cargo</option>
-            {cargos.map(cargo => (
-              <option key={cargo.id} value={cargo.id}>
-                {cargo.descricao}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="cargo_id">Cargo</Label>
+            <select
+              id="cargo_id"
+              {...register('cargo_id')}
+              className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 shadow-sm transition-all duration-300"
+              disabled={loadingOptions}
+            >
+              <option value="">Selecione um cargo</option>
+              {cargos.map(cargo => (
+                <option key={cargo.id} value={cargo.id}>
+                  {cargo.descricao}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
-          <select
-            id="area_coordenacao_id"
-            {...register('area_coordenacao_id')}
-            className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm transition-all duration-300"
-          >
-            <option value="">Selecione uma área</option>
-            {areas.map(area => (
-              <option key={area.id} value={area.id}>
-                {area.descricao}
-              </option>
-            ))}
-          </select>
-        </div>
-      </form>
+          <div className="space-y-2">
+            <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
+            <select
+              id="area_coordenacao_id"
+              {...register('area_coordenacao_id')}
+              className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 shadow-sm transition-all duration-300"
+              disabled={loadingOptions}
+            >
+              <option value="">Selecione uma área</option>
+              {areas.map(area => (
+                <option key={area.id} value={area.id}>
+                  {area.descricao}
+                </option>
+              ))}
+            </select>
+          </div>
+        </form>
+      )}
     </EditModal>
   );
 };

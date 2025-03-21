@@ -18,6 +18,7 @@ interface AccountSettingsModalProps {
 const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const { 
     notificationsPermission,
@@ -28,23 +29,27 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
   // Check if user has notifications enabled
   useEffect(() => {
     const checkNotificationStatus = async () => {
-      if (!user) return;
+      if (!user || !isOpen) return;
       
+      setCheckingStatus(true);
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('tokens_notificacoes')
           .select('*')
           .eq('user_id', user.id)
           .limit(1);
           
+        if (error) throw error;
         setNotificationsEnabled(!!data && data.length > 0);
       } catch (error) {
         console.error('Erro ao verificar status das notificações:', error);
+      } finally {
+        setCheckingStatus(false);
       }
     };
 
     checkNotificationStatus();
-  }, [user]);
+  }, [user, isOpen]);
 
   const handleToggleNotifications = async (enabled: boolean) => {
     if (!user || !isNotificationsSupported) return;
@@ -90,7 +95,7 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
   };
 
   const footerContent = (
-    <Button variant="outline" onClick={onClose} disabled={loading}>
+    <Button variant="outline" onClick={onClose} disabled={loading || checkingStatus}>
       Fechar
     </Button>
   );
@@ -106,7 +111,11 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
         <div>
           <h4 className="text-lg font-medium text-subpi-blue mb-4">Notificações</h4>
           
-          {isNotificationsSupported ? (
+          {checkingStatus ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-subpi-blue" />
+            </div>
+          ) : isNotificationsSupported ? (
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="notifications" className="text-base">
