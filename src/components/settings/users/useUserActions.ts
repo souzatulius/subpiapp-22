@@ -7,7 +7,7 @@ interface UserActionsProps {
   setIsDeleteDialogOpen: (open: boolean) => void;
   setUserToDelete: (user: User | null) => void;
   resetPassword: (userId: string, userEmail: string) => Promise<void>;
-  approveUser: (userId: string, userName: string, userEmail: string) => Promise<void>;
+  approveUser: (userId: string, userName: string, userEmail: string, permissionLevel?: string) => Promise<void>;
 }
 
 export const useUserActions = ({
@@ -34,9 +34,9 @@ export const useUserActions = ({
     }
   };
 
-  const handleApprove = async (user: User) => {
+  const handleApprove = async (user: User, permissionLevel?: string) => {
     if (user.id && user.nome_completo && user.email) {
-      await approveUser(user.id, user.nome_completo, user.email);
+      await approveUser(user.id, user.nome_completo, user.email, permissionLevel);
     }
   };
 

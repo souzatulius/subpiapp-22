@@ -3,7 +3,7 @@ import React from 'react';
 import { 
   Users, Layers, Briefcase, FileText, 
   Image, Globe, MapPin, MessageSquare, Shield, 
-  LayoutDashboard 
+  LayoutDashboard, Bell
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
@@ -27,6 +27,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     { id: 'origens_demanda', label: 'Origem das Demandas', icon: Globe },
     { id: 'distritos_bairros', label: 'Distritos e Bairros', icon: MapPin },
     { id: 'comunicados', label: 'Comunicados', icon: MessageSquare },
+    { id: 'notificacoes', label: 'Notificações', icon: Bell },
     { id: 'permissoes', label: 'Permissões', icon: Shield }
   ];
 

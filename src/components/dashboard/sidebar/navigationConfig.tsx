@@ -88,7 +88,7 @@ export const getNavigationSections = () => [
   },
   // Seção 4: Ranking das Subs (changed from menu item to section)
   {
-    id: 'zeladoria',
+    id: 'ranking',
     icon: <TrendingUp size={20} />,
     label: 'Ranking das Subs',
     path: '/dashboard/zeladoria/ranking-subs',

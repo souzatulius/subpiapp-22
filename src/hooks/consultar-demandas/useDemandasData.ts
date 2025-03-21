@@ -53,6 +53,7 @@ export const useDemandasData = () => {
   } = useQuery({
     queryKey: ['demandas'],
     queryFn: async () => {
+      console.log('Fetching demandas');
       const {
         data,
         error
@@ -67,8 +68,12 @@ export const useDemandasData = () => {
         `).order('horario_publicacao', {
         ascending: false
       });
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching demandas:', error);
+        throw error;
+      }
       
+      console.log('Demandas data:', data);
       const processedData = data?.map(item => {
         if (typeof item.perguntas === 'string') {
           try {
@@ -84,6 +89,7 @@ export const useDemandasData = () => {
     },
     meta: {
       onError: (err: any) => {
+        console.error('Query error:', err);
         toast({
           title: "Erro ao carregar demandas",
           description: err.message,
@@ -102,73 +108,69 @@ export const useDemandasData = () => {
   const handleDeleteConfirm = async () => {
     if (!selectedDemand) return;
     setDeleteLoading(true);
+    console.log('Deleting demand:', selectedDemand.id);
     
     try {
-      // First check for approved or published notes
-      const { data: relatedNotes, error: checkNotesError } = await supabase
+      // Delete related notes first
+      console.log('Checking for related notes');
+      const { data: relatedNotes, error: notesError } = await supabase
         .from('notas_oficiais')
-        .select('id, status')
+        .select('id')
         .eq('demanda_id', selectedDemand.id);
       
-      if (checkNotesError) throw checkNotesError;
-      
-      if (relatedNotes && relatedNotes.length > 0) {
-        const hasApprovedNotes = relatedNotes.some(note => 
-          note.status === 'aprovado' || note.status === 'publicado'
-        );
-        
-        if (hasApprovedNotes) {
-          toast({
-            title: "Não é possível excluir a demanda",
-            description: "Esta demanda possui notas oficiais aprovadas ou publicadas associadas.",
-            variant: "destructive"
-          });
-          setIsDeleteDialogOpen(false);
-          setDeleteLoading(false);
-          return;
-        }
-        
-        toast({
-          title: "Atenção",
-          description: "Esta demanda possui notas oficiais associadas que também serão excluídas.",
-          variant: "default" // Changed from "warning" to "default" as "warning" is not a supported variant
-        });
+      if (notesError) {
+        console.error('Error checking related notes:', notesError);
+        throw notesError;
       }
       
-      // First delete related responses to avoid the foreign key constraint error
+      if (relatedNotes && relatedNotes.length > 0) {
+        console.log('Found related notes, deleting them first:', relatedNotes);
+        
+        // Delete related notes
+        const { error: deleteNotesError } = await supabase
+          .from('notas_oficiais')
+          .delete()
+          .in('id', relatedNotes.map(note => note.id));
+          
+        if (deleteNotesError) {
+          console.error('Error deleting related notes:', deleteNotesError);
+          throw deleteNotesError;
+        }
+      }
+      
+      // Delete related responses
+      console.log('Deleting related responses');
       const { error: deleteResponsesError } = await supabase
         .from('respostas_demandas')
         .delete()
         .eq('demanda_id', selectedDemand.id);
         
-      if (deleteResponsesError) throw deleteResponsesError;
-        
-      // Then delete related notes if they exist
-      if (relatedNotes && relatedNotes.length > 0) {
-        const { error: deleteNotesError } = await supabase
-          .from('notas_oficiais')
-          .delete()
-          .eq('demanda_id', selectedDemand.id);
-          
-        if (deleteNotesError) throw deleteNotesError;
+      if (deleteResponsesError) {
+        console.error('Error deleting responses:', deleteResponsesError);
+        throw deleteResponsesError;
       }
       
-      // Finally delete the demand itself
-      const { error } = await supabase
+      // Finally delete the demand
+      console.log('Deleting the demand itself');
+      const { error: deleteDemandError } = await supabase
         .from('demandas')
         .delete()
         .eq('id', selectedDemand.id);
         
-      if (error) throw error;
+      if (deleteDemandError) {
+        console.error('Error deleting demand:', deleteDemandError);
+        throw deleteDemandError;
+      }
       
       toast({
         title: "Demanda excluída",
-        description: "A demanda foi excluída com sucesso."
+        description: "A demanda e todas as notas associadas foram excluídas com sucesso."
       });
       
       setIsDeleteDialogOpen(false);
       refetch();
     } catch (error: any) {
+      console.error('Error in delete process:', error);
       toast({
         title: "Erro ao excluir demanda",
         description: error.message,

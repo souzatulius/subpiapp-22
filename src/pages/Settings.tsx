@@ -5,9 +5,10 @@ import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import SettingsContent from '@/components/settings/SettingsContent';
 import SettingsDashboard from '@/components/settings/SettingsDashboard';
+import BackButton from '@/components/layouts/BackButton';
 
 const Settings = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,11 +26,6 @@ const Settings = () => {
     setSidebarOpen(!sidebarOpen);
   };
   
-  const handleBackToDashboard = () => {
-    setActiveSection('dashboard');
-    navigate('/settings');
-  };
-  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
@@ -37,7 +33,11 @@ const Settings = () => {
       <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar isOpen={sidebarOpen} />
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 relative">
+          {activeSection !== 'dashboard' && (
+            <BackButton destination="/settings" />
+          )}
+          
           <div className="max-w-7xl mx-auto">
             {activeSection === 'dashboard' ? (
               <div>
@@ -46,25 +46,18 @@ const Settings = () => {
               </div>
             ) : (
               <div>
-                <div className="flex items-center mb-6">
-                  <button 
-                    onClick={handleBackToDashboard}
-                    className="mr-3 text-blue-600 hover:text-blue-800"
-                  >
-                    ← Voltar para Dashboard
-                  </button>
-                  <h1 className="text-2xl font-bold text-gray-800">
-                    {activeSection === 'usuarios' && 'Usuários'}
-                    {activeSection === 'areas' && 'Áreas de Coordenação'}
-                    {activeSection === 'cargos' && 'Cargos'}
-                    {activeSection === 'servicos' && 'Serviços'}
-                    {activeSection === 'tipos_midia' && 'Tipos de Mídia'}
-                    {activeSection === 'origens_demanda' && 'Origem das Demandas'}
-                    {activeSection === 'distritos_bairros' && 'Distritos e Bairros'}
-                    {activeSection === 'comunicados' && 'Comunicados'}
-                    {activeSection === 'permissoes' && 'Permissões'}
-                  </h1>
-                </div>
+                <h1 className="text-2xl font-bold text-gray-800 mt-4 mb-6 pl-16">
+                  {activeSection === 'usuarios' && 'Usuários'}
+                  {activeSection === 'areas' && 'Áreas de Coordenação'}
+                  {activeSection === 'cargos' && 'Cargos'}
+                  {activeSection === 'servicos' && 'Serviços'}
+                  {activeSection === 'tipos_midia' && 'Tipos de Mídia'}
+                  {activeSection === 'origens_demanda' && 'Origem das Demandas'}
+                  {activeSection === 'distritos_bairros' && 'Distritos e Bairros'}
+                  {activeSection === 'comunicados' && 'Comunicados'}
+                  {activeSection === 'permissoes' && 'Permissões'}
+                  {activeSection === 'notificacoes' && 'Notificações'}
+                </h1>
                 <SettingsContent activeSection={activeSection} />
               </div>
             )}
