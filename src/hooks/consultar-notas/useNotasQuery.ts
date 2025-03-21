@@ -39,7 +39,16 @@ export const useNotasQuery = () => {
         let query = supabase
           .from('notas_oficiais')
           .select(`
-            *,
+            id,
+            titulo,
+            texto,
+            status,
+            criado_em,
+            atualizado_em,
+            autor_id,
+            aprovador_id,
+            area_coordenacao_id,
+            demanda_id,
             autor:autor_id(id, nome_completo),
             aprovador:aprovador_id(id, nome_completo),
             area_coordenacao:area_coordenacao_id(id, descricao)
@@ -59,9 +68,11 @@ export const useNotasQuery = () => {
 
         if (error) throw error;
 
+        // Cast the data to the expected type with proper formatting for nullable fields
         return (data || []).map(nota => ({
           ...nota,
           autor: nota.autor || { id: '', nome_completo: 'Não informado' },
+          aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
           area_coordenacao: nota.area_coordenacao || { id: '', descricao: 'Não informada' }
         })) as NotaOficial[];
       } catch (error: any) {
@@ -75,7 +86,7 @@ export const useNotasQuery = () => {
       }
     },
     staleTime: 30000, // 30 segundos antes de considerar dados obsoletos
-    cacheTime: 300000 // Cache por 5 minutos
+    gcTime: 300000 // Cache por 5 minutos (renamed from cacheTime)
   });
 
   const filteredNotas = notas.filter(nota => {
