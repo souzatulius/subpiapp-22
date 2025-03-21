@@ -38,7 +38,7 @@ const LeftContentSection: React.FC = () => {
               asChild 
               className={`rounded-xl py-2 px-6 flex items-center shadow-md transition-all duration-300 ${
                 isLoginPage 
-                  ? "bg-gray-400 text-gray-100 cursor-not-allowed" 
+                  ? "bg-gray-400 text-gray-100 cursor-not-allowed hover:bg-gray-400 hover:shadow-md" 
                   : "bg-[#002855] hover:bg-[#001f40] text-white hover:shadow-lg"
               }`}
               disabled={isLoginPage}
@@ -52,7 +52,7 @@ const LeftContentSection: React.FC = () => {
               variant="outline" 
               className={`rounded-xl bg-transparent border-2 py-2 px-6 shadow-md transition-all duration-300 ${
                 isRegisterPage
-                  ? "border-gray-400 text-gray-400 cursor-not-allowed" 
+                  ? "border-gray-400 text-gray-400 cursor-not-allowed hover:border-gray-400 hover:bg-transparent hover:text-gray-400 hover:shadow-md" 
                   : "border-[#f57c35] text-[#f57c35] hover:bg-[#f57c35] hover:text-white hover:shadow-lg"
               }`}
               disabled={isRegisterPage}
