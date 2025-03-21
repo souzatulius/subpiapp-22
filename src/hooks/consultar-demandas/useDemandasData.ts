@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -163,47 +162,8 @@ export const useDemandasData = () => {
     console.log('Deleting demand:', selectedDemand.id);
     
     try {
-      // Delete related notes first
-      console.log('Checking for related notes');
-      const { data: relatedNotes, error: notesError } = await supabase
-        .from('notas_oficiais')
-        .select('id')
-        .eq('demanda_id', selectedDemand.id);
-      
-      if (notesError) {
-        console.error('Error checking related notes:', notesError);
-        throw notesError;
-      }
-      
-      if (relatedNotes && relatedNotes.length > 0) {
-        console.log('Found related notes, deleting them first:', relatedNotes);
-        
-        // Delete related notes
-        const { error: deleteNotesError } = await supabase
-          .from('notas_oficiais')
-          .delete()
-          .in('id', relatedNotes.map(note => note.id));
-          
-        if (deleteNotesError) {
-          console.error('Error deleting related notes:', deleteNotesError);
-          throw deleteNotesError;
-        }
-      }
-      
-      // Delete related responses
-      console.log('Deleting related responses');
-      const { error: deleteResponsesError } = await supabase
-        .from('respostas_demandas')
-        .delete()
-        .eq('demanda_id', selectedDemand.id);
-        
-      if (deleteResponsesError) {
-        console.error('Error deleting responses:', deleteResponsesError);
-        throw deleteResponsesError;
-      }
-      
-      // Finally delete the demand
-      console.log('Deleting the demand itself');
+      // Delete the demand itself
+      console.log('Deleting the demand:', selectedDemand.id);
       const { error: deleteDemandError } = await supabase
         .from('demandas')
         .delete()
@@ -216,7 +176,7 @@ export const useDemandasData = () => {
       
       toast({
         title: "Demanda excluída",
-        description: "A demanda e todas as notas associadas foram excluídas com sucesso."
+        description: "A demanda e todos os dados associados foram excluídos com sucesso."
       });
       
       setIsDeleteDialogOpen(false);

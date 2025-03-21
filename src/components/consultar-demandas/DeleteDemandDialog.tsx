@@ -42,6 +42,7 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
     
     try {
       // Primeiro, excluímos as notas relacionadas à demanda
+      console.log('Excluindo notas relacionadas à demanda:', demandId);
       const { error: notasError } = await supabase
         .from('notas_oficiais')
         .delete()
@@ -57,14 +58,31 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
         return;
       }
       
-      // Depois de excluir as notas, continuamos com a exclusão da demanda via onConfirm
+      // Excluir respostas relacionadas à demanda
+      console.log('Excluindo respostas relacionadas à demanda:', demandId);
+      const { error: respostasError } = await supabase
+        .from('respostas_demandas')
+        .delete()
+        .eq('demanda_id', demandId);
+        
+      if (respostasError) {
+        console.error('Erro ao excluir respostas relacionadas:', respostasError);
+        toast({
+          title: "Erro ao excluir respostas relacionadas",
+          description: respostasError.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Depois de excluir as notas e respostas, continuamos com a exclusão da demanda via onConfirm
       await onConfirm();
       
-    } catch (error) {
-      console.error('Erro ao excluir demanda e notas:', error);
+    } catch (error: any) {
+      console.error('Erro ao excluir demanda e dados relacionados:', error);
       toast({
         title: "Erro ao excluir",
-        description: "Ocorreu um erro ao excluir a demanda e suas notas relacionadas.",
+        description: "Ocorreu um erro ao excluir a demanda e seus dados relacionados.",
         variant: "destructive"
       });
     }
@@ -77,7 +95,7 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
           <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
           <AlertDialogDescription>
             Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita.
-            Todas as notas oficiais relacionadas a esta demanda também serão excluídas.
+            Todas as notas oficiais e respostas relacionadas a esta demanda também serão excluídas.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
