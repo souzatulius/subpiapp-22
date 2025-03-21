@@ -28,11 +28,12 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const fetchNotas = async () => {
     try {
       setIsLoading(true);
+      // Specify the exact columns we want and use explicit foreign key hints
       const { data, error } = await supabase
         .from('notas_oficiais')
         .select(`
           id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id,
-          autor:autor_id(id, nome_completo),
+          autor:usuarios!autor_id(id, nome_completo),
           area_coordenacao:area_coordenacao_id(id, descricao),
           demanda:demanda_id(*)
         `)
@@ -52,10 +53,13 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         aprovador_id: nota.aprovador_id,
         area_coordenacao_id: nota.area_coordenacao_id,
         demanda_id: nota.demanda_id,
-        autor: nota.autor || { nome_completo: 'Desconhecido' },
+        autor: nota.autor ? {
+          id: nota.autor.id,
+          nome_completo: nota.autor.nome_completo
+        } : { nome_completo: 'Desconhecido' },
         areas_coordenacao: nota.area_coordenacao ? 
           { descricao: nota.area_coordenacao.descricao, id: nota.area_coordenacao.id } : 
-          { descricao: 'Desconhecida' },
+          { descricao: 'Desconhecida', id: '' },
         demanda: nota.demanda
       })) || [];
       
