@@ -58,25 +58,50 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
         return;
       }
       
-      // Excluir respostas relacionadas à demanda
+      // Excluir todas as possíveis referências na tabela respostas_demandas
       console.log('Excluindo respostas relacionadas à demanda:', demandId);
-      const { error: respostasError } = await supabase
+      
+      // CORREÇÃO: Verificamos se existem respostas para garantir que não há mais referências
+      const { data: respostasData, error: checkRespostasError } = await supabase
         .from('respostas_demandas')
-        .delete()
+        .select('id')
         .eq('demanda_id', demandId);
         
-      if (respostasError) {
-        console.error('Erro ao excluir respostas relacionadas:', respostasError);
+      if (checkRespostasError) {
+        console.error('Erro ao verificar respostas existentes:', checkRespostasError);
         toast({
-          title: "Erro ao excluir respostas relacionadas",
-          description: respostasError.message,
+          title: "Erro ao verificar respostas relacionadas",
+          description: checkRespostasError.message,
           variant: "destructive"
         });
         return;
       }
       
+      console.log('Respostas encontradas:', respostasData?.length);
+      
+      if (respostasData && respostasData.length > 0) {
+        // Se existirem respostas, excluímos uma a uma para garantir
+        for (const resposta of respostasData) {
+          console.log('Excluindo resposta ID:', resposta.id);
+          const { error: deleteRespostaError } = await supabase
+            .from('respostas_demandas')
+            .delete()
+            .eq('id', resposta.id);
+            
+          if (deleteRespostaError) {
+            console.error('Erro ao excluir resposta específica:', deleteRespostaError);
+            toast({
+              title: "Erro ao excluir resposta específica",
+              description: deleteRespostaError.message,
+              variant: "destructive"
+            });
+            return;
+          }
+        }
+      }
+      
       // Depois de excluir todos os dados relacionados, continuamos com a exclusão da demanda
-      // A função onConfirm não precisa mais se preocupar com dados relacionados
+      // A função onConfirm fará a exclusão da demanda
       await onConfirm();
       
     } catch (error: any) {

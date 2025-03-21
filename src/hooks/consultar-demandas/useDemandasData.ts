@@ -161,17 +161,18 @@ export const useDemandasData = () => {
     if (!selectedDemand) return;
     
     setDeleteLoading(true);
-    console.log('Deleting demand:', selectedDemand.id);
+    console.log('Excluindo demanda principal:', selectedDemand.id);
     
     try {
-      // Delete the demand itself - related data is already deleted in the DeleteDemandDialog
+      // A exclusão dos dados relacionados já foi feita no DeleteDemandDialog
+      // Agora podemos excluir com segurança a demanda principal
       const { error: deleteDemandError } = await supabase
         .from('demandas')
         .delete()
         .eq('id', selectedDemand.id);
         
       if (deleteDemandError) {
-        console.error('Error deleting demand:', deleteDemandError);
+        console.error('Erro ao excluir demanda principal:', deleteDemandError);
         throw deleteDemandError;
       }
       
@@ -183,7 +184,7 @@ export const useDemandasData = () => {
       setIsDeleteDialogOpen(false);
       refetch();
     } catch (error: any) {
-      console.error('Error in delete process:', error);
+      console.error('Erro completo na exclusão:', error);
       toast({
         title: "Erro ao excluir demanda",
         description: error.message || "Ocorreu um erro desconhecido ao excluir a demanda.",
