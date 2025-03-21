@@ -1,25 +1,9 @@
+
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { toast } from '@/hooks/use-toast';
 import CardsContainer from './grid/CardsContainer';
-import { ActionCardItem } from './CardGrid';
-
-// Define action card data type
-export interface ActionCardItem {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
-  path: string;
-  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
-  isCustom?: boolean;
-  width?: '25' | '50' | '75' | '100';
-  height?: '1' | '2';
-  isQuickDemand?: boolean;
-  isSearch?: boolean;
-  isNewCardButton?: boolean;
-  isOverdueDemands?: boolean;
-  isPendingActions?: boolean;
-}
+import { ActionCardItem } from '@/hooks/dashboard/types';
 
 interface CardGridProps {
   cards: ActionCardItem[];
@@ -108,22 +92,6 @@ const CardGrid: React.FC<CardGridProps> = ({
       />
     </DndContext>
   );
-};
-
-// Function to get width classes - mantido para compatibilidade com código existente
-const getWidthClasses = (width: string = '25') => {
-  switch (width) {
-    case '25':
-      return 'col-span-1';
-    case '50':
-      return 'col-span-1 md:col-span-2';
-    case '75':
-      return 'col-span-1 md:col-span-3';
-    case '100':
-      return 'col-span-1 md:col-span-4';
-    default:
-      return 'col-span-1';
-  }
 };
 
 export default CardGrid;

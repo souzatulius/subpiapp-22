@@ -3,7 +3,7 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ActionCard from '@/components/dashboard/ActionCard';
-import { ActionCardItem } from './CardGrid';
+import { ActionCardItem } from '@/hooks/dashboard/types';
 import { X, Pencil } from 'lucide-react';
 
 interface SortableActionCardProps {
@@ -30,7 +30,7 @@ export const getWidthClasses = (width: string = '25') => {
 };
 
 // Control buttons component for card actions
-const Controls: React.FC<{
+export const Controls: React.FC<{
   cardId: string;
   onEdit: () => void;
   onDelete?: (id: string) => void;
@@ -119,8 +119,5 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
     </div>
   );
 };
-
-// Adicionando Controls como uma propriedade estática para que possa ser acessado como ActionCard.Controls
-SortableActionCard.Controls = Controls;
 
 export default SortableActionCard;
