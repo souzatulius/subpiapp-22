@@ -17,8 +17,16 @@ const Index = () => {
           <LeftContentSection />
         </div>
         
-        {/* Right side with blue background */}
-        <div className="w-full md:w-1/2 bg-[#003570] flex flex-col items-center justify-center p-8 relative animate-fade-right">
+        {/* Right side with blue background and background image */}
+        <div 
+          className="w-full md:w-1/2 bg-[#003570] flex flex-col items-center justify-center p-8 relative animate-fade-right"
+          style={{
+            backgroundImage: 'url("/lovable-uploads/4a180a95-2659-4b91-a791-bc7fcd795823.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
           {/* No image here anymore */}
         </div>
       </div>

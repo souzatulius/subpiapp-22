@@ -23,8 +23,16 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           <LeftContentSection />
         </div>
 
-        {/* Right side - Dynamic content */}
-        <div className="w-full md:w-1/2 bg-[#003570] p-8 flex flex-col items-center justify-center relative">
+        {/* Right side - Dynamic content with background image */}
+        <div 
+          className="w-full md:w-1/2 bg-[#003570] p-8 flex flex-col items-center justify-center relative"
+          style={{
+            backgroundImage: 'url("/lovable-uploads/4a180a95-2659-4b91-a791-bc7fcd795823.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
           <div className="w-full max-w-md animate-fade-right">
             {children}
           </div>
