@@ -16,7 +16,7 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
         
-        // First, fetch all demandas
+        // First, fetch all demandas that are either pendente or em_andamento
         const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
           .select(`
@@ -27,7 +27,7 @@ export const useDemandasData = () => {
             perguntas,
             area_coordenacao:area_coordenacao_id(id, descricao)
           `)
-          .in('status', ['pendente', 'em_andamento'])
+          .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
         
         if (demandasError) throw demandasError;
@@ -40,7 +40,7 @@ export const useDemandasData = () => {
         if (notasError) throw notasError;
         
         // Create a set of demanda IDs that already have notas
-        const demandasComNotas = new Set(notasData.map(nota => nota.demanda_id).filter(Boolean));
+        const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
         
         // Filter to include only demandas that don't have notas associated
         const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));

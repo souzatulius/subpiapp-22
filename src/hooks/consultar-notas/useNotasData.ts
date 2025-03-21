@@ -26,7 +26,7 @@ export const useNotasData = () => {
           *,
           autor:autor_id(id, nome_completo),
           aprovador:aprovador_id(id, nome_completo),
-          areas_coordenacao:area_coordenacao_id(id, nome)
+          area_coordenacao:area_coordenacao_id(id, descricao)
         `)
         .order('criado_em', { ascending: false });
 
@@ -35,9 +35,7 @@ export const useNotasData = () => {
       }
 
       if (areaFilter !== '') {
-        // Assuming areas_coordenacao.nome can be filtered directly
-        // If not, you may need to adjust the query based on your database structure
-        query = query.eq('areas_coordenacao.nome', areaFilter);
+        query = query.eq('area_coordenacao_id', areaFilter);
       }
 
       const { data, error } = await query;
@@ -48,7 +46,7 @@ export const useNotasData = () => {
       const transformedData = data?.map(nota => ({
         ...nota,
         autor: nota.autor || { nome_completo: 'Não informado' },
-        areas_coordenacao: nota.areas_coordenacao || { nome: 'Não informada' }
+        area_coordenacao: nota.area_coordenacao || { descricao: 'Não informada' }
       })) || [];
 
       setNotas(transformedData);
@@ -89,7 +87,7 @@ export const useNotasData = () => {
         nota.titulo?.toLowerCase().includes(searchLower) ||
         nota.texto?.toLowerCase().includes(searchLower) ||
         nota.autor?.nome_completo?.toLowerCase().includes(searchLower) ||
-        nota.areas_coordenacao?.nome?.toLowerCase().includes(searchLower) ||
+        nota.area_coordenacao?.descricao?.toLowerCase().includes(searchLower) ||
         nota.status?.toLowerCase().includes(searchLower)
       )) {
         return false;

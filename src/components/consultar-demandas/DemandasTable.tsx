@@ -38,10 +38,14 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
         return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">Aguardando Respostas</Badge>;
       case 'respondida':
         return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">Respondida</Badge>;
-      case 'aguardando_nota':
-        return <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">Aguardando Nota</Badge>;
       case 'nota_criada':
         return <Badge variant="outline" className="bg-indigo-100 text-indigo-800 border-indigo-300">Nota Criada</Badge>;
+      case 'nota_aprovada':
+        return <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-300">Nota Aprovada</Badge>;
+      case 'nota_rejeitada':
+        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Nota Rejeitada</Badge>;
+      case 'aguardando_nota':
+        return <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">Aguardando Nota</Badge>;
       case 'pendente_aprovacao':
         return <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300">Pendente de Aprovação</Badge>;
       case 'aprovada':
