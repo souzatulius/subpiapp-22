@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { startOfDay, endOfDay, isAfter, isBefore, isEqual } from 'date-fns';
 import { useCurrentUser } from '@/components/settings/access-control/hooks/useCurrentUser';
+import { NotaOficial } from './types';
 
 export const useNotasQuery = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,11 +59,11 @@ export const useNotasQuery = () => {
 
         if (error) throw error;
 
-        return data?.map(nota => ({
+        return (data || []).map(nota => ({
           ...nota,
-          autor: nota.autor || { nome_completo: 'Não informado' },
-          area_coordenacao: nota.area_coordenacao || { descricao: 'Não informada' }
-        })) || [];
+          autor: nota.autor || { id: '', nome_completo: 'Não informado' },
+          area_coordenacao: nota.area_coordenacao || { id: '', descricao: 'Não informada' }
+        })) as NotaOficial[];
       } catch (error: any) {
         console.error('Erro ao carregar notas:', error);
         toast({
@@ -72,7 +73,9 @@ export const useNotasQuery = () => {
         });
         return [];
       }
-    }
+    },
+    staleTime: 30000, // 30 segundos antes de considerar dados obsoletos
+    cacheTime: 300000 // Cache por 5 minutos
   });
 
   const filteredNotas = notas.filter(nota => {

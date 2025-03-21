@@ -1,67 +1,63 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+
 interface ActionCardProps {
   title: string;
-  icon: string | React.ReactNode;
-  onClick: () => void;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'dark-blue';
-  iconSize?: 'normal' | 'large' | 'giant';
-  className?: string;
+  icon: React.ReactNode;
+  onClick?: () => void;
+  color: 'blue' | 'green' | 'orange' | 'purple' | 'red';
+  path?: string;
 }
+
+const getColorClasses = (color: string) => {
+  switch (color) {
+    case 'blue':
+      return 'bg-blue-50 text-blue-500 hover:bg-blue-100';
+    case 'green':
+      return 'bg-green-50 text-green-500 hover:bg-green-100';
+    case 'orange':
+      return 'bg-orange-50 text-orange-500 hover:bg-orange-100';
+    case 'purple':
+      return 'bg-purple-50 text-purple-500 hover:bg-purple-100';
+    case 'red':
+      return 'bg-red-50 text-red-500 hover:bg-red-100';
+    default:
+      return 'bg-blue-50 text-blue-500 hover:bg-blue-100';
+  }
+};
+
 const ActionCard: React.FC<ActionCardProps> = ({
   title,
   icon,
   onClick,
   color,
-  iconSize = 'normal',
-  className = ''
+  path
 }) => {
-  const getColorClasses = () => {
-    switch (color) {
-      case 'blue':
-        return 'bg-blue-50 border-blue-200 hover:bg-blue-100';
-      case 'green':
-        return 'bg-green-50 border-green-200 hover:bg-green-100';
-      case 'orange':
-        return 'bg-orange-50 border-orange-200 hover:bg-orange-100';
-      case 'purple':
-        return 'bg-purple-50 border-purple-200 hover:bg-purple-100';
-      case 'dark-blue':
-        return 'bg-[#003570] border-[#002855] hover:bg-[#002855] text-white';
-      default:
-        return 'bg-gray-50 border-gray-200 hover:bg-gray-100';
-    }
-  };
-  const getIconSizeClasses = () => {
-    switch (iconSize) {
-      case 'giant':
-        return 'text-6xl mb-6';
-      case 'large':
-        return 'text-5xl mb-5';
-      case 'normal':
-      default:
-        return 'text-4xl mb-4';
-    }
-  };
-  const renderIcon = () => {
-    if (typeof icon === 'string') {
-      return <span className={getIconSizeClasses()}>{icon}</span>;
-    }
+  const navigate = useNavigate();
 
-    // If it's a React component (like a Lucide icon)
-    return <div className={`${getIconSizeClasses()} flex justify-center items-center`}>
-        {icon}
-      </div>;
+  const handleClick = () => {
+    if (path) {
+      navigate(path);
+    } else if (onClick) {
+      onClick();
+    }
   };
-  return <Card onClick={onClick} className="cursor-pointer rounded-2xl">
-      <CardContent className="p-6 flex flex-col items-center justify-center text-center bg-orange-500 rounded-2xl hover:bg-orange-600 hover:scale-105 transition duration-300">
-        <div className="mb-2 p-3 rounded-full bg-transparent">
-          {renderIcon()}
+
+  return (
+    <Card 
+      className={`cursor-pointer transition-all duration-200 border border-gray-200 hover:shadow-md ${getColorClasses(color)}`} 
+      onClick={handleClick}
+    >
+      <CardContent className="flex flex-col items-center justify-center p-6 h-full">
+        <div className="mb-4">
+          {icon}
         </div>
-        <h3 className="text-lg font-semibold">
-          {title}
-        </h3>
+        <h3 className="text-lg font-medium text-center">{title}</h3>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default ActionCard;

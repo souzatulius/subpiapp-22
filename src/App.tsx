@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/providers/AuthProvider";
+
+// Pages
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -15,6 +17,9 @@ import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
+import DashboardLayout from "./components/layouts/DashboardLayout";
+
+// Dashboard Pages
 import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
 import ResponderDemandas from './pages/dashboard/comunicacao/ResponderDemandas';
 import CriarNotaOficial from './pages/dashboard/comunicacao/CriarNotaOficial';
@@ -26,7 +31,15 @@ import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
 import NotasDashboard from './pages/dashboard/comunicacao/Notas';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      cacheTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false
+    }
+  }
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -43,25 +56,26 @@ const App = () => (
             <Route path="/email-verified" element={<EmailVerified />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             
-            {/* Dashboard routes */}
+            {/* Dashboard route */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-
-            {/* Dashboard Comunicação routes */}
-            <Route path="/dashboard/comunicacao/comunicacao" element={<ProtectedRoute><ComunicacaoDashboard /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/notas" element={<ProtectedRoute><NotasDashboard /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/cadastrar" element={<ProtectedRoute><CadastrarDemanda /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/responder" element={<ProtectedRoute><ResponderDemandas /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/consultar-demandas" element={<ProtectedRoute><ConsultarDemandas /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/criar-nota" element={<ProtectedRoute><CriarNotaOficial /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/aprovar-nota" element={<ProtectedRoute><AprovarNotaOficial /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/consultar-notas" element={<ProtectedRoute><ConsultarNotas /></ProtectedRoute>} />
-            <Route path="/dashboard/comunicacao/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
-
-            {/* Zeladoria routes */}
-            <Route path="/dashboard/zeladoria/ranking-subs" element={<ProtectedRoute><RankingSubs /></ProtectedRoute>} />
-
-            {/* Settings route */}
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+
+            {/* Dashboard with shared layout */}
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+              {/* Comunicação routes */}
+              <Route path="comunicacao/comunicacao" element={<ComunicacaoDashboard />} />
+              <Route path="comunicacao/notas" element={<NotasDashboard />} />
+              <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
+              <Route path="comunicacao/responder" element={<ResponderDemandas />} />
+              <Route path="comunicacao/consultar-demandas" element={<ConsultarDemandas />} />
+              <Route path="comunicacao/criar-nota" element={<CriarNotaOficial />} />
+              <Route path="comunicacao/aprovar-nota" element={<AprovarNotaOficial />} />
+              <Route path="comunicacao/consultar-notas" element={<ConsultarNotas />} />
+              <Route path="comunicacao/relatorios" element={<RelatoriosPage />} />
+              
+              {/* Zeladoria routes */}
+              <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
+            </Route>
 
             {/* 404 route */}
             <Route path="*" element={<NotFound />} />

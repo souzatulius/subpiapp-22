@@ -7,11 +7,12 @@ import { useNotasData } from '@/hooks/consultar-notas/useNotasData';
 import { useExportPDF } from '@/hooks/consultar-notas/useExportPDF';
 import { Button } from '@/components/ui/button';
 import { List, Grid } from 'lucide-react';
+import { NotaOficial } from '@/hooks/consultar-notas/types';
 
 const NotasContent: React.FC = () => {
   const {
     notas,
-    loading,
+    isLoading,
     searchQuery,
     setSearchQuery,
     statusFilter,
@@ -75,16 +76,16 @@ const NotasContent: React.FC = () => {
         
         {viewMode === 'table' ? (
           <NotasTable
-            notas={filteredNotas}
-            loading={loading}
+            notas={filteredNotas as any}
+            loading={isLoading}
             formatDate={formatDate}
             onDeleteNota={deleteNota}
             deleteLoading={deleteLoading}
           />
         ) : (
           <NotasCards 
-            notas={filteredNotas}
-            loading={loading}
+            notas={filteredNotas as any}
+            loading={isLoading}
             formatDate={formatDate}
             onDeleteNota={deleteNota}
             deleteLoading={deleteLoading}
