@@ -42,7 +42,7 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
             {hasDemanda && (
               <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200 text-yellow-800 mb-4">
                 <strong>Atenção:</strong> Esta nota está vinculada a uma demanda. 
-                Ao excluir esta nota, a demanda retornará para a etapa de "Criar Nota Oficial".
+                Ao excluir esta nota, a demanda retornará para o status de "Pendente".
               </div>
             )}
             

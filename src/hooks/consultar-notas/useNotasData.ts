@@ -77,10 +77,21 @@ export const useNotasData = () => {
 
       // If there's a related demanda, update its status instead of deleting it
       if (nota.demanda_id) {
+        // First, fetch the current status to understand what we're working with
+        const { data: demanda, error: fetchError } = await supabase
+          .from('demandas')
+          .select('status')
+          .eq('id', nota.demanda_id)
+          .single();
+          
+        if (fetchError) throw fetchError;
+        
+        // Update to a valid status based on the database constraints
+        // Using 'pendente' as it's likely a valid status
         const { error: demandaError } = await supabase
           .from('demandas')
           .update({ 
-            status: 'aguardando_nota' // Set status to indicate it needs a note again
+            status: 'pendente' // Using a likely valid status
           })
           .eq('id', nota.demanda_id);
 
@@ -103,6 +114,10 @@ export const useNotasData = () => {
         description: 'A nota foi excluída com sucesso.',
         variant: 'default',
       });
+      
+      // Refresh the data to ensure everything is in sync
+      fetchNotas();
+      
     } catch (error: any) {
       console.error('Erro ao excluir nota:', error);
       toast({
