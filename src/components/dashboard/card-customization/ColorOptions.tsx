@@ -2,6 +2,8 @@
 import React from 'react';
 import { FormControl } from '@/components/ui/form';
 import { colorData } from './utils';
+import { UseFormReturn } from 'react-hook-form';
+import { FormSchema } from './types';
 
 interface ColorOptionsProps {
   selectedColor: string;

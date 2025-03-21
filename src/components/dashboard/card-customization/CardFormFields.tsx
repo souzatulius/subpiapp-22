@@ -76,8 +76,17 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         <FormField
           control={form.control}
           name="color"
-          render={() => (
-            <ColorOptions form={form} />
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cor</FormLabel>
+              <FormControl>
+                <ColorOptions 
+                  selectedColor={field.value} 
+                  onSelectColor={(color) => form.setValue('color', color as any)} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
 
@@ -89,11 +98,19 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
           control={form.control}
           name="iconId"
           render={() => (
-            <IconSelector 
-              form={form} 
-              selectedIconId={selectedIconId}
-              setSelectedIconId={setSelectedIconId}
-            />
+            <FormItem>
+              <FormLabel>Ícone</FormLabel>
+              <FormControl>
+                <IconSelector 
+                  selectedIconId={selectedIconId}
+                  onSelectIcon={(id) => {
+                    setSelectedIconId(id);
+                    form.setValue('iconId', id);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
       </div>

@@ -59,6 +59,33 @@ export const colorData = [
   { id: 'gray-ultra-light', label: 'Cinza Ultra Claro', class: 'bg-gray-25 text-gray-600 border-gray-50' },
 ];
 
+// Dashboard pages for navigation
+export const dashboardPages = [
+  { value: '/dashboard', label: 'Dashboard' },
+  { value: '/dashboard/comunicacao/cadastrar-demanda', label: 'Cadastrar Demanda' },
+  { value: '/dashboard/comunicacao/responder-demandas', label: 'Responder Demandas' },
+  { value: '/dashboard/comunicacao/consultar-demandas', label: 'Consultar Demandas' },
+  { value: '/dashboard/comunicacao/criar-nota-oficial', label: 'Criar Nota Oficial' },
+  { value: '/dashboard/comunicacao/aprovar-nota-oficial', label: 'Aprovar Nota Oficial' },
+  { value: '/dashboard/comunicacao/consultar-notas', label: 'Consultar Notas' },
+  { value: '/dashboard/zeladoria/ranking', label: 'Ranking de Subsecretarias' },
+  { value: '/dashboard/comunicacao/relatorios', label: 'Relatórios' },
+];
+
+// Width options for card customization
+export const widthOptions = [
+  { id: "25", value: "25", label: "25%" },
+  { id: "50", value: "50", label: "50%" },
+  { id: "75", value: "75", label: "75%" },
+  { id: "100", value: "100", label: "100%" },
+];
+
+// Height options for card customization
+export const heightOptions = [
+  { id: "1", value: "1", label: "Padrão" },
+  { id: "2", value: "2", label: "Duplo" },
+];
+
 // Utility to get icon component by ID
 export const getIconComponentById = (iconId: string) => {
   const found = iconsData.find(icon => icon.id === iconId);
@@ -66,6 +93,15 @@ export const getIconComponentById = (iconId: string) => {
     return found.component;
   }
   return <ClipboardList className="h-12 w-12" />;
+};
+
+// Utility to get color class by color ID
+export const getColorClass = (colorId: string) => {
+  const found = colorData.find(color => color.id === colorId);
+  if (found) {
+    return found.class;
+  }
+  return 'bg-blue-50 text-blue-600 border-blue-100';
 };
 
 // Utility to identify icon component type

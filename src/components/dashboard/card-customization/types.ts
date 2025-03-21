@@ -26,3 +26,11 @@ export interface CardCustomizationModalProps {
   }) => void;
   initialData?: any;
 }
+
+export interface CardFormPreviewProps {
+  title: string;
+  iconId: string;
+  color: string;
+  width: string;
+  height: string;
+}
