@@ -77,7 +77,7 @@ const NotasCards: React.FC<NotasCardsProps> = ({ notas, loading, formatDate }) =
               
               <div className="flex items-center gap-2">
                 <FileText size={14} className="text-gray-400" />
-                <span>{nota.areas_coordenacao?.descricao || 'Área não informada'}</span>
+                <span>{nota.areas_coordenacao?.nome || 'Área não informada'}</span>
               </div>
               
               <div className="flex items-center gap-2">
