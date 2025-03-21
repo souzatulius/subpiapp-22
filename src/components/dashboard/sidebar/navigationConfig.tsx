@@ -12,7 +12,8 @@ import {
   FileCheck,
   Search,
   BookOpen,
-  LayoutDashboard
+  LayoutDashboard,
+  FileSignature
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
@@ -31,8 +32,25 @@ export const getNavigationSections = () => [
     icon: <MessageCircle size={20} />,
     label: 'Comunicação',
     isSection: true,
-    expandOnIconClick: true, // Add this property to expand on icon click
+    expandOnIconClick: true,
     subSections: [
+      {
+        id: 'comunicacao-dash',
+        label: 'Painel Geral',
+        isSubSection: true,
+        items: [
+          {
+            icon: <LayoutDashboard size={18} />,
+            label: 'Comunicação',
+            path: '/dashboard/comunicacao/comunicacao'
+          },
+          {
+            icon: <FileSignature size={18} />,
+            label: 'Notas para Imprensa',
+            path: '/dashboard/comunicacao/notas'
+          }
+        ]
+      },
       {
         id: 'impresa',
         label: 'Solicitações da Imprensa',

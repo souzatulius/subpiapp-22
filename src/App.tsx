@@ -23,6 +23,8 @@ import RelatoriosPage from './pages/dashboard/comunicacao/Relatorios';
 import ConsultarDemandas from './pages/dashboard/comunicacao/ConsultarDemandas';
 import ConsultarNotas from './pages/dashboard/comunicacao/ConsultarNotas';
 import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
+import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
+import NotasDashboard from './pages/dashboard/comunicacao/Notas';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,8 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
             {/* Dashboard Comunicação routes */}
+            <Route path="/dashboard/comunicacao/comunicacao" element={<ProtectedRoute><ComunicacaoDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/comunicacao/notas" element={<ProtectedRoute><NotasDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/comunicacao/cadastrar" element={<ProtectedRoute><CadastrarDemanda /></ProtectedRoute>} />
             <Route path="/dashboard/comunicacao/responder" element={<ProtectedRoute><ResponderDemandas /></ProtectedRoute>} />
             <Route path="/dashboard/comunicacao/consultar-demandas" element={<ProtectedRoute><ConsultarDemandas /></ProtectedRoute>} />
