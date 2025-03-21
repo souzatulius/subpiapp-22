@@ -62,7 +62,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         onDelete={onDelete}
       >
         <QuickDemandCard 
-          title={card.title}
           value={quickDemandTitle}
           onChange={onQuickDemandTitleChange}
           onSubmit={onQuickDemandSubmit}

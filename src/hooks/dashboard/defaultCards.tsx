@@ -136,7 +136,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
   // Last row - Quick demand and New card
   {
     id: 'quick-demand',
-    title: 'Iniciar nova demanda',
+    title: '',
     icon: <PlusCircleIcon className="h-12 w-12" />,
     path: '/dashboard/comunicacao/cadastrar',
     color: 'blue-dark',

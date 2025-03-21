@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { toast } from '@/hooks/use-toast';
 import CardsContainer from './grid/CardsContainer';
 import { ActionCardItem } from '@/hooks/dashboard/types';
 
@@ -68,11 +67,7 @@ const CardGrid: React.FC<CardGridProps> = ({
       
       onCardsChange(newCards);
       
-      toast({
-        title: "Cards reorganizados",
-        description: "A nova ordem dos cards foi salva com sucesso.",
-        variant: "success",
-      });
+      // Toast message removed from here
     }
   };
 

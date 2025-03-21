@@ -22,7 +22,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   return (
-    <div className="w-full h-full bg-white border border-gray-300 rounded-xl shadow-md flex items-center px-6 transition-all hover:shadow-lg relative">
+    <div className="w-full h-full bg-white border border-gray-300 rounded-xl shadow-md flex items-center px-6 transition-all hover:shadow-lg">
       <Search className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
       <input
         type="text"
@@ -32,7 +32,6 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
       />
-      <div className="absolute inset-0 cursor-move opacity-0" />
     </div>
   );
 };
