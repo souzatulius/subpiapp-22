@@ -19,7 +19,7 @@ const Index = () => {
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Content */}
-        <div className="w-full md:w-2/3 px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
           <div className="max-w-2xl mx-auto md:mx-0 animate-fade-in">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
               <span className="text-[#002855]">Demandas da SUB com </span>
@@ -62,11 +62,8 @@ const Index = () => {
         </div>
         
         {/* Right side with blue background */}
-        <div className="w-full md:w-1/3 bg-[#003570] flex flex-col items-center justify-center p-8 relative">
-          <img src="/lovable-uploads/292774a8-b25d-4dc6-9555-f54295b8bd9f.png" alt="Logo SUB PI" className="w-4/5 max-w-sm mb-8" />
-          <h2 className="text-white text-4xl font-bold">
-            SUB<span className="bg-[#f57c35] px-2 py-1 rounded ml-1">PI</span>
-          </h2>
+        <div className="w-full md:w-1/2 bg-[#003570] flex flex-col items-center justify-center p-8 relative">
+          <img src="/lovable-uploads/5b8c78fb-e26a-45d0-844e-df1dea58037b.png" alt="Logo SUB PI" className="w-2/3 max-w-sm" />
         </div>
       </div>
       
