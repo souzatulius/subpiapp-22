@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DemandFormData } from './types';
+import { useNavigate } from 'react-router-dom';
 
 export const useDemandFormSubmit = (
   userId: string | undefined,
@@ -9,6 +10,8 @@ export const useDemandFormSubmit = (
   setIsLoading: (loading: boolean) => void,
   onClose: () => void
 ) => {
+  const navigate = useNavigate();
+  
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
@@ -58,7 +61,8 @@ export const useDemandFormSubmit = (
         description: "A solicitação foi registrada no sistema."
       });
       
-      onClose();
+      // Redirect to dashboard
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Erro ao cadastrar demanda:', error);
       toast({

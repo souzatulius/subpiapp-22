@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,26 +27,20 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
   handleSelectChange,
   errors = []
 }) => {
-  const [activeQuestions, setActiveQuestions] = useState<number>(0);
-
-  useEffect(() => {
-    // Determine how many question fields should be visible
-    let count = 0;
-    for (let i = 0; i < formData.perguntas.length; i++) {
-      if (formData.perguntas[i]?.trim()) {
-        count = i + 1;
-      }
-    }
-    // Show one more empty field if all are filled
-    if (count === formData.perguntas.length || count === 0) {
-      setActiveQuestions(Math.min(count + 1, 5));
-    } else {
-      setActiveQuestions(count + 1);
-    }
-  }, [formData.perguntas]);
+  const [activeQuestions, setActiveQuestions] = useState<number>(
+    formData.perguntas.filter(p => p.trim()).length > 0 
+      ? formData.perguntas.filter(p => p.trim()).length 
+      : 1
+  );
 
   const handleQuestionChange = (index: number, value: string) => {
     handlePerguntaChange(index, value);
+  };
+
+  const handleAddQuestion = () => {
+    if (activeQuestions < 5) {
+      setActiveQuestions(prev => prev + 1);
+    }
   };
 
   const handleFileChange = (fileUrl: string) => {
@@ -70,14 +64,13 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
               className="flex-1 rounded-lg"
               value={formData.perguntas[index] || ''}
               onChange={e => handleQuestionChange(index, e.target.value)}
-              placeholder={`Pergunta ${index + 1}`}
             />
-            {index === activeQuestions - 1 && activeQuestions < 5 && formData.perguntas[index]?.trim() && (
+            {index === activeQuestions - 1 && activeQuestions < 5 && (
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => setActiveQuestions(prev => Math.min(prev + 1, 5))}
+                onClick={handleAddQuestion}
                 className="flex-shrink-0"
               >
                 <Plus className="h-4 w-4" />

@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface LocationStepProps {
   formData: {
@@ -44,23 +45,24 @@ const LocationStep: React.FC<LocationStepProps> = ({
           name="endereco" 
           value={formData.endereco} 
           onChange={handleChange} 
+          placeholder="Rua e Número"
         />
       </div>
       
       <div>
         <Label htmlFor="distrito">Distrito</Label>
-        <Select value={selectedDistrito} onValueChange={setSelectedDistrito}>
-          <SelectTrigger className="rounded-lg">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
+        <RadioGroup value={selectedDistrito} onValueChange={setSelectedDistrito} className="mt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {distritos.map(distrito => (
-              <SelectItem key={distrito.id} value={distrito.id}>
-                {distrito.nome}
-              </SelectItem>
+              <div key={distrito.id} className="flex items-center space-x-2">
+                <RadioGroupItem value={distrito.id} id={`distrito-${distrito.id}`} />
+                <Label htmlFor={`distrito-${distrito.id}`} className="cursor-pointer">
+                  {distrito.nome}
+                </Label>
+              </div>
             ))}
-          </SelectContent>
-        </Select>
+          </div>
+        </RadioGroup>
       </div>
       
       <div>

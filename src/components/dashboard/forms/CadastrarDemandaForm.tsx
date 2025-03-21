@@ -11,7 +11,6 @@ import { useDemandForm } from '@/hooks/demandForm';
 import { ValidationError, validateDemandForm } from '@/lib/formValidationUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface CadastrarDemandaFormProps {
   onClose: () => void;
@@ -22,7 +21,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
-  const navigate = useNavigate();
   
   const {
     formData,
@@ -72,21 +70,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const handleSubmit = async () => {
     try {
       await submitForm();
-      
-      // Instead of closing, redirect to add a new demand
-      toast({
-        title: "Demanda cadastrada com sucesso!",
-        description: "Iniciando cadastro de uma nova demanda."
-      });
-      
-      // Reset the form for a new demand
-      resetForm();
-      
-      // Go back to first step
-      while (activeStep > 0) {
-        prevStep();
-      }
-      
     } catch (error: any) {
       toast({
         title: "Erro ao cadastrar demanda",

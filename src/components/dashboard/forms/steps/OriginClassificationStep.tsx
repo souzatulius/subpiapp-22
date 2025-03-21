@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle } from 'lucide-react';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface OriginClassificationStepProps {
@@ -39,6 +39,9 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
       "Jornal Online": <Monitor className="h-6 w-6" />,
       "Portal": <MousePointer className="h-6 w-6" />,
       "Blog": <Globe className="h-6 w-6" />,
+      "Podcast": <Mic className="h-6 w-6" />,
+      "TV": <Tv className="h-6 w-6" />,
+      "Rádio": <Radio className="h-6 w-6" />,
       "Outros": <HelpCircle className="h-6 w-6" />
     };
     return iconMap[descricao] || <HelpCircle className="h-6 w-6" />;

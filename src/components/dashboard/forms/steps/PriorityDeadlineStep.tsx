@@ -74,41 +74,30 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
           Prioridade
         </Label>
         
-        <div className="flex flex-col items-center mb-4">
-          <div className="flex flex-col bg-gray-200 p-3 rounded-lg w-24 h-64 mb-2">
-            {/* Traffic Light */}
+        <div className="mb-4">
+          {/* Horizontal Traffic Light */}
+          <div className="flex items-center bg-gray-200 p-3 rounded-lg w-64 h-24 mb-2">
+            {/* Red Light */}
             <button 
               onClick={() => handleSelectChange('prioridade', 'alta')}
-              className={`w-16 h-16 rounded-full mx-auto mb-4 transition-all ${formData.prioridade === 'alta' ? 'ring-4 ring-gray-400' : ''}`}
+              className={`w-16 h-16 rounded-full mx-2 transition-all ${formData.prioridade === 'alta' ? 'ring-4 ring-gray-400' : ''}`}
               style={{ backgroundColor: '#FF4136' }}
               aria-label="Prioridade Alta"
             />
+            {/* Yellow Light */}
             <button 
               onClick={() => handleSelectChange('prioridade', 'media')}
-              className={`w-16 h-16 rounded-full mx-auto mb-4 transition-all ${formData.prioridade === 'media' ? 'ring-4 ring-gray-400' : ''}`}
+              className={`w-16 h-16 rounded-full mx-2 transition-all ${formData.prioridade === 'media' ? 'ring-4 ring-gray-400' : ''}`}
               style={{ backgroundColor: '#FFDC00' }}
               aria-label="Prioridade Média"
             />
+            {/* Green Light */}
             <button 
               onClick={() => handleSelectChange('prioridade', 'baixa')}
-              className={`w-16 h-16 rounded-full mx-auto transition-all ${formData.prioridade === 'baixa' ? 'ring-4 ring-gray-400' : ''}`}
+              className={`w-16 h-16 rounded-full mx-2 transition-all ${formData.prioridade === 'baixa' ? 'ring-4 ring-gray-400' : ''}`}
               style={{ backgroundColor: '#2ECC40' }}
               aria-label="Prioridade Baixa"
             />
-          </div>
-          <div className="flex flex-row space-x-4">
-            <div className="flex items-center">
-              <div className="w-4 h-4 rounded-full bg-red-600 mr-2" />
-              <span className={`text-sm ${formData.prioridade === 'alta' ? 'font-bold' : ''}`}>Alta</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 rounded-full bg-yellow-400 mr-2" />
-              <span className={`text-sm ${formData.prioridade === 'media' ? 'font-bold' : ''}`}>Média</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 rounded-full bg-green-600 mr-2" />
-              <span className={`text-sm ${formData.prioridade === 'baixa' ? 'font-bold' : ''}`}>Baixa</span>
-            </div>
           </div>
         </div>
       </div>
@@ -118,7 +107,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
           Prazo para Resposta
         </Label>
         <div className="flex space-x-4">
-          <div className="flex-1">
+          <div className="w-48">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -148,7 +137,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             </Popover>
           </div>
 
-          <div className="w-32">
+          <div className="w-28">
             <Select
               value={formData.prazo_resposta 
                 ? format(new Date(formData.prazo_resposta), "HH:mm") 
