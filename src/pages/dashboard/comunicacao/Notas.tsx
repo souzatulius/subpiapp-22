@@ -45,6 +45,13 @@ const NotasDashboard: React.FC = () => {
     }
   ];
 
+  // Função para remover um card do dashboard
+  const handleDeleteCard = (id: string) => {
+    // Aqui implementaríamos a lógica para remover o card
+    console.log(`Card ${id} removido`);
+    // Na implementação real, poderia atualizar o estado ou fazer uma chamada de API
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Notas para Imprensa</h1>
@@ -55,7 +62,8 @@ const NotasDashboard: React.FC = () => {
           title="Nova Nota" 
           icon={<FileText className="h-12 w-12" />} 
           path="/dashboard/comunicacao/criar-nota" 
-          color="blue" 
+          color="blue"
+          onDelete={handleDeleteCard}
         />
         
         <ActionCard 
@@ -63,7 +71,8 @@ const NotasDashboard: React.FC = () => {
           title="Aprovar Nota" 
           icon={<FileCheck className="h-12 w-12" />} 
           path="/dashboard/comunicacao/aprovar-nota" 
-          color="green" 
+          color="green"
+          onDelete={handleDeleteCard}
         />
         
         <ActionCard 
@@ -71,7 +80,8 @@ const NotasDashboard: React.FC = () => {
           title="Consultar Notas" 
           icon={<BookOpen className="h-12 w-12" />} 
           path="/dashboard/comunicacao/consultar-notas" 
-          color="orange" 
+          color="orange"
+          onDelete={handleDeleteCard}
         />
         
         <ActionCard 
@@ -79,7 +89,8 @@ const NotasDashboard: React.FC = () => {
           title="Relatórios" 
           icon={<BarChart2 className="h-12 w-12" />} 
           path="/dashboard/comunicacao/relatorios" 
-          color="purple" 
+          color="purple"
+          onDelete={handleDeleteCard}
         />
       </div>
       
