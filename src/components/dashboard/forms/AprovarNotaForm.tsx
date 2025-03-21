@@ -9,33 +9,19 @@ import { toast } from '@/components/ui/use-toast';
 import { Search } from 'lucide-react';
 import NotasList from './components/NotasList';
 import NotaDetail from './components/NotaDetail';
-import LoadingSkeleton from './components/NotasListStates';
+import { LoadingState, EmptyState } from './components/NotasListStates';
+import { NotaOficial } from './types';
 
 interface AprovarNotaFormProps {
   onClose: () => void;
 }
 
-type Nota = {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  autor: {
-    nome_completo: string;
-  } | null;
-  area_coordenacao: {
-    descricao: string;
-  } | null;
-  criado_em: string;
-  demanda?: any;
-};
-
 const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const { user } = useAuth();
-  const [notas, setNotas] = useState<Nota[]>([]);
+  const [notas, setNotas] = useState<NotaOficial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedNota, setSelectedNota] = useState<Nota | null>(null);
+  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
 
@@ -46,8 +32,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         .from('notas_oficiais')
         .select(`
           *,
-          autor:autor_id(nome_completo),
-          area_coordenacao:area_coordenacao_id(descricao),
+          autor:autor_id(id, nome_completo),
+          area_coordenacao:area_coordenacao_id(id, descricao),
           demanda:demanda_id(*)
         `)
         .eq('status', 'pendente')  // Only fetch pending notes
@@ -55,7 +41,24 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       if (error) throw error;
       
-      setNotas(data || []);
+      // Ensure proper typing for the data
+      const typedData: NotaOficial[] = data?.map(nota => ({
+        id: nota.id,
+        titulo: nota.titulo,
+        texto: nota.texto,
+        status: nota.status,
+        criado_em: nota.criado_em,
+        autor_id: nota.autor_id,
+        aprovador_id: nota.aprovador_id,
+        area_coordenacao_id: nota.area_coordenacao_id,
+        demanda_id: nota.demanda_id,
+        autor: nota.autor || { nome_completo: 'Desconhecido' },
+        areas_coordenacao: nota.area_coordenacao ? 
+          { descricao: nota.area_coordenacao.descricao } : 
+          { descricao: 'Desconhecida' }
+      })) || [];
+      
+      setNotas(typedData);
     } catch (error) {
       console.error('Erro ao carregar notas oficiais:', error);
       toast({
@@ -74,7 +77,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
 
   const filteredNotas = notas.filter(nota => 
     nota.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    nota.area_coordenacao?.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+    (nota.areas_coordenacao?.descricao?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   const handleApprove = async () => {
@@ -96,11 +99,11 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       if (notaError) throw notaError;
       
       // Update demanda status if there is an associated demanda
-      if (selectedNota.demanda) {
+      if (selectedNota.demanda_id) {
         const { error: demandaError } = await supabase
           .from('demandas')
           .update({ status: 'aprovada' })
-          .eq('id', selectedNota.demanda.id);
+          .eq('id', selectedNota.demanda_id);
         
         if (demandaError) throw demandaError;
       }
@@ -144,11 +147,11 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       if (notaError) throw notaError;
       
       // Update demanda status if there is an associated demanda
-      if (selectedNota.demanda) {
+      if (selectedNota.demanda_id) {
         const { error: demandaError } = await supabase
           .from('demandas')
           .update({ status: 'rejeitada' })
-          .eq('id', selectedNota.demanda.id);
+          .eq('id', selectedNota.demanda_id);
         
         if (demandaError) throw demandaError;
       }
@@ -193,27 +196,44 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
               </div>
               
               {isLoading ? (
-                <LoadingSkeleton />
+                <LoadingState />
+              ) : filteredNotas.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredNotas.map(nota => (
+                    <div 
+                      key={nota.id}
+                      className="border p-4 rounded-md cursor-pointer hover:bg-gray-50"
+                      onClick={() => setSelectedNota(nota)}
+                    >
+                      <h3 className="font-medium text-lg">{nota.titulo}</h3>
+                      <div className="text-sm text-gray-500">
+                        <p>Autor: {nota.autor?.nome_completo || 'Desconhecido'}</p>
+                        <p>Área: {nota.areas_coordenacao?.descricao || 'Desconhecida'}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <NotasList 
-                  notas={filteredNotas} 
-                  onSelectNota={setSelectedNota} 
-                  emptyMessage="Não há notas pendentes de aprovação."
-                />
+                <EmptyState />
               )}
             </>
           ) : (
-            <NotaDetail 
-              nota={selectedNota}
-              onBack={() => setSelectedNota(null)}
-              footerActions={
-                <div className="flex justify-end space-x-2 pt-4 border-t mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setSelectedNota(null)}
-                  >
-                    Voltar
-                  </Button>
+            <div>
+              <Button variant="outline" className="mb-4" onClick={() => setSelectedNota(null)}>
+                Voltar
+              </Button>
+              
+              <div className="border p-6 rounded-md">
+                <h2 className="text-xl font-bold mb-4">{selectedNota.titulo}</h2>
+                <div className="mb-4">
+                  <p><strong>Autor:</strong> {selectedNota.autor?.nome_completo || 'Desconhecido'}</p>
+                  <p><strong>Área:</strong> {selectedNota.areas_coordenacao?.descricao || 'Desconhecida'}</p>
+                </div>
+                <div className="mb-6 whitespace-pre-line border-t pt-4">
+                  {selectedNota.texto}
+                </div>
+                
+                <div className="flex justify-end space-x-2">
                   <Button
                     variant="destructive"
                     onClick={handleReject}
@@ -229,8 +249,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
                     {isApproving ? "Aprovando..." : "Aprovar Nota"}
                   </Button>
                 </div>
-              }
-            />
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

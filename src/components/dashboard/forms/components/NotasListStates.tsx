@@ -55,3 +55,5 @@ export const SearchEmptyState: React.FC = () => (
     </p>
   </div>
 );
+
+// No default export - we're exporting named components instead

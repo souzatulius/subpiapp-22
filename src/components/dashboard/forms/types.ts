@@ -1,3 +1,4 @@
+
 import { Database } from '@/integrations/supabase/types';
 
 export interface Demand {
@@ -37,9 +38,12 @@ export interface NotaOficial {
   area_coordenacao_id: string;
   demanda_id?: string | null;
   autor?: {
+    id?: string;
     nome_completo: string;
   };
   areas_coordenacao?: {
+    id?: string;
     descricao: string;
   };
+  demanda?: any;
 }
