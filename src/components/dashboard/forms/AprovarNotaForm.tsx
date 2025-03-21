@@ -31,7 +31,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       const { data, error } = await supabase
         .from('notas_oficiais')
         .select(`
-          *,
+          id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id,
           autor:autor_id(id, nome_completo),
           area_coordenacao:area_coordenacao_id(id, descricao),
           demanda:demanda_id(*)
@@ -41,8 +41,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       if (error) throw error;
       
-      // Ensure proper typing for the data
-      const typedData: NotaOficial[] = data?.map(nota => ({
+      // Transform the data to ensure it matches the NotaOficial interface
+      const typedNotas: NotaOficial[] = data?.map(nota => ({
         id: nota.id,
         titulo: nota.titulo,
         texto: nota.texto,
@@ -54,11 +54,12 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         demanda_id: nota.demanda_id,
         autor: nota.autor || { nome_completo: 'Desconhecido' },
         areas_coordenacao: nota.area_coordenacao ? 
-          { descricao: nota.area_coordenacao.descricao } : 
-          { descricao: 'Desconhecida' }
+          { descricao: nota.area_coordenacao.descricao, id: nota.area_coordenacao.id } : 
+          { descricao: 'Desconhecida' },
+        demanda: nota.demanda
       })) || [];
       
-      setNotas(typedData);
+      setNotas(typedNotas);
     } catch (error) {
       console.error('Erro ao carregar notas oficiais:', error);
       toast({
