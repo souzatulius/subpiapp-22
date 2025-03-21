@@ -14,54 +14,32 @@ export const useDemandasActions = (refetch: () => Promise<any>) => {
     if (!selectedDemand) return;
     
     setDeleteLoading(true);
-    console.log('Iniciando exclusão da demanda:', selectedDemand.id);
+    console.log('Iniciando ocultação da demanda:', selectedDemand.id);
     
     try {
-      // 1. First delete all responses related to the demand
-      const { error: responsesError } = await supabase
-        .from('respostas_demandas')
-        .delete()
-        .eq('demanda_id', selectedDemand.id);
-        
-      if (responsesError) {
-        console.error('Erro ao excluir respostas da demanda:', responsesError);
-        throw responsesError;
-      }
-      
-      // 2. Delete any notes related to the demand
-      const { error: notasError } = await supabase
-        .from('notas_oficiais')
-        .delete()
-        .eq('demanda_id', selectedDemand.id);
-        
-      if (notasError) {
-        console.error('Erro ao excluir notas da demanda:', notasError);
-        throw notasError;
-      }
-      
-      // 3. Now we can safely delete the demand itself
+      // Update the demanda status to 'oculta' instead of deleting it
       const { error: demandaError } = await supabase
         .from('demandas')
-        .delete()
+        .update({ status: 'oculta' })
         .eq('id', selectedDemand.id);
         
       if (demandaError) {
-        console.error('Erro ao excluir demanda:', demandaError);
+        console.error('Erro ao ocultar demanda:', demandaError);
         throw demandaError;
       }
       
       toast({
-        title: "Demanda excluída",
-        description: "A demanda e todos os dados associados foram excluídos com sucesso."
+        title: "Demanda ocultada",
+        description: "A demanda foi ocultada com sucesso e não aparecerá mais nas listagens."
       });
       
       setIsDeleteDialogOpen(false);
       refetch();
     } catch (error: any) {
-      console.error('Erro completo na exclusão:', error);
+      console.error('Erro completo na ocultação:', error);
       toast({
-        title: "Erro ao excluir demanda",
-        description: error.message || "Ocorreu um erro desconhecido ao excluir a demanda.",
+        title: "Erro ao ocultar demanda",
+        description: error.message || "Ocorreu um erro desconhecido ao ocultar a demanda.",
         variant: "destructive"
       });
     } finally {

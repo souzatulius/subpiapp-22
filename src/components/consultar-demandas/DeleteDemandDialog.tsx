@@ -36,7 +36,7 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
     try {
       await onConfirm();
     } catch (error) {
-      console.error('Erro ao excluir demanda e dados relacionados:', error);
+      console.error('Erro ao ocultar demanda:', error);
     }
   };
 
@@ -44,10 +44,14 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent className="bg-gray-50">
         <AlertDialogHeader>
-          <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
+          <AlertDialogTitle>Ocultar Demanda</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita.
-            Todas as notas oficiais e respostas relacionadas a esta demanda também serão excluídas.
+            <p className="mb-4">Tem certeza que deseja ocultar esta demanda? Ela não aparecerá mais nas listagens.</p>
+            <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200 mb-2">
+              <p className="text-yellow-800 font-medium">Observação:</p>
+              <p className="text-yellow-800">Notas oficiais e respostas relacionadas serão mantidas no sistema. 
+              Este processo é reversível apenas por administradores do sistema.</p>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -56,9 +60,9 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                Excluindo...
+                Ocultando...
               </>
-            ) : 'Excluir'}
+            ) : 'Ocultar Demanda'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
