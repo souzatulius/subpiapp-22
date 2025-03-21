@@ -8,10 +8,12 @@ const AuthCallback = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [processingAuth, setProcessingAuth] = useState(true);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       console.log("Auth callback handler triggered");
+      setProcessingAuth(true);
       
       // Get URL hash parameters and query parameters
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -25,7 +27,8 @@ const AuthCallback = () => {
         hash: Object.fromEntries(hashParams.entries()),
         query: Object.fromEntries(queryParams.entries()),
         errorType,
-        errorDescription
+        errorDescription,
+        url: window.location.href
       });
       
       if (errorType || errorDescription) {
@@ -48,6 +51,7 @@ const AuthCallback = () => {
         
         setError(userMessage);
         setErrorDetails(errorDetailsMsg);
+        setProcessingAuth(false);
         
         toast({
           title: "Erro de autenticação",
@@ -69,6 +73,7 @@ const AuthCallback = () => {
         console.error('Erro no callback de autenticação:', error);
         setError('Falha ao verificar sessão');
         setErrorDetails(error.message);
+        setProcessingAuth(false);
         
         toast({
           title: "Erro de autenticação",
@@ -91,6 +96,7 @@ const AuthCallback = () => {
           
           setError('Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos');
           setErrorDetails(`Email utilizado: ${userEmail}`);
+          setProcessingAuth(false);
           
           toast({
             title: "Domínio não permitido",
@@ -110,6 +116,7 @@ const AuthCallback = () => {
         navigate('/dashboard');
       } else {
         console.log("No session found, redirecting to login");
+        setProcessingAuth(false);
         navigate('/login');
       }
     };

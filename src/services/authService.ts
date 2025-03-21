@@ -59,7 +59,7 @@ export const signIn = async (email: string, password: string) => {
 export const signInWithGoogle = async () => {
   try {
     // Log the configuration to help with debugging
-    console.log('Initiating Google sign-in with domain restriction', {
+    console.log('Iniciando login com Google', {
       redirectUrl: `${window.location.origin}/auth/callback`,
       domain: 'smsub.prefeitura.sp.gov.br'
     });
@@ -77,7 +77,7 @@ export const signInWithGoogle = async () => {
     });
     
     if (error) {
-      console.error('Google sign-in error:', error);
+      console.error('Erro no login com Google:', error);
       throw error;
     }
     
