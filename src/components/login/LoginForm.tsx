@@ -7,6 +7,8 @@ import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
 import { toast } from '@/components/ui/use-toast';
+import AttentionBox from '@/components/ui/attention-box';
+
 const LoginForm = () => {
   const {
     password,
@@ -25,6 +27,7 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState(false);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -66,6 +69,7 @@ const LoginForm = () => {
       setLoading(false);
     }
   };
+
   const handleGoogleLogin = async () => {
     try {
       toast({
@@ -82,11 +86,13 @@ const LoginForm = () => {
       });
     }
   };
+
   if (loading || authLoading) {
     return <div className="h-full flex items-center justify-center p-8">
         <div className="loading-spinner animate-spin w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full"></div>
       </div>;
   }
+
   return <div className="bg-white rounded-xl shadow-lg p-8 w-full">
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
       <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
@@ -145,10 +151,9 @@ const LoginForm = () => {
               Entrar com Google (@smsub.prefeitura.sp.gov.br)
             </button>
             
-            <div className="p-3 rounded-md text-sm text-blue-700 bg-orange-50">
-              <p className="font-medium text-gray-600">Importante:</p>
-              <p className="text-gray-600">Você precisa usar uma conta do domínio @smsub.prefeitura.sp.gov.br para acessar o sistema.</p>
-            </div>
+            <AttentionBox title="Importante:">
+              <p>Você precisa usar uma conta do domínio @smsub.prefeitura.sp.gov.br para acessar o sistema.</p>
+            </AttentionBox>
           </div>
         </div>
       </form>
@@ -158,4 +163,5 @@ const LoginForm = () => {
       </p>
     </div>;
 };
+
 export default LoginForm;

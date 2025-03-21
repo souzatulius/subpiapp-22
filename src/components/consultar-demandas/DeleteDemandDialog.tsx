@@ -11,6 +11,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
+import AttentionBox from '@/components/ui/attention-box';
 
 interface DeleteDemandDialogProps {
   isOpen: boolean;
@@ -47,11 +48,10 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
           <AlertDialogTitle>Ocultar Demanda</AlertDialogTitle>
           <AlertDialogDescription>
             <p className="mb-4">Tem certeza que deseja ocultar esta demanda? Ela não aparecerá mais nas listagens.</p>
-            <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200 mb-2">
-              <p className="text-yellow-800 font-medium">Observação:</p>
-              <p className="text-yellow-800">Notas oficiais e respostas relacionadas serão mantidas no sistema. 
+            <AttentionBox title="Observação:" variant="info" className="mb-2">
+              <p>Notas oficiais e respostas relacionadas serão mantidas no sistema. 
               Este processo é reversível apenas por administradores do sistema.</p>
-            </div>
+            </AttentionBox>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

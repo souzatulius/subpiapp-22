@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AuthLayout from '@/components/AuthLayout';
+import AttentionBox from '@/components/ui/attention-box';
 
 const EmailVerified = () => {
   return (
@@ -10,11 +11,11 @@ const EmailVerified = () => {
         <h2 className="text-2xl font-bold mb-4 text-slate-900">
           Email Verificado com Sucesso
         </h2>
-        <div className="border border-blue-200 rounded-lg p-4 mb-6 bg-orange-100">
-          <p className="text-orange-600">
-            Seu cadastro está sendo analisado e aguarda aprovação de um administrador.
-          </p>
-        </div>
+        
+        <AttentionBox title="Aguardando aprovação" className="mb-6">
+          Seu cadastro está sendo analisado e aguarda aprovação de um administrador.
+        </AttentionBox>
+        
         <p className="text-gray-600 mb-4">
           Você receberá um e-mail assim que seu acesso for liberado.
         </p>
