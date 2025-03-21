@@ -715,6 +715,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_dashboard: {
+        Row: {
+          cards_config: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cards_config: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cards_config?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usuario_permissoes: {
         Row: {
           criado_em: string

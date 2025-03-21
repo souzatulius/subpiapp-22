@@ -108,14 +108,16 @@ export const useDashboardState = (userId?: string) => {
 
           // Fetch saved dashboard configuration
           const { data: dashboardData, error: dashboardError } = await supabase
-            .from<UserDashboard>('user_dashboard')
+            .from('user_dashboard')
             .select('cards_config')
             .eq('user_id', userId)
             .maybeSingle();
 
-          if (dashboardError && dashboardError.code !== 'PGRST116') {
-            // PGRST116 is "no rows returned" error, which is expected for first-time users
-            console.error('Error fetching dashboard data:', dashboardError);
+          if (dashboardError) {
+            // Only log if it's not just a "no rows returned" error
+            if (dashboardError.code !== 'PGRST116') {
+              console.error('Error fetching dashboard data:', dashboardError);
+            }
           }
 
           // If user has saved configuration, use it; otherwise use default
@@ -204,9 +206,9 @@ export const useDashboardState = (userId?: string) => {
           // Convert to JSON string to store in the database
           const cardsConfigString = JSON.stringify(serializableCards);
           
-          // Upsert the configuration using explicit types
+          // Upsert the configuration
           const { error } = await supabase
-            .from<UserDashboard>('user_dashboard')
+            .from('user_dashboard')
             .upsert({ 
               user_id: userId, 
               cards_config: cardsConfigString 
@@ -340,4 +342,3 @@ export const useDashboardState = (userId?: string) => {
     handleSearchSubmit
   };
 };
-
