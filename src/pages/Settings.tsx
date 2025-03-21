@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -56,7 +55,6 @@ const Settings = () => {
             ) : (
               <div>
                 <h1 className="text-2xl font-bold text-gray-800 mt-4 mb-6 pl-16">
-                  {activeSection === 'usuarios' && 'Usuários'}
                   {activeSection === 'areas' && 'Áreas de Coordenação'}
                   {activeSection === 'cargos' && 'Cargos'}
                   {activeSection === 'servicos' && 'Serviços'}
