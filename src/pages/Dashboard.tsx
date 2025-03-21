@@ -6,12 +6,13 @@ import { CSS } from '@dnd-kit/utilities';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import ActionCard from '@/components/dashboard/ActionCard';
-import { ClipboardList, MessageSquareReply, FileCheck, BarChart2, PlusCircle } from 'lucide-react';
+import { ClipboardList, MessageSquareReply, FileCheck, BarChart2, PlusCircle, Pencil } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
 import { Button } from '@/components/ui/button';
+import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
 
 // Define action card data type
 interface ActionCardItem {
@@ -20,27 +21,47 @@ interface ActionCardItem {
   icon: React.ReactNode;
   path: string;
   color: 'blue' | 'green' | 'orange' | 'purple' | 'red';
+  isCustom?: boolean;
 }
 
 // Create sortable version of ActionCard
-const SortableActionCard = ({ card }: { card: ActionCardItem }) => {
+const SortableActionCard = ({ card, onEdit, onDelete }: { card: ActionCardItem, onEdit?: (card: ActionCardItem) => void, onDelete?: (id: string) => void }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: card.id });
   
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEdit && card.isCustom) {
+      onEdit(card);
+    }
+  };
   
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <ActionCard
-        id={card.id}
-        title={card.title}
-        icon={card.icon}
-        path={card.path}
-        color={card.color}
-        isDraggable={true}
-      />
+      <div className="relative group">
+        {card.isCustom && onEdit && (
+          <button 
+            onClick={handleEdit}
+            className="absolute top-2 right-10 z-10 p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100"
+            aria-label="Editar card"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        )}
+        <ActionCard
+          id={card.id}
+          title={card.title}
+          icon={card.icon}
+          path={card.path}
+          color={card.color}
+          isDraggable={true}
+          onDelete={onDelete}
+        />
+      </div>
     </div>
   );
 };
@@ -79,6 +100,9 @@ const Dashboard = () => {
       color: 'purple'
     }
   ]);
+
+  const [isCustomizationModalOpen, setIsCustomizationModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
 
   const { user } = useAuth();
   
@@ -144,6 +168,59 @@ const Dashboard = () => {
 
   const handleDeleteCard = (id: string) => {
     setActionCards((cards) => cards.filter((card) => card.id !== id));
+    
+    toast({
+      title: "Card removido",
+      description: "O card foi removido com sucesso.",
+      variant: "success",
+    });
+  };
+
+  const handleAddNewCard = () => {
+    setEditingCard(null);
+    setIsCustomizationModalOpen(true);
+  };
+
+  const handleEditCard = (card: ActionCardItem) => {
+    setEditingCard(card);
+    setIsCustomizationModalOpen(true);
+  };
+
+  const handleSaveCard = (cardData: Omit<ActionCardItem, 'id'>) => {
+    if (editingCard) {
+      // Edit existing card
+      setActionCards(cards => 
+        cards.map(card => 
+          card.id === editingCard.id 
+            ? { ...card, ...cardData, isCustom: true }
+            : card
+        )
+      );
+      
+      toast({
+        title: "Card atualizado",
+        description: "As alterações foram salvas com sucesso.",
+        variant: "success",
+      });
+    } else {
+      // Add new card
+      const newCard = {
+        id: `custom-${Date.now()}`,
+        ...cardData,
+        isCustom: true
+      };
+      
+      setActionCards(cards => [...cards, newCard]);
+      
+      toast({
+        title: "Novo card adicionado",
+        description: "O card foi criado com sucesso.",
+        variant: "success",
+      });
+    }
+    
+    setIsCustomizationModalOpen(false);
+    setEditingCard(null);
   };
 
   return (
@@ -164,6 +241,17 @@ const Dashboard = () => {
               <h1 className="text-2xl font-bold text-gray-800"></h1>
             </div>
             
+            <div className="flex justify-end mb-6">
+              <Button 
+                variant="action" 
+                onClick={handleAddNewCard}
+                className="rounded-xl"
+              >
+                <PlusCircle className="mr-2 h-5 w-5" />
+                Novo Card
+              </Button>
+            </div>
+            
             <DndContext 
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -172,7 +260,12 @@ const Dashboard = () => {
               <SortableContext items={actionCards.map(card => card.id)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   {actionCards.map((card) => (
-                    <SortableActionCard key={card.id} card={card} />
+                    <SortableActionCard 
+                      key={card.id} 
+                      card={card} 
+                      onEdit={handleEditCard}
+                      onDelete={handleDeleteCard}
+                    />
                   ))}
                 </div>
               </SortableContext>
@@ -180,6 +273,14 @@ const Dashboard = () => {
           </div>
         </main>
       </div>
+      
+      {/* Card Customization Modal */}
+      <CardCustomizationModal
+        isOpen={isCustomizationModalOpen}
+        onClose={() => setIsCustomizationModalOpen(false)}
+        onSave={handleSaveCard}
+        initialData={editingCard || undefined}
+      />
     </div>
   );
 };

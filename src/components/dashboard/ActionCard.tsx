@@ -86,14 +86,14 @@ const ActionCard: React.FC<ActionCardProps> = ({
       <Card 
         className={`cursor-pointer transition-all duration-300 border border-gray-200 
           rounded-xl shadow-md hover:shadow-xl hover:scale-105 
-          ${getColorClasses(color)} ${isDraggable ? 'touch-action-none' : ''}`}
+          ${getColorClasses(color)} ${isDraggable ? 'touch-action-none' : ''} group`}
         onClick={handleClick}
         data-card-id={id}
       >
         <CardContent className="relative flex flex-col items-center justify-center p-6 md:p-4 h-full">
           {onDelete && (
             <button 
-              className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors"
+              className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
               onClick={handleDelete}
               aria-label="Remover card"
             >
