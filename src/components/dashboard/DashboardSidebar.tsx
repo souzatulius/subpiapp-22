@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import SidebarSection from './sidebar/SidebarSection';
 import { getNavigationSections } from './sidebar/navigationConfig';

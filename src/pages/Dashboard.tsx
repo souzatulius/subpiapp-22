@@ -9,7 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
 
 const Dashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Start with sidebar collapsed
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [firstName, setFirstName] = useState('');
   const { user } = useAuth();
 

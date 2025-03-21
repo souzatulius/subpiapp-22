@@ -5,7 +5,8 @@ import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import RankingContent from '@/components/ranking/RankingContent';
 
 const RankingSubs = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Start with sidebar collapsed
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);

@@ -11,7 +11,8 @@ import {
   MessageSquareReply,
   FileCheck,
   Search,
-  BookOpen
+  BookOpen,
+  LayoutDashboard
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
@@ -77,33 +78,21 @@ export const getNavigationSections = () => [
       }
     ]
   },
-  // Seção 3: Relatórios
+  // Seção 3: Relatórios (changed from menu item to section)
   {
     id: 'relatorios',
     icon: <BarChart2 size={20} />,
     label: 'Relatórios',
-    isSection: true,
-    items: [
-      {
-        icon: <BarChart2 size={18} />,
-        label: 'Números da Comunicação',
-        path: '/dashboard/comunicacao/relatorios'
-      }
-    ]
+    path: '/dashboard/comunicacao/relatorios',
+    isSection: false
   },
-  // Seção 4: Zeladoria
+  // Seção 4: Ranking das Subs (changed from menu item to section)
   {
     id: 'zeladoria',
     icon: <TrendingUp size={20} />,
-    label: 'Zeladoria',
-    isSection: true,
-    items: [
-      {
-        icon: <TrendingUp size={18} />,
-        label: 'Ranking das Subs',
-        path: '/dashboard/zeladoria/ranking-subs'
-      }
-    ]
+    label: 'Ranking das Subs',
+    path: '/dashboard/zeladoria/ranking-subs',
+    isSection: false
   },
   // Seção 5: Ajustes (only shown to admins)
   {
