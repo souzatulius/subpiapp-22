@@ -104,6 +104,7 @@ export const useDemandasData = () => {
     setDeleteLoading(true);
     
     try {
+      // First check for approved or published notes
       const { data: relatedNotes, error: checkNotesError } = await supabase
         .from('notas_oficiais')
         .select('id, status')
@@ -132,7 +133,18 @@ export const useDemandasData = () => {
           description: "Esta demanda possui notas oficiais associadas que também serão excluídas.",
           variant: "default" // Changed from "warning" to "default" as "warning" is not a supported variant
         });
+      }
+      
+      // First delete related responses to avoid the foreign key constraint error
+      const { error: deleteResponsesError } = await supabase
+        .from('respostas_demandas')
+        .delete()
+        .eq('demanda_id', selectedDemand.id);
         
+      if (deleteResponsesError) throw deleteResponsesError;
+        
+      // Then delete related notes if they exist
+      if (relatedNotes && relatedNotes.length > 0) {
         const { error: deleteNotesError } = await supabase
           .from('notas_oficiais')
           .delete()
@@ -141,6 +153,7 @@ export const useDemandasData = () => {
         if (deleteNotesError) throw deleteNotesError;
       }
       
+      // Finally delete the demand itself
       const { error } = await supabase
         .from('demandas')
         .delete()

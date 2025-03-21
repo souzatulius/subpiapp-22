@@ -2,16 +2,20 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { startOfDay, endOfDay, isAfter, isBefore, isEqual } from 'date-fns';
 
 export const useNotasData = () => {
   const [notas, setNotas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('todos');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [areaFilter, setAreaFilter] = useState('');
+  const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
+  const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     fetchNotas();
-  }, [statusFilter]);
+  }, [statusFilter, areaFilter, dataInicioFilter, dataFimFilter]);
 
   const fetchNotas = async () => {
     setLoading(true);
@@ -22,12 +26,18 @@ export const useNotasData = () => {
           *,
           autor:autor_id(id, nome_completo),
           aprovador:aprovador_id(id, nome_completo),
-          area_coordenacao:area_coordenacao_id(id, descricao)
+          areas_coordenacao:area_coordenacao_id(id, descricao)
         `)
         .order('criado_em', { ascending: false });
 
-      if (statusFilter !== 'todos') {
+      if (statusFilter !== '') {
         query = query.eq('status', statusFilter);
+      }
+
+      if (areaFilter !== '') {
+        // Assuming areas_coordenacao.descricao can be filtered directly
+        // If not, you may need to adjust the query based on your database structure
+        query = query.eq('areas_coordenacao.descricao', areaFilter);
       }
 
       const { data, error } = await query;
@@ -38,7 +48,7 @@ export const useNotasData = () => {
       const transformedData = data?.map(nota => ({
         ...nota,
         autor: nota.autor || { nome_completo: 'Não informado' },
-        area_coordenacao: nota.area_coordenacao || { descricao: 'Não informada' }
+        areas_coordenacao: nota.areas_coordenacao || { descricao: 'Não informada' }
       })) || [];
 
       setNotas(transformedData);
@@ -70,26 +80,56 @@ export const useNotasData = () => {
     }
   };
 
-  // Apply search filter to notes
+  // Apply all filters to notes
   const filteredNotas = notas.filter(nota => {
-    if (!searchQuery.trim()) return true;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      nota.titulo?.toLowerCase().includes(searchLower) ||
-      nota.texto?.toLowerCase().includes(searchLower) ||
-      nota.autor?.nome_completo?.toLowerCase().includes(searchLower) ||
-      nota.area_coordenacao?.descricao?.toLowerCase().includes(searchLower) ||
-      nota.status?.toLowerCase().includes(searchLower)
-    );
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase();
+      if (!(
+        nota.titulo?.toLowerCase().includes(searchLower) ||
+        nota.texto?.toLowerCase().includes(searchLower) ||
+        nota.autor?.nome_completo?.toLowerCase().includes(searchLower) ||
+        nota.areas_coordenacao?.descricao?.toLowerCase().includes(searchLower) ||
+        nota.status?.toLowerCase().includes(searchLower)
+      )) {
+        return false;
+      }
+    }
+
+    // Apply date filters
+    if (dataInicioFilter) {
+      const notaDate = new Date(nota.criado_em);
+      const startDate = startOfDay(dataInicioFilter);
+      if (isBefore(notaDate, startDate) && !isEqual(notaDate, startDate)) {
+        return false;
+      }
+    }
+
+    if (dataFimFilter) {
+      const notaDate = new Date(nota.criado_em);
+      const endDate = endOfDay(dataFimFilter);
+      if (isAfter(notaDate, endDate) && !isEqual(notaDate, endDate)) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
   return {
-    notas: filteredNotas,
+    notas,
+    filteredNotas,
     loading,
     searchQuery,
     setSearchQuery,
     statusFilter,
     setStatusFilter,
+    areaFilter,
+    setAreaFilter,
+    dataInicioFilter,
+    setDataInicioFilter,
+    dataFimFilter,
+    setDataFimFilter,
     formatDate,
     refetch: fetchNotas
   };
