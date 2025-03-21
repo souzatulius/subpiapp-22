@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Trash } from 'lucide-react';
+
 interface DeleteNotaDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,6 +9,7 @@ interface DeleteNotaDialogProps {
   notaTitle: string;
   hasDemanda: boolean;
 }
+
 const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
   isOpen,
   onClose,
@@ -42,4 +43,5 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
       </AlertDialogContent>
     </AlertDialog>;
 };
+
 export default DeleteNotaDialog;
