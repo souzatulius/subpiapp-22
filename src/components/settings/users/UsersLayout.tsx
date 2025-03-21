@@ -23,7 +23,9 @@ const UsersLayout = (props: any) => {
     setIsDeleteDialogOpen,
     userToDelete,
     handleDeleteUser,
-    userActions
+    userActions,
+    approving,
+    removing
   } = props;
 
   return (
@@ -42,6 +44,7 @@ const UsersLayout = (props: any) => {
         onDelete={userActions.handleDelete}
         onResetPassword={userActions.handleResetPassword}
         onApprove={userActions.handleApprove}
+        onRemoveAccess={userActions.handleRemoveAccess}
       />
       
       <UsersDialogs

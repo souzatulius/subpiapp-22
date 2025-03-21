@@ -14,6 +14,7 @@ export const useUsersData = () => {
     setLoading(true);
     
     try {
+      // Buscar dados básicos dos usuários
       const { data: usersData, error: usersError } = await supabase
         .from('usuarios')
         .select(`
@@ -26,10 +27,45 @@ export const useUsersData = () => {
           cargo_id,
           area_coordenacao_id,
           cargos:cargo_id(id, descricao),
-          areas_coordenacao:area_coordenacao_id(id, descricao)
+          areas_coordenacao:area_coordenacao_id(id, descricao),
+          criado_em
         `);
         
       if (usersError) throw usersError;
+      
+      // Buscar permissões para cada usuário
+      const usersWithPermissions = await Promise.all(
+        (usersData || []).map(async (user) => {
+          try {
+            const { data: permissionsData, error: permissionsError } = await supabase
+              .from('usuario_permissoes')
+              .select(`
+                id,
+                permissao:permissao_id(id, descricao)
+              `)
+              .eq('usuario_id', user.id);
+              
+            if (permissionsError) throw permissionsError;
+            
+            // Formatar as permissões para um formato mais acessível
+            const permissoes = (permissionsData || []).map(p => ({
+              id: p.id,
+              descricao: p.permissao ? p.permissao.descricao : null
+            })).filter(p => p.descricao !== null);
+            
+            return {
+              ...user,
+              permissoes
+            };
+          } catch (error) {
+            console.error(`Erro ao buscar permissões para o usuário ${user.id}:`, error);
+            return {
+              ...user,
+              permissoes: []
+            };
+          }
+        })
+      );
       
       const { data: areasData, error: areasError } = await supabase
         .from('areas_coordenacao')
@@ -43,7 +79,7 @@ export const useUsersData = () => {
         
       if (cargosError) throw cargosError;
       
-      setUsers(usersData || []);
+      setUsers(usersWithPermissions || []);
       setAreas(areasData || []);
       setCargos(cargosData || []);
     } catch (error: any) {

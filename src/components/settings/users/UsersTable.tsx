@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Table,
@@ -36,7 +35,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onApprove,
   onRemoveAccess
 }) => {
-  // Filter users that need approval - users without permissions
+  // Atualização da lógica para identificar usuários pendentes e ativos
+  // Um usuário é considerado pendente apenas se ele não tiver permissões ou as permissões forem um array vazio
   const pendingUsers = users.filter(user => !user.permissoes || user.permissoes.length === 0);
   const activeUsers = users.filter(user => user.permissoes && user.permissoes.length > 0);
 
