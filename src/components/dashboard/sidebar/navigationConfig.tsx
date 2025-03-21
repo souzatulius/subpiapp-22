@@ -3,22 +3,15 @@ import React from 'react';
 import { 
   Home, 
   MessageCircle, 
-  FileText, 
   BarChart2, 
   Settings, 
   TrendingUp,
-  PlusCircle,
-  MessageSquareReply,
-  FileCheck,
-  Search,
-  BookOpen,
-  LayoutDashboard,
-  FileSignature
+  FileText
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
 export const getNavigationSections = () => [
-  // Seção 1: Página Principal
+  // Seção 1: Início
   {
     id: 'inicio',
     icon: <Home size={20} />,
@@ -31,73 +24,18 @@ export const getNavigationSections = () => [
     id: 'comunicacao',
     icon: <MessageCircle size={20} />,
     label: 'Comunicação',
-    isSection: true,
-    expandOnIconClick: true,
-    subSections: [
-      {
-        id: 'comunicacao-dash',
-        label: 'Painel Geral',
-        isSubSection: true,
-        items: [
-          {
-            icon: <LayoutDashboard size={18} />,
-            label: 'Comunicação',
-            path: '/dashboard/comunicacao/comunicacao'
-          },
-          {
-            icon: <FileSignature size={18} />,
-            label: 'Notas para Imprensa',
-            path: '/dashboard/comunicacao/notas'
-          }
-        ]
-      },
-      {
-        id: 'impresa',
-        label: 'Solicitações da Imprensa',
-        isSubSection: true,
-        items: [
-          {
-            icon: <PlusCircle size={18} />,
-            label: 'Nova Demanda',
-            path: '/dashboard/comunicacao/cadastrar'
-          },
-          {
-            icon: <Search size={18} />,
-            label: 'Consultar Demandas',
-            path: '/dashboard/comunicacao/consultar-demandas'
-          },
-          {
-            icon: <MessageSquareReply size={18} />,
-            label: 'Responder Demandas',
-            path: '/dashboard/comunicacao/responder'
-          }
-        ]
-      },
-      {
-        id: 'notas',
-        label: 'Notas Oficiais',
-        isSubSection: true,
-        items: [
-          {
-            icon: <FileText size={18} />,
-            label: 'Nova Nota',
-            path: '/dashboard/comunicacao/criar-nota'
-          },
-          {
-            icon: <FileCheck size={18} />,
-            label: 'Aprovar Nota',
-            path: '/dashboard/comunicacao/aprovar-nota'
-          },
-          {
-            icon: <BookOpen size={18} />,
-            label: 'Consultar Notas',
-            path: '/dashboard/comunicacao/consultar-notas'
-          }
-        ]
-      }
-    ]
+    path: '/dashboard/comunicacao/comunicacao',
+    isSection: false
   },
-  // Seção 3: Relatórios
+  // Seção 3: Notas para Imprensa
+  {
+    id: 'notas',
+    icon: <FileText size={20} />,
+    label: 'Notas para Imprensa',
+    path: '/dashboard/comunicacao/notas',
+    isSection: false
+  },
+  // Seção 4: Relatórios
   {
     id: 'relatorios',
     icon: <BarChart2 size={20} />,
@@ -105,7 +43,7 @@ export const getNavigationSections = () => [
     path: '/dashboard/comunicacao/relatorios',
     isSection: false
   },
-  // Seção 4: Ranking das Subs (corrigido para a rota correta)
+  // Seção 5: Ranking das Subs
   {
     id: 'ranking',
     icon: <TrendingUp size={20} />,
@@ -113,7 +51,7 @@ export const getNavigationSections = () => [
     path: '/dashboard/zeladoria/ranking-subs',
     isSection: false
   },
-  // Seção 5: Ajustes (only shown to admins)
+  // Seção 6: Ajustes
   {
     id: 'ajustes',
     icon: <Settings size={20} />,

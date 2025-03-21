@@ -3,7 +3,7 @@ import React from 'react';
 import { NotificationsPopover } from './NotificationsPopover';
 import { ProfileMenu } from './ProfileMenu';
 import { Button } from '@/components/ui/button';
-import { Menu, Settings } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
@@ -41,9 +41,6 @@ const Header: React.FC<HeaderProps> = ({
         {showControls && user && (
           <div className="flex items-center gap-2">
             <NotificationsPopover />
-            <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
-              <Settings className="h-5 w-5 text-[#003570]" />
-            </Button>
             <ProfileMenu />
           </div>
         )}
