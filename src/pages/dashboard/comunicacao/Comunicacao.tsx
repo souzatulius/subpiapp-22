@@ -1,10 +1,17 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import ActionCard from '@/components/dashboard/ActionCard';
 import { Card, CardContent } from '@/components/ui/card';
-import { ClipboardList, MessageSquareReply, FileCheck, BarChart2, TrendingUp, TrendingDown } from 'lucide-react';
+import { 
+  ClipboardList, 
+  MessageSquareReply, 
+  FileCheck, 
+  BarChart2, 
+  TrendingUp, 
+  TrendingDown,
+  Search 
+} from 'lucide-react';
 
 const ComunicacaoDashboard: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

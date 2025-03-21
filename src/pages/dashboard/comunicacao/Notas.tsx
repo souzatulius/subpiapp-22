@@ -10,7 +10,8 @@ import {
   Search, 
   BookOpen,
   TrendingUp, 
-  TrendingDown 
+  TrendingDown,
+  BarChart2 
 } from 'lucide-react';
 
 const NotasDashboard: React.FC = () => {
