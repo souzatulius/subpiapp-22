@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 
 interface SubSection {
@@ -43,6 +43,9 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     [id]: true
   });
+  
+  // Track if sidebar is currently being toggled
+  const [isTogglingOpen, setIsTogglingOpen] = useState(false);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -54,10 +57,17 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   // Handle click on section when sidebar is collapsed
   const handleSectionClick = () => {
     if (isSection && !isOpen) {
+      // Set toggling state to true
+      setIsTogglingOpen(true);
+      
       // Force open the sidebar by simulating a click on the sidebar toggle
-      document.querySelector('[data-sidebar="trigger"]')?.dispatchEvent(
-        new MouseEvent('click', { bubbles: true })
-      );
+      const sidebarTrigger = document.querySelector('[data-sidebar="trigger"]');
+      if (sidebarTrigger) {
+        sidebarTrigger.dispatchEvent(
+          new MouseEvent('click', { bubbles: true })
+        );
+      }
+      
       // Ensure section is expanded after sidebar opens
       setExpandedSections(prev => ({
         ...prev,
@@ -67,6 +77,13 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
       toggleSection(id);
     }
   };
+  
+  // Reset the toggling state when sidebar opens
+  useEffect(() => {
+    if (isOpen && isTogglingOpen) {
+      setIsTogglingOpen(false);
+    }
+  }, [isOpen, isTogglingOpen]);
 
   if (!isSection) {
     return (
@@ -85,6 +102,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
       <button 
         onClick={handleSectionClick}
         className="flex items-center px-4 py-3 text-gray-200 hover:bg-[#0c2d45] transition-colors font-medium rounded-xl mb-1 w-full"
+        title={!isOpen ? label : undefined}
       >
         <div className="flex-shrink-0 text-[#f57737]">{icon}</div>
         {isOpen && (
