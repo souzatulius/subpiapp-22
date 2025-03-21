@@ -24,6 +24,15 @@ const QuickDemandCard: React.FC<QuickDemandCardProps> = ({
     }
   };
 
+  // Stop propagation to avoid triggering drag when interacting with input/button
+  const handleInputMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleButtonMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="w-full h-full bg-white border border-gray-200 rounded-xl shadow-md p-6 flex flex-col justify-between transition-all hover:shadow-lg">
       <div className="space-y-4">
@@ -36,10 +45,12 @@ const QuickDemandCard: React.FC<QuickDemandCardProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onMouseDown={handleInputMouseDown}
           />
           <Button
             type="button" 
             onClick={onSubmit}
+            onMouseDown={handleButtonMouseDown}
             className="w-full sm:w-auto"
           >
             <PlusCircle className="mr-2 h-4 w-4" />

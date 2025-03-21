@@ -9,6 +9,7 @@ interface SortableActionCardProps {
   card: ActionCardItem;
   onEdit: (card: ActionCardItem) => void;
   onDelete?: (id: string) => void;
+  children?: React.ReactNode;
 }
 
 // Function to get width classes
@@ -30,7 +31,8 @@ export const getWidthClasses = (width: string = '25') => {
 const SortableActionCard: React.FC<SortableActionCardProps> = ({ 
   card, 
   onEdit, 
-  onDelete 
+  onDelete,
+  children
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: card.id });
   
@@ -51,19 +53,33 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
       {...listeners}
       className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
     >
-      <ActionCard
-        id={card.id}
-        title={card.title}
-        icon={card.icon}
-        path={card.path}
-        color={card.color}
-        isDraggable={true}
-        onDelete={onDelete}
-        onEdit={handleEdit}
-        width={card.width}
-        height={card.height}
-        isCustom={card.isCustom}
-      />
+      {children ? (
+        <div className="w-full h-full relative group">
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <ActionCard.Controls 
+              cardId={card.id} 
+              onEdit={handleEdit} 
+              onDelete={onDelete} 
+              isCustom={card.isCustom}
+            />
+          </div>
+          {children}
+        </div>
+      ) : (
+        <ActionCard
+          id={card.id}
+          title={card.title}
+          icon={card.icon}
+          path={card.path}
+          color={card.color}
+          isDraggable={true}
+          onDelete={onDelete}
+          onEdit={handleEdit}
+          width={card.width}
+          height={card.height}
+          isCustom={card.isCustom}
+        />
+      )}
     </div>
   );
 };

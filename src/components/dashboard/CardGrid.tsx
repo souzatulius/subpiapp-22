@@ -105,12 +105,13 @@ const CardGrid: React.FC<CardGridProps> = ({
       <SortableContext items={cards.map(card => card.id)}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
           {cards.map((card) => {
-            // Check for special card types
             if (card.isQuickDemand) {
               return (
-                <div 
-                  key={card.id}
-                  className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+                <SortableActionCard 
+                  key={card.id} 
+                  card={card} 
+                  onEdit={onEditCard}
+                  onDelete={onDeleteCard}
                 >
                   <QuickDemandCard 
                     title={card.title}
@@ -118,21 +119,23 @@ const CardGrid: React.FC<CardGridProps> = ({
                     onChange={onQuickDemandTitleChange}
                     onSubmit={onQuickDemandSubmit}
                   />
-                </div>
+                </SortableActionCard>
               );
             }
             
             if (card.isSearch) {
               return (
-                <div 
-                  key={card.id}
-                  className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+                <SortableActionCard 
+                  key={card.id} 
+                  card={card} 
+                  onEdit={onEditCard}
+                  onDelete={onDeleteCard}
                 >
                   <SmartSearchCard
                     placeholder={card.title}
                     onSearch={onSearchSubmit}
                   />
-                </div>
+                </SortableActionCard>
               );
             }
             
