@@ -54,7 +54,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
       </div>;
   };
   return <Card onClick={onClick} className="cursor-pointer rounded-2xl">
-      <CardContent className="p-6 flex flex-col items-center justify-center text-center bg-orange-500 rounded-2xl">
+      <CardContent className="p-6 flex flex-col items-center justify-center text-center bg-orange-500 rounded-2xl hover:bg-orange-600 hover:scale-105 transition duration-300">
         <div className="mb-2 p-3 rounded-full bg-transparent">
           {renderIcon()}
         </div>
