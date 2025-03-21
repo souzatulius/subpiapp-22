@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Table, 
@@ -13,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Eye, MessageSquare, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { type Demand } from '@/hooks/consultar-demandas/useDemandasData';
+import { type Demand } from '@/hooks/consultar-demandas';
 
 interface DemandasTableProps {
   demandas: Demand[];

@@ -5,7 +5,7 @@ import DemandasSearchBar from './DemandasSearchBar';
 import DemandasTable from './DemandasTable';
 import DeleteDemandDialog from './DeleteDemandDialog';
 import DemandDetail from '@/components/demandas/DemandDetail';
-import { useDemandasData, type Demand } from '@/hooks/consultar-demandas/useDemandasData';
+import { useDemandasData, type Demand } from '@/hooks/consultar-demandas';
 
 const ConsultarDemandasContent: React.FC = () => {
   const {
