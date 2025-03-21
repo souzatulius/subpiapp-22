@@ -18,8 +18,8 @@ const Index = () => {
         </div>
         
         {/* Right side with blue background */}
-        <div className="w-full md:w-1/2 bg-[#003570] flex flex-col items-center justify-center p-8 relative">
-          <img alt="Logo SUB PI" src="/lovable-uploads/eb0076f1-2566-457e-99aa-aebc32408720.png" className="w-2/3 max-w-sm object-fill" />
+        <div className="w-full md:w-1/2 bg-[#003570] flex flex-col items-center justify-center p-8 relative animate-fade-right">
+          {/* No image here anymore */}
         </div>
       </div>
       

@@ -28,7 +28,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           <div className="w-full max-w-md animate-fade-right">
             {children}
           </div>
-          <img src="/lovable-uploads/5b8c78fb-e26a-45d0-844e-df1dea58037b.png" alt="Logo SUB PI" className="w-2/3 max-w-sm" />
         </div>
       </div>
 

@@ -12,7 +12,7 @@ const PWAButton: React.FC = () => {
   return (
     <>
       <button 
-        className="fixed bottom-6 right-6 p-3 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center"
+        className="fixed bottom-6 right-6 p-3 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center hover:scale-105"
         onClick={toggleInstructions}
         aria-label="Adicionar à tela inicial"
       >
@@ -20,8 +20,8 @@ const PWAButton: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={toggleInstructions}>
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={toggleInstructions}>
+          <div className="bg-white rounded-lg max-w-2xl w-full p-6 shadow-xl animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex justify-center mb-4">
               <Smartphone className="h-8 w-8 text-subpi-blue" />
             </div>
@@ -93,7 +93,7 @@ const PWAButton: React.FC = () => {
 
             <div className="mt-6 flex justify-center">
               <button 
-                className="bg-subpi-blue text-white px-4 py-2 rounded-lg"
+                className="bg-subpi-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 onClick={toggleInstructions}
               >
                 Fechar
