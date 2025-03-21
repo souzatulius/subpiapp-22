@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/layouts/Header';
@@ -9,39 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Search, Filter, Eye, MessageSquare, Trash2, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import DemandDetail from '@/components/demandas/DemandDetail';
-
 interface Demand {
   id: string;
   titulo: string;
@@ -75,7 +49,6 @@ interface Demand {
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null;
 }
-
 const ConsultarDemandas = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -84,7 +57,6 @@ const ConsultarDemandas = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const navigate = useNavigate();
-
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -98,9 +70,10 @@ const ConsultarDemandas = () => {
   } = useQuery({
     queryKey: ['demandas'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('demandas')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('demandas').select(`
           *,
           area_coordenacao:area_coordenacao_id(descricao),
           servico:servico_id(descricao),
@@ -108,9 +81,9 @@ const ConsultarDemandas = () => {
           tipo_midia:tipo_midia_id(descricao),
           bairro:bairro_id(nome),
           autor:autor_id(nome_completo)
-        `)
-        .order('horario_publicacao', { ascending: false });
-
+        `).order('horario_publicacao', {
+        ascending: false
+      });
       if (error) throw error;
       return data || [];
     },
@@ -126,11 +99,7 @@ const ConsultarDemandas = () => {
   });
 
   // Filter demands based on search term
-  const filteredDemandas = demandas.filter((demand: any) =>
-    demand.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    demand.servico?.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    demand.area_coordenacao?.descricao.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDemandas = demandas.filter((demand: any) => demand.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || demand.servico?.descricao.toLowerCase().includes(searchTerm.toLowerCase()) || demand.area_coordenacao?.descricao.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Handle view demand
   const handleViewDemand = (demand: Demand) => {
@@ -149,24 +118,18 @@ const ConsultarDemandas = () => {
     setSelectedDemand(demand);
     setIsDeleteDialogOpen(true);
   };
-
   const handleDeleteConfirm = async () => {
     if (!selectedDemand) return;
-    
     setDeleteLoading(true);
     try {
-      const { error } = await supabase
-        .from('demandas')
-        .delete()
-        .eq('id', selectedDemand.id);
-      
+      const {
+        error
+      } = await supabase.from('demandas').delete().eq('id', selectedDemand.id);
       if (error) throw error;
-      
       toast({
         title: "Demanda excluída",
         description: "A demanda foi excluída com sucesso."
       });
-      
       setIsDeleteDialogOpen(false);
       refetch();
     } catch (error: any) {
@@ -197,9 +160,7 @@ const ConsultarDemandas = () => {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
-
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+  return <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
@@ -217,13 +178,7 @@ const ConsultarDemandas = () => {
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                   <div className="relative flex-1">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                    <Input
-                      type="search"
-                      placeholder="Buscar demandas..."
-                      className="pl-9"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                    <Input type="search" placeholder="Buscar demandas..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                   </div>
                   <Button variant="outline" className="md:w-auto flex items-center gap-2">
                     <Filter className="h-4 w-4" />
@@ -231,16 +186,11 @@ const ConsultarDemandas = () => {
                   </Button>
                 </div>
                 
-                {isLoading ? (
-                  <div className="flex justify-center items-center py-8">
+                {isLoading ? <div className="flex justify-center items-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                  </div>
-                ) : filteredDemandas.length === 0 ? (
-                  <div className="text-center py-8">
+                  </div> : filteredDemandas.length === 0 ? <div className="text-center py-8">
                     <p className="text-gray-500">Nenhuma demanda encontrada</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
+                  </div> : <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -253,51 +203,33 @@ const ConsultarDemandas = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredDemandas.map((demand: any) => (
-                          <TableRow key={demand.id}>
+                        {filteredDemandas.map((demand: any) => <TableRow key={demand.id}>
                             <TableCell className="font-medium">{demand.titulo}</TableCell>
                             <TableCell>{demand.area_coordenacao?.descricao || '-'}</TableCell>
                             <TableCell>{demand.servico?.descricao || '-'}</TableCell>
                             <TableCell>{getStatusBadge(demand.status)}</TableCell>
                             <TableCell>
-                              {demand.horario_publicacao 
-                                ? format(new Date(demand.horario_publicacao), 'dd/MM/yyyy', { locale: ptBR }) 
-                                : '-'}
+                              {demand.horario_publicacao ? format(new Date(demand.horario_publicacao), 'dd/MM/yyyy', {
+                          locale: ptBR
+                        }) : '-'}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => handleViewDemand(demand)}
-                                  title="Visualizar"
-                                >
+                                <Button variant="ghost" size="icon" onClick={() => handleViewDemand(demand)} title="Visualizar">
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => handleRespondDemand(demand)}
-                                  title="Responder"
-                                >
+                                <Button variant="ghost" size="icon" onClick={() => handleRespondDemand(demand)} title="Responder">
                                   <MessageSquare className="h-4 w-4" />
                                 </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => handleDeleteClick(demand)}
-                                  title="Excluir"
-                                >
+                                <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(demand)} title="Excluir">
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>
-                          </TableRow>
-                        ))}
+                          </TableRow>)}
                       </TableBody>
                     </Table>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
           </div>
@@ -305,15 +237,11 @@ const ConsultarDemandas = () => {
       </div>
 
       {/* Demand Detail Dialog */}
-      <DemandDetail 
-        demand={selectedDemand} 
-        isOpen={isDetailOpen} 
-        onClose={() => setIsDetailOpen(false)} 
-      />
+      <DemandDetail demand={selectedDemand} isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-gray-50">
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
             <AlertDialogDescription>
@@ -323,20 +251,14 @@ const ConsultarDemandas = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteLoading}>
-              {deleteLoading ? (
-                <>
+              {deleteLoading ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                   Excluindo...
-                </>
-              ) : (
-                'Excluir'
-              )}
+                </> : 'Excluir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default ConsultarDemandas;
