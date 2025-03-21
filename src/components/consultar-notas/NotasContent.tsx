@@ -23,7 +23,9 @@ const NotasContent: React.FC = () => {
     dataInicioFilter,
     setDataInicioFilter,
     dataFimFilter,
-    setDataFimFilter
+    setDataFimFilter,
+    deleteNota,
+    deleteLoading
   } = useNotasData();
   
   const { handleExportPDF } = useExportPDF();
@@ -76,12 +78,16 @@ const NotasContent: React.FC = () => {
             notas={filteredNotas}
             loading={loading}
             formatDate={formatDate}
+            onDeleteNota={deleteNota}
+            deleteLoading={deleteLoading}
           />
         ) : (
           <NotasCards 
             notas={filteredNotas}
             loading={loading}
             formatDate={formatDate}
+            onDeleteNota={deleteNota}
+            deleteLoading={deleteLoading}
           />
         )}
       </div>

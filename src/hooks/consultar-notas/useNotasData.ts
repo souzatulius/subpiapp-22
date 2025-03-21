@@ -12,6 +12,7 @@ export const useNotasData = () => {
   const [areaFilter, setAreaFilter] = useState('all');
   const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
   const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchNotas();
@@ -59,6 +60,56 @@ export const useNotasData = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteNota = async (notaId: string) => {
+    setDeleteLoading(true);
+    try {
+      // First check if this nota has a related demanda
+      const { data: nota, error: notaError } = await supabase
+        .from('notas_oficiais')
+        .select('demanda_id')
+        .eq('id', notaId)
+        .single();
+
+      if (notaError) throw notaError;
+
+      // If there's a related demanda, delete it first
+      if (nota.demanda_id) {
+        const { error: demandaError } = await supabase
+          .from('demandas')
+          .delete()
+          .eq('id', nota.demanda_id);
+
+        if (demandaError) throw demandaError;
+      }
+
+      // Now delete the nota
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .delete()
+        .eq('id', notaId);
+
+      if (error) throw error;
+
+      // Update the local state
+      setNotas(notas.filter(n => n.id !== notaId));
+
+      toast({
+        title: 'Nota excluída',
+        description: 'A nota foi excluída com sucesso.',
+        variant: 'default',
+      });
+    } catch (error: any) {
+      console.error('Erro ao excluir nota:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir a nota',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -129,6 +180,8 @@ export const useNotasData = () => {
     dataFimFilter,
     setDataFimFilter,
     formatDate,
-    refetch: fetchNotas
+    refetch: fetchNotas,
+    deleteNota,
+    deleteLoading
   };
 };
