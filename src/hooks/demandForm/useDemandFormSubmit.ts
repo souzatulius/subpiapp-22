@@ -40,7 +40,7 @@ export const useDemandFormSubmit = (
         prioridade: normalizedPrioridade,
         perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
         autor_id: userId,
-        status: 'pendente' // Ensuring we use a valid status from the constraint
+        status: 'pendente' // Setting the initial status as 'pendente' which will display as 'Nova'
       };
 
       console.log('Submitting demand data:', demandaData);

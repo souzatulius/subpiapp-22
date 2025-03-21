@@ -10,6 +10,7 @@ export interface DemandFormData {
   nome_solicitante: string;
   telefone_solicitante: string;
   email_solicitante: string;
+  veiculo_imprensa: string;
   endereco: string;
   bairro_id: string;
   perguntas: string[];

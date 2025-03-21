@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { AlertCircle, Clock, CheckCircle2, Archive, XCircle } from 'lucide-react';
+import { AlertCircle, Clock, CheckCircle2, Archive, XCircle, FileText, Clock3, FileCheck } from 'lucide-react';
 
 interface Demand {
   id: string;
@@ -67,15 +66,26 @@ const DemandCards: React.FC<DemandCardsProps> = ({ demandas, isLoading, onSelect
     );
   }
 
-  // Helper function to get status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pendente':
         return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'em_andamento':
-        return <AlertCircle className="h-4 w-4 text-blue-500" />;
-      case 'concluida':
+        return <Clock3 className="h-4 w-4 text-blue-500" />;
+      case 'respondida':
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case 'aguardando_nota':
+        return <AlertCircle className="h-4 w-4 text-purple-500" />;
+      case 'nota_criada':
+        return <FileText className="h-4 w-4 text-indigo-500" />;
+      case 'pendente_aprovacao':
+        return <FileCheck className="h-4 w-4 text-orange-500" />;
+      case 'aprovada':
+        return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
+      case 'editada':
+        return <FileText className="h-4 w-4 text-cyan-500" />;
+      case 'recusada':
+        return <XCircle className="h-4 w-4 text-red-500" />;
       case 'arquivada':
         return <Archive className="h-4 w-4 text-gray-500" />;
       case 'cancelada':
@@ -85,19 +95,23 @@ const DemandCards: React.FC<DemandCardsProps> = ({ demandas, isLoading, onSelect
     }
   };
 
-  // Helper function to get status text
   const formatStatus = (status: string) => {
     switch (status) {
-      case 'pendente': return 'Pendente';
-      case 'em_andamento': return 'Em Andamento';
-      case 'concluida': return 'Concluída';
+      case 'pendente': return 'Nova';
+      case 'em_andamento': return 'Aguardando Respostas';
+      case 'respondida': return 'Respondida';
+      case 'aguardando_nota': return 'Aguardando Nota';
+      case 'nota_criada': return 'Nota Criada';
+      case 'pendente_aprovacao': return 'Pendente de Aprovação';
+      case 'aprovada': return 'Aprovada';
+      case 'editada': return 'Editada';
+      case 'recusada': return 'Recusada';
       case 'arquivada': return 'Arquivada';
       case 'cancelada': return 'Cancelada';
       default: return status;
     }
   };
 
-  // Helper function to get priority badge color
   const getPriorityColor = (prioridade: string) => {
     switch (prioridade) {
       case 'alta':
@@ -111,7 +125,6 @@ const DemandCards: React.FC<DemandCardsProps> = ({ demandas, isLoading, onSelect
     }
   };
 
-  // Helper function to format priority text
   const formatPriority = (prioridade: string) => {
     switch (prioridade) {
       case 'alta': return 'Alta';
