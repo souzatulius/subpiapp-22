@@ -31,6 +31,7 @@ export const getNavigationSections = () => [
     icon: <MessageCircle size={20} />,
     label: 'Comunicação',
     isSection: true,
+    expandOnIconClick: true, // Add this property to expand on icon click
     subSections: [
       {
         id: 'impresa',
@@ -86,7 +87,7 @@ export const getNavigationSections = () => [
     path: '/dashboard/comunicacao/relatorios',
     isSection: false
   },
-  // Seção 4: Ranking das Subs (corrigindo a rota)
+  // Seção 4: Ranking das Subs (corrigido para a rota correta)
   {
     id: 'ranking',
     icon: <TrendingUp size={20} />,

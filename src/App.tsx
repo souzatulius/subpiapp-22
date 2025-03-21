@@ -61,8 +61,10 @@ const App = () => (
             <Route path="/dashboard/comunicacao/consultar-notas" element={<ProtectedRoute><ConsultarNotas /></ProtectedRoute>} />
             <Route path="/dashboard/comunicacao/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
 
-            {/* Zeladoria routes */}
+            {/* Zeladoria routes - Make sure only this is used */}
             <Route path="/dashboard/zeladoria/ranking-subs" element={<ProtectedRoute><RankingSubs /></ProtectedRoute>} />
+
+            {/* Remove or redirect old route */}
             <Route path="/zeladoria/ranking-subs" element={<ProtectedRoute><RankingSubs /></ProtectedRoute>} />
 
             {/* Settings route */}

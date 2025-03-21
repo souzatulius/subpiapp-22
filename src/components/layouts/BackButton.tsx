@@ -7,9 +7,14 @@ import { useNavigate } from 'react-router-dom';
 interface BackButtonProps {
   destination?: string;
   className?: string;
+  title?: string;
 }
 
-const BackButton: React.FC<BackButtonProps> = ({ destination, className }) => {
+const BackButton: React.FC<BackButtonProps> = ({ 
+  destination, 
+  className,
+  title = "Voltar"
+}) => {
   const navigate = useNavigate();
   
   const handleClick = () => {
@@ -26,7 +31,7 @@ const BackButton: React.FC<BackButtonProps> = ({ destination, className }) => {
       size="icon" 
       onClick={handleClick}
       className={`absolute top-6 left-6 z-10 bg-[#f57737] hover:bg-[#e56726] text-white ${className || ''}`}
-      title="Voltar"
+      title={title}
     >
       <ArrowLeft className="h-5 w-5" />
     </Button>
