@@ -75,11 +75,13 @@ export const useNotasData = () => {
 
       if (notaError) throw notaError;
 
-      // If there's a related demanda, delete it first
+      // If there's a related demanda, update its status instead of deleting it
       if (nota.demanda_id) {
         const { error: demandaError } = await supabase
           .from('demandas')
-          .delete()
+          .update({ 
+            status: 'aguardando_nota' // Set status to indicate it needs a note again
+          })
           .eq('id', nota.demanda_id);
 
         if (demandaError) throw demandaError;
