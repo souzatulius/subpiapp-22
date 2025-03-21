@@ -24,7 +24,13 @@ const Dashboard = () => {
     handleDeleteCard,
     handleAddNewCard,
     handleEditCard,
-    handleSaveCard
+    handleSaveCard,
+    // Quick demand functionality
+    newDemandTitle,
+    setNewDemandTitle,
+    handleQuickDemandSubmit,
+    // Search functionality
+    handleSearchSubmit
   } = useDashboardState(user?.id);
 
   const toggleSidebar = () => {
@@ -50,6 +56,10 @@ const Dashboard = () => {
               onCardsChange={setActionCards}
               onEditCard={handleEditCard}
               onDeleteCard={handleDeleteCard}
+              quickDemandTitle={newDemandTitle}
+              onQuickDemandTitleChange={setNewDemandTitle}
+              onQuickDemandSubmit={handleQuickDemandSubmit}
+              onSearchSubmit={handleSearchSubmit}
             />
           </div>
         </main>
