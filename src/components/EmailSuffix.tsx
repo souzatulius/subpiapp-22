@@ -41,17 +41,15 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
     onChange(e.target.value);
   };
 
-  const borderColor = error 
+  const containerBorderColor = error 
     ? 'border-subpi-orange' 
-    : isFocused 
-      ? 'border-subpi-orange' 
-      : isHovered 
-        ? 'border-gray-400' 
-        : 'border-gray-300';
+    : isHovered && !isFocused
+      ? 'border-gray-400' 
+      : 'border-gray-300';
 
   return (
     <div 
-      className={`flex w-full overflow-hidden ${borderColor} transition-colors ${className}`} 
+      className={`flex w-full overflow-hidden border ${containerBorderColor} transition-colors rounded-xl ${className}`} 
       onClick={() => {
         setIsFocused(true);
         inputRef.current?.focus();
@@ -67,12 +65,12 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
         onChange={handleChange} 
         onFocus={() => setIsFocused(true)} 
         placeholder="usuario" 
-        className={`px-4 py-2 w-full border ${isHovered && !isFocused ? 'border-gray-400' : 'border-gray-300'} rounded-l-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
+        className={`px-4 py-2 w-full border-0 focus:outline-none focus:ring-2 focus:ring-[#003570] transition-all duration-200`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)} 
       />
       <div 
-        className={`bg-gray-100 w-full px-4 py-2 border ${isHovered && !isFocused ? 'border-gray-400' : 'border-gray-300'} rounded-r-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200 pr-1`}
+        className="bg-gray-100 w-full px-4 py-2 border-0 border-l border-gray-300 transition-all duration-200 pr-1"
       >
         {suffix}
       </div>
