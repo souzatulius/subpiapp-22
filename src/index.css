@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,6 +98,21 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+@keyframes fadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-right {
+  animation: fadeRight 0.3s ease-out forwards;
+}
+
 /* Custom styles for modern UI */
 .interactive-card {
   @apply bg-white rounded-xl shadow-md border border-gray-100 transition-all duration-200 hover:shadow-lg;
@@ -109,3 +125,4 @@
 .modern-label {
   @apply text-base font-medium text-gray-700;
 }
+
