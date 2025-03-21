@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Trash } from 'lucide-react';
@@ -24,7 +25,7 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
               Você tem certeza que deseja excluir a nota <strong>"{notaTitle}"</strong>?
             </p>
             
-            {hasDemanda && <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200 text-yellow-800 mb-4">
+            {hasDemanda && <div className="bg-white p-3 rounded-md border border-yellow-200 text-yellow-800 mb-4">
                 <strong>Atenção:</strong> Esta nota está vinculada a uma demanda. 
                 Ao excluir esta nota, a demanda retornará para o status de "Pendente".
               </div>}
