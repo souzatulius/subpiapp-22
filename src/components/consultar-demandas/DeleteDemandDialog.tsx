@@ -31,7 +31,14 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
 }) => {
   // Função para excluir a demanda e a nota relacionada
   const handleDelete = async () => {
-    if (!demandId) return;
+    if (!demandId) {
+      toast({
+        title: "Erro ao excluir",
+        description: "ID da demanda não encontrado.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       // Primeiro, excluímos as notas relacionadas à demanda

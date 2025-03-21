@@ -73,6 +73,7 @@ const ConsultarDemandasContent: React.FC = () => {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
         isLoading={deleteLoading}
+        demandId={selectedDemand?.id}
       />
     </div>
   );
