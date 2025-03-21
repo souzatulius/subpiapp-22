@@ -643,6 +643,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tokens_notificacoes: {
+        Row: {
+          criado_em: string
+          fcm_token: string
+          id: string
+          navegador: string
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          fcm_token: string
+          id?: string
+          navegador: string
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          fcm_token?: string
+          id?: string
+          navegador?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       uploads_ordens_servico: {
         Row: {
           data_upload: string | null

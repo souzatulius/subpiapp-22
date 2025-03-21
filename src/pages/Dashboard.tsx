@@ -6,6 +6,7 @@ import ActionCard from '@/components/dashboard/ActionCard';
 import { ClipboardList, MessageSquareReply, FileCheck, BarChart2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
+import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -51,6 +52,9 @@ const Dashboard = () => {
         
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-7xl mx-auto">
+            {/* Notification permission request */}
+            <NotificationsEnabler />
+            
             <div className="mb-6">
               <h3 className="mb-2 text-3xl font-bold text-slate-950">Olá, {firstName || 'Usuário'}!</h3>
               <h1 className="text-2xl font-bold text-gray-800"></h1>
