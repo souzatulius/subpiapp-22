@@ -31,7 +31,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 isSection={section.isSection}
                 isOpen={isOpen}
                 subSections={section.subSections}
-                items={section.items}
                 path={section.path}
               />
             </li>
