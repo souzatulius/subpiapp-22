@@ -20,7 +20,7 @@ const Index = () => {
         <div className="w-full md:w-1/2 px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
           <div className="max-w-2xl mx-auto md:mx-0 animate-fade-in">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
-              <span className="text-[#002855]">Demandas</span>
+              <span className="text-[#002855]">Demandas </span>
               <span className="text-[#f57c35]">com eficiência</span>
             </h1>
             
