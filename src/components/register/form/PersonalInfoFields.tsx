@@ -2,6 +2,7 @@
 import React from 'react';
 import EmailSuffix from '@/components/EmailSuffix';
 import { formatPhone, formatDate } from '@/lib/formValidation';
+import { Input } from '@/components/ui/input';
 
 interface PersonalInfoFieldsProps {
   name: string;
@@ -26,13 +27,13 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
         <label htmlFor="name" className="block text-sm font-medium text-[#111827] mb-1">
           Nome Completo
         </label>
-        <input 
+        <Input 
           id="name" 
           name="name" 
           type="text" 
           value={name} 
           onChange={handleChange} 
-          className={`w-full px-4 py-2 border ${errors.name ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} 
+          className={errors.name ? 'border-[#f57b35] ring-[#f57b35]' : ''} 
         />
         {errors.name && <p className="mt-1 text-sm text-[#f57b35]">Nome é obrigatório</p>}
       </div>
@@ -64,15 +65,15 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
           <label htmlFor="birthday" className="block text-sm font-medium text-[#111827] mb-1">
             Data de Aniversário
           </label>
-          <input 
+          <Input 
             id="birthday" 
             name="birthday" 
             type="text" 
             value={birthday} 
             onChange={handleChange} 
-            className={`w-full px-4 py-2 border ${errors.birthday ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} 
             placeholder="DD/MM/AAAA" 
             maxLength={10} 
+            className={errors.birthday ? 'border-[#f57b35] ring-[#f57b35]' : ''}
           />
           {errors.birthday && <p className="mt-1 text-sm text-[#f57b35]">Data válida é obrigatória</p>}
         </div>
@@ -81,15 +82,15 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
           <label htmlFor="whatsapp" className="block text-sm font-medium text-[#111827] mb-1">
             WhatsApp
           </label>
-          <input 
+          <Input 
             id="whatsapp" 
             name="whatsapp" 
             type="text" 
             value={whatsapp} 
             onChange={handleChange} 
-            className={`w-full px-4 py-2 border ${errors.whatsapp ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} 
             placeholder="(XX) XXXXX-XXXX" 
             maxLength={15} 
+            className={errors.whatsapp ? 'border-[#f57b35] ring-[#f57b35]' : ''}
           />
           {errors.whatsapp && <p className="mt-1 text-sm text-[#f57b35]">WhatsApp é obrigatório</p>}
         </div>

@@ -32,7 +32,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           name="role" 
           value={role} 
           onChange={handleChange} 
-          className={`w-full px-4 py-2 border ${errors.role ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} 
+          className={`w-full px-4 py-2 border ${errors.role ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} 
           disabled={loadingOptions}
         >
           <option value="">Selecione</option>
@@ -50,7 +50,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           name="area" 
           value={area} 
           onChange={handleChange} 
-          className={`w-full px-4 py-2 border ${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} 
+          className={`w-full px-4 py-2 border ${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200`} 
           disabled={loadingOptions}
         >
           <option value="">Selecione</option>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import PasswordRequirements from '@/components/PasswordRequirements';
+import { Input } from '@/components/ui/input';
 
 interface PasswordFieldsProps {
   password: string;
@@ -38,13 +39,13 @@ const PasswordFields: React.FC<PasswordFieldsProps> = ({
           Senha
         </label>
         <div className="relative">
-          <input 
+          <Input 
             id="password" 
             type={showPassword ? 'text' : 'password'} 
             value={password} 
             onChange={e => setPassword(e.target.value)} 
             onFocus={() => setShowRequirements(true)} 
-            className={`w-full px-4 py-2 border ${errors.password ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200 pr-10`} 
+            className={`pr-10 ${errors.password ? 'border-[#f57b35] ring-[#f57b35]' : ''}`} 
             placeholder="••••••••" 
           />
           <button 
@@ -66,13 +67,13 @@ const PasswordFields: React.FC<PasswordFieldsProps> = ({
           Confirmar Senha
         </label>
         <div className="relative">
-          <input 
+          <Input 
             id="confirmPassword" 
             name="confirmPassword" 
             type={showConfirmPassword ? 'text' : 'password'} 
             value={confirmPassword} 
             onChange={handleChange} 
-            className={`w-full px-4 py-2 border ${errors.confirmPassword ? 'border-[#f57b35]' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200 pr-10`} 
+            className={`pr-10 ${errors.confirmPassword ? 'border-[#f57b35] ring-[#f57b35]' : ''}`} 
             placeholder="••••••••" 
           />
           <button 
