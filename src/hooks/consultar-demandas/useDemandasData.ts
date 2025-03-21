@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,14 +68,11 @@ export const useDemandasData = () => {
       });
       if (error) throw error;
       
-      // Process the data to ensure perguntas is always a Record<string, string> or null
       const processedData = data?.map(item => {
-        // If perguntas is a string, try to parse it as JSON
         if (typeof item.perguntas === 'string') {
           try {
             item.perguntas = JSON.parse(item.perguntas);
           } catch (e) {
-            // If parsing fails, set to null
             item.perguntas = null;
           }
         }
@@ -107,22 +103,41 @@ export const useDemandasData = () => {
     setDeleteLoading(true);
     
     try {
-      const { data: relatedNotes, error: checkError } = await supabase
+      const { data: relatedNotes, error: checkNotesError } = await supabase
         .from('notas_oficiais')
-        .select('id')
+        .select('id, status')
         .eq('demanda_id', selectedDemand.id);
       
-      if (checkError) throw checkError;
+      if (checkNotesError) throw checkNotesError;
       
       if (relatedNotes && relatedNotes.length > 0) {
+        const hasApprovedNotes = relatedNotes.some(note => 
+          note.status === 'aprovado' || note.status === 'publicado'
+        );
+        
+        if (hasApprovedNotes) {
+          toast({
+            title: "Não é possível excluir a demanda",
+            description: "Esta demanda possui notas oficiais aprovadas ou publicadas associadas.",
+            variant: "destructive"
+          });
+          setIsDeleteDialogOpen(false);
+          setDeleteLoading(false);
+          return;
+        }
+        
         toast({
-          title: "Não é possível excluir a demanda",
-          description: "Esta demanda possui notas oficiais associadas. Exclua as notas primeiro.",
-          variant: "destructive"
+          title: "Atenção",
+          description: "Esta demanda possui notas oficiais associadas que também serão excluídas.",
+          variant: "warning"
         });
-        setIsDeleteDialogOpen(false);
-        setDeleteLoading(false);
-        return;
+        
+        const { error: deleteNotesError } = await supabase
+          .from('notas_oficiais')
+          .delete()
+          .eq('demanda_id', selectedDemand.id);
+          
+        if (deleteNotesError) throw deleteNotesError;
       }
       
       const { error } = await supabase

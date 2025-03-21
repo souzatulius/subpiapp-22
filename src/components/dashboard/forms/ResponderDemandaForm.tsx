@@ -1,27 +1,59 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, X, Upload, AlertCircle, Clock } from 'lucide-react';
+import { ArrowLeft, X, Upload, AlertCircle, Clock, Grid, List, Filter, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+
 interface ResponderDemandaFormProps {
   onClose: () => void;
 }
+
 const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
   onClose
 }) => {
   const {
     user
   } = useAuth();
+  const navigate = useNavigate();
   const [demandas, setDemandas] = useState<any[]>([]);
+  const [filteredDemandas, setFilteredDemandas] = useState<any[]>([]);
   const [selectedDemanda, setSelectedDemanda] = useState<any>(null);
   const [resposta, setResposta] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingDemandas, setIsLoadingDemandas] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [areaFilter, setAreaFilter] = useState<string>('');
+  const [prioridadeFilter, setPrioridadeFilter] = useState<string>('');
+  const [areas, setAreas] = useState<{id: string, descricao: string}[]>([]);
+
+  // Fetch areas from Supabase
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('areas_coordenacao')
+          .select('id, descricao')
+          .order('descricao');
+          
+        if (error) throw error;
+        setAreas(data || []);
+      } catch (error) {
+        console.error('Erro ao carregar áreas:', error);
+      }
+    };
+    
+    fetchAreas();
+  }, []);
 
   // Fetch demandas from Supabase
   useEffect(() => {
@@ -33,7 +65,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
           error
         } = await supabase.from('demandas').select(`
             *,
-            areas_coordenacao (descricao),
+            areas_coordenacao (id, descricao),
             origens_demandas (descricao),
             tipos_midia (descricao),
             servicos (descricao)
@@ -44,6 +76,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
         });
         if (error) throw error;
         setDemandas(data || []);
+        setFilteredDemandas(data || []);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
         toast({
@@ -57,9 +90,42 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
     };
     fetchDemandas();
   }, []);
+
+  // Apply filters when they change
+  useEffect(() => {
+    let filtered = [...demandas];
+    
+    // Apply area filter if selected
+    if (areaFilter) {
+      filtered = filtered.filter(demanda => demanda.areas_coordenacao?.id === areaFilter);
+    }
+    
+    // Apply priority filter if selected
+    if (prioridadeFilter) {
+      filtered = filtered.filter(demanda => demanda.prioridade === prioridadeFilter);
+    }
+    
+    // Apply search term filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        demanda => demanda.titulo.toLowerCase().includes(searchLower) || 
+                  demanda.areas_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
+                  demanda.servicos?.descricao?.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    setFilteredDemandas(filtered);
+  }, [demandas, areaFilter, prioridadeFilter, searchTerm]);
+
   const handleSelectDemanda = (demanda: any) => {
     setSelectedDemanda(demanda);
   };
+  
+  const handleNavigateToConsultar = () => {
+    navigate('/dashboard/comunicacao/consultar-demandas');
+  };
+
   const handleSubmitResposta = async () => {
     if (!resposta.trim()) {
       toast({
@@ -109,6 +175,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
       setIsLoading(false);
     }
   };
+
   const formatPrioridade = (prioridade: string) => {
     switch (prioridade.toLowerCase()) {
       case 'alta':
@@ -121,6 +188,7 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
         return prioridade;
     }
   };
+
   const calcularTempoRestante = (prazo: string) => {
     const prazoDate = new Date(prazo);
     const agora = new Date();
@@ -135,23 +203,134 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
       return <span className="text-green-600 flex items-center"><Clock className="h-3 w-3 mr-1" /> {diffDias}d restantes</span>;
     }
   };
-  const renderDemandaList = () => {
+
+  const renderFiltersBar = () => (
+    <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-2.5 top-3 h-4 w-4 text-gray-500" />
+        <Input 
+          type="text"
+          placeholder="Buscar demandas..." 
+          className="pl-8"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <Select value={areaFilter} onValueChange={setAreaFilter}>
+          <SelectTrigger className="w-[220px]">
+            <SelectValue placeholder="Filtrar por área" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todas as áreas</SelectItem>
+            {areas.map(area => (
+              <SelectItem key={area.id} value={area.id}>{area.descricao}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filtrar por prioridade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Qualquer prioridade</SelectItem>
+            <SelectItem value="alta">Alta</SelectItem>
+            <SelectItem value="média">Média</SelectItem>
+            <SelectItem value="baixa">Baixa</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <div className="border rounded-md overflow-hidden flex">
+          <Button 
+            variant={viewMode === 'list' ? 'default' : 'ghost'} 
+            size="icon" 
+            onClick={() => setViewMode('list')}
+            className="h-10 w-10"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant={viewMode === 'cards' ? 'default' : 'ghost'} 
+            size="icon" 
+            onClick={() => setViewMode('cards')}
+            className="h-10 w-10"
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDemandasCards = () => {
     if (isLoadingDemandas) {
       return <div className="flex justify-center items-center h-64">
           <div className="loading-spinner" />
         </div>;
     }
-    if (demandas.length === 0) {
-      return <div className="text-center py-12">
-          <div className="mx-auto h-12 w-12 text-gray-400 mb-4">✓</div>
-          <h3 className="text-lg font-medium text-gray-900">Nenhuma demanda pendente</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Não há demandas pendentes para resposta no momento.
-          </p>
+    
+    if (filteredDemandas.length === 0) {
+      return renderEmptyState();
+    }
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredDemandas.map(demanda => (
+          <Card 
+            key={demanda.id} 
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              selectedDemanda?.id === demanda.id ? 'border-2 border-[#003570]' : 'border border-gray-200'
+            }`}
+            onClick={() => handleSelectDemanda(demanda)}
+          >
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-medium">{demanda.titulo}</h3>
+                <div className="flex space-x-2">
+                  {formatPrioridade(demanda.prioridade)}
+                </div>
+              </div>
+              
+              <div className="text-sm text-gray-500 mb-2">
+                <span className="font-medium">Área:</span>{' '}
+                {demanda.areas_coordenacao?.descricao || 'Não informada'}
+              </div>
+              
+              <div className="text-sm text-gray-500 mb-2">
+                <span className="font-medium">Origem:</span>{' '}
+                {demanda.origens_demandas?.descricao || 'Não informada'}
+              </div>
+              
+              <div className="flex justify-between items-center text-xs text-gray-500 mt-3">
+                <div>
+                  {demanda.prazo_resposta && calcularTempoRestante(demanda.prazo_resposta)}
+                </div>
+                <div>
+                  {demanda.prazo_resposta && format(new Date(demanda.prazo_resposta), "dd/MM/yyyy 'às' HH:mm", {
+                    locale: ptBR
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const renderDemandasList = () => {
+    if (isLoadingDemandas) {
+      return <div className="flex justify-center items-center h-64">
+          <div className="loading-spinner" />
         </div>;
     }
+    if (filteredDemandas.length === 0) {
+      return renderEmptyState();
+    }
     return <div className="space-y-4">
-        {demandas.map(demanda => <Card key={demanda.id} className={`cursor-pointer transition-all hover:shadow-md ${selectedDemanda?.id === demanda.id ? 'border-2 border-[#003570]' : 'border border-gray-200'}`} onClick={() => handleSelectDemanda(demanda)}>
+        {filteredDemandas.map(demanda => <Card key={demanda.id} className={`cursor-pointer transition-all hover:shadow-md ${selectedDemanda?.id === demanda.id ? 'border-2 border-[#003570]' : 'border border-gray-200'}`} onClick={() => handleSelectDemanda(demanda)}>
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-medium">{demanda.titulo}</h3>
@@ -184,6 +363,22 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
           </Card>)}
       </div>;
   };
+
+  const renderEmptyState = () => (
+    <div className="text-center py-12">
+      <div className="mx-auto h-12 w-12 text-gray-400 mb-4">✓</div>
+      <h3 className="text-lg font-medium text-gray-900">Nenhuma demanda pendente</h3>
+      <p className="mt-2 text-sm text-gray-500">
+        Não há demandas pendentes para resposta com os filtros selecionados.
+      </p>
+      <div className="mt-6">
+        <Button onClick={handleNavigateToConsultar} variant="outline">
+          Consultar Todas as Demandas
+        </Button>
+      </div>
+    </div>
+  );
+
   const renderRespostaForm = () => {
     if (!selectedDemanda) return null;
     return <div className="animate-fade-in">
@@ -266,14 +461,29 @@ const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({
         </div>
       </div>;
   };
+
   return <div className="animate-fade-in">
-      
-      
-      <Card className="border border-gray-200">
+      <Card className="border border-gray-200 mb-4">
+        <CardHeader className="pb-2 border-b">
+          <CardTitle className="text-xl font-semibold text-[#003570] flex justify-between items-center">
+            <span>Responder Demandas</span>
+            <Button 
+              variant="outline" 
+              onClick={handleNavigateToConsultar}
+              className="text-sm"
+            >
+              Consultar Outras Demandas
+            </Button>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="p-6">
-          {selectedDemanda ? renderRespostaForm() : renderDemandaList()}
+          {!selectedDemanda && renderFiltersBar()}
+          {selectedDemanda ? renderRespostaForm() : (
+            viewMode === 'cards' ? renderDemandasCards() : renderDemandasList()
+          )}
         </CardContent>
       </Card>
     </div>;
 };
+
 export default ResponderDemandaForm;
