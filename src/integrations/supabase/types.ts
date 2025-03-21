@@ -903,7 +903,16 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      demanda_status_enum:
+        | "pendente"
+        | "em_andamento"
+        | "aguardando_nota"
+        | "nota_em_revisao"
+        | "nota_aprovada"
+        | "nota_rejeitada"
+        | "encerrada"
+        | "oculta"
+      nota_status_enum: "pendente" | "aprovada" | "rejeitada" | "excluida"
     }
     CompositeTypes: {
       [_ in never]: never

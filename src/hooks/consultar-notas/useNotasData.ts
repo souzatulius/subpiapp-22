@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -43,7 +42,6 @@ export const useNotasData = () => {
 
       if (error) throw error;
 
-      // Transform data to handle null values
       const transformedData = data?.map(nota => ({
         ...nota,
         autor: nota.autor || { nome_completo: 'Não informado' },
@@ -66,7 +64,6 @@ export const useNotasData = () => {
   const deleteNota = async (notaId: string) => {
     setDeleteLoading(true);
     try {
-      // First check if this nota has a related demanda
       const { data: nota, error: notaError } = await supabase
         .from('notas_oficiais')
         .select('demanda_id')
@@ -75,38 +72,24 @@ export const useNotasData = () => {
 
       if (notaError) throw notaError;
 
-      // If there's a related demanda, update its status instead of deleting it
       if (nota.demanda_id) {
-        // First, fetch the current status to understand what we're working with
-        const { data: demanda, error: fetchError } = await supabase
-          .from('demandas')
-          .select('status')
-          .eq('id', nota.demanda_id)
-          .single();
-          
-        if (fetchError) throw fetchError;
-        
-        // Update to a valid status based on the database constraints
-        // Using 'pendente' as it's likely a valid status
         const { error: demandaError } = await supabase
           .from('demandas')
           .update({ 
-            status: 'pendente' // Using a likely valid status
+            status: 'aguardando_nota'
           })
           .eq('id', nota.demanda_id);
 
         if (demandaError) throw demandaError;
       }
 
-      // Now delete the nota
       const { error } = await supabase
         .from('notas_oficiais')
-        .delete()
+        .update({ status: 'excluida' })
         .eq('id', notaId);
 
       if (error) throw error;
 
-      // Update the local state
       setNotas(notas.filter(n => n.id !== notaId));
 
       toast({
@@ -115,7 +98,6 @@ export const useNotasData = () => {
         variant: 'default',
       });
       
-      // Refresh the data to ensure everything is in sync
       fetchNotas();
       
     } catch (error: any) {
@@ -146,9 +128,7 @@ export const useNotasData = () => {
     }
   };
 
-  // Apply all filters to notes
   const filteredNotas = notas.filter(nota => {
-    // Apply search filter
     if (searchQuery.trim()) {
       const searchLower = searchQuery.toLowerCase();
       if (!(
@@ -162,7 +142,6 @@ export const useNotasData = () => {
       }
     }
 
-    // Apply date filters
     if (dataInicioFilter) {
       const notaDate = new Date(nota.criado_em);
       const startDate = startOfDay(dataInicioFilter);
