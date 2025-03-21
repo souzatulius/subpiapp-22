@@ -35,7 +35,7 @@ export interface Demand {
   telefone_solicitante: string | null;
   veiculo_imprensa: string | null;
   detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null;
+  perguntas: Record<string, string> | null | any; // Changed to accept any type to handle JSON
 }
 
 export const useDemandasData = () => {
@@ -68,7 +68,22 @@ export const useDemandasData = () => {
         ascending: false
       });
       if (error) throw error;
-      return data || [];
+      
+      // Process the data to ensure perguntas is always a Record<string, string> or null
+      const processedData = data?.map(item => {
+        // If perguntas is a string, try to parse it as JSON
+        if (typeof item.perguntas === 'string') {
+          try {
+            item.perguntas = JSON.parse(item.perguntas);
+          } catch (e) {
+            // If parsing fails, set to null
+            item.perguntas = null;
+          }
+        }
+        return item;
+      }) || [];
+      
+      return processedData;
     },
     meta: {
       onError: (err: any) => {
