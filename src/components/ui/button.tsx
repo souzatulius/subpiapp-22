@@ -6,26 +6,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-subpi-blue focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-[#174ba9] text-white hover:bg-[#1a3c7a]",
+        default: "bg-subpi-blue text-white hover:bg-subpi-blue-dark shadow-md hover:shadow-lg",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-gray-300 bg-white hover:bg-gray-50 text-subpi-gray-text hover:text-subpi-blue",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-[#174ba9] underline-offset-4 hover:underline",
-        action: "bg-[#f57737] text-white hover:bg-[#e06a2a]",
+          "bg-gray-100 text-subpi-gray-text hover:bg-gray-200",
+        ghost: "hover:bg-gray-100 text-subpi-gray-text hover:text-subpi-blue",
+        link: "text-subpi-blue underline-offset-4 hover:underline hover:text-subpi-blue-light",
+        action: "bg-subpi-orange text-white hover:bg-subpi-orange-dark shadow-md hover:shadow-lg",
       },
       size: {
         default: "h-12 px-5 py-3 rounded-xl",
-        sm: "h-10 rounded-xl px-4",
+        sm: "h-10 rounded-xl px-4 text-sm",
         lg: "h-14 rounded-xl px-8 text-lg",
-        icon: "h-12 w-12 rounded-full",
+        icon: "h-12 w-12 rounded-xl",
       },
     },
     defaultVariants: {

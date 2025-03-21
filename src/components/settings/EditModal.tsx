@@ -14,15 +14,15 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, title, children 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-medium text-[#003570]">{title}</h3>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in transition-opacity duration-300">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 ease-in-out">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-subpi-blue">{title}</h3>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="rounded-full h-8 w-8"
+            className="rounded-full h-8 w-8 hover:bg-gray-100"
           >
             <X className="h-4 w-4" />
           </Button>

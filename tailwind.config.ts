@@ -64,8 +64,16 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				subpi: {
-					blue: '#003570',
-					orange: '#f57b35',
+					blue: {
+						DEFAULT: '#003570',
+						dark: '#001f40',
+						light: '#174ba9'
+					},
+					orange: {
+						DEFAULT: '#f57b35',
+						dark: '#e06a2a',
+						light: '#ff8c40'
+					},
 					gray: {
 						light: '#F9FAFB',
 						text: '#111827',
