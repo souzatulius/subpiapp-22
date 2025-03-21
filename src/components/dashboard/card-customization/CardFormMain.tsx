@@ -24,9 +24,14 @@ const CardFormMain: React.FC<CardFormMainProps> = ({
   setSelectedIconId,
   initialData
 }) => {
+  const onSubmit = form.handleSubmit((data) => {
+    // The actual submission logic is handled in the parent component
+    // This just triggers the form validation and passes the data up
+  });
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
         <CardFormFields 
           form={form}
           selectedIconId={selectedIconId}
