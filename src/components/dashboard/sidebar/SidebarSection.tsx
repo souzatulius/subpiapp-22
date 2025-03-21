@@ -51,6 +51,23 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
     }));
   };
 
+  // Handle click on section when sidebar is collapsed
+  const handleSectionClick = () => {
+    if (isSection && !isOpen) {
+      // Force open the sidebar by simulating a click on the sidebar toggle
+      document.querySelector('[data-sidebar="trigger"]')?.dispatchEvent(
+        new MouseEvent('click', { bubbles: true })
+      );
+      // Ensure section is expanded after sidebar opens
+      setExpandedSections(prev => ({
+        ...prev,
+        [id]: true
+      }));
+    } else {
+      toggleSection(id);
+    }
+  };
+
   if (!isSection) {
     return (
       <NavLink 
@@ -66,7 +83,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   return (
     <>
       <button 
-        onClick={() => toggleSection(id)}
+        onClick={handleSectionClick}
         className="flex items-center px-4 py-3 text-gray-200 hover:bg-[#0c2d45] transition-colors font-medium rounded-xl mb-1 w-full"
       >
         <div className="flex-shrink-0 text-[#f57737]">{icon}</div>

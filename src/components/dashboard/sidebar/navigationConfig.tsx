@@ -78,7 +78,7 @@ export const getNavigationSections = () => [
       }
     ]
   },
-  // Seção 3: Relatórios (changed from menu item to section)
+  // Seção 3: Relatórios
   {
     id: 'relatorios',
     icon: <BarChart2 size={20} />,
@@ -86,7 +86,7 @@ export const getNavigationSections = () => [
     path: '/dashboard/comunicacao/relatorios',
     isSection: false
   },
-  // Seção 4: Ranking das Subs (changed from menu item to section)
+  // Seção 4: Ranking das Subs (corrigindo a rota)
   {
     id: 'ranking',
     icon: <TrendingUp size={20} />,

@@ -15,7 +15,9 @@ export const useDemandasData = () => {
     const fetchDemandas = async () => {
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
+        
+        // Primeiro, buscar todas as demandas
+        const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
           .select(`
             id,
@@ -28,10 +30,23 @@ export const useDemandasData = () => {
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
         
-        if (error) throw error;
+        if (demandasError) throw demandasError;
+        
+        // Buscar todas as notas oficiais para verificar quais demandas já têm notas
+        const { data: notasData, error: notasError } = await supabase
+          .from('notas_oficiais')
+          .select('demanda_id');
+        
+        if (notasError) throw notasError;
+        
+        // Criar um conjunto de IDs de demandas que já têm notas
+        const demandasComNotas = new Set(notasData.map(nota => nota.demanda_id));
+        
+        // Filtrar para incluir apenas demandas que não têm notas associadas
+        const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
         
         // Make sure the perguntas field is properly typed
-        const typedData = data?.map(item => ({
+        const typedData = demandasSemNotas?.map(item => ({
           ...item,
           perguntas: item.perguntas as Record<string, string> | null
         })) || [];

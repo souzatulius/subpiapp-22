@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,7 +16,7 @@ import Settings from "./pages/Settings";
 import Demandas from "./pages/comunicacao/Demandas";
 import NotasOficiais from "./pages/comunicacao/NotasOficiais";
 import Relatorios from "./pages/comunicacao/Relatorios";
-import RankingSubs from "./pages/zeladoria/RankingSubs";
+import RankingSubs from "./pages/dashboard/zeladoria/RankingSubs";
 import AuthCallback from "./components/AuthCallback";
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/dashboard/comunicacao/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
 
             {/* Zeladoria routes */}
+            <Route path="/dashboard/zeladoria/ranking-subs" element={<ProtectedRoute><RankingSubs /></ProtectedRoute>} />
             <Route path="/zeladoria/ranking-subs" element={<ProtectedRoute><RankingSubs /></ProtectedRoute>} />
 
             {/* Settings route */}
