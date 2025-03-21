@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import DemandDetail from '@/components/demandas/DemandDetail';
+
 interface Demand {
   id: string;
   titulo: string;
@@ -49,6 +50,7 @@ interface Demand {
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null;
 }
+
 const ConsultarDemandas = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,11 +59,11 @@ const ConsultarDemandas = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const navigate = useNavigate();
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Fetch demands data
   const {
     data: demandas = [],
     isLoading,
@@ -98,38 +100,58 @@ const ConsultarDemandas = () => {
     }
   });
 
-  // Filter demands based on search term
   const filteredDemandas = demandas.filter((demand: any) => demand.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || demand.servico?.descricao.toLowerCase().includes(searchTerm.toLowerCase()) || demand.area_coordenacao?.descricao.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Handle view demand
   const handleViewDemand = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
   };
 
-  // Handle respond to demand
   const handleRespondDemand = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
   };
 
-  // Handle delete demand
   const handleDeleteClick = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDeleteDialogOpen(true);
   };
+
   const handleDeleteConfirm = async () => {
     if (!selectedDemand) return;
     setDeleteLoading(true);
+    
     try {
-      const {
-        error
-      } = await supabase.from('demandas').delete().eq('id', selectedDemand.id);
+      const { data: relatedNotes, error: checkError } = await supabase
+        .from('notas_oficiais')
+        .select('id')
+        .eq('demanda_id', selectedDemand.id);
+      
+      if (checkError) throw checkError;
+      
+      if (relatedNotes && relatedNotes.length > 0) {
+        toast({
+          title: "Não é possível excluir a demanda",
+          description: "Esta demanda possui notas oficiais associadas. Exclua as notas primeiro.",
+          variant: "destructive"
+        });
+        setIsDeleteDialogOpen(false);
+        setDeleteLoading(false);
+        return;
+      }
+      
+      const { error } = await supabase
+        .from('demandas')
+        .delete()
+        .eq('id', selectedDemand.id);
+        
       if (error) throw error;
+      
       toast({
         title: "Demanda excluída",
         description: "A demanda foi excluída com sucesso."
       });
+      
       setIsDeleteDialogOpen(false);
       refetch();
     } catch (error: any) {
@@ -143,7 +165,6 @@ const ConsultarDemandas = () => {
     }
   };
 
-  // Helper function to get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pendente':
@@ -160,6 +181,7 @@ const ConsultarDemandas = () => {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
   return <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
@@ -236,10 +258,8 @@ const ConsultarDemandas = () => {
         </main>
       </div>
 
-      {/* Demand Detail Dialog */}
       <DemandDetail demand={selectedDemand} isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} />
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="bg-gray-50">
           <AlertDialogHeader>
@@ -261,4 +281,5 @@ const ConsultarDemandas = () => {
       </AlertDialog>
     </div>;
 };
+
 export default ConsultarDemandas;

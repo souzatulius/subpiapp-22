@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio } from 'lucide-react';
@@ -28,6 +28,17 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
   };
+  
+  // Check if "Imprensa" is selected
+  const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
+  const isImprensaSelected = selectedOrigin?.descricao === "Imprensa";
+  
+  // Reset tipo_midia_id when origin is not "Imprensa"
+  useEffect(() => {
+    if (!isImprensaSelected && formData.tipo_midia_id) {
+      handleSelectChange('tipo_midia_id', '');
+    }
+  }, [isImprensaSelected, formData.tipo_midia_id]);
 
   // Get media type icon based on description
   const getMediaTypeIcon = (descricao: string) => {
@@ -56,7 +67,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
         >
           Origem da Demanda {hasError('origem_id') && <span className="text-orange-500">*</span>}
         </Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="flex flex-wrap gap-3">
           {origens.map(origem => (
             <Button 
               key={origem.id} 
@@ -78,35 +89,37 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
         )}
       </div>
       
-      <div>
-        <Label 
-          htmlFor="tipo_midia_id" 
-          className={`block mb-2 ${hasError('tipo_midia_id') ? 'text-orange-500 font-semibold' : ''}`}
-        >
-          Tipo de Mídia {hasError('tipo_midia_id') && <span className="text-orange-500">*</span>}
-        </Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {tiposMidia.map(tipo => (
-            <Button 
-              key={tipo.id} 
-              type="button" 
-              variant={formData.tipo_midia_id === tipo.id ? "default" : "outline"} 
-              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-                formData.tipo_midia_id === tipo.id ? "ring-2 ring-[#003570]" : ""
-              } ${
-                hasError('tipo_midia_id') ? 'border-orange-500' : ''
-              }`} 
-              onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
-            >
-              {getMediaTypeIcon(tipo.descricao)}
-              <span className="text-sm font-semibold">{tipo.descricao}</span>
-            </Button>
-          ))}
+      {isImprensaSelected && (
+        <div className="animate-fadeIn">
+          <Label 
+            htmlFor="tipo_midia_id" 
+            className={`block mb-2 ${hasError('tipo_midia_id') ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Tipo de Mídia {hasError('tipo_midia_id') && <span className="text-orange-500">*</span>}
+          </Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {tiposMidia.map(tipo => (
+              <Button 
+                key={tipo.id} 
+                type="button" 
+                variant={formData.tipo_midia_id === tipo.id ? "default" : "outline"} 
+                className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
+                  formData.tipo_midia_id === tipo.id ? "ring-2 ring-[#003570]" : ""
+                } ${
+                  hasError('tipo_midia_id') ? 'border-orange-500' : ''
+                }`} 
+                onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
+              >
+                {getMediaTypeIcon(tipo.descricao)}
+                <span className="text-sm font-semibold">{tipo.descricao}</span>
+              </Button>
+            ))}
+          </div>
+          {hasError('tipo_midia_id') && (
+            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('tipo_midia_id')}</p>
+          )}
         </div>
-        {hasError('tipo_midia_id') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('tipo_midia_id')}</p>
-        )}
-      </div>
+      )}
     </div>
   );
 };

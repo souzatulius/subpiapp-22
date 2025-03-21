@@ -62,7 +62,7 @@ export const useDemandFormSubmit = (
       });
       
       // Redirect to dashboard
-      navigate('/dashboard');
+      navigate('/dashboard/comunicacao/consultar-demandas');
     } catch (error: any) {
       console.error('Erro ao cadastrar demanda:', error);
       toast({

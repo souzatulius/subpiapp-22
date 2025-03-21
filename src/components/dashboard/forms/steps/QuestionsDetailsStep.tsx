@@ -4,15 +4,13 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import FileUpload from '../components/FileUpload';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface QuestionsDetailsStepProps {
   formData: {
     perguntas: string[];
     detalhes_solicitacao: string;
-    arquivo_url: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handlePerguntaChange: (index: number, value: string) => void;
@@ -27,84 +25,102 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
   handleSelectChange,
   errors = []
 }) => {
-  const [activeQuestions, setActiveQuestions] = useState<number>(
-    formData.perguntas.filter(p => p.trim()).length > 0 
-      ? formData.perguntas.filter(p => p.trim()).length 
-      : 1
+  const [activeQuestions, setActiveQuestions] = useState<number[]>(
+    formData.perguntas.filter(p => p.trim() !== '').length > 0 
+      ? formData.perguntas.filter(p => p.trim() !== '').map((_, i) => i) 
+      : [0]
   );
-
-  const handleQuestionChange = (index: number, value: string) => {
-    handlePerguntaChange(index, value);
-  };
-
-  const handleAddQuestion = () => {
-    if (activeQuestions < 5) {
-      setActiveQuestions(prev => prev + 1);
-    }
-  };
-
-  const handleFileChange = (fileUrl: string) => {
-    handleSelectChange('arquivo_url', fileUrl);
-  };
-
+  
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
   };
 
+  const addQuestion = () => {
+    if (activeQuestions.length < 5) {
+      const nextIndex = activeQuestions.length;
+      setActiveQuestions([...activeQuestions, nextIndex]);
+    }
+  };
+
+  const removeQuestion = (index: number) => {
+    // Update active questions
+    const newActiveQuestions = activeQuestions.filter(i => i !== index).map((val, idx) => idx);
+    setActiveQuestions(newActiveQuestions);
+    
+    // Update form data
+    const newPerguntas = [...formData.perguntas];
+    newPerguntas.splice(index, 1);
+    newPerguntas.push(''); // Keep array length at 5
+    handleSelectChange('perguntas', JSON.stringify(newPerguntas));
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
-        <Label>Perguntas</Label>
+        <div className="flex justify-between items-center mb-2">
+          <Label className={`block ${hasError('perguntas') ? 'text-orange-500 font-semibold' : ''}`}>
+            Perguntas
+          </Label>
+          {activeQuestions.length < 5 && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={addQuestion}
+              className="flex items-center gap-1"
+            >
+              <Plus className="h-4 w-4" />
+              Adicionar pergunta
+            </Button>
+          )}
+        </div>
         
-        {Array.from({ length: activeQuestions }).map((_, index) => (
-          <div key={index} className="flex items-center gap-2 mb-2">
-            <Input 
-              className="flex-1 rounded-lg"
-              value={formData.perguntas[index] || ''}
-              onChange={e => handleQuestionChange(index, e.target.value)}
-            />
-            {index === activeQuestions - 1 && activeQuestions < 5 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleAddQuestion}
-                className="flex-shrink-0"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        ))}
+        <div className="space-y-3">
+          {activeQuestions.map(index => (
+            <div key={index} className="flex gap-2">
+              <Input
+                value={formData.perguntas[index] || ''}
+                onChange={(e) => handlePerguntaChange(index, e.target.value)}
+                className={`flex-1 ${hasError('perguntas') ? 'border-orange-500' : ''}`}
+              />
+              {activeQuestions.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeQuestion(index)}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+        
+        {hasError('perguntas') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('perguntas')}</p>
+        )}
       </div>
-      
+
       <div>
-        <Label 
-          htmlFor="detalhes_solicitacao" 
-          className={`block ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}
-        >
+        <Label htmlFor="detalhes_solicitacao" className={`block ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
           Detalhes da Solicitação
         </Label>
-        <Textarea 
-          id="detalhes_solicitacao" 
-          name="detalhes_solicitacao" 
-          value={formData.detalhes_solicitacao} 
-          onChange={handleChange} 
-          maxLength={500} 
-          rows={4} 
-          className={`rounded-lg ${hasError('detalhes_solicitacao') ? 'border-orange-500 ring-orange-500' : ''}`} 
+        <Textarea
+          id="detalhes_solicitacao"
+          name="detalhes_solicitacao"
+          value={formData.detalhes_solicitacao}
+          onChange={handleChange}
+          rows={5}
+          className={hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}
         />
         {hasError('detalhes_solicitacao') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
         )}
       </div>
-      
-      <FileUpload 
-        onChange={handleFileChange}
-        value={formData.arquivo_url}
-      />
     </div>
   );
 };
