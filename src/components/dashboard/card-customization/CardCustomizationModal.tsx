@@ -71,9 +71,6 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     });
   };
 
-  // Use form's handleSubmit function
-  const onSubmitForm = form.handleSubmit(handleSubmit);
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto">

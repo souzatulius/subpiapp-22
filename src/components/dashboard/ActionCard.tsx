@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +18,7 @@ interface ActionCardProps {
   title: string;
   icon: React.ReactNode;
   onClick?: () => void;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
+  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
   path?: string;
   id: string;
   onDelete?: (id: string) => void;
@@ -42,10 +41,6 @@ const getColorClasses = (color: string) => {
       return 'bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-100';
     case 'orange-light':
       return 'bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100';
-    case 'purple':
-      return 'bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-100';
-    case 'red':
-      return 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100';
     case 'gray-light':
       return 'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100';
     case 'gray-dark':
@@ -134,7 +129,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         onClick={handleClick}
         data-card-id={id}
       >
-        <CardContent className={`relative flex flex-col items-center justify-center p-6 md:p-4 h-full ${height === '2' ? 'min-h-[240px]' : ''} transform-gpu hover:scale-[1.03]`}>
+        <CardContent className={`relative flex flex-col items-center justify-center p-6 md:p-4 h-full ${height === '2' ? 'min-h-[240px]' : ''} transform-gpu hover:scale-[1.03] overflow-hidden`}>
           {onDelete && (
             <button 
               className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
