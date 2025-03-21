@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import ActionCard from '@/components/dashboard/ActionCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -9,10 +9,56 @@ import {
   BarChart2, 
   TrendingUp, 
   TrendingDown,
-  Search 
+  Search,
+  Pencil
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
+
+interface ActionCardItem {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  path: string;
+  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
+  width?: '25' | '50' | '75' | '100';
+  height?: '1' | '2';
+}
 
 const ComunicacaoDashboard: React.FC = () => {
+  const [isCustomizationModalOpen, setIsCustomizationModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
+  const [actionCards, setActionCards] = useState<ActionCardItem[]>([
+    {
+      id: 'nova-demanda',
+      title: 'Nova Demanda',
+      icon: <ClipboardList className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/cadastrar',
+      color: 'blue',
+    },
+    {
+      id: 'responder-demandas',
+      title: 'Responder Demandas',
+      icon: <MessageSquareReply className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/responder',
+      color: 'green',
+    },
+    {
+      id: 'consultar-demandas',
+      title: 'Consultar Demandas',
+      icon: <Search className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/consultar-demandas',
+      color: 'orange',
+    },
+    {
+      id: 'relatorios',
+      title: 'Relatórios',
+      icon: <BarChart2 className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/relatorios',
+      color: 'purple',
+    }
+  ]);
+
   // Dados estatísticos das demandas (simulados)
   const comunicacaoStats = [
     {
@@ -47,51 +93,65 @@ const ComunicacaoDashboard: React.FC = () => {
 
   // Função para remover um card do dashboard
   const handleDeleteCard = (id: string) => {
-    // Aqui implementaríamos a lógica para remover o card
-    console.log(`Card ${id} removido`);
-    // Na implementação real, poderia atualizar o estado ou fazer uma chamada de API
+    setActionCards(cards => cards.filter(card => card.id !== id));
+    toast({
+      title: "Card removido",
+      description: "O card foi removido com sucesso.",
+      variant: "success",
+    });
+  };
+
+  // Função para editar um card
+  const handleEditCard = (id: string) => {
+    const cardToEdit = actionCards.find(card => card.id === id);
+    if (cardToEdit) {
+      setEditingCard(cardToEdit);
+      setIsCustomizationModalOpen(true);
+    }
+  };
+
+  // Função para salvar alterações em um card
+  const handleSaveCard = (cardData: Omit<ActionCardItem, 'id'>) => {
+    if (editingCard) {
+      // Edit existing card
+      setActionCards(cards => 
+        cards.map(card => 
+          card.id === editingCard.id 
+            ? { ...card, ...cardData }
+            : card
+        )
+      );
+      
+      toast({
+        title: "Card atualizado",
+        description: "As alterações foram salvas com sucesso.",
+        variant: "success",
+      });
+    }
+    
+    setIsCustomizationModalOpen(false);
+    setEditingCard(null);
   };
 
   return (
     <div className="max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Comunicação</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <ActionCard 
-          id="nova-demanda"
-          title="Nova Demanda" 
-          icon={<ClipboardList className="h-12 w-12" />} 
-          path="/dashboard/comunicacao/cadastrar" 
-          color="blue"
-          onDelete={handleDeleteCard}
-        />
-        
-        <ActionCard 
-          id="responder-demandas"
-          title="Responder Demandas" 
-          icon={<MessageSquareReply className="h-12 w-12" />} 
-          path="/dashboard/comunicacao/responder" 
-          color="green"
-          onDelete={handleDeleteCard}
-        />
-        
-        <ActionCard 
-          id="consultar-demandas"
-          title="Consultar Demandas" 
-          icon={<Search className="h-12 w-12" />} 
-          path="/dashboard/comunicacao/consultar-demandas" 
-          color="orange"
-          onDelete={handleDeleteCard}
-        />
-        
-        <ActionCard 
-          id="relatorios"
-          title="Relatórios" 
-          icon={<BarChart2 className="h-12 w-12" />} 
-          path="/dashboard/comunicacao/relatorios" 
-          color="purple"
-          onDelete={handleDeleteCard}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {actionCards.map((card) => (
+          <ActionCard 
+            key={card.id}
+            id={card.id}
+            title={card.title} 
+            icon={card.icon} 
+            path={card.path} 
+            color={card.color}
+            onDelete={handleDeleteCard}
+            onEdit={handleEditCard}
+            width={card.width}
+            height={card.height}
+          />
+        ))}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -113,6 +173,14 @@ const ComunicacaoDashboard: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* Card Customization Modal */}
+      <CardCustomizationModal
+        isOpen={isCustomizationModalOpen}
+        onClose={() => setIsCustomizationModalOpen(false)}
+        onSave={handleSaveCard}
+        initialData={editingCard || undefined}
+      />
     </div>
   );
 };

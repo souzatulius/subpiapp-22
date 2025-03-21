@@ -20,12 +20,22 @@ interface ActionCardItem {
   title: string;
   icon: React.ReactNode;
   path: string;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'red';
+  color: 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light';
   isCustom?: boolean;
+  width?: '25' | '50' | '75' | '100';
+  height?: '1' | '2';
 }
 
 // Create sortable version of ActionCard
-const SortableActionCard = ({ card, onEdit, onDelete }: { card: ActionCardItem, onEdit?: (card: ActionCardItem) => void, onDelete?: (id: string) => void }) => {
+const SortableActionCard = ({ 
+  card, 
+  onEdit, 
+  onDelete 
+}: { 
+  card: ActionCardItem, 
+  onEdit?: (card: ActionCardItem) => void, 
+  onDelete?: (id: string) => void 
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: card.id });
   
   const style = {
@@ -33,37 +43,51 @@ const SortableActionCard = ({ card, onEdit, onDelete }: { card: ActionCardItem, 
     transition,
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onEdit && card.isCustom) {
+  const handleEdit = () => {
+    if (onEdit) {
       onEdit(card);
     }
   };
   
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <div className="relative group">
-        {card.isCustom && onEdit && (
-          <button 
-            onClick={handleEdit}
-            className="absolute top-2 right-10 z-10 p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100"
-            aria-label="Editar card"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        )}
-        <ActionCard
-          id={card.id}
-          title={card.title}
-          icon={card.icon}
-          path={card.path}
-          color={card.color}
-          isDraggable={true}
-          onDelete={onDelete}
-        />
-      </div>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners}
+      className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+    >
+      <ActionCard
+        id={card.id}
+        title={card.title}
+        icon={card.icon}
+        path={card.path}
+        color={card.color}
+        isDraggable={true}
+        onDelete={onDelete}
+        onEdit={handleEdit}
+        width={card.width}
+        height={card.height}
+        isCustom={card.isCustom}
+      />
     </div>
   );
+};
+
+// Function to get width classes
+const getWidthClasses = (width: string = '25') => {
+  switch (width) {
+    case '25':
+      return 'col-span-1';
+    case '50':
+      return 'col-span-1 md:col-span-2';
+    case '75':
+      return 'col-span-1 md:col-span-3';
+    case '100':
+      return 'col-span-1 md:col-span-4';
+    default:
+      return 'col-span-1';
+  }
 };
 
 const Dashboard = () => {
@@ -76,28 +100,36 @@ const Dashboard = () => {
       title: 'Nova Demanda',
       icon: <ClipboardList className="h-12 w-12" />,
       path: '/dashboard/comunicacao/cadastrar',
-      color: 'blue'
+      color: 'blue',
+      width: '25',
+      height: '1'
     },
     {
       id: '2',
       title: 'Responder Demandas',
       icon: <MessageSquareReply className="h-12 w-12" />,
       path: '/dashboard/comunicacao/responder',
-      color: 'green'
+      color: 'green',
+      width: '25',
+      height: '1'
     },
     {
       id: '3',
       title: 'Aprovar Nota',
       icon: <FileCheck className="h-12 w-12" />,
       path: '/dashboard/comunicacao/aprovar-nota',
-      color: 'orange'
+      color: 'orange',
+      width: '25',
+      height: '1'
     },
     {
       id: '4',
       title: 'Números da Comunicação',
       icon: <BarChart2 className="h-12 w-12" />,
       path: '/dashboard/comunicacao/relatorios',
-      color: 'purple'
+      color: 'purple',
+      width: '25',
+      height: '1'
     }
   ]);
 
@@ -233,9 +265,6 @@ const Dashboard = () => {
         
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-7xl mx-auto">
-            {/* Notification permission request */}
-            <NotificationsEnabler />
-            
             <div className="mb-6">
               <h3 className="mb-2 text-3xl font-bold text-slate-950">Olá, {firstName || 'Usuário'}!</h3>
               <h1 className="text-2xl font-bold text-gray-800"></h1>
@@ -258,7 +287,7 @@ const Dashboard = () => {
               onDragEnd={handleDragEnd}
             >
               <SortableContext items={actionCards.map(card => card.id)}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
                   {actionCards.map((card) => (
                     <SortableActionCard 
                       key={card.id} 
@@ -267,6 +296,9 @@ const Dashboard = () => {
                       onDelete={handleDeleteCard}
                     />
                   ))}
+                  
+                  {/* Add NotificationsEnabler after the cards */}
+                  <NotificationsEnabler />
                 </div>
               </SortableContext>
             </DndContext>
