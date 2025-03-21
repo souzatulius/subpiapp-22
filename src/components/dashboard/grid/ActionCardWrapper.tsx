@@ -5,6 +5,7 @@ import QuickDemandCard from '../QuickDemandCard';
 import SmartSearchCard from '../SmartSearchCard';
 import OverdueDemandsCard from '../cards/OverdueDemandsCard';
 import PendingActionsCard from '../cards/PendingActionsCard';
+import NewCardButton from '../cards/NewCardButton';
 import { ActionCardItem } from '@/hooks/dashboard/types';
 
 // Function to get width classes
@@ -27,6 +28,7 @@ interface ActionCardWrapperProps {
   card: ActionCardItem;
   onEdit: (card: ActionCardItem) => void;
   onDelete: (id: string) => void;
+  onAddNewCard: () => void;
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
@@ -44,6 +46,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   card,
   onEdit,
   onDelete,
+  onAddNewCard,
   quickDemandTitle = "",
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
@@ -108,6 +111,16 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
           notesToApprove={specialCardsData.notesToApprove}
           responsesToDo={specialCardsData.responsesToDo}
         />
+      </div>
+    );
+  }
+  
+  if (card.isNewCardButton) {
+    return (
+      <div 
+        className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+      >
+        <NewCardButton onClick={onAddNewCard} />
       </div>
     );
   }

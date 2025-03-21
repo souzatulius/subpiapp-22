@@ -5,7 +5,6 @@ import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardActions from '@/components/dashboard/DashboardActions';
 import CardGrid from '@/components/dashboard/CardGrid';
 import { useDashboardState } from '@/hooks/useDashboardState';
 
@@ -51,13 +50,12 @@ const Dashboard = () => {
           <div className="max-w-7xl mx-auto">
             <DashboardHeader firstName={firstName} />
             
-            <DashboardActions onAddNewCard={handleAddNewCard} />
-            
             <CardGrid 
               cards={actionCards}
               onCardsChange={setActionCards}
               onEditCard={handleEditCard}
               onDeleteCard={handleDeleteCard}
+              onAddNewCard={handleAddNewCard}
               quickDemandTitle={newDemandTitle}
               onQuickDemandTitleChange={setNewDemandTitle}
               onQuickDemandSubmit={handleQuickDemandSubmit}

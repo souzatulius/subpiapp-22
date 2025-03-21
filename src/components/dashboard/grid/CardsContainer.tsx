@@ -9,6 +9,7 @@ interface CardsContainerProps {
   cards: ActionCardItem[];
   onEditCard: (card: ActionCardItem) => void;
   onDeleteCard: (id: string) => void;
+  onAddNewCard: () => void;
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
@@ -26,6 +27,7 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   cards,
   onEditCard,
   onDeleteCard,
+  onAddNewCard,
   quickDemandTitle,
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
@@ -41,6 +43,7 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
             card={card} 
             onEdit={onEditCard}
             onDelete={onDeleteCard}
+            onAddNewCard={onAddNewCard}
             quickDemandTitle={quickDemandTitle}
             onQuickDemandTitleChange={onQuickDemandTitleChange}
             onQuickDemandSubmit={onQuickDemandSubmit}

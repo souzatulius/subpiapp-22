@@ -147,12 +147,13 @@ export const getDefaultCards = (): ActionCardItem[] => [
   },
   {
     id: 'new-card',
-    title: '+ Novo Card',
+    title: 'Adicionar Novo Card',
     icon: <PlusCircleIcon className="h-12 w-12" />,
     path: '',
     color: 'orange-light',
     width: '25',
     height: '1',
+    isCustom: false,
     isNewCardButton: true
   }
 ];

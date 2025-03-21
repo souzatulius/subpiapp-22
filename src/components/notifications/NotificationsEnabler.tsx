@@ -19,8 +19,8 @@ const NotificationsEnabler: React.FC = () => {
   }
 
   return (
-    <div className="col-span-1">
-      <Card className="bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-xl shadow-md overflow-hidden">
+    <div className="col-span-1 md:col-span-4">
+      <Card className="bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-xl shadow-md overflow-hidden h-full">
         <CardContent className="p-4 relative transform-gpu hover:scale-[1.03] transition-all duration-300 overflow-hidden">
           <div className="flex items-center space-x-3">
             <BellOff className="h-6 w-6 flex-shrink-0" />

@@ -10,6 +10,7 @@ interface CardGridProps {
   onCardsChange: (cards: ActionCardItem[]) => void;
   onEditCard: (card: ActionCardItem) => void;
   onDeleteCard: (id: string) => void;
+  onAddNewCard: () => void;
   // New props for special cards
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
@@ -30,6 +31,7 @@ const CardGrid: React.FC<CardGridProps> = ({
   onCardsChange, 
   onEditCard, 
   onDeleteCard,
+  onAddNewCard,
   quickDemandTitle = "",
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
@@ -84,6 +86,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         cards={cards}
         onEditCard={onEditCard}
         onDeleteCard={onDeleteCard}
+        onAddNewCard={onAddNewCard}
         quickDemandTitle={quickDemandTitle}
         onQuickDemandTitleChange={onQuickDemandTitleChange}
         onQuickDemandSubmit={onQuickDemandSubmit}
