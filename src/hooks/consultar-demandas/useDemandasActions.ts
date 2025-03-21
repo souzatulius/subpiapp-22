@@ -14,19 +14,40 @@ export const useDemandasActions = (refetch: () => Promise<any>) => {
     if (!selectedDemand) return;
     
     setDeleteLoading(true);
-    console.log('Excluindo demanda principal:', selectedDemand.id);
+    console.log('Iniciando exclusão da demanda:', selectedDemand.id);
     
     try {
-      // A exclusão dos dados relacionados já foi feita no DeleteDemandDialog
-      // Agora podemos excluir com segurança a demanda principal
-      const { error: deleteDemandError } = await supabase
+      // 1. First delete all responses related to the demand
+      const { error: responsesError } = await supabase
+        .from('respostas_demandas')
+        .delete()
+        .eq('demanda_id', selectedDemand.id);
+        
+      if (responsesError) {
+        console.error('Erro ao excluir respostas da demanda:', responsesError);
+        throw responsesError;
+      }
+      
+      // 2. Delete any notes related to the demand
+      const { error: notasError } = await supabase
+        .from('notas_oficiais')
+        .delete()
+        .eq('demanda_id', selectedDemand.id);
+        
+      if (notasError) {
+        console.error('Erro ao excluir notas da demanda:', notasError);
+        throw notasError;
+      }
+      
+      // 3. Now we can safely delete the demand itself
+      const { error: demandaError } = await supabase
         .from('demandas')
         .delete()
         .eq('id', selectedDemand.id);
         
-      if (deleteDemandError) {
-        console.error('Erro ao excluir demanda principal:', deleteDemandError);
-        throw deleteDemandError;
+      if (demandaError) {
+        console.error('Erro ao excluir demanda:', demandaError);
+        throw demandaError;
       }
       
       toast({

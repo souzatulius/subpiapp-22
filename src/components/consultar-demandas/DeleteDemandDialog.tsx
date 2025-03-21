@@ -11,8 +11,6 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 
 interface DeleteDemandDialogProps {
   isOpen: boolean;
@@ -29,88 +27,16 @@ const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
   isLoading,
   demandId
 }) => {
-  // Função para excluir a demanda e seus dados relacionados
   const handleDelete = async () => {
     if (!demandId) {
-      toast({
-        title: "Erro ao excluir",
-        description: "ID da demanda não encontrado.",
-        variant: "destructive"
-      });
+      console.error('ID da demanda não encontrado');
       return;
     }
     
     try {
-      // Primeiro, excluímos as notas relacionadas à demanda
-      console.log('Excluindo notas relacionadas à demanda:', demandId);
-      const { error: notasError } = await supabase
-        .from('notas_oficiais')
-        .delete()
-        .eq('demanda_id', demandId);
-      
-      if (notasError) {
-        console.error('Erro ao excluir notas relacionadas:', notasError);
-        toast({
-          title: "Erro ao excluir notas relacionadas",
-          description: notasError.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Excluir todas as possíveis referências na tabela respostas_demandas
-      console.log('Excluindo respostas relacionadas à demanda:', demandId);
-      
-      // CORREÇÃO: Verificamos se existem respostas para garantir que não há mais referências
-      const { data: respostasData, error: checkRespostasError } = await supabase
-        .from('respostas_demandas')
-        .select('id')
-        .eq('demanda_id', demandId);
-        
-      if (checkRespostasError) {
-        console.error('Erro ao verificar respostas existentes:', checkRespostasError);
-        toast({
-          title: "Erro ao verificar respostas relacionadas",
-          description: checkRespostasError.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      console.log('Respostas encontradas:', respostasData?.length);
-      
-      if (respostasData && respostasData.length > 0) {
-        // Se existirem respostas, excluímos uma a uma para garantir
-        for (const resposta of respostasData) {
-          console.log('Excluindo resposta ID:', resposta.id);
-          const { error: deleteRespostaError } = await supabase
-            .from('respostas_demandas')
-            .delete()
-            .eq('id', resposta.id);
-            
-          if (deleteRespostaError) {
-            console.error('Erro ao excluir resposta específica:', deleteRespostaError);
-            toast({
-              title: "Erro ao excluir resposta específica",
-              description: deleteRespostaError.message,
-              variant: "destructive"
-            });
-            return;
-          }
-        }
-      }
-      
-      // Depois de excluir todos os dados relacionados, continuamos com a exclusão da demanda
-      // A função onConfirm fará a exclusão da demanda
       await onConfirm();
-      
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao excluir demanda e dados relacionados:', error);
-      toast({
-        title: "Erro ao excluir",
-        description: "Ocorreu um erro ao excluir a demanda e seus dados relacionados.",
-        variant: "destructive"
-      });
     }
   };
 
