@@ -1,9 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { AlertCircle, BellOff, Bell, Loader2 } from 'lucide-react';
+import { AlertCircle, BellOff, Bell, Loader2, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
 const NotificationsEnabler: React.FC = () => {
@@ -16,6 +16,7 @@ const NotificationsEnabler: React.FC = () => {
   } = useNotifications();
   
   const { user } = useAuth();
+  const [dismissed, setDismissed] = useState(false);
 
   // Handle successful setup
   const handleEnableNotifications = async () => {
@@ -39,15 +40,25 @@ const NotificationsEnabler: React.FC = () => {
     }
   }, [error]);
 
-  // Don't show anything if user isn't logged in
-  if (!user) return null;
+  // Handler to dismiss notification message
+  const handleDismiss = () => {
+    setDismissed(true);
+  };
+
+  // Don't show anything if user isn't logged in or banner was dismissed
+  if (!user || dismissed) return null;
 
   // Show unsupported message
   if (isNotificationsSupported === false) {
     return (
-      <div className="flex items-center gap-2 p-3 mb-4 text-sm bg-yellow-50 border border-yellow-200 rounded-md">
-        <BellOff className="h-5 w-5 text-yellow-500" />
-        <span>Seu navegador não suporta notificações push.</span>
+      <div className="flex items-center justify-between gap-2 p-3 mb-4 text-sm bg-yellow-50 border border-yellow-200 rounded-md">
+        <div className="flex items-center gap-2">
+          <BellOff className="h-5 w-5 text-yellow-500" />
+          <span>Seu navegador não suporta notificações push.</span>
+        </div>
+        <Button variant="ghost" size="sm" onClick={handleDismiss} className="p-1 h-6 w-6">
+          <X className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
@@ -60,9 +71,14 @@ const NotificationsEnabler: React.FC = () => {
   // Already granted
   if (notificationsPermission === 'granted') {
     return (
-      <div className="flex items-center gap-2 p-3 mb-4 text-sm bg-green-50 border border-green-200 rounded-md">
-        <Bell className="h-5 w-5 text-green-500" />
-        <span>Notificações estão ativadas.</span>
+      <div className="flex items-center justify-between gap-2 p-3 mb-4 text-sm bg-green-50 border border-green-200 rounded-md">
+        <div className="flex items-center gap-2">
+          <Bell className="h-5 w-5 text-green-500" />
+          <span>Notificações estão ativadas.</span>
+        </div>
+        <Button variant="ghost" size="sm" onClick={handleDismiss} className="p-1 h-6 w-6">
+          <X className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
@@ -70,9 +86,14 @@ const NotificationsEnabler: React.FC = () => {
   // Denied permission
   if (notificationsPermission === 'denied') {
     return (
-      <div className="flex items-center gap-2 p-3 mb-4 text-sm bg-red-50 border border-red-200 rounded-md">
-        <AlertCircle className="h-5 w-5 text-red-500" />
-        <span>Notificações estão bloqueadas. Habilite-as nas configurações do seu navegador para receber atualizações.</span>
+      <div className="flex items-center justify-between gap-2 p-3 mb-4 text-sm bg-red-50 border border-red-200 rounded-md">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-red-500" />
+          <span>Notificações estão bloqueadas. Habilite-as nas configurações do seu navegador para receber atualizações.</span>
+        </div>
+        <Button variant="ghost" size="sm" onClick={handleDismiss} className="p-1 h-6 w-6">
+          <X className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
@@ -85,21 +106,26 @@ const NotificationsEnabler: React.FC = () => {
           <Bell className="h-5 w-5 text-blue-500" />
           <span className="text-sm">Ativar notificações para receber atualizações sobre suas demandas?</span>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleEnableNotifications}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Aguarde...
-            </>
-          ) : (
-            'Ativar'
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleEnableNotifications}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Aguarde...
+              </>
+            ) : (
+              'Ativar'
+            )}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleDismiss} className="p-1 h-6 w-6">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

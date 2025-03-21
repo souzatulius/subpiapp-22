@@ -34,7 +34,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onResetPassword,
   onApprove
 }) => {
-  // Filter users that need approval
+  // Filter users that need approval - users without permissions
   const pendingUsers = users.filter(user => !user.permissoes || user.permissoes.length === 0);
   const activeUsers = users.filter(user => user.permissoes && user.permissoes.length > 0);
 
