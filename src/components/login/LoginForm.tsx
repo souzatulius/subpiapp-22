@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -74,8 +73,17 @@ const LoginForm = () => {
   const handleGoogleLogin = async () => {
     try {
       await signInWithGoogle();
+      toast({
+        title: "Redirecting to Google",
+        description: "You'll be redirected to Google for authentication.",
+      });
     } catch (error) {
       console.error('Erro no login com Google:', error);
+      toast({
+        title: "Erro de autenticação",
+        description: "Falha ao conectar com o Google. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Session, User } from '@supabase/supabase-js';
@@ -58,7 +57,7 @@ export const signIn = async (email: string, password: string) => {
 // Login with Google
 export const signInWithGoogle = async () => {
   try {
-    await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         queryParams: {
@@ -68,9 +67,13 @@ export const signInWithGoogle = async () => {
         redirectTo: `${window.location.origin}/auth/callback`
       }
     });
+    
+    if (error) throw error;
+    
+    return { data, error: null };
   } catch (error) {
     console.error('Erro no login com Google:', error);
-    throw error;
+    return { data: null, error };
   }
 };
 
