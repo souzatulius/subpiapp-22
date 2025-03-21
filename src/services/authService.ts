@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Session, User } from '@supabase/supabase-js';
@@ -63,6 +64,7 @@ export const signInWithGoogle = async () => {
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
+          hd: 'smsub.prefeitura.sp.gov.br', // Restrict to specific domain
         },
         redirectTo: `${window.location.origin}/auth/callback`
       }
