@@ -51,6 +51,7 @@ const NotasDashboard: React.FC = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <ActionCard 
+          id="nova-nota"
           title="Nova Nota" 
           icon={<FileText className="h-12 w-12" />} 
           path="/dashboard/comunicacao/criar-nota" 
@@ -58,6 +59,7 @@ const NotasDashboard: React.FC = () => {
         />
         
         <ActionCard 
+          id="aprovar-nota"
           title="Aprovar Nota" 
           icon={<FileCheck className="h-12 w-12" />} 
           path="/dashboard/comunicacao/aprovar-nota" 
@@ -65,6 +67,7 @@ const NotasDashboard: React.FC = () => {
         />
         
         <ActionCard 
+          id="consultar-notas"
           title="Consultar Notas" 
           icon={<BookOpen className="h-12 w-12" />} 
           path="/dashboard/comunicacao/consultar-notas" 
@@ -72,6 +75,7 @@ const NotasDashboard: React.FC = () => {
         />
         
         <ActionCard 
+          id="relatorios-notas"
           title="Relatórios" 
           icon={<BarChart2 className="h-12 w-12" />} 
           path="/dashboard/comunicacao/relatorios" 

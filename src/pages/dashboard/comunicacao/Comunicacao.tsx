@@ -51,6 +51,7 @@ const ComunicacaoDashboard: React.FC = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <ActionCard 
+          id="nova-demanda"
           title="Nova Demanda" 
           icon={<ClipboardList className="h-12 w-12" />} 
           path="/dashboard/comunicacao/cadastrar" 
@@ -58,6 +59,7 @@ const ComunicacaoDashboard: React.FC = () => {
         />
         
         <ActionCard 
+          id="responder-demandas"
           title="Responder Demandas" 
           icon={<MessageSquareReply className="h-12 w-12" />} 
           path="/dashboard/comunicacao/responder" 
@@ -65,6 +67,7 @@ const ComunicacaoDashboard: React.FC = () => {
         />
         
         <ActionCard 
+          id="consultar-demandas"
           title="Consultar Demandas" 
           icon={<Search className="h-12 w-12" />} 
           path="/dashboard/comunicacao/consultar-demandas" 
@@ -72,6 +75,7 @@ const ComunicacaoDashboard: React.FC = () => {
         />
         
         <ActionCard 
+          id="relatorios"
           title="Relatórios" 
           icon={<BarChart2 className="h-12 w-12" />} 
           path="/dashboard/comunicacao/relatorios" 
