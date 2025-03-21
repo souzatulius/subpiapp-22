@@ -7,7 +7,7 @@ interface Autor {
 }
 
 interface AreaCoordenacao {
-  nome: string;
+  descricao: string;
 }
 
 export interface NotaOficial {
@@ -18,7 +18,7 @@ export interface NotaOficial {
   criado_em: string;
   atualizado_em: string;
   autor: Autor;
-  areas_coordenacao: AreaCoordenacao;
+  area_coordenacao: AreaCoordenacao;
 }
 
 interface NotasTableProps {
@@ -71,7 +71,7 @@ const NotasTable: React.FC<NotasTableProps> = ({ notas, loading, formatDate }) =
                   <div className="text-sm text-gray-500">{nota.autor.nome_completo}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">{nota.areas_coordenacao.nome}</div>
+                  <div className="text-sm text-gray-500">{nota.area_coordenacao.descricao}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -79,6 +79,7 @@ const NotasTable: React.FC<NotasTableProps> = ({ notas, loading, formatDate }) =
                     ${nota.status === 'pendente' ? 'bg-yellow-100 text-yellow-800' : ''}
                     ${nota.status === 'rascunho' ? 'bg-gray-100 text-gray-800' : ''}
                     ${nota.status === 'publicado' ? 'bg-blue-100 text-blue-800' : ''}
+                    ${nota.status === 'rejeitado' ? 'bg-red-100 text-red-800' : ''}
                   `}>
                     {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
                   </span>

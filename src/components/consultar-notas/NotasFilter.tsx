@@ -1,30 +1,18 @@
+
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Search, Download, FileDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Search, Download, Filter, Calendar, FileText } from 'lucide-react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger 
-} from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface NotasFilterProps {
   searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  setSearchQuery: (value: string) => void;
   statusFilter: string;
-  setStatusFilter: (status: string) => void;
+  setStatusFilter: (value: string) => void;
   areaFilter: string;
-  setAreaFilter: (area: string) => void;
+  setAreaFilter: (value: string) => void;
   dataInicioFilter: Date | undefined;
   setDataInicioFilter: (date: Date | undefined) => void;
   dataFimFilter: Date | undefined;
@@ -46,102 +34,74 @@ const NotasFilter: React.FC<NotasFilterProps> = ({
   handleExportPDF
 }) => {
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-        <Input 
-          placeholder="Buscar por título ou conteúdo..."
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      
-      <div className="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-3 md:space-y-0">
-        <div className="flex items-center gap-2 flex-1">
-          <Filter size={18} className="text-gray-500" />
+    <div className="space-y-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="text"
+            placeholder="Buscar por título, autor ou área..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        
+        <div className="flex flex-wrap gap-3">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="min-w-[180px]">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os status</SelectItem>
-              <SelectItem value="rascunho">Rascunho</SelectItem>
+              <SelectItem value="all">Todos os status</SelectItem>
               <SelectItem value="pendente">Pendente</SelectItem>
               <SelectItem value="aprovado">Aprovado</SelectItem>
-              <SelectItem value="publicado">Publicado</SelectItem>
               <SelectItem value="rejeitado">Rejeitado</SelectItem>
+              <SelectItem value="publicado">Publicado</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        
-        <div className="flex items-center gap-2 flex-1">
-          <FileText size={18} className="text-gray-500" />
+          
           <Select value={areaFilter} onValueChange={setAreaFilter}>
-            <SelectTrigger className="min-w-[180px]">
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Área" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as áreas</SelectItem>
+              <SelectItem value="all">Todas as áreas</SelectItem>
               <SelectItem value="comunicacao">Comunicação</SelectItem>
-              <SelectItem value="educacao">Educação</SelectItem>
-              <SelectItem value="saude">Saúde</SelectItem>
-              <SelectItem value="cultura">Cultura</SelectItem>
-              <SelectItem value="esportes">Esportes</SelectItem>
-              <SelectItem value="zeladoria">Zeladoria</SelectItem>
+              <SelectItem value="areas_verdes">Áreas Verdes</SelectItem>
+              <SelectItem value="manutencao_viaria">Manutenção Viária</SelectItem>
+              <SelectItem value="fiscalizacao">Fiscalização</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-[200px] pl-3 flex items-center justify-start text-left font-normal">
-                <Calendar className="mr-2 h-4 w-4" />
-                {dataInicioFilter ? (
-                  format(dataInicioFilter, 'dd/MM/yyyy', { locale: ptBR })
-                ) : (
-                  <span>Data inicial</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={dataInicioFilter}
-                onSelect={setDataInicioFilter}
-                initialFocus
-                locale={ptBR}
-              />
-            </PopoverContent>
-          </Popover>
           
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-[200px] pl-3 flex items-center justify-start text-left font-normal">
-                <Calendar className="mr-2 h-4 w-4" />
-                {dataFimFilter ? (
-                  format(dataFimFilter, 'dd/MM/yyyy', { locale: ptBR })
-                ) : (
-                  <span>Data final</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={dataFimFilter}
-                onSelect={setDataFimFilter}
-                initialFocus
-                locale={ptBR}
-              />
-            </PopoverContent>
-          </Popover>
-          
-          <Button variant="outline" onClick={handleExportPDF}>
-            <Download size={18} className="mr-2" />
+          <Button 
+            onClick={handleExportPDF} 
+            variant="outline" 
+            className="flex items-center gap-1"
+          >
+            <FileDown className="h-4 w-4" />
             Exportar PDF
           </Button>
+        </div>
+      </div>
+      
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">De:</span>
+          <DatePicker 
+            date={dataInicioFilter} 
+            setDate={setDataInicioFilter}
+            placeholder="Data inicial"
+          />
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Até:</span>
+          <DatePicker 
+            date={dataFimFilter} 
+            setDate={setDataFimFilter}
+            placeholder="Data final"
+          />
         </div>
       </div>
     </div>

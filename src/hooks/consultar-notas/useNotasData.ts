@@ -8,8 +8,8 @@ export const useNotasData = () => {
   const [notas, setNotas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [areaFilter, setAreaFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [areaFilter, setAreaFilter] = useState('all');
   const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
   const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
 
@@ -30,11 +30,11 @@ export const useNotasData = () => {
         `)
         .order('criado_em', { ascending: false });
 
-      if (statusFilter !== '') {
+      if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       }
 
-      if (areaFilter !== '') {
+      if (areaFilter !== 'all') {
         query = query.eq('area_coordenacao_id', areaFilter);
       }
 
