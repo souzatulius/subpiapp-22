@@ -150,7 +150,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     title: 'Novo Card',
     icon: <PlusCircle className="h-12 w-12" />,
     path: '',
-    color: 'amber-50',
+    color: 'orange-light', // Changed from 'amber-50' to 'orange-light' which is an allowed value
     width: '25',
     height: '1',
     isCustom: false,
