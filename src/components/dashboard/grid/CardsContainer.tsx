@@ -37,7 +37,8 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   return (
     <SortableContext items={cards.map(card => card.id)}>
       <div className="grid grid-cols-4 gap-6 auto-rows-auto">
-        {cards.map((card) => (
+        {/* First show the search card */}
+        {cards.filter(card => card.isSearch).map((card) => (
           <ActionCardWrapper 
             key={card.id}
             card={card} 
@@ -52,8 +53,73 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
           />
         ))}
         
-        {/* Add NotificationsEnabler after the cards */}
+        {/* Add NotificationsEnabler after the search card */}
         <NotificationsEnabler />
+        
+        {/* Show pending actions card */}
+        {cards.filter(card => card.isPendingActions).map((card) => (
+          <ActionCardWrapper 
+            key={card.id}
+            card={card} 
+            onEdit={onEditCard}
+            onDelete={onDeleteCard}
+            onAddNewCard={onAddNewCard}
+            quickDemandTitle={quickDemandTitle}
+            onQuickDemandTitleChange={onQuickDemandTitleChange}
+            onQuickDemandSubmit={onQuickDemandSubmit}
+            onSearchSubmit={onSearchSubmit}
+            specialCardsData={specialCardsData}
+          />
+        ))}
+        
+        {/* Show overdue demands card */}
+        {cards.filter(card => card.isOverdueDemands).map((card) => (
+          <ActionCardWrapper 
+            key={card.id}
+            card={card} 
+            onEdit={onEditCard}
+            onDelete={onDeleteCard}
+            onAddNewCard={onAddNewCard}
+            quickDemandTitle={quickDemandTitle}
+            onQuickDemandTitleChange={onQuickDemandTitleChange}
+            onQuickDemandSubmit={onQuickDemandSubmit}
+            onSearchSubmit={onSearchSubmit}
+            specialCardsData={specialCardsData}
+          />
+        ))}
+        
+        {/* Show standard cards */}
+        {cards.filter(card => !card.isSearch && !card.isPendingActions && !card.isOverdueDemands && 
+                            !card.isQuickDemand && !card.isNewCardButton).map((card) => (
+          <ActionCardWrapper 
+            key={card.id}
+            card={card} 
+            onEdit={onEditCard}
+            onDelete={onDeleteCard}
+            onAddNewCard={onAddNewCard}
+            quickDemandTitle={quickDemandTitle}
+            onQuickDemandTitleChange={onQuickDemandTitleChange}
+            onQuickDemandSubmit={onQuickDemandSubmit}
+            onSearchSubmit={onSearchSubmit}
+            specialCardsData={specialCardsData}
+          />
+        ))}
+        
+        {/* Show quick demand and new card button at the end */}
+        {cards.filter(card => card.isQuickDemand || card.isNewCardButton).map((card) => (
+          <ActionCardWrapper 
+            key={card.id}
+            card={card} 
+            onEdit={onEditCard}
+            onDelete={onDeleteCard}
+            onAddNewCard={onAddNewCard}
+            quickDemandTitle={quickDemandTitle}
+            onQuickDemandTitleChange={onQuickDemandTitleChange}
+            onQuickDemandSubmit={onQuickDemandSubmit}
+            onSearchSubmit={onSearchSubmit}
+            specialCardsData={specialCardsData}
+          />
+        ))}
       </div>
     </SortableContext>
   );

@@ -5,7 +5,7 @@ import {
   MessageSquareReply, 
   FileCheck, 
   BarChart2, 
-  PlusCircleIcon, 
+  PlusCircle, 
   Search,
   Clock,
   AlertTriangle
@@ -24,7 +24,7 @@ export const getIconComponentFromId = (iconId: string) => {
     case 'bar-chart-2':
       return <BarChart2 className="h-12 w-12" />;
     case 'plus-circle':
-      return <PlusCircleIcon className="h-12 w-12" />;
+      return <PlusCircle className="h-12 w-12" />;
     case 'search':
       return <Search className="h-12 w-12" />;
     case 'clock':
@@ -137,7 +137,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
   {
     id: 'quick-demand',
     title: '', // Removed title as requested
-    icon: <PlusCircleIcon className="h-12 w-12" />,
+    icon: <PlusCircle className="h-12 w-12" />,
     path: '/dashboard/comunicacao/cadastrar',
     color: 'blue-dark',
     width: '50', // Set to 50% width
@@ -148,9 +148,9 @@ export const getDefaultCards = (): ActionCardItem[] => [
   {
     id: 'new-card',
     title: 'Novo Card',
-    icon: <PlusCircleIcon className="h-12 w-12" />,
+    icon: <PlusCircle className="h-12 w-12" />,
     path: '',
-    color: 'orange-light',
+    color: 'amber-50',
     width: '25',
     height: '1',
     isCustom: false,
