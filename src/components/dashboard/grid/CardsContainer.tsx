@@ -36,7 +36,7 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
 }) => {
   return (
     <SortableContext items={cards.map(card => card.id)}>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
+      <div className="grid grid-cols-4 gap-6 auto-rows-auto">
         {cards.map((card) => (
           <ActionCardWrapper 
             key={card.id}

@@ -136,18 +136,18 @@ export const getDefaultCards = (): ActionCardItem[] => [
   // Last row - Quick demand and New card
   {
     id: 'quick-demand',
-    title: '',
+    title: '', // Removed title as requested
     icon: <PlusCircleIcon className="h-12 w-12" />,
     path: '/dashboard/comunicacao/cadastrar',
     color: 'blue-dark',
-    width: '25',
+    width: '50', // Set to 50% width
     height: '1',
     isCustom: false,
     isQuickDemand: true,
   },
   {
     id: 'new-card',
-    title: 'Adicionar Novo Card',
+    title: 'Novo Card',
     icon: <PlusCircleIcon className="h-12 w-12" />,
     path: '',
     color: 'orange-light',

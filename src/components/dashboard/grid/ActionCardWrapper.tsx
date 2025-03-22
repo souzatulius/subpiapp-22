@@ -14,11 +14,11 @@ export const getWidthClasses = (width: string = '25') => {
     case '25':
       return 'col-span-1';
     case '50':
-      return 'col-span-1 md:col-span-2';
+      return 'col-span-2';
     case '75':
-      return 'col-span-1 md:col-span-3';
+      return 'col-span-3';
     case '100':
-      return 'col-span-1 md:col-span-4';
+      return 'col-span-4';
     default:
       return 'col-span-1';
   }
@@ -55,18 +55,20 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
 }) => {
   if (card.isQuickDemand) {
     return (
-      <SortableActionCard 
-        key={card.id} 
-        card={card} 
-        onEdit={onEdit}
-        onDelete={onDelete}
-      >
-        <QuickDemandCard 
-          value={quickDemandTitle}
-          onChange={onQuickDemandTitleChange}
-          onSubmit={onQuickDemandSubmit}
-        />
-      </SortableActionCard>
+      <div className="col-span-2 flex-none"> {/* Fixed width to 50% */}
+        <SortableActionCard 
+          key={card.id} 
+          card={{...card, width: '50'}} 
+          onEdit={onEdit}
+          onDelete={onDelete}
+        >
+          <QuickDemandCard 
+            value={quickDemandTitle}
+            onChange={onQuickDemandTitleChange}
+            onSubmit={onQuickDemandSubmit}
+          />
+        </SortableActionCard>
+      </div>
     );
   }
   
@@ -89,7 +91,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   if (card.isOverdueDemands) {
     return (
       <div 
-        className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+        className={`${getWidthClasses(card.width)} ${card.height === '2' ? 'row-span-2' : ''} flex-none`}
       >
         <OverdueDemandsCard
           id={card.id}
@@ -103,7 +105,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   if (card.isPendingActions) {
     return (
       <div 
-        className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+        className={`${getWidthClasses(card.width)} ${card.height === '2' ? 'row-span-2' : ''} flex-none`}
       >
         <PendingActionsCard
           id={card.id}
@@ -117,7 +119,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   if (card.isNewCardButton) {
     return (
       <div 
-        className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+        className="col-span-1 flex-none" 
       >
         <NewCardButton onClick={onAddNewCard} />
       </div>

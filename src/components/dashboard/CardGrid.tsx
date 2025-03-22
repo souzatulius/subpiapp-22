@@ -67,7 +67,7 @@ const CardGrid: React.FC<CardGridProps> = ({
       
       onCardsChange(newCards);
       
-      // Toast message removed from here
+      // Toast message removed from here - no success message on card reorder
     }
   };
 

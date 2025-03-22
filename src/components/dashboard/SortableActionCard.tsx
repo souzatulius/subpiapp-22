@@ -19,23 +19,28 @@ export const getWidthClasses = (width: string = '25') => {
     case '25':
       return 'col-span-1';
     case '50':
-      return 'col-span-1 md:col-span-2';
+      return 'col-span-2';
     case '75':
-      return 'col-span-1 md:col-span-3';
+      return 'col-span-3';
     case '100':
-      return 'col-span-1 md:col-span-4';
+      return 'col-span-4';
     default:
       return 'col-span-1';
   }
 };
 
 // Control buttons component for card actions
-export const Controls: React.FC<{
+export const Controls = ({
+  cardId,
+  onEdit,
+  onDelete,
+  isCustom,
+}: {
   cardId: string;
   onEdit: () => void;
   onDelete?: (id: string) => void;
   isCustom?: boolean;
-}> = ({ cardId, onEdit, onDelete, isCustom }) => {
+}) => {
   return (
     <div className="flex space-x-1">
       <button 
@@ -75,11 +80,16 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    width: '100%',
+    height: '100%',
   };
 
   const handleEdit = () => {
     onEdit(card);
   };
+
+  // Determine how wide the card should be
+  const widthClass = getWidthClasses(card.width);
   
   return (
     <div 
@@ -87,7 +97,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
       style={style} 
       {...attributes} 
       {...listeners}
-      className={`${card.width ? getWidthClasses(card.width) : 'col-span-1'} ${card.height === '2' ? 'row-span-2' : ''}`}
+      className={`${widthClass} ${card.height === '2' ? 'row-span-2' : ''} flex-none`}
     >
       {children ? (
         <div className="w-full h-full relative group">
