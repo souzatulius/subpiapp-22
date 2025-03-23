@@ -73,9 +73,11 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-auto" hideCloseButton>
+      <DialogContent className="sm:max-w-md md:max-w-2xl p-6 rounded-xl" hideCloseButton>
         <DialogHeader>
-          <DialogTitle>{initialData ? 'Editar Card' : 'Novo Card'}</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold text-gray-800">
+            {initialData ? 'Editar Card' : 'Novo Card'}
+          </DialogTitle>
         </DialogHeader>
         
         <CardFormMain
@@ -84,6 +86,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
           selectedIconId={selectedIconId}
           setSelectedIconId={setSelectedIconId}
           initialData={initialData}
+          onSubmit={handleSubmit}
         />
       </DialogContent>
     </Dialog>

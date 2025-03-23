@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { CardFormPreviewProps } from './types';
 import { getColorClass, getIconComponentById, dashboardPages } from './utils';
 import { useFormContext } from 'react-hook-form';
@@ -21,28 +20,34 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
     { className: 'h-12 w-12' }
   );
 
+  // Generate text color based on background
+  const getTextColor = (bgColor: string) => {
+    const darkColors = ['blue-dark', 'gray-dark', 'orange-light', 'gray-ultra-light'];
+    return darkColors.includes(color) ? 'text-white' : 'text-gray-800';
+  };
+
   return (
     <div className="space-y-2">
-      <Label>Preview</Label>
-      <div className="flex justify-center items-center">
+      <h3 className="text-sm font-medium text-gray-700 mb-3">Preview do Card</h3>
+      <div className="flex items-center justify-center">
         <div 
-          className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden
-            ${height === '2' ? 'h-[180px]' : 'h-[120px]'} 
-            ${width === '100' ? 'w-full' : 
-              width === '75' ? 'w-[75%]' : 
-              width === '50' ? 'w-[180px]' : 'w-[120px]'} 
-            ${getColorClass(color)}`}
+          className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden h-[200px] w-[200px] ${getColorClass(color)}`}
         >
           <div className="mb-3">
-            {iconComponent}
+            {React.cloneElement(iconComponent, { 
+              className: `h-16 w-16 ${getTextColor(color)}`
+            })}
           </div>
-          <h3 className="text-lg font-medium text-center line-clamp-2">{title || 'Título do Card'}</h3>
+          <h3 className={`text-lg font-medium text-center line-clamp-2 ${getTextColor(color)}`}>
+            {title || 'Título do Card'}
+          </h3>
         </div>
       </div>
       
-      <div className="text-xs text-gray-500 text-center mt-2">
-        <p>Tamanho: {width}% {height === '2' ? '(altura dupla)' : ''}</p>
-        <p className="mt-1">Redirecionamento: {dashboardPages.find(page => page.value === form?.watch('path'))?.label || 'Dashboard'}</p>
+      <div className="text-xs text-gray-500 text-center mt-4">
+        <p className="mt-1">
+          Redirecionamento: {dashboardPages.find(page => page.value === form?.watch('path'))?.label || 'Dashboard'}
+        </p>
       </div>
     </div>
   );

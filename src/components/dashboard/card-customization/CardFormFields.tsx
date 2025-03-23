@@ -14,7 +14,6 @@ import {
 import { dashboardPages } from './utils';
 import ColorOptions from './ColorOptions';
 import IconSelector from './IconSelector';
-import DimensionOptions from './DimensionOptions';
 
 interface CardFormFieldsProps {
   form: UseFormReturn<FormSchema>;
@@ -34,9 +33,9 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Título</FormLabel>
+            <FormLabel className="text-sm font-medium text-gray-700">Título do Card</FormLabel>
             <FormControl>
-              <Input placeholder="Digite o título do card" {...field} />
+              <Input placeholder="Digite o título do card" {...field} className="h-10" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -48,14 +47,14 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         name="path"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Link de Redirecionamento</FormLabel>
+            <FormLabel className="text-sm font-medium text-gray-700">Direcionamento do Card</FormLabel>
             <FormControl>
               <Select 
                 onValueChange={field.onChange} 
                 defaultValue={field.value}
                 value={field.value}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full h-10">
                   <SelectValue placeholder="Selecione uma página" />
                 </SelectTrigger>
                 <SelectContent>
@@ -72,33 +71,29 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         )}
       />
       
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="color"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cor</FormLabel>
-              <FormControl>
-                <ColorOptions 
-                  selectedColor={field.value} 
-                  onSelectColor={(color) => form.setValue('color', color as any)} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <DimensionOptions form={form} />
-      </div>
+      <FormField
+        control={form.control}
+        name="color"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-sm font-medium text-gray-700">Cor do Card</FormLabel>
+            <FormControl>
+              <ColorOptions 
+                selectedColor={field.value} 
+                onSelectColor={(color) => form.setValue('color', color as any)} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       
       <FormField
         control={form.control}
         name="iconId"
         render={() => (
           <FormItem>
-            <FormLabel>Ícone</FormLabel>
+            <FormLabel className="text-sm font-medium text-gray-700">Ícone</FormLabel>
             <FormControl>
               <IconSelector 
                 selectedIconId={selectedIconId}
