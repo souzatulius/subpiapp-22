@@ -1,23 +1,17 @@
 
-import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
+import { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useUserProfile } from '@/components/layouts/header/useUserProfile';
 import { toast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import EditModal from '@/components/settings/EditModal';
-import { Camera, Upload, Trash2, Loader2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { UserProfile } from '../types';
 
-interface ChangePhotoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) => {
+export const usePhotoUpload = (
+  userProfile: UserProfile | null, 
+  fetchUserProfile: () => Promise<void>,
+  onClose: () => void
+) => {
   const { user } = useAuth();
-  const { userProfile, fetchUserProfile, loading: profileLoading } = useUserProfile();
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,11 +19,9 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
 
   // Reset state when modal opens
   useEffect(() => {
-    if (isOpen) {
-      setPreviewUrl(null);
-      setSelectedFile(null);
-    }
-  }, [isOpen]);
+    setPreviewUrl(null);
+    setSelectedFile(null);
+  }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,9 +72,9 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
         const filename = urlParts[urlParts.length - 1];
         
         if (filename) {
-          // Create the bucket if it doesn't exist
-          const { data: bucketExists } = await supabase.storage.getBucket('profile_photos');
-          if (!bucketExists) {
+          // Check if bucket exists and create if not
+          const { data: bucketData } = await supabase.storage.getBucket('profile_photos');
+          if (!bucketData) {
             await supabase.storage.createBucket('profile_photos', {
               public: true
             });
@@ -126,8 +118,8 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     setLoading(true);
     try {
       // Check if bucket exists, create if not
-      const { data: bucketExists } = await supabase.storage.getBucket('profile_photos');
-      if (!bucketExists) {
+      const { data: bucketData } = await supabase.storage.getBucket('profile_photos');
+      if (!bucketData) {
         await supabase.storage.createBucket('profile_photos', {
           public: true
         });
@@ -179,97 +171,14 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  const getUserInitials = (name: string) => {
-    if (!name) return 'U';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-    }
-    return parts[0][0].toUpperCase();
+  return {
+    loading,
+    previewUrl,
+    selectedFile,
+    fileInputRef,
+    handleFileChange,
+    handleUploadClick,
+    handleRemovePhoto,
+    handleSavePhoto
   };
-
-  const footerContent = (
-    <>
-      <Button variant="outline" onClick={onClose} disabled={loading || profileLoading}>
-        Cancelar
-      </Button>
-      {selectedFile && (
-        <Button 
-          variant="default" 
-          onClick={handleSavePhoto} 
-          disabled={loading || profileLoading}
-        >
-          {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</> : 'Salvar'}
-        </Button>
-      )}
-    </>
-  );
-
-  return (
-    <EditModal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Alterar Foto de Perfil"
-      footerContent={footerContent}
-    >
-      {profileLoading ? (
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-subpi-blue" />
-        </div>
-      ) : (
-        <div className="flex flex-col items-center space-y-4">
-          <Avatar className="h-32 w-32 border-4 border-gray-200">
-            {previewUrl ? (
-              <AvatarImage src={previewUrl} alt="Preview" />
-            ) : userProfile?.foto_perfil_url ? (
-              <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
-            ) : (
-              <AvatarFallback className="text-3xl bg-subpi-blue text-white">
-                {userProfile?.nome_completo ? getUserInitials(userProfile.nome_completo) : 'U'}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            className="hidden"
-          />
-          
-          <div className="flex space-x-3">
-            <Button
-              onClick={handleUploadClick}
-              variant="outline"
-              size="sm"
-              disabled={loading}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Selecionar Imagem
-            </Button>
-            
-            {(userProfile?.foto_perfil_url || previewUrl) && (
-              <Button
-                onClick={handleRemovePhoto}
-                variant="outline"
-                size="sm"
-                disabled={loading}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Remover Foto
-              </Button>
-            )}
-          </div>
-          
-          <div className="text-sm text-gray-500 text-center mt-2">
-            <p>Tamanho máximo: 5MB</p>
-            <p>Formatos aceitos: JPG, PNG, GIF</p>
-          </div>
-        </div>
-      )}
-    </EditModal>
-  );
 };
-
-export default ChangePhotoModal;

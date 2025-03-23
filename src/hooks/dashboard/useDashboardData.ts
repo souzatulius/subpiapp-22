@@ -1,8 +1,59 @@
 
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from './types';
-import { defaultActionCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
+
+// Default cards as a fallback when no custom cards are available
+const defaultActionCards: ActionCardItem[] = [
+  {
+    id: "card-1",
+    title: "Cadastrar Demanda",
+    path: "/dashboard/comunicacao/cadastrar-demanda",
+    icon: "ClipboardList",
+    color: "blue",
+    isCustom: false
+  },
+  {
+    id: "card-2",
+    title: "Responder Demanda",
+    path: "/dashboard/comunicacao/responder-demandas",
+    icon: "MessageSquare",
+    color: "green",
+    isCustom: false
+  },
+  {
+    id: "card-3",
+    title: "Criar Nota Oficial",
+    path: "/dashboard/comunicacao/criar-nota-oficial",
+    icon: "FileText",
+    color: "orange",
+    isCustom: false
+  },
+  {
+    id: "card-4",
+    title: "Aprovar Nota Oficial",
+    path: "/dashboard/comunicacao/aprovar-nota-oficial",
+    icon: "CheckCircle",
+    color: "purple",
+    isCustom: false
+  },
+  {
+    id: "card-5",
+    title: "Consultar Notas",
+    path: "/dashboard/comunicacao/consultar-notas",
+    icon: "Search",
+    color: "yellow",
+    isCustom: false
+  },
+  {
+    id: "card-6",
+    title: "Consultar Demandas",
+    path: "/dashboard/comunicacao/consultar-demandas",
+    icon: "List",
+    color: "red",
+    isCustom: false
+  }
+];
 
 export const useDashboardData = (userId?: string) => {
   const [firstName, setFirstName] = useState('');

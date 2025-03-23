@@ -36,7 +36,7 @@ export const useCardActions = (
             .from('user_dashboard')
             .update({ 
               cards_config: JSON.stringify(updatedCards),
-              updated_at: new Date()
+              updated_at: new Date().toISOString() // Convert Date to string
             })
             .eq('user_id', user.id);
         }
@@ -140,7 +140,7 @@ export const useCardActions = (
           .from('user_dashboard')
           .update({ 
             cards_config: JSON.stringify(updatedCards),
-            updated_at: new Date()
+            updated_at: new Date().toISOString() // Convert Date to string
           })
           .eq('user_id', user.id);
       } else {

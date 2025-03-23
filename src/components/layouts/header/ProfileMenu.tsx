@@ -10,7 +10,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useUserProfile } from './useUserProfile';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
-import ChangePhotoModal from '@/components/profile/ChangePhotoModal';
+import ChangePhotoModal from '@/components/profile/photo/ChangePhotoModal';
+import { getUserInitials } from '@/components/profile/photo/AvatarDisplay';
 
 export const ProfileMenu: React.FC = () => {
   const navigate = useNavigate();
@@ -38,15 +39,6 @@ export const ProfileMenu: React.FC = () => {
         variant: "destructive"
       });
     }
-  };
-
-  const getUserInitials = (name: string) => {
-    if (!name) return 'U';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-    }
-    return parts[0][0].toUpperCase();
   };
 
   const handleOpenEditProfile = () => {
