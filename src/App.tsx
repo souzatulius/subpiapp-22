@@ -41,49 +41,51 @@ const queryClient = new QueryClient({
   }
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/email-verified" element={<EmailVerified />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            
-            {/* Dashboard route */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-
-            {/* Dashboard with shared layout */}
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              {/* Comunicação routes */}
-              <Route path="comunicacao/comunicacao" element={<ComunicacaoDashboard />} />
-              <Route path="comunicacao/notas" element={<NotasDashboard />} />
-              <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
-              <Route path="comunicacao/responder" element={<ResponderDemandas />} />
-              <Route path="comunicacao/consultar-demandas" element={<ConsultarDemandas />} />
-              <Route path="comunicacao/criar-nota" element={<CriarNotaOficial />} />
-              <Route path="comunicacao/aprovar-nota" element={<AprovarNotaOficial />} />
-              <Route path="comunicacao/consultar-notas" element={<ConsultarNotas />} />
-              <Route path="comunicacao/relatorios" element={<RelatoriosPage />} />
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/email-verified" element={<EmailVerified />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               
-              {/* Zeladoria routes */}
-              <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
-            </Route>
+              {/* Dashboard route */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-            {/* 404 route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
+              {/* Dashboard with shared layout */}
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                {/* Comunicação routes */}
+                <Route path="comunicacao/comunicacao" element={<ComunicacaoDashboard />} />
+                <Route path="comunicacao/notas" element={<NotasDashboard />} />
+                <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
+                <Route path="comunicacao/responder" element={<ResponderDemandas />} />
+                <Route path="comunicacao/consultar-demandas" element={<ConsultarDemandas />} />
+                <Route path="comunicacao/criar-nota" element={<CriarNotaOficial />} />
+                <Route path="comunicacao/aprovar-nota" element={<AprovarNotaOficial />} />
+                <Route path="comunicacao/consultar-notas" element={<ConsultarNotas />} />
+                <Route path="comunicacao/relatorios" element={<RelatoriosPage />} />
+                
+                {/* Zeladoria routes */}
+                <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
+              </Route>
+
+              {/* 404 route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </TooltipProvider>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;

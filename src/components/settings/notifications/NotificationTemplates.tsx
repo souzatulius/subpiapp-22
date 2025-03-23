@@ -1,38 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertCircle, Edit, Plus, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-import { 
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { MessageSquare, Plus, Save, Loader2, FileText } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 interface NotificationConfig {
   id: string;
@@ -46,390 +27,434 @@ interface NotificationTemplate {
   configuracao_id: string;
   conteudo: string;
   tipo_envio: string;
+  criado_em: string;
+  atualizado_em: string;
+  configuracao?: NotificationConfig;
 }
 
-const NotificationTemplates: React.FC = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [configurations, setConfigurations] = useState<NotificationConfig[]>([]);
+interface TemplateFormData {
+  id?: string;
+  configuracao_id: string;
+  conteudo: string;
+  tipo_envio: string;
+}
+
+const NotificationTemplates = () => {
   const [templates, setTemplates] = useState<NotificationTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTemplate, setActiveTemplate] = useState<NotificationTemplate | null>(null);
-  const [editContent, setEditContent] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newTemplate, setNewTemplate] = useState({
+  const [configs, setConfigs] = useState<NotificationConfig[]>([]);
+  const [selectedEnvio, setSelectedEnvio] = useState<string>('app');
+  const [loading, setLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState<NotificationTemplate | null>(null);
+  const [formData, setFormData] = useState<TemplateFormData>({
     configuracao_id: '',
     conteudo: '',
     tipo_envio: 'app'
   });
+  const { toast } = useToast();
+  const { user } = useAuth();
 
+  // Fetch templates and configurations
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
+    const fetchData = async () => {
+      if (!user) return;
       
-      // Fetch configurations
-      const { data: configData, error: configError } = await supabase
-        .from('configuracoes_notificacoes')
-        .select('id, tipo, titulo, descricao')
-        .order('titulo');
-      
-      if (configError) throw configError;
-      
-      // Fetch templates
-      const { data: templateData, error: templateError } = await supabase
-        .from('templates_notificacoes')
-        .select('*');
-      
-      if (templateError) throw templateError;
-      
-      setConfigurations(configData || []);
-      setTemplates(templateData || []);
-      
-      // Set active template if any exists
-      if (templateData && templateData.length > 0) {
-        setActiveTemplate(templateData[0]);
-        setEditContent(templateData[0].conteudo);
+      try {
+        setLoading(true);
+        
+        // Fetch notification configurations
+        const { data: configsData, error: configsError } = await supabase
+          .from('configuracoes_notificacoes')
+          .select('id, tipo, titulo, descricao')
+          .order('titulo');
+          
+        if (configsError) throw configsError;
+        setConfigs(configsData || []);
+        
+        // Fetch templates
+        const { data: templatesData, error: templatesError } = await supabase
+          .from('templates_notificacoes')
+          .select(`
+            *,
+            configuracao:configuracao_id(id, tipo, titulo, descricao)
+          `)
+          .order('tipo_envio');
+          
+        if (templatesError) throw templatesError;
+        setTemplates(templatesData || []);
+      } catch (error: any) {
+        console.error('Erro ao carregar templates de notificações:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar os templates de notificações.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Erro ao carregar dados de templates:', error);
+    };
+    
+    fetchData();
+  }, [user, toast]);
+
+  // Filter templates by tipo_envio
+  const filteredTemplates = templates.filter(template => 
+    template.tipo_envio === selectedEnvio
+  );
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.configuracao_id || !formData.conteudo) {
       toast({
-        title: "Erro",
-        description: "Não foi possível carregar os templates de notificações.",
-        variant: "destructive"
+        title: 'Campos obrigatórios',
+        description: 'Preencha todos os campos obrigatórios.',
+        variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
-
-  const handleTemplateSelect = (template: NotificationTemplate) => {
-    setActiveTemplate(template);
-    setEditContent(template.conteudo);
-    setIsEditing(false);
-  };
-
-  const startEditing = () => {
-    setIsEditing(true);
-  };
-
-  const cancelEditing = () => {
-    if (activeTemplate) {
-      setEditContent(activeTemplate.conteudo);
-    }
-    setIsEditing(false);
-  };
-
-  const saveTemplate = async () => {
-    if (!activeTemplate) return;
     
     try {
-      setIsSaving(true);
-      
-      const { error } = await supabase
-        .from('templates_notificacoes')
-        .update({ 
-          conteudo: editContent,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', activeTemplate.id);
+      if (formData.id) {
+        // Update existing template
+        const { error } = await supabase
+          .from('templates_notificacoes')
+          .update({
+            configuracao_id: formData.configuracao_id,
+            conteudo: formData.conteudo,
+            tipo_envio: formData.tipo_envio,
+            atualizado_em: new Date().toISOString()
+          })
+          .eq('id', formData.id);
+          
+        if (error) throw error;
         
-      if (error) throw error;
-      
-      // Update local state
-      setTemplates(prev => 
-        prev.map(t => 
-          t.id === activeTemplate.id ? { ...t, conteudo: editContent } : t
-        )
-      );
-      setActiveTemplate({ ...activeTemplate, conteudo: editContent });
-      setIsEditing(false);
-      
-      toast({
-        title: "Sucesso",
-        description: "Template de notificação atualizado com sucesso.",
-      });
-    } catch (error) {
-      console.error('Erro ao salvar template:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar o template de notificação.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const createNewTemplate = async () => {
-    try {
-      if (!newTemplate.configuracao_id || !newTemplate.conteudo) {
         toast({
-          title: "Campos obrigatórios",
-          description: "Preencha todos os campos obrigatórios.",
-          variant: "destructive"
+          title: 'Template atualizado',
+          description: 'O template foi atualizado com sucesso.',
         });
-        return;
+      } else {
+        // Create new template
+        const { error } = await supabase
+          .from('templates_notificacoes')
+          .insert({
+            configuracao_id: formData.configuracao_id,
+            conteudo: formData.conteudo,
+            tipo_envio: formData.tipo_envio
+          });
+          
+        if (error) throw error;
+        
+        toast({
+          title: 'Template criado',
+          description: 'O novo template foi criado com sucesso.',
+        });
       }
       
-      setIsSaving(true);
-      
+      // Refresh templates
       const { data, error } = await supabase
         .from('templates_notificacoes')
-        .insert({
-          configuracao_id: newTemplate.configuracao_id,
-          conteudo: newTemplate.conteudo,
-          tipo_envio: newTemplate.tipo_envio
-        })
-        .select();
+        .select(`
+          *,
+          configuracao:configuracao_id(id, tipo, titulo, descricao)
+        `)
+        .order('tipo_envio');
         
       if (error) throw error;
+      setTemplates(data || []);
       
-      // Add to templates list
-      if (data && data.length > 0) {
-        setTemplates(prev => [...prev, data[0]]);
-        setActiveTemplate(data[0]);
-        setEditContent(data[0].conteudo);
-      }
-      
-      // Reset form
-      setNewTemplate({
-        configuracao_id: '',
-        conteudo: '',
-        tipo_envio: 'app'
-      });
-      setIsDialogOpen(false);
-      
+      // Reset form and close dialog
+      resetForm();
+      setIsFormOpen(false);
+    } catch (error: any) {
+      console.error('Erro ao salvar template:', error);
       toast({
-        title: "Sucesso",
-        description: "Novo template de notificação criado com sucesso.",
+        title: 'Erro',
+        description: 'Não foi possível salvar o template.',
+        variant: 'destructive',
       });
-    } catch (error) {
-      console.error('Erro ao criar template:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar o template de notificação.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  const getConfigName = (configId: string) => {
-    const config = configurations.find(c => c.id === configId);
-    return config ? config.titulo : 'Desconhecido';
+  // Handle edit template
+  const handleEditTemplate = (template: NotificationTemplate) => {
+    setFormData({
+      id: template.id,
+      configuracao_id: template.configuracao_id,
+      conteudo: template.conteudo,
+      tipo_envio: template.tipo_envio
+    });
+    setIsFormOpen(true);
   };
 
-  if (isLoading) {
+  // Handle delete template
+  const handleDeleteTemplate = async () => {
+    if (!currentTemplate) return;
+    
+    try {
+      const { error } = await supabase
+        .from('templates_notificacoes')
+        .delete()
+        .eq('id', currentTemplate.id);
+        
+      if (error) throw error;
+      
+      // Update templates list
+      setTemplates(templates.filter(t => t.id !== currentTemplate.id));
+      
+      toast({
+        title: 'Template excluído',
+        description: 'O template foi excluído com sucesso.',
+      });
+      
+      setIsDeleteDialogOpen(false);
+      setCurrentTemplate(null);
+    } catch (error: any) {
+      console.error('Erro ao excluir template:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir o template.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Reset form data
+  const resetForm = () => {
+    setFormData({
+      configuracao_id: '',
+      conteudo: '',
+      tipo_envio: 'app'
+    });
+  };
+
+  // Handle new template button click
+  const handleNewTemplate = () => {
+    resetForm();
+    setFormData(prev => ({
+      ...prev,
+      tipo_envio: selectedEnvio
+    }));
+    setIsFormOpen(true);
+  };
+
+  if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="space-y-2">
+                <div className="h-6 w-40 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Templates de Notificações</h3>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Novo Template
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[625px]">
-            <DialogHeader>
-              <DialogTitle>Criar Novo Template</DialogTitle>
-              <DialogDescription>
-                Crie um novo template para envio de notificações aos usuários.
-              </DialogDescription>
-            </DialogHeader>
+    <>
+      <Card>
+        <CardContent className="pt-6">
+          <Tabs value={selectedEnvio} onValueChange={setSelectedEnvio} className="w-full">
+            <div className="flex justify-between items-center mb-4">
+              <TabsList>
+                <TabsTrigger value="app">App</TabsTrigger>
+                <TabsTrigger value="email">Email</TabsTrigger>
+                <TabsTrigger value="push">Push</TabsTrigger>
+              </TabsList>
+              
+              <Button onClick={handleNewTemplate} className="flex items-center">
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Template
+              </Button>
+            </div>
             
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="tipo">Tipo de Notificação</Label>
-                <Select
-                  value={newTemplate.configuracao_id}
-                  onValueChange={(value) => setNewTemplate(prev => ({ ...prev, configuracao_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {configurations.map(config => (
-                      <SelectItem key={config.id} value={config.id}>
-                        {config.titulo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="tipoEnvio">Método de Envio</Label>
-                <Select
-                  value={newTemplate.tipo_envio}
-                  onValueChange={(value) => setNewTemplate(prev => ({ ...prev, tipo_envio: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="app">App (Push)</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="sms">SMS</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="conteudo">Conteúdo</Label>
-                <Textarea
-                  id="conteudo"
-                  rows={6}
-                  value={newTemplate.conteudo}
-                  onChange={(e) => setNewTemplate(prev => ({ ...prev, conteudo: e.target.value }))}
-                  placeholder="Digite o conteúdo do template..."
-                />
-                <p className="text-xs text-muted-foreground">
-                  Use {"{nome}"} para incluir o nome do usuário e {"{info}"} para informações específicas.
-                </p>
-              </div>
+            <TabsContent value="app" className="space-y-4">
+              {renderTemplatesList(filteredTemplates)}
+            </TabsContent>
+            
+            <TabsContent value="email" className="space-y-4">
+              {renderTemplatesList(filteredTemplates)}
+            </TabsContent>
+            
+            <TabsContent value="push" className="space-y-4">
+              {renderTemplatesList(filteredTemplates)}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+      
+      {/* Template Form Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {formData.id ? 'Editar Template' : 'Novo Template'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="tipo">Tipo de Notificação</Label>
+              <Select 
+                value={formData.configuracao_id} 
+                onValueChange={(value) => setFormData({...formData, configuracao_id: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo de notificação" />
+                </SelectTrigger>
+                <SelectContent>
+                  {configs.map(config => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.titulo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="tipo_envio">Forma de Envio</Label>
+              <Select 
+                value={formData.tipo_envio} 
+                onValueChange={(value) => setFormData({...formData, tipo_envio: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a forma de envio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="app">App</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="push">Push</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="conteudo">
+                Conteúdo do Template
+                <span className="text-xs text-gray-500 ml-2">
+                  Use {'{nome}'}, {'{data}'} etc. como variáveis
+                </span>
+              </Label>
+              <Textarea
+                id="conteudo"
+                value={formData.conteudo}
+                onChange={(e) => setFormData({...formData, conteudo: e.target.value})}
+                rows={6}
+                placeholder="Digite o conteúdo do template..."
+              />
             </div>
             
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-              <Button onClick={createNewTemplate} disabled={isSaving}>
-                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Criar Template
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsFormOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit">
+                {formData.id ? 'Atualizar' : 'Criar'} Template
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       
-      {templates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <MessageSquare className="h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-700">Nenhum template encontrado</h3>
-          <p className="text-sm text-gray-500 mt-2 mb-4">
-            Crie templates para diferentes tipos de notificações
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <p>
+            Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita.
           </p>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Criar Primeiro Template
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteTemplate}
+            >
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+  // Helper function to render templates list
+  function renderTemplatesList(templates: NotificationTemplate[]) {
+    if (templates.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <AlertCircle className="h-10 w-10 text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900">Nenhum template encontrado</h3>
+          <p className="text-gray-500 mt-1 mb-4">
+            Não existem templates de {selectedEnvio === 'app' ? 'aplicativo' : 
+              selectedEnvio === 'email' ? 'email' : 'notificações push'} definidos.
+          </p>
+          <Button onClick={handleNewTemplate}>
+            Criar Novo Template
           </Button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Templates</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ul className="divide-y">
-                  {templates.map(template => (
-                    <li
-                      key={template.id}
-                      className={`px-4 py-3 cursor-pointer hover:bg-muted transition-colors ${
-                        activeTemplate?.id === template.id ? 'bg-muted' : ''
-                      }`}
-                      onClick={() => handleTemplateSelect(template)}
-                    >
-                      <p className="font-medium text-sm">
-                        {getConfigName(template.configuracao_id)}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Via: {template.tipo_envio.toUpperCase()}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+      );
+    }
+    
+    return templates.map(template => (
+      <div key={template.id} className="border rounded-md p-4 space-y-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-medium">{template.configuracao?.titulo || 'Template sem título'}</h3>
+            <p className="text-xs text-gray-500">
+              Última atualização: {template.atualizado_em ? 
+                format(new Date(template.atualizado_em), 'dd/MM/yyyy HH:mm', {locale: pt}) : 
+                'Data desconhecida'}
+            </p>
           </div>
-          
-          <div className="md:col-span-2">
-            {activeTemplate ? (
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-medium">
-                      {getConfigName(activeTemplate.configuracao_id)}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Via {activeTemplate.tipo_envio.toUpperCase()}
-                    </p>
-                  </div>
-                  
-                  {!isEditing ? (
-                    <Button variant="outline" size="sm" onClick={startEditing}>
-                      Editar
-                    </Button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={cancelEditing}>
-                        Cancelar
-                      </Button>
-                      <Button size="sm" onClick={saveTemplate} disabled={isSaving}>
-                        {isSaving && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                        Salvar
-                      </Button>
-                    </div>
-                  )}
-                </CardHeader>
-                
-                <CardContent>
-                  {isEditing ? (
-                    <div className="space-y-2">
-                      <Label htmlFor="editContent">Conteúdo do Template</Label>
-                      <Textarea
-                        id="editContent"
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        rows={8}
-                        className="font-mono text-sm"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Use {"{nome}"} para incluir o nome do usuário e {"{info}"} para informações específicas.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="rounded-md bg-muted p-4 font-mono text-sm whitespace-pre-wrap">
-                      {activeTemplate.conteudo}
-                    </div>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <FileText className="h-3 w-3" />
-                    Última atualização: {new Date(activeTemplate.atualizado_em).toLocaleDateString('pt-BR')}
-                  </div>
-                </CardFooter>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">
-                  Selecione um template para visualizar ou editar
-                </CardContent>
-              </Card>
-            )}
+          <div className="flex space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => handleEditTemplate(template)}
+            >
+              <Edit className="h-4 w-4" />
+              <span className="sr-only">Editar</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+              onClick={() => {
+                setCurrentTemplate(template);
+                setIsDeleteDialogOpen(true);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Excluir</span>
+            </Button>
           </div>
         </div>
-      )}
-    </div>
-  );
+        <pre className="bg-gray-50 p-3 rounded text-sm whitespace-pre-wrap">
+          {template.conteudo}
+        </pre>
+      </div>
+    ));
+  }
 };
 
 export default NotificationTemplates;

@@ -1,30 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Check, X, AlertCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-import { useAdminCheck } from '@/components/dashboard/sidebar/useAdminCheck';
-import { 
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { AlertCircle, Bell, Info, Loader2, SaveIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface NotificationConfig {
   id: string;
@@ -35,199 +18,222 @@ interface NotificationConfig {
   frequencia: string;
 }
 
-const NotificationConfigurations: React.FC = () => {
-  const { user } = useAuth();
-  const { isAdmin } = useAdminCheck(user);
-  const { toast } = useToast();
+const NotificationConfigurations = () => {
   const [configurations, setConfigurations] = useState<NotificationConfig[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
+  // Fetch notification configurations
   useEffect(() => {
-    fetchConfigurations();
-  }, []);
-
-  const fetchConfigurations = async () => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('configuracoes_notificacoes')
-        .select('*')
-        .order('tipo');
+    const fetchConfigurations = async () => {
+      if (!user) return;
       
-      if (error) throw error;
-      
-      setConfigurations(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar configurações de notificações:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as configurações de notificações.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleToggleActive = (id: string, active: boolean) => {
-    if (!isAdmin) return;
-    
-    setConfigurations(prev => 
-      prev.map(config => 
-        config.id === id ? { ...config, ativo: active } : config
-      )
-    );
-  };
-
-  const handleChangeFrequency = (id: string, frequency: string) => {
-    if (!isAdmin) return;
-    
-    setConfigurations(prev => 
-      prev.map(config => 
-        config.id === id ? { ...config, frequencia: frequency } : config
-      )
-    );
-  };
-
-  const saveChanges = async () => {
-    if (!isAdmin) return;
-    
-    try {
-      setIsSaving(true);
-      
-      for (const config of configurations) {
-        const { error } = await supabase
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
           .from('configuracoes_notificacoes')
-          .update({ 
-            ativo: config.ativo, 
-            frequencia: config.frequencia,
-            atualizado_em: new Date().toISOString()
-          })
-          .eq('id', config.id);
+          .select('*')
+          .order('titulo');
           
         if (error) throw error;
+        setConfigurations(data || []);
+      } catch (error: any) {
+        console.error('Erro ao carregar configurações de notificações:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar as configurações de notificações.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
+    };
+    
+    fetchConfigurations();
+  }, [user, toast]);
+
+  // Toggle notification status
+  const handleToggleActive = async (id: string, currentValue: boolean) => {
+    const updatedConfigurations = configurations.map(config => 
+      config.id === id ? { ...config, ativo: !currentValue } : config
+    );
+    
+    setConfigurations(updatedConfigurations);
+    
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('configuracoes_notificacoes')
+        .update({ ativo: !currentValue })
+        .eq('id', id);
+        
+      if (error) throw error;
       
       toast({
-        title: "Sucesso",
-        description: "Configurações de notificações atualizadas com sucesso.",
+        title: 'Configuração atualizada',
+        description: !currentValue 
+          ? 'Notificação ativada com sucesso.' 
+          : 'Notificação desativada com sucesso.',
       });
-    } catch (error) {
-      console.error('Erro ao salvar configurações de notificações:', error);
+    } catch (error: any) {
+      console.error('Erro ao atualizar configuração:', error);
+      // Revert the change in UI
+      setConfigurations(configurations);
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar as configurações de notificações.",
-        variant: "destructive"
+        title: 'Erro',
+        description: 'Não foi possível atualizar a configuração.',
+        variant: 'destructive',
       });
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
   };
 
-  if (isLoading) {
+  // Update notification frequency
+  const handleFrequencyChange = async (id: string, frequency: string) => {
+    const updatedConfigurations = configurations.map(config => 
+      config.id === id ? { ...config, frequencia: frequency } : config
+    );
+    
+    setConfigurations(updatedConfigurations);
+    
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('configuracoes_notificacoes')
+        .update({ frequencia: frequency })
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: 'Frequência atualizada',
+        description: 'A frequência da notificação foi atualizada com sucesso.',
+      });
+    } catch (error: any) {
+      console.error('Erro ao atualizar frequência:', error);
+      // Revert the change in UI
+      setConfigurations(configurations);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar a frequência da notificação.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Add a new configuration
+  const handleAddConfiguration = async () => {
+    toast({
+      title: 'Funcionalidade em desenvolvimento',
+      description: 'A adição de novas configurações será implementada em breve.',
+    });
+  };
+
+  if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 w-60 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="h-6 w-12 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {!isAdmin && (
-        <Alert variant="warning">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Acesso Limitado</AlertTitle>
-          <AlertDescription>
-            Você está vendo as configurações atuais, mas apenas administradores podem alterá-las.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Tipos de Notificações</h3>
-        
-        {isAdmin && (
-          <Button 
-            onClick={saveChanges} 
-            disabled={isSaving} 
-            className="flex items-center gap-2"
-          >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <SaveIcon className="h-4 w-4" />}
-            Salvar Alterações
-          </Button>
-        )}
-      </div>
-      
-      <div className="grid grid-cols-1 gap-4">
-        {configurations.map((config) => (
-          <Card key={config.id} className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-base font-medium flex items-center gap-2">
-                    {config.titulo}
-                    <Badge variant={config.ativo ? "default" : "outline"}>
-                      {config.ativo ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </CardTitle>
-                  <CardDescription className="mt-1">{config.descricao}</CardDescription>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="space-y-6">
+          {configurations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <AlertCircle className="h-10 w-10 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900">Nenhuma configuração encontrada</h3>
+              <p className="text-gray-500 mt-1 mb-4">
+                Não existem configurações de notificações definidas no sistema.
+              </p>
+              <Button onClick={handleAddConfiguration}>
+                Adicionar Configuração
+              </Button>
+            </div>
+          ) : (
+            <>
+              {configurations.map((config) => (
+                <div key={config.id} className="flex flex-col space-y-3 border-b pb-4 last:border-b-0">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-sm">{config.titulo}</div>
+                      <div className="text-sm text-gray-500">{config.descricao}</div>
+                    </div>
+                    <div className="flex items-center">
+                      <Switch 
+                        checked={config.ativo} 
+                        disabled={saving}
+                        onCheckedChange={() => handleToggleActive(config.id, config.ativo)}
+                      />
+                      <span className="ml-2 w-12 text-xs">
+                        {config.ativo ? 
+                          <span className="text-green-600 flex items-center"><Check className="h-3 w-3 mr-1" /> Ativo</span> : 
+                          <span className="text-gray-500 flex items-center"><X className="h-3 w-3 mr-1" /> Inativo</span>
+                        }
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {config.ativo && (
+                    <div className="flex items-center space-x-4 text-sm">
+                      <Label className="text-xs text-gray-500">Frequência:</Label>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant={config.frequencia === 'imediata' ? 'default' : 'outline'} 
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleFrequencyChange(config.id, 'imediata')}
+                          disabled={saving}
+                        >
+                          Imediata
+                        </Button>
+                        <Button 
+                          variant={config.frequencia === 'diaria' ? 'default' : 'outline'} 
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleFrequencyChange(config.id, 'diaria')}
+                          disabled={saving}
+                        >
+                          Diária
+                        </Button>
+                        <Button 
+                          variant={config.frequencia === 'semanal' ? 'default' : 'outline'} 
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleFrequencyChange(config.id, 'semanal')}
+                          disabled={saving}
+                        >
+                          Semanal
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id={`active-${config.id}`}
-                    checked={config.ativo}
-                    onCheckedChange={(checked) => handleToggleActive(config.id, checked)}
-                    disabled={!isAdmin}
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent>
-              <div className="pt-2 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor={`frequency-${config.id}`} className="text-sm">
-                    Frequência:
-                  </Label>
-                  <Select
-                    value={config.frequencia}
-                    onValueChange={(value) => handleChangeFrequency(config.id, value)}
-                    disabled={!isAdmin || !config.ativo}
-                  >
-                    <SelectTrigger className="w-[180px]" id={`frequency-${config.id}`}>
-                      <SelectValue placeholder="Selecione..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="imediata">Imediata</SelectItem>
-                      <SelectItem value="diaria">Diária</SelectItem>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="text-xs text-muted-foreground flex items-center">
-                  <Info className="h-3 w-3 mr-1" /> 
-                  Tipo: <code className="ml-1 text-xs bg-muted p-1 rounded">{config.tipo}</code>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        
-        {configurations.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Bell className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-700">Nenhuma configuração encontrada</h3>
-            <p className="text-sm text-gray-500 mt-2">
-              Não há configurações de notificações disponíveis no momento
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+              ))}
+            </>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
