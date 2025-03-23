@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { X, Pencil } from 'lucide-react';
+import { X, Pencil, ClipboardList, FileCheck, MessageSquareReply, BarChart2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -19,7 +19,7 @@ interface ActionCardProps {
   title: string;
   icon: React.ReactNode;
   onClick?: () => void;
-  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light';
+  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light' | 'lime';
   path?: string;
   id: string;
   onDelete?: (id: string) => void;
@@ -48,6 +48,8 @@ const getColorClasses = (color: string) => {
       return 'bg-gray-700 text-white border-gray-600 hover:bg-gray-800';
     case 'gray-ultra-light':
       return 'bg-gray-25 text-gray-600 border-gray-50 hover:bg-gray-50';
+    case 'lime':
+      return 'bg-lime-50 text-lime-600 border-lime-100 hover:bg-lime-100';
     default:
       return 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100';
   }
@@ -102,14 +104,28 @@ const ActionCard: React.FC<ActionCardProps> = ({
     setShowDeleteDialog(false);
   };
 
-  // Properly render the icon element
+  // Enhanced renderIcon function to handle different types of icons
   const renderIcon = () => {
+    // Handle case when icon is already a valid React element
     if (React.isValidElement(icon)) {
-      return React.cloneElement(icon as React.ReactElement<any>, { 
+      return React.cloneElement(icon as React.ReactElement, {
         className: 'h-12 w-12'
       });
     }
-    return null;
+    
+    // Fallback based on title for standard cards
+    if (title === 'Nova Demanda') {
+      return <ClipboardList className="h-12 w-12" />;
+    } else if (title === 'Aprovar Nota') {
+      return <FileCheck className="h-12 w-12" />;
+    } else if (title === 'Responder Demandas') {
+      return <MessageSquareReply className="h-12 w-12" />;
+    } else if (title === 'Números da Comunicação') {
+      return <BarChart2 className="h-12 w-12" />;
+    }
+    
+    // Fallback for empty or invalid icon
+    return <ClipboardList className="h-12 w-12" />;
   };
 
   return (
