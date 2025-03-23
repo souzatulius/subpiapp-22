@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, X, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, X, ChevronDown, Search } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -76,7 +76,17 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
         <Label htmlFor="titulo" className={`block ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
           Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
         </Label>
-        <Input id="titulo" name="titulo" value={formData.titulo} onChange={handleChange} className={`${hasError('titulo') ? 'border-orange-500 ring-orange-500' : ''}`} />
+        {/* Título da Demanda - estilo similar ao SmartSearchCard */}
+        <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+          <Input 
+            id="titulo" 
+            name="titulo" 
+            value={formData.titulo} 
+            onChange={handleChange} 
+            className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasError('titulo') ? 'placeholder-orange-300' : ''}`} 
+            placeholder="Digite o título da demanda..."
+          />
+        </div>
         {hasError('titulo') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>}
       </div>
       
@@ -127,32 +137,34 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
             </div>
           ) : (
             <div className="relative">
-              <div className="flex">
+              {/* Campo de busca de serviço - estilo similar ao SmartSearchCard */}
+              <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+                <Search className="h-5 w-5 text-gray-400 ml-4 mr-2 flex-shrink-0" />
                 <Input 
                   type="text" 
                   name="serviceSearch" 
                   value={serviceSearch} 
                   onChange={handleChange} 
-                  className={`flex-1 rounded-l-lg ${hasError('servico_id') ? 'border-orange-500 ring-orange-500' : ''}`} 
+                  className={`flex-1 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasError('servico_id') ? 'placeholder-orange-300' : ''}`} 
                   placeholder="Pesquisar serviço" 
                 />
                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                   <PopoverTrigger asChild>
                     <Button 
-                      variant="outline" 
-                      className="rounded-l-none border-l-0"
+                      variant="ghost" 
+                      className="h-full px-4 border-l border-gray-200"
                     >
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-56 p-0" align="end">
+                  <PopoverContent className="w-[calc(100%-2rem)] p-0 max-w-none bg-white rounded-xl shadow-lg border border-gray-200" align="center">
                     <div className="max-h-60 overflow-y-auto">
                       {filteredServicesBySearch.length > 0 ? (
                         filteredServicesBySearch.map(service => (
                           <Button 
                             key={service.id} 
                             variant="ghost" 
-                            className="w-full justify-start px-3 py-2 text-left hover:bg-blue-50"
+                            className="w-full justify-start px-4 py-3 text-left hover:bg-blue-50 rounded-none"
                             onClick={() => {
                               handleServiceSelect(service.id);
                               setIsPopoverOpen(false);
@@ -162,7 +174,7 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
                           </Button>
                         ))
                       ) : (
-                        <p className="p-3 text-sm text-gray-500">Nenhum serviço encontrado</p>
+                        <p className="p-4 text-sm text-gray-500">Nenhum serviço encontrado</p>
                       )}
                     </div>
                   </PopoverContent>
@@ -170,12 +182,12 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
               </div>
               
               {serviceSearch && filteredServicesBySearch.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                   {filteredServicesBySearch.map(service => (
                     <div 
                       key={service.id} 
                       onClick={() => handleServiceSelect(service.id)} 
-                      className="px-4 py-2 cursor-pointer hover:bg-blue-50"
+                      className="px-4 py-3 cursor-pointer hover:bg-blue-50 text-base text-subpi-gray-text transition-colors"
                     >
                       {service.descricao}
                     </div>
