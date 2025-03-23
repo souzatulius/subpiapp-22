@@ -38,16 +38,27 @@ export const useSpecialCardsData = () => {
         }
         
         // 2. Fetch notes waiting for approval (if user has permission)
-        const { data: notesData, error: notesError } = await supabase
-          .from('notas_oficiais')
-          .select('id')
-          .eq('status', 'pendente')
-          .limit(10);
+        const { data: userPermissions, error: permissionsError } = await supabase
+          .from('usuario_permissoes')
+          .select('permissao_id, permissoes(descricao)')
+          .eq('usuario_id', user.id);
           
-        if (notesError) {
-          console.error('Error fetching notes to approve:', notesError);
-        } else {
-          setNotesToApprove(notesData.length);
+        if (!permissionsError) {
+          // Check if user is admin or has communication team role
+          const isAdmin = userPermissions?.some(p => p.permissoes?.descricao === 'Admin');
+          const isCommsTeam = userPermissions?.some(p => p.permissoes?.descricao === 'Time de Comunicação');
+          
+          if (isAdmin || isCommsTeam) {
+            const { data: notesData, error: notesError } = await supabase
+              .from('notas_oficiais')
+              .select('id')
+              .eq('status', 'pendente')
+              .limit(10);
+              
+            if (!notesError) {
+              setNotesToApprove(notesData.length);
+            }
+          }
         }
         
         // 3. Fetch demands waiting for response from this user area

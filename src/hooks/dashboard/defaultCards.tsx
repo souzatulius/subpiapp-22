@@ -8,7 +8,8 @@ import {
   PlusCircle, 
   Search,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 import React from 'react';
 
@@ -31,6 +32,8 @@ export const getIconComponentFromId = (iconId: string) => {
       return <Clock className="h-12 w-12" />;
     case 'alert-triangle':
       return <AlertTriangle className="h-12 w-12" />;
+    case 'check-circle':
+      return <CheckCircle className="h-12 w-12" />;
     default:
       return <ClipboardList className="h-12 w-12" />;
   }
@@ -50,6 +53,7 @@ export const getIconIdFromComponent = (component: React.ReactNode): string => {
   if (componentStr.includes('Search')) return 'search';
   if (componentStr.includes('Clock')) return 'clock';
   if (componentStr.includes('AlertTriangle')) return 'alert-triangle';
+  if (componentStr.includes('CheckCircle')) return 'check-circle';
   
   return 'clipboard-list'; // Default
 };
