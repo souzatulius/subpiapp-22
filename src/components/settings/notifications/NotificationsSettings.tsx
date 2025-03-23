@@ -56,9 +56,11 @@ const NotificationsSettings: React.FC = () => {
         </CardDescription>
         
         <Separator className="my-2" />
-        
+      </CardHeader>
+      
+      <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-4">
             <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
             <TabsTrigger value="preferencias">Preferências</TabsTrigger>
             {isAdmin && (
@@ -68,29 +70,27 @@ const NotificationsSettings: React.FC = () => {
               </>
             )}
           </TabsList>
+          
+          <TabsContent value="configuracoes" className="space-y-4">
+            <NotificationConfigurations />
+          </TabsContent>
+          
+          <TabsContent value="preferencias" className="space-y-4">
+            <NotificationUserPreferences />
+          </TabsContent>
+          
+          {isAdmin && (
+            <>
+              <TabsContent value="templates" className="space-y-4">
+                <NotificationTemplates />
+              </TabsContent>
+              
+              <TabsContent value="estatisticas" className="space-y-4">
+                <NotificationStats />
+              </TabsContent>
+            </>
+          )}
         </Tabs>
-      </CardHeader>
-      
-      <CardContent>
-        <TabsContent value="configuracoes" className="space-y-4">
-          <NotificationConfigurations />
-        </TabsContent>
-        
-        <TabsContent value="preferencias" className="space-y-4">
-          <NotificationUserPreferences />
-        </TabsContent>
-        
-        {isAdmin && (
-          <>
-            <TabsContent value="templates" className="space-y-4">
-              <NotificationTemplates />
-            </TabsContent>
-            
-            <TabsContent value="estatisticas" className="space-y-4">
-              <NotificationStats />
-            </TabsContent>
-          </>
-        )}
       </CardContent>
     </Card>
   );
