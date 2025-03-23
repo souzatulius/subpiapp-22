@@ -60,6 +60,7 @@ export const dashboardPages = [
   { value: '/settings?tab=tipos_midia', label: 'Tipos de Mídia (Configurações)' },
   { value: '/settings?tab=origens_demanda', label: 'Origem das Demandas (Configurações)' },
   { value: '/settings?tab=distritos_bairros', label: 'Distritos e Bairros (Configurações)' },
+  { value: '/settings?tab=areas', label: 'Áreas de Coordenação (Configurações)' },
 ];
 
 // List of available icons for the cards - now using proper JSX elements

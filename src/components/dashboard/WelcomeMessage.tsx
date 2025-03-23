@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { X, Info, ArrowUpDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const WelcomeMessage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
