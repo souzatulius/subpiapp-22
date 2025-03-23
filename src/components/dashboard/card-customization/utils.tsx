@@ -61,7 +61,7 @@ export const dashboardPages = [
   { value: '/settings?tab=distritos_bairros', label: 'Distritos e Bairros (Configurações)' },
 ];
 
-// List of available icons for the cards
+// List of available icons for the cards - now using proper JSX elements
 export const iconsData = [
   { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <ClipboardList /> },
   { id: 'message-square', label: 'Responder Demanda', component: <MessageSquare /> },
@@ -80,7 +80,7 @@ export const iconsData = [
   { id: 'map-pin', label: 'Distritos e Bairros', component: <MapPin /> },
 ];
 
-// Function to get the icon component by its ID
+// Function to get the icon component by its ID - returning a proper React element
 export const getIconComponentById = (id: string) => {
   const icon = iconsData.find(icon => icon.id === id);
   return icon?.component || <ClipboardList />;
@@ -88,15 +88,18 @@ export const getIconComponentById = (id: string) => {
 
 // Function to identify the icon component based on its type
 export const identifyIconComponent = (icon: React.ReactNode): string => {
-  if (typeof icon === 'object' && React.isValidElement(icon)) {
-    const iconType = React. Children.only(icon).type;
-
-    const foundIcon = iconsData.find(item => item.component.type === iconType);
-    if (foundIcon) {
-      return foundIcon.id;
+  if (React.isValidElement(icon)) {
+    const iconType = icon.type;
+    
+    // Find a matching icon by comparing the component types
+    for (const item of iconsData) {
+      if (React.isValidElement(item.component) && item.component.type === iconType) {
+        return item.id;
+      }
     }
   }
-  return 'clipboard-list';
+  
+  return 'clipboard-list'; // Default fallback
 };
 
 export const widthOptions = [

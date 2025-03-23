@@ -17,6 +17,7 @@ const IconSelector: React.FC<IconSelectorProps> = ({
       <ScrollArea className="h-full p-2">
         <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
           {iconsData.map((icon) => {
+            // We need to make sure we're rendering the icon component properly
             const IconComponent = icon.component;
             
             return (
@@ -28,9 +29,12 @@ const IconSelector: React.FC<IconSelectorProps> = ({
                 `}
                 title={icon.label}
               >
-                {React.isValidElement(IconComponent) ? 
-                  React.cloneElement(IconComponent, { className: 'h-6 w-6' }) : 
-                  null
+                {/* Properly handle the icon component */}
+                {React.isValidElement(IconComponent) && 
+                  React.cloneElement(IconComponent, { 
+                    size: 24,
+                    className: 'h-6 w-6' 
+                  })
                 }
               </div>
             );

@@ -102,6 +102,17 @@ const ActionCard: React.FC<ActionCardProps> = ({
     setShowDeleteDialog(false);
   };
 
+  // Properly render the icon element
+  const renderIcon = () => {
+    if (React.isValidElement(icon)) {
+      return React.cloneElement(icon, { 
+        size: 48,
+        className: 'h-12 w-12'
+      });
+    }
+    return null;
+  };
+
   return (
     <>
       <Card 
@@ -131,7 +142,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
             </button>
           )}
           <div className="mb-4">
-            {icon}
+            {renderIcon()}
           </div>
           <h3 className="text-lg font-medium text-center">{title}</h3>
         </CardContent>
