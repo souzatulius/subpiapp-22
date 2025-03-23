@@ -53,7 +53,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="distrito" className="block mb-2">
+        <Label htmlFor="distrito" className="block mb-2 text-lg">
           Distrito
         </Label>
         
@@ -63,14 +63,25 @@ const LocationStep: React.FC<LocationStepProps> = ({
             setSelectedDistrito(value);
             handleSelectChange('bairro_id', ''); // Reset bairro when distrito changes
           }}
-          className="grid grid-cols-2 gap-2 md:grid-cols-3"
+          className="flex flex-wrap gap-3"
         >
           {distritos.map(distrito => (
-            <div key={distrito.id} className="flex items-center space-x-2 bg-gray-50 p-2 rounded-md">
-              <RadioGroupItem value={distrito.id} id={`distrito-${distrito.id}`} />
-              <Label htmlFor={`distrito-${distrito.id}`} className="cursor-pointer">
-                {distrito.nome}
-              </Label>
+            <div key={distrito.id} className="flex-1 min-w-[160px]">
+              <label 
+                htmlFor={`distrito-${distrito.id}`} 
+                className={`flex items-center justify-center gap-2 p-3 rounded-xl text-base font-medium cursor-pointer transition-all duration-300 border ${
+                  selectedDistrito === distrito.id 
+                    ? 'bg-subpi-blue text-white border-subpi-blue' 
+                    : 'bg-gray-50 border-gray-200 hover:bg-subpi-blue hover:text-white hover:border-subpi-blue'
+                }`}
+              >
+                <RadioGroupItem 
+                  value={distrito.id} 
+                  id={`distrito-${distrito.id}`}
+                  className="h-5 w-5 transition-colors hover:border-subpi-orange"
+                />
+                <span className="text-lg">{distrito.nome}</span>
+              </label>
             </div>
           ))}
         </RadioGroup>
@@ -81,17 +92,17 @@ const LocationStep: React.FC<LocationStepProps> = ({
           <Label htmlFor="bairro_id" className={`block mb-2 ${hasError('bairro_id') ? 'text-orange-500 font-semibold' : ''}`}>
             Bairro
           </Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {filteredBairros.length > 0 ? (
               filteredBairros.map(bairro => (
                 <button
                   key={bairro.id}
                   type="button"
                   onClick={() => handleSelectChange('bairro_id', bairro.id)}
-                  className={`p-2 text-sm text-center rounded-md border transition-colors 
+                  className={`p-3 text-sm text-center rounded-xl border transition-all duration-300
                     ${formData.bairro_id === bairro.id 
-                      ? 'bg-primary text-white border-primary' 
-                      : 'bg-background border-input hover:bg-muted'
+                      ? 'bg-subpi-blue text-white border-subpi-blue' 
+                      : 'bg-gray-50 border-gray-200 hover:bg-subpi-blue hover:text-white hover:border-subpi-blue'
                     } ${hasError('bairro_id') ? 'border-orange-500' : ''}`}
                 >
                   {bairro.nome}
