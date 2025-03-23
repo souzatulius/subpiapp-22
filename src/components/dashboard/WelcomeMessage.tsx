@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { X, Info, ArrowsUpDown } from 'lucide-react';
+import { X, Info, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const WelcomeMessage: React.FC = () => {
@@ -47,7 +46,7 @@ const WelcomeMessage: React.FC = () => {
               Você pode organizar esta área como preferir, movendo os cards e personalizando seu painel de trabalho.
             </p>
             <div className="flex items-center text-xs text-blue-600">
-              <ArrowsUpDown className="h-3 w-3 mr-1" />
+              <ArrowUpDown className="h-3 w-3 mr-1" />
               <span>Arraste e solte os cards para reorganizá-los</span>
             </div>
           </div>
