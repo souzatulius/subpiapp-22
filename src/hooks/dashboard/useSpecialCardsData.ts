@@ -1,69 +1,78 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export const useSpecialCardsData = () => {
-  const { user } = useAuth();
-  const [overdueCount, setOverdueCount] = useState(0);
+  const [overdueCount, setOverdueCount] = useState<number>(0);
   const [overdueItems, setOverdueItems] = useState<{ title: string; id: string }[]>([]);
-  const [notesToApprove, setNotesToApprove] = useState(0);
-  const [responsesToDo, setResponsesToDo] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const [notesToApprove, setNotesToApprove] = useState<number>(0);
+  const [responsesToDo, setResponsesToDo] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  const { user } = useAuth();
+  
   useEffect(() => {
     const fetchSpecialCardsData = async () => {
-      if (!user) return;
-      
-      setIsLoading(true);
-      
       try {
-        // Fetch overdue demands
-        const today = new Date();
+        setIsLoading(true);
+        
+        if (!user) return;
+        
+        // 1. Fetch overdue demands
+        const now = new Date().toISOString();
         const { data: overdueData, error: overdueError } = await supabase
           .from('demandas')
           .select('id, titulo')
-          .lt('prazo_resposta', today.toISOString())
-          .neq('status', 'concluida')
-          .neq('status', 'nota_aprovada')
+          .lt('prazo_resposta', now)
+          .neq('status', 'concluido')
+          .neq('status', 'cancelado')
           .order('prazo_resposta', { ascending: true })
+          .limit(5);
+          
+        if (overdueError) {
+          console.error('Error fetching overdue demands:', overdueError);
+        } else {
+          setOverdueCount(overdueData.length);
+          setOverdueItems(overdueData.map(item => ({ title: item.titulo, id: item.id })));
+        }
+        
+        // 2. Fetch notes waiting for approval (if user has permission)
+        const { data: notesData, error: notesError } = await supabase
+          .from('notas_oficiais')
+          .select('id')
+          .eq('status', 'pendente')
           .limit(10);
           
-        if (!overdueError) {
-          setOverdueCount(overdueData.length);
-          setOverdueItems(overdueData.slice(0, 3).map(item => ({
-            id: item.id,
-            title: item.titulo
-          })));
+        if (notesError) {
+          console.error('Error fetching notes to approve:', notesError);
+        } else {
+          setNotesToApprove(notesData.length);
         }
         
-        // Check if user is admin to fetch notes to approve
-        const { data: isAdminData } = await supabase
-          .rpc('is_admin', { user_id: user.id });
+        // 3. Fetch demands waiting for response from this user area
+        if (user.id) {
+          const { data: userData, error: userError } = await supabase
+            .from('usuarios')
+            .select('area_coordenacao_id')
+            .eq('id', user.id)
+            .single();
           
-        if (isAdminData) {
-          // Fetch notes that need approval
-          const { data: pendingNotes, error: notesError } = await supabase
-            .from('notas_oficiais')
-            .select('id')
-            .eq('status', 'pendente');
-            
-          if (!notesError) {
-            setNotesToApprove(pendingNotes?.length || 0);
+          if (!userError && userData?.area_coordenacao_id) {
+            const { data: responsesData, error: responsesError } = await supabase
+              .from('demandas')
+              .select('id')
+              .eq('area_coordenacao_id', userData.area_coordenacao_id)
+              .eq('status', 'em_analise')
+              .limit(10);
+              
+            if (!responsesError) {
+              setResponsesToDo(responsesData.length);
+            }
           }
         }
-        
-        // Fetch demands that need response
-        const { data: responsesNeeded, error: responsesError } = await supabase
-          .from('demandas')
-          .select('id')
-          .eq('status', 'em_analise');
-          
-        if (!responsesError) {
-          setResponsesToDo(responsesNeeded?.length || 0);
-        }
       } catch (error) {
-        console.error('Error fetching special cards data:', error);
+        console.error('Error in fetching special cards data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -71,8 +80,8 @@ export const useSpecialCardsData = () => {
     
     fetchSpecialCardsData();
     
-    // Refresh data every 5 minutes
-    const intervalId = setInterval(fetchSpecialCardsData, 5 * 60 * 1000);
+    // Setup refresh interval
+    const intervalId = setInterval(fetchSpecialCardsData, 5 * 60 * 1000); // Refresh every 5 minutes
     
     return () => clearInterval(intervalId);
   }, [user]);
@@ -80,7 +89,7 @@ export const useSpecialCardsData = () => {
   return {
     overdueCount,
     overdueItems,
-    notesToApprove,
+    notesToApprove, 
     responsesToDo,
     isLoading
   };

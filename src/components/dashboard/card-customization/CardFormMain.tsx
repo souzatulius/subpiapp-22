@@ -37,7 +37,7 @@ const CardFormMain: React.FC<CardFormMainProps> = ({
           </Button>
           <Button variant="default" type="submit">
             <Check className="mr-2 h-4 w-4" />
-            {initialData ? 'Salvar Alterações' : 'Criar Card'}
+            {initialData ? 'Salvar' : 'Criar Card'}
           </Button>
         </div>
         

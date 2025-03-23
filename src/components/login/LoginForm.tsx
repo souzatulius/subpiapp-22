@@ -51,7 +51,17 @@ const LoginForm = () => {
       } = await signIn(completeEmail, password);
       if (error) {
         setError(null); // Remove the error message text since we show it as a toast
-        showAuthError(error);
+        
+        // Exibir mensagem clara quando o usuário já está cadastrado
+        if (error.message.includes('Email already') || error.message.includes('already registered')) {
+          toast({
+            title: "Usuário já cadastrado",
+            description: "Este e-mail já está cadastrado na plataforma. Por favor, tente fazer login ou recuperar sua senha.",
+            variant: "warning"
+          });
+        } else {
+          showAuthError(error);
+        }
       } else {
         toast({
           title: "Login efetuado",

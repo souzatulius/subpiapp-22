@@ -12,7 +12,7 @@ const NewCardButton: React.FC<NewCardButtonProps> = ({ onClick }) => {
     <Card 
       className="w-full h-full cursor-pointer transition-all duration-300 border border-gray-200 
         rounded-xl shadow-md hover:shadow-xl overflow-hidden 
-        bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100 group"
+        bg-orange-50 text-orange-500 border-orange-100 hover:bg-orange-100 group"
       onClick={onClick}
     >
       <CardContent className="relative flex flex-col items-center justify-center p-6 md:p-4 h-full transform-gpu hover:scale-[1.03] overflow-hidden">
