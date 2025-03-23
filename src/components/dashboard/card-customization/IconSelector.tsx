@@ -16,20 +16,25 @@ const IconSelector: React.FC<IconSelectorProps> = ({
     <div className="border rounded-md h-48 overflow-hidden">
       <ScrollArea className="h-full p-2">
         <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-          {iconsData.map((icon) => (
-            <div
-              key={icon.id}
-              onClick={() => onSelectIcon(icon.id)}
-              className={`flex items-center justify-center p-2 rounded-md cursor-pointer transition-all hover:bg-gray-50
-                ${selectedIconId === icon.id ? 'bg-blue-50 border border-blue-200 shadow-sm' : ''}
-              `}
-              title={icon.label}
-            >
-              {React.cloneElement(icon.component as React.ReactElement, { 
-                className: 'h-6 w-6' 
-              })}
-            </div>
-          ))}
+          {iconsData.map((icon) => {
+            const IconComponent = icon.component;
+            
+            return (
+              <div
+                key={icon.id}
+                onClick={() => onSelectIcon(icon.id)}
+                className={`flex items-center justify-center p-2 rounded-md cursor-pointer transition-all hover:bg-gray-50
+                  ${selectedIconId === icon.id ? 'bg-blue-50 border border-blue-200 shadow-sm' : ''}
+                `}
+                title={icon.label}
+              >
+                {React.isValidElement(IconComponent) ? 
+                  React.cloneElement(IconComponent, { className: 'h-6 w-6' }) : 
+                  null
+                }
+              </div>
+            );
+          })}
         </div>
       </ScrollArea>
     </div>

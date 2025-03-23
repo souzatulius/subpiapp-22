@@ -20,6 +20,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
     isLoading,
     demandas
   } = useDemandasData();
+  
   const {
     selectedDemanda,
     titulo,
@@ -33,18 +34,45 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
     handleBackToSelection,
     handleSubmit
   } = useNotaForm(onClose);
-  return <div className="animate-fade-in">
-      
-      
-      {step === 'select-demand' ? <DemandaSelection filteredDemandas={filteredDemandas} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onDemandaSelect={demandaId => handleDemandaSelect(demandaId, demandas)} isLoading={isLoading} /> : <Card className="border border-gray-200">
+  
+  return (
+    <div className="animate-fade-in">
+      {step === 'select-demand' ? (
+        <DemandaSelection 
+          filteredDemandas={filteredDemandas} 
+          searchTerm={searchTerm} 
+          setSearchTerm={setSearchTerm} 
+          onDemandaSelect={demandaId => handleDemandaSelect(demandaId, demandas)} 
+          isLoading={isLoading} 
+        />
+      ) : (
+        <Card className="border border-gray-200">
           <CardContent className="p-6">
             <div className="space-y-6">
-              {selectedDemanda && <DemandaInfo selectedDemanda={selectedDemanda} formattedResponses={formattedResponses} />}
+              {selectedDemanda && (
+                <DemandaInfo 
+                  selectedDemanda={selectedDemanda} 
+                  formattedResponses={formattedResponses} 
+                />
+              )}
               
-              <NotaForm titulo={titulo} setTitulo={setTitulo} texto={texto} setTexto={setTexto} handleBackToSelection={handleBackToSelection} handleSubmit={handleSubmit} isSubmitting={isSubmitting} selectedDemanda={selectedDemanda} formattedResponses={formattedResponses} />
+              <NotaForm 
+                titulo={titulo} 
+                setTitulo={setTitulo} 
+                texto={texto} 
+                setTexto={setTexto} 
+                handleBackToSelection={handleBackToSelection} 
+                handleSubmit={handleSubmit} 
+                isSubmitting={isSubmitting} 
+                selectedDemanda={selectedDemanda} 
+                formattedResponses={formattedResponses} 
+              />
             </div>
           </CardContent>
-        </Card>}
-    </div>;
+        </Card>
+      )}
+    </div>
+  );
 };
+
 export default CriarNotaForm;
