@@ -3,7 +3,7 @@ import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useUserProfile } from '@/components/layouts/header/useUserProfile';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import EditModal from '@/components/settings/EditModal';
@@ -80,15 +80,25 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
         const filename = urlParts[urlParts.length - 1];
         
         if (filename) {
+          // Create the bucket if it doesn't exist
+          const { data: bucketExists } = await supabase.storage.getBucket('profile_photos');
+          if (!bucketExists) {
+            await supabase.storage.createBucket('profile_photos', {
+              public: true
+            });
+          }
+          
           await supabase.storage.from('profile_photos').remove([filename]);
         }
       }
 
       // Update user profile
-      await supabase
+      const { error } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: null })
         .eq('id', user.id);
+        
+      if (error) throw error;
 
       await fetchUserProfile();
       setPreviewUrl(null);
@@ -115,27 +125,40 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     
     setLoading(true);
     try {
+      // Check if bucket exists, create if not
+      const { data: bucketExists } = await supabase.storage.getBucket('profile_photos');
+      if (!bucketExists) {
+        await supabase.storage.createBucket('profile_photos', {
+          public: true
+        });
+      }
+      
       // Generate a unique filename
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
       const filePath = `${fileName}`;
 
       // Upload the file
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('profile_photos')
-        .upload(filePath, selectedFile);
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data } = supabase.storage.from('profile_photos').getPublicUrl(filePath);
-      const publicUrl = data.publicUrl;
+      const { data: urlData } = supabase.storage.from('profile_photos').getPublicUrl(filePath);
+      const publicUrl = urlData.publicUrl;
 
       // Update user profile with new photo URL
-      await supabase
+      const { error: updateError } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
+        
+      if (updateError) throw updateError;
 
       await fetchUserProfile();
       onClose();
@@ -144,11 +167,11 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
         title: "Foto atualizada",
         description: "Sua foto de perfil foi atualizada com sucesso.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar foto:', error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao salvar sua foto de perfil.",
+        description: `Ocorreu um erro ao salvar sua foto de perfil: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive",
       });
     } finally {

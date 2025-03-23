@@ -73,7 +73,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-auto">
+      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-auto" hideCloseButton>
         <DialogHeader>
           <DialogTitle>{initialData ? 'Editar Card' : 'Novo Card'}</DialogTitle>
         </DialogHeader>

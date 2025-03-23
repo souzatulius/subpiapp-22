@@ -1,132 +1,72 @@
 
 import { useState, useEffect } from 'react';
+import { ActionCardItem } from './types';
+import { defaultActionCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { UserDashboard, ActionCardItem, SerializableCard } from './types';
-import { getDefaultCards, getIconComponentFromId, getIconIdFromComponent } from './defaultCards';
 
 export const useDashboardData = (userId?: string) => {
   const [firstName, setFirstName] = useState('');
-  const [actionCards, setActionCards] = useState<ActionCardItem[]>(getDefaultCards());
-  const [isLoading, setIsLoading] = useState(true);
+  const [actionCards, setActionCards] = useState<ActionCardItem[]>(defaultActionCards);
+  const [loading, setLoading] = useState(true);
 
-  // Load user name and saved cards
+  // Fetch user dashboard data and cards
   useEffect(() => {
-    if (userId) {
-      const fetchUserData = async () => {
-        try {
-          setIsLoading(true);
-          
-          // Fetch user name
-          const { data: userData, error: userError } = await supabase
-            .from('usuarios')
-            .select('nome_completo')
-            .eq('id', userId)
-            .single();
-            
-          if (userError) throw userError;
+    const fetchData = async () => {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
 
-          // Get the first name only
-          const fullName = userData?.nome_completo || '';
-          const firstNameOnly = fullName.split(' ')[0];
-          setFirstName(firstNameOnly);
-
-          // Fetch saved dashboard configuration
-          const { data: dashboardData, error: dashboardError } = await supabase
-            .from('user_dashboard')
-            .select('cards_config')
-            .eq('user_id', userId)
-            .maybeSingle();
-
-          if (dashboardError) {
-            // Only log if it's not just a "no rows returned" error
-            if (dashboardError.code !== 'PGRST116') {
-              console.error('Error fetching dashboard data:', dashboardError);
-            }
-          }
-
-          // If user has saved configuration, use it; otherwise use default
-          if (dashboardData?.cards_config) {
-            try {
-              const savedCards = JSON.parse(dashboardData.cards_config);
-              
-              // Transform string icon references back into React components
-              const processedCards = savedCards.map((card: SerializableCard) => {
-                // Process icon based on string reference
-                const iconComponent = getIconComponentFromId(card.iconId);
-                
-                return {
-                  ...card,
-                  icon: iconComponent
-                };
-              });
-              
-              setActionCards(processedCards);
-            } catch (error) {
-              console.error('Error parsing saved dashboard config:', error);
-              setActionCards(getDefaultCards());
-            }
-          }
-        } catch (error) {
-          console.error('Error in fetching user data:', error);
-        } finally {
-          setIsLoading(false);
+      try {
+        setLoading(true);
+        
+        // Fetch user info for first name
+        const { data: userData, error: userError } = await supabase
+          .from('usuarios')
+          .select('nome_completo')
+          .eq('id', userId)
+          .single();
+        
+        if (userError) throw userError;
+        
+        if (userData?.nome_completo) {
+          // Extract first name
+          const names = userData.nome_completo.split(' ');
+          setFirstName(names[0]);
         }
-      };
-      
-      fetchUserData();
-    }
+        
+        // Fetch user dashboard settings
+        const { data: dashboardData, error: dashboardError } = await supabase
+          .from('user_dashboard')
+          .select('cards_config')
+          .eq('user_id', userId);
+        
+        if (dashboardError) throw dashboardError;
+        
+        if (dashboardData && dashboardData.length > 0 && dashboardData[0].cards_config) {
+          try {
+            const customCards = JSON.parse(dashboardData[0].cards_config);
+            if (Array.isArray(customCards) && customCards.length > 0) {
+              setActionCards(customCards);
+            }
+          } catch (parseError) {
+            console.error('Erro ao processar configuração de cards:', parseError);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do dashboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [userId]);
-
-  // Save cards configuration whenever it changes
-  useEffect(() => {
-    if (userId && actionCards.length > 0 && !isLoading) {
-      const saveConfiguration = async () => {
-        try {
-          // Transform React components to string references for storage
-          const serializableCards = actionCards.map(card => {
-            // Determine icon type from component
-            const iconId = getIconIdFromComponent(card.icon);
-            
-            // Return a serializable version of the card
-            return {
-              ...card,
-              icon: undefined, // Remove React component
-              iconId: iconId // Store string reference instead
-            };
-          });
-          
-          // Convert to JSON string to store in the database
-          const cardsConfigString = JSON.stringify(serializableCards);
-          
-          // Upsert the configuration
-          const { error } = await supabase
-            .from('user_dashboard')
-            .upsert({ 
-              user_id: userId, 
-              cards_config: cardsConfigString 
-            }, 
-            { 
-              onConflict: 'user_id'
-            });
-            
-          if (error) throw error;
-          
-        } catch (error) {
-          console.error('Error saving dashboard configuration:', error);
-        }
-      };
-      
-      // Debounce to avoid too many save operations
-      const timeoutId = setTimeout(saveConfiguration, 1000);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [actionCards, userId, isLoading]);
 
   return {
     firstName,
     actionCards,
     setActionCards,
-    isLoading
+    loading
   };
 };
