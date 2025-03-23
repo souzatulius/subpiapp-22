@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,7 +6,6 @@ import { FormSchema, CardCustomizationModalProps, formSchema } from './types';
 import { identifyIconComponent } from './utils';
 import CardFormMain from './CardFormMain';
 import { getIconComponentById } from './utils';
-
 const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   isOpen,
   onClose,
@@ -55,7 +53,6 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       setSelectedIconId('clipboard-list');
     }
   }, [initialData, form, isOpen]);
-
   const handleSubmit = (data: FormSchema) => {
     const iconComponent = getIconComponentById(data.iconId);
     onSave({
@@ -67,25 +64,14 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       height: data.height
     });
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+  return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-100 rounded-xl">
         <DialogHeader>
           <DialogTitle>{initialData ? 'Editar Card' : 'Novo Card'}</DialogTitle>
         </DialogHeader>
         
-        <CardFormMain 
-          form={form} 
-          onClose={onClose} 
-          selectedIconId={selectedIconId} 
-          setSelectedIconId={setSelectedIconId} 
-          initialData={initialData} 
-          onSubmit={handleSubmit}
-        />
+        <CardFormMain form={form} onClose={onClose} selectedIconId={selectedIconId} setSelectedIconId={setSelectedIconId} initialData={initialData} />
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default CardCustomizationModal;
