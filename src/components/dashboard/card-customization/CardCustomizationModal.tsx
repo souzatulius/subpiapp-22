@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,15 +6,14 @@ import { FormSchema, CardCustomizationModalProps, formSchema } from './types';
 import { identifyIconComponent } from './utils';
 import CardFormMain from './CardFormMain';
 import { getIconComponentById } from './utils';
-
 const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  initialData,
+  initialData
 }) => {
   const [selectedIconId, setSelectedIconId] = useState<string>('clipboard-list');
-  
+
   // Set up form with validation
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -25,8 +23,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       color: 'blue',
       iconId: 'clipboard-list',
       width: '25',
-      height: '1',
-    },
+      height: '1'
+    }
   });
 
   // Update form when initialData changes
@@ -34,16 +32,14 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     if (initialData) {
       // Find the icon ID based on the component type
       const iconId = identifyIconComponent(initialData.icon);
-      
       form.reset({
         title: initialData.title,
         path: initialData.path,
         color: initialData.color,
         iconId: iconId,
         width: initialData.width || '25',
-        height: initialData.height || '1',
+        height: initialData.height || '1'
       });
-      
       setSelectedIconId(iconId);
     } else {
       form.reset({
@@ -52,45 +48,30 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
         color: 'blue',
         iconId: 'clipboard-list',
         width: '25',
-        height: '1',
+        height: '1'
       });
       setSelectedIconId('clipboard-list');
     }
   }, [initialData, form, isOpen]);
-
   const handleSubmit = (data: FormSchema) => {
     const iconComponent = getIconComponentById(data.iconId);
-    
     onSave({
       title: data.title,
       path: data.path,
       color: data.color,
       icon: iconComponent,
       width: data.width,
-      height: data.height,
+      height: data.height
     });
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-2xl p-6 rounded-xl" hideCloseButton>
+  return <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-100 rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-gray-800">
-            {initialData ? 'Editar Card' : 'Novo Card'}
-          </DialogTitle>
+          <DialogTitle>{initialData ? 'Editar Card' : 'Novo Card'}</DialogTitle>
         </DialogHeader>
         
-        <CardFormMain
-          form={form}
-          onClose={onClose}
-          selectedIconId={selectedIconId}
-          setSelectedIconId={setSelectedIconId}
-          initialData={initialData}
-          onSubmit={handleSubmit}
-        />
+        <CardFormMain form={form} onClose={onClose} selectedIconId={selectedIconId} setSelectedIconId={setSelectedIconId} initialData={initialData} />
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default CardCustomizationModal;
