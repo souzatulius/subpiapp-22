@@ -2,6 +2,7 @@
 import React from 'react';
 import { iconsData } from './utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { LucideIcon } from 'lucide-react';
 
 interface IconSelectorProps {
   selectedIconId: string;
@@ -17,7 +18,6 @@ const IconSelector: React.FC<IconSelectorProps> = ({
       <ScrollArea className="h-full p-2">
         <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
           {iconsData.map((icon) => {
-            // We need to make sure we're rendering the icon component properly
             const IconComponent = icon.component;
             
             return (
@@ -29,13 +29,12 @@ const IconSelector: React.FC<IconSelectorProps> = ({
                 `}
                 title={icon.label}
               >
-                {/* Properly handle the icon component */}
-                {React.isValidElement(IconComponent) && 
-                  React.cloneElement(IconComponent, { 
-                    size: 24,
+                {/* Render the icon component safely */}
+                {React.isValidElement(IconComponent) ? (
+                  React.cloneElement(IconComponent as React.ReactElement<any>, { 
                     className: 'h-6 w-6' 
                   })
-                }
+                ) : null}
               </div>
             );
           })}

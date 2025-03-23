@@ -105,8 +105,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   // Properly render the icon element
   const renderIcon = () => {
     if (React.isValidElement(icon)) {
-      return React.cloneElement(icon, { 
-        size: 48,
+      return React.cloneElement(icon as React.ReactElement<any>, { 
         className: 'h-12 w-12'
       });
     }
