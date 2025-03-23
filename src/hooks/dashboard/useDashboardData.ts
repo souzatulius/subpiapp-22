@@ -34,7 +34,7 @@ const defaultActionCards: ActionCardItem[] = [
     title: "Aprovar Nota Oficial",
     path: "/dashboard/comunicacao/aprovar-nota-oficial",
     icon: "CheckCircle",
-    color: "purple",
+    color: "blue-dark",
     isCustom: false
   },
   {
@@ -42,7 +42,7 @@ const defaultActionCards: ActionCardItem[] = [
     title: "Consultar Notas",
     path: "/dashboard/comunicacao/consultar-notas",
     icon: "Search",
-    color: "yellow",
+    color: "orange-light",
     isCustom: false
   },
   {
@@ -50,7 +50,7 @@ const defaultActionCards: ActionCardItem[] = [
     title: "Consultar Demandas",
     path: "/dashboard/comunicacao/consultar-demandas",
     icon: "List",
-    color: "red",
+    color: "gray-dark",
     isCustom: false
   }
 ];
