@@ -36,7 +36,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           disabled={loadingOptions}
         >
           <option value="">Selecione</option>
-          {roles.map(role => <option key={role.id} value={role.value}>{role.value}</option>)}
+          {roles.map(role => <option key={role.id} value={role.id}>{role.value}</option>)}
         </select>
         {errors.role && <p className="mt-1 text-sm text-[#f57b35]">Cargo é obrigatório</p>}
       </div>
@@ -54,7 +54,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           disabled={loadingOptions}
         >
           <option value="">Selecione</option>
-          {areas.map(area => <option key={area.id} value={area.value}>{area.value}</option>)}
+          {areas.map(area => <option key={area.id} value={area.id}>{area.value}</option>)}
         </select>
         {errors.area && <p className="mt-1 text-sm text-[#f57b35]">Área é obrigatória</p>}
       </div>

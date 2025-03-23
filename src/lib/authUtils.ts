@@ -96,3 +96,23 @@ export const sendApprovalEmail = async (userId: string): Promise<void> => {
     console.error('Erro ao enviar e-mail de aprovação:', error);
   }
 };
+
+// Update the function that handles new user registration
+export const updateUserProfile = async (userId: string, userData: any): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('usuarios')
+      .update({
+        nome_completo: userData.nome_completo,
+        whatsapp: userData.whatsapp,
+        aniversario: userData.aniversario,
+        cargo_id: userData.cargo_id,
+        area_coordenacao_id: userData.area_coordenacao_id
+      })
+      .eq('id', userId);
+      
+    if (error) throw error;
+  } catch (error) {
+    console.error('Erro ao atualizar perfil do usuário:', error);
+  }
+};

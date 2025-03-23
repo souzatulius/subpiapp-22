@@ -4,7 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import * as authService from '@/services/authService';
-import { isUserApproved, createAdminNotification } from '@/lib/authUtils';
+import { isUserApproved, createAdminNotification, updateUserProfile } from '@/lib/authUtils';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -67,6 +67,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!result.error) {
       // Notify admins about new user registration
       if (result.data?.user) {
+        // Atualizar perfil do usuário com cargo e área
+        await updateUserProfile(
+          result.data.user.id,
+          userData
+        );
+        
+        // Notificar administradores
         await createAdminNotification(
           result.data.user.id, 
           userData.nome_completo,

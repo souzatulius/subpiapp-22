@@ -89,8 +89,8 @@ export const useRegisterForm = () => {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
-        cargo: formData.role,
-        area: formData.area
+        cargo_id: formData.role,         // Agora estamos passando o ID do cargo
+        area_coordenacao_id: formData.area  // Agora estamos passando o ID da área
       });
 
       if (error) {
