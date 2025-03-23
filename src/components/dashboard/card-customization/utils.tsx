@@ -19,7 +19,24 @@ import {
   CircleCheck, 
   User, 
   Users, 
-  Settings
+  Settings,
+  Map,
+  Clipboard,
+  FileText,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Ticket,
+  Inbox,
+  Database,
+  BookOpen,
+  HelpCircle,
+  Info,
+  ArrowUpDown,
+  CloudUpload,
+  Send,
+  Printer,
+  ExternalLink
 } from 'lucide-react';
 import React from 'react';
 
@@ -45,6 +62,23 @@ export const iconsData = [
   { id: 'user', component: <User className="h-6 w-6" />, label: 'Usuário' },
   { id: 'users', component: <Users className="h-6 w-6" />, label: 'Usuários' },
   { id: 'settings', component: <Settings className="h-6 w-6" />, label: 'Configurações' },
+  { id: 'map', component: <Map className="h-6 w-6" />, label: 'Mapa' },
+  { id: 'clipboard', component: <Clipboard className="h-6 w-6" />, label: 'Prancheta' },
+  { id: 'file-text', component: <FileText className="h-6 w-6" />, label: 'Documento' },
+  { id: 'mail', component: <Mail className="h-6 w-6" />, label: 'Email' },
+  { id: 'phone', component: <Phone className="h-6 w-6" />, label: 'Telefone' },
+  { id: 'shield-check', component: <ShieldCheck className="h-6 w-6" />, label: 'Segurança' },
+  { id: 'ticket', component: <Ticket className="h-6 w-6" />, label: 'Ticket' },
+  { id: 'inbox', component: <Inbox className="h-6 w-6" />, label: 'Caixa de Entrada' },
+  { id: 'database', component: <Database className="h-6 w-6" />, label: 'Banco de Dados' },
+  { id: 'book-open', component: <BookOpen className="h-6 w-6" />, label: 'Livro' },
+  { id: 'help-circle', component: <HelpCircle className="h-6 w-6" />, label: 'Ajuda' },
+  { id: 'info', component: <Info className="h-6 w-6" />, label: 'Informação' },
+  { id: 'arrow-up-down', component: <ArrowUpDown className="h-6 w-6" />, label: 'Ordenar' },
+  { id: 'cloud-upload', component: <CloudUpload className="h-6 w-6" />, label: 'Upload' },
+  { id: 'send', component: <Send className="h-6 w-6" />, label: 'Enviar' },
+  { id: 'printer', component: <Printer className="h-6 w-6" />, label: 'Impressora' },
+  { id: 'external-link', component: <ExternalLink className="h-6 w-6" />, label: 'Link Externo' },
 ];
 
 // Colors available for selection
@@ -62,14 +96,17 @@ export const colorData = [
 // Dashboard pages for navigation
 export const dashboardPages = [
   { value: '/dashboard', label: 'Dashboard' },
-  { value: '/dashboard/comunicacao/cadastrar-demanda', label: 'Cadastrar Demanda' },
-  { value: '/dashboard/comunicacao/responder-demandas', label: 'Responder Demandas' },
+  { value: '/dashboard/comunicacao/cadastrar', label: 'Cadastrar Demanda' },
+  { value: '/dashboard/comunicacao/responder', label: 'Responder Demandas' },
   { value: '/dashboard/comunicacao/consultar-demandas', label: 'Consultar Demandas' },
-  { value: '/dashboard/comunicacao/criar-nota-oficial', label: 'Criar Nota Oficial' },
-  { value: '/dashboard/comunicacao/aprovar-nota-oficial', label: 'Aprovar Nota Oficial' },
+  { value: '/dashboard/comunicacao/criar-nota', label: 'Criar Nota Oficial' },
+  { value: '/dashboard/comunicacao/aprovar-nota', label: 'Aprovar Nota Oficial' },
   { value: '/dashboard/comunicacao/consultar-notas', label: 'Consultar Notas' },
-  { value: '/dashboard/zeladoria/ranking', label: 'Ranking de Subsecretarias' },
   { value: '/dashboard/comunicacao/relatorios', label: 'Relatórios' },
+  { value: '/dashboard/zeladoria/ranking-subs', label: 'Ranking de Subsecretarias' },
+  { value: '/dashboard/comunicacao/comunicacao', label: 'Dashboard Comunicação' },
+  { value: '/dashboard/comunicacao/notas', label: 'Dashboard Notas' },
+  { value: '/settings', label: 'Configurações' },
 ];
 
 // Width options for card customization

@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { ActionCardItem } from './types';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export const useCardActions = (
   actionCards: ActionCardItem[],
@@ -9,6 +11,7 @@ export const useCardActions = (
 ) => {
   const [isCustomizationModalOpen, setIsCustomizationModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
+  const { user } = useAuth();
 
   const handleDeleteCard = (id: string) => {
     setActionCards((cards) => cards.filter((card) => card.id !== id));
@@ -30,16 +33,16 @@ export const useCardActions = (
     setIsCustomizationModalOpen(true);
   };
 
-  const handleSaveCard = (cardData: Omit<ActionCardItem, 'id'>) => {
+  const handleSaveCard = async (cardData: Omit<ActionCardItem, 'id'>) => {
     if (editingCard) {
       // Edit existing card
-      setActionCards(cards => 
-        cards.map(card => 
-          card.id === editingCard.id 
-            ? { ...card, ...cardData, isCustom: true }
-            : card
-        )
+      const updatedCards = actionCards.map(card => 
+        card.id === editingCard.id 
+          ? { ...card, ...cardData, isCustom: true }
+          : card
       );
+      
+      setActionCards(updatedCards);
       
       toast({
         title: "Card atualizado",

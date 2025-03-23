@@ -8,12 +8,15 @@ import { getDefaultCards, getIconComponentFromId, getIconIdFromComponent } from 
 export const useDashboardData = (userId?: string) => {
   const [firstName, setFirstName] = useState('');
   const [actionCards, setActionCards] = useState<ActionCardItem[]>(getDefaultCards());
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load user name and saved cards
   useEffect(() => {
     if (userId) {
       const fetchUserData = async () => {
         try {
+          setIsLoading(true);
+          
           // Fetch user name
           const { data: userData, error: userError } = await supabase
             .from('usuarios')
@@ -66,6 +69,8 @@ export const useDashboardData = (userId?: string) => {
           }
         } catch (error) {
           console.error('Error in fetching user data:', error);
+        } finally {
+          setIsLoading(false);
         }
       };
       
@@ -75,7 +80,7 @@ export const useDashboardData = (userId?: string) => {
 
   // Save cards configuration whenever it changes
   useEffect(() => {
-    if (userId && actionCards.length > 0) {
+    if (userId && actionCards.length > 0 && !isLoading) {
       const saveConfiguration = async () => {
         try {
           // Transform React components to string references for storage
@@ -116,11 +121,12 @@ export const useDashboardData = (userId?: string) => {
       const timeoutId = setTimeout(saveConfiguration, 1000);
       return () => clearTimeout(timeoutId);
     }
-  }, [actionCards, userId]);
+  }, [actionCards, userId, isLoading]);
 
   return {
     firstName,
     actionCards,
-    setActionCards
+    setActionCards,
+    isLoading
   };
 };
