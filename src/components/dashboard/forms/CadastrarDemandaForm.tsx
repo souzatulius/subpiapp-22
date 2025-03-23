@@ -43,24 +43,15 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     nextStep,
     prevStep,
     setSelectedDistrito,
-    resetForm
+    resetForm,
+    setActiveStep
   } = useDemandForm(user?.id, onClose);
 
   console.log('Current user ID:', user?.id);
 
   const handleStepClick = (stepIndex: number) => {
-    // Allow going to any step since no validation is required
-    if (stepIndex <= activeStep) {
-      // Set active step to the clicked step (going backward)
-      for (let i = activeStep; i > stepIndex; i--) {
-        prevStep();
-      }
-    } else {
-      // Going forward
-      for (let i = activeStep; i < stepIndex; i++) {
-        nextStep();
-      }
-    }
+    // Allow direct navigation to any step
+    setActiveStep(stepIndex);
   };
 
   const handleNextStep = () => {

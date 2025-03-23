@@ -30,7 +30,8 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     nextStep,
     prevStep,
     setSelectedDistrito,
-    resetForm
+    resetForm,
+    setActiveStep
   } = useDemandFormState(servicos, bairros);
 
   const { handleSubmit } = useDemandFormSubmit(
@@ -61,6 +62,7 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     nextStep,
     prevStep,
     setSelectedDistrito,
-    resetForm
+    resetForm,
+    setActiveStep
   };
 };

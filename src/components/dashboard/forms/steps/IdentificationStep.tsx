@@ -22,6 +22,7 @@ interface IdentificationStepProps {
   serviceSearch: string;
   servicos: any[];
   errors?: ValidationError[];
+  showTitleField?: boolean;
 }
 
 const IdentificationStep: React.FC<IdentificationStepProps> = ({
@@ -33,7 +34,8 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   filteredServicesBySearch,
   serviceSearch,
   servicos,
-  errors = []
+  errors = [],
+  showTitleField = true
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -72,23 +74,25 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   const selectedService = servicos.find(s => s.id === formData.servico_id);
 
   return <div className="space-y-4">
-      <div>
-        <Label htmlFor="titulo" className={`block ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
-          Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
-        </Label>
-        {/* Título da Demanda - estilo similar ao SmartSearchCard */}
-        <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
-          <Input 
-            id="titulo" 
-            name="titulo" 
-            value={formData.titulo} 
-            onChange={handleChange} 
-            className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasError('titulo') ? 'placeholder-orange-300' : ''}`} 
-            placeholder="Digite o título da demanda..."
-          />
+      {showTitleField && (
+        <div>
+          <Label htmlFor="titulo" className={`block ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
+            Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
+          </Label>
+          {/* Título da Demanda - estilo similar ao SmartSearchCard */}
+          <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+            <Input 
+              id="titulo" 
+              name="titulo" 
+              value={formData.titulo} 
+              onChange={handleChange} 
+              className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasError('titulo') ? 'placeholder-orange-300' : ''}`} 
+              placeholder="Digite o título da demanda..."
+            />
+          </div>
+          {hasError('titulo') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>}
         </div>
-        {hasError('titulo') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>}
-      </div>
+      )}
       
       <div>
         <Label className={`block mb-2 ${hasError('area_coordenacao_id') ? 'text-orange-500 font-semibold' : ''}`}>

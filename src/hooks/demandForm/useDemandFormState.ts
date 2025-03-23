@@ -17,7 +17,7 @@ export const useDemandFormState = (
     nome_solicitante: '',
     telefone_solicitante: '',
     email_solicitante: '',
-    veiculo_imprensa: '', // Added the missing field
+    veiculo_imprensa: '',
     endereco: '',
     bairro_id: '',
     perguntas: ['', '', '', '', ''],
@@ -31,6 +31,28 @@ export const useDemandFormState = (
   const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
+
+  // Generate title suggestion based on service and bairro
+  useEffect(() => {
+    // Only auto-generate title if we're on step 5 and moving to step 6
+    if (activeStep === 5) {
+      const selectedService = servicos.find(s => s.id === formData.servico_id);
+      const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
+      
+      if (selectedService && selectedBairro) {
+        const suggestedTitle = `${selectedService.descricao} - ${selectedBairro.nome}`;
+        setFormData(prev => ({
+          ...prev,
+          titulo: suggestedTitle
+        }));
+      } else if (selectedService) {
+        setFormData(prev => ({
+          ...prev,
+          titulo: selectedService.descricao
+        }));
+      }
+    }
+  }, [activeStep, formData.servico_id, formData.bairro_id, servicos, bairros]);
 
   useEffect(() => {
     if (formData.area_coordenacao_id) {
@@ -131,6 +153,7 @@ export const useDemandFormState = (
     nextStep,
     prevStep,
     setSelectedDistrito,
-    resetForm
+    resetForm,
+    setActiveStep
   };
 };
