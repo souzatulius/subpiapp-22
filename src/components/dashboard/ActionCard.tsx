@@ -74,7 +74,30 @@ const ActionCard: React.FC<ActionCardProps> = ({
 
   const handleClick = () => {
     if (path) {
-      navigate(path);
+      // Ensure path exists before navigating
+      // Map standard card titles to their correct paths if needed
+      let correctPath = path;
+      
+      // Fix common path issues based on card title
+      if (title === "Nova Demanda" && path.includes("cadastrar-demanda")) {
+        correctPath = "/dashboard/comunicacao/cadastrar";
+      } else if (title === "Aprovar Nota" && path.includes("aprovar-nota-oficial")) {
+        correctPath = "/dashboard/comunicacao/aprovar-nota";
+      } else if (title === "Responder Demandas" && path.includes("responder-demandas")) {
+        correctPath = "/dashboard/comunicacao/responder";
+      } else if (title === "Números da Comunicação" && !path.includes("relatorios")) {
+        correctPath = "/dashboard/comunicacao/relatorios";
+      } else if (title === "Consultar Notas" && !path.includes("consultar-notas")) {
+        correctPath = "/dashboard/comunicacao/consultar-notas";
+      } else if (title === "Consultar Demandas" && !path.includes("consultar-demandas")) {
+        correctPath = "/dashboard/comunicacao/consultar-demandas";
+      }
+      
+      // Navigate to the corrected path
+      navigate(correctPath);
+      
+      // Log navigation for debugging purposes
+      console.log(`Navigating to: ${correctPath}`);
     } else if (onClick) {
       onClick();
     }
