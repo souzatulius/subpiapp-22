@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -63,7 +64,8 @@ const Settings = () => {
                   {activeSection === 'distritos_bairros' && 'Distritos e Bairros'}
                   {activeSection === 'comunicados' && 'Comunicados'}
                   {activeSection === 'permissoes' && 'Permissões'}
-                  {activeSection === 'notificacoes' && 'Notificações'}
+                  {activeSection === 'notificacoes' && 'Configurações de Notificações'}
+                  {activeSection === 'usuarios' && 'Gerenciamento de Usuários'}
                 </h1>
                 <SettingsContent activeSection={activeSection} />
               </div>

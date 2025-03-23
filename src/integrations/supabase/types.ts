@@ -170,6 +170,39 @@ export type Database = {
           },
         ]
       }
+      configuracoes_notificacoes: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string | null
+          criado_em: string | null
+          descricao: string | null
+          frequencia: string | null
+          id: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          frequencia?: string | null
+          id?: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          frequencia?: string | null
+          id?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
       demandas: {
         Row: {
           area_coordenacao_id: string
@@ -646,6 +679,41 @@ export type Database = {
           },
         ]
       }
+      templates_notificacoes: {
+        Row: {
+          atualizado_em: string | null
+          configuracao_id: string | null
+          conteudo: string
+          criado_em: string | null
+          id: string
+          tipo_envio: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          configuracao_id?: string | null
+          conteudo: string
+          criado_em?: string | null
+          id?: string
+          tipo_envio?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          configuracao_id?: string | null
+          conteudo?: string
+          criado_em?: string | null
+          id?: string
+          tipo_envio?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "templates_notificacoes_configuracao_id_fkey"
+            columns: ["configuracao_id"]
+            isOneToOne: false
+            referencedRelation: "configuracoes_notificacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tipos_midia: {
         Row: {
           criado_em: string
@@ -780,6 +848,7 @@ export type Database = {
           aniversario: string | null
           area_coordenacao_id: string | null
           cargo_id: string | null
+          configuracoes_notificacao: Json | null
           criado_em: string
           email: string
           foto_perfil_url: string | null
@@ -791,6 +860,7 @@ export type Database = {
           aniversario?: string | null
           area_coordenacao_id?: string | null
           cargo_id?: string | null
+          configuracoes_notificacao?: Json | null
           criado_em?: string
           email: string
           foto_perfil_url?: string | null
@@ -802,6 +872,7 @@ export type Database = {
           aniversario?: string | null
           area_coordenacao_id?: string | null
           cargo_id?: string | null
+          configuracoes_notificacao?: Json | null
           criado_em?: string
           email?: string
           foto_perfil_url?: string | null

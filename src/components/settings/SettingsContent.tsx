@@ -10,6 +10,7 @@ import DistrictsAndNeighborhoods from './DistrictsAndNeighborhoods';
 import Announcements from './Announcements';
 import AccessControl from './AccessControl';
 import Notifications from './Notifications';
+import NotificationsSettings from './notifications/NotificationsSettings';
 
 interface SettingsContentProps {
   activeSection: string;
@@ -26,7 +27,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
       {activeSection === 'origens_demanda' && <DemandOrigins />}
       {activeSection === 'distritos_bairros' && <DistrictsAndNeighborhoods />}
       {activeSection === 'comunicados' && <Announcements />}
-      {activeSection === 'notificacoes' && <Notifications />}
+      {activeSection === 'notificacoes' && <NotificationsSettings />}
       {activeSection === 'permissoes' && <AccessControl />}
     </div>
   );
