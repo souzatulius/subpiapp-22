@@ -47,8 +47,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     setActiveStep
   } = useDemandForm(user?.id, onClose);
 
-  console.log('Current user ID:', user?.id);
-
   const handleStepClick = (stepIndex: number) => {
     // Allow direct navigation to any step
     setActiveStep(stepIndex);
@@ -61,6 +59,13 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     
     if (errors.length === 0) {
       nextStep();
+    } else {
+      console.log('Validation errors:', errors);
+      toast({
+        title: "Formulário incompleto",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive"
+      });
     }
   };
 

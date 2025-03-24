@@ -43,7 +43,6 @@ const FormSteps: React.FC<FormStepsProps> = ({
 
   const handleStepClick = (index: number) => {
     if (onStepClick) {
-      // Now we directly call onStepClick with the exact index clicked
       onStepClick(index);
     }
   };

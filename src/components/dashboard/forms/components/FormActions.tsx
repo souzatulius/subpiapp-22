@@ -23,6 +23,7 @@ const FormActions: React.FC<FormActionsProps> = ({
   return (
     <div className="flex justify-between mt-8">
       <Button 
+        type="button"
         variant="outline" 
         onClick={onPrevStep} 
         disabled={isFirstStep} 
@@ -33,6 +34,7 @@ const FormActions: React.FC<FormActionsProps> = ({
       
       {isLastStep ? (
         <Button 
+          type="button"
           onClick={onSubmit} 
           disabled={isSubmitting} 
           className="bg-[#003570] hover:bg-[#002855] rounded-lg"
@@ -41,6 +43,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         </Button>
       ) : (
         <Button 
+          type="button"
           onClick={onNextStep} 
           className="bg-[#003570] hover:bg-[#002855] rounded-lg"
         >
