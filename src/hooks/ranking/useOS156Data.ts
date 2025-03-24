@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { OS156Item, OS156Upload, OS156ChartData, OS156FilterOptions } from '@/components/ranking/types';
+import { OS156Item, OS156Upload, OS156ChartData, OS156FilterOptions, OrderStatus, District } from '@/components/ranking/types';
 import { User } from '@supabase/supabase-js';
 
 // Helper to parse Excel/CSV data and map to the correct format
@@ -414,8 +414,8 @@ export const useOS156Data = (user: User | null) => {
     let filteredData = [...osData];
     
     // Apply status filter
-    if (filters.statuses && !filters.statuses.includes('Todos')) {
-      filteredData = filteredData.filter(item => filters.statuses.includes(item.status));
+    if (filters.statuses && !filters.statuses.includes('Todos' as OrderStatus)) {
+      filteredData = filteredData.filter(item => filters.statuses.includes(item.status as OrderStatus));
     }
     
     // Apply area tecnica filter
@@ -442,9 +442,9 @@ export const useOS156Data = (user: User | null) => {
     }
     
     // Apply district filter
-    if (filters.districts && !filters.districts.includes('Todos')) {
+    if (filters.districts && !filters.districts.includes('Todos' as District)) {
       filteredData = filteredData.filter(item => 
-        item.distrito && filters.districts.includes(item.distrito)
+        item.distrito && filters.districts.includes(item.distrito as District)
       );
     }
     

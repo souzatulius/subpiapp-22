@@ -17,7 +17,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CalendarIcon, X, Filter } from 'lucide-react';
-import { OS156FilterOptions } from './types';
+import { OS156FilterOptions, OrderStatus, District } from './types';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -47,21 +47,21 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
     let newStatuses = [...filters.statuses];
     
     if (status === 'Todos') {
-      newStatuses = ['Todos'];
+      newStatuses = ['Todos' as OrderStatus];
     } else {
       // Remove 'Todos' if present
       newStatuses = newStatuses.filter(s => s !== 'Todos');
       
       // Add or remove the status
-      if (newStatuses.includes(status)) {
+      if (newStatuses.includes(status as OrderStatus)) {
         newStatuses = newStatuses.filter(s => s !== status);
       } else {
-        newStatuses.push(status);
+        newStatuses.push(status as OrderStatus);
       }
       
       // If no status is selected, add 'Todos'
       if (newStatuses.length === 0) {
-        newStatuses = ['Todos'];
+        newStatuses = ['Todos' as OrderStatus];
       }
     }
     
@@ -97,21 +97,21 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
     let newDistricts = [...filters.districts];
     
     if (district === 'Todos') {
-      newDistricts = ['Todos'];
+      newDistricts = ['Todos' as District];
     } else {
       // Remove 'Todos' if present
       newDistricts = newDistricts.filter(d => d !== 'Todos');
       
       // Add or remove the district
-      if (newDistricts.includes(district)) {
+      if (newDistricts.includes(district as District)) {
         newDistricts = newDistricts.filter(d => d !== district);
       } else {
-        newDistricts.push(district);
+        newDistricts.push(district as District);
       }
       
       // If no district is selected, add 'Todos'
       if (newDistricts.length === 0) {
-        newDistricts = ['Todos'];
+        newDistricts = ['Todos' as District];
       }
     }
     
@@ -128,9 +128,9 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
   const clearFilters = () => {
     onFiltersChange({
       dateRange: undefined,
-      statuses: ['Todos'],
+      statuses: ['Todos' as OrderStatus],
       serviceTypes: ['Todos'],
-      districts: ['Todos'],
+      districts: ['Todos' as District],
       areaTecnica: 'Todos',
       empresa: ['Todos'],
       dataInicio: undefined,
@@ -141,8 +141,8 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
   const getActiveFilterCount = () => {
     let count = 0;
     
-    if (!filters.statuses.includes('Todos')) count++;
-    if (!filters.districts.includes('Todos')) count++;
+    if (!filters.statuses.includes('Todos' as OrderStatus)) count++;
+    if (!filters.districts.includes('Todos' as District)) count++;
     if (filters.areaTecnica !== 'Todos') count++;
     if (!filters.empresa.includes('Todos')) count++;
     if (filters.dataInicio) count++;
@@ -199,9 +199,9 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
                 {['Todos', 'NOVO', 'CONC', 'PREPLAN', 'PRECANC', 'AB', 'PE'].map((status) => (
                   <Badge
                     key={status}
-                    variant={filters.statuses.includes(status) ? "default" : "outline"}
+                    variant={filters.statuses.includes(status as OrderStatus) ? "default" : "outline"}
                     className={`cursor-pointer ${
-                      filters.statuses.includes(status) ? 'bg-orange-500 hover:bg-orange-600' : ''
+                      filters.statuses.includes(status as OrderStatus) ? 'bg-orange-500 hover:bg-orange-600' : ''
                     } ${['PREPLAN', 'PRECANC'].includes(status) ? 'border-red-300' : ''}`}
                     onClick={() => handleStatusChange(status)}
                   >
@@ -217,9 +217,9 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
                 {['Todos', 'PINHEIROS', 'ALTO DE PINHEIROS', 'JARDIM PAULISTA', 'ITAIM BIBI'].map((district) => (
                   <Badge
                     key={district}
-                    variant={filters.districts.includes(district) ? "default" : "outline"}
+                    variant={filters.districts.includes(district as District) ? "default" : "outline"}
                     className={`cursor-pointer ${
-                      filters.districts.includes(district) ? 'bg-orange-500 hover:bg-orange-600' : ''
+                      filters.districts.includes(district as District) ? 'bg-orange-500 hover:bg-orange-600' : ''
                     }`}
                     onClick={() => handleDistrictChange(district)}
                   >
@@ -351,22 +351,22 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
               </Badge>
             )}
             
-            {!filters.statuses.includes('Todos') && (
+            {!filters.statuses.includes('Todos' as OrderStatus) && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Status: {filters.statuses.join(', ')}
                 <X 
                   className="h-3 w-3 cursor-pointer" 
-                  onClick={() => onFiltersChange({ ...filters, statuses: ['Todos'] })} 
+                  onClick={() => onFiltersChange({ ...filters, statuses: ['Todos' as OrderStatus] })} 
                 />
               </Badge>
             )}
             
-            {!filters.districts.includes('Todos') && (
+            {!filters.districts.includes('Todos' as District) && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Distritos: {filters.districts.length}
                 <X 
                   className="h-3 w-3 cursor-pointer" 
-                  onClick={() => onFiltersChange({ ...filters, districts: ['Todos'] })} 
+                  onClick={() => onFiltersChange({ ...filters, districts: ['Todos' as District] })} 
                 />
               </Badge>
             )}

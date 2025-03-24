@@ -3,11 +3,11 @@ import React from 'react';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { FilterOptions } from '@/components/ranking/types';
+import { FilterOptions, District } from '@/components/ranking/types';
 
 interface DistrictFilterProps {
   districts: FilterOptions['districts'];
-  onDistrictChange: (district: string) => void;
+  onDistrictChange: (district: District) => void;
 }
 
 const DistrictFilter: React.FC<DistrictFilterProps> = ({ districts, onDistrictChange }) => {
@@ -20,12 +20,12 @@ const DistrictFilter: React.FC<DistrictFilterProps> = ({ districts, onDistrictCh
         </SelectTrigger>
         <SelectContent>
           <div className="space-y-1 p-1">
-            {['Todos', 'Itaim Bibi', 'Pinheiros', 'Alto de Pinheiros', 'Jardim Paulista'].map((district) => (
+            {['Todos', 'Itaim Bibi', 'Pinheiros', 'Alto de Pinheiros', 'Jardim Paulista', 'PINHEIROS', 'ALTO DE PINHEIROS', 'JARDIM PAULISTA', 'ITAIM BIBI'].map((district) => (
               <div key={district} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`district-${district}`} 
-                  checked={districts.includes(district as any)}
-                  onCheckedChange={() => onDistrictChange(district)}
+                  checked={districts.includes(district as District)}
+                  onCheckedChange={() => onDistrictChange(district as District)}
                 />
                 <label 
                   htmlFor={`district-${district}`}
