@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BellOff, X, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/notifications';
 import { toast } from '@/components/ui/use-toast';
 
 const NotificationsEnabler: React.FC = () => {
