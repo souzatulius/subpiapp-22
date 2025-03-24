@@ -17,6 +17,9 @@ const QuickDemandCard: React.FC<QuickDemandCardProps> = ({
 }) => {
   // Handle Enter key press without any prevention for spaces
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Stop propagation to isolate input from drag-and-drop
+    e.stopPropagation();
+    
     if (e.key === 'Enter') {
       onSubmit();
     }
