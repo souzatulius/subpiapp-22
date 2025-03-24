@@ -55,18 +55,31 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   };
 
   const handleNextStep = () => {
-    nextStep();
+    // Validate current step
+    const errors = validateDemandForm(formData, activeStep);
+    setValidationErrors(errors);
+    
+    if (errors.length === 0) {
+      nextStep();
+    }
   };
 
   const handleSubmit = async () => {
-    try {
-      await submitForm();
-    } catch (error: any) {
-      toast({
-        title: "Erro ao cadastrar demanda",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
+    // Validate final step before submission
+    const errors = validateDemandForm(formData, activeStep);
+    setValidationErrors(errors);
+    
+    if (errors.length === 0) {
+      try {
+        await submitForm();
+      } catch (error: any) {
+        console.error('Submission error:', error);
+        toast({
+          title: "Erro ao cadastrar demanda",
+          description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+          variant: "destructive"
+        });
+      }
     }
   };
 

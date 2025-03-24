@@ -35,8 +35,13 @@ export const useDemandFormSubmit = (
         normalizedPrioridade = 'media'; // Default to media if invalid
       }
       
+      // Format the date properly for Supabase
+      const prazoResposta = formData.prazo_resposta ? new Date(formData.prazo_resposta).toISOString() : null;
+      
+      // Prepare data for submission
       const demandaData = {
         ...formData,
+        prazo_resposta: prazoResposta,
         prioridade: normalizedPrioridade,
         perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
         autor_id: userId,
