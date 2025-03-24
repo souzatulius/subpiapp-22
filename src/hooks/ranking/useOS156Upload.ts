@@ -1,17 +1,16 @@
 
-import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { OS156Upload, OS156Item } from '@/components/ranking/types';
 import { processPlanilha156, mapAreaTecnica } from './utils/os156DataProcessing';
 
 export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item[]) => void) => {
-  const { toast } = useToast();
   const [lastUpload, setLastUpload] = useState<OS156Upload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchLastUpload = async () => {
+  const fetchLastUpload = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
       return;
@@ -40,51 +39,67 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       }
     } catch (error) {
       console.error('Erro ao buscar último upload:', error);
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar as informações do último upload.",
-        variant: "destructive",
-      });
+      toast.error("Não foi possível carregar as informações do último upload.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   const fetchOSData = async (uploadId: string) => {
     try {
-      const { data, error } = await supabase
+      // First, get count to ensure we're loading all records
+      const { count, error: countError } = await supabase
         .from('ordens_156')
-        .select('*')
+        .select('*', { count: 'exact', head: true })
         .eq('upload_id', uploadId);
-
-      if (error) throw error;
-
-      if (data) {
-        onDataLoaded(data as OS156Item[]);
+      
+      if (countError) throw countError;
+      
+      console.log(`Total records for upload ${uploadId}: ${count}`);
+      
+      // Now fetch all records with pagination if needed
+      let allData: OS156Item[] = [];
+      const pageSize = 1000;
+      let page = 0;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+        
+        const { data, error } = await supabase
+          .from('ordens_156')
+          .select('*')
+          .eq('upload_id', uploadId)
+          .range(from, to);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          allData = [...allData, ...data as OS156Item[]];
+          page++;
+        }
+        
+        hasMore = data && data.length === pageSize;
       }
+      
+      console.log(`Loaded ${allData.length} records successfully`);
+      onDataLoaded(allData);
     } catch (error) {
       console.error('Erro ao buscar dados das ordens:', error);
-      toast({
-        title: "Erro ao carregar ordens",
-        description: "Não foi possível carregar os dados das ordens de serviço.",
-        variant: "destructive",
-      });
+      toast.error("Não foi possível carregar os dados das ordens de serviço.");
     }
   };
 
   const handleFileUpload = async (file: File) => {
     if (!user) {
-      toast({
-        title: "Erro de autenticação",
-        description: "Você precisa estar logado para fazer upload de arquivos.",
-        variant: "destructive",
-      });
+      toast.error("Você precisa estar logado para fazer upload de arquivos.");
       return;
     }
 
     try {
       setIsLoading(true);
-
+      
       // Create upload record in database
       const { data: uploadData, error: uploadError } = await supabase
         .from('os_uploads')
@@ -104,22 +119,28 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       
       // Process the file data
       const osItems = await processPlanilha156(file);
+      console.log(`Processed ${osItems.length} items from file`);
       
-      // For each OS item, determine its technical area and save to database
-      const processedItems = osItems.map(item => ({
-        ...item,
-        upload_id: uploadId,
-        area_tecnica: mapAreaTecnica(item.tipo_servico) || 'STM', // Default to STM if unknown
-        servico_valido: ['PINHEIROS', 'ALTO DE PINHEIROS', 'JARDIM PAULISTA', 'ITAIM BIBI'].includes(item.distrito)
-      }));
-      
-      // Insert OS items
-      if (processedItems.length > 0) {
+      // Batch insert records in chunks to avoid payload size limits
+      const batchSize = 500;
+      for (let i = 0; i < osItems.length; i += batchSize) {
+        const batch = osItems.slice(i, i + batchSize).map(item => ({
+          ...item,
+          upload_id: uploadId,
+          area_tecnica: mapAreaTecnica(item.tipo_servico) || 'STM', // Default to STM if unknown
+          servico_valido: ['PINHEIROS', 'ALTO DE PINHEIROS', 'JARDIM PAULISTA', 'ITAIM BIBI'].includes(item.distrito)
+        }));
+        
         const { error: insertError } = await supabase
           .from('ordens_156')
-          .insert(processedItems);
+          .insert(batch);
   
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Error inserting batch:', insertError);
+          throw insertError;
+        }
+        
+        console.log(`Inserted batch ${i/batchSize + 1}/${Math.ceil(osItems.length/batchSize)}`);
       }
       
       // Call the function to process the upload (detect changes, etc.)
@@ -138,18 +159,11 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       });
       
       await fetchOSData(uploadId);
-
-      toast({
-        title: "Upload concluído",
-        description: "A planilha foi processada com sucesso.",
-      });
+      
+      toast.success("Planilha processada com sucesso.");
     } catch (error: any) {
       console.error('Erro ao processar planilha:', error);
-      toast({
-        title: "Erro no upload",
-        description: error.message || "Não foi possível processar o arquivo.",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Não foi possível processar o arquivo.");
     } finally {
       setIsLoading(false);
     }
@@ -172,17 +186,10 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       setLastUpload(null);
       onDataLoaded([]);
       
-      toast({
-        title: "Upload removido",
-        description: "O arquivo foi removido com sucesso.",
-      });
+      toast.success("Upload removido com sucesso.");
     } catch (error: any) {
       console.error('Erro ao remover upload:', error);
-      toast({
-        title: "Erro ao remover",
-        description: error.message || "Não foi possível remover o arquivo.",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Não foi possível remover o arquivo.");
     } finally {
       setIsLoading(false);
     }

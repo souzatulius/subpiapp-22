@@ -1,29 +1,6 @@
+import { Chart, registerables } from 'chart.js';
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement
-} from 'chart.js';
+// Register all Chart.js components (scales, controllers, plugins, etc.)
+Chart.register(...registerables);
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement
-);
-
-// This is just a registration file, not a component
-
+// This ensures all features like the Filler plugin are available
