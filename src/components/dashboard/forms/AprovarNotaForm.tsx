@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Search } from 'lucide-react';
 import NotasList from './components/NotasList';
 import NotaDetail from './components/NotaDetail';
@@ -32,9 +32,9 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       const { data, error } = await supabase
         .from('notas_oficiais')
         .select(`
-          id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id,
+          id, titulo, texto, status, criado_em, autor_id, aprovador_id, problema_id, demanda_id,
           autor:usuarios!autor_id(id, nome_completo),
-          area_coordenacao:area_coordenacao_id(id, descricao),
+          problemas:problema_id(id, descricao),
           demanda:demanda_id(*)
         `)
         .eq('status', 'pendente')  // Only fetch pending notes
@@ -51,14 +51,14 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         criado_em: nota.criado_em,
         autor_id: nota.autor_id,
         aprovador_id: nota.aprovador_id,
-        area_coordenacao_id: nota.area_coordenacao_id,
+        problema_id: nota.problema_id,
         demanda_id: nota.demanda_id,
         autor: nota.autor ? {
           id: nota.autor.id,
           nome_completo: nota.autor.nome_completo
         } : { nome_completo: 'Desconhecido' },
-        areas_coordenacao: nota.area_coordenacao ? 
-          { descricao: nota.area_coordenacao.descricao, id: nota.area_coordenacao.id } : 
+        problemas: nota.problemas ? 
+          { descricao: nota.problemas.descricao, id: nota.problemas.id } : 
           { descricao: 'Desconhecida', id: '' },
         demanda: nota.demanda
       })) || [];
@@ -82,7 +82,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
 
   const filteredNotas = notas.filter(nota => 
     nota.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (nota.areas_coordenacao?.descricao?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    (nota.problemas?.descricao?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   const handleApprove = async () => {
@@ -213,7 +213,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
                       <h3 className="font-medium text-lg">{nota.titulo}</h3>
                       <div className="text-sm text-gray-500">
                         <p>Autor: {nota.autor?.nome_completo || 'Desconhecido'}</p>
-                        <p>Área: {nota.areas_coordenacao?.descricao || 'Desconhecida'}</p>
+                        <p>Área: {nota.problemas?.descricao || 'Desconhecida'}</p>
                       </div>
                     </div>
                   ))}
@@ -232,7 +232,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
                 <h2 className="text-xl font-bold mb-4">{selectedNota.titulo}</h2>
                 <div className="mb-4">
                   <p><strong>Autor:</strong> {selectedNota.autor?.nome_completo || 'Desconhecido'}</p>
-                  <p><strong>Área:</strong> {selectedNota.areas_coordenacao?.descricao || 'Desconhecida'}</p>
+                  <p><strong>Área:</strong> {selectedNota.problemas?.descricao || 'Desconhecida'}</p>
                 </div>
                 <div className="mb-6 whitespace-pre-line border-t pt-4">
                   {selectedNota.texto}

@@ -5,7 +5,8 @@ export interface Demand {
   id: string;
   titulo: string;
   status: string;
-  area_coordenacao: {
+  problema_id: string;
+  problema?: {
     id: string;
     descricao: string;
   } | null;
@@ -35,13 +36,13 @@ export interface NotaOficial {
   criado_em: string;
   autor_id: string;
   aprovador_id?: string | null;
-  area_coordenacao_id: string;
+  problema_id: string;
   demanda_id?: string | null;
   autor?: {
     id?: string;
     nome_completo: string;
   };
-  areas_coordenacao?: {
+  problemas?: {
     id?: string;
     descricao: string;
   };

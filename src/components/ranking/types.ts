@@ -1,3 +1,4 @@
+
 // OS156 Types
 export interface OS156Item {
   id: string;
@@ -11,7 +12,7 @@ export interface OS156Item {
   data_criacao: string;
   data_status: string;
   tempo_aberto: number;
-  area_tecnica: 'STM' | 'STLP';
+  area_tecnica: 'STM' | 'STLP' | '';
   servico_valido: boolean;
   upload_id?: string;
 }
@@ -34,7 +35,16 @@ export interface OS156FilterOptions {
   empresa: string[];
   dataInicio: Date | null;
   dataFim: Date | null;
+  dateRange?: { from: Date; to: Date }; // Added for compatibility
 }
+
+// For backward compatibility with the ranking and filters
+export type FilterOptions = {
+  dateRange?: { from: Date; to: Date };
+  statuses: string[];
+  serviceTypes: string[];
+  districts: string[];
+};
 
 // Add other types as needed for charts
 export interface OS156ChartData {
@@ -53,6 +63,7 @@ export interface OS156ChartData {
   efficiencyRadar: any;
   criticalStatusAnalysis: any;
   frequentServices: any;
+  statusTransition?: any; // Added for compatibility
 }
 
 export interface UploadInfo {
@@ -76,4 +87,41 @@ export interface ChartVisibility {
   statusTransition: boolean;
   criticalStatus: boolean;
   frequentServices: boolean;
+  occurrences?: boolean; // Added for compatibility
+}
+
+// For ranking data compatibility
+export interface OrdemServico {
+  id: string;
+  ordem_servico: string;
+  classificacao_servico: string;
+  status: string;
+  criado_em: string;
+  data_status: string;
+  distrito: string;
+  bairro?: string;
+  logradouro?: string;
+  fornecedor?: string;
+  area_tecnica?: string;
+  dias_ate_status_atual?: number;
+  planilha_referencia?: string;
+}
+
+export interface PlanilhaUpload {
+  id: string;
+  arquivo_nome: string;
+  data_upload: string;
+  usuario_upload: string;
+  qtd_ordens_processadas: number;
+  qtd_ordens_validas: number;
+  status_upload: "sucesso" | "erro" | "parcial";
+}
+
+export interface StatusHistorico {
+  id: string;
+  ordem_servico: string;
+  status_antigo: string;
+  status_novo: string;
+  data_mudanca: string;
+  planilha_origem?: string;
 }

@@ -1,21 +1,21 @@
 
-import { Toast, ToastActionElement, ToastProps } from "@/components/ui/toast";
+import { Toast } from "@/components/ui/toast";
 import { useToast as useShadcnToast } from "@/components/ui/use-toast";
 
-type ToastProps = Omit<Toast, "id"> & {
-  action?: ToastActionElement;
+type CustomToastProps = Omit<Toast, "id"> & {
+  action?: React.ReactElement;
 };
 
 export function useToast() {
   const { toast: shadcnToast, ...rest } = useShadcnToast();
 
   // Customized toast function that preserves all shadcn/ui toast functionality
-  function toast(props: ToastProps) {
+  function customToast(props: CustomToastProps) {
     return shadcnToast(props);
   }
 
   // Add predefined toast types
-  toast.success = (title: string, description?: string) => {
+  customToast.success = (title: string, description?: string) => {
     return shadcnToast({
       title,
       description,
@@ -23,7 +23,7 @@ export function useToast() {
     });
   };
 
-  toast.error = (title: string, description?: string) => {
+  customToast.error = (title: string, description?: string) => {
     return shadcnToast({
       title,
       description,
@@ -31,14 +31,14 @@ export function useToast() {
     });
   };
 
-  toast.info = (title: string, description?: string) => {
+  customToast.info = (title: string, description?: string) => {
     return shadcnToast({
       title,
       description,
     });
   };
 
-  toast.warning = (title: string, description?: string) => {
+  customToast.warning = (title: string, description?: string) => {
     return shadcnToast({
       title,
       description,
@@ -48,8 +48,8 @@ export function useToast() {
 
   return {
     ...rest,
-    toast
+    toast: customToast
   };
 }
 
-export { toast } from "@/components/ui/use-toast";
+export { toast as originalToast } from "@/components/ui/use-toast";
