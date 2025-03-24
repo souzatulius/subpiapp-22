@@ -24,7 +24,8 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     handleFileChange,
     handleUploadClick,
     handleRemovePhoto,
-    handleSavePhoto
+    handleSavePhoto,
+    photoRemoved
   } = usePhotoUpload(userProfile, fetchUserProfile, onClose);
 
   const footerContent = (
@@ -32,7 +33,7 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
       <Button variant="outline" onClick={onClose} disabled={loading || profileLoading}>
         Cancelar
       </Button>
-      {selectedFile && (
+      {(selectedFile || photoRemoved) && (
         <Button 
           variant="default" 
           onClick={handleSavePhoto} 
