@@ -117,9 +117,6 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
                 <div className="font-medium text-subpi-gray-text">
                   {suggestion.label}
                 </div>
-                <div className="text-sm text-gray-500 mt-0.5">
-                  {suggestion.route}
-                </div>
               </button>
             ))}
           </div>
