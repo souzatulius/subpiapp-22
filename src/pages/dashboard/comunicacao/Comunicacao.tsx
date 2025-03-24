@@ -10,10 +10,12 @@ import {
   TrendingUp, 
   TrendingDown,
   Search,
-  Pencil
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
+import { DndContext, closestCenter, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, arrayMove } from '@dnd-kit/sortable';
+import SortableActionCard from '@/components/dashboard/SortableActionCard';
 
 interface ActionCardItem {
   id: string;
@@ -58,6 +60,30 @@ const ComunicacaoDashboard: React.FC = () => {
       color: 'gray-light',
     }
   ]);
+
+  // Set up DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
+
+  // Handle drag end event
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setActionCards((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   // Dados estatísticos das demandas (simulados)
   const comunicacaoStats = [
@@ -137,22 +163,24 @@ const ComunicacaoDashboard: React.FC = () => {
     <div className="max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Comunicação</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {actionCards.map((card) => (
-          <ActionCard 
-            key={card.id}
-            id={card.id}
-            title={card.title} 
-            icon={card.icon} 
-            path={card.path} 
-            color={card.color}
-            onDelete={handleDeleteCard}
-            onEdit={handleEditCard}
-            width={card.width}
-            height={card.height}
-          />
-        ))}
-      </div>
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={actionCards.map(card => card.id)}>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {actionCards.map((card) => (
+              <SortableActionCard 
+                key={card.id}
+                card={card} 
+                onEdit={(c) => handleEditCard(c.id)}
+                onDelete={handleDeleteCard}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {comunicacaoStats.map((stat, index) => (

@@ -43,7 +43,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             <SelectTrigger 
               className={`${errors.role ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
             >
-              <SelectValue placeholder="Selecione um cargo" />
+              <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
               {roles.length === 0 ? (
@@ -81,7 +81,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             <SelectTrigger 
               className={`${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
             >
-              <SelectValue placeholder="Selecione uma área" />
+              <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
               {areas.length === 0 ? (

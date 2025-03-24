@@ -35,8 +35,11 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   onSearchSubmit,
   specialCardsData
 }) => {
+  // Include all cards in the sortable context, not just the regular ones
+  const allCardIds = cards.map(card => card.id);
+  
   return (
-    <SortableContext items={cards.map(card => card.id)}>
+    <SortableContext items={allCardIds}>
       <div className="grid grid-cols-4 gap-6 auto-rows-auto">
         {/* Mensagem de boas-vindas no primeiro acesso */}
         <WelcomeMessage />
@@ -60,57 +63,8 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
         {/* Add NotificationsEnabler after the search card */}
         <NotificationsEnabler />
         
-        {/* Show pending actions card */}
-        {cards.filter(card => card.isPendingActions).map((card) => (
-          <ActionCardWrapper 
-            key={card.id}
-            card={card} 
-            onEdit={onEditCard}
-            onDelete={onDeleteCard}
-            onAddNewCard={onAddNewCard}
-            quickDemandTitle={quickDemandTitle}
-            onQuickDemandTitleChange={onQuickDemandTitleChange}
-            onQuickDemandSubmit={onQuickDemandSubmit}
-            onSearchSubmit={onSearchSubmit}
-            specialCardsData={specialCardsData}
-          />
-        ))}
-        
-        {/* Show overdue demands card */}
-        {cards.filter(card => card.isOverdueDemands).map((card) => (
-          <ActionCardWrapper 
-            key={card.id}
-            card={card} 
-            onEdit={onEditCard}
-            onDelete={onDeleteCard}
-            onAddNewCard={onAddNewCard}
-            quickDemandTitle={quickDemandTitle}
-            onQuickDemandTitleChange={onQuickDemandTitleChange}
-            onQuickDemandSubmit={onQuickDemandSubmit}
-            onSearchSubmit={onSearchSubmit}
-            specialCardsData={specialCardsData}
-          />
-        ))}
-        
-        {/* Show standard cards */}
-        {cards.filter(card => !card.isSearch && !card.isPendingActions && !card.isOverdueDemands && 
-                            !card.isQuickDemand && !card.isNewCardButton).map((card) => (
-          <ActionCardWrapper 
-            key={card.id}
-            card={card} 
-            onEdit={onEditCard}
-            onDelete={onDeleteCard}
-            onAddNewCard={onAddNewCard}
-            quickDemandTitle={quickDemandTitle}
-            onQuickDemandTitleChange={onQuickDemandTitleChange}
-            onQuickDemandSubmit={onQuickDemandSubmit}
-            onSearchSubmit={onSearchSubmit}
-            specialCardsData={specialCardsData}
-          />
-        ))}
-        
-        {/* Show quick demand and new card button at the end */}
-        {cards.filter(card => card.isQuickDemand || card.isNewCardButton).map((card) => (
+        {/* Show all other cards */}
+        {cards.filter(card => !card.isSearch).map((card) => (
           <ActionCardWrapper 
             key={card.id}
             card={card} 

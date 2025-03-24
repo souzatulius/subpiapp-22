@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, CheckCircle } from 'lucide-react';
+import { Clock, CheckCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface OverdueDemandsProps {
   id: string;
@@ -12,10 +14,88 @@ interface OverdueDemandsProps {
 
 const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({ 
   id, 
-  overdueCount,
-  overdueItems
+  overdueCount: initialOverdueCount,
+  overdueItems: initialOverdueItems
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [overdueItems, setOverdueItems] = useState<{ title: string; id: string }[]>(initialOverdueItems);
+  const [overdueCount, setOverdueCount] = useState<number>(initialOverdueCount);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
+  useEffect(() => {
+    const fetchOverdueDemands = async () => {
+      if (!user) return;
+      
+      setIsLoading(true);
+      
+      try {
+        // First, get user's area_coordenacao_id
+        const { data: userData, error: userError } = await supabase
+          .from('usuarios')
+          .select('area_coordenacao_id')
+          .eq('id', user.id)
+          .single();
+          
+        if (userError) throw userError;
+        
+        const userAreaId = userData?.area_coordenacao_id;
+        
+        // Get current date for comparing with deadlines
+        const now = new Date().toISOString();
+        
+        // Fetch overdue demands for user's area
+        const { data: demandsData, error: demandsError } = await supabase
+          .from('demandas')
+          .select('id, titulo')
+          .lt('prazo_resposta', now) // Less than = past deadline
+          .eq('area_coordenacao_id', userAreaId)
+          .eq('status', 'pendente')
+          .order('prazo_resposta', { ascending: true })
+          .limit(5);
+          
+        if (demandsError) throw demandsError;
+        
+        if (demandsData) {
+          const formattedItems = demandsData.map(demand => ({
+            id: demand.id,
+            title: demand.titulo || 'Demanda sem título'
+          }));
+          
+          setOverdueItems(formattedItems);
+          setOverdueCount(formattedItems.length);
+        }
+      } catch (error) {
+        console.error('Error fetching overdue demands:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchOverdueDemands();
+    
+    // Set up a real-time subscription for new demands
+    const demandsChannel = supabase
+      .channel('overdue-demands-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'demandas',
+        },
+        () => {
+          // Just re-fetch data when changes occur
+          fetchOverdueDemands();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(demandsChannel);
+    };
+  }, [user]);
+
   const hasOverdueItems = overdueCount > 0;
 
   const handleViewAll = () => {
@@ -38,14 +118,22 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
           <h3 className="text-lg font-medium">
             {hasOverdueItems ? 'Demandas em Atraso' : 'Você está com tudo em dia'}
           </h3>
-          {hasOverdueItems 
-            ? <Clock className="h-5 w-5" /> 
-            : <CheckCircle className="h-5 w-5" />
-          }
+          {isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            hasOverdueItems 
+              ? <Clock className="h-5 w-5" /> 
+              : <CheckCircle className="h-5 w-5" />
+          )}
         </div>
         
         <div className="space-y-2 mt-2">
-          {hasOverdueItems ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+              <span className="ml-2 text-sm text-gray-500">Carregando...</span>
+            </div>
+          ) : hasOverdueItems ? (
             <ul className="text-sm space-y-2">
               {overdueItems.map((item, index) => (
                 <li 
