@@ -7,7 +7,8 @@ import {
   FilterOptions,
   OrdemServico,
   PlanilhaUpload,
-  StatusHistorico
+  StatusHistorico,
+  OS156Item
 } from '@/components/ranking/types';
 import { useChartDataGeneration } from './useChartDataGeneration';
 
@@ -46,7 +47,7 @@ export const useRankingData = (user: User | null) => {
           usuario_upload: data[0].usuario_upload,
           qtd_ordens_processadas: data[0].qtd_ordens_processadas,
           qtd_ordens_validas: data[0].qtd_ordens_validas,
-          status_upload: data[0].status_upload
+          status_upload: data[0].status_upload as "sucesso" | "erro" | "parcial"
         });
         
         // Fetch order data for this upload
@@ -129,12 +130,34 @@ export const useRankingData = (user: User | null) => {
         setStatusTypes(uniqueStatusTypes);
       }
       
-      // Generate charts
-      generateChartData(allData);
+      // Transform OrdemServico to OS156Item for chart generation
+      const chartItems: OS156Item[] = ordensToOS156Items(allData);
+      
+      // Generate charts with converted data
+      generateChartData(chartItems);
     } catch (error) {
       console.error('Error fetching orders data:', error);
       toast.error('Não foi possível carregar os dados das ordens de serviço');
     }
+  };
+  
+  // Helper function to convert OrdemServico to OS156Item
+  const ordensToOS156Items = (orders: OrdemServico[]): OS156Item[] => {
+    return orders.map(order => ({
+      id: order.id,
+      numero_os: order.ordem_servico,
+      distrito: order.distrito,
+      bairro: order.bairro || '',
+      logradouro: order.logradouro || '',
+      tipo_servico: order.classificacao_servico,
+      area_tecnica: order.area_tecnica as "STM" | "STLP" | "",
+      empresa: order.fornecedor,
+      data_criacao: order.criado_em,
+      status: order.status,
+      data_status: order.data_status,
+      tempo_aberto: order.dias_ate_status_atual || 0,
+      servico_valido: true
+    }));
   };
   
   // Function to upload a new file
@@ -161,7 +184,7 @@ export const useRankingData = (user: User | null) => {
         .insert({
           arquivo_nome: file.name,
           usuario_upload: user.id,
-          status_upload: 'sucesso' // Will be updated after processing
+          status_upload: 'sucesso' as "sucesso" | "erro" | "parcial" // Will be updated after processing
         })
         .select();
       
@@ -186,7 +209,7 @@ export const useRankingData = (user: User | null) => {
         .update({
           qtd_ordens_processadas: 100, // Placeholder
           qtd_ordens_validas: 80,      // Placeholder
-          status_upload: 'sucesso'
+          status_upload: 'sucesso' as "sucesso" | "erro" | "parcial"
         })
         .eq('id', uploadId);
       
@@ -296,8 +319,11 @@ export const useRankingData = (user: User | null) => {
       );
     }
     
+    // Transform filtered OrdemServico to OS156Item for chart generation
+    const chartItems: OS156Item[] = ordensToOS156Items(filteredData);
+    
     // Generate charts with filtered data
-    generateChartData(filteredData);
+    generateChartData(chartItems);
   };
   
   // Fetch data when component mounts or when user changes

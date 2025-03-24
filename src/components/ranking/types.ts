@@ -4,7 +4,7 @@ import { DateRange } from 'react-day-picker';
 export type OrderStatus = 'Planejar' | 'Novo' | 'Aprovado' | 'Concluído' | 'Todos' | 'NOVO' | 'CONC' | 'PREPLAN' | 'PRECANC' | 'AB' | 'PE' | 'FECHADO';
 export type ServiceType = 'Tapa Buraco' | 'Poda' | 'Limpeza' | 'Todos';
 export type District = 'Itaim Bibi' | 'Pinheiros' | 'Alto de Pinheiros' | 'Jardim Paulista' | 'Todos' | 'PINHEIROS' | 'ALTO DE PINHEIROS' | 'JARDIM PAULISTA' | 'ITAIM BIBI' | 'EXTERNO';
-export type AreaTecnica = 'STM' | 'STLP' | 'Todos';
+export type AreaTecnica = 'STM' | 'STLP' | '' | 'Todos';
 
 export interface ChartVisibility {
   occurrences: boolean;

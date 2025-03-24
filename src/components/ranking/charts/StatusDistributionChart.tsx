@@ -6,12 +6,17 @@ import ChartCard from './ChartCard';
 interface StatusDistributionChartProps {
   data: any;
   isLoading: boolean;
+  title?: string;
 }
 
-const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({ data, isLoading }) => {
+const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({ 
+  data, 
+  isLoading,
+  title = "Status das ordens de serviço"
+}) => {
   return (
     <ChartCard
-      title="Status das ordens de serviço"
+      title={title}
       value={isLoading ? '' : 'Comparação'}
       isLoading={isLoading}
     >

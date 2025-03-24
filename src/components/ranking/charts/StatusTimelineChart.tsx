@@ -6,9 +6,10 @@ import ChartCard from './ChartCard';
 interface StatusTimelineChartProps {
   data: any;
   isLoading: boolean;
+  className?: string;
 }
 
-const StatusTimelineChart: React.FC<StatusTimelineChartProps> = ({ data, isLoading }) => {
+const StatusTimelineChart: React.FC<StatusTimelineChartProps> = ({ data, isLoading, className }) => {
   // Check if data exists before accessing it
   const totalOrders = isLoading || !data || !data.datasets ? 
     '' : 
@@ -19,6 +20,7 @@ const StatusTimelineChart: React.FC<StatusTimelineChartProps> = ({ data, isLoadi
       title="Evolução Temporal por Status"
       value={totalOrders ? `${totalOrders} ocorrências` : ''}
       isLoading={isLoading}
+      className={className}
     >
       {!isLoading && data && (
         <Line 
