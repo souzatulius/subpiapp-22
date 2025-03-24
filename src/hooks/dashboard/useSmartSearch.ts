@@ -65,7 +65,7 @@ export const useSmartSearch = () => {
   const fuse = useMemo(() => new Fuse(searchActions, {
     keys: ['label', 'keywords'],
     includeScore: true,
-    threshold: 0.6, // Increased threshold for more lenient matching
+    threshold: 0.6, // More lenient matching
     ignoreLocation: true,
     useExtendedSearch: true, // Enable extended search for better phrase matching
   }), []);
@@ -87,6 +87,10 @@ export const useSmartSearch = () => {
       
       // Split the query into individual words for better matching
       const queryWords = searchQuery.toLowerCase().split(/\s+/);
+      
+      // Log the search query for debugging
+      console.log('Searching for:', searchQuery);
+      console.log('Query words:', queryWords);
       
       // Perform a direct search with the full query
       let results = fuse.search(searchQuery);
@@ -118,6 +122,8 @@ export const useSmartSearch = () => {
         .map(result => result.item)
         .slice(0, 5); // Limit to 5 suggestions
       
+      console.log('Suggestions:', filteredSuggestions);
+      
       setSuggestions(filteredSuggestions);
       setShowSuggestions(true);
       setIsLoading(false);
@@ -128,6 +134,7 @@ export const useSmartSearch = () => {
 
   // Navigate to the selected action's route
   const handleSelectSuggestion = (action: SearchAction) => {
+    console.log('Selected suggestion:', action);
     setQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
@@ -136,6 +143,7 @@ export const useSmartSearch = () => {
 
   // Handle direct search submission
   const handleSearch = (searchQuery: string) => {
+    console.log('Search submitted:', searchQuery);
     if (searchQuery.trim() && suggestions.length > 0) {
       // Navigate to the first suggestion
       handleSelectSuggestion(suggestions[0]);
