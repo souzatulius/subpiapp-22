@@ -21,7 +21,7 @@ export const getColorClasses = (color: string) => {
     case 'gray-ultra-light':
       return 'bg-gray-25 text-gray-600 border-gray-50 hover:bg-gray-50';
     case 'lime':
-      return 'bg-lime-50 text-lime-600 border-lime-100 hover:bg-lime-100';
+      return 'bg-lime-500 text-white border-lime-600 hover:bg-lime-600';
     default:
       return 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100';
   }
