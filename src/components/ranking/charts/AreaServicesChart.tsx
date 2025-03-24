@@ -9,24 +9,15 @@ interface AreaServicesChartProps {
 }
 
 const AreaServicesChart: React.FC<AreaServicesChartProps> = ({ data, isLoading }) => {
-  // Calculate totals for STM and STLP
-  const stmTotal = isLoading || !data || !data.datasets || !data.datasets[0]?.data ? 
-    0 : 
-    data.datasets[0].data.reduce((sum: number, val: number) => sum + val, 0);
-  
-  const stlpTotal = isLoading || !data || !data.datasets || !data.datasets[1]?.data ? 
-    0 : 
-    data.datasets[1].data.reduce((sum: number, val: number) => sum + val, 0);
-  
   return (
     <ChartCard
       title="Serviços por Área Técnica"
-      value={isLoading ? '' : `STM: ${stmTotal} / STLP: ${stlpTotal}`}
+      value={isLoading ? '' : 'STM vs STLP'}
       isLoading={isLoading}
     >
       {!isLoading && data && (
         <Bar 
-          data={data} 
+          data={data}
           options={{
             maintainAspectRatio: false,
             plugins: {
@@ -43,9 +34,9 @@ const AreaServicesChart: React.FC<AreaServicesChartProps> = ({ data, isLoading }
                 }
               },
               x: {
-                ticks: {
-                  maxRotation: 45,
-                  minRotation: 45
+                title: {
+                  display: true,
+                  text: 'Tipo de Serviço'
                 }
               }
             },

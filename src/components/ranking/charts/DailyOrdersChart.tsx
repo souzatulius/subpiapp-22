@@ -9,15 +9,15 @@ interface DailyOrdersChartProps {
 }
 
 const DailyOrdersChart: React.FC<DailyOrdersChartProps> = ({ data, isLoading }) => {
-  // Calculate average daily volume
-  const averageVolume = isLoading || !data || !data.datasets || data.datasets[0]?.data.length === 0 ? 
-    0 : 
-    Math.round(data.datasets[0].data.reduce((sum: number, val: number) => sum + val, 0) / data.datasets[0].data.length);
+  // Calculate the total or average if appropriate
+  const chartValue = isLoading || !data || !data.datasets || data.datasets[0]?.data?.length === 0 
+    ? '' 
+    : `${data.datasets[0]?.data.reduce((sum: number, val: number) => sum + val, 0)} ordens`;
   
   return (
     <ChartCard
       title="Volume Diário de Novas Ordens"
-      value={isLoading ? '' : `Média: ${averageVolume}/dia`}
+      value={chartValue}
       isLoading={isLoading}
     >
       {!isLoading && data && (
@@ -27,7 +27,7 @@ const DailyOrdersChart: React.FC<DailyOrdersChartProps> = ({ data, isLoading }) 
             maintainAspectRatio: false,
             plugins: {
               legend: {
-                display: false,
+                position: 'top' as const,
               },
             },
             scales: {
@@ -39,9 +39,9 @@ const DailyOrdersChart: React.FC<DailyOrdersChartProps> = ({ data, isLoading }) 
                 }
               },
               x: {
-                ticks: {
-                  maxRotation: 45,
-                  minRotation: 45
+                title: {
+                  display: true,
+                  text: 'Data'
                 }
               }
             },

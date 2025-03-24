@@ -12,22 +12,17 @@ interface CompaniesPerformanceChartProps {
 const CompaniesPerformanceChart: React.FC<CompaniesPerformanceChartProps> = ({ 
   data, 
   isLoading,
-  title = "Empresas com Mais Ordens Concluídas"
+  title = "Empresas com Obras Concluídas" 
 }) => {
-  // Calculate total
-  const total = isLoading || !data || !data.datasets || !data.datasets[0]?.data ? 
-    0 : 
-    data.datasets[0].data.reduce((sum: number, val: number) => sum + val, 0);
-  
   return (
     <ChartCard
       title={title}
-      value={isLoading ? '' : `${total} ocorrências`}
+      value={isLoading ? '' : 'Top Empresas'}
       isLoading={isLoading}
     >
       {!isLoading && data && (
         <Bar 
-          data={data} 
+          data={data}
           options={{
             maintainAspectRatio: false,
             indexAxis: 'y' as const,
@@ -39,17 +34,11 @@ const CompaniesPerformanceChart: React.FC<CompaniesPerformanceChartProps> = ({
             scales: {
               x: {
                 beginAtZero: true,
-              },
-              y: {
-                ticks: {
-                  autoSkip: false,
-                  callback: function(value) {
-                    const label = this.getLabelForValue(value as number);
-                    // Truncate long labels
-                    return label.length > 15 ? label.substring(0, 15) + '...' : label;
-                  }
+                title: {
+                  display: true,
+                  text: 'Obras Concluídas'
                 }
-              }
+              },
             },
           }}
         />

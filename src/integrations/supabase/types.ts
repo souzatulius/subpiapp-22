@@ -513,39 +513,74 @@ export type Database = {
       }
       ordens_servico: {
         Row: {
+          area_tecnica: string | null
           bairro: string | null
-          classificacao: string | null
+          cep: string | null
+          classificacao_servico: string
+          contrato: string | null
           criado_em: string | null
-          dias: number | null
+          data_status: string | null
+          dias_ate_status_atual: number | null
           distrito: string | null
-          id: number
+          fornecedor: string | null
+          id: string
+          logradouro: string | null
+          numero: string | null
           ordem_servico: string
-          status: string | null
-          ultima_atualizacao: string | null
+          planilha_referencia: string | null
+          prioridade: string | null
+          status: string
+          subprefeitura: string | null
         }
         Insert: {
+          area_tecnica?: string | null
           bairro?: string | null
-          classificacao?: string | null
+          cep?: string | null
+          classificacao_servico: string
+          contrato?: string | null
           criado_em?: string | null
-          dias?: number | null
+          data_status?: string | null
+          dias_ate_status_atual?: number | null
           distrito?: string | null
-          id?: number
+          fornecedor?: string | null
+          id?: string
+          logradouro?: string | null
+          numero?: string | null
           ordem_servico: string
-          status?: string | null
-          ultima_atualizacao?: string | null
+          planilha_referencia?: string | null
+          prioridade?: string | null
+          status: string
+          subprefeitura?: string | null
         }
         Update: {
+          area_tecnica?: string | null
           bairro?: string | null
-          classificacao?: string | null
+          cep?: string | null
+          classificacao_servico?: string
+          contrato?: string | null
           criado_em?: string | null
-          dias?: number | null
+          data_status?: string | null
+          dias_ate_status_atual?: number | null
           distrito?: string | null
-          id?: number
+          fornecedor?: string | null
+          id?: string
+          logradouro?: string | null
+          numero?: string | null
           ordem_servico?: string
-          status?: string | null
-          ultima_atualizacao?: string | null
+          planilha_referencia?: string | null
+          prioridade?: string | null
+          status?: string
+          subprefeitura?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ordens_servico_planilha_referencia_fkey"
+            columns: ["planilha_referencia"]
+            isOneToOne: false
+            referencedRelation: "planilhas_upload"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       origens_demandas: {
         Row: {
@@ -660,6 +695,36 @@ export type Database = {
           descricao?: string
           id?: string
           nivel_acesso?: number
+        }
+        Relationships: []
+      }
+      planilhas_upload: {
+        Row: {
+          arquivo_nome: string
+          data_upload: string | null
+          id: string
+          qtd_ordens_processadas: number | null
+          qtd_ordens_validas: number | null
+          status_upload: string | null
+          usuario_upload: string | null
+        }
+        Insert: {
+          arquivo_nome: string
+          data_upload?: string | null
+          id?: string
+          qtd_ordens_processadas?: number | null
+          qtd_ordens_validas?: number | null
+          status_upload?: string | null
+          usuario_upload?: string | null
+        }
+        Update: {
+          arquivo_nome?: string
+          data_upload?: string | null
+          id?: string
+          qtd_ordens_processadas?: number | null
+          qtd_ordens_validas?: number | null
+          status_upload?: string | null
+          usuario_upload?: string | null
         }
         Relationships: []
       }
@@ -814,6 +879,41 @@ export type Database = {
             columns: ["area_coordenacao_id"]
             isOneToOne: false
             referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      status_historico: {
+        Row: {
+          data_mudanca: string | null
+          id: string
+          ordem_servico: string
+          planilha_origem: string | null
+          status_antigo: string | null
+          status_novo: string
+        }
+        Insert: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico: string
+          planilha_origem?: string | null
+          status_antigo?: string | null
+          status_novo: string
+        }
+        Update: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico?: string
+          planilha_origem?: string | null
+          status_antigo?: string | null
+          status_novo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_historico_planilha_origem_fkey"
+            columns: ["planilha_origem"]
+            isOneToOne: false
+            referencedRelation: "planilhas_upload"
             referencedColumns: ["id"]
           },
         ]
