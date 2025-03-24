@@ -61,30 +61,21 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
       <div>
         <div className="flex justify-between items-center mb-2">
           <Label className={`block ${hasError('perguntas') ? 'text-orange-500 font-semibold' : ''}`}>
-            Perguntas
+            Perguntas para a Área Técnica
           </Label>
-          {activeQuestions.length < 5 && (
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
-              onClick={addQuestion}
-              className="flex items-center gap-1"
-            >
-              <Plus className="h-4 w-4" />
-              Adicionar pergunta
-            </Button>
-          )}
         </div>
         
         <div className="space-y-3">
           {activeQuestions.map(index => (
             <div key={index} className="flex gap-2">
-              <Input
-                value={formData.perguntas[index] || ''}
-                onChange={(e) => handlePerguntaChange(index, e.target.value)}
-                className={`flex-1 ${hasError('perguntas') ? 'border-orange-500' : ''}`}
-              />
+              <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+                <input
+                  value={formData.perguntas[index] || ''}
+                  onChange={(e) => handlePerguntaChange(index, e.target.value)}
+                  className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full py-3 ${hasError('perguntas') ? 'placeholder-orange-300' : ''}`}
+                  placeholder={`Pergunta ${index + 1}`}
+                />
+              </div>
               {activeQuestions.length > 1 && (
                 <Button
                   type="button"

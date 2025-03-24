@@ -81,7 +81,6 @@ const FormContent: React.FC<FormContentProps> = ({
 }) => {
   switch (activeStep) {
     case 0:
-      // Detalhes da Solicitação (moved from QuestionsDetailsStep)
       return (
         <div className="space-y-4">
           <div>
@@ -192,24 +191,8 @@ const FormContent: React.FC<FormContentProps> = ({
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className={`block text-sm font-medium ${errors.some(err => err.field === 'perguntas') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
-                Perguntas
+                Perguntas para a Área Técnica
               </label>
-              {formData.perguntas.filter(p => p.trim() !== '').length < 5 && (
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    const activeQuestions = formData.perguntas.filter(p => p.trim() !== '').length;
-                    const updatedPerguntas = [...formData.perguntas];
-                    if (activeQuestions < 5) {
-                      updatedPerguntas[activeQuestions] = '';
-                      handleSelectChange('perguntas', JSON.stringify(updatedPerguntas));
-                    }
-                  }}
-                  className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center gap-1"
-                >
-                  + Adicionar pergunta
-                </button>
-              )}
             </div>
             
             <div className="space-y-3">
@@ -217,14 +200,14 @@ const FormContent: React.FC<FormContentProps> = ({
                 if (index < 5 && (index === 0 || formData.perguntas[index-1].trim() !== '' || pergunta.trim() !== '')) {
                   return (
                     <div key={index} className="flex gap-2">
-                      <input
-                        value={pergunta}
-                        onChange={(e) => handlePerguntaChange(index, e.target.value)}
-                        className={`w-full rounded-md border ${
-                          errors.some(err => err.field === 'perguntas') ? 'border-orange-500' : 'border-gray-300'
-                        } px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                        placeholder={`Pergunta ${index + 1}`}
-                      />
+                      <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+                        <input
+                          value={pergunta}
+                          onChange={(e) => handlePerguntaChange(index, e.target.value)}
+                          className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full py-3 ${errors.some(err => err.field === 'perguntas') ? 'placeholder-orange-300' : ''}`}
+                          placeholder={`Pergunta ${index + 1}`}
+                        />
+                      </div>
                       {index > 0 && (
                         <button
                           type="button"
@@ -267,3 +250,4 @@ const FormContent: React.FC<FormContentProps> = ({
 };
 
 export default FormContent;
+
