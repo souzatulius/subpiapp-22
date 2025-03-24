@@ -6,6 +6,9 @@ import { toast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { UserProfile } from '../types';
 
+// The bucket name must only contain lowercase letters, numbers, dots, and hyphens
+const PROFILE_PHOTOS_BUCKET = 'profile-photos';
+
 export const usePhotoUpload = (
   userProfile: UserProfile | null, 
   fetchUserProfile: () => Promise<void>,
@@ -73,7 +76,7 @@ export const usePhotoUpload = (
         
         if (filename) {
           try {
-            await supabase.storage.from('profile_photos').remove([filename]);
+            await supabase.storage.from(PROFILE_PHOTOS_BUCKET).remove([filename]);
           } catch (error) {
             console.warn('Erro ao remover arquivo de storage, continuando com a atualização do perfil:', error);
             // Continue with profile update even if file removal fails
@@ -121,7 +124,7 @@ export const usePhotoUpload = (
 
       // Upload the file - assume bucket already exists
       const { error: uploadError, data } = await supabase.storage
-        .from('profile_photos')
+        .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, selectedFile, {
           cacheControl: '3600',
           upsert: false
@@ -130,14 +133,14 @@ export const usePhotoUpload = (
       if (uploadError) {
         if (uploadError.message.includes('bucket') || uploadError.message.includes('Bucket')) {
           // If there's a bucket-related error, inform the user
-          throw new Error('A pasta de armazenamento de fotos não existe. Entre em contato com o administrador do sistema.');
+          throw new Error(`A pasta de armazenamento "${PROFILE_PHOTOS_BUCKET}" não existe. Entre em contato com o administrador do sistema.`);
         } else {
           throw uploadError;
         }
       }
 
       // Get public URL
-      const { data: urlData } = supabase.storage.from('profile_photos').getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.from(PROFILE_PHOTOS_BUCKET).getPublicUrl(filePath);
       const publicUrl = urlData.publicUrl;
 
       // Update user profile with new photo URL
