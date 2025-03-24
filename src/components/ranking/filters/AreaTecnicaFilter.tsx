@@ -7,10 +7,11 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { AreaTecnica } from '../types';
 
 interface AreaTecnicaFilterProps {
-  value: 'Todos' | 'STM' | 'STLP';
-  onChange: (value: 'Todos' | 'STM' | 'STLP') => void;
+  value: AreaTecnica;
+  onChange: (value: AreaTecnica) => void;
 }
 
 const AreaTecnicaFilter: React.FC<AreaTecnicaFilterProps> = ({

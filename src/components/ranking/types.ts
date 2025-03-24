@@ -1,4 +1,3 @@
-
 import { DateRange } from 'react-day-picker';
 
 export type OrderStatus = 'Planejar' | 'Novo' | 'Aprovado' | 'Concluído' | 'Todos' | 'NOVO' | 'CONC' | 'PREPLAN' | 'PRECANC' | 'AB' | 'PE' | 'FECHADO';
