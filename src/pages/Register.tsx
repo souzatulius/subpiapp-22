@@ -11,6 +11,14 @@ const Register = () => {
   const { session } = useAuth();
   const navigate = useNavigate();
   
+  // Debug
+  useEffect(() => {
+    console.log('Register page loaded');
+    console.log('Roles:', roles);
+    console.log('Areas:', areas);
+    console.log('Loading options:', loadingOptions);
+  }, [roles, areas, loadingOptions]);
+  
   useEffect(() => {
     if (session) {
       navigate('/dashboard');

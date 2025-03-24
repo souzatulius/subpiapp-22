@@ -13,21 +13,33 @@ export const useRegisterOptions = () => {
     const fetchOptions = async () => {
       setLoadingOptions(true);
       try {
-        // Fetch positions from cargos table
+        // Fetch positions from cargos table - add console logs to debug
+        console.log('Fetching cargos from Supabase...');
         const { data: cargosData, error: cargosError } = await supabase
           .from('cargos')
           .select('id, descricao')
           .order('descricao', { ascending: true });
         
-        if (cargosError) throw cargosError;
+        if (cargosError) {
+          console.error('Error fetching cargos:', cargosError);
+          throw cargosError;
+        }
+        
+        console.log('Cargos data received:', cargosData);
         
         // Fetch coordination areas from areas_coordenacao table
+        console.log('Fetching areas from Supabase...');
         const { data: areasData, error: areasError } = await supabase
           .from('areas_coordenacao')
           .select('id, descricao')
           .order('descricao', { ascending: true });
         
-        if (areasError) throw areasError;
+        if (areasError) {
+          console.error('Error fetching areas:', areasError);
+          throw areasError;
+        }
+        
+        console.log('Areas data received:', areasData);
         
         if (!cargosData || cargosData.length === 0) {
           console.warn('No cargos found in the database');

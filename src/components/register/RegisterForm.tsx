@@ -26,6 +26,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     handleSubmit
   } = useRegisterForm();
 
+  // Debug
+  React.useEffect(() => {
+    console.log('RegisterForm received props:');
+    console.log('Roles:', roles);
+    console.log('Areas:', areas);
+    console.log('Loading options:', loadingOptions);
+  }, [roles, areas, loadingOptions]);
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center p-8">
