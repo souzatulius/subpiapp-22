@@ -135,11 +135,7 @@ const RankingContent: React.FC = () => {
 
   const saveChartConfig = async () => {
     if (!user) {
-      toast({
-        title: "Erro ao salvar configuração",
-        description: "Você precisa estar logado para salvar configurações.",
-        variant: "destructive"
-      });
+      toast.error("Você precisa estar logado para salvar configurações.");
       return;
     }
     
@@ -161,33 +157,21 @@ const RankingContent: React.FC = () => {
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          charts_config: JSON.stringify(config),
+          cards_config: JSON.stringify(config),
           updated_at: new Date().toISOString()
         });
       
       if (error) {
         console.error('Error saving chart config:', error);
-        toast({
-          title: "Erro ao salvar configuração",
-          description: "Não foi possível salvar a configuração dos gráficos.",
-          variant: "destructive"
-        });
+        toast.error("Não foi possível salvar a configuração dos gráficos.");
         return;
       }
       
       setChartConfig(config);
-      toast({
-        title: "Configuração salva",
-        description: "A configuração dos gráficos foi salva com sucesso.",
-        variant: "success"
-      });
+      toast.success("Configuração salva com sucesso.");
     } catch (err) {
       console.error('Failed to save chart config:', err);
-      toast({
-        title: "Erro ao salvar configuração",
-        description: "Ocorreu um erro ao salvar a configuração.",
-        variant: "destructive"
-      });
+      toast.error("Ocorreu um erro ao salvar a configuração.");
     } finally {
       setIsSavingConfig(false);
     }
@@ -228,26 +212,21 @@ const RankingContent: React.FC = () => {
       setUploadProgress(0);
       setEstimatedTime('Calculando...');
       
-      toast({
-        title: "Processando planilha",
-        description: "Aguarde enquanto processamos os dados...",
+      toast.info("Processando planilha", {
+        description: "Aguarde enquanto processamos os dados..."
       });
       
       await handleFileUpload(file);
       
-      toast({
-        title: "Upload concluído!",
-        description: "Os gráficos foram atualizados com sucesso.",
-        variant: "success"
+      toast.success("Upload concluído!", {
+        description: "Os gráficos foram atualizados com sucesso."
       });
       
       saveChartConfig();
       
     } catch (error: any) {
-      toast({
-        title: "Erro no upload",
-        description: error.message || "Houve um erro ao processar a planilha.",
-        variant: "destructive"
+      toast.error("Erro no upload", {
+        description: error.message || "Houve um erro ao processar a planilha."
       });
     } finally {
       setUploadProgress(0);
@@ -280,10 +259,8 @@ const RankingContent: React.FC = () => {
 
   const handleApplyFilters = () => {
     applyFilters(filters);
-    toast({
-      title: "Filtros aplicados",
-      description: "Os gráficos foram atualizados com os filtros selecionados.",
-      variant: "success"
+    toast.success("Filtros aplicados", {
+      description: "Os gráficos foram atualizados com os filtros selecionados."
     });
   };
 
