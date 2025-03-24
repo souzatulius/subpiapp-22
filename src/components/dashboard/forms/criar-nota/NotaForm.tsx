@@ -36,10 +36,8 @@ const NotaForm: React.FC<NotaFormProps> = ({
 
   const handleGenerateSuggestion = async () => {
     if (!selectedDemanda) {
-      toast({
-        title: "Erro",
-        description: "Nenhuma demanda selecionada para gerar sugestão.",
-        variant: "destructive"
+      toast.error("Erro", {
+        description: "Nenhuma demanda selecionada para gerar sugestão."
       });
       return;
     }
@@ -81,17 +79,14 @@ const NotaForm: React.FC<NotaFormProps> = ({
         if (suggestedTitle) setTitulo(suggestedTitle);
         setTexto(suggestedContent);
         
-        toast({
-          title: "Sugestão gerada com sucesso!",
+        toast.success("Sugestão gerada com sucesso!", {
           description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
         });
       }
     } catch (error) {
       console.error('Erro ao gerar sugestão:', error);
-      toast({
-        title: "Erro ao gerar sugestão",
-        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão de nota.",
-        variant: "destructive"
+      toast.error("Erro ao gerar sugestão", {
+        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão de nota."
       });
     } finally {
       setIsGeneratingSuggestion(false);

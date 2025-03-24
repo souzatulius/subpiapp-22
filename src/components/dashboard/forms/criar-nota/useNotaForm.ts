@@ -75,10 +75,8 @@ export const useNotaForm = (onClose: () => void) => {
         setStep('create-note');
       } catch (error) {
         console.error('Error fetching responses:', error);
-        toast({
-          title: "Erro ao carregar respostas",
-          description: "Não foi possível carregar as respostas para esta demanda.",
-          variant: "destructive"
+        toast.error("Erro ao carregar respostas", {
+          description: "Não foi possível carregar as respostas para esta demanda."
         });
       }
     }
@@ -94,10 +92,8 @@ export const useNotaForm = (onClose: () => void) => {
 
   const handleSubmit = async () => {
     if (!selectedDemanda || !titulo || !texto || !user?.id) {
-      toast({
-        title: "Formulário incompleto",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
+      toast.error("Formulário incompleto", {
+        description: "Por favor, preencha todos os campos obrigatórios."
       });
       return;
     }
@@ -116,8 +112,7 @@ export const useNotaForm = (onClose: () => void) => {
 
       if (error) throw error;
 
-      toast({
-        title: "Nota enviada com sucesso!",
+      toast.success("Nota enviada com sucesso!", {
         description: "A nota oficial foi enviada para aprovação."
       });
 
@@ -128,10 +123,8 @@ export const useNotaForm = (onClose: () => void) => {
       }
     } catch (error: any) {
       console.error('Erro ao enviar nota:', error);
-      toast({
-        title: "Erro ao enviar nota",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
+      toast.error("Erro ao enviar nota", {
+        description: error.message || "Ocorreu um erro ao processar sua solicitação."
       });
     } finally {
       setIsSubmitting(false);
