@@ -7,7 +7,7 @@ interface DemandaDetalhes {
   id: string;
   titulo: string;
   status: string;
-  problema?: {
+  area_coordenacao: {
     id: string;
     descricao: string;
   } | null;
@@ -43,7 +43,7 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
       try {
         setLoading(true);
         
-        // Fetch demanda details with problema_id (not area_coordenacao_id)
+        // Fetch demanda details
         const { data, error: demandaError } = await supabase
           .from('demandas')
           .select(`
@@ -52,24 +52,24 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
             status,
             detalhes_solicitacao,
             perguntas,
-            problema_id
+            area_coordenacao_id
           `)
           .eq('id', demandaId)
           .single();
           
         if (demandaError) throw demandaError;
         
-        // Fetch problema separately to avoid relation errors
-        let problema = null;
-        if (data.problema_id) {
-          const { data: problemaData, error: problemaError } = await supabase
-            .from('problemas')
+        // Fetch area_coordenacao separately to avoid relation errors
+        let areaCoordenacao = null;
+        if (data.area_coordenacao_id) {
+          const { data: areaData, error: areaError } = await supabase
+            .from('areas_coordenacao')
             .select('id, descricao')
-            .eq('id', data.problema_id)
+            .eq('id', data.area_coordenacao_id)
             .maybeSingle();
             
-          if (!problemaError && problemaData) {
-            problema = problemaData;
+          if (!areaError && areaData) {
+            areaCoordenacao = areaData;
           }
         }
         
@@ -108,7 +108,7 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
           id: data.id,
           titulo: data.titulo,
           status: data.status,
-          problema: problema,
+          area_coordenacao: areaCoordenacao,
           detalhes_solicitacao: data.detalhes_solicitacao,
           perguntas: data.perguntas as Record<string, string> | null,
           respostas: respostas

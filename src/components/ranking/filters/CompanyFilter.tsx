@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 
 interface CompanyFilterProps {
   companies: string[];
@@ -14,31 +13,36 @@ const CompanyFilter: React.FC<CompanyFilterProps> = ({
   selectedCompanies,
   onCompanyChange
 }) => {
-  // Make sure 'Todos' is included
-  const allCompanies = ['Todos', ...companies.filter(c => c !== 'Todos')];
+  if (companies.length === 0) return null;
 
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">Empresas</label>
-      <ScrollArea className="h-48 border rounded-md p-2">
-        <div className="space-y-2">
-          {allCompanies.map((company) => (
-            <div key={company} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`company-${company}`}
-                checked={selectedCompanies.includes(company)}
-                onCheckedChange={() => onCompanyChange(company)}
-              />
-              <label 
-                htmlFor={`company-${company}`}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                {company}
-              </label>
-            </div>
+      <div className="max-h-20 overflow-y-auto">
+        <div className="flex flex-wrap gap-1">
+          <Badge
+            variant={selectedCompanies.includes('Todos') ? "default" : "outline"}
+            className={`cursor-pointer ${
+              selectedCompanies.includes('Todos') ? 'bg-orange-500 hover:bg-orange-600' : ''
+            }`}
+            onClick={() => onCompanyChange('Todos')}
+          >
+            Todas
+          </Badge>
+          {companies.map((company) => (
+            <Badge
+              key={company}
+              variant={selectedCompanies.includes(company) ? "default" : "outline"}
+              className={`cursor-pointer ${
+                selectedCompanies.includes(company) ? 'bg-orange-500 hover:bg-orange-600' : ''
+              }`}
+              onClick={() => onCompanyChange(company)}
+            >
+              {company}
+            </Badge>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

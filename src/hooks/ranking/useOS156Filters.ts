@@ -1,68 +1,69 @@
 
-import { useState, useCallback } from 'react';
-import { OS156FilterOptions, OS156Item, OrderStatus, District, AreaTecnica } from '@/components/ranking/types';
+import { useState } from 'react';
+import { OS156Item, OS156FilterOptions, OrderStatus, District } from '@/components/ranking/types';
 
-export const useOS156Filters = (osData: OS156Item[], onFilteredDataChange: (filteredData: OS156Item[]) => void) => {
+export const useOS156Filters = (osData: OS156Item[], onFilteredDataChange: (data: OS156Item[]) => void) => {
   const [filters, setFilters] = useState<OS156FilterOptions>({
+    dateRange: undefined,
     statuses: ['Todos'],
+    serviceTypes: ['Todos'],
     districts: ['Todos'],
     areaTecnica: 'Todos',
-    empresa: [],
-    dataInicio: null,
-    dataFim: null
+    empresa: ['Todos'],
+    dataInicio: undefined,
+    dataFim: undefined
   });
 
-  // Function to apply filters
-  const applyFilters = useCallback((filterOptions: OS156FilterOptions) => {
+  const applyFilters = (newFilters: OS156FilterOptions) => {
+    if (osData.length === 0) {
+      return;
+    }
+    
     let filteredData = [...osData];
-
-    // Filter by status
-    if (filterOptions.statuses.length > 0 && !filterOptions.statuses.includes('Todos')) {
+    
+    // Apply status filter
+    if (newFilters.statuses && !newFilters.statuses.includes('Todos' as OrderStatus)) {
       filteredData = filteredData.filter(item => 
-        filterOptions.statuses.includes(item.status as OrderStatus)
+        newFilters.statuses.includes(item.status as OrderStatus)
       );
     }
-
-    // Filter by district
-    if (filterOptions.districts.length > 0 && !filterOptions.districts.includes('Todos')) {
+    
+    // Apply area tecnica filter
+    if (newFilters.areaTecnica !== 'Todos') {
+      filteredData = filteredData.filter(item => item.area_tecnica === newFilters.areaTecnica);
+    }
+    
+    // Apply company filter
+    if (newFilters.empresa && newFilters.empresa.length > 0 && !newFilters.empresa.includes('Todos')) {
+      filteredData = filteredData.filter(item => item.empresa && newFilters.empresa.includes(item.empresa));
+    }
+    
+    // Apply date range filter
+    if (newFilters.dataInicio) {
       filteredData = filteredData.filter(item => 
-        filterOptions.districts.includes(item.distrito as District)
+        new Date(item.data_criacao) >= new Date(newFilters.dataInicio!)
       );
     }
-
-    // Filter by technical area
-    if (filterOptions.areaTecnica !== 'Todos') {
+    
+    if (newFilters.dataFim) {
       filteredData = filteredData.filter(item => 
-        item.area_tecnica === filterOptions.areaTecnica
+        new Date(item.data_criacao) <= new Date(newFilters.dataFim!)
       );
     }
-
-    // Filter by company
-    if (filterOptions.empresa && filterOptions.empresa.length > 0) {
+    
+    // Apply district filter
+    if (newFilters.districts && !newFilters.districts.includes('Todos' as District)) {
       filteredData = filteredData.filter(item => 
-        filterOptions.empresa.includes(item.empresa)
+        item.distrito && newFilters.districts.includes(item.distrito as District)
       );
     }
-
-    // Filter by date range
-    if (filterOptions.dataInicio) {
-      const startDate = new Date(filterOptions.dataInicio);
-      filteredData = filteredData.filter(item => 
-        new Date(item.data_criacao) >= startDate
-      );
-    }
-
-    if (filterOptions.dataFim) {
-      const endDate = new Date(filterOptions.dataFim);
-      endDate.setHours(23, 59, 59, 999); // End of day
-      filteredData = filteredData.filter(item => 
-        new Date(item.data_criacao) <= endDate
-      );
-    }
-
-    // Call the callback with filtered data
+    
+    // Update the filtered data
     onFilteredDataChange(filteredData);
-  }, [osData, onFilteredDataChange]);
+    
+    // Update the filters state
+    setFilters(newFilters);
+  };
 
   return {
     filters,

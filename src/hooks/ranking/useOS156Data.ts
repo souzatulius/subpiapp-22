@@ -29,8 +29,7 @@ export const useOS156Data = (user: User | null) => {
   
   const { 
     lastUpload, 
-    isLoading,
-    progress, 
+    isLoading, 
     fetchLastUpload, 
     handleFileUpload, 
     deleteLastUpload 
@@ -50,7 +49,6 @@ export const useOS156Data = (user: User | null) => {
   return {
     lastUpload,
     isLoading,
-    progress,
     osData,
     chartData,
     companies,

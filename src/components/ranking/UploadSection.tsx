@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { UploadCloud, Trash2, RefreshCw, Clock, FileSpreadsheet } from 'lucide-react';
 import { UploadInfo } from './types';
 import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
@@ -49,7 +48,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const handleUploadClick = async () => {
     if (selectedFile) {
       try {
-        toast.loading('Processando planilha...');
         await onUpload(selectedFile);
         toast.success('Planilha carregada com sucesso!');
         setSelectedFile(null);
@@ -106,29 +104,25 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           
           {lastUpload && (
             <div className="flex flex-col gap-2">
-              <Alert>
-                <AlertDescription className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <FileSpreadsheet className="h-6 w-6 text-orange-500" />
-                    <div>
-                      <p className="font-medium text-sm">{lastUpload.fileName}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="mr-2 h-3 w-3" />
-                        Atualizado em: {lastUpload.uploadDate}
-                      </div>
-                    </div>
+              <div className="flex items-center gap-4 p-3 border rounded-md bg-gray-50">
+                <FileSpreadsheet className="h-8 w-8 text-orange-500" />
+                <div className="flex-1">
+                  <p className="font-medium text-sm">{lastUpload.fileName}</p>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Clock className="mr-2 h-3 w-3" />
+                    {lastUpload.uploadDate}
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-red-500" 
-                    onClick={onDelete}
-                    disabled={isLoading}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDescription>
-              </Alert>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-red-500" 
+                  onClick={onDelete}
+                  disabled={isLoading}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
               
               <Button 
                 variant="secondary" 

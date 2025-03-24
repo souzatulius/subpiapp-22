@@ -18,7 +18,7 @@ export const useDemandasData = () => {
     const fetchAreas = async () => {
       try {
         const { data, error } = await supabase
-          .from('problemas')
+          .from('areas_coordenacao')
           .select('id, descricao')
           .order('descricao');
           
@@ -41,7 +41,7 @@ export const useDemandasData = () => {
           error
         } = await supabase.from('demandas').select(`
             *,
-            problemas (id, descricao),
+            areas_coordenacao (id, descricao),
             origens_demandas (descricao),
             tipos_midia (descricao),
             servicos (descricao)
@@ -104,7 +104,7 @@ export const useDemandasData = () => {
     let filtered = [...demandas];
     
     if (areaFilter) {
-      filtered = filtered.filter(demanda => demanda.problemas?.id === areaFilter);
+      filtered = filtered.filter(demanda => demanda.areas_coordenacao?.id === areaFilter);
     }
     
     if (prioridadeFilter) {
@@ -115,7 +115,7 @@ export const useDemandasData = () => {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
         demanda => demanda.titulo.toLowerCase().includes(searchLower) || 
-                  demanda.problemas?.descricao.toLowerCase().includes(searchLower) ||
+                  demanda.areas_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
                   demanda.servicos?.descricao?.toLowerCase().includes(searchLower)
       );
     }

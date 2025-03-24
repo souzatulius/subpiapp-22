@@ -6,14 +6,14 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 interface UserProfile {
   nome_completo: string;
   cargo_id: string;
-  problema_id: string;
+  area_coordenacao_id: string;
   foto_perfil_url?: string;
   whatsapp?: string;
   aniversario?: string;
   cargos?: {
     descricao: string;
   };
-  problemas?: {
+  areas_coordenacao?: {
     descricao: string;
   };
 }
@@ -33,24 +33,18 @@ export const useUserProfile = () => {
         .select(`
           nome_completo,
           cargo_id,
-          problema_id,
+          area_coordenacao_id,
           foto_perfil_url,
           whatsapp,
           aniversario,
           cargos:cargo_id(descricao),
-          problemas:problema_id(descricao)
+          areas_coordenacao:area_coordenacao_id(descricao)
         `)
         .eq('id', user.id)
         .single();
 
       if (error) throw error;
-      
-      // Check if the data is valid before setting it
-      if (data) {
-        setUserProfile(data);
-      } else {
-        console.error('No profile data found for user');
-      }
+      setUserProfile(data);
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
     } finally {

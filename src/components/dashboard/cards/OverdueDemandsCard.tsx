@@ -30,23 +30,16 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
       setIsLoading(true);
       
       try {
-        // First, get user's problema_id
+        // First, get user's area_coordenacao_id
         const { data: userData, error: userError } = await supabase
           .from('usuarios')
-          .select('problema_id')
+          .select('area_coordenacao_id')
           .eq('id', user.id)
           .single();
           
         if (userError) throw userError;
         
-        const userProblemaId = userData?.problema_id;
-        
-        if (!userProblemaId) {
-          console.log('User has no assigned problem area');
-          setOverdueItems([]);
-          setOverdueCount(0);
-          return;
-        }
+        const userAreaId = userData?.area_coordenacao_id;
         
         // Get current date for comparing with deadlines
         const now = new Date().toISOString();
@@ -56,7 +49,7 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
           .from('demandas')
           .select('id, titulo')
           .lt('prazo_resposta', now) // Less than = past deadline
-          .eq('problema_id', userProblemaId)
+          .eq('area_coordenacao_id', userAreaId)
           .eq('status', 'pendente')
           .order('prazo_resposta', { ascending: true })
           .limit(5);

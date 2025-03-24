@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { Demand } from '../types';
+import { toast } from '@/components/ui/use-toast';
+import { Demand } from './types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -25,8 +25,7 @@ export const useDemandasData = () => {
             status,
             detalhes_solicitacao,
             perguntas,
-            problema_id,
-            problemas:problema_id(id, descricao)
+            area_coordenacao:area_coordenacao_id(id, descricao)
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -43,21 +42,16 @@ export const useDemandasData = () => {
         // Create a set of demanda IDs that already have notas
         const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
         
-        console.log('All demandas:', allDemandas.length);
-        console.log('Demandas with notas:', demandasComNotas.size);
-        console.log('Demandas without notas:', allDemandas.length - demandasComNotas.size);
-        
         // Filter to include only demandas that don't have notas associated
         const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
         
-        // Make sure the perguntas field is properly typed and map to include Demand type fields
-        const typedData: Demand[] = demandasSemNotas?.map(item => ({
-          id: item.id,
-          titulo: item.titulo,
-          status: item.status,
-          problema_id: item.problema_id,
-          problema: item.problemas,
-          detalhes_solicitacao: item.detalhes_solicitacao,
+        console.log('All demandas:', allDemandas.length);
+        console.log('Demandas with notas:', demandasComNotas.size);
+        console.log('Demandas without notas:', demandasSemNotas.length);
+        
+        // Make sure the perguntas field is properly typed
+        const typedData = demandasSemNotas?.map(item => ({
+          ...item,
           perguntas: item.perguntas as Record<string, string> | null
         })) || [];
         
@@ -88,7 +82,7 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.problema?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.area_coordenacao?.descricao.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);

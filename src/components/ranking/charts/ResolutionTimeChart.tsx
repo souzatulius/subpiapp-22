@@ -10,9 +10,9 @@ interface ResolutionTimeChartProps {
 
 const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ data, isLoading }) => {
   // Check if data and data.datasets exist before accessing them
-  const averageTime = isLoading || !data || !data.datasets || data.datasets[0]?.data?.length === 0 ? 
+  const averageTime = isLoading || !data || !data.datasets ? 
     '' : 
-    `${Math.round(data.datasets[0]?.data[0] || 0)} dias`;
+    `${data.datasets[0].data[0]} dias`;
   
   return (
     <ChartCard

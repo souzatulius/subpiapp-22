@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Demand, ResponseQA } from '../types';
+import { Demand, ResponseQA } from './types';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
@@ -80,10 +80,10 @@ export const useNotaForm = (onClose: () => void) => {
       return;
     }
 
-    if (!selectedDemanda || !selectedDemanda.problema_id) {
+    if (!selectedDemanda || !selectedDemanda.area_coordenacao) {
       toast({
         title: "Demanda inválida",
-        description: "A demanda selecionada não possui problema associado.",
+        description: "A demanda selecionada não possui área de coordenação.",
         variant: "destructive"
       });
       return;
@@ -92,17 +92,17 @@ export const useNotaForm = (onClose: () => void) => {
     try {
       setIsSubmitting(true);
       
-      // Create the note with problema_id instead of area_coordenacao_id
+      // Create the note
       const { data, error } = await supabase
         .from('notas_oficiais')
-        .insert({
+        .insert([{
           titulo,
           texto,
-          problema_id: selectedDemanda.problema_id,
+          area_coordenacao_id: selectedDemanda.area_coordenacao.id,
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId
-        })
+        }])
         .select();
       
       if (error) throw error;
