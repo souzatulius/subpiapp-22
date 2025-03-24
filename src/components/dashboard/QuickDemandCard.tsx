@@ -15,11 +15,16 @@ const QuickDemandCard: React.FC<QuickDemandCardProps> = ({
   onChange, 
   onSubmit 
 }) => {
-  // Handle Enter key press - Removendo qualquer prevenção de eventos para espaço
+  // Handle Enter key press without any prevention for spaces
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onSubmit();
     }
+  };
+
+  // Direct handler for input changes to ensure spaces are captured
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
   };
 
   // Stop propagation to avoid triggering drag when interacting with input/button
@@ -40,7 +45,7 @@ const QuickDemandCard: React.FC<QuickDemandCardProps> = ({
             placeholder="Digite o título de uma nova demanda..."
             className="flex-1 border border-gray-300"
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onMouseDown={handleInputMouseDown}
           />

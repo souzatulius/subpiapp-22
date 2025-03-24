@@ -26,7 +26,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Handle Enter key press - Removendo prevenção de eventos para espaço
+  // Handle keys without any prevention for space
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && query.trim()) {
       if (suggestions.length > 0) {
@@ -83,6 +83,11 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     };
   }, [setShowSuggestions]);
 
+  // Directly handle input change without any filtering of space characters
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  };
+
   return (
     <div className="w-full h-full relative">
       <div className="w-full h-full bg-white border border-gray-300 rounded-xl shadow-md flex items-center px-6 transition-all hover:shadow-lg">
@@ -93,7 +98,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
           placeholder={placeholder}
           className="w-full bg-transparent text-lg md:text-xl font-medium placeholder-gray-400 focus:outline-none py-4"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onClick={() => query.trim() && setShowSuggestions(true)}
         />
