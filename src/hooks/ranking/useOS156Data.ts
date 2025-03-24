@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
-import { OS156Item, OS156FilterOptions } from '@/components/ranking/types';
+import { OS156Item, FilterOptions } from '@/components/ranking/types';
 import { useOS156Upload } from './useOS156Upload';
 import { useChartDataGeneration } from './useChartDataGeneration';
 import { useOS156Filters } from './useOS156Filters';
@@ -56,9 +56,9 @@ export const useOS156Data = (user: User | null) => {
     fetchLastUpload,
     handleFileUpload,
     deleteLastUpload,
-    applyFilters: (newFilters: OS156FilterOptions) => {
-      setFilters(newFilters);
-      applyFilters(newFilters);
+    applyFilters: (newFilters: FilterOptions) => {
+      setFilters(newFilters as any);
+      applyFilters(newFilters as any);
     }
   };
 };

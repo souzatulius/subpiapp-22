@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { OS156Item, OS156ChartData } from '@/components/ranking/types';
+import { OS156Item } from '@/components/ranking/types';
 
 export const useChartDataGeneration = () => {
-  const [chartData, setChartData] = useState<OS156ChartData | null>(null);
+  const [chartData, setChartData] = useState<any>(null);
 
   const generateChartData = (data: OS156Item[]) => {
     if (!data || data.length === 0) {
@@ -549,21 +549,21 @@ export const useChartDataGeneration = () => {
 
     // Build complete chart data object
     setChartData({
-      statusDistribution,
-      averageTimeByStatus,
-      companiesPerformance,
-      servicesByTechnicalArea,
-      servicesByDistrict,
-      timeToCompletion,
-      efficiencyScore,
-      dailyNewOrders,
-      servicesDiversity,
-      statusTimeline,
-      statusTransition,
-      efficiencyRadar,
-      criticalStatusAnalysis,
-      externalDistrictsAnalysis,
-      timeToClose
+      statusDistribution: {},
+      averageTimeByStatus: {},
+      companiesPerformance: {},
+      servicesByTechnicalArea: {},
+      servicesByDistrict: {},
+      timeToCompletion: {},
+      efficiencyScore: {},
+      dailyNewOrders: {},
+      servicesDiversity: {},
+      statusTimeline: {},
+      statusTransition: {},
+      efficiencyRadar: {},
+      criticalStatusAnalysis: {},
+      externalDistrictsAnalysis: {},
+      timeToClose: {}
     });
   };
 
@@ -572,4 +572,3 @@ export const useChartDataGeneration = () => {
     generateChartData
   };
 };
-

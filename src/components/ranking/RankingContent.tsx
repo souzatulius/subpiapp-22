@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Card } from '@/components/ui/card';
@@ -23,7 +22,6 @@ const RankingContent: React.FC = () => {
   const [chartConfig, setChartConfig] = useState<any>(null);
   const [lastUpdatedFormatted, setLastUpdatedFormatted] = useState<string | null>(null);
   
-  // Configure DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -55,7 +53,6 @@ const RankingContent: React.FC = () => {
     handleChartVisibilityChange
   } = useFilterManagement();
 
-  // Format the last updated date and time
   useEffect(() => {
     if (lastUpload) {
       const date = new Date(lastUpload.data_upload);
@@ -70,11 +67,8 @@ const RankingContent: React.FC = () => {
     }
   }, [lastUpload]);
 
-  // Initialize charts when data is loaded
   useEffect(() => {
     if (chartData && !isLoading) {
-      // Here we would load the saved chart configuration from Supabase
-      // For now, we'll use a default configuration
       const defaultCharts: ChartCard[] = [
         { id: 'status-distribution', name: 'Distribuição de Status', visible: true, order: 0 },
         { id: 'resolution-time', name: 'Tempo de Resolução', visible: true, order: 1 },
@@ -89,7 +83,6 @@ const RankingContent: React.FC = () => {
     }
   }, [chartData, isLoading]);
 
-  // Load saved chart configuration from Supabase
   const loadChartConfig = async () => {
     if (!user) return;
     
@@ -101,7 +94,7 @@ const RankingContent: React.FC = () => {
         .single();
       
       if (error) {
-        if (error.code !== 'PGRST116') { // Not found error
+        if (error.code !== 'PGRST116') {
           console.error('Error loading chart config:', error);
         }
         return;
@@ -131,7 +124,6 @@ const RankingContent: React.FC = () => {
     }
   };
 
-  // Save chart configuration to Supabase
   const saveChartConfig = async () => {
     if (!user) return;
     
@@ -176,7 +168,6 @@ const RankingContent: React.FC = () => {
     }
   };
 
-  // Handle chart reordering via drag and drop
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
@@ -189,7 +180,6 @@ const RankingContent: React.FC = () => {
         const [movedItem] = newCharts.splice(oldIndex, 1);
         newCharts.splice(newIndex, 0, movedItem);
         
-        // Update order property
         return newCharts.map((chart, idx) => ({
           ...chart,
           order: idx
@@ -198,7 +188,6 @@ const RankingContent: React.FC = () => {
     }
   };
 
-  // Toggle chart visibility
   const toggleChartVisibility = (chartId: string) => {
     setVisibleCharts((charts) => 
       charts.map((chart) => 
@@ -209,7 +198,6 @@ const RankingContent: React.FC = () => {
     );
   };
 
-  // Handle file upload with success/error toasts
   const handleUpload = async (file: File) => {
     try {
       toast({
@@ -224,7 +212,6 @@ const RankingContent: React.FC = () => {
         description: "Os gráficos foram atualizados com sucesso.",
       });
       
-      // Auto-save chart config after successful upload
       saveChartConfig();
       
     } catch (error: any) {
@@ -236,7 +223,6 @@ const RankingContent: React.FC = () => {
     }
   };
 
-  // Remove a specific filter
   const handleRemoveFilter = (type: string, value: string) => {
     switch (type) {
       case 'status':
@@ -260,7 +246,6 @@ const RankingContent: React.FC = () => {
     }
   };
 
-  // Handle applying filters with feedback
   const handleApplyFilters = () => {
     applyFilters(filters);
     toast({
@@ -284,7 +269,11 @@ const RankingContent: React.FC = () => {
           <TabsContent value="dados" className="pt-2">
             <UploadSection
               onUpload={handleUpload}
-              lastUpload={lastUpload}
+              lastUpload={lastUpload ? {
+                id: lastUpload.id,
+                fileName: lastUpload.arquivo_nome,
+                uploadDate: lastUpload.data_upload
+              } : null}
               onDelete={deleteLastUpload}
               isLoading={isLoading}
               onRefresh={fetchLastUpload}

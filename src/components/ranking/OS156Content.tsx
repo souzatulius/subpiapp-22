@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useOS156Data } from '@/hooks/ranking/useOS156Data';
 import OS156Charts from './OS156Charts';
 import OS156Filters from './OS156Filters';
-import { OS156FilterOptions } from './types';
+import { FilterOptions } from './types';
 
 const OS156Content: React.FC = () => {
   const { user } = useAuth();
@@ -25,8 +25,8 @@ const OS156Content: React.FC = () => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const handleFiltersChange = (newFilters: Partial<OS156FilterOptions>) => {
-    applyFilters({ ...filters, ...newFilters });
+  const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
+    applyFilters({ ...filters, ...newFilters } as any);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,10 +116,10 @@ const OS156Content: React.FC = () => {
       </Card>
       
       <OS156Filters 
-        filters={filters}
+        filters={filters as any}
         onFiltersChange={handleFiltersChange}
         companies={companies}
-        onApplyFilters={() => applyFilters(filters)}
+        onApplyFilters={() => applyFilters(filters as any)}
       />
       
       <OS156Charts 

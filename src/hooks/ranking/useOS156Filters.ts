@@ -1,20 +1,18 @@
 
 import { useState } from 'react';
-import { OS156Item, OS156FilterOptions, OrderStatus, District } from '@/components/ranking/types';
+import { OS156Item, FilterOptions, OrderStatus, District } from '@/components/ranking/types';
 
 export const useOS156Filters = (osData: OS156Item[], onFilteredDataChange: (data: OS156Item[]) => void) => {
-  const [filters, setFilters] = useState<OS156FilterOptions>({
+  const [filters, setFilters] = useState<FilterOptions>({
     dateRange: undefined,
-    statuses: ['Todos'],
+    statuses: ['Todos' as OrderStatus],
     serviceTypes: ['Todos'],
-    districts: ['Todos'],
-    areaTecnica: 'Todos',
-    empresa: ['Todos'],
-    dataInicio: undefined,
-    dataFim: undefined
+    districts: ['Todos' as District],
+    areas: ['STM', 'STLP'],
+    companies: ['Todos']
   });
 
-  const applyFilters = (newFilters: OS156FilterOptions) => {
+  const applyFilters = (newFilters: FilterOptions) => {
     if (osData.length === 0) {
       return;
     }
@@ -22,37 +20,41 @@ export const useOS156Filters = (osData: OS156Item[], onFilteredDataChange: (data
     let filteredData = [...osData];
     
     // Apply status filter
-    if (newFilters.statuses && !newFilters.statuses.includes('Todos' as OrderStatus)) {
+    if (newFilters.statuses && !newFilters.statuses.includes('Todos')) {
       filteredData = filteredData.filter(item => 
         newFilters.statuses.includes(item.status as OrderStatus)
       );
     }
     
     // Apply area tecnica filter
-    if (newFilters.areaTecnica !== 'Todos') {
-      filteredData = filteredData.filter(item => item.area_tecnica === newFilters.areaTecnica);
-    }
-    
-    // Apply company filter
-    if (newFilters.empresa && newFilters.empresa.length > 0 && !newFilters.empresa.includes('Todos')) {
-      filteredData = filteredData.filter(item => item.empresa && newFilters.empresa.includes(item.empresa));
-    }
-    
-    // Apply date range filter
-    if (newFilters.dataInicio) {
+    if (newFilters.areas && newFilters.areas.length > 0 && !newFilters.areas.includes('Todos')) {
       filteredData = filteredData.filter(item => 
-        new Date(item.data_criacao) >= new Date(newFilters.dataInicio!)
+        newFilters.areas.includes(item.area_tecnica)
       );
     }
     
-    if (newFilters.dataFim) {
+    // Apply company filter
+    if (newFilters.companies && newFilters.companies.length > 0 && !newFilters.companies.includes('Todos')) {
       filteredData = filteredData.filter(item => 
-        new Date(item.data_criacao) <= new Date(newFilters.dataFim!)
+        item.empresa && newFilters.companies.includes(item.empresa)
+      );
+    }
+    
+    // Apply date range filter
+    if (newFilters.dateRange?.from) {
+      filteredData = filteredData.filter(item => 
+        new Date(item.data_criacao) >= new Date(newFilters.dateRange!.from!)
+      );
+    }
+    
+    if (newFilters.dateRange?.to) {
+      filteredData = filteredData.filter(item => 
+        new Date(item.data_criacao) <= new Date(newFilters.dateRange!.to!)
       );
     }
     
     // Apply district filter
-    if (newFilters.districts && !newFilters.districts.includes('Todos' as District)) {
+    if (newFilters.districts && !newFilters.districts.includes('Todos')) {
       filteredData = filteredData.filter(item => 
         item.distrito && newFilters.districts.includes(item.distrito as District)
       );

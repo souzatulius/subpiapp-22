@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { OS156FilterOptions, OrderStatus, District } from './types';
+import { FilterOptions, OrderStatus, District } from './types';
 import { useFilterVisibility } from './hooks/useFilterVisibility';
 
 // Import individual filter components
@@ -15,8 +15,8 @@ import FilterActions from './filters/FilterActions';
 import ActiveFilterBadges from './filters/ActiveFilterBadges';
 
 interface OS156FiltersProps {
-  filters: OS156FilterOptions;
-  onFiltersChange: (filters: OS156FilterOptions) => void;
+  filters: FilterOptions;
+  onFiltersChange: (filters: FilterOptions) => void;
   companies: string[];
   onApplyFilters: () => void;
 }
@@ -32,7 +32,7 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
   const handleAreaTecnicaChange = (value: 'Todos' | 'STM' | 'STLP') => {
     onFiltersChange({
       ...filters,
-      areaTecnica: value
+      areas: [value as any]
     });
   };
 
@@ -62,7 +62,7 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
   };
 
   const handleCompanyChange = (company: string) => {
-    let newCompanies = [...filters.empresa];
+    let newCompanies = [...(filters.companies || [])];
     
     if (company === 'Todos') {
       newCompanies = ['Todos'];
@@ -83,7 +83,7 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
       }
     }
     
-    onFiltersChange({ ...filters, empresa: newCompanies });
+    onFiltersChange({ ...filters, companies: newCompanies as any });
   };
 
   const handleDistrictChange = (district: string) => {
@@ -112,9 +112,17 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
   };
 
   const handleDateChange = (field: 'dataInicio' | 'dataFim', date?: Date) => {
+    const dateRange = { ...filters.dateRange };
+    
+    if (field === 'dataInicio') {
+      dateRange.from = date;
+    } else {
+      dateRange.to = date;
+    }
+    
     onFiltersChange({
       ...filters,
-      [field]: date
+      dateRange
     });
   };
 
@@ -124,10 +132,8 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
       statuses: ['Todos' as OrderStatus],
       serviceTypes: ['Todos'],
       districts: ['Todos' as District],
-      areaTecnica: 'Todos',
-      empresa: ['Todos'],
-      dataInicio: undefined,
-      dataFim: undefined
+      areas: ['STM', 'STLP'],
+      companies: ['Todos']
     });
   };
   
@@ -145,7 +151,7 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <AreaTecnicaFilter 
-              value={filters.areaTecnica} 
+              value={(filters.areas && filters.areas.length > 0) ? filters.areas[0] as any : 'Todos'} 
               onChange={handleAreaTecnicaChange} 
             />
             
@@ -155,21 +161,23 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
             />
             
             <DistrictBadgeFilter 
-              districts={filters.districts} 
+              districts={filters.districts as any} 
               onDistrictChange={handleDistrictChange} 
             />
           </div>
           
+          {/* Temporarily comment out date range filters until we create the component 
           <DateRangeFilters 
-            dataInicio={filters.dataInicio} 
-            dataFim={filters.dataFim} 
+            dataInicio={filters.dateRange?.from} 
+            dataFim={filters.dateRange?.to} 
             onDateChange={handleDateChange} 
           />
+          */}
           
           <div className="mt-4">
             <CompanyFilter 
               companies={companies} 
-              selectedCompanies={filters.empresa} 
+              selectedCompanies={filters.companies || ['Todos']} 
               onCompanyChange={handleCompanyChange} 
             />
           </div>
@@ -189,11 +197,30 @@ const OS156Filters: React.FC<OS156FiltersProps> = ({
         <CardContent className="pt-0">
           <ActiveFilterBadges 
             filters={filters}
-            onAreaTecnicaChange={handleAreaTecnicaChange}
-            onStatusChange={(newStatuses) => onFiltersChange({ ...filters, statuses: newStatuses })}
-            onDistrictChange={(newDistricts) => onFiltersChange({ ...filters, districts: newDistricts })}
-            onCompanyChange={(newCompanies) => onFiltersChange({ ...filters, empresa: newCompanies })}
-            onDateChange={handleDateChange}
+            onRemoveFilter={(type, value) => {
+              // Handle removing filters based on type
+              if (type === 'status') {
+                onFiltersChange({
+                  ...filters,
+                  statuses: filters.statuses.filter(s => s !== value)
+                });
+              } else if (type === 'district') {
+                onFiltersChange({
+                  ...filters,
+                  districts: filters.districts.filter(d => d !== value)
+                });
+              } else if (type === 'company') {
+                onFiltersChange({
+                  ...filters,
+                  companies: (filters.companies || []).filter(c => c !== value) as any
+                });
+              } else if (type === 'dateRange') {
+                onFiltersChange({
+                  ...filters,
+                  dateRange: undefined
+                });
+              }
+            }}
           />
         </CardContent>
       )}

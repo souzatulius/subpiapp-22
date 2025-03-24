@@ -8,6 +8,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FilterOptions } from '@/components/ranking/types';
+import { DateRange as DayPickerDateRange } from 'react-day-picker';
 
 interface DateRangeFilterProps {
   dateRange: FilterOptions['dateRange'];
@@ -16,6 +17,28 @@ interface DateRangeFilterProps {
 
 const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRangeChange }) => {
   const [calendarOpen, setCalendarOpen] = useState(false);
+
+  // Convert our DateRange to react-day-picker's DateRange
+  const convertToDayPickerDateRange = (range?: FilterOptions['dateRange']): DayPickerDateRange | undefined => {
+    if (!range) return undefined;
+    return {
+      from: range.from || new Date(),
+      to: range.to
+    };
+  };
+
+  // Handle date selection from the calendar
+  const handleDateRangeChange = (range: DayPickerDateRange | undefined) => {
+    if (!range) {
+      onDateRangeChange(undefined);
+      return;
+    }
+    
+    onDateRangeChange({
+      from: range.from,
+      to: range.to
+    });
+  };
 
   return (
     <div className="space-y-2">
@@ -46,8 +69,8 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRang
             locale={ptBR}
             mode="range"
             defaultMonth={new Date()}
-            selected={dateRange}
-            onSelect={onDateRangeChange}
+            selected={convertToDayPickerDateRange(dateRange)}
+            onSelect={handleDateRangeChange}
             numberOfMonths={2}
           />
         </PopoverContent>

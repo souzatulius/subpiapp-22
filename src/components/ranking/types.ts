@@ -1,7 +1,9 @@
+
 export type OrderStatus = 'Todos' | 'NOVO' | 'AB' | 'PE' | 'APROVADO' | 'PREPLAN' | 'PRECANC' | 'EMAND' | 'CONC' | 'FECHADO';
 export type District = 'Todos' | 'PINHEIROS' | 'ALTO DE PINHEIROS' | 'JARDIM PAULISTA' | 'ITAIM BIBI' | 'EXTERNO';
 export type ServiceType = string;
 export type TechnicalArea = 'STM' | 'STLP' | '';
+export type AreaTecnica = 'Todos' | 'STM' | 'STLP';
 
 export interface DateRange {
   from?: Date;
@@ -15,6 +17,18 @@ export interface FilterOptions {
   districts: District[];
   companies: ['Todos'] | string[];
   areas: ['STM', 'STLP'] | string[];
+}
+
+// Add OS156 specific types
+export interface OS156FilterOptions {
+  dateRange?: DateRange;
+  statuses: OrderStatus[];
+  serviceTypes: ServiceType[];
+  districts: District[];
+  areaTecnica: AreaTecnica;
+  empresa: string[];
+  dataInicio?: Date;
+  dataFim?: Date;
 }
 
 export interface ChartVisibility {
@@ -105,4 +119,23 @@ export interface ChartCard {
   name: string;
   visible: boolean;
   order: number;
+}
+
+// Define the structure for chart data
+export interface OS156ChartData {
+  statusDistribution: any;
+  averageTimeByStatus: any;
+  companiesPerformance: any;
+  servicesByTechnicalArea: any;
+  servicesByDistrict: any;
+  timeToCompletion: any;
+  efficiencyScore: any;
+  dailyNewOrders: any;
+  servicesDiversity: any;
+  statusTimeline: any;
+  statusTransition: any;
+  efficiencyRadar: any;
+  criticalStatusAnalysis: any;
+  externalDistrictsAnalysis: any;
+  timeToClose: any;
 }

@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Filter } from 'lucide-react';
 
 interface FilterHeaderProps {
   isOpen: boolean;
@@ -10,28 +9,23 @@ interface FilterHeaderProps {
   activeFilterCount: number;
 }
 
-const FilterHeader: React.FC<FilterHeaderProps> = ({
-  isOpen,
-  onToggle,
-  activeFilterCount
-}) => {
+const FilterHeader: React.FC<FilterHeaderProps> = ({ isOpen, onToggle, activeFilterCount }) => {
   return (
-    <div className="flex justify-between items-center">
-      <h3 className="text-lg font-semibold">Filtros</h3>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={onToggle}
-        className="flex items-center gap-1"
-      >
-        <Filter className="h-4 w-4" />
-        <span>Filtros</span>
+    <div className="flex justify-between items-center cursor-pointer" onClick={onToggle}>
+      <div className="flex items-center space-x-2">
+        <Filter className="h-5 w-5 text-orange-500" />
+        <h3 className="text-lg font-medium">Filtros</h3>
         {activeFilterCount > 0 && (
-          <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full">
+          <Badge variant="outline" className="bg-orange-100 text-orange-700">
             {activeFilterCount}
           </Badge>
         )}
-      </Button>
+      </div>
+      {isOpen ? (
+        <ChevronUp className="h-5 w-5 text-gray-500" />
+      ) : (
+        <ChevronDown className="h-5 w-5 text-gray-500" />
+      )}
     </div>
   );
 };

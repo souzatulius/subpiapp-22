@@ -9,7 +9,7 @@ import CompanyFilter from './filters/CompanyFilter';
 import AreaTecnicaFilter from './filters/AreaTecnicaFilter';
 import FilterActions from './filters/FilterActions';
 import ActiveFilterBadges from './filters/ActiveFilterBadges';
-import { FilterOptions } from './types';
+import { FilterOptions, OrderStatus, District } from './types';
 
 interface FilterSectionProps {
   filters: FilterOptions;
@@ -42,17 +42,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 }) => {
   // Handle status change
   const handleStatusChange = (status: string) => {
-    let newStatuses: string[];
+    let newStatuses: OrderStatus[];
     
     if (status === 'Todos') {
-      newStatuses = ['Todos'];
-    } else if (filters.statuses.includes(status)) {
+      newStatuses = ['Todos' as OrderStatus];
+    } else if (filters.statuses.includes(status as OrderStatus)) {
       newStatuses = filters.statuses.filter(s => s !== status);
       if (newStatuses.length === 0 || (newStatuses.length === 1 && newStatuses[0] === 'Todos')) {
-        newStatuses = ['Todos'];
+        newStatuses = ['Todos' as OrderStatus];
       }
     } else {
-      newStatuses = filters.statuses.filter(s => s !== 'Todos').concat(status);
+      newStatuses = filters.statuses.filter(s => s !== 'Todos').concat(status as OrderStatus);
     }
     
     onFiltersChange({ statuses: newStatuses });
@@ -60,17 +60,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   
   // Handle district change
   const handleDistrictChange = (district: string) => {
-    let newDistricts: string[];
+    let newDistricts: District[];
     
     if (district === 'Todos') {
-      newDistricts = ['Todos'];
-    } else if (filters.districts.includes(district)) {
+      newDistricts = ['Todos' as District];
+    } else if (filters.districts.includes(district as District)) {
       newDistricts = filters.districts.filter(d => d !== district);
       if (newDistricts.length === 0 || (newDistricts.length === 1 && newDistricts[0] === 'Todos')) {
-        newDistricts = ['Todos'];
+        newDistricts = ['Todos' as District];
       }
     } else {
-      newDistricts = filters.districts.filter(d => d !== 'Todos').concat(district);
+      newDistricts = filters.districts.filter(d => d !== 'Todos').concat(district as District);
     }
     
     onFiltersChange({ districts: newDistricts });
@@ -133,7 +133,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           
           <ServiceTypeFilter
             serviceTypes={filters.serviceTypes}
-            allServiceTypes={serviceTypes}
             onServiceTypeChange={handleServiceTypeChange}
           />
           
@@ -149,9 +148,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           />
           
           <AreaTecnicaFilter
-            selectedAreas={filters.areas || ['STM', 'STLP']}
-            onAreaChange={(area) => {
+            value={filters.areas && filters.areas.length > 0 ? filters.areas[0] as 'STM' | 'STLP' | 'Todos' : 'Todos'}
+            onChange={(area) => {
               // Implement area change handling
+              onFiltersChange({ areas: [area] });
             }}
           />
         </div>
