@@ -452,6 +452,65 @@ export type Database = {
           },
         ]
       }
+      ordens_156: {
+        Row: {
+          area_tecnica: string | null
+          bairro: string | null
+          data_criacao: string | null
+          data_status: string | null
+          distrito: string | null
+          empresa: string | null
+          id: string
+          logradouro: string | null
+          numero_os: string
+          servico_valido: boolean | null
+          status: string | null
+          tempo_aberto: number | null
+          tipo_servico: string | null
+          upload_id: string | null
+        }
+        Insert: {
+          area_tecnica?: string | null
+          bairro?: string | null
+          data_criacao?: string | null
+          data_status?: string | null
+          distrito?: string | null
+          empresa?: string | null
+          id?: string
+          logradouro?: string | null
+          numero_os: string
+          servico_valido?: boolean | null
+          status?: string | null
+          tempo_aberto?: number | null
+          tipo_servico?: string | null
+          upload_id?: string | null
+        }
+        Update: {
+          area_tecnica?: string | null
+          bairro?: string | null
+          data_criacao?: string | null
+          data_status?: string | null
+          distrito?: string | null
+          empresa?: string | null
+          id?: string
+          logradouro?: string | null
+          numero_os?: string
+          servico_valido?: boolean | null
+          status?: string | null
+          tempo_aberto?: number | null
+          tipo_servico?: string | null
+          upload_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordens_156_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "os_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ordens_servico: {
         Row: {
           bairro: string | null
@@ -503,6 +562,83 @@ export type Database = {
           criado_em?: string
           descricao?: string
           id?: string
+        }
+        Relationships: []
+      }
+      os_areas_tecnicas: {
+        Row: {
+          area_tecnica: string
+          id: string
+          tipo_servico: string
+        }
+        Insert: {
+          area_tecnica: string
+          id?: string
+          tipo_servico: string
+        }
+        Update: {
+          area_tecnica?: string
+          id?: string
+          tipo_servico?: string
+        }
+        Relationships: []
+      }
+      os_status_historico: {
+        Row: {
+          data_mudanca: string | null
+          id: string
+          numero_os: string
+          status_anterior: string | null
+          status_novo: string
+          upload_id: string | null
+        }
+        Insert: {
+          data_mudanca?: string | null
+          id?: string
+          numero_os: string
+          status_anterior?: string | null
+          status_novo: string
+          upload_id?: string | null
+        }
+        Update: {
+          data_mudanca?: string | null
+          id?: string
+          numero_os?: string
+          status_anterior?: string | null
+          status_novo?: string
+          upload_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "os_status_historico_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "os_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      os_uploads: {
+        Row: {
+          data_upload: string | null
+          id: string
+          nome_arquivo: string
+          processado: boolean | null
+          usuario_id: string
+        }
+        Insert: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo: string
+          processado?: boolean | null
+          usuario_id: string
+        }
+        Update: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo?: string
+          processado?: boolean | null
+          usuario_id?: string
         }
         Relationships: []
       }
@@ -1100,6 +1236,12 @@ export type Database = {
           user_id: string
         }
         Returns: boolean
+      }
+      processar_upload_os_156: {
+        Args: {
+          upload_id: string
+        }
+        Returns: undefined
       }
       update_area_coordenacao: {
         Args: {
