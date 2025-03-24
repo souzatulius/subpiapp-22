@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import EditModal from '@/components/settings/EditModal';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/notifications';
 import { Loader2 } from 'lucide-react';
 
 interface AccountSettingsModalProps {
@@ -26,7 +25,6 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
     isNotificationsSupported
   } = useNotifications();
 
-  // Check if user has notifications enabled
   useEffect(() => {
     const checkNotificationStatus = async () => {
       if (!user || !isOpen) return;
@@ -58,7 +56,6 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
       setLoading(true);
       
       if (enabled) {
-        // Enable notifications
         const success = await requestPermissionAndRegisterToken();
         if (success) {
           setNotificationsEnabled(true);
@@ -70,7 +67,6 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
           throw new Error("Não foi possível ativar as notificações");
         }
       } else {
-        // Disable notifications
         await supabase
           .from('tokens_notificacoes')
           .delete()
