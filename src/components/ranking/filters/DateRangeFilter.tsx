@@ -21,10 +21,23 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRang
   // Convert our DateRange to react-day-picker's DateRange
   const convertToDayPickerDateRange = (range?: FilterOptions['dateRange']): DayPickerDateRange | undefined => {
     if (!range) return undefined;
+    
+    // Ensure we're working with Date objects
+    const from = range.from ? new Date(range.from) : undefined;
+    const to = range.to ? new Date(range.to) : undefined;
+    
+    if (!from) return undefined;
+    
     return {
-      from: range.from || new Date(),
-      to: range.to
+      from,
+      to
     };
+  };
+
+  // Format date for display
+  const formatDateDisplay = (date: Date | string | null | undefined) => {
+    if (!date) return '';
+    return format(new Date(date), 'PP', { locale: ptBR });
   };
 
   // Handle date selection from the calendar
@@ -53,11 +66,11 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRang
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {format(dateRange.from, 'PP', { locale: ptBR })} -{' '}
-                  {format(dateRange.to, 'PP', { locale: ptBR })}
+                  {formatDateDisplay(dateRange.from)} -{' '}
+                  {formatDateDisplay(dateRange.to)}
                 </>
               ) : (
-                format(dateRange.from, 'PP', { locale: ptBR })
+                formatDateDisplay(dateRange.from)
               )
             ) : (
               <span>Selecione um período</span>
@@ -68,7 +81,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRang
           <Calendar
             locale={ptBR}
             mode="range"
-            defaultMonth={new Date()}
+            defaultMonth={dateRange?.from ? new Date(dateRange.from) : new Date()}
             selected={convertToDayPickerDateRange(dateRange)}
             onSelect={handleDateRangeChange}
             numberOfMonths={2}

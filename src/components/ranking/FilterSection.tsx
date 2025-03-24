@@ -115,7 +115,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
   
   // Handle date range change
-  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
+  const handleDateRangeChange = (range?: FilterOptions['dateRange']) => {
     onFiltersChange({ dateRange: range });
   };
 
