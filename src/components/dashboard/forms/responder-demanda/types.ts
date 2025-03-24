@@ -6,6 +6,14 @@ export interface Problema {
   descricao: string;
 }
 
+export type Area = Problema; // For backward compatibility
+
+export type ViewMode = 'list' | 'grid';
+
+export interface ResponderDemandaFormProps {
+  onClose?: () => void;
+}
+
 export interface Origem {
   id: string;
   descricao: string;

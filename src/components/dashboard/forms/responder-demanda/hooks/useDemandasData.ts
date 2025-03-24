@@ -3,12 +3,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from 'sonner';
-import { Demanda, Area, Filter } from '../types';
+import { Demanda, Filter, Problema } from '../types';
 
 export const useDemandasData = (initialFilter: Filter = 'all') => {
   const { user } = useAuth();
   const [demandas, setDemandas] = useState<Demanda[]>([]);
-  const [areasCoordinacao, setAreasCoordinacao] = useState<Area[]>([]);
+  const [problemas, setProblemas] = useState<Problema[]>([]);
   const [origens, setOrigens] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +17,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
   const [selectedDemanda, setSelectedDemanda] = useState<Demanda | null>(null);
   const [areaFilter, setAreaFilter] = useState<string>('');
   const [prioridadeFilter, setPrioridadeFilter] = useState<string>('');
-  const [areas, setAreas] = useState<Area[]>([]);
+  const [areas, setAreas] = useState<Problema[]>([]);
   const [isLoadingDemandas, setIsLoadingDemandas] = useState(true);
 
   // Fetch demandas and filter options
@@ -29,14 +29,14 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
         setIsLoading(true);
         setIsLoadingDemandas(true);
         
-        // Fetch áreas de coordenação
-        const { data: areasData, error: areasError } = await supabase
-          .from('areas_coordenacao')
+        // Fetch problemas (formerly areas_coordenacao)
+        const { data: problemasData, error: problemasError } = await supabase
+          .from('problemas')
           .select('*');
         
-        if (areasError) throw areasError;
-        setAreasCoordinacao(areasData || []);
-        setAreas(areasData || []);
+        if (problemasError) throw problemasError;
+        setProblemas(problemasData || []);
+        setAreas(problemasData || []);
         
         // Fetch origens
         const { data: origensData, error: origensError } = await supabase
@@ -51,8 +51,8 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           .from('demandas')
           .select(`
             *,
+            problema:problema_id (id, descricao),
             origens_demandas:origem_id (descricao),
-            areas_coordenacao:area_coordenacao_id (id, descricao),
             servicos:servico_id (descricao),
             tipos_midia:tipo_midia_id (descricao),
             bairro:bairro_id (nome, distrito_id),
@@ -63,10 +63,10 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
         
         if (demandasError) throw demandasError;
         
-        // Get current user's area_coordenacao_id
+        // Get current user's problema_id
         const { data: userData, error: userError } = await supabase
           .from('usuarios')
-          .select('area_coordenacao_id')
+          .select('problema_id')
           .eq('id', user.id)
           .single();
         
@@ -75,7 +75,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
         // Filter demandas for user's area if they're not admin
         let userDemandas = demandasData || [];
         
-        if (userData && userData.area_coordenacao_id) {
+        if (userData && userData.problema_id) {
           // Filter for user's area unless they're admin
           const { data: userRoles } = await supabase
             .from('usuario_permissoes')
@@ -86,7 +86,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           
           if (!isAdmin) {
             userDemandas = userDemandas.filter(
-              demanda => demanda.area_coordenacao_id === userData.area_coordenacao_id
+              demanda => demanda.problema_id === userData.problema_id
             );
           }
         }
@@ -100,7 +100,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           prazo_resposta: demanda.prazo_resposta,
           perguntas: demanda.perguntas as Record<string, string> | string[] | null,
           detalhes_solicitacao: demanda.detalhes_solicitacao,
-          areas_coordenacao: demanda.areas_coordenacao,
+          problema: demanda.problema,
           origens_demandas: demanda.origens_demandas,
           tipos_midia: demanda.tipos_midia,
           servicos: demanda.servicos,
@@ -136,7 +136,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
     // Apply area filter
     if (areaFilter) {
       filtered = filtered.filter(demanda => 
-        demanda.areas_coordenacao?.id === areaFilter
+        demanda.problema?.id === areaFilter
       );
     }
     
@@ -152,7 +152,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(demanda => 
         demanda.titulo.toLowerCase().includes(searchLower) ||
-        demanda.areas_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
+        demanda.problema?.descricao.toLowerCase().includes(searchLower) ||
         demanda.servicos?.descricao.toLowerCase().includes(searchLower)
       );
     }
@@ -179,7 +179,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
     setDemandas,
     filteredDemandas,
     setFilteredDemandas,
-    areasCoordinacao,
+    problemas,
     origens,
     isLoading,
     searchTerm,

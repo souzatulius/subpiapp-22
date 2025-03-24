@@ -19,18 +19,18 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
 
-        const { data: areasData, error: areasError } = await supabase
-          .from('areas_coordenacao')
+        const { data: problemasData, error: problemasError } = await supabase
+          .from('problemas')
           .select('*');
         
-        if (areasError) throw areasError;
+        if (problemasError) throw problemasError;
 
         // Fetch demandas com status 'respondida'
         const { data, error } = await supabase
           .from('demandas')
           .select(`
             *,
-            area_coordenacao:area_coordenacao_id (*)
+            problema:problema_id (*)
           `)
           .eq('status', 'respondida')
           .order('criado_em', { ascending: false });
@@ -44,7 +44,7 @@ export const useDemandasData = () => {
             titulo: demanda.titulo,
             status: demanda.status,
             prioridade: demanda.prioridade,
-            area_coordenacao: demanda.area_coordenacao,
+            problema: demanda.problema,
             perguntas: demanda.perguntas ? demanda.perguntas as Record<string, string> : null,
             detalhes_solicitacao: demanda.detalhes_solicitacao || null,
             horario_publicacao: demanda.horario_publicacao,
@@ -77,7 +77,7 @@ export const useDemandasData = () => {
     const lowercasedSearch = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercasedSearch) ||
-      demanda.area_coordenacao?.descricao.toLowerCase().includes(lowercasedSearch)
+      demanda.problema?.descricao.toLowerCase().includes(lowercasedSearch)
     );
     
     setFilteredDemandas(filtered);

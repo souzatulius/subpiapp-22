@@ -1,68 +1,61 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { CalendarClock, Info } from 'lucide-react';
+import { formatarData } from '../utils/formatters';
 import { Demanda } from '../types';
-import { formatPrioridade, calcularTempoRestante, formatarData } from '../utils/formatters';
-import { AlertCircle, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface DemandaCardProps {
   demanda: Demanda;
   selected: boolean;
   onClick: () => void;
-  className?: string;
 }
 
-const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, className }) => {
-  const prioridadeInfo = formatPrioridade(demanda.prioridade);
-  
-  const renderTempoRestante = () => {
-    if (!demanda.prazo_resposta) return null;
-    
-    const tempoInfo = calcularTempoRestante(demanda.prazo_resposta);
-    const Icon = tempoInfo.iconName === 'AlertCircle' ? AlertCircle : Clock;
-    
-    return (
-      <span className={tempoInfo.className}>
-        <Icon className={tempoInfo.iconClassName} />
-        {tempoInfo.label}
-      </span>
-    );
+const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick }) => {
+  // Define badge color based on priority
+  const getPriorityBadge = () => {
+    switch (demanda.prioridade.toLowerCase()) {
+      case 'alta':
+        return 'bg-red-500 hover:bg-red-600';
+      case 'media':
+        return 'bg-yellow-500 hover:bg-yellow-600';
+      case 'baixa':
+        return 'bg-green-500 hover:bg-green-600';
+      default:
+        return 'bg-gray-500 hover:bg-gray-600';
+    }
   };
 
+  // Format date for display
+  const formattedDate = formatarData(demanda.prazo_resposta);
+  
   return (
     <Card 
-      className={`cursor-pointer transition-all hover:shadow-md ${
-        selected ? 'border-2 border-[#003570]' : 'border border-gray-200'
-      } ${className}`}
+      className={`transition-all cursor-pointer ${
+        selected 
+          ? 'border-2 border-blue-500 bg-blue-50' 
+          : 'hover:bg-gray-50 border border-gray-200'
+      }`}
       onClick={onClick}
     >
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium">{demanda.titulo}</h3>
-          <div className="flex space-x-2">
-            <span className={prioridadeInfo.className}>
-              {prioridadeInfo.label}
-            </span>
+      <CardHeader className="p-4 pb-2">
+        <CardTitle className="text-base font-medium line-clamp-2">{demanda.titulo}</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-2">
+        <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex items-center">
+            <Info className="w-4 h-4 mr-1" />
+            <span className="line-clamp-1">{demanda.problema?.descricao || 'Não informada'}</span>
           </div>
+          <Badge className={`text-xs ${getPriorityBadge()}`}>
+            {demanda.prioridade.charAt(0).toUpperCase() + demanda.prioridade.slice(1)}
+          </Badge>
         </div>
         
-        <div className="text-sm text-gray-500 mb-2">
-          <span className="font-medium">Área:</span>{' '}
-          {demanda.areas_coordenacao?.descricao || 'Não informada'}
-        </div>
-        
-        <div className="text-sm text-gray-500 mb-2">
-          <span className="font-medium">Origem:</span>{' '}
-          {demanda.origens_demandas?.descricao || 'Não informada'}
-        </div>
-        
-        <div className="flex justify-between items-center text-xs text-gray-500 mt-3">
-          <div>
-            {demanda.prazo_resposta && renderTempoRestante()}
-          </div>
-          <div>
-            {demanda.prazo_resposta && formatarData(demanda.prazo_resposta)}
-          </div>
+        <div className="flex items-center text-sm text-gray-600">
+          <CalendarClock className="w-4 h-4 mr-1" />
+          <span>Prazo: {formattedDate}</span>
         </div>
       </CardContent>
     </Card>

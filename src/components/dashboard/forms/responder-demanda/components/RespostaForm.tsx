@@ -126,7 +126,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium text-gray-500">Área de Coordenação</p>
-            <p>{selectedDemanda.areas_coordenacao?.descricao || 'Não informada'}</p>
+            <p>{selectedDemanda.problema?.descricao || 'Não informada'}</p>
           </div>
           
           <div>

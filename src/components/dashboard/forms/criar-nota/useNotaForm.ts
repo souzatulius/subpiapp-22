@@ -101,11 +101,12 @@ export const useNotaForm = (onClose: () => void) => {
     try {
       setIsSubmitting(true);
 
+      // Use problema_id instead of area_coordenacao_id
       const { error } = await supabase.from('notas_oficiais').insert({
         titulo,
         texto,
         demanda_id: selectedDemanda.id,
-        area_coordenacao_id: selectedDemanda.area_coordenacao?.id,
+        problema_id: selectedDemanda.problema?.id,
         autor_id: user.id,
         status: 'pendente'
       });
