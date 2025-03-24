@@ -3,17 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Download, Trash2 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useOS156Data } from '@/hooks/ranking/useOS156Data';
 import OS156Charts from './OS156Charts';
 import OS156Filters from './OS156Filters';
 import { OS156FilterOptions } from './types';
+import { toast } from '@/hooks/use-toast';
 
 const OS156Content: React.FC = () => {
   const { user } = useAuth();
   const {
     lastUpload,
     isLoading,
+    progress,
     chartData,
     osData,
     companies,
@@ -24,6 +27,14 @@ const OS156Content: React.FC = () => {
   } = useOS156Data(user);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [persistedChartData, setPersistedChartData] = useState(chartData);
+
+  // Update persistedChartData whenever chartData changes and is not null
+  useEffect(() => {
+    if (chartData) {
+      setPersistedChartData(chartData);
+    }
+  }, [chartData]);
 
   const handleFiltersChange = (newFilters: Partial<OS156FilterOptions>) => {
     applyFilters({ ...filters, ...newFilters });
@@ -37,12 +48,21 @@ const OS156Content: React.FC = () => {
 
   const handleUploadClick = async () => {
     if (selectedFile) {
-      await handleFileUpload(selectedFile);
-      setSelectedFile(null);
-      // Reset the file input
-      const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
+      try {
+        // Call the file upload handler from the hook
+        await handleFileUpload(selectedFile);
+        
+        // Reset the selected file
+        setSelectedFile(null);
+        
+        // Reset the file input
+        const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = '';
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast.error('Erro ao processar planilha', 'Verifique o formato do arquivo e tente novamente.');
       }
     }
   };
@@ -50,6 +70,7 @@ const OS156Content: React.FC = () => {
   const handleExportData = () => {
     // To be implemented - export data to CSV/Excel
     console.log('Export data');
+    toast.info('Exportação de dados', 'Funcionalidade em desenvolvimento');
   };
 
   return (
@@ -82,7 +103,20 @@ const OS156Content: React.FC = () => {
               </Button>
             </div>
             
-            {lastUpload && (
+            {isLoading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Processando planilha...</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  Aguarde enquanto processamos os dados. Isso pode levar alguns minutos, dependendo do tamanho do arquivo.
+                </p>
+              </div>
+            )}
+            
+            {lastUpload && !isLoading && (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
                   <div>
@@ -123,7 +157,7 @@ const OS156Content: React.FC = () => {
       />
       
       <OS156Charts 
-        data={chartData}
+        data={persistedChartData}
         isLoading={isLoading}
       />
       

@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { OS156Upload, OS156Item } from '@/components/ranking/types';
@@ -8,7 +8,8 @@ import { processPlanilha156, mapAreaTecnica } from './utils/os156DataProcessing'
 
 export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item[]) => void) => {
   const [lastUpload, setLastUpload] = useState<OS156Upload | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const fetchLastUpload = useCallback(async () => {
     if (!user) {
@@ -17,6 +18,8 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
     }
     
     try {
+      setIsLoading(true);
+      
       const { data, error } = await supabase
         .from('os_uploads')
         .select('*')
@@ -39,9 +42,10 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       }
     } catch (error) {
       console.error('Erro ao buscar último upload:', error);
-      toast.error("Não foi possível carregar as informações do último upload.");
+      toast.error('Falha ao carregar dados', 'Não foi possível carregar as informações do último upload.');
     } finally {
       setIsLoading(false);
+      setProgress(0);
     }
   }, [user]);
 
@@ -62,6 +66,7 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       const pageSize = 1000;
       let page = 0;
       let hasMore = true;
+      const totalPages = Math.ceil((count || 1) / pageSize);
       
       while (hasMore) {
         const from = page * pageSize;
@@ -78,6 +83,8 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
         if (data && data.length > 0) {
           allData = [...allData, ...data as OS156Item[]];
           page++;
+          // Update progress
+          setProgress((page / totalPages) * 100);
         }
         
         hasMore = data && data.length === pageSize;
@@ -87,18 +94,21 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       onDataLoaded(allData);
     } catch (error) {
       console.error('Erro ao buscar dados das ordens:', error);
-      toast.error("Não foi possível carregar os dados das ordens de serviço.");
+      toast.error('Falha ao carregar dados', 'Não foi possível carregar os dados das ordens de serviço.');
     }
   };
 
   const handleFileUpload = async (file: File) => {
     if (!user) {
-      toast.error("Você precisa estar logado para fazer upload de arquivos.");
+      toast.error('Não autorizado', 'Você precisa estar logado para fazer upload de arquivos.');
       return;
     }
 
     try {
       setIsLoading(true);
+      setProgress(0);
+      
+      toast.info('Processamento iniciado', 'Iniciando o processamento da planilha. Isso pode levar alguns minutos.');
       
       // Create upload record in database
       const { data: uploadData, error: uploadError } = await supabase
@@ -118,11 +128,15 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       const uploadId = uploadData[0].id;
       
       // Process the file data
+      setProgress(10); // File read started
       const osItems = await processPlanilha156(file);
+      setProgress(30); // File processed
       console.log(`Processed ${osItems.length} items from file`);
       
       // Batch insert records in chunks to avoid payload size limits
       const batchSize = 500;
+      const totalBatches = Math.ceil(osItems.length / batchSize);
+      
       for (let i = 0; i < osItems.length; i += batchSize) {
         const batch = osItems.slice(i, i + batchSize).map(item => ({
           ...item,
@@ -140,10 +154,16 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
           throw insertError;
         }
         
-        console.log(`Inserted batch ${i/batchSize + 1}/${Math.ceil(osItems.length/batchSize)}`);
+        const currentBatch = i / batchSize + 1;
+        console.log(`Inserted batch ${currentBatch}/${totalBatches}`);
+        
+        // Update progress (from 30% to 80%)
+        const batchProgress = 30 + 50 * (currentBatch / totalBatches);
+        setProgress(batchProgress);
       }
       
       // Call the function to process the upload (detect changes, etc.)
+      setProgress(85);
       const { error: functionError } = await supabase.rpc('processar_upload_os_156', {
         upload_id: uploadId
       });
@@ -158,12 +178,14 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
         processado: true
       });
       
+      setProgress(90);
       await fetchOSData(uploadId);
+      setProgress(100);
       
-      toast.success("Planilha processada com sucesso.");
+      toast.success('Processamento concluído', 'Planilha processada com sucesso!');
     } catch (error: any) {
       console.error('Erro ao processar planilha:', error);
-      toast.error(error.message || "Não foi possível processar o arquivo.");
+      toast.error('Falha no processamento', error.message || "Não foi possível processar o arquivo.");
     } finally {
       setIsLoading(false);
     }
@@ -186,18 +208,20 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
       setLastUpload(null);
       onDataLoaded([]);
       
-      toast.success("Upload removido com sucesso.");
+      toast.success('Upload removido', 'Os dados foram removidos com sucesso.');
     } catch (error: any) {
       console.error('Erro ao remover upload:', error);
-      toast.error(error.message || "Não foi possível remover o arquivo.");
+      toast.error('Falha ao remover', error.message || "Não foi possível remover o arquivo.");
     } finally {
       setIsLoading(false);
+      setProgress(0);
     }
   };
 
   return {
     lastUpload,
     isLoading,
+    progress,
     fetchLastUpload,
     handleFileUpload,
     deleteLastUpload
