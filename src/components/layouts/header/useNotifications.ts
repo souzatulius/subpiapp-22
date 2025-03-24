@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -18,6 +18,7 @@ export const useNotifications = () => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const deletedIdsRef = useRef<Set<string>>(new Set());
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -32,8 +33,13 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
+      // Filter out any notifications that have been deleted locally
+      const filteredData = (data || []).filter(notification => 
+        !deletedIdsRef.current.has(notification.id)
+      );
+
       // Ensure each notification has a tipo property with a default value
-      const processedNotifications = (data || []).map(notification => ({
+      const processedNotifications = filteredData.map(notification => ({
         ...notification,
         tipo: notification.tipo || 'comunicado' // Default to 'comunicado' if tipo is missing
       })) as Notification[];
@@ -75,6 +81,9 @@ export const useNotifications = () => {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Add the ID to the deleted IDs set to prevent it from reappearing
+      deletedIdsRef.current.add(id);
 
       const notificationToRemove = notifications.find(n => n.id === id);
       setNotifications(notifications.filter(n => n.id !== id));

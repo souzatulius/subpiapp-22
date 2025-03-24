@@ -38,13 +38,14 @@ export const NotificationsPopover: React.FC = () => {
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          event: 'INSERT', // Only listen for new notifications
           schema: 'public',
           table: 'notificacoes',
           filter: `usuario_id=eq.${user.id}`
         },
         (payload) => {
-          // Refresh notifications when changes are detected
+          console.log('New notification received:', payload);
+          // Only refresh notifications when new ones are inserted
           fetchNotifications();
         }
       )
