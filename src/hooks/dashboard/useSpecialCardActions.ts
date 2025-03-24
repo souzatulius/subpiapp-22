@@ -11,10 +11,8 @@ export const useSpecialCardActions = () => {
   // Quick demand submission
   const handleQuickDemandSubmit = () => {
     if (!newDemandTitle.trim()) {
-      toast({
-        title: "Título não pode estar vazio",
-        description: "Por favor, informe um título para a demanda.",
-        variant: "destructive",
+      toast.error("Título não pode estar vazio", {
+        description: "Por favor, informe um título para a demanda."
       });
       return;
     }

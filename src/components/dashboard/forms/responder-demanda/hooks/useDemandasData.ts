@@ -1,147 +1,152 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
-import { Demanda, Area } from '../types';
+import { Demanda, AreasCoordinacao, Origem, Filter } from '../types';
 
-export const useDemandasData = () => {
+export const useDemandasData = (initialFilter: Filter = 'all') => {
+  const { user } = useAuth();
   const [demandas, setDemandas] = useState<Demanda[]>([]);
+  const [areasCoordinacao, setAreasCoordinacao] = useState<AreasCoordinacao[]>([]);
+  const [origens, setOrigens] = useState<Origem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<Filter>(initialFilter);
   const [filteredDemandas, setFilteredDemandas] = useState<Demanda[]>([]);
   const [selectedDemanda, setSelectedDemanda] = useState<Demanda | null>(null);
-  const [isLoadingDemandas, setIsLoadingDemandas] = useState(true);
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [areaFilter, setAreaFilter] = useState<string>('');
-  const [prioridadeFilter, setPrioridadeFilter] = useState<string>('');
 
+  // Fetch demandas and filter options
   useEffect(() => {
-    const fetchAreas = async () => {
+    const fetchData = async () => {
+      if (!user) return;
+
       try {
-        const { data, error } = await supabase
+        setIsLoading(true);
+        
+        // Fetch áreas de coordenação
+        const { data: areasData, error: areasError } = await supabase
           .from('areas_coordenacao')
-          .select('id, descricao')
-          .order('descricao');
+          .select('*');
+        
+        if (areasError) throw areasError;
+        setAreasCoordinacao(areasData || []);
+        
+        // Fetch origens
+        const { data: origensData, error: origensError } = await supabase
+          .from('origens_demanda')
+          .select('*');
+        
+        if (origensError) throw origensError;
+        setOrigens(origensData || []);
+        
+        // Fetch demandas pendentes
+        const { data: demandasData, error: demandasError } = await supabase
+          .from('demandas')
+          .select(`
+            *,
+            origem:origem_id (descricao),
+            area_coordenacao:area_coordenacao_id (id, descricao),
+            servico:servico_id (descricao),
+            tipo_midia:tipo_midia_id (descricao),
+            bairro:bairro_id (nome, distrito_id),
+            autor:autor_id (nome),
+            arquivo_url
+          `)
+          .eq('status', 'pendente')
+          .order('criado_em', { ascending: false });
+        
+        if (demandasError) throw demandasError;
+        
+        // Get current user's area_coordenacao_id
+        const { data: userData, error: userError } = await supabase
+          .from('usuarios')
+          .select('area_coordenacao_id')
+          .eq('id', user.id)
+          .single();
+        
+        if (userError) throw userError;
+        
+        // Filter demandas for user's area if they're not admin
+        let userDemandas = demandasData || [];
+        
+        if (userData && userData.area_coordenacao_id) {
+          // Filter for user's area unless they're admin
+          const { data: userRoles } = await supabase
+            .from('perfis_usuarios')
+            .select('perfil_id')
+            .eq('usuario_id', user.id);
           
-        if (error) throw error;
-        setAreas(data || []);
-      } catch (error) {
-        console.error('Erro ao carregar áreas:', error);
+          const isAdmin = userRoles?.some(role => role.perfil_id === 1);
+          
+          if (!isAdmin) {
+            userDemandas = userDemandas.filter(
+              demanda => demanda.area_coordenacao_id === userData.area_coordenacao_id
+            );
+          }
+        }
+        
+        setDemandas(userDemandas);
+        setFilteredDemandas(userDemandas);
+      } catch (error: any) {
+        console.error('Erro ao carregar dados:', error);
+        toast.error("Erro ao carregar dados", {
+          description: error.message || "Ocorreu um erro ao carregar as demandas. Por favor, tente novamente."
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
     
-    fetchAreas();
-  }, []);
+    fetchData();
+  }, [user]);
 
-  useEffect(() => {
-    const fetchDemandas = async () => {
-      try {
-        setIsLoadingDemandas(true);
-        const {
-          data,
-          error
-        } = await supabase.from('demandas').select(`
-            *,
-            areas_coordenacao (id, descricao),
-            origens_demandas (descricao),
-            tipos_midia (descricao),
-            servicos (descricao)
-          `)
-          .eq('status', 'pendente')
-          .order('prioridade', {
-            ascending: false
-          })
-          .order('prazo_resposta', {
-            ascending: true
-          });
-          
-        if (error) throw error;
-        
-        const { data: notasData, error: notasError } = await supabase
-          .from('notas_oficiais')
-          .select('demanda_id');
-          
-        if (notasError) throw notasError;
-        
-        const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
-        
-        const filteredDemandas = data?.filter(demanda => !demandasComNotas.has(demanda.id)) || [];
-        
-        // Type assertion to make TypeScript happy
-        const typedDemandas = filteredDemandas.map(demanda => {
-          // Ensure perguntas is in the correct format
-          let parsedPerguntas = demanda.perguntas;
-          if (typeof parsedPerguntas === 'string') {
-            try {
-              parsedPerguntas = JSON.parse(parsedPerguntas);
-            } catch (e) {
-              parsedPerguntas = null;
-            }
-          }
-          
-          return {
-            ...demanda,
-            perguntas: parsedPerguntas
-          } as Demanda;
-        });
-        
-        setDemandas(typedDemandas);
-        setFilteredDemandas(typedDemandas);
-      } catch (error) {
-        console.error('Erro ao carregar demandas:', error);
-        toast({
-          title: "Erro ao carregar demandas",
-          description: "Não foi possível carregar as demandas pendentes.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoadingDemandas(false);
-      }
-    };
-    fetchDemandas();
-  }, []);
-
+  // Apply filters when filter or search term changes
   useEffect(() => {
     let filtered = [...demandas];
     
-    if (areaFilter) {
-      filtered = filtered.filter(demanda => demanda.areas_coordenacao?.id === areaFilter);
+    // Apply priority filter
+    if (filter !== 'all') {
+      filtered = filtered.filter(demanda => demanda.prioridade === filter);
     }
     
-    if (prioridadeFilter) {
-      filtered = filtered.filter(demanda => demanda.prioridade === prioridadeFilter);
-    }
-    
+    // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        demanda => demanda.titulo.toLowerCase().includes(searchLower) || 
-                  demanda.areas_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
-                  demanda.servicos?.descricao?.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(demanda => 
+        demanda.titulo.toLowerCase().includes(searchLower) ||
+        demanda.area_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
+        demanda.servico?.descricao.toLowerCase().includes(searchLower)
       );
     }
     
     setFilteredDemandas(filtered);
-  }, [demandas, areaFilter, prioridadeFilter, searchTerm]);
+  }, [filter, searchTerm, demandas]);
 
-  const handleSelectDemanda = (demanda: Demanda) => {
-    setSelectedDemanda(demanda);
-  };
+  // Get counts by priority
+  const counts = useMemo(() => {
+    return {
+      all: demandas.length,
+      alta: demandas.filter(d => d.prioridade === 'alta').length,
+      media: demandas.filter(d => d.prioridade === 'media').length,
+      baixa: demandas.filter(d => d.prioridade === 'baixa').length
+    };
+  }, [demandas]);
 
   return {
     demandas,
     setDemandas,
     filteredDemandas,
     setFilteredDemandas,
-    selectedDemanda,
-    setSelectedDemanda,
-    isLoadingDemandas,
-    areas,
+    areasCoordinacao,
+    origens,
+    isLoading,
     searchTerm,
     setSearchTerm,
-    areaFilter,
-    setAreaFilter,
-    prioridadeFilter,
-    setPrioridadeFilter,
-    handleSelectDemanda
+    filter,
+    setFilter,
+    counts,
+    selectedDemanda,
+    setSelectedDemanda
   };
 };

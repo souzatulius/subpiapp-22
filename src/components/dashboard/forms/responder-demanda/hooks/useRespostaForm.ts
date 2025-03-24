@@ -27,10 +27,8 @@ export const useRespostaForm = (
 
   const handleSubmitResposta = async () => {
     if (!selectedDemanda) {
-      toast({
-        title: "Demanda não selecionada",
-        description: "Por favor, selecione uma demanda para responder.",
-        variant: "destructive"
+      toast.error("Demanda não selecionada", {
+        description: "Por favor, selecione uma demanda para responder."
       });
       return;
     }
@@ -39,10 +37,8 @@ export const useRespostaForm = (
     const hasAnsweredAnyQuestion = Object.values(respostasPerguntas).some(answer => answer.trim() !== '');
     
     if (!hasAnsweredAnyQuestion && !resposta.trim()) {
-      toast({
-        title: "Resposta não pode ser vazia",
-        description: "Por favor, responda pelo menos uma pergunta ou adicione observações.",
-        variant: "destructive"
+      toast.error("Resposta não pode ser vazia", {
+        description: "Por favor, responda pelo menos uma pergunta ou adicione observações."
       });
       return;
     }
@@ -72,8 +68,7 @@ export const useRespostaForm = (
       
       if (statusError) throw statusError;
       
-      toast({
-        title: "Resposta enviada com sucesso!",
+      toast.success("Resposta enviada com sucesso!", {
         description: "A demanda foi respondida e seu status foi atualizado."
       });
 
@@ -84,10 +79,8 @@ export const useRespostaForm = (
       setRespostasPerguntas({});
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
-      toast({
-        title: "Erro ao enviar resposta",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
+      toast.error("Erro ao enviar resposta", {
+        description: error.message || "Ocorreu um erro ao processar sua solicitação."
       });
     } finally {
       setIsLoading(false);

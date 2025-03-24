@@ -1,68 +1,61 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
 import { Demand } from './types';
 
 export const useDemandasData = () => {
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const [demandas, setDemandas] = useState<Demand[]>([]);
   const [filteredDemandas, setFilteredDemandas] = useState<Demand[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch demandas
   useEffect(() => {
     const fetchDemandas = async () => {
+      if (!user) return;
+
       try {
         setIsLoading(true);
+
+        const { data: areasData, error: areasError } = await supabase
+          .from('areas_coordenacao')
+          .select('*');
         
-        // First, fetch all demandas that are either pendente or em_andamento
-        const { data: allDemandas, error: demandasError } = await supabase
+        if (areasError) throw areasError;
+
+        // Fetch demandas com status 'respondida'
+        const { data, error } = await supabase
           .from('demandas')
           .select(`
-            id,
-            titulo,
-            status,
-            detalhes_solicitacao,
-            perguntas,
-            area_coordenacao:area_coordenacao_id(id, descricao)
+            *,
+            area_coordenacao:area_coordenacao_id (*)
           `)
-          .in('status', ['pendente', 'em_andamento', 'respondida'])
-          .order('horario_publicacao', { ascending: false });
+          .eq('status', 'respondida')
+          .order('criado_em', { ascending: false });
         
-        if (demandasError) throw demandasError;
-        
-        // Fetch all notas oficiais to check which demandas already have notas
-        const { data: notasData, error: notasError } = await supabase
-          .from('notas_oficiais')
-          .select('demanda_id');
-        
-        if (notasError) throw notasError;
-        
-        // Create a set of demanda IDs that already have notas
-        const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
-        
-        // Filter to include only demandas that don't have notas associated
-        const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
-        
-        console.log('All demandas:', allDemandas.length);
-        console.log('Demandas with notas:', demandasComNotas.size);
-        console.log('Demandas without notas:', demandasSemNotas.length);
-        
-        // Make sure the perguntas field is properly typed
-        const typedData = demandasSemNotas?.map(item => ({
-          ...item,
-          perguntas: item.perguntas as Record<string, string> | null
-        })) || [];
-        
-        setDemandas(typedData);
-        setFilteredDemandas(typedData);
-      } catch (error) {
-        console.error('Erro ao carregar demandas:', error);
-        toast({
-          title: "Erro ao carregar demandas",
-          description: "Não foi possível carregar as demandas disponíveis.",
-          variant: "destructive"
+        if (error) throw error;
+
+        if (data) {
+          // Transform data to match the Demand type
+          const formattedDemandas: Demand[] = data.map(demanda => ({
+            id: demanda.id,
+            titulo: demanda.titulo,
+            status: demanda.status,
+            prioridade: demanda.prioridade,
+            area_coordenacao: demanda.area_coordenacao,
+            perguntas: demanda.perguntas || {},
+            criado_em: demanda.criado_em
+          }));
+
+          setDemandas(formattedDemandas);
+          setFilteredDemandas(formattedDemandas);
+        }
+      } catch (error: any) {
+        console.error('Erro ao buscar demandas:', error);
+        toast.error("Erro ao carregar demandas", {
+          description: error.message || "Ocorreu um erro ao buscar as demandas respondidas."
         });
       } finally {
         setIsLoading(false);
@@ -70,29 +63,29 @@ export const useDemandasData = () => {
     };
 
     fetchDemandas();
-  }, []);
+  }, [user]);
 
   // Filter demandas based on search term
   useEffect(() => {
-    if (!searchTerm.trim()) {
+    if (searchTerm.trim() === '') {
       setFilteredDemandas(demandas);
       return;
     }
-    
-    const lowercaseSearchTerm = searchTerm.toLowerCase();
+
+    const lowercasedSearch = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
-      demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.area_coordenacao?.descricao.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.titulo.toLowerCase().includes(lowercasedSearch) ||
+      demanda.area_coordenacao?.descricao.toLowerCase().includes(lowercasedSearch)
     );
     
     setFilteredDemandas(filtered);
   }, [searchTerm, demandas]);
 
   return {
+    isLoading,
     demandas,
     filteredDemandas,
     searchTerm,
-    setSearchTerm,
-    isLoading
+    setSearchTerm
   };
 };
