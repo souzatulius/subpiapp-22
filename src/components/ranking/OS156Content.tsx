@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, RefreshCw, Download, Trash2 } from 'lucide-react';
+import { UploadCloud, Download, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useOS156Data } from '@/hooks/ranking/useOS156Data';
 import OS156Charts from './OS156Charts';
@@ -16,40 +16,17 @@ const OS156Content: React.FC = () => {
     isLoading,
     chartData,
     osData,
+    companies,
+    filters,
     handleFileUpload,
     deleteLastUpload,
     applyFilters
   } = useOS156Data(user);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [companies, setCompanies] = useState<string[]>([]);
-  const [filters, setFilters] = useState<OS156FilterOptions>({
-    dateRange: undefined,
-    statuses: ['Todos'],
-    serviceTypes: ['Todos'],
-    districts: ['Todos'],
-    areaTecnica: 'Todos',
-    empresa: ['Todos'],
-    dataInicio: undefined,
-    dataFim: undefined
-  });
-
-  useEffect(() => {
-    if (osData.length > 0) {
-      // Extract unique company names from OS data
-      const uniqueCompanies = Array.from(
-        new Set(osData.map(item => item.empresa).filter(Boolean) as string[])
-      );
-      setCompanies(uniqueCompanies);
-    }
-  }, [osData]);
 
   const handleFiltersChange = (newFilters: Partial<OS156FilterOptions>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
-
-  const handleApplyFilters = () => {
-    applyFilters(filters);
+    applyFilters({ ...filters, ...newFilters });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +119,7 @@ const OS156Content: React.FC = () => {
         filters={filters}
         onFiltersChange={handleFiltersChange}
         companies={companies}
-        onApplyFilters={handleApplyFilters}
+        onApplyFilters={() => applyFilters(filters)}
       />
       
       <OS156Charts 
