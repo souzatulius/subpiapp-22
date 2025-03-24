@@ -9,12 +9,13 @@ interface ColorOptionsProps {
 }
 
 const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColor }) => {
-  // Updated color options as requested
+  // Updated color options with the new orange-600 option
   const colorOptions = [
     { value: 'blue', display: 'blue-50', className: 'bg-blue-50 border-blue-100' },
     { value: 'blue-dark', display: 'blue-950', className: 'bg-blue-950 border-blue-900' },
     { value: 'orange', display: 'orange-50', className: 'bg-orange-50 border-orange-100' },
     { value: 'orange-light', display: 'orange-500', className: 'bg-orange-500 border-orange-600' },
+    { value: 'orange-600', display: 'orange-600', className: 'bg-orange-600 border-orange-700 text-white' },
     { value: 'gray-light', display: 'gray-25', className: 'bg-gray-25 border-gray-100' },
     { value: 'gray-dark', display: 'gray-400', className: 'bg-gray-400 border-gray-500' },
     { value: 'green', display: 'lime-50', className: 'bg-lime-50 border-lime-100' },

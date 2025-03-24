@@ -14,6 +14,8 @@ export const getColorClasses = (color: string) => {
       return 'bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-100';
     case 'orange-light':
       return 'bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100';
+    case 'orange-600':
+      return 'bg-orange-600 text-white border-orange-700 hover:bg-orange-700';
     case 'gray-light':
       return 'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100';
     case 'gray-dark':

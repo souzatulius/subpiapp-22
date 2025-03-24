@@ -63,7 +63,7 @@ export interface ActionCardItem {
   title: string;
   icon: ReactNode;
   path: string;
-  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light' | 'lime';
+  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light' | 'lime' | 'orange-600';
   isCustom?: boolean;
   width?: '25' | '50' | '75' | '100';
   height?: '1' | '2';

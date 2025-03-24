@@ -1,3 +1,4 @@
+
 import {
   ClipboardList,
   MessageSquare,
@@ -28,6 +29,8 @@ export const getColorClass = (color: string): string => {
       return 'bg-orange-50 text-orange-950 border-orange-100';
     case 'orange-light':
       return 'bg-orange-500 text-white border-orange-600';
+    case 'orange-600':
+      return 'bg-orange-600 text-white border-orange-700';
     case 'gray-light':
       return 'bg-gray-25 text-gray-700 border-gray-100';
     case 'gray-dark':
