@@ -61,36 +61,6 @@ export const usePhotoUpload = (
     fileInputRef.current?.click();
   };
 
-  // Função para garantir que o bucket existe, criando se necessário
-  const ensureBucketExists = async (bucketName: string) => {
-    try {
-      // Primeiro, verifica se o bucket existe
-      const { data: bucketList } = await supabase.storage.listBuckets();
-      const bucketExists = bucketList?.some(bucket => bucket.name === bucketName);
-      
-      // Se o bucket não existe, cria
-      if (!bucketExists) {
-        console.log(`Bucket ${bucketName} não encontrado, criando...`);
-        const { error } = await supabase.storage.createBucket(bucketName, {
-          public: true
-        });
-        
-        if (error) {
-          console.error(`Erro ao criar bucket ${bucketName}:`, error);
-          throw error;
-        }
-        console.log(`Bucket ${bucketName} criado com sucesso`);
-      } else {
-        console.log(`Bucket ${bucketName} já existe`);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Erro ao verificar/criar bucket:', error);
-      throw error;
-    }
-  };
-
   const handleRemovePhoto = async () => {
     if (!user) return;
     
@@ -102,10 +72,12 @@ export const usePhotoUpload = (
         const filename = urlParts[urlParts.length - 1];
         
         if (filename) {
-          // Garantir que o bucket existe
-          await ensureBucketExists('profile_photos');
-          
-          await supabase.storage.from('profile_photos').remove([filename]);
+          try {
+            await supabase.storage.from('profile_photos').remove([filename]);
+          } catch (error) {
+            console.warn('Erro ao remover arquivo de storage, continuando com a atualização do perfil:', error);
+            // Continue with profile update even if file removal fails
+          }
         }
       }
 
@@ -142,15 +114,12 @@ export const usePhotoUpload = (
     
     setLoading(true);
     try {
-      // Garantir que o bucket existe antes de fazer o upload
-      await ensureBucketExists('profile_photos');
-      
       // Generate a unique filename
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // Upload the file
+      // Upload the file - assume bucket already exists
       const { error: uploadError, data } = await supabase.storage
         .from('profile_photos')
         .upload(filePath, selectedFile, {
@@ -158,7 +127,14 @@ export const usePhotoUpload = (
           upsert: false
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        if (uploadError.message.includes('bucket') || uploadError.message.includes('Bucket')) {
+          // If there's a bucket-related error, inform the user
+          throw new Error('A pasta de armazenamento de fotos não existe. Entre em contato com o administrador do sistema.');
+        } else {
+          throw uploadError;
+        }
+      }
 
       // Get public URL
       const { data: urlData } = supabase.storage.from('profile_photos').getPublicUrl(filePath);
