@@ -13,7 +13,7 @@ interface ActionCardProps {
   title: string;
   icon: React.ReactNode;
   onClick?: () => void;
-  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light' | 'lime';
+  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light' | 'lime' | 'orange-600';
   path?: string;
   id: string;
   onDelete?: (id: string) => void;
