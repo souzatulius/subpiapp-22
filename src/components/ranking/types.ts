@@ -1,9 +1,8 @@
-
 import { DateRange } from 'react-day-picker';
 
-export type OrderStatus = 'Planejar' | 'Novo' | 'Aprovado' | 'Concluído' | 'Todos' | 'NOVO' | 'CONC' | 'PREPLAN' | 'PRECANC' | 'AB' | 'PE';
+export type OrderStatus = 'Planejar' | 'Novo' | 'Aprovado' | 'Concluído' | 'Todos' | 'NOVO' | 'CONC' | 'PREPLAN' | 'PRECANC' | 'AB' | 'PE' | 'FECHADO';
 export type ServiceType = 'Tapa Buraco' | 'Poda' | 'Limpeza' | 'Todos';
-export type District = 'Itaim Bibi' | 'Pinheiros' | 'Alto de Pinheiros' | 'Jardim Paulista' | 'Todos' | 'PINHEIROS' | 'ALTO DE PINHEIROS' | 'JARDIM PAULISTA' | 'ITAIM BIBI';
+export type District = 'Itaim Bibi' | 'Pinheiros' | 'Alto de Pinheiros' | 'Jardim Paulista' | 'Todos' | 'PINHEIROS' | 'ALTO DE PINHEIROS' | 'JARDIM PAULISTA' | 'ITAIM BIBI' | 'EXTERNO';
 
 export interface ChartVisibility {
   occurrences: boolean;
@@ -12,6 +11,14 @@ export interface ChartVisibility {
   neighborhoods: boolean;
   frequentServices: boolean;
   statusDistribution: boolean;
+  statusTimeline: boolean;
+  statusTransition: boolean;
+  efficiencyRadar: boolean;
+  criticalStatus: boolean;
+  externalDistricts: boolean;
+  servicesDiversity: boolean;
+  timeToClose: boolean;
+  dailyOrders: boolean;
 }
 
 export interface FilterOptions {
@@ -27,7 +34,6 @@ export interface UploadInfo {
   uploadDate: string;
 }
 
-// Types for OS 156 data
 export interface OS156Item {
   id: string;
   numero_os: string;
@@ -61,9 +67,14 @@ export interface OS156ChartData {
   efficiencyScore: any;
   dailyNewOrders: any;
   servicesDiversity: any;
+  statusTimeline: any;
+  statusTransition: any;
+  efficiencyRadar: any;
+  criticalStatusAnalysis: any;
+  externalDistrictsAnalysis: any;
+  timeToClose: any;
 }
 
-// Extended filter options for OS156
 export interface OS156FilterOptions extends FilterOptions {
   areaTecnica: 'Todos' | 'STM' | 'STLP';
   empresa: string[];
