@@ -61,6 +61,36 @@ export const usePhotoUpload = (
     fileInputRef.current?.click();
   };
 
+  // Função para garantir que o bucket existe, criando se necessário
+  const ensureBucketExists = async (bucketName: string) => {
+    try {
+      // Primeiro, verifica se o bucket existe
+      const { data: bucketList } = await supabase.storage.listBuckets();
+      const bucketExists = bucketList?.some(bucket => bucket.name === bucketName);
+      
+      // Se o bucket não existe, cria
+      if (!bucketExists) {
+        console.log(`Bucket ${bucketName} não encontrado, criando...`);
+        const { error } = await supabase.storage.createBucket(bucketName, {
+          public: true
+        });
+        
+        if (error) {
+          console.error(`Erro ao criar bucket ${bucketName}:`, error);
+          throw error;
+        }
+        console.log(`Bucket ${bucketName} criado com sucesso`);
+      } else {
+        console.log(`Bucket ${bucketName} já existe`);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Erro ao verificar/criar bucket:', error);
+      throw error;
+    }
+  };
+
   const handleRemovePhoto = async () => {
     if (!user) return;
     
@@ -72,13 +102,8 @@ export const usePhotoUpload = (
         const filename = urlParts[urlParts.length - 1];
         
         if (filename) {
-          // Check if bucket exists and create if not
-          const { data: bucketData } = await supabase.storage.getBucket('profile_photos');
-          if (!bucketData) {
-            await supabase.storage.createBucket('profile_photos', {
-              public: true
-            });
-          }
+          // Garantir que o bucket existe
+          await ensureBucketExists('profile_photos');
           
           await supabase.storage.from('profile_photos').remove([filename]);
         }
@@ -117,13 +142,8 @@ export const usePhotoUpload = (
     
     setLoading(true);
     try {
-      // Check if bucket exists, create if not
-      const { data: bucketData } = await supabase.storage.getBucket('profile_photos');
-      if (!bucketData) {
-        await supabase.storage.createBucket('profile_photos', {
-          public: true
-        });
-      }
+      // Garantir que o bucket existe antes de fazer o upload
+      await ensureBucketExists('profile_photos');
       
       // Generate a unique filename
       const fileExt = selectedFile.name.split('.').pop();
