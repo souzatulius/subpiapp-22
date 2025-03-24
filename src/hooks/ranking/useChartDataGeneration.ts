@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { OS156Item } from '@/components/ranking/types';
 
@@ -429,5 +430,60 @@ export const useChartDataGeneration = () => {
         ]
       };
       
-      // Helper
+      // Helper functions for area-specific calculations
+      function avgTimeByArea(area: string): number {
+        const areaItems = data.filter(item => item.area_tecnica === area);
+        if (areaItems.length === 0) return 0;
+        return areaItems.reduce((sum, item) => sum + item.tempo_aberto, 0) / areaItems.length;
+      }
+      
+      function countByArea(area: string): number {
+        return data.filter(item => item.area_tecnica === area).length;
+      }
+      
+      function completionRateByArea(area: string): number {
+        const areaItems = data.filter(item => item.area_tecnica === area);
+        if (areaItems.length === 0) return 0;
+        return areaItems.filter(item => item.status === 'CONC').length / areaItems.length;
+      }
+      
+      function serviceTypesByArea(area: string): Set<string> {
+        const uniqueTypes = new Set<string>();
+        data.filter(item => item.area_tecnica === area).forEach(item => {
+          if (item.tipo_servico) uniqueTypes.add(item.tipo_servico);
+        });
+        return uniqueTypes;
+      }
+      
+      function problemRateByArea(area: string): number {
+        const areaItems = data.filter(item => item.area_tecnica === area);
+        if (areaItems.length === 0) return 0;
+        return areaItems.filter(item => item.status === 'PREPLAN' || item.status === 'PRECANC').length / areaItems.length;
+      }
+      
+      // Combine all chart data
+      setChartData({
+        statusDistribution,
+        averageTimeByStatus,
+        companiesPerformance,
+        servicesByTechnicalArea,
+        servicesByDistrict,
+        timeToCompletion,
+        efficiencyScore,
+        dailyNewOrders,
+        servicesDiversity,
+        statusTimeline,
+        statusTransition,
+        efficiencyRadar
+      });
+    } catch (error) {
+      console.error('Error generating chart data:', error);
+      setChartData(null);
+    }
+  };
 
+  return {
+    chartData,
+    generateChartData
+  };
+};
