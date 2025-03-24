@@ -82,8 +82,8 @@ export const useSmartSearch = () => {
     
     // Simulate a small delay for better UX
     const timer = setTimeout(() => {
-      // Prepare search query - preserve internal spaces for better phrase matching
-      const searchQuery = query.trim();
+      // Preserve internal spaces for better phrase matching
+      const searchQuery = query;
       
       // Split the query into individual words for better matching
       const queryWords = searchQuery.toLowerCase().split(/\s+/);

@@ -26,7 +26,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Handle key events without preventing space key
+  // Handle key events without preventing default for space key
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && query.trim()) {
       if (suggestions.length > 0) {
@@ -43,6 +43,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
       const firstSuggestion = suggestionsRef.current?.querySelector('button');
       firstSuggestion?.focus();
     }
+    // Do NOT prevent default on space key or any other normal typing keys
   };
 
   // Handle suggestion navigation with keyboard
@@ -83,8 +84,9 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     };
   }, [setShowSuggestions]);
 
-  // Handle input change without preventing spaces
+  // Handle input change with direct assignment, not filtering spaces
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Use the input value directly without any filtering
     setQuery(e.target.value);
   };
 
