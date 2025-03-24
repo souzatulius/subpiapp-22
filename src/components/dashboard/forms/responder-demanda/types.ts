@@ -7,7 +7,7 @@ export interface Demanda {
   status: string;
   prioridade: string;
   prazo_resposta?: string;
-  perguntas?: string[];
+  perguntas?: string[] | Record<string, string> | null;
   detalhes_solicitacao?: string;
   areas_coordenacao?: {
     id: string;

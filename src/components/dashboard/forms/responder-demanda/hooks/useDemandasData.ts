@@ -66,8 +66,26 @@ export const useDemandasData = () => {
         
         const filteredDemandas = data?.filter(demanda => !demandasComNotas.has(demanda.id)) || [];
         
-        setDemandas(filteredDemandas);
-        setFilteredDemandas(filteredDemandas);
+        // Type assertion to make TypeScript happy
+        const typedDemandas = filteredDemandas.map(demanda => {
+          // Ensure perguntas is in the correct format
+          let parsedPerguntas = demanda.perguntas;
+          if (typeof parsedPerguntas === 'string') {
+            try {
+              parsedPerguntas = JSON.parse(parsedPerguntas);
+            } catch (e) {
+              parsedPerguntas = null;
+            }
+          }
+          
+          return {
+            ...demanda,
+            perguntas: parsedPerguntas
+          } as Demanda;
+        });
+        
+        setDemandas(typedDemandas);
+        setFilteredDemandas(typedDemandas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
         toast({

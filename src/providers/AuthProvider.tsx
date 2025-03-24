@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import * as authService from '@/services/authService';
 import { isUserApproved, createAdminNotification, updateUserProfile } from '@/lib/authUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -59,27 +61,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initialize();
   }, []);
 
-  // Create or update user profile
-  const updateUserProfile = async (userId: string, userData: any) => {
-    try {
-      const { error } = await supabase
-        .from('usuarios')
-        .upsert({
-          id: userId,
-          nome_completo: userData.nome_completo,
-          email: userData.email || '', 
-          aniversario: userData.aniversario,
-          whatsapp: userData.whatsapp,
-          cargo_id: userData.cargo_id,
-          area_coordenacao_id: userData.area_coordenacao_id
-        });
-      
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error updating user profile:', error);
-      return false;
-    }
+  // Create or update user profile - already defined in authUtils.ts, so we'll use that instead
+  const handleUpdateUserProfile = async (userId: string, userData: any) => {
+    return updateUserProfile(userId, userData);
   };
 
   // Sign up wrapper
@@ -90,7 +74,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Notify admins about new user registration
       if (result.data?.user) {
         // Update user profile with cargo and area
-        await updateUserProfile(
+        await handleUpdateUserProfile(
           result.data.user.id,
           userData
         );
