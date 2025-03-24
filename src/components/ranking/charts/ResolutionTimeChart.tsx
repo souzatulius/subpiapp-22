@@ -9,10 +9,12 @@ interface ResolutionTimeChartProps {
 }
 
 const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ data, isLoading }) => {
-  // Check if data and data.datasets exist before accessing them
-  const averageTime = isLoading || !data || !data.datasets || data.datasets[0]?.data?.length === 0 ? 
-    '' : 
-    `${Math.round(data.datasets[0]?.data[0] || 0)} dias`;
+  // Check if data and data.datasets exist and have content before accessing them
+  const isDataValid = !isLoading && data && data.datasets && data.datasets.length > 0;
+  
+  const averageTime = isDataValid && data.datasets[0]?.data?.length > 0 ? 
+    `${Math.round(data.datasets[0].data[0] || 0)} dias` : 
+    'N/A';
   
   return (
     <ChartCard
@@ -20,7 +22,7 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ data, isLoadi
       value={averageTime}
       isLoading={isLoading}
     >
-      {!isLoading && data && (
+      {isDataValid ? (
         <Line 
           data={data} 
           options={{
@@ -37,6 +39,10 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ data, isLoadi
             },
           }}
         />
+      ) : (
+        <div className="h-full flex items-center justify-center">
+          <p className="text-gray-400">Dados insuficientes para exibir o gráfico</p>
+        </div>
       )}
     </ChartCard>
   );

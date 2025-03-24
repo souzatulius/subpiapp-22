@@ -1,26 +1,14 @@
-
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, GripVertical } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { ChartVisibility, ChartCard } from './types';
 import NoDataMessage from './charts/NoDataMessage';
-import OccurrencesChart from './charts/OccurrencesChart';
-import ServiceTypesChart from './charts/ServiceTypesChart';
-import ResolutionTimeChart from './charts/ResolutionTimeChart';
-import NeighborhoodsChart from './charts/NeighborhoodsChart';
-import FrequentServicesChart from './charts/FrequentServicesChart';
 import StatusDistributionChart from './charts/StatusDistributionChart';
-import StatusTimelineChart from './charts/StatusTimelineChart';
+import ResolutionTimeChart from './charts/ResolutionTimeChart';
 import TimeToCloseChart from './charts/TimeToCloseChart';
-import EfficiencyRadarChart from './charts/EfficiencyRadarChart';
-import CriticalStatusChart from './charts/CriticalStatusChart';
-import ExternalDistrictsChart from './charts/ExternalDistrictsChart';
-import ServicesDiversityChart from './charts/ServicesDiversityChart';
 import CompaniesPerformanceChart from './charts/CompaniesPerformanceChart';
-import AreaServicesChart from './charts/AreaServicesChart';
 import DailyOrdersChart from './charts/DailyOrdersChart';
 
 // Import chart registration
@@ -66,6 +54,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   onToggleVisibility,
   lastUpdated
 }) => {
+  // Show no data message if there is no chart data and not loading
   if (!chartData && !isLoading) {
     return <NoDataMessage />;
   }
@@ -107,6 +96,9 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
 
   // Helper to render a chart based on its ID
   const renderChart = (chartId: string) => {
+    // Make sure chartData exists before accessing its properties
+    if (!chartData) return null;
+    
     switch (chartId) {
       case 'status-distribution':
         return (
