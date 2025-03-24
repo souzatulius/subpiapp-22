@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Table, 
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Eye, MessageSquare, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { type Demand } from '@/hooks/consultar-demandas';
+import { type Demand } from '@/hooks/consultar-demandas/types';
 
 interface DemandasTableProps {
   demandas: Demand[];
@@ -84,7 +85,7 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Título</TableHead>
-            <TableHead>Área</TableHead>
+            <TableHead>Problema</TableHead>
             <TableHead>Serviço</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Data</TableHead>
@@ -95,7 +96,7 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
           {demandas.map((demand) => (
             <TableRow key={demand.id}>
               <TableCell className="font-medium">{demand.titulo}</TableCell>
-              <TableCell>{demand.area_coordenacao?.descricao || '-'}</TableCell>
+              <TableCell>{demand.problema?.descricao || '-'}</TableCell>
               <TableCell>{demand.servico?.descricao || '-'}</TableCell>
               <TableCell>{getStatusBadge(demand.status)}</TableCell>
               <TableCell>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Info, FileText, Calendar, User, Mail, Phone, MapPin } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Demand, ResponseQA } from './types';
@@ -22,7 +22,7 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
         <div>
           <h3 className="font-medium text-lg">Informações da Demanda</h3>
           <p className="text-sm text-gray-500">
-            {selectedDemanda.area_coordenacao?.descricao || 'Área não especificada'}
+            {selectedDemanda.problema?.descricao || 'Problema não especificado'}
           </p>
         </div>
       </div>

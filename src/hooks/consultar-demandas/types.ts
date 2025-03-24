@@ -30,6 +30,24 @@ export interface Demand {
   autor?: {
     nome_completo: string;
   } | null;
+  criado_em?: string;
 }
 
 export type FilterType = 'all' | 'pending' | 'responded' | 'approved';
+
+export interface UseDemandasDataReturn {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  selectedDemand: Demand | null;
+  setSelectedDemand: (demand: Demand | null) => void;
+  isDetailOpen: boolean;
+  setIsDetailOpen: (isOpen: boolean) => void;
+  isDeleteDialogOpen: boolean;
+  setIsDeleteDialogOpen: (isOpen: boolean) => void;
+  deleteLoading: boolean;
+  filteredDemandas: Demand[];
+  isLoading: boolean;
+  error: any;
+  refetch: () => Promise<any>;
+  handleDeleteConfirm: () => Promise<void>;
+}

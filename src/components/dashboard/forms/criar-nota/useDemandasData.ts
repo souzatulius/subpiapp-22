@@ -48,7 +48,12 @@ export const useDemandasData = () => {
             perguntas: demanda.perguntas ? demanda.perguntas as Record<string, string> : null,
             detalhes_solicitacao: demanda.detalhes_solicitacao || null,
             horario_publicacao: demanda.horario_publicacao,
-            criado_em: demanda.criado_em // Using criado_em
+            veiculo_imprensa: demanda.veiculo_imprensa,
+            nome_solicitante: demanda.nome_solicitante,
+            email_solicitante: demanda.email_solicitante,
+            telefone_solicitante: demanda.telefone_solicitante,
+            endereco: demanda.endereco,
+            criado_em: demanda.criado_em
           }));
 
           setDemandas(formattedDemandas);

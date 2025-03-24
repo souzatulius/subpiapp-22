@@ -9,37 +9,34 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import { Loader2 } from 'lucide-react';
 
 interface DeleteDemandDialogProps {
   isOpen: boolean;
-  onConfirm: () => Promise<void>;
-  onCancel: () => void;
   isLoading: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
-const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
-  isOpen,
-  onConfirm,
-  onCancel,
-  isLoading
+const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({ 
+  isOpen, 
+  isLoading,
+  onConfirm, 
+  onCancel 
 }) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onCancel}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir esta demanda? 
-            Esta ação não pode ser desfeita e todos os dados relacionados serão perdidos.
+            Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel} disabled={isLoading}>
-            Cancelar
-          </AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
               onConfirm();

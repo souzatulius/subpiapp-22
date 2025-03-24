@@ -57,19 +57,24 @@ const ConsultarDemandasContent: React.FC = () => {
     }
   }, [selectedDemand, isDetailOpen, navigate, location.pathname]);
 
-  const handleRowClick = (demand: Demand) => {
+  const handleViewDemand = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
   };
 
-  const handleCloseDetail = () => {
-    setIsDetailOpen(false);
-    setSelectedDemand(null);
+  const handleEdit = (demand: Demand) => {
+    // Placeholder for edit functionality
+    console.log('Edit demand:', demand.id);
   };
 
-  const handleEdit = () => {
-    // Placeholder for edit functionality
-    console.log('Edit demand:', selectedDemand?.id);
+  const handleRespondDemand = (demand: Demand) => {
+    // Placeholder for respond functionality
+    console.log('Respond to demand:', demand.id);
+  };
+
+  const handleDeleteClick = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setIsDeleteDialogOpen(true);
   };
 
   if (isLoading) {
@@ -103,15 +108,18 @@ const ConsultarDemandasContent: React.FC = () => {
       
       <DemandasTable 
         demandas={filteredDemandas}
-        onRowClick={handleRowClick}
+        isLoading={isLoading}
+        onViewDemand={handleViewDemand}
+        onRespondDemand={handleRespondDemand}
+        onDeleteClick={handleDeleteClick}
       />
 
       {selectedDemand && (
         <DemandDetail 
           demand={selectedDemand} 
           isOpen={isDetailOpen} 
-          onClose={handleCloseDetail}
-          onEdit={handleEdit}
+          onClose={() => setIsDetailOpen(false)}
+          onEdit={() => handleEdit(selectedDemand)}
         />
       )}
 

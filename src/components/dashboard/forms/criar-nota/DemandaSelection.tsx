@@ -55,9 +55,9 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                     <span className="px-2 py-0.5 bg-gray-100 rounded-full">
                       {demanda.status === 'pendente' ? 'Pendente' : 'Em andamento'}
                     </span>
-                    {demanda.area_coordenacao && (
+                    {demanda.problema && (
                       <span className="px-2 py-0.5 bg-gray-100 rounded-full">
-                        {demanda.area_coordenacao.descricao}
+                        {demanda.problema.descricao}
                       </span>
                     )}
                   </div>
