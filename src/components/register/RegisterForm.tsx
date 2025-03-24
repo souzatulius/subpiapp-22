@@ -57,7 +57,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             areas={areas} 
             loadingOptions={loadingOptions} 
             errors={errors} 
-            handleChange={handleChange} 
+            handleChange={(name, value) => handleChange(name, value)} 
           />
           
           <PasswordFields 

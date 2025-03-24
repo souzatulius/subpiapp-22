@@ -25,28 +25,48 @@ export const useRegisterForm = () => {
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    let processedValue = value;
-
-    // Apply formatting for specific fields
-    if (name === 'whatsapp') {
-      processedValue = formatPhone(value);
-    } else if (name === 'birthday') {
-      processedValue = formatDate(value);
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: processedValue
-    }));
-
-    // Clear the error for this field if it exists
-    if (errors[name]) {
-      setErrors(prev => ({
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | string, value?: string) => {
+    // Handle both event-based changes and direct value changes from the Select component
+    if (typeof e === 'string' && value !== undefined) {
+      // This is from the Select component
+      const name = e;
+      
+      setFormData(prev => ({
         ...prev,
-        [name]: false
+        [name]: value
       }));
+      
+      // Clear the error for this field if it exists
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: false
+        }));
+      }
+    } else if (typeof e === 'object' && 'target' in e) {
+      // This is from a regular input element
+      const { name, value } = e.target;
+      let processedValue = value;
+
+      // Apply formatting for specific fields
+      if (name === 'whatsapp') {
+        processedValue = formatPhone(value);
+      } else if (name === 'birthday') {
+        processedValue = formatDate(value);
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        [name]: processedValue
+      }));
+
+      // Clear the error for this field if it exists
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: false
+        }));
+      }
     }
   };
 
@@ -89,8 +109,8 @@ export const useRegisterForm = () => {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
-        cargo_id: formData.role,         // Agora estamos passando o ID do cargo
-        area_coordenacao_id: formData.area  // Agora estamos passando o ID da área
+        cargo_id: formData.role,         // Passing the ID of the cargo
+        area_coordenacao_id: formData.area  // Passing the ID of the area
       });
 
       if (error) {
