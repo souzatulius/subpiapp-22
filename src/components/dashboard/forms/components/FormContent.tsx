@@ -102,6 +102,7 @@ const FormContent: React.FC<FormContentProps> = ({
                   filteredServicesBySearch={filteredServicesBySearch}
                   serviceSearch={serviceSearch}
                   handleServiceSelect={handleServiceSelect}
+                  servicos={servicos}
                   errors={errors}
                 />;
       case 1:
@@ -133,7 +134,6 @@ const FormContent: React.FC<FormContentProps> = ({
       case 4:
         return <PriorityDeadlineStep 
                   formData={formData} 
-                  handleChange={handleChange}
                   handleSelectChange={handleSelectChange}
                   errors={errors}
                 />;
