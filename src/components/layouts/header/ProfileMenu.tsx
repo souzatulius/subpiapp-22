@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { User, UserCog, Settings, Camera, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useUserProfile } from './useUserProfile';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
@@ -27,15 +26,11 @@ export const ProfileMenu: React.FC = () => {
     try {
       await signOut();
       setIsProfileOpen(false);
-      toast({
-        description: "Você foi desconectado com sucesso"
-      });
+      toast.success("Logout realizado com sucesso!");
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível fazer logout. Tente novamente.",
-        variant: "destructive"
+      toast.error("Erro", { 
+        description: "Erro ao fazer logout. Por favor, tente novamente." 
       });
     }
   };

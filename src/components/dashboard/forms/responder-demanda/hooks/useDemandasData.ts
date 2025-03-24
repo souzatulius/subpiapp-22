@@ -98,7 +98,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           status: demanda.status,
           prioridade: demanda.prioridade,
           prazo_resposta: demanda.prazo_resposta,
-          perguntas: demanda.perguntas ? demanda.perguntas as Record<string, string> : null,
+          perguntas: demanda.perguntas as Record<string, string> | string[] | null,
           detalhes_solicitacao: demanda.detalhes_solicitacao,
           areas_coordenacao: demanda.areas_coordenacao,
           origens_demandas: demanda.origens_demandas,
