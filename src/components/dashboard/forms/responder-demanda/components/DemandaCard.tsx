@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Demanda } from '../types';
 import { formatPrioridade, calcularTempoRestante, formatarData } from '../utils/formatters';
+import { AlertCircle, Clock } from 'lucide-react';
 
 interface DemandaCardProps {
   demanda: Demanda;
@@ -12,6 +13,22 @@ interface DemandaCardProps {
 }
 
 const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, className }) => {
+  const prioridadeInfo = formatPrioridade(demanda.prioridade);
+  
+  const renderTempoRestante = () => {
+    if (!demanda.prazo_resposta) return null;
+    
+    const tempoInfo = calcularTempoRestante(demanda.prazo_resposta);
+    const Icon = tempoInfo.iconName === 'AlertCircle' ? AlertCircle : Clock;
+    
+    return (
+      <span className={tempoInfo.className}>
+        <Icon className={tempoInfo.iconClassName} />
+        {tempoInfo.label}
+      </span>
+    );
+  };
+
   return (
     <Card 
       className={`cursor-pointer transition-all hover:shadow-md ${
@@ -23,7 +40,9 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, c
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-medium">{demanda.titulo}</h3>
           <div className="flex space-x-2">
-            {formatPrioridade(demanda.prioridade)}
+            <span className={prioridadeInfo.className}>
+              {prioridadeInfo.label}
+            </span>
           </div>
         </div>
         
@@ -39,7 +58,7 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, c
         
         <div className="flex justify-between items-center text-xs text-gray-500 mt-3">
           <div>
-            {demanda.prazo_resposta && calcularTempoRestante(demanda.prazo_resposta)}
+            {demanda.prazo_resposta && renderTempoRestante()}
           </div>
           <div>
             {demanda.prazo_resposta && formatarData(demanda.prazo_resposta)}
