@@ -6,7 +6,7 @@ export interface Demand {
   titulo: string;
   status: string;
   prioridade: string;
-  area_coordenacao: {
+  problema: {
     id: string;
     descricao: string;
   } | null;
@@ -18,6 +18,7 @@ export interface Demand {
   telefone_solicitante?: string | null;
   endereco?: string | null;
   criado_em?: string;
+  horario_publicacao?: string;
 }
 
 export interface DemandResponse {

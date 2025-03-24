@@ -1,11 +1,10 @@
 
-// Make sure to add onEdit prop to the DemandDetail component call
 import React, { useEffect } from 'react';
 import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Loader } from 'lucide-react';
-import { DemandasTable } from './DemandasTable';
-import { DemandasSearchBar } from './DemandasSearchBar';
+import DemandasTable from './DemandasTable';
+import DemandasSearchBar from './DemandasSearchBar';
 import { Demand } from '@/hooks/consultar-demandas/types';
 import DemandDetail from './DemandDetail';
 import DeleteDemandDialog from './DeleteDemandDialog';
@@ -68,6 +67,11 @@ const ConsultarDemandasContent: React.FC = () => {
     setSelectedDemand(null);
   };
 
+  const handleEdit = () => {
+    // Placeholder for edit functionality
+    console.log('Edit demand:', selectedDemand?.id);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">
@@ -107,15 +111,15 @@ const ConsultarDemandasContent: React.FC = () => {
           demand={selectedDemand} 
           isOpen={isDetailOpen} 
           onClose={handleCloseDetail}
-          onEdit={() => {}} // Add empty onEdit handler
+          onEdit={handleEdit}
         />
       )}
 
       <DeleteDemandDialog
         isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDeleteConfirm}
         isLoading={deleteLoading}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setIsDeleteDialogOpen(false)}
       />
     </div>
   );

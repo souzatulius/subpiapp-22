@@ -8,7 +8,7 @@ export interface Problema {
 
 export type Area = Problema; // For backward compatibility
 
-export type ViewMode = 'list' | 'grid';
+export type ViewMode = 'list' | 'grid' | 'cards';
 
 export interface ResponderDemandaFormProps {
   onClose?: () => void;
@@ -42,4 +42,20 @@ export interface Demanda {
   };
   arquivo_url?: string;
   arquivo_nome?: string | null;
+}
+
+export interface DemandasFilterProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  filter: Filter;
+  setFilter: (filter: Filter) => void;
+  counts: Record<Filter, number>;
+  areaFilter: string;
+  setAreaFilter: (area: string) => void;
+  prioridadeFilter: string;
+  setPrioridadeFilter: (prioridade: string) => void;
+  areas: Problema[];
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+  isLoadingDemandas: boolean;
 }

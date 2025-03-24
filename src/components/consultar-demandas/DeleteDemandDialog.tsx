@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -8,61 +8,53 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
-import AttentionBox from '@/components/ui/attention-box';
 
 interface DeleteDemandDialogProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
   onConfirm: () => Promise<void>;
+  onCancel: () => void;
   isLoading: boolean;
-  demandId?: string;
 }
 
 const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
   isOpen,
-  onOpenChange,
   onConfirm,
-  isLoading,
-  demandId
+  onCancel,
+  isLoading
 }) => {
-  const handleDelete = async () => {
-    if (!demandId) {
-      console.error('ID da demanda não encontrado');
-      return;
-    }
-    
-    try {
-      await onConfirm();
-    } catch (error) {
-      console.error('Erro ao ocultar demanda:', error);
-    }
-  };
-
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-gray-50">
+    <AlertDialog open={isOpen} onOpenChange={onCancel}>
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Ocultar Demanda</AlertDialogTitle>
+          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
           <AlertDialogDescription>
-            <p className="mb-4">Tem certeza que deseja ocultar esta demanda? Ela não aparecerá mais nas listagens.</p>
-            <AttentionBox title="Observação:" variant="info" className="mb-2">
-              <p>Notas oficiais e respostas relacionadas serão mantidas no sistema. 
-              Este processo é reversível apenas por administradores do sistema.</p>
-            </AttentionBox>
+            Tem certeza que deseja excluir esta demanda? 
+            Esta ação não pode ser desfeita e todos os dados relacionados serão perdidos.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+          <AlertDialogCancel onClick={onCancel} disabled={isLoading}>
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
+            disabled={isLoading}
+            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+          >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                Ocultando...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Excluindo...
               </>
-            ) : 'Ocultar Demanda'}
+            ) : (
+              'Excluir'
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

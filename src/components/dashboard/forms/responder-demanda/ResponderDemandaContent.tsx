@@ -1,35 +1,37 @@
 
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 import { useDemandasData } from './hooks/useDemandasData';
 import { useRespostaForm } from './hooks/useRespostaForm';
-import { ViewMode } from './types';
+import { Demanda, ViewMode } from './types';
 import DemandasFilter from './components/DemandasFilter';
 import DemandaList from './components/DemandaList';
 import DemandaGrid from './components/DemandaGrid';
+import EmptyState from './components/EmptyState';
 import RespostaForm from './components/RespostaForm';
+import { Loader2 } from 'lucide-react';
 
 const ResponderDemandaContent: React.FC = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   
   const {
-    demandas,
-    setDemandas,
-    filteredDemandas,
-    setFilteredDemandas,
-    selectedDemanda,
-    setSelectedDemanda,
-    isLoadingDemandas,
-    areas,
     searchTerm,
     setSearchTerm,
+    filter,
+    setFilter,
+    counts,
+    filteredDemandas,
+    selectedDemanda,
+    setSelectedDemanda,
+    isLoading,
+    demandas,
+    setDemandas,
+    setFilteredDemandas,
     areaFilter,
     setAreaFilter,
     prioridadeFilter,
     setPrioridadeFilter,
+    areas,
+    isLoadingDemandas,
     handleSelectDemanda
   } = useDemandasData();
 
@@ -38,7 +40,7 @@ const ResponderDemandaContent: React.FC = () => {
     setResposta,
     respostasPerguntas,
     handleRespostaPerguntaChange,
-    isLoading,
+    isLoading: isLoadingForm,
     handleSubmitResposta
   } = useRespostaForm(
     selectedDemanda,
@@ -49,70 +51,72 @@ const ResponderDemandaContent: React.FC = () => {
     setFilteredDemandas
   );
 
-  const handleNavigateToConsultar = () => {
-    navigate('/dashboard/comunicacao/consultar-demandas');
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-60">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <span className="ml-2 text-lg text-gray-600">Carregando...</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="animate-fade-in">
-      <Card className="border border-gray-200 mb-4">
-        <CardHeader className="pb-2 border-b">
-          <CardTitle className="text-xl font-semibold text-[#003570] flex justify-between items-center">
-            <span>Responder Demandas</span>
-            <Button 
-              variant="outline" 
-              onClick={handleNavigateToConsultar}
-              className="text-sm"
-            >
-              Consultar Outras Demandas
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          {!selectedDemanda && (
-            <DemandasFilter
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              areaFilter={areaFilter}
-              setAreaFilter={setAreaFilter}
-              prioridadeFilter={prioridadeFilter}
-              setPrioridadeFilter={setPrioridadeFilter}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              areas={areas}
-            />
-          )}
+    <div className="space-y-6">
+      {selectedDemanda ? (
+        <RespostaForm
+          selectedDemanda={selectedDemanda}
+          resposta={resposta}
+          setResposta={setResposta}
+          respostasPerguntas={respostasPerguntas}
+          handleRespostaPerguntaChange={handleRespostaPerguntaChange}
+          onBack={() => setSelectedDemanda(null)}
+          isLoading={isLoadingForm}
+          onSubmit={handleSubmitResposta}
+        />
+      ) : (
+        <>
+          <DemandasFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filter={filter}
+            setFilter={setFilter}
+            counts={counts}
+            areaFilter={areaFilter}
+            setAreaFilter={setAreaFilter}
+            prioridadeFilter={prioridadeFilter}
+            setPrioridadeFilter={setPrioridadeFilter}
+            areas={areas}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            isLoadingDemandas={isLoadingDemandas}
+          />
           
-          {selectedDemanda ? (
-            <RespostaForm
-              selectedDemanda={selectedDemanda}
-              resposta={resposta}
-              setResposta={setResposta}
-              respostasPerguntas={respostasPerguntas}
-              handleRespostaPerguntaChange={handleRespostaPerguntaChange}
-              onBack={() => setSelectedDemanda(null)}
-              isLoading={isLoading}
-              onSubmit={handleSubmitResposta}
-            />
+          {filteredDemandas.length === 0 ? (
+            <EmptyState searchTerm={searchTerm} />
           ) : (
-            viewMode === 'cards' ? (
-              <DemandaGrid
-                demandas={filteredDemandas}
-                selectedDemanda={selectedDemanda}
-                handleSelectDemanda={handleSelectDemanda}
-                isLoading={isLoadingDemandas}
-              />
-            ) : (
-              <DemandaList
-                demandas={filteredDemandas}
-                selectedDemanda={selectedDemanda}
-                handleSelectDemanda={handleSelectDemanda}
-                isLoading={isLoadingDemandas}
-              />
-            )
+            <>
+              {viewMode === 'list' && (
+                <DemandaList
+                  demandas={filteredDemandas}
+                  onSelectDemanda={handleSelectDemanda}
+                />
+              )}
+              {viewMode === 'grid' && (
+                <DemandaGrid
+                  demandas={filteredDemandas}
+                  onSelectDemanda={handleSelectDemanda}
+                />
+              )}
+              {viewMode === 'cards' && (
+                <DemandaGrid
+                  demandas={filteredDemandas}
+                  onSelectDemanda={handleSelectDemanda}
+                />
+              )}
+            </>
           )}
-        </CardContent>
-      </Card>
+        </>
+      )}
     </div>
   );
 };
