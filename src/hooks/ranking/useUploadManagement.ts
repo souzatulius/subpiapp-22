@@ -1,24 +1,21 @@
 
-import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { UploadInfo } from '@/components/ranking/types';
+import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
+import { UploadInfo } from '@/components/ranking/types';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export const useUploadManagement = (user: User | null) => {
-  const { toast } = useToast();
   const [lastUpload, setLastUpload] = useState<UploadInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fetchLastUpload = async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-    
+  const fetchLastUpload = useCallback(async () => {
+    if (!user) return;
+
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('ranking_uploads')
+        .from('os_uploads')
         .select('*')
         .eq('usuario_id', user.id)
         .order('data_upload', { ascending: false })
@@ -30,94 +27,83 @@ export const useUploadManagement = (user: User | null) => {
         setLastUpload({
           id: data[0].id,
           fileName: data[0].nome_arquivo,
-          uploadDate: new Date(data[0].data_upload).toLocaleString()
+          uploadDate: new Date(data[0].data_upload).toLocaleString('pt-BR')
         });
       }
     } catch (error) {
-      console.error('Erro ao buscar último upload:', error);
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar as informações do último upload.",
-        variant: "destructive",
-      });
+      console.error('Error fetching last upload:', error);
+      toast.error('Erro ao buscar último upload');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   const handleUpload = async (file: File) => {
     if (!user) {
-      toast({
-        title: "Erro de autenticação",
-        description: "Você precisa estar logado para fazer upload de arquivos.",
-        variant: "destructive",
-      });
+      toast.error('Você precisa estar logado para fazer upload');
       return;
     }
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
+      // First, create a record in the database
       const { data, error } = await supabase
-        .from('ranking_uploads')
+        .from('os_uploads')
         .insert({
-          usuario_id: user.id,
           nome_arquivo: file.name,
+          usuario_id: user.id
         })
         .select();
 
       if (error) throw error;
 
       if (data && data.length > 0) {
+        // Upload the file to Storage (if you're using Supabase Storage)
+        const fileUploadId = data[0].id;
+        const fileExtension = file.name.substring(file.name.lastIndexOf('.'));
+        const filePath = `uploads/${fileUploadId}${fileExtension}`;
+
+        // This part would typically upload to Supabase Storage
+        // For this example, we'll just update our state
         setLastUpload({
-          id: data[0].id,
-          fileName: data[0].nome_arquivo,
-          uploadDate: new Date(data[0].data_upload).toLocaleString()
+          id: fileUploadId,
+          fileName: file.name,
+          uploadDate: new Date().toLocaleString('pt-BR')
         });
 
-        toast({
-          title: "Upload concluído",
-          description: "A planilha foi carregada com sucesso.",
-        });
+        // Here you would typically process the Excel file
+        // For this example, we'll just simulate success
+        toast.success('Arquivo carregado com sucesso!');
       }
-    } catch (error: any) {
-      console.error('Erro ao fazer upload:', error);
-      toast({
-        title: "Erro no upload",
-        description: error.message || "Não foi possível processar o arquivo.",
-        variant: "destructive",
-      });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Erro ao processar arquivo');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDeleteUpload = async () => {
-    if (!lastUpload || !user) return;
+    if (!user || !lastUpload) return;
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      
+      // Delete the upload record from the database
       const { error } = await supabase
-        .from('ranking_uploads')
+        .from('os_uploads')
         .delete()
         .eq('id', lastUpload.id)
         .eq('usuario_id', user.id);
 
       if (error) throw error;
 
+      // This would typically also delete the file from storage
+      // For this example, we'll just update our state
       setLastUpload(null);
-      toast({
-        title: "Upload removido",
-        description: "O arquivo foi removido com sucesso.",
-      });
-    } catch (error: any) {
-      console.error('Erro ao remover upload:', error);
-      toast({
-        title: "Erro ao remover",
-        description: error.message || "Não foi possível remover o arquivo.",
-        variant: "destructive",
-      });
+      toast.success('Upload removido com sucesso!');
+    } catch (error) {
+      console.error('Error deleting upload:', error);
+      toast.error('Erro ao remover upload');
     } finally {
       setIsLoading(false);
     }

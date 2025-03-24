@@ -7,14 +7,20 @@ import { Label } from '@/components/ui/label';
 interface ChartVisibilityManagerProps {
   chartVisibility: ChartVisibility;
   onChange: (newVisibility: Partial<ChartVisibility>) => void;
+  onChartVisibilityToggle?: (chart: keyof ChartVisibility) => void;
 }
 
 const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
   chartVisibility,
-  onChange
+  onChange,
+  onChartVisibilityToggle
 }) => {
   const handleChange = (key: keyof ChartVisibility) => {
-    onChange({ [key]: !chartVisibility[key] });
+    if (onChartVisibilityToggle) {
+      onChartVisibilityToggle(key);
+    } else {
+      onChange({ [key]: !chartVisibility[key] });
+    }
   };
 
   return (

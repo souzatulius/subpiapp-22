@@ -109,12 +109,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       districts: ['Todos']
     });
   };
-  
-  const handleChartVisibilityToggle = (chart: keyof ChartVisibility) => {
-    onChartVisibilityChange({ 
-      [chart]: !chartVisibility[chart] 
-    });
-  };
 
   return (
     <Card>
@@ -156,7 +150,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           
           <ChartVisibilityManager
             chartVisibility={chartVisibility}
-            onChartVisibilityToggle={handleChartVisibilityToggle}
+            onChange={onChartVisibilityChange}
           />
         </div>
       </CardContent>
