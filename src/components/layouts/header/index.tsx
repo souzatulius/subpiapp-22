@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import ProfileMenu from './ProfileMenu';
+import { ProfileMenu } from './ProfileMenu';
 import NotificationsPopover from './NotificationsPopover';
 import { useNotifications } from './useNotifications';
 
