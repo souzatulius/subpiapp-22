@@ -5,6 +5,7 @@ export interface Demand {
   id: string;
   titulo: string;
   status: string;
+  prioridade: string;
   area_coordenacao: {
     id: string;
     descricao: string;

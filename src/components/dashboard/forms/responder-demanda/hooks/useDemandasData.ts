@@ -2,14 +2,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
-import { Demanda, AreasCoordinacao, Origem, Filter, Area } from '../types';
+import { toast } from 'sonner';
+import { Demanda, Area, Filter } from '../types';
 
 export const useDemandasData = (initialFilter: Filter = 'all') => {
   const { user } = useAuth();
   const [demandas, setDemandas] = useState<Demanda[]>([]);
-  const [areasCoordinacao, setAreasCoordinacao] = useState<AreasCoordinacao[]>([]);
-  const [origens, setOrigens] = useState<Origem[]>([]);
+  const [areasCoordinacao, setAreasCoordinacao] = useState<Area[]>([]);
+  const [origens, setOrigens] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<Filter>(initialFilter);
@@ -56,8 +56,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
             servicos:servico_id (descricao),
             tipos_midia:tipo_midia_id (descricao),
             bairro:bairro_id (nome, distrito_id),
-            autor:autor_id (nome),
-            arquivo_url
+            autor:autor_id (nome)
           `)
           .eq('status', 'pendente')
           .order('criado_em', { ascending: false });
@@ -99,7 +98,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           status: demanda.status,
           prioridade: demanda.prioridade,
           prazo_resposta: demanda.prazo_resposta,
-          perguntas: demanda.perguntas,
+          perguntas: demanda.perguntas ? demanda.perguntas as Record<string, string> : null,
           detalhes_solicitacao: demanda.detalhes_solicitacao,
           areas_coordenacao: demanda.areas_coordenacao,
           origens_demandas: demanda.origens_demandas,

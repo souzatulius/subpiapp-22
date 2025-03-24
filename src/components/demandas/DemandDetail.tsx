@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -143,10 +142,8 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
       if (updateError) throw updateError;
     },
     onSuccess: () => {
-      toast({
-        title: "Respostas enviadas",
-        description: "As respostas foram salvas com sucesso",
-        variant: "default"
+      toast.success("Respostas enviadas", {
+        description: "As respostas foram salvas com sucesso"
       });
       queryClient.invalidateQueries({
         queryKey: ['demandas']
@@ -155,10 +152,8 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
     },
     onError: error => {
       console.error("Error submitting response:", error);
-      toast({
-        title: "Erro ao enviar respostas",
-        description: error.message || "Ocorreu um erro ao enviar as respostas.",
-        variant: "destructive"
+      toast.error("Erro ao enviar respostas", {
+        description: error.message || "Ocorreu um erro ao enviar as respostas."
       });
     },
     onSettled: () => {

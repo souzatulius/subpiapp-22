@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Demanda } from '../types';
 
 export const useRespostaForm = (

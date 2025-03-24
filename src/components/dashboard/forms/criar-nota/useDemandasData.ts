@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Demand } from './types';
 
 export const useDemandasData = () => {
@@ -45,9 +45,10 @@ export const useDemandasData = () => {
             status: demanda.status,
             prioridade: demanda.prioridade,
             area_coordenacao: demanda.area_coordenacao,
-            perguntas: demanda.perguntas || {},
+            perguntas: demanda.perguntas ? demanda.perguntas as Record<string, string> : null,
             detalhes_solicitacao: demanda.detalhes_solicitacao || null,
-            criado_em: demanda.criado_em
+            horario_publicacao: demanda.horario_publicacao,
+            criado_em: demanda.horario_publicacao // Using horario_publicacao instead of criado_em
           }));
 
           setDemandas(formattedDemandas);
