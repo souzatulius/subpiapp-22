@@ -155,12 +155,12 @@ const ActionCard: React.FC<ActionCardProps> = ({
     <>
       <Card 
         className={`cursor-pointer transition-all duration-300 border border-gray-200 
-          rounded-xl shadow-md hover:shadow-xl overflow-hidden 
+          rounded-xl shadow-md hover:shadow-xl overflow-hidden h-full
           ${getColorClasses(color)} ${isDraggable ? 'touch-action-none' : ''} group`}
         onClick={handleClick}
         data-card-id={id}
       >
-        <CardContent className={`relative flex flex-col items-center justify-center p-6 md:p-4 h-full ${height === '2' ? 'min-h-[240px]' : ''} transform-gpu hover:scale-[1.03] overflow-hidden`}>
+        <CardContent className={`relative flex flex-col items-center justify-center p-6 md:p-4 h-full ${height === '2' ? 'min-h-[240px]' : 'min-h-[140px]'} transform-gpu hover:scale-[1.03] overflow-hidden`}>
           {onDelete && (
             <button 
               className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"

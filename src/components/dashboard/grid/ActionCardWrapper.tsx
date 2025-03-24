@@ -55,10 +55,10 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
 }) => {
   if (card.isQuickDemand) {
     return (
-      <div className="col-span-2 flex-none"> {/* Fixed width to 50% */}
+      <div className={`${getWidthClasses(card.width)} flex-none`}>
         <SortableActionCard 
           key={card.id} 
-          card={{...card, width: '50'}} 
+          card={card} 
           onEdit={onEdit}
           onDelete={onDelete}
         >
@@ -119,7 +119,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   if (card.isNewCardButton) {
     return (
       <div 
-        className="col-span-1 flex-none" 
+        className={`${getWidthClasses(card.width)} flex-none`}
       >
         <NewCardButton onClick={onAddNewCard} />
       </div>
