@@ -2,15 +2,18 @@
 import React, { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface OriginClassificationStepProps {
   formData: {
     origem_id: string;
     tipo_midia_id: string;
+    veiculo_imprensa: string;
   };
   handleSelectChange: (name: string, value: string) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   origens: any[];
   tiposMidia: any[];
   errors?: ValidationError[];
@@ -19,6 +22,7 @@ interface OriginClassificationStepProps {
 const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
   formData,
   handleSelectChange,
+  handleChange,
   origens,
   tiposMidia,
   errors = []
@@ -32,6 +36,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
   // Check if "Imprensa" is selected
   const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
   const isImprensaSelected = selectedOrigin?.descricao === "Imprensa";
+  const showVeiculoImprensa = isImprensaSelected && formData.tipo_midia_id;
   
   // Reset tipo_midia_id when origin is not "Imprensa"
   useEffect(() => {
@@ -117,6 +122,27 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
           </div>
           {hasError('tipo_midia_id') && (
             <p className="text-orange-500 text-sm mt-1">{getErrorMessage('tipo_midia_id')}</p>
+          )}
+        </div>
+      )}
+      
+      {showVeiculoImprensa && (
+        <div className="animate-fadeIn">
+          <Label 
+            htmlFor="veiculo_imprensa" 
+            className={`block mb-2 ${hasError('veiculo_imprensa') ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Veículo de Imprensa
+          </Label>
+          <Input 
+            id="veiculo_imprensa" 
+            name="veiculo_imprensa" 
+            value={formData.veiculo_imprensa} 
+            onChange={handleChange} 
+            className={hasError('veiculo_imprensa') ? 'border-orange-500' : ''}
+          />
+          {hasError('veiculo_imprensa') && (
+            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('veiculo_imprensa')}</p>
           )}
         </div>
       )}

@@ -128,6 +128,7 @@ const FormContent: React.FC<FormContentProps> = ({
         <OriginClassificationStep 
           formData={formData}
           handleSelectChange={handleSelectChange}
+          handleChange={handleChange}
           origens={origens}
           tiposMidia={tiposMidia}
           errors={errors}

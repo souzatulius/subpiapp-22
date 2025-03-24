@@ -97,7 +97,7 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="detalhes_solicitacao" className={`block ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
+        <Label htmlFor="detalhes_solicitacao" className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
           Detalhes da Solicitação
         </Label>
         <Textarea

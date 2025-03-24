@@ -38,7 +38,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <Label htmlFor="endereco" className={`block ${hasError('endereco') ? 'text-orange-500 font-semibold' : ''}`}>
+        <Label htmlFor="endereco" className={`block mb-2 ${hasError('endereco') ? 'text-orange-500 font-semibold' : ''}`}>
           Endereço
         </Label>
         <Input 
@@ -53,7 +53,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="distrito" className="block mb-2 text-lg">
+        <Label htmlFor="distrito" className="block mb-2 text-base">
           Distrito
         </Label>
         

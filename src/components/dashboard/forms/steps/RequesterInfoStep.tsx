@@ -9,7 +9,6 @@ interface RequesterInfoStepProps {
     nome_solicitante: string;
     telefone_solicitante: string;
     email_solicitante: string;
-    veiculo_imprensa: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   errors?: ValidationError[];
@@ -54,7 +53,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="nome_solicitante" className={`block ${hasError('nome_solicitante') ? 'text-orange-500 font-semibold' : ''}`}>
+        <Label htmlFor="nome_solicitante" className={`block mb-2 ${hasError('nome_solicitante') ? 'text-orange-500 font-semibold' : ''}`}>
           Nome do Solicitante
         </Label>
         <Input 
@@ -69,7 +68,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="telefone_solicitante" className={`block ${hasError('telefone_solicitante') ? 'text-orange-500 font-semibold' : ''}`}>
+          <Label htmlFor="telefone_solicitante" className={`block mb-2 ${hasError('telefone_solicitante') ? 'text-orange-500 font-semibold' : ''}`}>
             Telefone
           </Label>
           <Input 
@@ -84,7 +83,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
         </div>
 
         <div>
-          <Label htmlFor="email_solicitante" className={`block ${hasError('email_solicitante') ? 'text-orange-500 font-semibold' : ''}`}>
+          <Label htmlFor="email_solicitante" className={`block mb-2 ${hasError('email_solicitante') ? 'text-orange-500 font-semibold' : ''}`}>
             Email
           </Label>
           <Input 
@@ -98,20 +97,6 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
           />
           {hasError('email_solicitante') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('email_solicitante')}</p>}
         </div>
-      </div>
-
-      <div>
-        <Label htmlFor="veiculo_imprensa" className={`block ${hasError('veiculo_imprensa') ? 'text-orange-500 font-semibold' : ''}`}>
-          Veículo de Imprensa
-        </Label>
-        <Input 
-          id="veiculo_imprensa" 
-          name="veiculo_imprensa" 
-          value={formData.veiculo_imprensa} 
-          onChange={handleChange} 
-          className={hasError('veiculo_imprensa') ? 'border-orange-500' : ''}
-        />
-        {hasError('veiculo_imprensa') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('veiculo_imprensa')}</p>}
       </div>
     </div>
   );

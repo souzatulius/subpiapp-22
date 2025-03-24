@@ -6,7 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ArrowDownAZIcon, ClockIcon, AlertTriangleIcon, Clock } from 'lucide-react';
+import { CalendarIcon, ClockIcon, AlertTriangleIcon, Flag } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -136,7 +136,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             }`}
             onClick={() => handleSelectChange('prioridade', 'baixa')}
           >
-            <ArrowDownAZIcon className="h-5 w-5 text-green-500" />
+            <Flag className="h-5 w-5 text-green-500" />
             <span className="text-sm font-semibold">Baixa</span>
           </Button>
         </div>
