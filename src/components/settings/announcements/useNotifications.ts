@@ -61,6 +61,7 @@ export const useNotifications = () => {
         usuario_id: usuarioId,
         data_envio: new Date().toISOString(),
         lida: false,
+        excluida: false
       }));
       
       // Inserir notificações
