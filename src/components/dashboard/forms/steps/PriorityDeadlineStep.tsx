@@ -1,13 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ArrowDownAZIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react';
+import { CalendarIcon, ArrowDownAZIcon, ClockIcon, AlertTriangleIcon, Clock } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -27,17 +28,65 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined
   );
   
+  const [selectedHour, setSelectedHour] = useState<string>("12");
+  const [selectedMinute, setSelectedMinute] = useState<string>("00");
+  
+  useEffect(() => {
+    // Initialize time from existing date if available
+    if (date) {
+      setSelectedHour(date.getHours().toString().padStart(2, '0'));
+      // Only allow 00 or 30 minutes
+      setSelectedMinute(date.getMinutes() >= 30 ? "30" : "00");
+    }
+  }, []);
+  
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
   };
 
-  // Handle date selection
-  const handleDateSelect = (date: Date | undefined) => {
-    setDate(date);
+  // Generate available hours (6-22)
+  const hours = Array.from({ length: 17 }, (_, i) => i + 6);
+
+  // Handle date and time selection
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      const newDate = new Date(selectedDate);
+      
+      // Set the time part
+      newDate.setHours(parseInt(selectedHour));
+      newDate.setMinutes(parseInt(selectedMinute));
+      newDate.setSeconds(0);
+      newDate.setMilliseconds(0);
+      
+      setDate(newDate);
+      handleSelectChange('prazo_resposta', newDate.toISOString());
+    } else {
+      setDate(undefined);
+      handleSelectChange('prazo_resposta', '');
+    }
+  };
+
+  // Handle time change
+  const handleTimeChange = (type: 'hour' | 'minute', value: string) => {
+    if (type === 'hour') {
+      setSelectedHour(value);
+    } else {
+      setSelectedMinute(value);
+    }
+    
     if (date) {
-      handleSelectChange('prazo_resposta', date.toISOString());
+      const newDate = new Date(date);
+      
+      if (type === 'hour') {
+        newDate.setHours(parseInt(value));
+      } else {
+        newDate.setMinutes(parseInt(value));
+      }
+      
+      setDate(newDate);
+      handleSelectChange('prazo_resposta', newDate.toISOString());
     }
   };
 
@@ -103,31 +152,69 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
         >
           Prazo para Resposta {hasError('prazo_resposta') && <span className="text-orange-500">*</span>}
         </Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={`w-full justify-start text-left font-normal ${
-                hasError('prazo_resposta') ? 'border-orange-500' : ''
-              }`}
+        <div className="flex space-x-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={`flex-grow justify-start text-left font-normal ${
+                  hasError('prazo_resposta') ? 'border-orange-500' : ''
+                }`}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, "PPP", { locale: ptBR }) : (
+                  <span>Selecione uma data</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 pointer-events-auto">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={handleDateSelect}
+                locale={ptBR}
+                initialFocus
+                className="pointer-events-auto"
+                disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <div className="flex items-center space-x-2">
+            <Select 
+              value={selectedHour} 
+              onValueChange={(value) => handleTimeChange('hour', value)}
+              disabled={!date}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP", { locale: ptBR }) : (
-                <span>Selecione uma data</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={handleDateSelect}
-              locale={ptBR}
-              initialFocus
-              disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))}
-            />
-          </PopoverContent>
-        </Popover>
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="Hora" />
+              </SelectTrigger>
+              <SelectContent>
+                {hours.map(hour => (
+                  <SelectItem key={hour} value={hour.toString().padStart(2, '0')}>
+                    {hour.toString().padStart(2, '0')}h
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <span>:</span>
+            
+            <Select 
+              value={selectedMinute} 
+              onValueChange={(value) => handleTimeChange('minute', value)}
+              disabled={!date}
+            >
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="Min" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="00">00min</SelectItem>
+                <SelectItem value="30">30min</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         {hasError('prazo_resposta') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prazo_resposta')}</p>
         )}
@@ -137,4 +224,3 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
 };
 
 export default PriorityDeadlineStep;
-

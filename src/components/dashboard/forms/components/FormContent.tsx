@@ -1,3 +1,4 @@
+
 import React from 'react';
 import IdentificationStep from '../steps/IdentificationStep';
 import OriginClassificationStep from '../steps/OriginClassificationStep';
@@ -84,7 +85,7 @@ const FormContent: React.FC<FormContentProps> = ({
       return (
         <div className="space-y-4">
           <div>
-            <label htmlFor="detalhes_solicitacao" className={`block text-sm font-medium ${errors.some(err => err.field === 'detalhes_solicitacao') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
+            <label htmlFor="detalhes_solicitacao" className={`block text-sm font-medium mb-2 ${errors.some(err => err.field === 'detalhes_solicitacao') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
               Explique a solicitação ou cole a solicitação recebida
             </label>
             <textarea
@@ -97,7 +98,7 @@ const FormContent: React.FC<FormContentProps> = ({
                 errors.some(err => err.field === 'detalhes_solicitacao') 
                   ? 'border-orange-500' 
                   : 'border-gray-300'
-              } bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#174ba9]`}
+              } bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent`}
             />
             {errors.some(err => err.field === 'detalhes_solicitacao') && (
               <p className="text-orange-500 text-sm mt-1">
@@ -168,13 +169,13 @@ const FormContent: React.FC<FormContentProps> = ({
             <label htmlFor="titulo" className={`block text-sm font-medium mb-2 ${errors.some(err => err.field === 'titulo') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
               Título da Demanda {errors.some(err => err.field === 'titulo') && <span className="text-orange-500">*</span>}
             </label>
-            <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+            <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md">
               <input 
                 id="titulo" 
                 name="titulo" 
                 value={formData.titulo} 
                 onChange={handleChange} 
-                className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full py-3 ${errors.some(err => err.field === 'titulo') ? 'placeholder-orange-300' : ''}`} 
+                className="border-0 shadow-none focus:outline-none focus:ring-0 w-full py-3 bg-transparent" 
                 placeholder="Digite o título da demanda..."
               />
             </div>
@@ -204,7 +205,7 @@ const FormContent: React.FC<FormContentProps> = ({
                         <input
                           value={pergunta}
                           onChange={(e) => handlePerguntaChange(index, e.target.value)}
-                          className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full py-3 ${errors.some(err => err.field === 'perguntas') ? 'placeholder-orange-300' : ''}`}
+                          className="border-0 shadow-none focus:outline-none focus:ring-0 w-full py-3 bg-transparent"
                           placeholder={`Pergunta ${index + 1}`}
                         />
                       </div>

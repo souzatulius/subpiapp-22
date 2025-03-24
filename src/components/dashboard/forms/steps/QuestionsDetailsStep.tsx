@@ -72,7 +72,7 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
                 <input
                   value={formData.perguntas[index] || ''}
                   onChange={(e) => handlePerguntaChange(index, e.target.value)}
-                  className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full py-3 ${hasError('perguntas') ? 'placeholder-orange-300' : ''}`}
+                  className="border-0 shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 w-full py-3 bg-transparent"
                   placeholder={`Pergunta ${index + 1}`}
                 />
               </div>

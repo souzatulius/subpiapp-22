@@ -120,7 +120,7 @@ export const useDemandFormState = (
   };
 
   const nextStep = () => {
-    // Fix: Update to check against FORM_STEPS.length - 1 (6) instead of hardcoded value
+    // Check against FORM_STEPS.length - 1 (6) instead of hardcoded value
     if (activeStep < 6) {
       setActiveStep(activeStep + 1);
     }
