@@ -63,10 +63,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       nextStep();
     } else {
       console.log('Validation errors:', errors);
-      toast({
-        title: "Formulário incompleto",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
+      toast.error("Formulário incompleto", {
+        description: "Por favor, preencha todos os campos obrigatórios."
       });
     }
   };
@@ -81,10 +79,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
         await submitForm();
       } catch (error: any) {
         console.error('Submission error:', error);
-        toast({
-          title: "Erro ao cadastrar demanda",
-          description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-          variant: "destructive"
+        toast.error("Erro ao cadastrar demanda", {
+          description: error.message || "Ocorreu um erro ao processar sua solicitação."
         });
       }
     }

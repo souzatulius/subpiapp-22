@@ -90,8 +90,7 @@ export const useDemandFormSubmit = (
         throw error;
       }
 
-      toast({
-        title: "Demanda cadastrada com sucesso!",
+      toast.success("Demanda cadastrada com sucesso!", {
         description: "A solicitação foi registrada no sistema."
       });
       
@@ -99,10 +98,8 @@ export const useDemandFormSubmit = (
       navigate('/dashboard/comunicacao/consultar-demandas');
     } catch (error: any) {
       console.error('Erro ao cadastrar demanda:', error);
-      toast({
-        title: "Erro ao cadastrar demanda",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
+      toast.error("Erro ao cadastrar demanda", {
+        description: error.message || "Ocorreu um erro ao processar sua solicitação."
       });
     } finally {
       setIsLoading(false);
