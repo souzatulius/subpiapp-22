@@ -28,6 +28,8 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
 
   // Handle Enter key press
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Removendo qualquer prevenção padrão para a tecla de espaço
+    
     if (e.key === 'Enter' && query.trim()) {
       if (suggestions.length > 0) {
         handleSelectSuggestion(suggestions[0]);
