@@ -1,15 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Upload } from 'lucide-react';
+import { ArrowLeft, Upload, ExternalLink } from 'lucide-react';
 import { formatarData } from '../utils/formatters';
 import { Demanda } from '../types';
+import { Separator } from '@/components/ui/separator';
 
 interface RespostaFormProps {
   selectedDemanda: Demanda;
   resposta: string;
   setResposta: (resposta: string) => void;
+  respostasPerguntas: Record<string, string>;
+  handleRespostaPerguntaChange: (perguntaIndex: string, value: string) => void;
   onBack: () => void;
   isLoading: boolean;
   onSubmit: () => void;
@@ -19,6 +22,8 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   selectedDemanda,
   resposta,
   setResposta,
+  respostasPerguntas,
+  handleRespostaPerguntaChange,
   onBack,
   isLoading,
   onSubmit
@@ -33,27 +38,81 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     // If perguntas is an array of strings
     if (Array.isArray(perguntas)) {
       return (
-        <ul className="list-disc pl-5 space-y-1">
+        <div className="space-y-4">
           {perguntas.map((pergunta, index) => (
-            <li key={index} className="text-sm">{pergunta}</li>
+            <div key={index} className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
+              <p className="font-medium text-gray-700 mb-2">{pergunta}</p>
+              <Textarea 
+                value={respostasPerguntas[index.toString()] || ''} 
+                onChange={e => handleRespostaPerguntaChange(index.toString(), e.target.value)} 
+                placeholder="Digite sua resposta para esta pergunta..." 
+                rows={3} 
+                className="w-full" 
+              />
+            </div>
           ))}
-        </ul>
+        </div>
       );
     }
     
     // If perguntas is an object (Record<string, string>)
     if (typeof perguntas === 'object') {
       return (
-        <ul className="list-disc pl-5 space-y-1">
+        <div className="space-y-4">
           {Object.entries(perguntas).map(([key, value], index) => (
-            <li key={index} className="text-sm">{value}</li>
+            <div key={key} className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
+              <p className="font-medium text-gray-700 mb-2">{value}</p>
+              <Textarea 
+                value={respostasPerguntas[key] || ''} 
+                onChange={e => handleRespostaPerguntaChange(key, e.target.value)} 
+                placeholder="Digite sua resposta para esta pergunta..." 
+                rows={3} 
+                className="w-full" 
+              />
+            </div>
           ))}
-        </ul>
+        </div>
       );
     }
     
     // If perguntas is a string, just display it without calling toString()
-    return <p className="text-sm">{String(perguntas)}</p>;
+    return (
+      <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
+        <p className="font-medium text-gray-700 mb-2">{String(perguntas)}</p>
+        <Textarea 
+          value={respostasPerguntas['0'] || ''} 
+          onChange={e => handleRespostaPerguntaChange('0', e.target.value)} 
+          placeholder="Digite sua resposta para esta pergunta..." 
+          rows={3} 
+          className="w-full" 
+        />
+      </div>
+    );
+  };
+
+  const renderAttachment = () => {
+    if (!selectedDemanda.arquivo_url) return null;
+    
+    return (
+      <div className="mt-6">
+        <p className="text-sm font-medium text-gray-500 mb-2">Arquivo Anexado</p>
+        <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-md">
+          <Upload className="h-5 w-5 text-blue-500" />
+          <div className="flex-1 min-w-0">
+            <p className="truncate text-sm font-medium">{selectedDemanda.arquivo_nome || 'Arquivo anexado'}</p>
+          </div>
+          <a 
+            href={selectedDemanda.arquivo_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <span className="text-sm">Visualizar</span>
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -96,49 +155,41 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           </div>
         </div>
         
-        {selectedDemanda.perguntas && (
-          <div className="mt-6">
-            <p className="text-sm font-medium text-gray-500 mb-2">Perguntas</p>
-            {renderPerguntas()}
-          </div>
-        )}
+        {renderAttachment()}
         
         {selectedDemanda.detalhes_solicitacao && (
           <div className="mt-6">
             <p className="text-sm font-medium text-gray-500 mb-2">Detalhes da Solicitação</p>
-            <p className="text-sm whitespace-pre-line">{selectedDemanda.detalhes_solicitacao}</p>
+            <p className="text-sm whitespace-pre-line bg-gray-50 p-4 rounded-md border border-gray-200">
+              {selectedDemanda.detalhes_solicitacao}
+            </p>
           </div>
         )}
         
-        <div className="mt-8">
-          <p className="text-sm font-medium text-gray-500 mb-2">Resposta</p>
+        {selectedDemanda.perguntas && (
+          <div className="mt-6">
+            <p className="text-sm font-medium text-gray-500 mb-2">Perguntas e Respostas</p>
+            {renderPerguntas()}
+          </div>
+        )}
+        
+        <Separator className="my-6" />
+        
+        <div className="mt-6">
+          <p className="text-sm font-medium text-gray-500 mb-2">Observações Adicionais</p>
           <Textarea 
             value={resposta} 
             onChange={e => setResposta(e.target.value)} 
-            placeholder="Digite sua resposta aqui..." 
-            rows={6} 
+            placeholder="Digite observações adicionais aqui..." 
+            rows={4} 
             className="w-full" 
           />
-        </div>
-        
-        <div className="mt-4">
-          <div className="flex items-center justify-center border-2 border-dashed border-gray-300 p-4 rounded-md">
-            <div className="space-y-1 text-center">
-              <Upload className="mx-auto h-8 w-8 text-gray-400" />
-              <div className="text-sm text-gray-500">
-                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 hover:text-blue-500">
-                  <span>Anexar arquivo</span>
-                  <input id="file-upload" name="file-upload" type="file" className="sr-only" />
-                </label>
-              </div>
-            </div>
-          </div>
         </div>
         
         <div className="mt-8 flex justify-end">
           <Button 
             onClick={onSubmit} 
-            disabled={isLoading || !resposta.trim()} 
+            disabled={isLoading} 
             className="bg-[#003570] hover:bg-[#002855]"
           >
             {isLoading ? "Enviando..." : "Enviar Resposta"}

@@ -35,10 +35,12 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     filteredBairros,
     selectedDistrito,
     activeStep,
+    selectedFile,
     handleChange,
     handleSelectChange,
     handleServiceSelect,
     handlePerguntaChange,
+    handleFileChange,
     handleSubmit: submitForm,
     nextStep,
     prevStep,
@@ -130,6 +132,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             handleSelectChange={handleSelectChange}
             handleServiceSelect={handleServiceSelect}
             handlePerguntaChange={handlePerguntaChange}
+            handleFileChange={handleFileChange}
+            selectedFile={selectedFile}
             areasCoord={areasCoord}
             filteredServicesBySearch={filteredServicesBySearch}
             serviceSearch={serviceSearch}

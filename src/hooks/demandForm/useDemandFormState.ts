@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
@@ -22,7 +21,8 @@ export const useDemandFormState = (
     bairro_id: '',
     perguntas: ['', '', '', '', ''],
     detalhes_solicitacao: '',
-    arquivo_url: ''
+    arquivo_url: '',
+    arquivo_nome: ''
   };
 
   const [formData, setFormData] = useState<DemandFormData>(initialFormState);
@@ -31,10 +31,9 @@ export const useDemandFormState = (
   const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Generate title suggestion based on service and bairro
   useEffect(() => {
-    // Only auto-generate title if we're on step 5 and moving to step 6
     if (activeStep === 5) {
       const selectedService = servicos.find(s => s.id === formData.servico_id);
       const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
@@ -95,6 +94,22 @@ export const useDemandFormState = (
     }
   };
 
+  const handleFileChange = (file: File | null) => {
+    setSelectedFile(file);
+    if (file) {
+      setFormData(prev => ({
+        ...prev,
+        arquivo_nome: file.name
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        arquivo_nome: '',
+        arquivo_url: ''
+      }));
+    }
+  };
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -120,7 +135,6 @@ export const useDemandFormState = (
   };
 
   const nextStep = () => {
-    // Check against FORM_STEPS.length - 1 (6) instead of hardcoded value
     if (activeStep < 6) {
       setActiveStep(activeStep + 1);
     }
@@ -137,6 +151,7 @@ export const useDemandFormState = (
     setServiceSearch('');
     setSelectedDistrito('');
     setActiveStep(0);
+    setSelectedFile(null);
   };
 
   return {
@@ -147,10 +162,12 @@ export const useDemandFormState = (
     selectedDistrito,
     activeStep,
     filteredServicesBySearch,
+    selectedFile,
     handleChange,
     handleSelectChange,
     handleServiceSelect,
     handlePerguntaChange,
+    handleFileChange,
     nextStep,
     prevStep,
     setSelectedDistrito,

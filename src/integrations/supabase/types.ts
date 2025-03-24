@@ -809,6 +809,7 @@ export type Database = {
           criado_em: string
           demanda_id: string
           id: string
+          respostas: Json | null
           texto: string
           usuario_id: string
         }
@@ -818,6 +819,7 @@ export type Database = {
           criado_em?: string
           demanda_id: string
           id?: string
+          respostas?: Json | null
           texto: string
           usuario_id: string
         }
@@ -827,6 +829,7 @@ export type Database = {
           criado_em?: string
           demanda_id?: string
           id?: string
+          respostas?: Json | null
           texto?: string
           usuario_id?: string
         }

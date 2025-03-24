@@ -22,6 +22,8 @@ export interface Demanda {
   servicos?: {
     descricao: string;
   } | null;
+  arquivo_url?: string;
+  arquivo_nome?: string;
 }
 
 export interface Area {

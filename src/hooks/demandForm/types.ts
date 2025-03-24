@@ -16,6 +16,7 @@ export interface DemandFormData {
   perguntas: string[];
   detalhes_solicitacao: string;
   arquivo_url: string;
+  arquivo_nome?: string; // Added for file name reference
 }
 
 export interface FormState {
@@ -32,4 +33,5 @@ export interface FormState {
   serviceSearch: string;
   selectedDistrito: string;
   activeStep: number;
+  selectedFile: File | null; // Added for file upload
 }
