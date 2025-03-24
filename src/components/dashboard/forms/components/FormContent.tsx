@@ -1,4 +1,3 @@
-
 import React from 'react';
 import IdentificationStep from '../steps/IdentificationStep';
 import OriginClassificationStep from '../steps/OriginClassificationStep';
@@ -138,7 +137,6 @@ const FormContent: React.FC<FormContentProps> = ({
       return (
         <PriorityDeadlineStep 
           formData={formData}
-          handleChange={handleChange}
           handleSelectChange={handleSelectChange}
           errors={errors}
         />
