@@ -28,6 +28,34 @@ export const NotificationsPopover: React.FC = () => {
     }
   }, [user, fetchNotifications]);
 
+  // Set up real-time subscription for new notifications
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to changes in the notifications table for this user
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'notificacoes',
+          filter: `usuario_id=eq.${user.id}`
+        },
+        (payload) => {
+          // Refresh notifications when changes are detected
+          fetchNotifications();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchNotifications]);
+
   const getNotificationIcon = (tipo: string) => {
     switch (tipo) {
       case 'demanda':

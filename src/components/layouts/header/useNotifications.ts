@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -10,6 +11,7 @@ export interface Notification {
   data_envio: string;
   lida: boolean;
   usuario_id?: string;
+  referencia_id?: string;
 }
 
 export const useNotifications = () => {
