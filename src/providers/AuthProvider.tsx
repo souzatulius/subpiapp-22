@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
@@ -60,6 +59,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initialize();
   }, []);
 
+  // Create or update user profile
+  const updateUserProfile = async (userId: string, userData: any) => {
+    try {
+      const { error } = await supabase
+        .from('usuarios')
+        .upsert({
+          id: userId,
+          nome_completo: userData.nome_completo,
+          email: userData.email || '', 
+          aniversario: userData.aniversario,
+          whatsapp: userData.whatsapp,
+          cargo_id: userData.cargo_id,
+          area_coordenacao_id: userData.area_coordenacao_id
+        });
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      return false;
+    }
+  };
+
   // Sign up wrapper
   const signUp = async (email: string, password: string, userData: any) => {
     const result = await authService.signUp(email, password, userData);
@@ -67,13 +89,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!result.error) {
       // Notify admins about new user registration
       if (result.data?.user) {
-        // Atualizar perfil do usuário com cargo e área
+        // Update user profile with cargo and area
         await updateUserProfile(
           result.data.user.id,
           userData
         );
         
-        // Notificar administradores
+        // Notify administrators
         await createAdminNotification(
           result.data.user.id, 
           userData.nome_completo,

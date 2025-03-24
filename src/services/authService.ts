@@ -14,8 +14,8 @@ export const signUp = async (email: string, password: string, userData: any) => 
           name: userData.nome_completo,
           birthday: userData.aniversario,
           whatsapp: userData.whatsapp,
-          role_id: userData.cargo_id, // Armazenar o ID do cargo
-          area_id: userData.area_coordenacao_id, // Armazenar o ID da área
+          role_id: userData.cargo_id, // Store the ID of the cargo
+          area_id: userData.area_coordenacao_id, // Store the ID of the area
         },
         emailRedirectTo: `${window.location.origin}/email-verified`,
       }

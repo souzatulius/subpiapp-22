@@ -1,4 +1,3 @@
-
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -97,22 +96,25 @@ export const sendApprovalEmail = async (userId: string): Promise<void> => {
   }
 };
 
-// Update the function that handles new user registration
-export const updateUserProfile = async (userId: string, userData: any): Promise<void> => {
+export const updateUserProfile = async (userId: string, userData: any) => {
   try {
+    // Update user profile in usuarios table
     const { error } = await supabase
       .from('usuarios')
-      .update({
+      .upsert({
+        id: userId,
         nome_completo: userData.nome_completo,
-        whatsapp: userData.whatsapp,
+        email: userData.email,
         aniversario: userData.aniversario,
+        whatsapp: userData.whatsapp,
         cargo_id: userData.cargo_id,
         area_coordenacao_id: userData.area_coordenacao_id
-      })
-      .eq('id', userId);
-      
+      });
+
     if (error) throw error;
+    return true;
   } catch (error) {
-    console.error('Erro ao atualizar perfil do usuário:', error);
+    console.error('Error updating user profile:', error);
+    return false;
   }
 };

@@ -12,47 +12,26 @@ export const useRegisterOptions = () => {
     const fetchOptions = async () => {
       setLoadingOptions(true);
       try {
-        // Buscar cargos
+        // Fetch positions from cargos table
         const { data: cargosData, error: cargosError } = await supabase
           .from('cargos')
           .select('id, descricao');
         
         if (cargosError) throw cargosError;
         
-        // Buscar áreas de coordenação
+        // Fetch coordination areas from areas_coordenacao table
         const { data: areasData, error: areasError } = await supabase
           .from('areas_coordenacao')
           .select('id, descricao');
         
         if (areasError) throw areasError;
         
-        // Transformar dados para formato de opções
+        // Transform data to options format
         setRoles(cargosData.map(item => ({ id: item.id, value: item.descricao })));
         setAreas(areasData.map(item => ({ id: item.id, value: item.descricao })));
-        
-        // Se não houver dados, adicionar alguns valores padrão
-        if (cargosData.length === 0) {
-          setRoles([
-            { id: '1', value: 'Assessor' },
-            { id: '2', value: 'Coordenador' },
-            { id: '3', value: 'Analista' },
-            { id: '4', value: 'Técnico' },
-            { id: '5', value: 'Gestor' }
-          ]);
-        }
-        
-        if (areasData.length === 0) {
-          setAreas([
-            { id: '1', value: 'Gabinete' },
-            { id: '2', value: 'Comunicação' },
-            { id: '3', value: 'Administração' },
-            { id: '4', value: 'Planejamento' },
-            { id: '5', value: 'Infraestrutura' }
-          ]);
-        }
       } catch (error) {
-        console.error('Erro ao buscar opções:', error);
-        // Definir valores padrão caso falhe
+        console.error('Error fetching options:', error);
+        // Set fallback default values if fetch fails
         setRoles([
           { id: '1', value: 'Assessor' },
           { id: '2', value: 'Coordenador' },
