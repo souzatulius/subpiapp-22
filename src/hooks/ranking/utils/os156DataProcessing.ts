@@ -1,6 +1,7 @@
 
 import { OS156Item } from '@/components/ranking/types';
 import * as XLSX from 'xlsx';
+import { v4 as uuidv4 } from 'uuid';
 
 // Helper to parse Excel/CSV data and map to the correct format
 export const processPlanilha156 = async (file: File): Promise<OS156Item[]> => {
@@ -60,6 +61,7 @@ const mapExcelDataToOSItems = (data: any[]): OS156Item[] => {
     const tempoAberto = calculateDaysOpen(dataCriacao, status);
     
     return {
+      id: uuidv4(), // Generate a unique ID for each item
       numero_os: String(numeroOS),
       status,
       tipo_servico: tipoServico,

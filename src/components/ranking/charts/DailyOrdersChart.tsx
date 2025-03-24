@@ -10,7 +10,7 @@ interface DailyOrdersChartProps {
 
 const DailyOrdersChart: React.FC<DailyOrdersChartProps> = ({ data, isLoading }) => {
   // Calculate average daily volume
-  const averageVolume = isLoading || !data || !data.datasets || !data.datasets[0]?.data.length === 0 ? 
+  const averageVolume = isLoading || !data || !data.datasets || data.datasets[0]?.data.length === 0 ? 
     0 : 
     Math.round(data.datasets[0].data.reduce((sum: number, val: number) => sum + val, 0) / data.datasets[0].data.length);
   

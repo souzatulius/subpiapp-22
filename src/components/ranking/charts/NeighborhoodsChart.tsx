@@ -6,12 +6,17 @@ import ChartCard from './ChartCard';
 interface NeighborhoodsChartProps {
   data: any;
   isLoading: boolean;
+  title?: string;
 }
 
-const NeighborhoodsChart: React.FC<NeighborhoodsChartProps> = ({ data, isLoading }) => {
+const NeighborhoodsChart: React.FC<NeighborhoodsChartProps> = ({ 
+  data, 
+  isLoading,
+  title = "Ocorrências por bairro"
+}) => {
   return (
     <ChartCard
-      title="Ocorrências por bairro"
+      title={title}
       value={isLoading ? '' : 'Distribuição'}
       isLoading={isLoading}
     >
