@@ -46,11 +46,17 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
               <SelectValue placeholder="Selecione um cargo" />
             </SelectTrigger>
             <SelectContent>
-              {roles.map(role => (
-                <SelectItem key={role.id} value={role.id}>
-                  {role.value}
+              {roles.length === 0 ? (
+                <SelectItem value="no-options" disabled>
+                  Nenhum cargo disponível
                 </SelectItem>
-              ))}
+              ) : (
+                roles.map(role => (
+                  <SelectItem key={role.id} value={role.id}>
+                    {role.value}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         )}
@@ -78,11 +84,17 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
               <SelectValue placeholder="Selecione uma área" />
             </SelectTrigger>
             <SelectContent>
-              {areas.map(area => (
-                <SelectItem key={area.id} value={area.id}>
-                  {area.value}
+              {areas.length === 0 ? (
+                <SelectItem value="no-options" disabled>
+                  Nenhuma área disponível
                 </SelectItem>
-              ))}
+              ) : (
+                areas.map(area => (
+                  <SelectItem key={area.id} value={area.id}>
+                    {area.value}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         )}

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SelectOption } from '@/components/register/types';
+import { toast } from 'sonner';
 
 export const useRegisterOptions = () => {
   const [roles, setRoles] = useState<SelectOption[]>([]);
@@ -28,12 +29,21 @@ export const useRegisterOptions = () => {
         
         if (areasError) throw areasError;
         
+        if (!cargosData || cargosData.length === 0) {
+          console.warn('No cargos found in the database');
+        }
+        
+        if (!areasData || areasData.length === 0) {
+          console.warn('No areas found in the database');
+        }
+        
         // Transform data to options format
-        setRoles(cargosData.map(item => ({ id: item.id, value: item.descricao })));
-        setAreas(areasData.map(item => ({ id: item.id, value: item.descricao })));
+        setRoles(cargosData?.map(item => ({ id: item.id, value: item.descricao })) || []);
+        setAreas(areasData?.map(item => ({ id: item.id, value: item.descricao })) || []);
       } catch (error) {
         console.error('Error fetching options:', error);
-        // Definir valores vazios em caso de erro, em vez de valores padrão fixos
+        toast.error('Erro ao carregar opções de cargos e áreas');
+        // Define empty values in case of error
         setRoles([]);
         setAreas([]);
       } finally {
