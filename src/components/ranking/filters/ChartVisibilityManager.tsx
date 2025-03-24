@@ -18,7 +18,7 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
   const handleChange = (key: keyof ChartVisibility) => {
     if (onChartVisibilityToggle) {
       onChartVisibilityToggle(key);
-    } else {
+    } else if (onChange) {
       onChange({ [key]: !chartVisibility[key] });
     }
   };
