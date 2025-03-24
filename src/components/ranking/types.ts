@@ -1,45 +1,63 @@
 
-export type OrderStatus = 'Todos' | 'NOVO' | 'AB' | 'PE' | 'APROVADO' | 'PREPLAN' | 'PRECANC' | 'EMAND' | 'CONC' | 'FECHADO';
-export type District = 'Todos' | 'PINHEIROS' | 'ALTO DE PINHEIROS' | 'JARDIM PAULISTA' | 'ITAIM BIBI' | 'EXTERNO';
-export type ServiceType = string;
-export type TechnicalArea = 'STM' | 'STLP' | '';
-export type AreaTecnica = 'Todos' | 'STM' | 'STLP';
+import { ReactNode } from 'react';
 
-export interface DateRange {
-  from?: Date;
-  to?: Date;
+export interface Demanda {
+  id: string;
+  titulo: string;
+  status: string;
+  prioridade: string;
+  prazo_resposta?: string;
+  perguntas?: string[] | Record<string, string> | null;
+  detalhes_solicitacao?: string;
+  areas_coordenacao?: {
+    id: string;
+    descricao: string;
+  } | null;
+  origens_demandas?: {
+    descricao: string;
+  } | null;
+  tipos_midia?: {
+    descricao: string;
+  } | null;
+  servicos?: {
+    descricao: string;
+  } | null;
+  arquivo_url?: string;
+  arquivo_nome?: string;
+}
+
+export interface Area {
+  id: string;
+  descricao: string;
+}
+
+export interface ResponderDemandaFormProps {
+  onClose: () => void;
+}
+
+export type ViewMode = 'list' | 'cards';
+
+export interface ChartCard {
+  id: string;
+  name: string;
+  visible: boolean;
+  order: number;
+}
+
+export interface UploadInfo {
+  id: string;
+  fileName: string;
+  uploadDate: string;
 }
 
 export interface FilterOptions {
-  dateRange?: DateRange;
-  statuses: OrderStatus[];
-  serviceTypes: ServiceType[];
-  districts: District[];
-  companies: string[];
-  areas: AreaTecnica[];
-}
-
-// Add OS156 specific types
-export interface OS156FilterOptions extends FilterOptions {
-  dataInicio?: Date;
-  dataFim?: Date;
-}
-
-export interface ChartVisibility {
-  occurrences: boolean;
-  resolutionTime: boolean;
-  serviceTypes: boolean;
-  neighborhoods: boolean;
-  frequentServices: boolean;
-  statusDistribution: boolean;
-  statusTimeline: boolean;
-  statusTransition: boolean;
-  efficiencyRadar: boolean;
-  criticalStatus: boolean;
-  externalDistricts: boolean;
-  servicesDiversity: boolean;
-  timeToClose: boolean;
-  dailyOrders: boolean;
+  dateRange?: {
+    from: Date | string | null;
+    to: Date | string | null;
+  };
+  statuses: string[];
+  districts: string[];
+  serviceTypes: string[];
 }
 
 export interface OS156Item {
@@ -49,13 +67,14 @@ export interface OS156Item {
   bairro: string;
   logradouro: string;
   tipo_servico: string;
-  area_tecnica: TechnicalArea;
+  area_tecnica: "STM" | "STLP" | "";
   empresa: string;
   data_criacao: string;
   status: string;
   data_status: string;
   tempo_aberto: number;
   servico_valido: boolean;
+  upload_id?: string;
 }
 
 export interface OS156Upload {
@@ -70,66 +89,44 @@ export interface PlanilhaUpload {
   arquivo_nome: string;
   data_upload: string;
   usuario_upload: string;
-  qtd_ordens_processadas: number;
-  qtd_ordens_validas: number;
-  status_upload: 'sucesso' | 'erro' | 'parcial';
+  qtd_ordens_processadas?: number;
+  qtd_ordens_validas?: number;
+  status_upload: "sucesso" | "erro" | "parcial";
 }
 
 export interface OrdemServico {
   id: string;
   ordem_servico: string;
+  distrito: string;
+  bairro: string | null;
+  logradouro: string | null;
   classificacao_servico: string;
-  contrato?: string;
-  fornecedor?: string;
+  fornecedor: string;
+  area_tecnica: string;
   criado_em: string;
   status: string;
   data_status: string;
-  prioridade?: string;
-  logradouro?: string;
-  numero?: string;
-  bairro?: string;
-  distrito: string;
-  cep?: string;
-  area_tecnica: string;
-  dias_ate_status_atual?: number;
-}
-
-export interface UploadInfo {
-  id: string;
-  fileName: string;
-  uploadDate: string;
+  dias_ate_status_atual: number | null;
+  planilha_referencia: string;
 }
 
 export interface StatusHistorico {
   id: string;
-  ordem_servico: string;
-  status_antigo?: string;
-  status_novo: string;
-  data_mudanca: string;
+  ordem_servico_id: string;
+  status: string;
+  data_status: string;
+  dias_no_status: number;
+  criado_em: string;
 }
 
-export interface ChartCard {
-  id: string;
-  name: string;
-  visible: boolean;
-  order: number;
-}
-
-// Define the structure for chart data
-export interface OS156ChartData {
-  statusDistribution: any;
-  averageTimeByStatus: any;
-  companiesPerformance: any;
-  servicesByTechnicalArea: any;
-  servicesByDistrict: any;
-  timeToCompletion: any;
-  efficiencyScore: any;
-  dailyNewOrders: any;
-  servicesDiversity: any;
-  statusTimeline: any;
-  statusTransition: any;
-  efficiencyRadar: any;
-  criticalStatusAnalysis: any;
-  externalDistrictsAnalysis: any;
-  timeToClose: any;
+export interface ChartData {
+  statusDistribution?: any[];
+  resolutionTime?: any[];
+  dailyOrders?: any[];
+  companiesPerformance?: any[];
+  timeToClose?: any[];
+  efficiencyScore?: any[];
+  serviceTypes?: any[];
+  districtsData?: any[];
+  neighborhoodsData?: any[];
 }

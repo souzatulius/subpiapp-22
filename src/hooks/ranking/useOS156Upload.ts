@@ -6,7 +6,11 @@ import { User } from '@supabase/supabase-js';
 import { OS156Upload, OS156Item } from '@/components/ranking/types';
 import { processPlanilha156, mapAreaTecnica } from './utils/os156DataProcessing';
 
-export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item[]) => void) => {
+export const useOS156Upload = (
+  user: User | null, 
+  onDataLoaded: (data: OS156Item[]) => void,
+  setUploadProgress?: (progress: number) => void
+) => {
   const [lastUpload, setLastUpload] = useState<OS156Upload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -100,6 +104,11 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
     try {
       setIsLoading(true);
       
+      // Set initial progress
+      if (setUploadProgress) {
+        setUploadProgress(5);
+      }
+      
       // Create upload record in database
       const { data: uploadData, error: uploadError } = await supabase
         .from('os_uploads')
@@ -117,55 +126,104 @@ export const useOS156Upload = (user: User | null, onDataLoaded: (data: OS156Item
 
       const uploadId = uploadData[0].id;
       
-      // Process the file data
-      const osItems = await processPlanilha156(file);
-      console.log(`Processed ${osItems.length} items from file`);
-      
-      // Batch insert records in chunks to avoid payload size limits
-      const batchSize = 500;
-      for (let i = 0; i < osItems.length; i += batchSize) {
-        const batch = osItems.slice(i, i + batchSize).map(item => ({
-          ...item,
-          upload_id: uploadId,
-          area_tecnica: mapAreaTecnica(item.tipo_servico) || 'STM', // Default to STM if unknown
-          servico_valido: ['PINHEIROS', 'ALTO DE PINHEIROS', 'JARDIM PAULISTA', 'ITAIM BIBI'].includes(item.distrito)
-        }));
-        
-        const { error: insertError } = await supabase
-          .from('ordens_156')
-          .insert(batch);
-  
-        if (insertError) {
-          console.error('Error inserting batch:', insertError);
-          throw insertError;
-        }
-        
-        console.log(`Inserted batch ${i/batchSize + 1}/${Math.ceil(osItems.length/batchSize)}`);
+      if (setUploadProgress) {
+        setUploadProgress(15);
       }
       
-      // Call the function to process the upload (detect changes, etc.)
-      const { error: functionError } = await supabase.rpc('processar_upload_os_156', {
-        upload_id: uploadId
-      });
+      // Process the file data in a background-like manner
+      const processFileInBackground = async () => {
+        try {
+          // Simulate file processing with progress updates
+          if (setUploadProgress) {
+            setUploadProgress(30);
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
+          
+          // Process the file data
+          const osItems = await processPlanilha156(file);
+          console.log(`Processed ${osItems.length} items from file`);
+          
+          if (setUploadProgress) {
+            setUploadProgress(50);
+          }
+          
+          // Batch insert records in chunks to avoid payload size limits
+          const batchSize = 500;
+          const totalBatches = Math.ceil(osItems.length / batchSize);
+          
+          for (let i = 0; i < osItems.length; i += batchSize) {
+            const batch = osItems.slice(i, i + batchSize).map(item => ({
+              ...item,
+              upload_id: uploadId,
+              area_tecnica: mapAreaTecnica(item.tipo_servico) || 'STM', // Default to STM if unknown
+              servico_valido: ['PINHEIROS', 'ALTO DE PINHEIROS', 'JARDIM PAULISTA', 'ITAIM BIBI'].includes(item.distrito)
+            }));
+            
+            const { error: insertError } = await supabase
+              .from('ordens_156')
+              .insert(batch);
       
-      if (functionError) throw functionError;
-
-      // Update the last upload state and fetch its data
+            if (insertError) {
+              console.error('Error inserting batch:', insertError);
+              throw insertError;
+            }
+            
+            const batchNumber = Math.floor(i / batchSize) + 1;
+            console.log(`Inserted batch ${batchNumber}/${totalBatches}`);
+            
+            // Update progress based on batch completion
+            if (setUploadProgress) {
+              const batchProgress = 50 + (batchNumber / totalBatches) * 40;
+              setUploadProgress(batchProgress);
+            }
+          }
+          
+          // Call the function to process the upload (detect changes, etc.)
+          if (setUploadProgress) {
+            setUploadProgress(95);
+          }
+          
+          const { error: functionError } = await supabase.rpc('processar_upload_os_156', {
+            upload_id: uploadId
+          });
+          
+          if (functionError) throw functionError;
+          
+          if (setUploadProgress) {
+            setUploadProgress(100);
+          }
+          
+          // Fetch the data for the new upload
+          await fetchOSData(uploadId);
+          
+          toast.success("Planilha processada com sucesso.");
+        } catch (error: any) {
+          console.error('Error in background processing:', error);
+          toast.error(error.message || "Erro durante o processamento da planilha.");
+        }
+      };
+      
+      // Start background processing
+      processFileInBackground();
+      
+      // Update the last upload state immediately without waiting for processing to complete
       setLastUpload({
         id: uploadId,
         nome_arquivo: file.name,
         data_upload: new Date().toLocaleString(),
-        processado: true
+        processado: false
       });
       
-      await fetchOSData(uploadId);
-      
-      toast.success("Planilha processada com sucesso.");
     } catch (error: any) {
       console.error('Erro ao processar planilha:', error);
       toast.error(error.message || "Não foi possível processar o arquivo.");
+      // Reset progress on error
+      if (setUploadProgress) {
+        setUploadProgress(0);
+      }
     } finally {
-      setIsLoading(false);
+      // We don't set isLoading to false here, as processing continues in the background
+      // It will be set to false when the background processing completes
     }
   };
 

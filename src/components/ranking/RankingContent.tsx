@@ -21,6 +21,8 @@ const RankingContent: React.FC = () => {
   const [visibleCharts, setVisibleCharts] = useState<ChartCard[]>([]);
   const [chartConfig, setChartConfig] = useState<any>(null);
   const [lastUpdatedFormatted, setLastUpdatedFormatted] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [estimatedTime, setEstimatedTime] = useState<string | null>(null);
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -44,7 +46,7 @@ const RankingContent: React.FC = () => {
     handleFileUpload,
     deleteLastUpload,
     applyFilters
-  } = useRankingData(user);
+  } = useRankingData(user, setUploadProgress);
 
   const {
     filters,
@@ -68,20 +70,21 @@ const RankingContent: React.FC = () => {
   }, [lastUpload]);
 
   useEffect(() => {
-    if (chartData && !isLoading) {
-      const defaultCharts: ChartCard[] = [
-        { id: 'status-distribution', name: 'Distribuição de Status', visible: true, order: 0 },
-        { id: 'resolution-time', name: 'Tempo de Resolução', visible: true, order: 1 },
-        { id: 'companies-performance', name: 'Desempenho por Empresa', visible: true, order: 2 },
-        { id: 'daily-orders', name: 'Novas Ordens Diárias', visible: true, order: 3 },
-        { id: 'time-to-close', name: 'Tempo até Fechamento', visible: true, order: 4 },
-        { id: 'efficiency-score', name: 'Pontuação de Eficiência', visible: true, order: 5 },
-      ];
+    if (uploadProgress > 0 && uploadProgress < 100) {
+      const remainingPercentage = 100 - uploadProgress;
+      const estimatedSeconds = remainingPercentage * 0.5;
       
-      setVisibleCharts(defaultCharts);
-      loadChartConfig();
+      if (estimatedSeconds > 60) {
+        const minutes = Math.floor(estimatedSeconds / 60);
+        const seconds = Math.floor(estimatedSeconds % 60);
+        setEstimatedTime(`~${minutes}m ${seconds}s restantes`);
+      } else {
+        setEstimatedTime(`~${Math.ceil(estimatedSeconds)}s restantes`);
+      }
+    } else if (uploadProgress >= 100) {
+      setEstimatedTime(null);
     }
-  }, [chartData, isLoading]);
+  }, [uploadProgress]);
 
   const loadChartConfig = async () => {
     if (!user) return;
@@ -200,6 +203,9 @@ const RankingContent: React.FC = () => {
 
   const handleUpload = async (file: File) => {
     try {
+      setUploadProgress(0);
+      setEstimatedTime('Calculando...');
+      
       toast({
         title: "Processando planilha",
         description: "Aguarde enquanto processamos os dados...",
@@ -220,6 +226,9 @@ const RankingContent: React.FC = () => {
         description: error.message || "Houve um erro ao processar a planilha.",
         variant: "destructive"
       });
+    } finally {
+      setUploadProgress(0);
+      setEstimatedTime(null);
     }
   };
 
@@ -257,7 +266,7 @@ const RankingContent: React.FC = () => {
   return (
     <div className="space-y-6">
       <Card className="p-6 shadow-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Análise das Ordens de Serviço</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Ranking das Subs - Zeladoria</h2>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
@@ -277,6 +286,8 @@ const RankingContent: React.FC = () => {
               onDelete={deleteLastUpload}
               isLoading={isLoading}
               onRefresh={fetchLastUpload}
+              uploadProgress={uploadProgress}
+              estimatedTime={estimatedTime}
             />
           </TabsContent>
           

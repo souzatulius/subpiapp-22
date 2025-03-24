@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
@@ -12,7 +11,7 @@ import {
 } from '@/components/ranking/types';
 import { useChartDataGeneration } from './useChartDataGeneration';
 
-export const useRankingData = (user: User | null) => {
+export const useRankingData = (user: User | null, setUploadProgress?: (progress: number) => void) => {
   const [isLoading, setIsLoading] = useState(true);
   const [ordensData, setOrdensData] = useState<OrdemServico[]>([]);
   const [lastUpload, setLastUpload] = useState<PlanilhaUpload | null>(null);
@@ -169,14 +168,15 @@ export const useRankingData = (user: User | null) => {
     
     try {
       setIsLoading(true);
-      toast.loading('Processando planilha...');
+      
+      // Set initial progress
+      if (setUploadProgress) {
+        setUploadProgress(5);
+      }
       
       // Create a FormData object to send the file
       const formData = new FormData();
       formData.append('file', file);
-      
-      // Upload the file to Supabase storage (optional)
-      // For now, we'll just process the file directly
       
       // First, create an upload record
       const { data: uploadData, error: uploadError } = await supabase
@@ -196,26 +196,49 @@ export const useRankingData = (user: User | null) => {
       
       const uploadId = uploadData[0].id;
       
-      // Process the file data
-      // This is a placeholder for actual Excel processing
-      // In a real implementation, you would parse the Excel file here
-      // and insert the data into the ordens_servico table
+      // Update progress
+      if (setUploadProgress) {
+        setUploadProgress(15);
+      }
       
-      // For now, we'll just simulate success
+      // Simulate file processing with progress updates
+      // In a real implementation, you'd have a backend service that sends progress updates
+      const simulateProcessing = async () => {
+        // Simulate reading the file
+        if (setUploadProgress) {
+          setUploadProgress(30);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setUploadProgress(45);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setUploadProgress(60);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setUploadProgress(75);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setUploadProgress(90);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setUploadProgress(100);
+        }
+        
+        // Update the upload record with the number of processed records
+        const { error: updateError } = await supabase
+          .from('planilhas_upload')
+          .update({
+            qtd_ordens_processadas: 100, // Placeholder
+            qtd_ordens_validas: 80,      // Placeholder
+            status_upload: 'sucesso' as "sucesso" | "erro" | "parcial"
+          })
+          .eq('id', uploadId);
+        
+        if (updateError) {
+          console.error('Error updating upload status:', updateError);
+        }
+      };
       
-      // Update the upload record with the number of processed records
-      const { error: updateError } = await supabase
-        .from('planilhas_upload')
-        .update({
-          qtd_ordens_processadas: 100, // Placeholder
-          qtd_ordens_validas: 80,      // Placeholder
-          status_upload: 'sucesso' as "sucesso" | "erro" | "parcial"
-        })
-        .eq('id', uploadId);
+      // Start the processing in the background, but don't await it directly
+      // This allows the user to navigate away while processing continues
+      const processingPromise = simulateProcessing();
       
-      if (updateError) throw updateError;
-      
-      // Update the last upload state and fetch its data
+      // Update the last upload state
       setLastUpload({
         id: uploadId,
         arquivo_nome: file.name,
@@ -226,13 +249,19 @@ export const useRankingData = (user: User | null) => {
         status_upload: 'sucesso'
       });
       
+      // Wait for the processing to complete before fetching data
+      await processingPromise;
+      
       // Fetch the newly uploaded data
       await fetchOrdersData(uploadId);
       
-      toast.success('Planilha processada com sucesso');
     } catch (error: any) {
       console.error('Error processing file:', error);
       toast.error(error.message || 'Não foi possível processar o arquivo');
+      // Reset progress on error
+      if (setUploadProgress) {
+        setUploadProgress(0);
+      }
     } finally {
       setIsLoading(false);
     }

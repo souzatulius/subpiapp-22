@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Download, Trash2 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { UploadCloud, Download, Trash2, Clock } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useOS156Data } from '@/hooks/ranking/useOS156Data';
 import OS156Charts from './OS156Charts';
@@ -18,12 +19,32 @@ const OS156Content: React.FC = () => {
     osData,
     companies,
     filters,
+    uploadProgress,
     handleFileUpload,
     deleteLastUpload,
     applyFilters
   } = useOS156Data(user);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [estimatedTime, setEstimatedTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (uploadProgress > 0 && uploadProgress < 100) {
+      // Calculate estimated time based on progress
+      const remainingPercentage = 100 - uploadProgress;
+      const estimatedSeconds = remainingPercentage * 0.5; // Rough estimate: 0.5 sec per percentage point
+      
+      if (estimatedSeconds > 60) {
+        const minutes = Math.floor(estimatedSeconds / 60);
+        const seconds = Math.floor(estimatedSeconds % 60);
+        setEstimatedTime(`~${minutes}m ${seconds}s restantes`);
+      } else {
+        setEstimatedTime(`~${Math.ceil(estimatedSeconds)}s restantes`);
+      }
+    } else if (uploadProgress >= 100) {
+      setEstimatedTime(null);
+    }
+  }, [uploadProgress]);
 
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
     applyFilters({ ...filters, ...newFilters } as any);
@@ -81,6 +102,23 @@ const OS156Content: React.FC = () => {
                 {isLoading ? 'Processando...' : 'Carregar Planilha'}
               </Button>
             </div>
+            
+            {/* Upload Progress Indicator */}
+            {isLoading && uploadProgress > 0 && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Processando planilha...</span>
+                  <span className="text-sm font-medium">{Math.round(uploadProgress)}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+                {estimatedTime && (
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <Clock className="mr-1 h-3 w-3" />
+                    <span>{estimatedTime}</span>
+                  </div>
+                )}
+              </div>
+            )}
             
             {lastUpload && (
               <div className="flex flex-col gap-2">

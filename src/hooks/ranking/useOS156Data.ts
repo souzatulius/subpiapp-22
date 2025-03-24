@@ -9,6 +9,7 @@ import { useOS156Filters } from './useOS156Filters';
 export const useOS156Data = (user: User | null) => {
   const [osData, setOsData] = useState<OS156Item[]>([]);
   const [companies, setCompanies] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   
   const { chartData, generateChartData } = useChartDataGeneration();
   
@@ -33,7 +34,7 @@ export const useOS156Data = (user: User | null) => {
     fetchLastUpload, 
     handleFileUpload, 
     deleteLastUpload 
-  } = useOS156Upload(user, handleDataLoaded);
+  } = useOS156Upload(user, handleDataLoaded, setUploadProgress);
   
   const { 
     filters, 
@@ -53,6 +54,7 @@ export const useOS156Data = (user: User | null) => {
     chartData,
     companies,
     filters,
+    uploadProgress,
     fetchLastUpload,
     handleFileUpload,
     deleteLastUpload,

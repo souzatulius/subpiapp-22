@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { UploadCloud, Trash2, RefreshCw, Clock, FileSpreadsheet } from 'lucide-react';
 import { UploadInfo } from './types';
 import { toast } from 'sonner';
@@ -14,6 +15,8 @@ interface UploadSectionProps {
   onDelete: () => Promise<void>;
   isLoading: boolean;
   onRefresh?: () => void;
+  uploadProgress?: number;
+  estimatedTime?: string | null;
 }
 
 const UploadSection: React.FC<UploadSectionProps> = ({ 
@@ -21,7 +24,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   lastUpload, 
   onDelete,
   isLoading,
-  onRefresh
+  onRefresh,
+  uploadProgress = 0,
+  estimatedTime = null
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,15 +54,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const handleUploadClick = async () => {
     if (selectedFile) {
       try {
-        toast.loading('Processando planilha...');
         await onUpload(selectedFile);
-        toast.success('Planilha carregada com sucesso!');
         setSelectedFile(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
       } catch (error) {
-        toast.error('Erro ao processar planilha. Por favor, tente novamente.');
         console.error('Upload error:', error);
       }
     }
@@ -103,6 +105,23 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               {isLoading ? 'Processando...' : 'Carregar Planilha'}
             </Button>
           </div>
+          
+          {/* Upload Progress Indicator */}
+          {isLoading && uploadProgress > 0 && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Processando planilha...</span>
+                <span className="text-sm font-medium">{Math.round(uploadProgress)}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+              {estimatedTime && (
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <Clock className="mr-1 h-3 w-3" />
+                  <span>{estimatedTime}</span>
+                </div>
+              )}
+            </div>
+          )}
           
           {lastUpload && (
             <div className="flex flex-col gap-2">
