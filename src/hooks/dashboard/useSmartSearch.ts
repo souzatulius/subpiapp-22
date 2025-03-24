@@ -65,8 +65,9 @@ export const useSmartSearch = () => {
   const fuse = useMemo(() => new Fuse(searchActions, {
     keys: ['label', 'keywords'],
     includeScore: true,
-    threshold: 0.4, // Lower threshold means more strict matching
+    threshold: 0.6, // Increased threshold for more lenient matching
     ignoreLocation: true,
+    useExtendedSearch: true, // Enable extended search for better phrase matching
   }), []);
 
   // Update suggestions when the query changes
@@ -81,7 +82,36 @@ export const useSmartSearch = () => {
     
     // Simulate a small delay for better UX
     const timer = setTimeout(() => {
-      const results = fuse.search(query.trim());
+      // Prepare search query - don't trim away internal spaces
+      const searchQuery = query.trim();
+      
+      // Split the query into individual words for better matching
+      const queryWords = searchQuery.toLowerCase().split(/\s+/);
+      
+      // Perform a direct search with the full query
+      let results = fuse.search(searchQuery);
+      
+      // If no direct results or few results, enhance with individual word matching
+      if (results.length < 3 && queryWords.length > 1) {
+        // Create a combined search using individual words
+        const wordResults = queryWords.flatMap(word => {
+          if (word.length > 2) { // Only use words with 3+ characters
+            return fuse.search(word);
+          }
+          return [];
+        });
+        
+        // Combine and deduplicate results
+        const combinedResults = [...results];
+        wordResults.forEach(result => {
+          if (!combinedResults.some(r => r.item.route === result.item.route)) {
+            combinedResults.push(result);
+          }
+        });
+        
+        // Sort by relevance score
+        results = combinedResults.sort((a, b) => (a.score || 1) - (b.score || 1));
+      }
       
       // Map the Fuse.js results to our SearchAction type
       const filteredSuggestions = results
