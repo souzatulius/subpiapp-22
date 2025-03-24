@@ -98,20 +98,22 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
 
   const hasOverdueItems = overdueCount > 0;
 
-  const handleViewAll = () => {
+  const handleViewAll = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the parent's click event
     navigate('/dashboard/comunicacao/consultar');
   };
 
-  const handleItemClick = (itemId: string) => {
+  const handleItemClick = (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation(); // Prevent triggering the parent's click event
     navigate(`/dashboard/comunicacao/consultar?id=${itemId}`);
   };
 
   return (
     <Card 
-      className={`cursor-pointer h-full ${hasOverdueItems 
+      className={`w-full h-full ${hasOverdueItems 
         ? 'bg-red-50 text-red-800 border border-red-200' 
         : 'bg-green-50 text-green-800 border border-green-200'} 
-        rounded-xl shadow-md hover:shadow-xl overflow-hidden transform-gpu hover:scale-[1.03] transition-all duration-300`}
+        rounded-xl shadow-md overflow-hidden transition-all duration-300`}
     >
       <CardContent className="flex flex-col justify-between h-full p-4">
         <div className="flex items-center justify-between">
@@ -139,7 +141,7 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
                 <li 
                   key={index} 
                   className="truncate cursor-pointer hover:underline" 
-                  onClick={() => handleItemClick(item.id)}
+                  onClick={(e) => handleItemClick(e, item.id)}
                 >
                   • {item.title}
                 </li>

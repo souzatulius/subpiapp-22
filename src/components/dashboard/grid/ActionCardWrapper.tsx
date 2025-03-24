@@ -55,20 +55,18 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
 }) => {
   if (card.isQuickDemand) {
     return (
-      <div className={`${getWidthClasses(card.width)} flex-none`}>
-        <SortableActionCard 
-          key={card.id} 
-          card={card} 
-          onEdit={onEdit}
-          onDelete={onDelete}
-        >
-          <QuickDemandCard 
-            value={quickDemandTitle}
-            onChange={onQuickDemandTitleChange}
-            onSubmit={onQuickDemandSubmit}
-          />
-        </SortableActionCard>
-      </div>
+      <SortableActionCard 
+        key={card.id} 
+        card={card} 
+        onEdit={onEdit}
+        onDelete={onDelete}
+      >
+        <QuickDemandCard 
+          value={quickDemandTitle}
+          onChange={onQuickDemandTitleChange}
+          onSubmit={onQuickDemandSubmit}
+        />
+      </SortableActionCard>
     );
   }
   
@@ -90,39 +88,48 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   
   if (card.isOverdueDemands) {
     return (
-      <div 
-        className={`${getWidthClasses(card.width)} ${card.height === '2' ? 'row-span-2' : ''} flex-none`}
+      <SortableActionCard 
+        key={card.id} 
+        card={card} 
+        onEdit={onEdit}
+        onDelete={onDelete}
       >
         <OverdueDemandsCard
           id={card.id}
           overdueCount={specialCardsData.overdueCount}
           overdueItems={specialCardsData.overdueItems}
         />
-      </div>
+      </SortableActionCard>
     );
   }
   
   if (card.isPendingActions) {
     return (
-      <div 
-        className={`${getWidthClasses(card.width)} ${card.height === '2' ? 'row-span-2' : ''} flex-none`}
+      <SortableActionCard 
+        key={card.id} 
+        card={card} 
+        onEdit={onEdit}
+        onDelete={onDelete}
       >
         <PendingActionsCard
           id={card.id}
           notesToApprove={specialCardsData.notesToApprove}
           responsesToDo={specialCardsData.responsesToDo}
         />
-      </div>
+      </SortableActionCard>
     );
   }
   
   if (card.isNewCardButton) {
     return (
-      <div 
-        className={`${getWidthClasses(card.width)} flex-none`}
+      <SortableActionCard 
+        key={card.id} 
+        card={card} 
+        onEdit={onEdit}
+        onDelete={onDelete}
       >
         <NewCardButton onClick={onAddNewCard} />
-      </div>
+      </SortableActionCard>
     );
   }
   

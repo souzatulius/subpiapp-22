@@ -20,7 +20,8 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
   const totalPending = notesToApprove + responsesToDo;
   const hasPendingItems = totalPending > 0;
   
-  const handleViewAll = () => {
+  const handleViewAll = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering parent's click event
     if (notesToApprove > 0) {
       navigate('/dashboard/comunicacao/aprovar-nota');
     } else if (responsesToDo > 0) {
@@ -30,10 +31,10 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
 
   return (
     <Card 
-      className={`cursor-pointer h-full ${hasPendingItems 
+      className={`w-full h-full ${hasPendingItems 
         ? 'bg-yellow-50 text-yellow-800 border border-yellow-200' 
         : 'bg-green-50 text-green-800 border border-green-200'} 
-        rounded-xl shadow-md hover:shadow-xl overflow-hidden transform-gpu hover:scale-[1.03] transition-all duration-300`}
+        rounded-xl shadow-md overflow-hidden transition-all duration-300`}
     >
       <CardContent className="flex flex-col justify-between h-full p-4">
         <div className="flex items-center justify-between">
