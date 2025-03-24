@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
-import { Demanda, AreasCoordinacao, Origem, Filter } from '../types';
+import { Demanda, AreasCoordinacao, Origem, Filter, Area } from '../types';
 
 export const useDemandasData = (initialFilter: Filter = 'all') => {
   const { user } = useAuth();
@@ -15,6 +15,10 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
   const [filter, setFilter] = useState<Filter>(initialFilter);
   const [filteredDemandas, setFilteredDemandas] = useState<Demanda[]>([]);
   const [selectedDemanda, setSelectedDemanda] = useState<Demanda | null>(null);
+  const [areaFilter, setAreaFilter] = useState<string>('');
+  const [prioridadeFilter, setPrioridadeFilter] = useState<string>('');
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [isLoadingDemandas, setIsLoadingDemandas] = useState(true);
 
   // Fetch demandas and filter options
   useEffect(() => {
@@ -23,6 +27,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
 
       try {
         setIsLoading(true);
+        setIsLoadingDemandas(true);
         
         // Fetch áreas de coordenação
         const { data: areasData, error: areasError } = await supabase
@@ -31,10 +36,11 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
         
         if (areasError) throw areasError;
         setAreasCoordinacao(areasData || []);
+        setAreas(areasData || []);
         
         // Fetch origens
         const { data: origensData, error: origensError } = await supabase
-          .from('origens_demanda')
+          .from('origens_demandas')
           .select('*');
         
         if (origensError) throw origensError;
@@ -45,10 +51,10 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           .from('demandas')
           .select(`
             *,
-            origem:origem_id (descricao),
-            area_coordenacao:area_coordenacao_id (id, descricao),
-            servico:servico_id (descricao),
-            tipo_midia:tipo_midia_id (descricao),
+            origens_demandas:origem_id (descricao),
+            areas_coordenacao:area_coordenacao_id (id, descricao),
+            servicos:servico_id (descricao),
+            tipos_midia:tipo_midia_id (descricao),
             bairro:bairro_id (nome, distrito_id),
             autor:autor_id (nome),
             arquivo_url
@@ -73,11 +79,11 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
         if (userData && userData.area_coordenacao_id) {
           // Filter for user's area unless they're admin
           const { data: userRoles } = await supabase
-            .from('perfis_usuarios')
-            .select('perfil_id')
+            .from('usuario_permissoes')
+            .select('permissao_id')
             .eq('usuario_id', user.id);
           
-          const isAdmin = userRoles?.some(role => role.perfil_id === 1);
+          const isAdmin = userRoles?.some(role => role.permissao_id === '1');
           
           if (!isAdmin) {
             userDemandas = userDemandas.filter(
@@ -86,8 +92,25 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           }
         }
         
-        setDemandas(userDemandas);
-        setFilteredDemandas(userDemandas);
+        // Transform the data to match our Demanda type
+        const typedDemandas: Demanda[] = userDemandas.map(demanda => ({
+          id: demanda.id,
+          titulo: demanda.titulo,
+          status: demanda.status,
+          prioridade: demanda.prioridade,
+          prazo_resposta: demanda.prazo_resposta,
+          perguntas: demanda.perguntas,
+          detalhes_solicitacao: demanda.detalhes_solicitacao,
+          areas_coordenacao: demanda.areas_coordenacao,
+          origens_demandas: demanda.origens_demandas,
+          tipos_midia: demanda.tipos_midia,
+          servicos: demanda.servicos,
+          arquivo_url: demanda.arquivo_url,
+          arquivo_nome: demanda.arquivo_nome
+        }));
+        
+        setDemandas(typedDemandas);
+        setFilteredDemandas(typedDemandas);
       } catch (error: any) {
         console.error('Erro ao carregar dados:', error);
         toast.error("Erro ao carregar dados", {
@@ -95,6 +118,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
         });
       } finally {
         setIsLoading(false);
+        setIsLoadingDemandas(false);
       }
     };
     
@@ -110,18 +134,32 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
       filtered = filtered.filter(demanda => demanda.prioridade === filter);
     }
     
+    // Apply area filter
+    if (areaFilter) {
+      filtered = filtered.filter(demanda => 
+        demanda.areas_coordenacao?.id === areaFilter
+      );
+    }
+    
+    // Apply prioridade filter
+    if (prioridadeFilter) {
+      filtered = filtered.filter(demanda => 
+        demanda.prioridade === prioridadeFilter
+      );
+    }
+    
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(demanda => 
         demanda.titulo.toLowerCase().includes(searchLower) ||
-        demanda.area_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
-        demanda.servico?.descricao.toLowerCase().includes(searchLower)
+        demanda.areas_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
+        demanda.servicos?.descricao.toLowerCase().includes(searchLower)
       );
     }
     
     setFilteredDemandas(filtered);
-  }, [filter, searchTerm, demandas]);
+  }, [filter, searchTerm, demandas, areaFilter, prioridadeFilter]);
 
   // Get counts by priority
   const counts = useMemo(() => {
@@ -132,6 +170,10 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
       baixa: demandas.filter(d => d.prioridade === 'baixa').length
     };
   }, [demandas]);
+
+  const handleSelectDemanda = (demanda: Demanda) => {
+    setSelectedDemanda(demanda);
+  };
 
   return {
     demandas,
@@ -147,6 +189,13 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
     setFilter,
     counts,
     selectedDemanda,
-    setSelectedDemanda
+    setSelectedDemanda,
+    areaFilter,
+    setAreaFilter,
+    prioridadeFilter,
+    setPrioridadeFilter,
+    areas,
+    isLoadingDemandas,
+    handleSelectDemanda
   };
 };

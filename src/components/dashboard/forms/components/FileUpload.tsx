@@ -1,104 +1,95 @@
 
-import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Upload, X, FileText } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Upload, X } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface FileUploadProps {
-  onChange: (fileUrl: string) => void;
-  value?: string;
+  onFileChange: (file: File | null) => void;
+  selectedFile: File | null;
+  accept?: string;
+  maxSize?: number;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [fileName, setFileName] = useState('');
-  
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+const FileUpload: React.FC<FileUploadProps> = ({
+  onFileChange,
+  selectedFile,
+  accept = ".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png",
+  maxSize = 5
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
     
-    setIsUploading(true);
-    setFileName(file.name);
-    
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
+    if (file) {
+      // Check file size (in MB)
+      const fileSizeMB = file.size / (1024 * 1024);
       
-      const { error: uploadError } = await supabase.storage
-        .from('demandas')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
+      if (fileSizeMB > maxSize) {
+        toast.error(`Arquivo muito grande`, {
+          description: `O arquivo deve ter menos de ${maxSize}MB.`
+        });
+        e.target.value = '';
+        return;
+      }
       
-      const { data } = supabase.storage
-        .from('demandas')
-        .getPublicUrl(filePath);
-        
-      onChange(data.publicUrl);
-      
-      toast({
-        title: 'Arquivo anexado',
-        description: 'O arquivo foi anexado com sucesso.',
-      });
-    } catch (error: any) {
-      console.error('Erro ao fazer upload:', error);
-      toast({
-        title: 'Erro ao anexar arquivo',
-        description: error.message || 'Não foi possível anexar o arquivo.',
-        variant: 'destructive',
-      });
-      setFileName('');
-    } finally {
-      setIsUploading(false);
+      setFileName(file.name);
+      onFileChange(file);
+    } else {
+      setFileName(null);
+      onFileChange(null);
     }
   };
-  
+
   const handleRemoveFile = () => {
-    onChange('');
-    setFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setFileName(null);
+    onFileChange(null);
+    toast.success(`Arquivo removido`, {
+      description: `O arquivo foi removido com sucesso.`
+    });
   };
-  
+
   return (
-    <div>
-      <Label>Anexar Arquivo</Label>
-      {value || fileName ? (
-        <div className="mt-2 flex items-center gap-2 p-2 border border-gray-300 rounded-lg">
-          <FileText className="h-5 w-5 text-gray-500" />
-          <span className="text-sm text-gray-700 flex-1 truncate">
-            {fileName || value.split('/').pop()}
-          </span>
-          <button 
-            type="button"
-            onClick={handleRemoveFile}
-            className="p-1 hover:bg-gray-100 rounded-full"
+    <div className="space-y-2">
+      {!selectedFile ? (
+        <div className="flex items-center">
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept={accept}
+            onChange={handleFileSelect}
+            className="hidden"
+            id="file-upload"
+          />
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => fileInputRef.current?.click()}
           >
-            <X className="h-4 w-4 text-gray-500" />
-          </button>
+            <Upload className="w-4 h-4 mr-2" />
+            Selecionar Arquivo
+          </Button>
         </div>
       ) : (
-        <div className="mt-2 flex items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded-lg">
-          <div className="space-y-1 text-center">
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-            <div className="text-sm text-gray-600">
-              <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 hover:text-blue-500">
-                <span>{isUploading ? 'Enviando...' : 'Clique para anexar um arquivo'}</span>
-                <input 
-                  id="file-upload" 
-                  name="file-upload" 
-                  type="file" 
-                  className="sr-only" 
-                  onChange={handleFileChange}
-                  disabled={isUploading}
-                />
-              </label>
-            </div>
-            <p className="text-xs text-gray-500">
-              PNG, JPG, PDF até 10MB
-            </p>
+        <div className="flex items-center justify-between p-2 border rounded-md bg-gray-50">
+          <div className="flex items-center overflow-hidden">
+            <Upload className="w-4 h-4 mr-2 text-blue-500 shrink-0" />
+            <span className="text-sm font-medium truncate">{fileName || selectedFile.name}</span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRemoveFile}
+            className="p-1 h-auto"
+          >
+            <X className="w-4 h-4 text-gray-500" />
+          </Button>
         </div>
       )}
     </div>

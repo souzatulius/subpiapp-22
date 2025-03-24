@@ -36,3 +36,16 @@ export interface ResponderDemandaFormProps {
 }
 
 export type ViewMode = 'list' | 'cards';
+
+// Added missing types
+export interface AreasCoordinacao {
+  id: string;
+  descricao: string;
+}
+
+export interface Origem {
+  id: string;
+  descricao: string;
+}
+
+export type Filter = 'all' | 'alta' | 'media' | 'baixa';

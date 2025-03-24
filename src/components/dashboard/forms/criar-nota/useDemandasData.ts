@@ -46,6 +46,7 @@ export const useDemandasData = () => {
             prioridade: demanda.prioridade,
             area_coordenacao: demanda.area_coordenacao,
             perguntas: demanda.perguntas || {},
+            detalhes_solicitacao: demanda.detalhes_solicitacao || null,
             criado_em: demanda.criado_em
           }));
 
