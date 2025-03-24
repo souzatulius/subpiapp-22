@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,13 +17,13 @@ import { ChartCard } from './types';
 
 const RankingContent: React.FC = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>('dados');
   const [visibleCharts, setVisibleCharts] = useState<ChartCard[]>([]);
   const [chartConfig, setChartConfig] = useState<any>(null);
   const [lastUpdatedFormatted, setLastUpdatedFormatted] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [estimatedTime, setEstimatedTime] = useState<string | null>(null);
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -52,7 +53,8 @@ const RankingContent: React.FC = () => {
     filters,
     chartVisibility,
     handleFiltersChange,
-    handleChartVisibilityChange
+    handleChartVisibilityChange,
+    saveUserPreferences
   } = useFilterManagement();
 
   useEffect(() => {
@@ -86,6 +88,10 @@ const RankingContent: React.FC = () => {
     }
   }, [uploadProgress]);
 
+  useEffect(() => {
+    loadChartConfig();
+  }, [user]);
+
   const loadChartConfig = async () => {
     if (!user) return;
     
@@ -94,7 +100,7 @@ const RankingContent: React.FC = () => {
         .from('user_dashboard')
         .select('cards_config')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         if (error.code !== 'PGRST116') {
@@ -128,7 +134,16 @@ const RankingContent: React.FC = () => {
   };
 
   const saveChartConfig = async () => {
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "Erro ao salvar configuração",
+        description: "Você precisa estar logado para salvar configurações.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSavingConfig(true);
     
     try {
       const config = {
@@ -137,14 +152,18 @@ const RankingContent: React.FC = () => {
         lastUpdated: new Date().toISOString()
       };
       
-      const { data, error } = await supabase
+      await saveUserPreferences({
+        filters,
+        chartVisibility
+      });
+      
+      const { error } = await supabase
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          cards_config: JSON.stringify(config),
+          charts_config: JSON.stringify(config),
           updated_at: new Date().toISOString()
-        })
-        .select();
+        });
       
       if (error) {
         console.error('Error saving chart config:', error);
@@ -160,6 +179,7 @@ const RankingContent: React.FC = () => {
       toast({
         title: "Configuração salva",
         description: "A configuração dos gráficos foi salva com sucesso.",
+        variant: "success"
       });
     } catch (err) {
       console.error('Failed to save chart config:', err);
@@ -168,6 +188,8 @@ const RankingContent: React.FC = () => {
         description: "Ocorreu um erro ao salvar a configuração.",
         variant: "destructive"
       });
+    } finally {
+      setIsSavingConfig(false);
     }
   };
 
@@ -216,6 +238,7 @@ const RankingContent: React.FC = () => {
       toast({
         title: "Upload concluído!",
         description: "Os gráficos foram atualizados com sucesso.",
+        variant: "success"
       });
       
       saveChartConfig();
@@ -260,6 +283,7 @@ const RankingContent: React.FC = () => {
     toast({
       title: "Filtros aplicados",
       description: "Os gráficos foram atualizados com os filtros selecionados.",
+      variant: "success"
     });
   };
 
@@ -296,9 +320,9 @@ const RankingContent: React.FC = () => {
               filters={filters}
               onFiltersChange={handleFiltersChange}
               companies={companies}
-              districts={districts as any[]}
+              districts={districts}
               serviceTypes={serviceTypes}
-              statuses={statusTypes as any[]}
+              statuses={statusTypes}
               onRemoveFilter={handleRemoveFilter}
               onApplyFilters={handleApplyFilters}
               onClearFilters={() => {
@@ -311,7 +335,7 @@ const RankingContent: React.FC = () => {
               }}
               onSaveChartConfig={saveChartConfig}
               lastUpdated={lastUpdatedFormatted}
-              isProcessing={isLoading}
+              isProcessing={isLoading || isSavingConfig}
             />
           </TabsContent>
           

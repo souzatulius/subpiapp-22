@@ -58,13 +58,13 @@ export interface FilterOptions {
   statuses: string[];
   districts: string[];
   serviceTypes: string[];
-  areas?: string[];
+  areas?: AreaTecnica[];
   companies?: string[];
 }
 
 export type OrderStatus = string;
 export type District = string;
-export type AreaTecnica = 'Todos' | 'STM' | 'STLP';
+export type AreaTecnica = 'Todos' | 'STM' | 'STLP' | string;
 export type ChartVisibility = Record<string, boolean>;
 
 export interface OS156Item {
