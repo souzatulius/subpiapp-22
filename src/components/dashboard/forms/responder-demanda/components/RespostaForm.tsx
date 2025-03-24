@@ -23,6 +23,39 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   isLoading,
   onSubmit
 }) => {
+  // Helper function to render perguntas safely
+  const renderPerguntas = () => {
+    const { perguntas } = selectedDemanda;
+    
+    // If perguntas is null or undefined, return nothing
+    if (!perguntas) return null;
+    
+    // If perguntas is an array of strings
+    if (Array.isArray(perguntas)) {
+      return (
+        <ul className="list-disc pl-5 space-y-1">
+          {perguntas.map((pergunta, index) => (
+            <li key={index} className="text-sm">{pergunta}</li>
+          ))}
+        </ul>
+      );
+    }
+    
+    // If perguntas is an object (Record<string, string>)
+    if (typeof perguntas === 'object') {
+      return (
+        <ul className="list-disc pl-5 space-y-1">
+          {Object.entries(perguntas).map(([key, value], index) => (
+            <li key={index} className="text-sm">{value}</li>
+          ))}
+        </ul>
+      );
+    }
+    
+    // If perguntas is a string, just display it
+    return <p className="text-sm">{perguntas.toString()}</p>;
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
@@ -63,14 +96,10 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           </div>
         </div>
         
-        {selectedDemanda.perguntas && selectedDemanda.perguntas.length > 0 && (
+        {selectedDemanda.perguntas && (
           <div className="mt-6">
             <p className="text-sm font-medium text-gray-500 mb-2">Perguntas</p>
-            <ul className="list-disc pl-5 space-y-1">
-              {selectedDemanda.perguntas.map((pergunta, index) => (
-                <li key={index} className="text-sm">{pergunta}</li>
-              ))}
-            </ul>
+            {renderPerguntas()}
           </div>
         )}
         
