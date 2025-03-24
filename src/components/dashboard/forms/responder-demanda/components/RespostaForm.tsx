@@ -52,8 +52,8 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       );
     }
     
-    // If perguntas is a string, just display it
-    return <p className="text-sm">{perguntas.toString()}</p>;
+    // If perguntas is a string, just display it without calling toString()
+    return <p className="text-sm">{String(perguntas)}</p>;
   };
 
   return (
