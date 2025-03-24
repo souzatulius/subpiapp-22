@@ -10,11 +10,9 @@ interface TimeToCloseChartProps {
 
 const TimeToCloseChart: React.FC<TimeToCloseChartProps> = ({ data, isLoading }) => {
   // Check if data exists before accessing it
-  const isDataValid = !isLoading && data && data.datasets && data.datasets.length > 0;
-  
-  const averageTime = isDataValid && data.datasets[0]?.data ? 
-    `${Math.round(data.datasets[0].data[1] || 0)} dias` : 
-    'N/A';
+  const averageTime = isLoading || !data || !data.datasets || !data.datasets[0]?.data ? 
+    '' : 
+    `${Math.round(data.datasets[0].data[1] || 0)} dias`;
   
   return (
     <ChartCard
@@ -22,7 +20,7 @@ const TimeToCloseChart: React.FC<TimeToCloseChartProps> = ({ data, isLoading }) 
       value={averageTime}
       isLoading={isLoading}
     >
-      {isDataValid ? (
+      {!isLoading && data && (
         <Bar 
           data={data} 
           options={{
@@ -43,10 +41,6 @@ const TimeToCloseChart: React.FC<TimeToCloseChartProps> = ({ data, isLoading }) 
             },
           }}
         />
-      ) : (
-        <div className="h-full flex items-center justify-center">
-          <p className="text-gray-400">Dados insuficientes para exibir o gráfico</p>
-        </div>
       )}
     </ChartCard>
   );

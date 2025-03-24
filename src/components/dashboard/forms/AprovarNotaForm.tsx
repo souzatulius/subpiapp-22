@@ -66,8 +66,10 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       setNotas(typedNotas);
     } catch (error) {
       console.error('Erro ao carregar notas oficiais:', error);
-      toast.error("Erro ao carregar notas", {
-        description: "Não foi possível carregar as notas pendentes de aprovação."
+      toast({
+        title: "Erro ao carregar notas",
+        description: "Não foi possível carregar as notas pendentes de aprovação.",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -111,7 +113,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         if (demandaError) throw demandaError;
       }
       
-      toast.success("Nota aprovada com sucesso!", {
+      toast({
+        title: "Nota aprovada com sucesso!",
         description: "A nota oficial foi aprovada e está pronta para divulgação."
       });
       
@@ -120,8 +123,10 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       fetchNotas();
     } catch (error: any) {
       console.error('Erro ao aprovar nota:', error);
-      toast.error("Erro ao aprovar nota", {
-        description: error.message || "Ocorreu um erro ao processar sua solicitação."
+      toast({
+        title: "Erro ao aprovar nota",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        variant: "destructive"
       });
     } finally {
       setIsApproving(false);
@@ -156,7 +161,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         if (demandaError) throw demandaError;
       }
       
-      toast.success("Nota rejeitada", {
+      toast({
+        title: "Nota rejeitada",
         description: "A nota oficial foi rejeitada e retornada para revisão."
       });
       
@@ -165,8 +171,10 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       fetchNotas();
     } catch (error: any) {
       console.error('Erro ao rejeitar nota:', error);
-      toast.error("Erro ao rejeitar nota", {
-        description: error.message || "Ocorreu um erro ao processar sua solicitação."
+      toast({
+        title: "Erro ao rejeitar nota",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        variant: "destructive"
       });
     } finally {
       setIsRejecting(false);

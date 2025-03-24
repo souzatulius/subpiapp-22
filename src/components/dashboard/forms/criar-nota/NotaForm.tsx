@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { ResponseQA, Demand } from './types';
 
 interface NotaFormProps {
@@ -36,8 +36,10 @@ const NotaForm: React.FC<NotaFormProps> = ({
 
   const handleGenerateSuggestion = async () => {
     if (!selectedDemanda) {
-      toast.error("Erro", {
-        description: "Nenhuma demanda selecionada para gerar sugestão."
+      toast({
+        title: "Erro",
+        description: "Nenhuma demanda selecionada para gerar sugestão.",
+        variant: "destructive"
       });
       return;
     }
@@ -79,14 +81,17 @@ const NotaForm: React.FC<NotaFormProps> = ({
         if (suggestedTitle) setTitulo(suggestedTitle);
         setTexto(suggestedContent);
         
-        toast.success("Sugestão gerada com sucesso!", {
+        toast({
+          title: "Sugestão gerada com sucesso!",
           description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
         });
       }
     } catch (error) {
       console.error('Erro ao gerar sugestão:', error);
-      toast.error("Erro ao gerar sugestão", {
-        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão de nota."
+      toast({
+        title: "Erro ao gerar sugestão",
+        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão de nota.",
+        variant: "destructive"
       });
     } finally {
       setIsGeneratingSuggestion(false);

@@ -8,7 +8,6 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FilterOptions } from '@/components/ranking/types';
-import { DateRange as DayPickerDateRange } from 'react-day-picker';
 
 interface DateRangeFilterProps {
   dateRange: FilterOptions['dateRange'];
@@ -17,41 +16,6 @@ interface DateRangeFilterProps {
 
 const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRangeChange }) => {
   const [calendarOpen, setCalendarOpen] = useState(false);
-
-  // Convert our DateRange to react-day-picker's DateRange
-  const convertToDayPickerDateRange = (range?: FilterOptions['dateRange']): DayPickerDateRange | undefined => {
-    if (!range) return undefined;
-    
-    // Ensure we're working with Date objects
-    const from = range.from ? new Date(range.from) : undefined;
-    const to = range.to ? new Date(range.to) : undefined;
-    
-    if (!from) return undefined;
-    
-    return {
-      from,
-      to
-    };
-  };
-
-  // Format date for display
-  const formatDateDisplay = (date: Date | string | null | undefined) => {
-    if (!date) return '';
-    return format(new Date(date), 'PP', { locale: ptBR });
-  };
-
-  // Handle date selection from the calendar
-  const handleDateRangeChange = (range: DayPickerDateRange | undefined) => {
-    if (!range) {
-      onDateRangeChange(undefined);
-      return;
-    }
-    
-    onDateRangeChange({
-      from: range.from,
-      to: range.to
-    });
-  };
 
   return (
     <div className="space-y-2">
@@ -66,11 +30,11 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRang
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {formatDateDisplay(dateRange.from)} -{' '}
-                  {formatDateDisplay(dateRange.to)}
+                  {format(dateRange.from, 'PP', { locale: ptBR })} -{' '}
+                  {format(dateRange.to, 'PP', { locale: ptBR })}
                 </>
               ) : (
-                formatDateDisplay(dateRange.from)
+                format(dateRange.from, 'PP', { locale: ptBR })
               )
             ) : (
               <span>Selecione um período</span>
@@ -81,9 +45,9 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRang
           <Calendar
             locale={ptBR}
             mode="range"
-            defaultMonth={dateRange?.from ? new Date(dateRange.from) : new Date()}
-            selected={convertToDayPickerDateRange(dateRange)}
-            onSelect={handleDateRangeChange}
+            defaultMonth={new Date()}
+            selected={dateRange}
+            onSelect={onDateRangeChange}
             numberOfMonths={2}
           />
         </PopoverContent>

@@ -4,36 +4,34 @@ export interface Demand {
   titulo: string;
   status: string;
   prioridade: string;
-  problema?: {
-    id: string;
+  horario_publicacao: string;
+  prazo_resposta: string;
+  area_coordenacao: {
     descricao: string;
   } | null;
-  detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null;
-  veiculo_imprensa?: string | null;
-  nome_solicitante?: string | null;
-  email_solicitante?: string | null;
-  telefone_solicitante?: string | null;
-  endereco?: string | null;
-  horario_publicacao?: string;
-  servico?: {
+  servico: {
     descricao: string;
   } | null;
-  origem?: {
+  origem: {
     descricao: string;
   } | null;
-  bairro?: {
+  tipo_midia: {
+    descricao: string;
+  } | null;
+  bairro: {
     nome: string;
   } | null;
-  arquivo_url?: string | null;
-  arquivo_nome?: string | null;
-  autor?: {
+  autor: {
     nome_completo: string;
   } | null;
-  criado_em?: string;
+  endereco: string | null;
+  nome_solicitante: string | null;
+  email_solicitante: string | null;
+  telefone_solicitante: string | null;
+  veiculo_imprensa: string | null;
+  detalhes_solicitacao: string | null;
+  perguntas: Record<string, string> | null | any; // Changed to accept any type to handle JSON
 }
-
-export type FilterType = 'all' | 'pending' | 'responded' | 'approved';
 
 export interface UseDemandasDataReturn {
   searchTerm: string;
@@ -47,7 +45,7 @@ export interface UseDemandasDataReturn {
   deleteLoading: boolean;
   filteredDemandas: Demand[];
   isLoading: boolean;
-  error: any;
+  error: Error | null;
   refetch: () => Promise<any>;
   handleDeleteConfirm: () => Promise<void>;
 }

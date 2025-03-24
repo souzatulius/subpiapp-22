@@ -16,26 +16,26 @@ export function Toaster() {
   const getToastIcon = (variant: string | undefined) => {
     switch (variant) {
       case "success":
-        return <CheckCircle className="h-5 w-5 text-green-600" />
+        return <CheckCircle className="h-5 w-5" />
       case "destructive":
-        return <XCircle className="h-5 w-5 text-red-600" />
+        return <XCircle className="h-5 w-5" />
       case "warning":
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />
+        return <AlertTriangle className="h-5 w-5" />
       default:
-        return <Info className="h-5 w-5 text-blue-600" />
+        return <Info className="h-5 w-5" />
     }
   }
 
   const getToastStyles = (variant: string | undefined) => {
     switch (variant) {
       case "success":
-        return "bg-green-50 text-green-800 border border-green-200"
+        return "bg-green-100 text-green-800 border border-green-200"
       case "destructive":
-        return "bg-red-50 text-red-800 border border-red-200"
+        return "bg-red-100 text-red-800 border border-red-200"
       case "warning":
-        return "bg-yellow-50 text-yellow-800 border border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border border-yellow-200"
       default:
-        return "bg-blue-50 text-blue-800 border border-blue-200"
+        return "bg-blue-100 text-blue-800 border border-blue-200"
     }
   }
 

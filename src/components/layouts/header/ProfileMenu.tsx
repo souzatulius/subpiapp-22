@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { useUserProfile } from './useUserProfile';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
@@ -27,11 +27,15 @@ export const ProfileMenu: React.FC = () => {
     try {
       await signOut();
       setIsProfileOpen(false);
-      toast.success("Logout realizado com sucesso!");
+      toast({
+        description: "Você foi desconectado com sucesso"
+      });
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
-      toast.error("Erro ao fazer logout", { 
-        description: "Por favor, tente novamente." 
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer logout. Tente novamente.",
+        variant: "destructive"
       });
     }
   };

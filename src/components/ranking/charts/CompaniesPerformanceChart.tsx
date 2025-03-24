@@ -14,16 +14,13 @@ const CompaniesPerformanceChart: React.FC<CompaniesPerformanceChartProps> = ({
   isLoading,
   title = "Empresas com Obras Concluídas" 
 }) => {
-  // Check if data exists with proper structure
-  const isDataValid = !isLoading && data && data.datasets && data.datasets.length > 0;
-  
   return (
     <ChartCard
       title={title}
       value={isLoading ? '' : 'Top Empresas'}
       isLoading={isLoading}
     >
-      {isDataValid ? (
+      {!isLoading && data && (
         <Bar 
           data={data}
           options={{
@@ -45,10 +42,6 @@ const CompaniesPerformanceChart: React.FC<CompaniesPerformanceChartProps> = ({
             },
           }}
         />
-      ) : (
-        <div className="h-full flex items-center justify-center">
-          <p className="text-gray-400">Dados insuficientes para exibir o gráfico</p>
-        </div>
       )}
     </ChartCard>
   );

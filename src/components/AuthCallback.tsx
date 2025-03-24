@@ -53,8 +53,10 @@ const AuthCallback = () => {
         setErrorDetails(errorDetailsMsg);
         setProcessingAuth(false);
         
-        toast.error("Erro de autenticação", {
-          description: userMessage
+        toast({
+          title: "Erro de autenticação",
+          description: userMessage,
+          variant: "destructive"
         });
         
         // Navigate back to login after a short delay
@@ -73,8 +75,10 @@ const AuthCallback = () => {
         setErrorDetails(error.message);
         setProcessingAuth(false);
         
-        toast.error("Erro de autenticação", {
-          description: error.message
+        toast({
+          title: "Erro de autenticação",
+          description: error.message,
+          variant: "destructive"
         });
         
         setTimeout(() => navigate('/login'), 3000);
@@ -94,8 +98,10 @@ const AuthCallback = () => {
           setErrorDetails(`Email utilizado: ${userEmail}`);
           setProcessingAuth(false);
           
-          toast.error("Domínio não permitido", {
-            description: "Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos"
+          toast({
+            title: "Domínio não permitido",
+            description: "Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos",
+            variant: "destructive"
           });
           
           setTimeout(() => navigate('/login'), 3000);
@@ -103,8 +109,9 @@ const AuthCallback = () => {
         }
         
         console.log("Authentication successful, redirecting to dashboard");
-        toast.success("Login realizado com sucesso", {
-          description: "Bem-vindo(a) de volta!"
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo(a) de volta!",
         });
         navigate('/dashboard');
       } else {

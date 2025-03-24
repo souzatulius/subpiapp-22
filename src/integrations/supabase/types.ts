@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      areas_coordenacao: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
       bairros: {
         Row: {
           criado_em: string
@@ -59,36 +77,36 @@ export type Database = {
       comunicacoes_oficiais: {
         Row: {
           aprovador_id: string | null
+          area_coordenacao_id: string
           atualizado_em: string
           autor_id: string
           criado_em: string
           demanda_id: string | null
           id: string
-          problema_id: string
           status: string
           texto: string
           titulo: string
         }
         Insert: {
           aprovador_id?: string | null
+          area_coordenacao_id: string
           atualizado_em?: string
           autor_id: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
-          problema_id: string
           status?: string
           texto: string
           titulo: string
         }
         Update: {
           aprovador_id?: string | null
+          area_coordenacao_id?: string
           atualizado_em?: string
           autor_id?: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
-          problema_id?: string
           status?: string
           texto?: string
           titulo?: string
@@ -96,9 +114,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "comunicacoes_oficiais_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
+            columns: ["area_coordenacao_id"]
             isOneToOne: false
-            referencedRelation: "problemas"
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
           {
@@ -187,6 +205,7 @@ export type Database = {
       }
       demandas: {
         Row: {
+          area_coordenacao_id: string
           arquivo_url: string | null
           atualizado_em: string
           autor_id: string
@@ -201,7 +220,6 @@ export type Database = {
           perguntas: Json | null
           prazo_resposta: string
           prioridade: string
-          problema_id: string
           protocolo: string | null
           servico_id: string | null
           status: string
@@ -211,6 +229,7 @@ export type Database = {
           veiculo_imprensa: string | null
         }
         Insert: {
+          area_coordenacao_id: string
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id: string
@@ -225,7 +244,6 @@ export type Database = {
           perguntas?: Json | null
           prazo_resposta: string
           prioridade: string
-          problema_id: string
           protocolo?: string | null
           servico_id?: string | null
           status: string
@@ -235,6 +253,7 @@ export type Database = {
           veiculo_imprensa?: string | null
         }
         Update: {
+          area_coordenacao_id?: string
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id?: string
@@ -249,7 +268,6 @@ export type Database = {
           perguntas?: Json | null
           prazo_resposta?: string
           prioridade?: string
-          problema_id?: string
           protocolo?: string | null
           servico_id?: string | null
           status?: string
@@ -261,9 +279,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "demandas_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
+            columns: ["area_coordenacao_id"]
             isOneToOne: false
-            referencedRelation: "problemas"
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
           {
@@ -324,36 +342,36 @@ export type Database = {
       notas_oficiais: {
         Row: {
           aprovador_id: string | null
+          area_coordenacao_id: string
           atualizado_em: string
           autor_id: string
           criado_em: string
           demanda_id: string | null
           id: string
-          problema_id: string
           status: string
           texto: string
           titulo: string
         }
         Insert: {
           aprovador_id?: string | null
+          area_coordenacao_id: string
           atualizado_em?: string
           autor_id: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
-          problema_id: string
           status?: string
           texto: string
           titulo: string
         }
         Update: {
           aprovador_id?: string | null
+          area_coordenacao_id?: string
           atualizado_em?: string
           autor_id?: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
-          problema_id?: string
           status?: string
           texto?: string
           titulo?: string
@@ -368,9 +386,9 @@ export type Database = {
           },
           {
             foreignKeyName: "notas_oficiais_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
+            columns: ["area_coordenacao_id"]
             isOneToOne: false
-            referencedRelation: "problemas"
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
           {
@@ -710,24 +728,6 @@ export type Database = {
         }
         Relationships: []
       }
-      problemas: {
-        Row: {
-          criado_em: string
-          descricao: string
-          id: string
-        }
-        Insert: {
-          criado_em?: string
-          descricao: string
-          id?: string
-        }
-        Update: {
-          criado_em?: string
-          descricao?: string
-          id?: string
-        }
-        Relationships: []
-      }
       ranking_ordens_servico: {
         Row: {
           bairro: string | null
@@ -809,7 +809,6 @@ export type Database = {
           criado_em: string
           demanda_id: string
           id: string
-          respostas: Json | null
           texto: string
           usuario_id: string
         }
@@ -819,7 +818,6 @@ export type Database = {
           criado_em?: string
           demanda_id: string
           id?: string
-          respostas?: Json | null
           texto: string
           usuario_id: string
         }
@@ -829,7 +827,6 @@ export type Database = {
           criado_em?: string
           demanda_id?: string
           id?: string
-          respostas?: Json | null
           texto?: string
           usuario_id?: string
         }
@@ -859,29 +856,29 @@ export type Database = {
       }
       servicos: {
         Row: {
+          area_coordenacao_id: string
           criado_em: string
           descricao: string
           id: string
-          problema_id: string
         }
         Insert: {
+          area_coordenacao_id: string
           criado_em?: string
           descricao: string
           id?: string
-          problema_id: string
         }
         Update: {
+          area_coordenacao_id?: string
           criado_em?: string
           descricao?: string
           id?: string
-          problema_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "servicos_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
+            columns: ["area_coordenacao_id"]
             isOneToOne: false
-            referencedRelation: "problemas"
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
         ]
@@ -1088,6 +1085,7 @@ export type Database = {
       usuarios: {
         Row: {
           aniversario: string | null
+          area_coordenacao_id: string | null
           cargo_id: string | null
           configuracoes_notificacao: Json | null
           criado_em: string
@@ -1095,11 +1093,11 @@ export type Database = {
           foto_perfil_url: string | null
           id: string
           nome_completo: string
-          problema_id: string | null
           whatsapp: string | null
         }
         Insert: {
           aniversario?: string | null
+          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           criado_em?: string
@@ -1107,11 +1105,11 @@ export type Database = {
           foto_perfil_url?: string | null
           id: string
           nome_completo: string
-          problema_id?: string | null
           whatsapp?: string | null
         }
         Update: {
           aniversario?: string | null
+          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           criado_em?: string
@@ -1119,15 +1117,14 @@ export type Database = {
           foto_perfil_url?: string | null
           id?: string
           nome_completo?: string
-          problema_id?: string | null
           whatsapp?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "usuarios_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
+            columns: ["area_coordenacao_id"]
             isOneToOne: false
-            referencedRelation: "problemas"
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
           {
@@ -1143,41 +1140,83 @@ export type Database = {
     Views: {
       demandas_visiveis: {
         Row: {
+          area_coordenacao_id: string | null
           arquivo_url: string | null
           atualizado_em: string | null
           autor_id: string | null
-          autor_nome: string | null
           bairro_id: string | null
-          bairro_nome: string | null
           detalhes_solicitacao: string | null
           email_solicitante: string | null
           endereco: string | null
           horario_publicacao: string | null
           id: string | null
           nome_solicitante: string | null
-          origem_descricao: string | null
           origem_id: string | null
           perguntas: Json | null
           prazo_resposta: string | null
           prioridade: string | null
-          problema_descricao: string | null
-          problema_id: string | null
           protocolo: string | null
-          servico_descricao: string | null
           servico_id: string | null
           status: string | null
           telefone_solicitante: string | null
-          tipo_midia_descricao: string | null
           tipo_midia_id: string | null
           titulo: string | null
           veiculo_imprensa: string | null
         }
+        Insert: {
+          area_coordenacao_id?: string | null
+          arquivo_url?: string | null
+          atualizado_em?: string | null
+          autor_id?: string | null
+          bairro_id?: string | null
+          detalhes_solicitacao?: string | null
+          email_solicitante?: string | null
+          endereco?: string | null
+          horario_publicacao?: string | null
+          id?: string | null
+          nome_solicitante?: string | null
+          origem_id?: string | null
+          perguntas?: Json | null
+          prazo_resposta?: string | null
+          prioridade?: string | null
+          protocolo?: string | null
+          servico_id?: string | null
+          status?: string | null
+          telefone_solicitante?: string | null
+          tipo_midia_id?: string | null
+          titulo?: string | null
+          veiculo_imprensa?: string | null
+        }
+        Update: {
+          area_coordenacao_id?: string | null
+          arquivo_url?: string | null
+          atualizado_em?: string | null
+          autor_id?: string | null
+          bairro_id?: string | null
+          detalhes_solicitacao?: string | null
+          email_solicitante?: string | null
+          endereco?: string | null
+          horario_publicacao?: string | null
+          id?: string | null
+          nome_solicitante?: string | null
+          origem_id?: string | null
+          perguntas?: Json | null
+          prazo_resposta?: string | null
+          prioridade?: string | null
+          protocolo?: string | null
+          servico_id?: string | null
+          status?: string | null
+          telefone_solicitante?: string | null
+          tipo_midia_id?: string | null
+          titulo?: string | null
+          veiculo_imprensa?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: "demandas_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
+            columns: ["area_coordenacao_id"]
             isOneToOne: false
-            referencedRelation: "problemas"
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
           {

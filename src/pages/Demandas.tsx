@@ -1,14 +1,12 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout, DemandFilter, DemandList, DemandCards } from '@/components/demandas';
 import DemandDetail from '@/components/demandas/DemandDetail';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
 interface Demand {
   id: string;
   titulo: string;
@@ -42,7 +40,6 @@ interface Demand {
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null;
 }
-
 const Demandas = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [filterStatus, setFilterStatus] = useState<string>('pendente');
@@ -83,8 +80,10 @@ const Demandas = () => {
     },
     meta: {
       onError: (err: any) => {
-        toast.error("Erro ao carregar demandas", {
-          description: err.message || "Ocorreu um erro ao carregar as demandas."
+        toast({
+          title: "Erro ao carregar demandas",
+          description: err.message || "Ocorreu um erro ao carregar as demandas.",
+          variant: "destructive"
         });
       }
     }
@@ -100,30 +99,18 @@ const Demandas = () => {
   if (error) {
     console.error("Error loading demands:", error);
   }
-  
   const handleSelectDemand = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
   };
-  
   const handleCloseDetail = () => {
     setIsDetailOpen(false);
     setSelectedDemand(null);
   };
-  
-  const handleEditDemand = (demand: Demand) => {
-    // Implement edit functionality
-    console.log("Edit demand:", demand);
-    // Close detail view
-    handleCloseDetail();
-  };
-  
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  
-  return (
-    <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
+  return <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
       {/* Header */}
       <Header showControls={true} toggleSidebar={toggleSidebar} />
 
@@ -140,41 +127,15 @@ const Demandas = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <DemandFilter 
-                viewMode={viewMode} 
-                setViewMode={setViewMode} 
-                filterStatus={filterStatus} 
-                setFilterStatus={setFilterStatus} 
-              />
+              <DemandFilter viewMode={viewMode} setViewMode={setViewMode} filterStatus={filterStatus} setFilterStatus={setFilterStatus} />
               
-              {viewMode === 'cards' ? (
-                <DemandCards 
-                  demandas={demandas} 
-                  isLoading={isLoading} 
-                  onSelectDemand={handleSelectDemand} 
-                />
-              ) : (
-                <DemandList 
-                  demandas={demandas} 
-                  isLoading={isLoading} 
-                  onSelectDemand={handleSelectDemand} 
-                />
-              )}
-              
-              {selectedDemand && (
-                <DemandDetail 
-                  demand={selectedDemand} 
-                  onEdit={handleEditDemand} 
-                  isOpen={isDetailOpen} 
-                  onClose={handleCloseDetail} 
-                />
-              )}
+              {viewMode === 'cards' ? <DemandCards demandas={demandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} /> : <DemandList demandas={demandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} />}
+
+              <DemandDetail demand={selectedDemand} isOpen={isDetailOpen} onClose={handleCloseDetail} />
             </CardContent>
           </Card>
         </Layout>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Demandas;

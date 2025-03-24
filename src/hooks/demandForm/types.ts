@@ -1,7 +1,7 @@
 
 export interface DemandFormData {
   titulo: string;
-  problema_id: string;
+  area_coordenacao_id: string;
   servico_id: string;
   origem_id: string;
   tipo_midia_id: string;
@@ -16,12 +16,11 @@ export interface DemandFormData {
   perguntas: string[];
   detalhes_solicitacao: string;
   arquivo_url: string;
-  arquivo_nome?: string; // Added for file name reference
 }
 
 export interface FormState {
   formData: DemandFormData;
-  problemas: any[];
+  areasCoord: any[];
   servicos: any[];
   origens: any[];
   tiposMidia: any[];
@@ -33,5 +32,4 @@ export interface FormState {
   serviceSearch: string;
   selectedDistrito: string;
   activeStep: number;
-  selectedFile: File | null; // Added for file upload
 }

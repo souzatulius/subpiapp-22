@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
-import { OS156Item, FilterOptions } from '@/components/ranking/types';
+import { OS156Item, OS156FilterOptions } from '@/components/ranking/types';
 import { useOS156Upload } from './useOS156Upload';
 import { useChartDataGeneration } from './useChartDataGeneration';
 import { useOS156Filters } from './useOS156Filters';
@@ -9,7 +9,6 @@ import { useOS156Filters } from './useOS156Filters';
 export const useOS156Data = (user: User | null) => {
   const [osData, setOsData] = useState<OS156Item[]>([]);
   const [companies, setCompanies] = useState<string[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
   
   const { chartData, generateChartData } = useChartDataGeneration();
   
@@ -34,7 +33,7 @@ export const useOS156Data = (user: User | null) => {
     fetchLastUpload, 
     handleFileUpload, 
     deleteLastUpload 
-  } = useOS156Upload(user, handleDataLoaded, setUploadProgress);
+  } = useOS156Upload(user, handleDataLoaded);
   
   const { 
     filters, 
@@ -54,13 +53,12 @@ export const useOS156Data = (user: User | null) => {
     chartData,
     companies,
     filters,
-    uploadProgress,
     fetchLastUpload,
     handleFileUpload,
     deleteLastUpload,
-    applyFilters: (newFilters: FilterOptions) => {
-      setFilters(newFilters as any);
-      applyFilters(newFilters as any);
+    applyFilters: (newFilters: OS156FilterOptions) => {
+      setFilters(newFilters);
+      applyFilters(newFilters);
     }
   };
 };

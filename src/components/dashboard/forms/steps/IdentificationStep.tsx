@@ -1,25 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, Briefcase, Book, Heart, Home, Code, Lightbulb, Users, Mail, X, ChevronDown, Search } from 'lucide-react';
+import { LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, X, ChevronDown, Search } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Textarea } from '@/components/ui/textarea';
 
 interface IdentificationStepProps {
   formData: {
     titulo: string;
-    problema_id: string;
+    area_coordenacao_id: string;
     servico_id: string;
-    detalhes_solicitacao: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   handleServiceSelect: (serviceId: string) => void;
-  problemas: any[];
+  areasCoord: any[];
   filteredServicesBySearch: any[];
   serviceSearch: string;
   servicos: any[];
@@ -32,25 +30,17 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   handleChange,
   handleSelectChange,
   handleServiceSelect,
-  problemas,
+  areasCoord,
   filteredServicesBySearch,
   serviceSearch,
   servicos,
   errors = [],
-  showTitleField = false
+  showTitleField = true
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [showDetailsField, setShowDetailsField] = useState(false);
 
-  // Show details field when service is selected
-  useEffect(() => {
-    if (formData.servico_id) {
-      setShowDetailsField(true);
-    }
-  }, [formData.servico_id]);
-
-  // Function to get the appropriate icon based on problema description
-  const getProblemaIcon = (descricao: string) => {
+  // Function to get the appropriate icon based on area description
+  const getAreaIcon = (descricao: string) => {
     const iconMap: {
       [key: string]: React.ReactNode;
     } = {
@@ -73,7 +63,6 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
 
   const handleServiceRemove = () => {
     handleSelectChange('servico_id', '');
-    setShowDetailsField(false);
   };
 
   const hasError = (field: string) => errors.some(err => err.field === field);
@@ -85,32 +74,52 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   const selectedService = servicos.find(s => s.id === formData.servico_id);
 
   return <div className="space-y-4">
+      {showTitleField && (
+        <div>
+          <Label htmlFor="titulo" className={`block ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
+            Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
+          </Label>
+          {/* Título da Demanda - estilo similar ao SmartSearchCard */}
+          <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+            <Input 
+              id="titulo" 
+              name="titulo" 
+              value={formData.titulo} 
+              onChange={handleChange} 
+              className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasError('titulo') ? 'placeholder-orange-300' : ''}`} 
+              placeholder="Digite o título da demanda..."
+            />
+          </div>
+          {hasError('titulo') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>}
+        </div>
+      )}
+      
       <div>
-        <Label className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
-          Problema {hasError('problema_id') && <span className="text-orange-500">*</span>}
+        <Label className={`block mb-2 ${hasError('area_coordenacao_id') ? 'text-orange-500 font-semibold' : ''}`}>
+          Área de Coordenação {hasError('area_coordenacao_id') && <span className="text-orange-500">*</span>}
         </Label>
         <div className="flex flex-wrap gap-3">
-          {problemas.map(problema => (
+          {areasCoord.map(area => (
             <Button 
-              key={problema.id} 
+              key={area.id} 
               type="button" 
-              variant={formData.problema_id === problema.id ? "default" : "outline"} 
+              variant={formData.area_coordenacao_id === area.id ? "default" : "outline"} 
               className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-                formData.problema_id === problema.id ? "ring-2 ring-[#003570]" : ""
+                formData.area_coordenacao_id === area.id ? "ring-2 ring-[#003570]" : ""
               } ${
-                hasError('problema_id') ? 'border-orange-500' : ''
+                hasError('area_coordenacao_id') ? 'border-orange-500' : ''
               }`} 
-              onClick={() => handleSelectChange('problema_id', problema.id)}
+              onClick={() => handleSelectChange('area_coordenacao_id', area.id)}
             >
-              {getProblemaIcon(problema.descricao)}
-              <span className="text-sm font-semibold">{problema.descricao}</span>
+              {getAreaIcon(area.descricao)}
+              <span className="text-sm font-semibold">{area.descricao}</span>
             </Button>
           ))}
         </div>
-        {hasError('problema_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('problema_id')}</p>}
+        {hasError('area_coordenacao_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('area_coordenacao_id')}</p>}
       </div>
       
-      {formData.problema_id && (
+      {formData.area_coordenacao_id && (
         <div className="animate-fadeIn">
           <Label htmlFor="servico_id" className={`block mb-2 ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}>
             Serviço {hasError('servico_id') && <span className="text-orange-500">*</span>}
@@ -193,29 +202,6 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
           )}
           
           {hasError('servico_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>}
-        </div>
-      )}
-
-      {showDetailsField && (
-        <div className="animate-fadeIn">
-          <Label 
-            htmlFor="detalhes_solicitacao" 
-            className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Detalhes da Solicitação {hasError('detalhes_solicitacao') && <span className="text-orange-500">*</span>}
-          </Label>
-          <Textarea
-            id="detalhes_solicitacao"
-            name="detalhes_solicitacao"
-            value={formData.detalhes_solicitacao}
-            onChange={handleChange}
-            rows={5}
-            className={hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}
-            placeholder="Descreva os detalhes da solicitação..."
-          />
-          {hasError('detalhes_solicitacao') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
-          )}
         </div>
       )}
     </div>;

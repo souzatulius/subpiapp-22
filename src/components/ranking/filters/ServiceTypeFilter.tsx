@@ -7,15 +7,10 @@ import { FilterOptions } from '@/components/ranking/types';
 
 interface ServiceTypeFilterProps {
   serviceTypes: FilterOptions['serviceTypes'];
-  allServiceTypes?: string[]; // Make this prop optional
   onServiceTypeChange: (type: string) => void;
 }
 
-const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({ 
-  serviceTypes, 
-  allServiceTypes = ['Todos', 'Tapa Buraco', 'Poda', 'Limpeza'], // Default value
-  onServiceTypeChange 
-}) => {
+const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({ serviceTypes, onServiceTypeChange }) => {
   return (
     <div className="space-y-2">
       <Label>Tipo de Serviço</Label>
@@ -25,7 +20,7 @@ const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({
         </SelectTrigger>
         <SelectContent>
           <div className="space-y-1 p-1">
-            {allServiceTypes.map((type) => (
+            {['Todos', 'Tapa Buraco', 'Poda', 'Limpeza'].map((type) => (
               <div key={type} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`type-${type}`} 

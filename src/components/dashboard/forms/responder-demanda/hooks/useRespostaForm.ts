@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { Demanda } from '../types';
 
 export const useRespostaForm = (
@@ -15,49 +15,27 @@ export const useRespostaForm = (
 ) => {
   const { user } = useAuth();
   const [resposta, setResposta] = useState('');
-  const [respostasPerguntas, setRespostasPerguntas] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRespostaPerguntaChange = (perguntaIndex: string, value: string) => {
-    setRespostasPerguntas(prev => ({
-      ...prev,
-      [perguntaIndex]: value
-    }));
-  };
-
   const handleSubmitResposta = async () => {
-    if (!selectedDemanda) {
-      toast.error("Demanda não selecionada", {
-        description: "Por favor, selecione uma demanda para responder."
+    if (!selectedDemanda || !resposta.trim()) {
+      toast({
+        title: "Resposta não pode ser vazia",
+        description: "Por favor, digite uma resposta para a demanda.",
+        variant: "destructive"
       });
       return;
     }
-
-    // Check if at least one question has been answered
-    const hasAnsweredAnyQuestion = Object.values(respostasPerguntas).some(answer => answer.trim() !== '');
-    
-    if (!hasAnsweredAnyQuestion && !resposta.trim()) {
-      toast.error("Resposta não pode ser vazia", {
-        description: "Por favor, responda pelo menos uma pergunta ou adicione observações."
-      });
-      return;
-    }
-
     try {
       setIsLoading(true);
 
-      // Prepare the response data
-      const responseData = {
-        demanda_id: selectedDemanda.id,
-        usuario_id: user?.id,
-        texto: resposta.trim() ? resposta : "Respostas às perguntas fornecidas.",
-        respostas: respostasPerguntas
-      };
-
       const {
         error: respostaError
-      } = await supabase.from('respostas_demandas').insert([responseData]);
-      
+      } = await supabase.from('respostas_demandas').insert([{
+        demanda_id: selectedDemanda.id,
+        usuario_id: user?.id,
+        texto: resposta
+      }]);
       if (respostaError) throw respostaError;
 
       const {
@@ -65,10 +43,10 @@ export const useRespostaForm = (
       } = await supabase.from('demandas').update({
         status: 'respondida'
       }).eq('id', selectedDemanda.id);
-      
       if (statusError) throw statusError;
       
-      toast.success("Resposta enviada com sucesso!", {
+      toast({
+        title: "Resposta enviada com sucesso!",
         description: "A demanda foi respondida e seu status foi atualizado."
       });
 
@@ -76,11 +54,12 @@ export const useRespostaForm = (
       setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
       setSelectedDemanda(null);
       setResposta('');
-      setRespostasPerguntas({});
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
-      toast.error("Erro ao enviar resposta", {
-        description: error.message || "Ocorreu um erro ao processar sua solicitação."
+      toast({
+        title: "Erro ao enviar resposta",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -90,8 +69,6 @@ export const useRespostaForm = (
   return {
     resposta,
     setResposta,
-    respostasPerguntas,
-    handleRespostaPerguntaChange,
     isLoading,
     handleSubmitResposta
   };

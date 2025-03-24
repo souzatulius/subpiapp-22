@@ -1,85 +1,42 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from 'sonner';
-
-export type Notification = {
-  id: string;
-  mensagem: string;
-  data_envio: string;
-  lida: boolean;
-  tipo?: string;
-};
+import { toast } from '@/components/ui/use-toast';
+import { Notification } from '@/components/settings/announcements/types';
 
 export const useNotifications = () => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const deletedIdsRef = useRef<Set<string>>(new Set());
 
-  // Calculate unread count
-  const unreadCount = notifications.filter(notification => !notification.lida).length;
-
-  // Function to fetch notifications
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
 
     try {
-      setIsLoading(true);
       const { data, error } = await supabase
         .from('notificacoes')
         .select('*')
         .eq('usuario_id', user.id)
-        .eq('excluida', false)
-        .order('data_envio', { ascending: false });
+        .eq('excluida', false) // Ensure we fetch only non-deleted notifications
+        .order('data_envio', { ascending: false })
+        .limit(10);
 
-      if (error) {
-        console.error('Erro ao buscar notificações:', error);
-        toast.error("Erro", {
-          description: "Erro ao buscar notificações. Por favor, tente novamente."
-        });
-        return;
-      }
+      if (error) throw error;
 
-      setNotifications(data || []);
-    } catch (error: any) {
-      console.error('Erro ao buscar notificações:', error);
-      toast.error("Erro", {
-        description: error.message || "Ocorreu um erro ao buscar as notificações."
-      });
-    } finally {
-      setIsLoading(false);
+      // Ensure each notification has a tipo property with a default value
+      const processedNotifications = (data || []).map(notification => ({
+        ...notification,
+        tipo: notification.tipo || 'comunicado' // Default to 'comunicado' if tipo is missing
+      })) as Notification[];
+
+      setNotifications(processedNotifications);
+      setUnreadCount(processedNotifications.filter(n => !n.lida).length || 0);
+    } catch (error) {
+      console.error('Erro ao carregar notificações:', error);
     }
   }, [user]);
-
-  useEffect(() => {
-    fetchNotifications();
-
-    // Set up a real-time subscription to the 'notificacoes' table
-    if (user) {
-      const channel = supabase
-        .channel('public:notificacoes')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'notificacoes', filter: `usuario_id=eq.${user?.id}` },
-          (payload) => {
-            // When a new notification arrives, update the state
-            if (payload.new) {
-              setNotifications((prevNotifications) => [
-                payload.new as Notification,
-                ...prevNotifications,
-              ]);
-            }
-          }
-        )
-        .subscribe();
-
-      // Unsubscribe from the channel when the component unmounts
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [user, fetchNotifications]);
 
   const markAsRead = async (id: string) => {
     try {
@@ -88,89 +45,77 @@ export const useNotifications = () => {
         .update({ lida: true })
         .eq('id', id);
 
-      if (error) {
-        console.error('Erro ao marcar notificação como lida:', error);
-        toast.error("Erro", {
-          description: "Erro ao marcar notificação como lida. Por favor, tente novamente."
-        });
-        return;
-      }
+      if (error) throw error;
 
-      setNotifications(prevNotifications =>
-        prevNotifications.map(notification =>
-          notification.id === id ? { ...notification, lida: true } : notification
-        )
-      );
-    } catch (error: any) {
-      console.error('Erro ao marcar notificação como lida:', error);
-      toast.error("Erro", {
-        description: "Erro ao marcar notificação como lida. Por favor, tente novamente."
+      setNotifications(notifications.map(n => 
+        n.id === id ? { ...n, lida: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+
+      toast({
+        description: "Notificação marcada como lida"
       });
+    } catch (error) {
+      console.error('Erro ao marcar notificação como lida:', error);
     }
   };
 
   const deleteNotification = async (id: string) => {
     try {
+      // Update the notification to mark it as deleted instead of removing it
       const { error } = await supabase
         .from('notificacoes')
         .update({ excluida: true })
         .eq('id', id);
 
-      if (error) {
-        console.error('Erro ao excluir notificação:', error);
-        toast.error("Erro", {
-          description: "Erro ao excluir notificação. Por favor, tente novamente."
-        });
-        return;
+      if (error) throw error;
+
+      // Remove from local state
+      const notificationToRemove = notifications.find(n => n.id === id);
+      setNotifications(notifications.filter(n => n.id !== id));
+      
+      if (notificationToRemove && !notificationToRemove.lida) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
       }
 
-      setNotifications(prevNotifications =>
-        prevNotifications.filter(notification => notification.id !== id)
-      );
-    } catch (error: any) {
-      console.error('Erro ao excluir notificação:', error);
-      toast.error("Erro", {
-        description: "Erro ao excluir notificação. Por favor, tente novamente."
+      toast({
+        description: "Notificação excluída"
       });
+    } catch (error) {
+      console.error('Erro ao excluir notificação:', error);
     }
   };
 
   const markAllAsRead = async () => {
-    if (!user) return;
-    
     try {
+      const unreadIds = notifications.filter(n => !n.lida).map(n => n.id);
+      
+      if (unreadIds.length === 0) return;
+      
       const { error } = await supabase
         .from('notificacoes')
         .update({ lida: true })
-        .eq('usuario_id', user?.id)
-        .eq('excluida', false);
+        .in('id', unreadIds);
 
-      if (error) {
-        console.error('Erro ao marcar todas as notificações como lidas:', error);
-        toast.error("Erro", {
-          description: "Erro ao marcar todas as notificações como lidas. Por favor, tente novamente."
-        });
-        return;
-      }
+      if (error) throw error;
 
-      setNotifications(prevNotifications =>
-        prevNotifications.map(notification => ({ ...notification, lida: true }))
-      );
-    } catch (error: any) {
-      console.error('Erro ao marcar todas as notificações como lidas:', error);
-      toast.error("Erro", {
-        description: "Erro ao marcar todas as notificações como lidas. Por favor, tente novamente."
+      setNotifications(notifications.map(n => ({ ...n, lida: true })));
+      setUnreadCount(0);
+
+      toast({
+        description: "Todas as notificações foram marcadas como lidas"
       });
+    } catch (error) {
+      console.error('Erro ao marcar todas notificações como lidas:', error);
     }
   };
 
   return {
     notifications,
-    isLoading,
+    unreadCount,
+    fetchNotifications,
     markAsRead,
     deleteNotification,
-    markAllAsRead,
-    fetchNotifications, // Added this function
-    unreadCount        // Added the unread count
+    markAllAsRead
   };
 };

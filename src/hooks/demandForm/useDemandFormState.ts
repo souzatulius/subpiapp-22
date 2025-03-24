@@ -8,7 +8,7 @@ export const useDemandFormState = (
 ) => {
   const initialFormState: DemandFormData = {
     titulo: '',
-    problema_id: '',
+    area_coordenacao_id: '',
     servico_id: '',
     origem_id: '',
     tipo_midia_id: '',
@@ -22,8 +22,7 @@ export const useDemandFormState = (
     bairro_id: '',
     perguntas: ['', '', '', '', ''],
     detalhes_solicitacao: '',
-    arquivo_url: '',
-    arquivo_nome: ''
+    arquivo_url: ''
   };
 
   const [formData, setFormData] = useState<DemandFormData>(initialFormState);
@@ -32,10 +31,10 @@ export const useDemandFormState = (
   const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Auto-generate title based on selected problem, service, and bairro
+  // Generate title suggestion based on service and bairro
   useEffect(() => {
+    // Only auto-generate title if we're on step 5 and moving to step 6
     if (activeStep === 5) {
       const selectedService = servicos.find(s => s.id === formData.servico_id);
       const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
@@ -55,19 +54,17 @@ export const useDemandFormState = (
     }
   }, [activeStep, formData.servico_id, formData.bairro_id, servicos, bairros]);
 
-  // Filter services based on selected problem
   useEffect(() => {
-    if (formData.problema_id) {
+    if (formData.area_coordenacao_id) {
       const filtered = servicos.filter(
-        service => service.problema_id === formData.problema_id
+        service => service.area_coordenacao_id === formData.area_coordenacao_id
       );
       setFilteredServicos(filtered);
     } else {
       setFilteredServicos([]);
     }
-  }, [formData.problema_id, servicos]);
+  }, [formData.area_coordenacao_id, servicos]);
 
-  // Filter bairros based on selected distrito
   useEffect(() => {
     if (selectedDistrito) {
       const filtered = bairros.filter(
@@ -79,7 +76,6 @@ export const useDemandFormState = (
     }
   }, [selectedDistrito, bairros]);
 
-  // Filter services by search term
   const filteredServicesBySearch = useMemo(() => {
     if (!serviceSearch) return filteredServicos;
     return filteredServicos.filter(service => 
@@ -95,22 +91,6 @@ export const useDemandFormState = (
       setFormData(prev => ({
         ...prev,
         [name]: value
-      }));
-    }
-  };
-
-  const handleFileChange = (file: File | null) => {
-    setSelectedFile(file);
-    if (file) {
-      setFormData(prev => ({
-        ...prev,
-        arquivo_nome: file.name
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        arquivo_nome: '',
-        arquivo_url: ''
       }));
     }
   };
@@ -140,6 +120,7 @@ export const useDemandFormState = (
   };
 
   const nextStep = () => {
+    // Check against FORM_STEPS.length - 1 (6) instead of hardcoded value
     if (activeStep < 6) {
       setActiveStep(activeStep + 1);
     }
@@ -156,7 +137,6 @@ export const useDemandFormState = (
     setServiceSearch('');
     setSelectedDistrito('');
     setActiveStep(0);
-    setSelectedFile(null);
   };
 
   return {
@@ -167,12 +147,10 @@ export const useDemandFormState = (
     selectedDistrito,
     activeStep,
     filteredServicesBySearch,
-    selectedFile,
     handleChange,
     handleSelectChange,
     handleServiceSelect,
     handlePerguntaChange,
-    handleFileChange,
     nextStep,
     prevStep,
     setSelectedDistrito,

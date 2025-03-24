@@ -21,11 +21,10 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     formData,
-    problemas,
+    areasCoord,
     servicos,
     origens,
     tiposMidia,
@@ -36,12 +35,10 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     filteredBairros,
     selectedDistrito,
     activeStep,
-    selectedFile,
     handleChange,
     handleSelectChange,
     handleServiceSelect,
     handlePerguntaChange,
-    handleFileChange,
     handleSubmit: submitForm,
     nextStep,
     prevStep,
@@ -51,47 +48,44 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   } = useDemandForm(user?.id, onClose);
 
   const handleStepClick = (stepIndex: number) => {
-    // Allow free navigation between steps
+    // Allow direct navigation to any step
     setActiveStep(stepIndex);
   };
 
   const handleNextStep = () => {
-    // Validate current step but allow navigation even with errors
+    // Validate current step
     const errors = validateDemandForm(formData, activeStep);
     setValidationErrors(errors);
     
-    // Always allow moving to next step
-    nextStep();
+    if (errors.length === 0) {
+      nextStep();
+    } else {
+      console.log('Validation errors:', errors);
+      toast({
+        title: "Formulário incompleto",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSubmit = async () => {
-    // Validate all steps before final submission
-    setIsSubmitting(true);
-    let allErrors: ValidationError[] = [];
+    // Validate final step before submission
+    const errors = validateDemandForm(formData, activeStep);
+    setValidationErrors(errors);
     
-    // Validate each step
-    for (let i = 0; i < FORM_STEPS.length; i++) {
-      const stepErrors = validateDemandForm(formData, i);
-      allErrors = [...allErrors, ...stepErrors];
-    }
-    
-    setValidationErrors(allErrors);
-    
-    if (allErrors.length === 0) {
+    if (errors.length === 0) {
       try {
         await submitForm();
       } catch (error: any) {
         console.error('Submission error:', error);
-        toast.error("Erro ao cadastrar demanda", {
-          description: error.message || "Ocorreu um erro ao processar sua solicitação."
+        toast({
+          title: "Erro ao cadastrar demanda",
+          description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+          variant: "destructive"
         });
       }
-    } else {
-      toast.error("Formulário incompleto", {
-        description: "Por favor, preencha todos os campos obrigatórios."
-      });
     }
-    setIsSubmitting(false);
   };
 
   return (
@@ -136,9 +130,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             handleSelectChange={handleSelectChange}
             handleServiceSelect={handleServiceSelect}
             handlePerguntaChange={handlePerguntaChange}
-            handleFileChange={handleFileChange}
-            selectedFile={selectedFile}
-            problemas={problemas}
+            areasCoord={areasCoord}
             filteredServicesBySearch={filteredServicesBySearch}
             serviceSearch={serviceSearch}
             servicos={servicos}
@@ -156,7 +148,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             onNextStep={handleNextStep}
             isLastStep={activeStep === FORM_STEPS.length - 1}
             isFirstStep={activeStep === 0}
-            isSubmitting={isLoading || isSubmitting}
+            isSubmitting={isLoading}
             onSubmit={handleSubmit}
           />
         </div>

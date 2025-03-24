@@ -9,13 +9,10 @@ interface DailyOrdersChartProps {
 }
 
 const DailyOrdersChart: React.FC<DailyOrdersChartProps> = ({ data, isLoading }) => {
-  // Check if data and data.datasets exist with proper structure
-  const isDataValid = !isLoading && data && data.datasets && data.datasets.length > 0;
-  
   // Calculate the total or average if appropriate
-  const chartValue = isDataValid && data.datasets[0]?.data?.length > 0 
-    ? `${data.datasets[0].data.reduce((sum: number, val: number) => sum + val, 0)} ordens`
-    : 'N/A';
+  const chartValue = isLoading || !data || !data.datasets || data.datasets[0]?.data?.length === 0 
+    ? '' 
+    : `${data.datasets[0]?.data.reduce((sum: number, val: number) => sum + val, 0)} ordens`;
   
   return (
     <ChartCard
@@ -23,7 +20,7 @@ const DailyOrdersChart: React.FC<DailyOrdersChartProps> = ({ data, isLoading }) 
       value={chartValue}
       isLoading={isLoading}
     >
-      {isDataValid ? (
+      {!isLoading && data && (
         <Line 
           data={data} 
           options={{
@@ -50,10 +47,6 @@ const DailyOrdersChart: React.FC<DailyOrdersChartProps> = ({ data, isLoading }) 
             },
           }}
         />
-      ) : (
-        <div className="h-full flex items-center justify-center">
-          <p className="text-gray-400">Dados insuficientes para exibir o gráfico</p>
-        </div>
       )}
     </ChartCard>
   );

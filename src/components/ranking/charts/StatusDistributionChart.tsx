@@ -14,16 +14,13 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
   isLoading,
   title = "Status das ordens de serviço"
 }) => {
-  // Check if data and datasets exist
-  const isDataValid = !isLoading && data && data.datasets && data.datasets.length > 0;
-  
   return (
     <ChartCard
       title={title}
       value={isLoading ? '' : 'Comparação'}
       isLoading={isLoading}
     >
-      {isDataValid ? (
+      {!isLoading && (
         <Bar 
           data={data} 
           options={{
@@ -40,10 +37,6 @@ const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({
             },
           }}
         />
-      ) : (
-        <div className="h-full flex items-center justify-center">
-          <p className="text-gray-400">Dados insuficientes para exibir o gráfico</p>
-        </div>
       )}
     </ChartCard>
   );

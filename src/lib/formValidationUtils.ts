@@ -9,38 +9,28 @@ export interface ValidationError {
 export const validateDemandForm = (formData: DemandFormData, activeStep: number): ValidationError[] => {
   const errors: ValidationError[] = [];
   
-  // Validate based on steps
+  // Basic validation based on steps
   switch(activeStep) {
-    case 0: // Problema e Serviço
-      if (!formData.problema_id) {
-        errors.push({ field: 'problema_id', message: 'Selecione um problema' });
-      }
-      if (!formData.servico_id) {
-        errors.push({ field: 'servico_id', message: 'Selecione um serviço' });
-      }
+    case 0: // Detalhes da Solicitação
       if (!formData.detalhes_solicitacao?.trim()) {
         errors.push({ field: 'detalhes_solicitacao', message: 'Descreva os detalhes da solicitação' });
       }
       break;
-    case 1: // Origem da Demanda
+    case 1: // Area and Service step
+      if (!formData.area_coordenacao_id) {
+        errors.push({ field: 'area_coordenacao_id', message: 'Selecione uma área de coordenação' });
+      }
+      if (!formData.servico_id) {
+        errors.push({ field: 'servico_id', message: 'Selecione um serviço' });
+      }
+      break;
+    case 2: // Origin and Media step
       if (!formData.origem_id) {
         errors.push({ field: 'origem_id', message: 'Selecione uma origem para a demanda' });
       }
-      // Validate tipo_midia_id and veiculo_imprensa based on origem_id
-      // Add your specific validation logic here
+      // Only validate tipo_midia_id if origem is Imprensa (assuming it has a specific ID)
       break;
-    case 2: // Requester Info
-      // Add validation for requester info if needed
-      break;
-    case 3: // Location
-      if (!formData.endereco?.trim()) {
-        errors.push({ field: 'endereco', message: 'Informe o endereço' });
-      }
-      if (!formData.bairro_id) {
-        errors.push({ field: 'bairro_id', message: 'Selecione um bairro' });
-      }
-      break;
-    case 4: // Priority and Deadline
+    case 3: // Priority and Deadline step
       if (!formData.prioridade) {
         errors.push({ field: 'prioridade', message: 'Selecione uma prioridade' });
       }
@@ -48,17 +38,16 @@ export const validateDemandForm = (formData: DemandFormData, activeStep: number)
         errors.push({ field: 'prazo_resposta', message: 'Defina um prazo para resposta' });
       }
       break;
-    case 5: // Title and Questions
+    case 4: // Requester Info step
+      // No mandatory fields in this step typically, but can add if needed
+      break;
+    case 5: // Location step
+      // Add location validation if needed
+      break;
+    case 6: // Title and Questions step
       if (!formData.titulo?.trim()) {
         errors.push({ field: 'titulo', message: 'Defina um título para a demanda' });
       }
-      // At least one question is required
-      if (formData.perguntas.every(p => !p.trim())) {
-        errors.push({ field: 'perguntas', message: 'Adicione pelo menos uma pergunta' });
-      }
-      break;
-    case 6: // File Upload
-      // File upload is optional
       break;
   }
   

@@ -23,7 +23,7 @@ const AreaTecnicaFilter: React.FC<AreaTecnicaFilterProps> = ({
       <label className="block text-sm font-medium text-gray-700 mb-1">Área Técnica</label>
       <Select
         value={value}
-        onValueChange={(val) => onChange(val as AreaTecnica)}
+        onValueChange={onChange as (value: string) => void}
       >
         <SelectTrigger>
           <SelectValue placeholder="Selecione a área técnica" />

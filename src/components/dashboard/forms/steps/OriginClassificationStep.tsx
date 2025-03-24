@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,36 +27,24 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
   tiposMidia,
   errors = []
 }) => {
-  const [showTipoMidia, setShowTipoMidia] = useState(false);
-  const [showVeiculoImprensa, setShowVeiculoImprensa] = useState(false);
-
-  // Check if selected origin requires additional fields
-  useEffect(() => {
-    const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
-    const isSpecialOrigin = selectedOrigin?.descricao === "Imprensa" || 
-                           selectedOrigin?.descricao === "SECOM" || 
-                           selectedOrigin?.descricao === "SMSUB";
-    
-    setShowTipoMidia(isSpecialOrigin);
-    
-    // If origin changes and doesn't require tipo_midia, reset it
-    if (!isSpecialOrigin && formData.tipo_midia_id) {
-      handleSelectChange('tipo_midia_id', '');
-      handleSelectChange('veiculo_imprensa', '');
-    }
-  }, [formData.origem_id, origens]);
-
-  // Show vehicle field when media type is selected
-  useEffect(() => {
-    setShowVeiculoImprensa(!!formData.tipo_midia_id);
-  }, [formData.tipo_midia_id]);
-
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
   };
   
+  // Check if "Imprensa" is selected
+  const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
+  const isImprensaSelected = selectedOrigin?.descricao === "Imprensa";
+  const showVeiculoImprensa = isImprensaSelected && formData.tipo_midia_id;
+  
+  // Reset tipo_midia_id when origin is not "Imprensa"
+  useEffect(() => {
+    if (!isImprensaSelected && formData.tipo_midia_id) {
+      handleSelectChange('tipo_midia_id', '');
+    }
+  }, [isImprensaSelected, formData.tipo_midia_id]);
+
   // Get media type icon based on description
   const getMediaTypeIcon = (descricao: string) => {
     const iconMap: {
@@ -106,7 +94,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
         )}
       </div>
       
-      {showTipoMidia && (
+      {isImprensaSelected && (
         <div className="animate-fadeIn">
           <Label 
             htmlFor="tipo_midia_id" 
