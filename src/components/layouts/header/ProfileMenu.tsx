@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { User, UserCog, Settings, Camera, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,8 +30,8 @@ export const ProfileMenu: React.FC = () => {
       toast.success("Logout realizado com sucesso!");
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
-      toast.error("Erro", { 
-        description: "Erro ao fazer logout. Por favor, tente novamente." 
+      toast.error("Erro ao fazer logout", { 
+        description: "Por favor, tente novamente." 
       });
     }
   };

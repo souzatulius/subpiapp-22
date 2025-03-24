@@ -56,7 +56,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
             servicos:servico_id (descricao),
             tipos_midia:tipo_midia_id (descricao),
             bairro:bairro_id (nome, distrito_id),
-            autor:autor_id (nome)
+            autor:autor_id (nome_completo)
           `)
           .eq('status', 'pendente')
           .order('criado_em', { ascending: false });
@@ -105,7 +105,7 @@ export const useDemandasData = (initialFilter: Filter = 'all') => {
           tipos_midia: demanda.tipos_midia,
           servicos: demanda.servicos,
           arquivo_url: demanda.arquivo_url,
-          arquivo_nome: demanda.arquivo_nome
+          arquivo_nome: demanda.arquivo_nome || null // Handle the case if arquivo_nome doesn't exist
         }));
         
         setDemandas(typedDemandas);
