@@ -26,10 +26,8 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Handle Enter key press
+  // Handle Enter key press - Removendo prevenção de eventos para espaço
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // Removendo qualquer prevenção padrão para a tecla de espaço
-    
     if (e.key === 'Enter' && query.trim()) {
       if (suggestions.length > 0) {
         handleSelectSuggestion(suggestions[0]);

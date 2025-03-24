@@ -15,7 +15,7 @@ const QuickDemandCard: React.FC<QuickDemandCardProps> = ({
   onChange, 
   onSubmit 
 }) => {
-  // Handle Enter key press
+  // Handle Enter key press - Removendo qualquer prevenção de eventos para espaço
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onSubmit();
