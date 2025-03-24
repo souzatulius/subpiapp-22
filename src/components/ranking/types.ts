@@ -15,18 +15,12 @@ export interface FilterOptions {
   statuses: OrderStatus[];
   serviceTypes: ServiceType[];
   districts: District[];
-  companies: ['Todos'] | string[];
-  areas: ['STM', 'STLP'] | string[];
+  companies: string[];
+  areas: AreaTecnica[];
 }
 
 // Add OS156 specific types
-export interface OS156FilterOptions {
-  dateRange?: DateRange;
-  statuses: OrderStatus[];
-  serviceTypes: ServiceType[];
-  districts: District[];
-  areaTecnica: AreaTecnica;
-  empresa: string[];
+export interface OS156FilterOptions extends FilterOptions {
   dataInicio?: Date;
   dataFim?: Date;
 }

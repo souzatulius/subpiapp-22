@@ -7,10 +7,11 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { AreaTecnica } from '../types';
 
 interface AreaTecnicaFilterProps {
-  value: 'STM' | 'STLP' | 'Todos';
-  onChange: (value: 'STM' | 'STLP' | 'Todos') => void;
+  value: AreaTecnica;
+  onChange: (value: AreaTecnica) => void;
 }
 
 const AreaTecnicaFilter: React.FC<AreaTecnicaFilterProps> = ({
@@ -22,7 +23,7 @@ const AreaTecnicaFilter: React.FC<AreaTecnicaFilterProps> = ({
       <label className="block text-sm font-medium text-gray-700 mb-1">Área Técnica</label>
       <Select
         value={value}
-        onValueChange={onChange as (value: string) => void}
+        onValueChange={(val) => onChange(val as AreaTecnica)}
       >
         <SelectTrigger>
           <SelectValue placeholder="Selecione a área técnica" />

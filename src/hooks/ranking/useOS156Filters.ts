@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { OS156Item, FilterOptions, OrderStatus, District } from '@/components/ranking/types';
+import { OS156Item, FilterOptions, OrderStatus, District, AreaTecnica } from '@/components/ranking/types';
 
 export const useOS156Filters = (osData: OS156Item[], onFilteredDataChange: (data: OS156Item[]) => void) => {
   const [filters, setFilters] = useState<FilterOptions>({
@@ -27,9 +27,9 @@ export const useOS156Filters = (osData: OS156Item[], onFilteredDataChange: (data
     }
     
     // Apply area tecnica filter
-    if (newFilters.areas && newFilters.areas.length > 0 && !newFilters.areas.includes('Todos')) {
+    if (newFilters.areas && newFilters.areas.length === 1 && newFilters.areas[0] !== 'Todos') {
       filteredData = filteredData.filter(item => 
-        newFilters.areas.includes(item.area_tecnica)
+        item.area_tecnica === newFilters.areas[0]
       );
     }
     
