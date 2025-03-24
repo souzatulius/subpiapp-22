@@ -26,8 +26,11 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Handle key events without preventing default for space key
+  // Handle key events with stopPropagation to isolate input from drag-and-drop
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Stop propagation for ALL keyboard events when input is focused
+    e.stopPropagation();
+    
     if (e.key === 'Enter' && query.trim()) {
       if (suggestions.length > 0) {
         handleSelectSuggestion(suggestions[0]);
@@ -90,6 +93,14 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     setQuery(e.target.value);
   };
 
+  // Add a click handler that also stops propagation
+  const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    if (query.trim()) {
+      setShowSuggestions(true);
+    }
+  };
+
   return (
     <div className="w-full h-full relative">
       <div className="w-full h-full bg-white border border-gray-300 rounded-xl shadow-md flex items-center px-6 transition-all hover:shadow-lg">
@@ -102,7 +113,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onClick={() => query.trim() && setShowSuggestions(true)}
+          onClick={handleInputClick}
         />
         {isLoading && <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />}
       </div>
