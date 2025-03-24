@@ -165,7 +165,7 @@ const FormContent: React.FC<FormContentProps> = ({
       return (
         <div className="space-y-6">
           <div>
-            <label htmlFor="titulo" className={`block text-sm font-medium ${errors.some(err => err.field === 'titulo') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
+            <label htmlFor="titulo" className={`block text-sm font-medium mb-2 ${errors.some(err => err.field === 'titulo') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
               Título da Demanda {errors.some(err => err.field === 'titulo') && <span className="text-orange-500">*</span>}
             </label>
             <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
@@ -200,7 +200,7 @@ const FormContent: React.FC<FormContentProps> = ({
                 if (index < 5 && (index === 0 || formData.perguntas[index-1].trim() !== '' || pergunta.trim() !== '')) {
                   return (
                     <div key={index} className="flex gap-2">
-                      <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+                      <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md">
                         <input
                           value={pergunta}
                           onChange={(e) => handlePerguntaChange(index, e.target.value)}
@@ -250,4 +250,3 @@ const FormContent: React.FC<FormContentProps> = ({
 };
 
 export default FormContent;
-

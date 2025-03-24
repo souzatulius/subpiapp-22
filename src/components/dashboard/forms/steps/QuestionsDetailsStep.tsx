@@ -68,7 +68,7 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
         <div className="space-y-3">
           {activeQuestions.map(index => (
             <div key={index} className="flex gap-2">
-              <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
+              <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md">
                 <input
                   value={formData.perguntas[index] || ''}
                   onChange={(e) => handlePerguntaChange(index, e.target.value)}
