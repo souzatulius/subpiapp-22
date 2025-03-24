@@ -18,7 +18,7 @@ const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColo
     { value: 'gray-light', display: 'gray-25', className: 'bg-gray-25 border-gray-100' },
     { value: 'gray-dark', display: 'gray-400', className: 'bg-gray-400 border-gray-500' },
     { value: 'green', display: 'lime-50', className: 'bg-lime-50 border-lime-100' },
-    { value: 'gray-ultra-light', display: 'lime-500', className: 'bg-lime-500 border-lime-600' },
+    { value: 'lime', display: 'lime-500', className: 'bg-lime-500 border-lime-600' },
   ];
 
   return (
