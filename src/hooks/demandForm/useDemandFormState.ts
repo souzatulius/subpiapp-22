@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
@@ -7,7 +8,7 @@ export const useDemandFormState = (
 ) => {
   const initialFormState: DemandFormData = {
     titulo: '',
-    area_coordenacao_id: '',
+    problema_id: '',
     servico_id: '',
     origem_id: '',
     tipo_midia_id: '',
@@ -33,6 +34,7 @@ export const useDemandFormState = (
   const [activeStep, setActiveStep] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // Auto-generate title based on selected problem, service, and bairro
   useEffect(() => {
     if (activeStep === 5) {
       const selectedService = servicos.find(s => s.id === formData.servico_id);
@@ -53,17 +55,19 @@ export const useDemandFormState = (
     }
   }, [activeStep, formData.servico_id, formData.bairro_id, servicos, bairros]);
 
+  // Filter services based on selected problem
   useEffect(() => {
-    if (formData.area_coordenacao_id) {
+    if (formData.problema_id) {
       const filtered = servicos.filter(
-        service => service.area_coordenacao_id === formData.area_coordenacao_id
+        service => service.problema_id === formData.problema_id
       );
       setFilteredServicos(filtered);
     } else {
       setFilteredServicos([]);
     }
-  }, [formData.area_coordenacao_id, servicos]);
+  }, [formData.problema_id, servicos]);
 
+  // Filter bairros based on selected distrito
   useEffect(() => {
     if (selectedDistrito) {
       const filtered = bairros.filter(
@@ -75,6 +79,7 @@ export const useDemandFormState = (
     }
   }, [selectedDistrito, bairros]);
 
+  // Filter services by search term
   const filteredServicesBySearch = useMemo(() => {
     if (!serviceSearch) return filteredServicos;
     return filteredServicos.filter(service => 

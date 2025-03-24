@@ -1,7 +1,7 @@
 
 export type Filter = 'all' | 'alta' | 'media' | 'baixa';
 
-export interface Area {
+export interface Problema {
   id: string;
   descricao: string;
 }
@@ -19,7 +19,7 @@ export interface Demanda {
   prazo_resposta: string;
   perguntas: Record<string, string> | string[] | null;
   detalhes_solicitacao: string;
-  areas_coordenacao: {
+  problema: {
     id: string;
     descricao: string;
   };

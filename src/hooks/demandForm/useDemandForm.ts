@@ -5,7 +5,7 @@ import { useDemandFormSubmit } from './useDemandFormSubmit';
 
 export const useDemandForm = (userId: string | undefined, onClose: () => void) => {
   const {
-    areasCoord,
+    problemas,
     servicos,
     origens,
     tiposMidia,
@@ -46,7 +46,7 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
 
   return {
     formData,
-    areasCoord,
+    problemas,
     servicos,
     origens,
     tiposMidia,

@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Plus, Trash2 } from 'lucide-react';
@@ -10,7 +9,7 @@ import { Plus, Trash2 } from 'lucide-react';
 interface QuestionsDetailsStepProps {
   formData: {
     perguntas: string[];
-    detalhes_solicitacao: string;
+    titulo: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handlePerguntaChange: (index: number, value: string) => void;
@@ -25,43 +24,63 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
   handleSelectChange,
   errors = []
 }) => {
-  const [activeQuestions, setActiveQuestions] = useState<number[]>(
-    formData.perguntas.filter(p => p.trim() !== '').length > 0 
-      ? formData.perguntas.filter(p => p.trim() !== '').map((_, i) => i) 
-      : [0]
-  );
+  const [activeQuestions, setActiveQuestions] = useState<number[]>([0]);
   
+  // Monitor active questions and automatically add a new empty question field
+  // when the user starts typing in the last active question
+  useEffect(() => {
+    const lastActiveIndex = Math.max(...activeQuestions);
+    if (
+      formData.perguntas[lastActiveIndex]?.trim() !== '' &&
+      activeQuestions.length < 5
+    ) {
+      setActiveQuestions([...activeQuestions, lastActiveIndex + 1]);
+    }
+  }, [formData.perguntas, activeQuestions]);
+
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
   };
 
-  const addQuestion = () => {
-    if (activeQuestions.length < 5) {
-      const nextIndex = activeQuestions.length;
-      setActiveQuestions([...activeQuestions, nextIndex]);
-    }
-  };
-
   const removeQuestion = (index: number) => {
+    // Don't allow removing if only one question
+    if (activeQuestions.length <= 1) return;
+    
     // Update active questions
-    const newActiveQuestions = activeQuestions.filter(i => i !== index).map((val, idx) => idx);
+    const newActiveQuestions = activeQuestions.filter(i => i !== index);
     setActiveQuestions(newActiveQuestions);
     
     // Update form data
     const newPerguntas = [...formData.perguntas];
     newPerguntas.splice(index, 1);
-    newPerguntas.push(''); // Keep array length at 5
+    newPerguntas.push(''); // Keep array length consistent
     handleSelectChange('perguntas', JSON.stringify(newPerguntas));
   };
 
   return (
     <div className="space-y-6">
       <div>
+        <Label htmlFor="titulo" className={`block mb-2 ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
+          Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
+        </Label>
+        <Input 
+          id="titulo" 
+          name="titulo" 
+          value={formData.titulo} 
+          onChange={handleChange} 
+          className={hasError('titulo') ? 'border-orange-500' : ''}
+        />
+        {hasError('titulo') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>
+        )}
+      </div>
+
+      <div>
         <div className="flex justify-between items-center mb-2">
           <Label className={`block ${hasError('perguntas') ? 'text-orange-500 font-semibold' : ''}`}>
-            Perguntas para a Área Técnica
+            Perguntas para a Área Técnica {hasError('perguntas') && <span className="text-orange-500">*</span>}
           </Label>
         </div>
         
@@ -93,23 +112,6 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
         
         {hasError('perguntas') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('perguntas')}</p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="detalhes_solicitacao" className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
-          Detalhes da Solicitação
-        </Label>
-        <Textarea
-          id="detalhes_solicitacao"
-          name="detalhes_solicitacao"
-          value={formData.detalhes_solicitacao}
-          onChange={handleChange}
-          rows={5}
-          className={hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}
-        />
-        {hasError('detalhes_solicitacao') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
         )}
       </div>
     </div>

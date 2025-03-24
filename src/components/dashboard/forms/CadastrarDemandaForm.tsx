@@ -21,10 +21,11 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     formData,
-    areasCoord,
+    problemas,
     servicos,
     origens,
     tiposMidia,
@@ -50,31 +51,33 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   } = useDemandForm(user?.id, onClose);
 
   const handleStepClick = (stepIndex: number) => {
-    // Allow direct navigation to any step
+    // Allow free navigation between steps
     setActiveStep(stepIndex);
   };
 
   const handleNextStep = () => {
-    // Validate current step
+    // Validate current step but allow navigation even with errors
     const errors = validateDemandForm(formData, activeStep);
     setValidationErrors(errors);
     
-    if (errors.length === 0) {
-      nextStep();
-    } else {
-      console.log('Validation errors:', errors);
-      toast.error("Formulário incompleto", {
-        description: "Por favor, preencha todos os campos obrigatórios."
-      });
-    }
+    // Always allow moving to next step
+    nextStep();
   };
 
   const handleSubmit = async () => {
-    // Validate final step before submission
-    const errors = validateDemandForm(formData, activeStep);
-    setValidationErrors(errors);
+    // Validate all steps before final submission
+    setIsSubmitting(true);
+    let allErrors: ValidationError[] = [];
     
-    if (errors.length === 0) {
+    // Validate each step
+    for (let i = 0; i < FORM_STEPS.length; i++) {
+      const stepErrors = validateDemandForm(formData, i);
+      allErrors = [...allErrors, ...stepErrors];
+    }
+    
+    setValidationErrors(allErrors);
+    
+    if (allErrors.length === 0) {
       try {
         await submitForm();
       } catch (error: any) {
@@ -83,7 +86,12 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
           description: error.message || "Ocorreu um erro ao processar sua solicitação."
         });
       }
+    } else {
+      toast.error("Formulário incompleto", {
+        description: "Por favor, preencha todos os campos obrigatórios."
+      });
     }
+    setIsSubmitting(false);
   };
 
   return (
@@ -130,7 +138,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             handlePerguntaChange={handlePerguntaChange}
             handleFileChange={handleFileChange}
             selectedFile={selectedFile}
-            areasCoord={areasCoord}
+            problemas={problemas}
             filteredServicesBySearch={filteredServicesBySearch}
             serviceSearch={serviceSearch}
             servicos={servicos}
@@ -148,7 +156,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             onNextStep={handleNextStep}
             isLastStep={activeStep === FORM_STEPS.length - 1}
             isFirstStep={activeStep === 0}
-            isSubmitting={isLoading}
+            isSubmitting={isLoading || isSubmitting}
             onSubmit={handleSubmit}
           />
         </div>

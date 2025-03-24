@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 export const useDemandFormData = () => {
-  const [areasCoord, setAreasCoord] = useState<any[]>([]);
+  const [problemas, setProblemas] = useState<any[]>([]);
   const [servicos, setServicos] = useState<any[]>([]);
   const [origens, setOrigens] = useState<any[]>([]);
   const [tiposMidia, setTiposMidia] = useState<any[]>([]);
@@ -15,11 +15,11 @@ export const useDemandFormData = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data: areasData, error: areasError } = await supabase
-          .from('areas_coordenacao')
+        const { data: problemasData, error: problemasError } = await supabase
+          .from('problemas')
           .select('*');
-        if (areasError) throw areasError;
-        setAreasCoord(areasData || []);
+        if (problemasError) throw problemasError;
+        setProblemas(problemasData || []);
 
         const { data: servicosData, error: servicosError } = await supabase
           .from('servicos')
@@ -63,7 +63,7 @@ export const useDemandFormData = () => {
   }, []);
 
   return {
-    areasCoord,
+    problemas,
     servicos,
     origens,
     tiposMidia,

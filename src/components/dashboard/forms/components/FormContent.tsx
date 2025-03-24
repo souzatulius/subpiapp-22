@@ -13,13 +13,13 @@ import { ValidationError } from '@/lib/formValidationUtils';
 export const FORM_STEPS = [
   {
     id: 'identification',
-    title: 'Identificação',
-    description: 'Identificação da demanda'
+    title: 'Problema e Serviço',
+    description: 'Selecione o problema e o serviço relacionado'
   },
   {
     id: 'origin-classification',
-    title: 'Origem e Classificação',
-    description: 'Origem e classificação da demanda'
+    title: 'Origem da Demanda',
+    description: 'Indique a origem e classificação da demanda'
   },
   {
     id: 'requester-info',
@@ -38,8 +38,8 @@ export const FORM_STEPS = [
   },
   {
     id: 'questions-details',
-    title: 'Perguntas e Detalhes',
-    description: 'Perguntas e detalhes da demanda'
+    title: 'Título e Perguntas',
+    description: 'Título da demanda e perguntas para a área técnica'
   },
   {
     id: 'file-upload',
@@ -57,7 +57,7 @@ interface FormContentProps {
   handlePerguntaChange: (index: number, value: string) => void;
   handleFileChange?: (file: File | null) => void;
   selectedFile?: File | null;
-  areasCoord: any[];
+  problemas: any[];
   filteredServicesBySearch: any[];
   serviceSearch: string;
   servicos: any[];
@@ -79,7 +79,7 @@ const FormContent: React.FC<FormContentProps> = ({
   handlePerguntaChange,
   handleFileChange,
   selectedFile,
-  areasCoord,
+  problemas,
   filteredServicesBySearch,
   serviceSearch,
   servicos,
@@ -98,7 +98,7 @@ const FormContent: React.FC<FormContentProps> = ({
                   formData={formData} 
                   handleChange={handleChange}
                   handleSelectChange={handleSelectChange}
-                  areasCoord={areasCoord}
+                  problemas={problemas}
                   filteredServicesBySearch={filteredServicesBySearch}
                   serviceSearch={serviceSearch}
                   handleServiceSelect={handleServiceSelect}

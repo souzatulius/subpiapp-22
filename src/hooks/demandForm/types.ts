@@ -1,7 +1,7 @@
 
 export interface DemandFormData {
   titulo: string;
-  area_coordenacao_id: string;
+  problema_id: string;
   servico_id: string;
   origem_id: string;
   tipo_midia_id: string;
@@ -21,7 +21,7 @@ export interface DemandFormData {
 
 export interface FormState {
   formData: DemandFormData;
-  areasCoord: any[];
+  problemas: any[];
   servicos: any[];
   origens: any[];
   tiposMidia: any[];
