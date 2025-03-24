@@ -60,6 +60,9 @@ const mapExcelDataToOSItems = (data: any[]): OS156Item[] => {
     // Calculate days open
     const tempoAberto = calculateDaysOpen(dataCriacao, status);
     
+    // Determine area_tecnica
+    const areaTecnica = mapAreaTecnica(tipoServico) || 'STM';
+    
     return {
       id: uuidv4(), // Generate a unique ID for each item
       numero_os: String(numeroOS),
@@ -72,7 +75,7 @@ const mapExcelDataToOSItems = (data: any[]): OS156Item[] => {
       data_criacao: formatDate(dataCriacao),
       data_status: formatDate(dataStatus),
       tempo_aberto: tempoAberto,
-      area_tecnica: '', // Will be mapped later
+      area_tecnica: areaTecnica as 'STM' | 'STLP',
       servico_valido: true // Will be set later
     };
   });
