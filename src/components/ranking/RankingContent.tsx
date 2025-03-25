@@ -31,7 +31,8 @@ const RankingContent = () => {
   const {
     chartData,
     isLoading: isChartLoading,
-    lastUpdate
+    lastUpdate,
+    refreshData
   } = useChartData(filters);
 
   // Combined loading state
@@ -74,11 +75,26 @@ const RankingContent = () => {
         </div>
       </div>
       
-      <UploadSection onUpload={handleUpload} lastUpload={lastUpload} onDelete={handleDeleteUpload} isLoading={isLoading} />
+      <UploadSection 
+        onUpload={handleUpload} 
+        lastUpload={lastUpload} 
+        onDelete={handleDeleteUpload} 
+        isLoading={isLoading}
+        onRefreshCharts={refreshData} 
+      />
       
-      <FilterSection filters={filters} onFiltersChange={handleFiltersChange} chartVisibility={chartVisibility} onChartVisibilityChange={handleChartVisibilityChange} />
+      <FilterSection 
+        filters={filters} 
+        onFiltersChange={handleFiltersChange} 
+        chartVisibility={chartVisibility} 
+        onChartVisibilityChange={handleChartVisibilityChange} 
+      />
       
-      <ChartsSection chartData={chartData} isLoading={isLoading} chartVisibility={chartVisibility} />
+      <ChartsSection 
+        chartData={chartData} 
+        isLoading={isLoading} 
+        chartVisibility={chartVisibility} 
+      />
       
       <ActionsSection />
     </div>

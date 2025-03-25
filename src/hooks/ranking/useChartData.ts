@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FilterOptions } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -553,37 +553,37 @@ export const useChartData = (filters: FilterOptions) => {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Simulate loading data based on filters
-    const loadData = async () => {
-      setIsLoading(true);
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    
+    try {
+      // In a production environment, this would fetch data from Supabase
+      // For now, we'll use the sample data
       
-      try {
-        // In a production environment, this would fetch data from Supabase
-        // For now, we'll use the sample data
-        
-        // Simulate a delay to show loading state
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Use the sample data to generate chart data
-        const data = generateChartData(sampleSGZData, filters);
-        setChartData(data);
-        
-        // Set last update time
-        setLastUpdate(new Date().toLocaleString('pt-BR'));
-      } catch (error) {
-        console.error('Error loading chart data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
+      // Simulate a delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Use the sample data to generate chart data
+      const data = generateChartData(sampleSGZData, filters);
+      setChartData(data);
+      
+      // Set last update time
+      setLastUpdate(new Date().toLocaleString('pt-BR'));
+    } catch (error) {
+      console.error('Error loading chart data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [filters]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   return {
     chartData,
     isLoading,
-    lastUpdate
+    lastUpdate,
+    refreshData: loadData
   };
 };

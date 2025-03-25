@@ -5,19 +5,22 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle } from 'lucide-react';
 import { UploadInfo } from './types';
+import { toast } from 'sonner';
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
   lastUpload: UploadInfo | null;
   onDelete: () => Promise<void>;
   isLoading: boolean;
+  onRefreshCharts: () => void;
 }
 
 const UploadSection: React.FC<UploadSectionProps> = ({ 
   onUpload, 
   lastUpload, 
   onDelete,
-  isLoading
+  isLoading,
+  onRefreshCharts
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,8 +42,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   };
 
   const handleRefreshClick = () => {
-    // Esta função seria usada para atualizar os gráficos baseados no último upload
-    console.log('Atualizando gráficos...');
+    toast.info('Atualizando gráficos com os dados mais recentes...');
+    onRefreshCharts();
   };
 
   return (
