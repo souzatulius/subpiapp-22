@@ -1145,6 +1145,7 @@ export type Database = {
           area_coordenacao_id: string | null
           cargo_id: string | null
           configuracoes_notificacao: Json | null
+          coordenacao_id: string | null
           criado_em: string
           email: string
           foto_perfil_url: string | null
@@ -1158,6 +1159,7 @@ export type Database = {
           area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
+          coordenacao_id?: string | null
           criado_em?: string
           email: string
           foto_perfil_url?: string | null
@@ -1171,6 +1173,7 @@ export type Database = {
           area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
+          coordenacao_id?: string | null
           criado_em?: string
           email?: string
           foto_perfil_url?: string | null
@@ -1192,6 +1195,13 @@ export type Database = {
             columns: ["cargo_id"]
             isOneToOne: false
             referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuarios_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
         ]
@@ -1317,6 +1327,13 @@ export type Database = {
           p_id: string
         }
         Returns: boolean
+      }
+      get_unique_coordenacoes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          coordenacao_id: string
+          coordenacao: string
+        }[]
       }
       insert_area_coordenacao: {
         Args: {

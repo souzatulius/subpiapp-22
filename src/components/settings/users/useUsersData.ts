@@ -27,6 +27,7 @@ export const useUsersData = () => {
           foto_perfil_url,
           cargo_id,
           area_coordenacao_id,
+          coordenacao_id,
           criado_em
         `)
         .order('nome_completo');
