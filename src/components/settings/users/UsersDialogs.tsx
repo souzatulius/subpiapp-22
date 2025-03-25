@@ -20,6 +20,7 @@ interface UsersDialogsProps {
   handleInviteUser: (data: any) => Promise<void>;
   handleEditUser: (data: any) => Promise<void>;
   handleDeleteUser: () => Promise<void>;
+  isEditSubmitting?: boolean;
 }
 
 const UsersDialogs: React.FC<UsersDialogsProps> = ({
@@ -37,6 +38,7 @@ const UsersDialogs: React.FC<UsersDialogsProps> = ({
   handleInviteUser,
   handleEditUser,
   handleDeleteUser,
+  isEditSubmitting,
 }) => {
   return (
     <>
@@ -56,6 +58,8 @@ const UsersDialogs: React.FC<UsersDialogsProps> = ({
         onSubmit={handleEditUser}
         areas={areas}
         cargos={cargos}
+        coordenacoes={coordenacoes}
+        isSubmitting={isEditSubmitting}
       />
       
       <DeleteUserDialog 
