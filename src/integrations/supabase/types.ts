@@ -1371,6 +1371,14 @@ export type Database = {
         }
         Returns: string
       }
+      insert_supervision_with_coordination: {
+        Args: {
+          p_descricao: string
+          p_sigla: string
+          p_coordenacao_id: string
+        }
+        Returns: string
+      }
       insert_tipo_midia: {
         Args: {
           p_descricao: string

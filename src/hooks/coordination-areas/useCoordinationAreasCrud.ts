@@ -15,15 +15,44 @@ export const useCoordinationAreasCrud = (
   const addArea = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       setIsAdding(true);
-      const { data: newArea, error } = await supabase
-        .from('areas_coordenacao')
-        .insert(data)
-        .select()
-        .single();
-
-      if (error) throw error;
       
-      setAreas([...areas, newArea]);
+      if (data.coordenacao_id) {
+        // If a coordenacao_id is provided, use the special RPC function to insert with coordination
+        const { data: newAreaId, error: rpcError } = await supabase
+          .rpc('insert_supervision_with_coordination', {
+            p_descricao: data.descricao,
+            p_sigla: data.sigla || null,
+            p_coordenacao_id: data.coordenacao_id
+          });
+          
+        if (rpcError) throw rpcError;
+        
+        // Get the complete record using the ID returned by the function
+        const { data: newArea, error: fetchError } = await supabase
+          .from('areas_coordenacao')
+          .select('*')
+          .eq('id', newAreaId)
+          .single();
+          
+        if (fetchError) throw fetchError;
+        
+        setAreas([...areas, newArea]);
+      } else {
+        // If no coordenacao_id, insert directly
+        const { data: newArea, error } = await supabase
+          .from('areas_coordenacao')
+          .insert({
+            descricao: data.descricao,
+            sigla: data.sigla || null
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        setAreas([...areas, newArea]);
+      }
+      
       toast({
         title: "Supervisão técnica adicionada",
         description: "Supervisão técnica adicionada com sucesso.",
@@ -52,12 +81,39 @@ export const useCoordinationAreasCrud = (
         delete updateData.coordenacao_id;
       }
       
-      const { error } = await supabase
-        .from('areas_coordenacao')
-        .update(updateData)
-        .eq('id', id);
-
-      if (error) throw error;
+      let updateResult;
+      
+      if (updateData.coordenacao_id) {
+        // Get coordenacao description
+        const { data: coordData, error: coordError } = await supabase
+          .from('areas_coordenacao')
+          .select('descricao')
+          .eq('id', updateData.coordenacao_id)
+          .single();
+          
+        if (coordError) throw coordError;
+        
+        // Add coordenacao field
+        updateData.coordenacao = coordData.descricao;
+        
+        // Update with both fields
+        updateResult = await supabase
+          .from('areas_coordenacao')
+          .update(updateData)
+          .eq('id', id)
+          .select();
+      } else {
+        // If removing coordenacao_id, also null out coordenacao
+        updateData.coordenacao = null;
+        
+        updateResult = await supabase
+          .from('areas_coordenacao')
+          .update(updateData)
+          .eq('id', id)
+          .select();
+      }
+      
+      if (updateResult.error) throw updateResult.error;
       
       // Update local state
       setAreas(areas.map(area => 
@@ -115,6 +171,23 @@ export const useCoordinationAreasCrud = (
         toast({
           title: "Erro",
           description: "Esta supervisão técnica está sendo utilizada por problemas/temas e não pode ser excluída.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      // Check if area is used as coordenacao_id in other areas
+      const { data: referencedData, error: referencedError } = await supabase
+        .from('areas_coordenacao')
+        .select('id')
+        .eq('coordenacao_id', id);
+        
+      if (referencedError) throw referencedError;
+      
+      if (referencedData && referencedData.length > 0) {
+        toast({
+          title: "Erro",
+          description: "Esta supervisão técnica está sendo utilizada como coordenação para outras supervisões e não pode ser excluída.",
           variant: "destructive",
         });
         return false;

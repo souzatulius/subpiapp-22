@@ -52,7 +52,7 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
               id="descricao"
               {...register("descricao")}
               className="rounded-lg"
-              placeholder="Nome da área de coordenação"
+              placeholder="Nome da supervisão técnica"
             />
             {formState.errors.descricao && (
               <p className="text-sm text-red-500">{formState.errors.descricao.message}</p>
@@ -65,7 +65,7 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
               id="sigla"
               {...register("sigla")}
               className="rounded-lg"
-              placeholder="Sigla da área (ex: STLP)"
+              placeholder="Sigla da supervisão (ex: STLP)"
             />
             {formState.errors.sigla && (
               <p className="text-sm text-red-500">{formState.errors.sigla.message}</p>
