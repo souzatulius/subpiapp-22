@@ -3,7 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import DataEntryForm from '../DataEntryForm';
-import { areaSchema } from '@/hooks/useCoordinationAreas';
+import { areaSchema } from '@/hooks/coordination-areas/useCoordinationAreas';
 import { 
   Select,
   SelectContent,

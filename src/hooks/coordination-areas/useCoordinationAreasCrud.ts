@@ -1,85 +1,16 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { z } from 'zod';
-import { Coordination } from '@/hooks/settings/useCoordination';
+import { CoordinationArea } from './types';
 
-// Define tipos para evitar recursividade infinita
-export type CoordinationArea = {
-  id: string;
-  descricao: string;
-  sigla?: string;
-  coordenacao?: string;
-  coordenacao_id?: string;
-  criado_em?: string;
-};
-
-// Alias para compatibilidade com código existente
-export type Area = CoordinationArea;
-
-// Schema para validação de formulários
-export const areaSchema = z.object({
-  descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" }),
-  sigla: z.string().optional(),
-  coordenacao_id: z.string().optional()
-});
-
-export const useCoordinationAreas = () => {
-  const [areas, setAreas] = useState<CoordinationArea[]>([]);
-  const [coordinations, setCoordinations] = useState<Coordination[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const useCoordinationAreasCrud = (
+  areas: CoordinationArea[],
+  setAreas: React.Dispatch<React.SetStateAction<CoordinationArea[]>>
+) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const fetchAreas = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('areas_coordenacao')
-        .select('*')
-        .order('descricao');
-
-      if (error) throw error;
-      
-      setAreas(data || []);
-    } catch (error: any) {
-      console.error('Erro ao buscar supervisões técnicas:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as supervisões técnicas.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const fetchCoordinations = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('areas_coordenacao')
-        .select('*')
-        .order('descricao');
-
-      if (error) throw error;
-      
-      setCoordinations(data || []);
-    } catch (error: any) {
-      console.error('Erro ao buscar coordenações:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as coordenações.",
-        variant: "destructive",
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchAreas();
-    fetchCoordinations();
-  }, [fetchAreas, fetchCoordinations]);
 
   const addArea = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
@@ -183,18 +114,12 @@ export const useCoordinationAreas = () => {
   };
 
   return {
-    areas,
-    coordinations,
-    isLoading,
     isAdding,
     isEditing,
     isDeleting,
-    isSubmitting: isAdding || isEditing, // Alias para compatibilidade
-    loading: isLoading, // Alias para compatibilidade
-    fetchAreas,
-    fetchCoordinations,
+    isSubmitting: isAdding || isEditing,
     addArea,
     updateArea,
-    deleteArea,
+    deleteArea
   };
 };

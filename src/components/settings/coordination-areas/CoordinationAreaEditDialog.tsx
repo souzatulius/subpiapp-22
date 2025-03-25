@@ -2,7 +2,7 @@
 import React from 'react';
 import EditModal from '../EditModal';
 import CoordinationAreaForm from './CoordinationAreaForm';
-import { Area } from '@/hooks/useCoordinationAreas';
+import { Area } from '@/hooks/coordination-areas/useCoordinationAreas';
 import { Coordination } from '@/hooks/settings/useCoordination';
 
 interface CoordinationAreaEditDialogProps {

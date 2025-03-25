@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import DataTable from './data-table/DataTable';
 import CoordinationAreaForm from './coordination-areas/CoordinationAreaForm';
 import CoordinationAreaEditDialog from './coordination-areas/CoordinationAreaEditDialog';
-import { useCoordinationAreas, Area } from '@/hooks/useCoordinationAreas';
+import { useCoordinationAreas, Area } from '@/hooks/coordination-areas/useCoordinationAreas';
 import { toast } from '@/components/ui/use-toast';
 
 const CoordinationAreas = () => {
