@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      areas_coordenacao: {
+        Row: {
+          criado_em: string | null
+          descricao: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string | null
+          descricao: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string | null
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
       bairros: {
         Row: {
           criado_em: string
@@ -187,6 +205,7 @@ export type Database = {
       }
       demandas: {
         Row: {
+          area_coordenacao_id: string | null
           arquivo_url: string | null
           atualizado_em: string
           autor_id: string
@@ -211,6 +230,7 @@ export type Database = {
           veiculo_imprensa: string | null
         }
         Insert: {
+          area_coordenacao_id?: string | null
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id: string
@@ -235,6 +255,7 @@ export type Database = {
           veiculo_imprensa?: string | null
         }
         Update: {
+          area_coordenacao_id?: string | null
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id?: string
@@ -324,6 +345,7 @@ export type Database = {
       notas_oficiais: {
         Row: {
           aprovador_id: string | null
+          area_coordenacao_id: string | null
           atualizado_em: string
           autor_id: string
           criado_em: string
@@ -336,6 +358,7 @@ export type Database = {
         }
         Insert: {
           aprovador_id?: string | null
+          area_coordenacao_id?: string | null
           atualizado_em?: string
           autor_id: string
           criado_em?: string
@@ -348,6 +371,7 @@ export type Database = {
         }
         Update: {
           aprovador_id?: string | null
+          area_coordenacao_id?: string | null
           atualizado_em?: string
           autor_id?: string
           criado_em?: string
@@ -1256,6 +1280,7 @@ export type Database = {
       usuarios: {
         Row: {
           aniversario: string | null
+          area_coordenacao_id: string | null
           cargo_id: string | null
           configuracoes_notificacao: Json | null
           criado_em: string
@@ -1268,6 +1293,7 @@ export type Database = {
         }
         Insert: {
           aniversario?: string | null
+          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           criado_em?: string
@@ -1280,6 +1306,7 @@ export type Database = {
         }
         Update: {
           aniversario?: string | null
+          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           criado_em?: string

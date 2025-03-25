@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@dnd-kit/core';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { SGZChartData } from '@/types/sgz';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +14,51 @@ interface SGZChartsProps {
   data: SGZChartData | null;
   isLoading: boolean;
 }
+
+// Create a draggable chart component using dnd-kit
+const SortableChartItem = ({ 
+  id, 
+  title, 
+  children, 
+  onToggleVisibility
+}: { 
+  id: string; 
+  title: string; 
+  children: React.ReactNode; 
+  onToggleVisibility: () => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <Card className="h-full">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <CardTitle className="text-md flex items-center">
+            <MoveVertical className="h-4 w-4 mr-2 text-muted-foreground" />
+            {title}
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleVisibility}
+          >
+            <EyeOff className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[250px]">
+            {children}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 const SGZCharts: React.FC<SGZChartsProps> = ({ data, isLoading }) => {
   // Define chart configurations
@@ -32,14 +79,21 @@ const SGZCharts: React.FC<SGZChartsProps> = ({ data, isLoading }) => {
     ));
   };
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
     
-    const items = Array.from(charts);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    
-    setCharts(items);
+    if (active.id !== over.id) {
+      setCharts((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        
+        const newArray = [...items];
+        const [removed] = newArray.splice(oldIndex, 1);
+        newArray.splice(newIndex, 0, removed);
+        
+        return newArray;
+      });
+    }
   };
 
   if (!data && !isLoading) {
@@ -79,57 +133,34 @@ const SGZCharts: React.FC<SGZChartsProps> = ({ data, isLoading }) => {
       </Card>
 
       {data && (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="droppable">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-              >
-                {charts.map((chart, index) => (
-                  chart.visible && (
-                    <Draggable key={chart.id} draggableId={chart.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <Card className="h-full">
-                            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                              <CardTitle className="text-md flex items-center">
-                                <MoveVertical className="h-4 w-4 mr-2 text-muted-foreground" />
-                                {chart.title}
-                              </CardTitle>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleVisibility(chart.id)}
-                              >
-                                <EyeOff className="h-4 w-4" />
-                              </Button>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="h-[250px]">
-                                {isLoading ? (
-                                  <Skeleton className="h-full w-full" />
-                                ) : (
-                                  <SGZChart type={chart.type as any} data={data[chart.id as keyof SGZChartData]} />
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
-                    </Draggable>
-                  )
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SortableContext
+              items={charts.filter(chart => chart.visible).map(chart => chart.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {charts.map((chart) => (
+                chart.visible && (
+                  <SortableChartItem 
+                    key={chart.id} 
+                    id={chart.id} 
+                    title={chart.title}
+                    onToggleVisibility={() => toggleVisibility(chart.id)}
+                  >
+                    {isLoading ? (
+                      <Skeleton className="h-full w-full" />
+                    ) : (
+                      <SGZChart type={chart.type as any} data={data[chart.id as keyof SGZChartData]} />
+                    )}
+                  </SortableChartItem>
+                )
+              ))}
+            </SortableContext>
+          </div>
+        </DndContext>
       )}
 
       {isLoading && (
