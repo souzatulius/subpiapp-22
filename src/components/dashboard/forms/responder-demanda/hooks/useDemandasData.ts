@@ -42,7 +42,6 @@ export const useDemandasData = () => {
           .from('demandas')
           .select(`
             *,
-            servicos(id, descricao),
             origens_demandas(descricao),
             tipos_midia(descricao)
           `)
@@ -97,7 +96,7 @@ export const useDemandasData = () => {
               ...demanda,
               perguntas: parsedPerguntas,
               areas_coordenacao: areaInfo
-            } as Demanda;
+            } as unknown as Demanda;
           })
         );
         
@@ -132,8 +131,7 @@ export const useDemandasData = () => {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
         demanda => demanda.titulo.toLowerCase().includes(searchLower) || 
-                  demanda.areas_coordenacao?.descricao.toLowerCase().includes(searchLower) ||
-                  demanda.servicos?.descricao?.toLowerCase().includes(searchLower)
+                  demanda.areas_coordenacao?.descricao.toLowerCase().includes(searchLower)
       );
     }
     

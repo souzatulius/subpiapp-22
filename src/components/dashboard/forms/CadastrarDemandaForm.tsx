@@ -25,7 +25,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const {
     formData,
     areasCoord,
-    servicos,
     origens,
     tiposMidia,
     distritos,
@@ -33,13 +32,11 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     problemas,
     isLoading,
     serviceSearch,
-    filteredServicesBySearch,
     filteredBairros,
     selectedDistrito,
     activeStep,
     handleChange,
     handleSelectChange,
-    handleServiceSelect,
     handlePerguntaChange,
     handleAnexosChange,
     handleSubmit: submitForm,
@@ -131,14 +128,11 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             formData={formData}
             handleChange={handleChange}
             handleSelectChange={handleSelectChange}
-            handleServiceSelect={handleServiceSelect}
             handlePerguntaChange={handlePerguntaChange}
             handleAnexosChange={handleAnexosChange}
             areasCoord={areasCoord}
             problemas={problemas}
-            filteredServicesBySearch={filteredServicesBySearch}
             serviceSearch={serviceSearch}
-            servicos={servicos}
             origens={origens}
             tiposMidia={tiposMidia}
             selectedDistrito={selectedDistrito}

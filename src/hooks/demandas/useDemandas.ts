@@ -27,7 +27,6 @@ export function useDemandas(filterStatus: string) {
             horario_publicacao,
             prazo_resposta,
             supervisao_tecnica_id,
-            servico_id,
             origem_id,
             tipo_midia_id,
             bairro_id,
@@ -59,7 +58,6 @@ export function useDemandas(filterStatus: string) {
           let enhancedDemand: any = { 
             ...demanda,
             supervisao_tecnica: null,
-            servico: null, 
             origem: null,
             tipo_midia: null,
             bairro: null,
@@ -78,17 +76,6 @@ export function useDemandas(filterStatus: string) {
             enhancedDemand.supervisao_tecnica = stData;
             // Also set area_coordenacao to match the supervisao_tecnica
             enhancedDemand.area_coordenacao = stData;
-          }
-          
-          // Buscar serviço
-          if (demanda.servico_id) {
-            const { data: servicoData } = await supabase
-              .from('servicos')
-              .select('descricao')
-              .eq('id', demanda.servico_id)
-              .single();
-              
-            enhancedDemand.servico = servicoData;
           }
           
           // Buscar origem

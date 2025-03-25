@@ -1,7 +1,7 @@
+
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
-  servico_id: string;
   origem_id: string;
   tipo_midia_id: string;
   prioridade: string;
@@ -15,19 +15,19 @@ export interface DemandFormData {
   perguntas: string[];
   detalhes_solicitacao: string;
   arquivo_url: string;
-  anexos: string[]; // Novo campo para armazenar múltiplos anexos
+  anexos: string[]; 
+  tem_protocolo_156?: boolean;
+  numero_protocolo_156?: string;
 }
 
 export interface FormState {
   formData: DemandFormData;
   areasCoord: any[];
-  servicos: any[];
   origens: any[];
   tiposMidia: any[];
   distritos: any[];
   bairros: any[];
   problemas: any[];
-  filteredServicos: any[];
   filteredBairros: any[];
   isLoading: boolean;
   serviceSearch: string;
@@ -48,9 +48,6 @@ export interface Demand {
     descricao: string;
   } | null;
   area_coordenacao: {
-    descricao: string;
-  } | null;
-  servico: {
     descricao: string;
   } | null;
   origem: {

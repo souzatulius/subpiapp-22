@@ -16,6 +16,8 @@ export interface DemandFormData {
   detalhes_solicitacao: string;
   arquivo_url: string;
   anexos: string[];
+  tem_protocolo_156?: boolean;
+  numero_protocolo_156?: string;
 }
 
 export interface FormState {

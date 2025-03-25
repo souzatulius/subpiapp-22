@@ -15,7 +15,6 @@ export const useRespostaForm = (
 ) => {
   const { user } = useAuth();
   const [resposta, setResposta] = useState('');
-  const [servicoId, setServicoId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmitResposta = async () => {
@@ -28,23 +27,13 @@ export const useRespostaForm = (
       return;
     }
     
-    if (!servicoId) {
-      toast({
-        title: "Serviço não selecionado",
-        description: "Por favor, selecione um serviço para esta demanda.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     try {
       setIsLoading(true);
 
-      // First update the demand to set the service_id
+      // Update the demand status to "in progress"
       const { error: updateError } = await supabase
         .from('demandas')
         .update({
-          servico_id: servicoId,
           status: 'em_andamento'  // Update status to show it's being processed
         })
         .eq('id', selectedDemanda.id);
@@ -82,7 +71,6 @@ export const useRespostaForm = (
       setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
       setSelectedDemanda(null);
       setResposta('');
-      setServicoId('');
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
       toast({
@@ -98,8 +86,6 @@ export const useRespostaForm = (
   return {
     resposta,
     setResposta,
-    servicoId,
-    setServicoId,
     isLoading,
     handleSubmitResposta
   };
