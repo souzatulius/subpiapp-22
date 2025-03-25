@@ -1,4 +1,3 @@
-
 import React from 'react';
 import IdentificationStep from '../steps/IdentificationStep';
 import OriginClassificationStep from '../steps/OriginClassificationStep';

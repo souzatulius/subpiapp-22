@@ -2,15 +2,18 @@
 import React from 'react';
 import TemaSelector from './identification/TemaSelector';
 import DetalhesInput from './identification/DetalhesInput';
+import Protocolo156 from './identification/Protocolo156';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface IdentificationStepProps {
   formData: {
     problema_id: string;
     detalhes_solicitacao: string;
+    tem_protocolo_156: boolean;
+    numero_protocolo_156?: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
   problemas: any[];
   errors?: ValidationError[];
 }
@@ -27,6 +30,14 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
       <TemaSelector
         problemas={problemas}
         selectedTemaId={formData.problema_id}
+        handleSelectChange={handleSelectChange}
+        errors={errors}
+      />
+      
+      <Protocolo156
+        temProtocolo156={formData.tem_protocolo_156}
+        numeroProtocolo156={formData.numero_protocolo_156 || ''}
+        handleChange={handleChange}
         handleSelectChange={handleSelectChange}
         errors={errors}
       />

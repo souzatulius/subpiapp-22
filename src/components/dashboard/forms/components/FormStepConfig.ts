@@ -4,7 +4,7 @@ export const FORM_STEPS = [
   {
     title: "Identificação",
     description: "Selecione o tema, o serviço e informe os detalhes da demanda",
-    fields: ["problema_id", "servico_id", "detalhes_solicitacao"]
+    fields: ["problema_id", "servico_id", "detalhes_solicitacao", "tem_protocolo_156", "numero_protocolo_156"]
   },
   {
     title: "Classificação e Origem",
@@ -45,7 +45,7 @@ export interface FormContentProps {
   activeStep: number;
   formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
   handleServiceSelect: (serviceId: string) => void;
   handlePerguntaChange: (index: number, value: string) => void;
   handleAnexosChange?: (files: string[]) => void;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
@@ -23,7 +22,9 @@ export const useDemandFormState = (
     perguntas: ['', '', '', '', ''],
     detalhes_solicitacao: '',
     arquivo_url: '',
-    anexos: []
+    anexos: [],
+    tem_protocolo_156: false,
+    numero_protocolo_156: '',
   };
 
   const [formData, setFormData] = useState<DemandFormData>(initialFormState);
@@ -33,9 +34,7 @@ export const useDemandFormState = (
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
 
-  // Generate title suggestion based on service and bairro
   useEffect(() => {
-    // Gerar sugestão de título quando o usuário avança para a última etapa (resumo)
     if (activeStep === 6) {
       const selectedService = servicos.find(s => s.id === formData.servico_id);
       const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
@@ -96,7 +95,7 @@ export const useDemandFormState = (
     }
   };
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = (name: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -128,7 +127,6 @@ export const useDemandFormState = (
   };
 
   const nextStep = () => {
-    // Check against FORM_STEPS.length - 1 (6) instead of hardcoded value
     if (activeStep < 6) {
       setActiveStep(activeStep + 1);
     }

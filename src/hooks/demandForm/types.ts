@@ -17,6 +17,8 @@ export interface DemandFormData {
   detalhes_solicitacao: string;
   arquivo_url: string;
   anexos: string[]; // Added property for multiple attachments
+  tem_protocolo_156: boolean; // Novo campo para indicar se existe protocolo 156
+  numero_protocolo_156?: string; // Novo campo para armazenar o número do protocolo 156 (opcional)
 }
 
 export interface FormState {

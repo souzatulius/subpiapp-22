@@ -23,6 +23,14 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
         message: 'Selecione um tema'
       });
     }
+
+    // Validar campos do protocolo 156
+    if (formData.tem_protocolo_156 === true && (!formData.numero_protocolo_156 || formData.numero_protocolo_156.length !== 10)) {
+      errors.push({
+        field: 'numero_protocolo_156',
+        message: 'Digite os 10 dígitos do protocolo 156'
+      });
+    }
   }
   
   // Step 1: Classification and Origin
