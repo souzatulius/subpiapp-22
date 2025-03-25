@@ -95,7 +95,7 @@ const Settings = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="fixed top-16 left-2 z-30"
+                className="fixed top-20 left-2 z-30"
                 onClick={toggleSettingsSidebar}
               >
                 <Menu className="h-6 w-6" />
@@ -132,7 +132,7 @@ const Settings = () => {
                   </div>
                 ) : (
                   <div>
-                    {/* Breadcrumbs */}
+                    {/* Local breadcrumbs for settings sections */}
                     <div className="flex items-center mb-2 text-sm">
                       <span className="cursor-pointer hover:underline" onClick={handleBackClick}>Configurações</span>
                       <span className="mx-2">/</span>
