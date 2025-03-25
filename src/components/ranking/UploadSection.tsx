@@ -3,31 +3,24 @@ import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle } from 'lucide-react';
+import { UploadCloud, Trash2, RefreshCw, Clock } from 'lucide-react';
 import { UploadInfo } from './types';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
   lastUpload: UploadInfo | null;
   onDelete: () => Promise<void>;
   isLoading: boolean;
-  uploadProgress?: number;
-  uploadError?: string | null;
 }
 
 const UploadSection: React.FC<UploadSectionProps> = ({ 
   onUpload, 
   lastUpload, 
   onDelete,
-  isLoading,
-  uploadProgress = 0,
-  uploadError = null
+  isLoading
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isUploading = isLoading && selectedFile;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -46,15 +39,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   };
 
   const handleRefreshClick = () => {
-    window.location.reload();
-  };
-
-  // Calculate estimated time
-  const getEstimatedTime = () => {
-    if (uploadProgress < 30) return "Estimando tempo...";
-    if (uploadProgress < 70) return "Aproximadamente 1 minuto";
-    if (uploadProgress < 95) return "Finalizando...";
-    return "Concluído";
+    // Esta função seria usada para atualizar os gráficos baseados no último upload
+    // Por enquanto, é apenas um placeholder
+    console.log('Atualizando gráficos...');
   };
 
   return (
@@ -82,31 +69,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               className="w-full sm:w-auto"
             >
               <UploadCloud className="mr-2 h-4 w-4" />
-              {isUploading ? 'Carregando...' : 'Carregar Planilha'}
+              {isLoading ? 'Carregando...' : 'Carregar Planilha'}
             </Button>
           </div>
-          
-          {isUploading && (
-            <div className="space-y-2">
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Progresso do upload</span>
-                <span className="text-sm font-medium">{uploadProgress}%</span>
-              </div>
-              <Progress value={uploadProgress} className="h-2" />
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{getEstimatedTime()}</span>
-                {uploadProgress < 100 && <span>Não feche esta página</span>}
-              </div>
-            </div>
-          )}
-          
-          {uploadError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Erro no upload</AlertTitle>
-              <AlertDescription>{uploadError}</AlertDescription>
-            </Alert>
-          )}
           
           {lastUpload && (
             <div className="flex flex-col gap-2">

@@ -95,15 +95,14 @@ export const useNotaForm = (onClose: () => void) => {
       // Create the note
       const { data, error } = await supabase
         .from('notas_oficiais')
-        .insert({
-          titulo: titulo,
-          texto: texto,
+        .insert([{
+          titulo,
+          texto,
           area_coordenacao_id: selectedDemanda.area_coordenacao.id,
           autor_id: user?.id,
           status: 'pendente',
-          demanda_id: selectedDemandaId,
-          problema_id: selectedDemanda.problema_id || '00000000-0000-0000-0000-000000000000' // Default UUID if missing
-        })
+          demanda_id: selectedDemandaId
+        }])
         .select();
       
       if (error) throw error;

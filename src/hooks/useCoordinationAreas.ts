@@ -5,135 +5,192 @@ import { toast } from '@/components/ui/use-toast';
 import { z } from 'zod';
 
 export const areaSchema = z.object({
-  id: z.string().optional(),
-  descricao: z.string().min(3, "A descrição é obrigatória e deve ter pelo menos 3 caracteres")
+  descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
 });
 
-export interface Area {
+export type Area = {
   id: string;
   descricao: string;
-}
+  criado_em: string;
+};
 
-export const useCoordinationAreas = () => {
+export function useCoordinationAreas() {
   const [areas, setAreas] = useState<Area[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchAreas = async () => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('areas_coordenacao')
-        .select('id, descricao')
-        .order('descricao');
-      
-      if (error) throw error;
-      
-      setAreas(data || []);
-    } catch (error) {
-      console.error('Error fetching coordination areas:', error);
-      toast({
-        title: "Erro ao carregar áreas",
-        description: "Não foi possível carregar as áreas de coordenação.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const createArea = async (area: Omit<Area, 'id'>) => {
-    try {
-      const { data, error } = await supabase
-        .from('areas_coordenacao')
-        .insert(area)
-        .select();
-      
-      if (error) throw error;
-      
-      setAreas(prev => [...prev, data[0] as Area]);
-      
-      toast({
-        title: "Área criada",
-        description: "A área de coordenação foi criada com sucesso.",
-      });
-      
-      return data[0];
-    } catch (error) {
-      console.error('Error creating area:', error);
-      toast({
-        title: "Erro ao criar área",
-        description: "Não foi possível criar a área de coordenação.",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  };
-
-  const updateArea = async (id: string, area: Omit<Area, 'id'>) => {
-    try {
-      const { data, error } = await supabase
-        .from('areas_coordenacao')
-        .update(area)
-        .eq('id', id)
-        .select();
-      
-      if (error) throw error;
-      
-      setAreas(prev => prev.map(a => a.id === id ? { ...a, ...area } : a));
-      
-      toast({
-        title: "Área atualizada",
-        description: "A área de coordenação foi atualizada com sucesso.",
-      });
-      
-      return data[0];
-    } catch (error) {
-      console.error('Error updating area:', error);
-      toast({
-        title: "Erro ao atualizar área",
-        description: "Não foi possível atualizar a área de coordenação.",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  };
-
-  const deleteArea = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('areas_coordenacao')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      setAreas(prev => prev.filter(a => a.id !== id));
-      
-      toast({
-        title: "Área removida",
-        description: "A área de coordenação foi removida com sucesso.",
-      });
-    } catch (error) {
-      console.error('Error deleting area:', error);
-      toast({
-        title: "Erro ao remover área",
-        description: "Não foi possível remover a área de coordenação. Verifique se não existem registros associados a ela.",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchAreas();
   }, []);
 
+  const fetchAreas = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('areas_coordenacao')
+        .select('*')
+        .order('descricao', { ascending: true });
+      
+      if (error) throw error;
+      setAreas(data || []);
+    } catch (error: any) {
+      console.error('Erro ao carregar áreas:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as áreas de coordenação',
+        variant: 'destructive',
+      });
+      // Ensure areas is always an array even in case of error
+      setAreas([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addArea = async (data: { descricao: string }) => {
+    setIsSubmitting(true);
+    try {
+      console.log('Attempting to add area:', data);
+      
+      // Use a function call which has SECURITY DEFINER to bypass RLS
+      const { data: result, error } = await supabase.rpc('insert_area_coordenacao', {
+        p_descricao: data.descricao
+      });
+      
+      if (error) {
+        console.error('Detailed error when adding area:', error);
+        throw error;
+      }
+      
+      console.log('Area added successfully:', result);
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Área de coordenação adicionada com sucesso',
+      });
+      
+      await fetchAreas();
+      return Promise.resolve();
+    } catch (error: any) {
+      console.error('Erro ao adicionar área:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao adicionar a área',
+        variant: 'destructive',
+      });
+      return Promise.reject(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const updateArea = async (id: string, data: { descricao: string }) => {
+    setIsSubmitting(true);
+    try {
+      console.log('Attempting to update area:', id, data);
+      
+      // Use a function call which has SECURITY DEFINER to bypass RLS
+      const { data: result, error } = await supabase.rpc('update_area_coordenacao', {
+        p_id: id,
+        p_descricao: data.descricao
+      });
+      
+      if (error) {
+        console.error('Detailed error when updating area:', error);
+        throw error;
+      }
+      
+      console.log('Area updated successfully:', result);
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Área de coordenação atualizada com sucesso',
+      });
+      
+      await fetchAreas();
+      return Promise.resolve();
+    } catch (error: any) {
+      console.error('Erro ao editar área:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao atualizar a área',
+        variant: 'destructive',
+      });
+      return Promise.reject(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deleteArea = async (area: Area) => {
+    try {
+      console.log('Attempting to delete area:', area.id);
+      
+      // Check if there are dependent records
+      const { count: usersCount, error: usersError } = await supabase
+        .from('usuarios')
+        .select('*', { count: 'exact', head: true })
+        .eq('area_coordenacao_id', area.id);
+        
+      if (usersError) {
+        console.error('Error checking users:', usersError);
+        throw usersError;
+      }
+        
+      const { count: servicesCount, error: servicesError } = await supabase
+        .from('servicos')
+        .select('*', { count: 'exact', head: true })
+        .eq('area_coordenacao_id', area.id);
+        
+      if (servicesError) {
+        console.error('Error checking services:', servicesError);
+        throw servicesError;
+      }
+        
+      if ((usersCount || 0) > 0 || (servicesCount || 0) > 0) {
+        toast({
+          title: 'Não é possível excluir',
+          description: 'Existem usuários ou serviços associados a esta área',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Use a function call which has SECURITY DEFINER to bypass RLS
+      const { error } = await supabase.rpc('delete_area_coordenacao', {
+        p_id: area.id
+      });
+      
+      if (error) {
+        console.error('Error deleting area:', error);
+        throw error;
+      }
+      
+      console.log('Area deleted successfully');
+      
+      toast({
+        title: 'Área excluída',
+        description: 'A área de coordenação foi excluída com sucesso',
+      });
+      
+      await fetchAreas();
+    } catch (error: any) {
+      console.error('Erro ao excluir área:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao excluir a área',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return {
     areas,
-    isLoading,
+    loading,
+    isSubmitting,
     fetchAreas,
-    createArea,
+    addArea,
     updateArea,
     deleteArea
   };
-};
+}
