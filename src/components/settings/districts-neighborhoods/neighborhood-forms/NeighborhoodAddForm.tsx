@@ -64,7 +64,7 @@ const NeighborhoodAddForm: React.FC<NeighborhoodAddFormProps> = ({
                 <SelectValue placeholder="Selecione um distrito" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="select-district" disabled>Selecione um distrito</SelectItem>
+                <SelectItem value="select-district">Selecione um distrito</SelectItem>
                 {districts.map((district) => (
                   <SelectItem key={district.id} value={district.id}>
                     {district.nome}

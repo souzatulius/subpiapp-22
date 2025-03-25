@@ -91,7 +91,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione um cargo" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="select-cargo" disabled>Selecione um cargo</SelectItem>
+            <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
             {cargos.map(cargo => (
               <SelectItem key={cargo.id} value={cargo.id}>
                 {cargo.descricao}
@@ -117,7 +117,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione uma coordenação" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="select-coord" disabled>Selecione uma coordenação</SelectItem>
+            <SelectItem value="select-coord">Selecione uma coordenação</SelectItem>
             {coordenacoes.map(coord => (
               <SelectItem key={coord.id} value={coord.id}>
                 {coord.descricao}
@@ -148,16 +148,16 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             {!coordenacao || coordenacao === 'select-coord' ? (
-              <SelectItem value="need-coord-first" disabled>
+              <SelectItem value="need-coord-first">
                 Selecione uma coordenação primeiro
               </SelectItem>
             ) : filteredSupervisoes.length === 0 ? (
-              <SelectItem value="no-supervisoes-available" disabled>
+              <SelectItem value="no-supervisoes-available">
                 Nenhuma supervisão técnica disponível
               </SelectItem>
             ) : (
               <>
-                <SelectItem value="select-supervisao" disabled>Selecione uma supervisão técnica</SelectItem>
+                <SelectItem value="select-supervisao">Selecione uma supervisão técnica</SelectItem>
                 {filteredSupervisoes.map(supervisao => (
                   <SelectItem key={supervisao.id} value={supervisao.id}>
                     {supervisao.descricao}

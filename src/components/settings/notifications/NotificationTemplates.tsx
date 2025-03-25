@@ -337,15 +337,16 @@ const NotificationTemplates: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="configuracao">Tipo de Notificação</Label>
                 <Select
-                  value={formData.configuracao_id}
+                  value={formData.configuracao_id || 'select-config'}
                   onValueChange={(value) => 
-                    setFormData({ ...formData, configuracao_id: value })
+                    setFormData({ ...formData, configuracao_id: value === 'select-config' ? undefined : value })
                   }
                 >
                   <SelectTrigger id="configuracao">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="select-config">Selecione...</SelectItem>
                     {configurations.map((config) => (
                       <SelectItem key={config.id} value={config.id}>
                         {config.titulo} ({config.tipo})
