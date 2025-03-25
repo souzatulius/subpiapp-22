@@ -38,6 +38,9 @@ export const FORM_STEPS = [
   }
 ];
 
+// Importação explícita do tipo ValidationError
+import { ValidationError } from '@/lib/formValidationUtils';
+
 export interface FormContentProps {
   activeStep: number;
   formData: any;
