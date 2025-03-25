@@ -75,10 +75,13 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
           <div className="grid gap-2">
             <Label htmlFor="coordenacao_id">Coordenação</Label>
             <Select
-              defaultValue={defaultValues.coordenacao_id || ''}
+              defaultValue={defaultValues.coordenacao_id || 'none'}
               onValueChange={(value) => {
                 const event = {
-                  target: { value, name: 'coordenacao_id' }
+                  target: { 
+                    value: value === 'none' ? '' : value, 
+                    name: 'coordenacao_id' 
+                  }
                 };
                 register('coordenacao_id').onChange(event);
               }}
@@ -87,7 +90,7 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
                 <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhuma</SelectItem>
+                <SelectItem value="none">Nenhuma</SelectItem>
                 {coordinations.map((coordination) => (
                   <SelectItem key={coordination.id} value={coordination.id}>
                     {coordination.descricao}

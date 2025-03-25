@@ -28,7 +28,7 @@ const CoordinationAreaEditDialog: React.FC<CoordinationAreaEditDialogProps> = ({
     <EditModal 
       isOpen={isOpen} 
       onClose={onClose}
-      title="Editar Área de Coordenação"
+      title="Editar Supervisão Técnica"
     >
       <CoordinationAreaForm
         onSubmit={onSubmit}
