@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -12,12 +11,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Bell, Mail, MessageSquare } from "lucide-react";
 import AttentionBox from "@/components/ui/attention-box";
 
+interface NotificationPreferences {
+  app: boolean;
+  email: boolean;
+  resumo_diario: boolean;
+  frequencia?: string;
+}
+
 const NotificationUserPreferences: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [preferences, setPreferences] = useState({
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
     app: true,
     email: true,
     resumo_diario: true,
@@ -43,9 +49,15 @@ const NotificationUserPreferences: React.FC = () => {
       if (error) throw error;
       
       if (data?.configuracoes_notificacao) {
-        setPreferences(data.configuracoes_notificacao);
-        if (data.configuracoes_notificacao.frequencia) {
-          setFrequency(data.configuracoes_notificacao.frequencia);
+        const userPrefs = data.configuracoes_notificacao as NotificationPreferences;
+        setPreferences({
+          app: userPrefs.app ?? true,
+          email: userPrefs.email ?? true,
+          resumo_diario: userPrefs.resumo_diario ?? true
+        });
+        
+        if (userPrefs.frequencia) {
+          setFrequency(userPrefs.frequencia);
         }
       }
     } catch (error) {

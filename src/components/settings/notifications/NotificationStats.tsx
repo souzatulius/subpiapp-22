@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { DatePickerWithRange } from "./DateRangePickerWrapper";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Bell, UserCheck, UserX, BarChart3 } from "lucide-react";
@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { addDays, format, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { DateRange } from "react-day-picker";
 
 ChartJS.register(
   CategoryScale, 
@@ -42,6 +43,11 @@ interface UserStat {
   count: number;
 }
 
+interface ReadStat {
+  lida: boolean;
+  count: number;
+}
+
 interface ChartData {
   labels: string[];
   datasets: {
@@ -59,7 +65,7 @@ const NotificationStats: React.FC = () => {
   const [typeStats, setTypeStats] = useState<NotificationStat[]>([]);
   const [userStats, setUserStats] = useState<UserStat[]>([]);
   const [readStats, setReadStats] = useState<{read: number, unread: number}>({read: 0, unread: 0});
-  const [dateRange, setDateRange] = useState<{from: Date, to: Date}>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: subDays(new Date(), 30),
     to: new Date()
   });
@@ -75,40 +81,41 @@ const NotificationStats: React.FC = () => {
       setIsLoading(true);
       
       // Format dates for query
-      const from = dateRange.from.toISOString();
-      const to = dateRange.to.toISOString();
+      const from = dateRange.from?.toISOString() || '';
+      const to = dateRange.to?.toISOString() || '';
       
-      // Fetch type stats
+      // Fetch type stats using regular query instead of RPC
       const { data: typeData, error: typeError } = await supabase
-        .rpc('get_notification_type_stats', { 
-          from_date: from,
-          to_date: to
-        });
+        .from('notification_type_stats')
+        .select('*')
+        .gte('data_envio', from)
+        .lte('data_envio', to);
       
       if (typeError) throw typeError;
-      setTypeStats(typeData || []);
+      setTypeStats(typeData as NotificationStat[] || []);
       
-      // Fetch user stats
+      // Fetch user stats using regular query
       const { data: userData, error: userError } = await supabase
-        .rpc('get_notification_user_stats', { 
-          from_date: from,
-          to_date: to
-        });
+        .from('notification_user_stats')
+        .select('*')
+        .gte('data_envio', from)
+        .lte('data_envio', to);
       
       if (userError) throw userError;
-      setUserStats(userData || []);
+      setUserStats(userData as UserStat[] || []);
       
-      // Fetch read/unread stats
+      // Fetch read/unread stats using regular query
       const { data: readData, error: readError } = await supabase
-        .rpc('get_notification_read_stats', { 
-          from_date: from,
-          to_date: to
-        });
+        .from('notification_read_stats')
+        .select('*')
+        .gte('data_envio', from)
+        .lte('data_envio', to);
       
       if (readError) throw readError;
-      if (readData && readData.length > 0) {
-        const read = readData.find((item: any) => item.lida === true)?.count || 0;
-        const unread = readData.find((item: any) => item.lida === false)?.count || 0;
+      
+      if (readData && Array.isArray(readData) && readData.length > 0) {
+        const read = readData.find((item: ReadStat) => item.lida === true)?.count || 0;
+        const unread = readData.find((item: ReadStat) => item.lida === false)?.count || 0;
         setReadStats({ read, unread });
       }
       
@@ -379,7 +386,7 @@ const NotificationStats: React.FC = () => {
             
             <div className="text-center text-sm text-gray-500">
               {selectedPeriod === 'custom' 
-                ? `Período: ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`
+                ? `Período: ${dateRange.from ? format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR }) : '-'} a ${dateRange.to ? format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR }) : '-'}`
                 : selectedPeriod === '7d'
                   ? 'Últimos 7 dias'
                   : selectedPeriod === '30d'

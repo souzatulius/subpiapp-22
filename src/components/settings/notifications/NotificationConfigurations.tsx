@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Edit, Plus, Trash2, Loader2, Toggle, Info } from "lucide-react";
+import { Edit, Plus, Trash2, Loader2, ToggleLeft, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -163,7 +162,6 @@ const NotificationConfigurations: React.FC = () => {
       }
       
       if (isEditing && formData.id) {
-        // Update existing config
         const { error } = await supabase
           .from('configuracoes_notificacoes')
           .update({
@@ -184,7 +182,6 @@ const NotificationConfigurations: React.FC = () => {
           variant: "success",
         });
       } else {
-        // Create new config
         const { error } = await supabase
           .from('configuracoes_notificacoes')
           .insert({
@@ -204,10 +201,8 @@ const NotificationConfigurations: React.FC = () => {
         });
       }
       
-      // Refresh configurations
       fetchConfigurations();
       
-      // Reset form and close dialog
       resetForm();
       setIsDialogOpen(false);
     } catch (error) {
@@ -361,105 +356,5 @@ const NotificationConfigurations: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Configuration Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[525px]">
-          <DialogHeader>
-            <DialogTitle>
-              {isEditing ? 'Editar Configuração' : 'Nova Configuração de Notificação'}
-            </DialogTitle>
-            <DialogDescription>
-              Configure os diferentes tipos de notificações do sistema.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="titulo">Título da Notificação</Label>
-              <Input
-                id="titulo"
-                value={formData.titulo}
-                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                placeholder="Ex: Notificação de Nova Demanda"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="tipo">Tipo de Notificação</Label>
-                <Select
-                  value={formData.tipo}
-                  onValueChange={(value) => 
-                    setFormData({ ...formData, tipo: value })
-                  }
-                >
-                  <SelectTrigger id="tipo">
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="demanda">Demanda</SelectItem>
-                    <SelectItem value="nota">Nota Oficial</SelectItem>
-                    <SelectItem value="sistema">Sistema</SelectItem>
-                    <SelectItem value="comunicado">Comunicado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="frequencia">Frequência</Label>
-                <Select
-                  value={formData.frequencia}
-                  onValueChange={(value) => 
-                    setFormData({ ...formData, frequencia: value })
-                  }
-                >
-                  <SelectTrigger id="frequencia">
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="imediata">Imediata</SelectItem>
-                    <SelectItem value="agrupada">Agrupada (horária)</SelectItem>
-                    <SelectItem value="diaria">Diária (resumo)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="descricao">Descrição</Label>
-              <Textarea
-                id="descricao"
-                value={formData.descricao}
-                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                placeholder="Descrição detalhada desta notificação..."
-                rows={3}
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="ativo"
-                checked={formData.ativo}
-                onCheckedChange={(checked) => 
-                  setFormData({ ...formData, ativo: checked })
-                }
-              />
-              <Label htmlFor="ativo">Ativo</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline" onClick={handleDialogClose}>
-                Cancelar
-              </Button>
-            </DialogClose>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'Atualizar' : 'Criar'} Configuração
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
+      <
 
-export default NotificationConfigurations;
