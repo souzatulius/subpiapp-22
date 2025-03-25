@@ -11,10 +11,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
 import { Loader2 } from 'lucide-react';
 import { User, UserFormData, Area, Cargo } from './types';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 interface EditUserDialogProps {
   open: boolean;
@@ -131,18 +136,22 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
           <div className="grid gap-2">
             <Label htmlFor="cargo_id">Cargo</Label>
-            <select
-              id="cargo_id"
-              {...register('cargo_id')}
-              className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+            <Select
+              value={watch('cargo_id')}
+              onValueChange={(value) => setValue('cargo_id', value)}
             >
-              <option value="select-cargo">Selecione um cargo</option>
-              {cargos.map(cargo => (
-                <option key={cargo.id} value={cargo.id}>
-                  {cargo.descricao}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-12 rounded-xl">
+                <SelectValue placeholder="Selecione um cargo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
+                {cargos.map(cargo => (
+                  <SelectItem key={cargo.id} value={cargo.id}>
+                    {cargo.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.cargo_id && (
               <p className="text-sm text-red-500">{errors.cargo_id.message}</p>
             )}
@@ -150,23 +159,26 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
           <div className="grid gap-2">
             <Label htmlFor="coordenacao_id">Coordenação</Label>
-            <select
-              id="coordenacao_id"
-              {...register('coordenacao_id')}
-              className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
-              onChange={(e) => {
-                setValue('coordenacao_id', e.target.value);
+            <Select
+              value={watch('coordenacao_id')}
+              onValueChange={(value) => {
+                setValue('coordenacao_id', value);
                 // Reset area_coordenacao_id when coordination changes
                 setValue('area_coordenacao_id', '');
               }}
             >
-              <option value="select-coordenacao">Selecione uma coordenação</option>
-              {coordenacoes.map(coord => (
-                <option key={coord.coordenacao_id} value={coord.coordenacao_id}>
-                  {coord.coordenacao}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-12 rounded-xl">
+                <SelectValue placeholder="Selecione uma coordenação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
+                {coordenacoes.map(coord => (
+                  <SelectItem key={coord.coordenacao_id} value={coord.coordenacao_id}>
+                    {coord.coordenacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.coordenacao_id && (
               <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
             )}
@@ -174,25 +186,41 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
           <div className="grid gap-2">
             <Label htmlFor="area_coordenacao_id">Supervisão Técnica (Opcional)</Label>
-            <select
-              id="area_coordenacao_id"
-              {...register('area_coordenacao_id')}
-              className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+            <Select
+              value={watch('area_coordenacao_id')}
+              onValueChange={(value) => setValue('area_coordenacao_id', value)}
               disabled={!coordenacao || coordenacao === 'select-coordenacao' || filteredAreas.length === 0}
             >
-              <option value="select-area">
-                {!coordenacao || coordenacao === 'select-coordenacao'
-                  ? 'Selecione uma coordenação primeiro' 
-                  : filteredAreas.length === 0 
-                    ? 'Nenhuma supervisão técnica disponível' 
-                    : 'Selecione uma supervisão técnica'}
-              </option>
-              {filteredAreas.map(area => (
-                <option key={area.id} value={area.id}>
-                  {area.descricao}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-12 rounded-xl">
+                <SelectValue placeholder={
+                  !coordenacao || coordenacao === 'select-coordenacao'
+                    ? 'Selecione uma coordenação primeiro' 
+                    : filteredAreas.length === 0 
+                      ? 'Nenhuma supervisão técnica disponível' 
+                      : 'Selecione uma supervisão técnica'
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                {!coordenacao || coordenacao === 'select-coordenacao' ? (
+                  <SelectItem value="select-area">
+                    Selecione uma coordenação primeiro
+                  </SelectItem>
+                ) : filteredAreas.length === 0 ? (
+                  <SelectItem value="select-area">
+                    Nenhuma supervisão técnica disponível
+                  </SelectItem>
+                ) : (
+                  <>
+                    <SelectItem value="select-area">Selecione uma supervisão técnica</SelectItem>
+                    {filteredAreas.map(area => (
+                      <SelectItem key={area.id} value={area.id}>
+                        {area.descricao}
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
             {errors.area_coordenacao_id && (
               <p className="text-sm text-red-500">{errors.area_coordenacao_id.message}</p>
             )}
