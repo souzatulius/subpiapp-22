@@ -3,7 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import DataEntryForm from '../DataEntryForm';
-import { serviceSchema, Area } from '@/hooks/useServices';
+import { serviceSchema, Area } from '@/hooks/services/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ServiceFormProps {

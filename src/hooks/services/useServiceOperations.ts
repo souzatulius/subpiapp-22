@@ -2,125 +2,120 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Service } from './types';
 
-export function useServiceOperations(fetchServices: () => Promise<void>) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function useServiceOperations(refreshCallback: () => Promise<void>) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const addService = async (data: { descricao: string; area_coordenacao_id: string }) => {
-    setIsSubmitting(true);
     try {
-      console.log('Adicionando serviço:', data);
-      
-      const { data: result, error } = await supabase.rpc('insert_servico', {
-        p_descricao: data.descricao,
-        p_area_coordenacao_id: data.area_coordenacao_id
-      });
-      
+      setIsAdding(true);
+      const { error } = await supabase
+        .from('servicos')
+        .insert(data);
+
       if (error) throw error;
       
-      console.log('Serviço adicionado com sucesso:', result);
+      await refreshCallback();
       
       toast({
-        title: 'Sucesso',
-        description: 'Serviço adicionado com sucesso',
+        title: 'Serviço adicionado',
+        description: 'O serviço foi adicionado com sucesso.',
       });
       
-      await fetchServices();
-      return Promise.resolve();
+      return true;
     } catch (error: any) {
       console.error('Erro ao adicionar serviço:', error);
       toast({
         title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao adicionar o serviço',
+        description: 'Não foi possível adicionar o serviço.',
         variant: 'destructive',
       });
-      return Promise.reject(error);
+      return false;
     } finally {
-      setIsSubmitting(false);
+      setIsAdding(false);
     }
   };
 
-  const updateService = async (id: string, data: { descricao: string; area_coordenacao_id: string }) => {
-    setIsSubmitting(true);
+  const updateService = async (
+    id: string, 
+    data: { descricao: string; area_coordenacao_id: string }
+  ) => {
     try {
-      console.log('Atualizando serviço:', id, data);
-      
-      const { data: result, error } = await supabase.rpc('update_servico', {
-        p_id: id,
-        p_descricao: data.descricao,
-        p_area_coordenacao_id: data.area_coordenacao_id
-      });
-      
+      setIsEditing(true);
+      const { error } = await supabase
+        .from('servicos')
+        .update(data)
+        .eq('id', id);
+
       if (error) throw error;
       
-      console.log('Serviço atualizado com sucesso:', result);
+      await refreshCallback();
       
       toast({
-        title: 'Sucesso',
-        description: 'Serviço atualizado com sucesso',
+        title: 'Serviço atualizado',
+        description: 'O serviço foi atualizado com sucesso.',
       });
       
-      await fetchServices();
-      return Promise.resolve();
+      return true;
     } catch (error: any) {
-      console.error('Erro ao editar serviço:', error);
+      console.error('Erro ao atualizar serviço:', error);
       toast({
         title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao atualizar o serviço',
+        description: 'Não foi possível atualizar o serviço.',
         variant: 'destructive',
       });
-      return Promise.reject(error);
+      return false;
     } finally {
-      setIsSubmitting(false);
+      setIsEditing(false);
     }
   };
 
-  const deleteService = async (service: Service) => {
+  const deleteService = async (id: string) => {
     try {
-      console.log('Excluindo serviço:', service.id);
-      
-      // Verificar se há demandas associadas a este serviço
-      const { count, error: countError } = await supabase
-        .from('demandas')
-        .select('*', { count: 'exact', head: true })
-        .eq('servico_id', service.id);
-        
-      if (countError) throw countError;
-        
-      if ((count || 0) > 0) {
-        toast({
-          title: 'Não é possível excluir',
-          description: 'Existem demandas associadas a este serviço',
-          variant: 'destructive',
-        });
-        return;
-      }
-      
-      const { error } = await supabase.rpc('delete_servico', {
-        p_id: service.id
-      });
-      
+      setIsDeleting(true);
+      const { error } = await supabase
+        .from('servicos')
+        .delete()
+        .eq('id', id);
+
       if (error) throw error;
+      
+      await refreshCallback();
       
       toast({
         title: 'Serviço excluído',
-        description: 'O serviço foi excluído com sucesso',
+        description: 'O serviço foi excluído com sucesso.',
       });
       
-      await fetchServices();
+      return true;
     } catch (error: any) {
       console.error('Erro ao excluir serviço:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao excluir o serviço',
-        variant: 'destructive',
-      });
+      
+      // Check if error is due to foreign key constraint
+      if (error.code === '23503') {
+        toast({
+          title: 'Erro',
+          description: 'Este serviço está sendo usado e não pode ser excluído.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível excluir o serviço.',
+          variant: 'destructive',
+        });
+      }
+      
+      return false;
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return {
-    isSubmitting,
+    isSubmitting: isAdding || isEditing,
     addService,
     updateService,
     deleteService

@@ -2,7 +2,7 @@
 import React from 'react';
 import EditModal from '../EditModal';
 import ServiceForm from './ServiceForm';
-import { Service, Area } from '@/hooks/useServices';
+import { Service, Area } from '@/hooks/services/types';
 
 interface ServiceEditDialogProps {
   isOpen: boolean;
@@ -38,7 +38,6 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
         }}
         areas={areas}
         isSubmitting={isSubmitting}
-        submitText="Salvar Alterações"
       />
     </EditModal>
   );
