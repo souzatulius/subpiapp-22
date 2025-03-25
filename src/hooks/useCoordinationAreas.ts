@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { z } from 'zod';
 
 // Define tipos para evitar recursividade infinita
 export type CoordinationArea = {
@@ -9,6 +10,14 @@ export type CoordinationArea = {
   descricao: string;
   criado_em?: string;
 };
+
+// Alias para compatibilidade com código existente
+export type Area = CoordinationArea;
+
+// Schema para validação de formulários
+export const areaSchema = z.object({
+  descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" })
+});
 
 export const useCoordinationAreas = () => {
   const [areas, setAreas] = useState<CoordinationArea[]>([]);
@@ -151,6 +160,8 @@ export const useCoordinationAreas = () => {
     isAdding,
     isEditing,
     isDeleting,
+    isSubmitting: isAdding || isEditing, // Alias para compatibilidade
+    loading: isLoading, // Alias para compatibilidade
     fetchAreas,
     addArea,
     updateArea,

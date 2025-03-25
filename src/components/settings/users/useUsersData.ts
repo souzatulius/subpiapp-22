@@ -15,7 +15,7 @@ export const useUsersData = () => {
     try {
       setIsLoading(true);
       
-      // Buscar usuários com informações relacionadas
+      // Buscar usuários - selecionando apenas colunas básicas
       const { data: usersData, error: usersError } = await supabase
         .from('usuarios')
         .select(`
@@ -27,16 +27,43 @@ export const useUsersData = () => {
           foto_perfil_url,
           cargo_id,
           area_coordenacao_id,
-          criado_em,
-          cargos:cargo_id(id, descricao),
-          areas_coordenacao:area_coordenacao_id(id, descricao)
+          criado_em
         `)
         .order('nome_completo');
       
       if (usersError) throw usersError;
       
-      // Buscar permissões para cada usuário
-      const usersWithPermissions = await Promise.all(usersData.map(async (user) => {
+      // Processar para adicionar dados relacionados
+      const processedUsers = await Promise.all(usersData.map(async (user) => {
+        // Buscar cargo
+        let cargoInfo = { id: '', descricao: '' };
+        if (user.cargo_id) {
+          const { data: cargoData, error: cargoError } = await supabase
+            .from('cargos')
+            .select('id, descricao')
+            .eq('id', user.cargo_id)
+            .single();
+            
+          if (!cargoError && cargoData) {
+            cargoInfo = cargoData;
+          }
+        }
+        
+        // Buscar área
+        let areaInfo = { id: '', descricao: '' };
+        if (user.area_coordenacao_id) {
+          const { data: areaData, error: areaError } = await supabase
+            .from('areas_coordenacao')
+            .select('id, descricao')
+            .eq('id', user.area_coordenacao_id)
+            .single();
+            
+          if (!areaError && areaData) {
+            areaInfo = areaData;
+          }
+        }
+        
+        // Buscar permissões
         const { data: permissionsData, error: permissionsError } = await supabase
           .from('usuario_permissoes')
           .select(`
@@ -46,19 +73,21 @@ export const useUsersData = () => {
           `)
           .eq('usuario_id', user.id);
         
-        if (permissionsError) {
-          console.error('Erro ao buscar permissões:', permissionsError);
-          return { ...user, permissoes: [] };
+        let permissoes = [];
+        if (!permissionsError) {
+          permissoes = permissionsData.map(p => p.permissoes);
         }
         
         return { 
           ...user, 
-          permissoes: permissionsData.map(p => p.permissoes)
+          cargos: cargoInfo,
+          areas_coordenacao: areaInfo,
+          permissoes
         };
       }));
       
-      setUsers(usersWithPermissions);
-      setFilteredUsers(usersWithPermissions);
+      setUsers(processedUsers as User[]);
+      setFilteredUsers(processedUsers as User[]);
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
       toast({
@@ -89,9 +118,9 @@ export const useUsersData = () => {
     // Aplicar filtro de status
     if (statusFilter !== 'todos') {
       if (statusFilter === 'ativos') {
-        filtered = filtered.filter(user => true); // Todos são considerados ativos por enquanto
+        filtered = filtered.filter(user => user.permissoes && user.permissoes.length > 0);
       } else if (statusFilter === 'inativos') {
-        filtered = filtered.filter(user => false); // Nenhum é considerado inativo por enquanto
+        filtered = filtered.filter(user => !user.permissoes || user.permissoes.length === 0);
       }
     }
     

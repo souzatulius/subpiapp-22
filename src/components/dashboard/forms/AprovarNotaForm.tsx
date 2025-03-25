@@ -28,20 +28,36 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const fetchNotas = async () => {
     try {
       setIsLoading(true);
-      // Buscar notas com join em autores, usando alias para evitar conflitos
+      // Buscar notas com dados dos autores, usando a sintaxe correta para evitar erro de relação
       const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
         .select(`
-          id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id, problema_id,
-          autores:autor_id(id, nome_completo)
+          id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id, problema_id
         `)
         .eq('status', 'pendente')  // Apenas notas pendentes
         .order('criado_em', { ascending: false });
       
       if (notasError) throw notasError;
       
-      // Processar para adicionar informações de área
+      // Processar para adicionar informações de autor e área
       const notasProcessadas = await Promise.all(notasData.map(async (nota) => {
+        // Buscar autor separadamente
+        let autorInfo = { id: '', nome_completo: 'Desconhecido' };
+        if (nota.autor_id) {
+          const { data: autorData, error: autorError } = await supabase
+            .from('usuarios')
+            .select('id, nome_completo')
+            .eq('id', nota.autor_id)
+            .single();
+            
+          if (!autorError && autorData) {
+            autorInfo = { 
+              id: autorData.id, 
+              nome_completo: autorData.nome_completo 
+            };
+          }
+        }
+        
         // Buscar área de coordenação
         let areaInfo = { descricao: 'Desconhecida', id: '' };
         if (nota.area_coordenacao_id) {
@@ -62,10 +78,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         return {
           ...nota,
           areas_coordenacao: areaInfo,
-          autor: {
-            id: nota.autores?.id,
-            nome_completo: nota.autores?.nome_completo || 'Desconhecido'
-          }
+          autor: autorInfo
         };
       }));
       

@@ -34,7 +34,7 @@ export const useUserProfile = () => {
     try {
       setIsLoading(true);
       // Buscar perfil do usuário
-      const { data, error } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .select(`
           nome_completo,
@@ -42,26 +42,51 @@ export const useUserProfile = () => {
           area_coordenacao_id,
           foto_perfil_url,
           whatsapp,
-          aniversario,
-          cargos:cargo_id(descricao),
-          areas_coordenacao:area_coordenacao_id(descricao)
+          aniversario
         `)
         .eq('id', user.id)
         .single();
       
-      if (error) throw error;
+      if (userError) throw userError;
+      
+      // Buscar cargo e área separadamente para evitar erros de relação
+      let cargoInfo = { descricao: '' };
+      if (userData.cargo_id) {
+        const { data: cargoData, error: cargoError } = await supabase
+          .from('cargos')
+          .select('descricao')
+          .eq('id', userData.cargo_id)
+          .single();
+          
+        if (!cargoError && cargoData) {
+          cargoInfo = { descricao: cargoData.descricao };
+        }
+      }
+      
+      let areaInfo = { descricao: '' };
+      if (userData.area_coordenacao_id) {
+        const { data: areaData, error: areaError } = await supabase
+          .from('areas_coordenacao')
+          .select('descricao')
+          .eq('id', userData.area_coordenacao_id)
+          .single();
+          
+        if (!areaError && areaData) {
+          areaInfo = { descricao: areaData.descricao };
+        }
+      }
       
       setUserProfile({
-        nome_completo: data.nome_completo,
-        cargo: data.cargos?.descricao || '',
-        area: data.areas_coordenacao?.descricao || '',
-        foto_perfil_url: data.foto_perfil_url,
-        whatsapp: data.whatsapp,
-        aniversario: data.aniversario,
-        cargo_id: data.cargo_id,
-        area_coordenacao_id: data.area_coordenacao_id,
-        cargos: data.cargos,
-        areas_coordenacao: data.areas_coordenacao
+        nome_completo: userData.nome_completo,
+        cargo: cargoInfo.descricao,
+        area: areaInfo.descricao,
+        foto_perfil_url: userData.foto_perfil_url,
+        whatsapp: userData.whatsapp,
+        aniversario: userData.aniversario,
+        cargo_id: userData.cargo_id,
+        area_coordenacao_id: userData.area_coordenacao_id,
+        cargos: cargoInfo,
+        areas_coordenacao: areaInfo
       });
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);

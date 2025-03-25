@@ -42,7 +42,7 @@ const CoordinationAreas = () => {
     if (!editingArea) return Promise.reject(new Error('Nenhuma área selecionada'));
     
     try {
-      await updateArea(editingArea.id, data);
+      await updateArea(editingArea.id, data.descricao);
       closeEditForm();
       return Promise.resolve();
     } catch (error) {
@@ -54,7 +54,7 @@ const CoordinationAreas = () => {
   const handleAdd = async (data: { descricao: string }) => {
     try {
       console.log('CoordinationAreas handling add:', data);
-      await addArea(data);
+      await addArea(data.descricao);
       closeAddForm();
       return Promise.resolve();
     } catch (error) {
