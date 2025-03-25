@@ -1,337 +1,281 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from '@/integrations/supabase/client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { Badge } from "@/components/ui/badge"
+import { Circle } from 'lucide-react';
 
-interface NotificationStat {
-  tipo: string;
-  count: number;
+interface NotificationStatsProps {
+  // Define any props if needed
 }
 
-interface UserStat {
-  usuario_nome: string;
-  count: number;
-}
-
-interface ReadStat {
-  lida: boolean;
-  count: number;
-}
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
-
-const NotificationStats = () => {
-  const [typeStats, setTypeStats] = useState<NotificationStat[]>([]);
-  const [userStats, setUserStats] = useState<UserStat[]>([]);
-  const [readStats, setReadStats] = useState<{ lidas: number; naoLidas: number }>({ lidas: 0, naoLidas: 0 });
+const NotificationStats: React.FC<NotificationStatsProps> = () => {
+  const [totalNotifications, setTotalNotifications] = useState(0);
+  const [readNotifications, setReadNotifications] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [coordenacoesData, setCoordenacoesData] = useState<any[]>([]);
+  const [demandaStatusData, setDemandaStatusData] = useState<any[]>([]);
+  const [origensData, setOrigensData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState({
-    from: new Date(new Date().setDate(new Date().getDate() - 30)),
-    to: new Date(),
-  });
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchStats();
-  }, [dateRange]);
+    fetchData();
+  }, []);
 
-  const fetchStats = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch notification stats by type
-      const typeStatsResponse = await supabase
+      // Total de notificações
+      const { count: totalCount, error: totalError } = await supabase
         .from('notificacoes')
-        .select('tipo, count')
-        .gte('data_envio', dateRange.from.toISOString())
-        .lte('data_envio', dateRange.to.toISOString())
-        .select('tipo, count(*)')
-        .groupBy('tipo');
+        .select('*', { count: 'exact' });
 
-      if (typeStatsResponse.error) throw typeStatsResponse.error;
-      setTypeStats(typeStatsResponse.data as NotificationStat[]);
+      if (totalError) throw totalError;
+      setTotalNotifications(totalCount || 0);
 
-      // Fetch notification stats by user
-      const userStatsResponse = await supabase
+      // Total de notificações lidas
+      const { count: readCount, error: readError } = await supabase
         .from('notificacoes')
-        .select('usuario_id, usuarios!inner(nome_completo), count(*)')
-        .gte('data_envio', dateRange.from.toISOString())
-        .lte('data_envio', dateRange.to.toISOString())
-        .groupBy('usuario_id, usuarios.nome_completo');
+        .select('*', { count: 'exact' })
+        .eq('lida', true);
 
-      if (userStatsResponse.error) throw userStatsResponse.error;
-      
-      const formattedUserStats = userStatsResponse.data.map(item => ({
-        usuario_nome: item.usuarios?.nome_completo || 'Desconhecido',
-        count: parseInt(item.count)
-      }));
-      
-      setUserStats(formattedUserStats);
+      if (readError) throw readError;
+      setReadNotifications(readCount || 0);
 
-      // Fetch notification stats by read status
-      const readStatsResponse = await supabase
+      // Total de notificações não lidas
+      const { count: unreadCount, error: unreadError } = await supabase
         .from('notificacoes')
-        .select('lida, count(*)')
-        .gte('data_envio', dateRange.from.toISOString())
-        .lte('data_envio', dateRange.to.toISOString())
-        .groupBy('lida');
+        .select('*', { count: 'exact' })
+        .eq('lida', false);
 
-      if (readStatsResponse.error) throw readStatsResponse.error;
-      
-      let lidas = 0;
-      let naoLidas = 0;
-      
-      readStatsResponse.data.forEach((item: any) => {
-        if (item.lida === true) {
-          lidas = parseInt(item.count);
-        } else {
-          naoLidas = parseInt(item.count);
-        }
+      if (unreadError) throw unreadError;
+      setUnreadNotifications(unreadCount || 0);
+
+      const { data: coordenacoes, error: coordenacoesError } = await supabase
+        .from('coordenacoes')
+        .select('id, descricao');
+
+      if (coordenacoesError) throw coordenacoesError;
+
+      // Use this format:
+      const { data: notificacoesCoordenacaoData, error: coordError } = await supabase
+        .from('notificacoes')
+        .select('coordenacao_id, count(*)', { count: 'exact' })
+        .not('coordenacao_id', 'is', null)
+        .is('lida', false)
+        .groupBy('coordenacao_id');
+
+      if (coordError) throw coordError;
+
+      const coordenacoesMap: Record<string, string> = {};
+      coordenacoes?.forEach(coord => {
+        coordenacoesMap[coord.id] = coord.descricao;
       });
-      
-      setReadStats({ lidas, naoLidas });
-    } catch (error) {
-      console.error('Erro ao carregar estatísticas de notificações:', error);
+
+      const formattedCoordenacoesData = notificacoesCoordenacaoData?.map(item => ({
+        name: coordenacoesMap[item.coordenacao_id] || 'Desconhecido',
+        value: item.count,
+      })) || [];
+
+      setCoordenacoesData(formattedCoordenacoesData);
+
+      const { data: demandasStatusData, error: statusError } = await supabase
+        .from('demandas')
+        .select('status, count(*)', { count: 'exact' })
+        .in('status', ['pendente', 'em-andamento', 'concluido'])
+        .groupBy('status');
+
+      if (statusError) throw statusError;
+
+      const formattedDemandaStatusData = demandasStatusData?.map(item => ({
+        name: item.status,
+        value: item.count,
+      })) || [];
+
+      setDemandaStatusData(formattedDemandaStatusData);
+
+      const { data: demandasOrigensData, error: origensError } = await supabase
+        .from('demandas')
+        .select('origem_id, count(*)', { count: 'exact' })
+        .not('origem_id', 'is', null)
+        .is('respondida_em', null)
+        .groupBy('origem_id');
+
+      if (origensError) throw origensError;
+
+      const { data: origens, error: origensListError } = await supabase
+        .from('origens_demanda')
+        .select('id, descricao');
+
+      if (origensListError) throw origensListError;
+
+      const origensMap: Record<string, string> = {};
+      origens?.forEach(origem => {
+        origensMap[origem.id] = origem.descricao;
+      });
+
+      const formattedOrigensData = demandasOrigensData?.map(item => ({
+        name: origensMap[item.origem_id] || 'Desconhecido',
+        value: item.count,
+      })) || [];
+
+      setOrigensData(formattedOrigensData);
+
+    } catch (error: any) {
+      console.error('Erro ao buscar dados:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRangeChange = (range: { from?: Date; to?: Date }) => {
-    if (range.from && range.to) {
-      setDateRange({
-        from: range.from,
-        to: range.to,
-      });
-    }
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+
+  const renderLegend = (props: any) => {
+    const { payload } = props;
+
+    return (
+      <ul className="flex flex-col items-start justify-center">
+        {payload.map(
+          (entry: any, index: number) => (
+            <li key={`item-${index}`} className="flex items-center py-1">
+              <Circle color={entry.color} size={12} className="mr-2" />
+              <span className="text-sm">{entry.value}</span>
+            </li>
+          )
+        )}
+      </ul>
+    );
   };
-
-  const toggleTypeFilter = (tipo: string) => {
-    if (selectedTypes.includes(tipo)) {
-      setSelectedTypes(selectedTypes.filter(t => t !== tipo));
-    } else {
-      setSelectedTypes([...selectedTypes, tipo]);
-    }
-  };
-
-  const toggleUserFilter = (usuario: string) => {
-    if (selectedUsers.includes(usuario)) {
-      setSelectedUsers(selectedUsers.filter(u => u !== usuario));
-    } else {
-      setSelectedUsers([...selectedUsers, usuario]);
-    }
-  };
-
-  const filteredTypeStats = selectedTypes.length
-    ? typeStats.filter(stat => selectedTypes.includes(stat.tipo))
-    : typeStats;
-
-  const filteredUserStats = selectedUsers.length
-    ? userStats.filter(stat => selectedUsers.includes(stat.usuario_nome))
-    : userStats;
-
-  const readStatsData = [
-    { name: 'Lidas', value: readStats.lidas },
-    { name: 'Não Lidas', value: readStats.naoLidas },
-  ];
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle>Estatísticas de Notificações</CardTitle>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-2">
-            <DatePickerWithRange
-              dateRange={dateRange}
-              onRangeChange={handleRangeChange}
-            />
-            <Button
-              onClick={fetchStats}
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {loading ? 'Carregando...' : 'Atualizar'}
-            </Button>
-          </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Card de Resumo */}
+      <Card className="bg-white shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Resumo de Notificações</CardTitle>
         </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Total de Notificações:</span>
+                <Badge variant="secondary">{totalNotifications}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Notificações Lidas:</span>
+                <Badge variant="outline">{readNotifications}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Notificações Não Lidas:</span>
+                <Badge variant="destructive">{unreadNotifications}</Badge>
+              </div>
+            </div>
+          )}
+        </CardContent>
       </Card>
 
-      <Tabs defaultValue="tipo">
-        <TabsList className="w-full">
-          <TabsTrigger value="tipo" className="flex-1">Por Tipo</TabsTrigger>
-          <TabsTrigger value="usuario" className="flex-1">Por Usuário</TabsTrigger>
-          <TabsTrigger value="leitura" className="flex-1">Por Leitura</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="tipo">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notificações por Tipo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {typeStats.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  Nenhum dado disponível para o período selecionado.
-                </div>
-              ) : (
-                <>
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {typeStats.map(stat => (
-                      <Button
-                        key={stat.tipo}
-                        variant={selectedTypes.includes(stat.tipo) ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => toggleTypeFilter(stat.tipo)}
-                      >
-                        {stat.tipo}
-                      </Button>
-                    ))}
-                    {selectedTypes.length > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedTypes([])}
-                      >
-                        Limpar filtros
-                      </Button>
-                    )}
-                  </div>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={filteredTypeStats}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="tipo" />
-                        <YAxis />
-                        <Tooltip 
-                          formatter={(value: number) => [value, 'Notificações']}
-                          labelFormatter={(label) => `Tipo: ${label}`}
-                        />
-                        <Bar dataKey="count" fill="#8884d8" name="Quantidade" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="usuario">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notificações por Usuário</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userStats.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  Nenhum dado disponível para o período selecionado.
-                </div>
-              ) : (
-                <>
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {userStats.map(stat => (
-                      <Button
-                        key={stat.usuario_nome}
-                        variant={selectedUsers.includes(stat.usuario_nome) ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => toggleUserFilter(stat.usuario_nome)}
-                      >
-                        {stat.usuario_nome}
-                      </Button>
-                    ))}
-                    {selectedUsers.length > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedUsers([])}
-                      >
-                        Limpar filtros
-                      </Button>
-                    )}
-                  </div>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={filteredUserStats}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="usuario_nome" />
-                        <YAxis />
-                        <Tooltip 
-                          formatter={(value: number) => [value, 'Notificações']}
-                          labelFormatter={(label) => `Usuário: ${label}`}
-                        />
-                        <Bar dataKey="count" fill="#82ca9d" name="Quantidade" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="leitura">
-          <Card>
-            <CardHeader>
-              <CardTitle>Status de Leitura de Notificações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {readStats.lidas === 0 && readStats.naoLidas === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  Nenhum dado disponível para o período selecionado.
-                </div>
-              ) : (
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={readStatsData}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                        nameKey="name"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {readStatsData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === 0 ? '#00C49F' : '#FF8042'} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value: number) => [value, 'Notificações']}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex justify-center gap-8 mt-4">
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 mr-2 bg-[#00C49F] rounded-sm"></div>
-                      <span>Lidas: {readStats.lidas}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 mr-2 bg-[#FF8042] rounded-sm"></div>
-                      <span>Não Lidas: {readStats.naoLidas}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Gráfico de Coordenações */}
+      <Card className="bg-white shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Notificações Não Lidas por Coordenação</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={coordenacoesData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  label
+                >
+                  {coordenacoesData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend content={renderLegend} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Gráfico de Status das Demandas */}
+      <Card className="bg-white shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Status das Demandas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={demandaStatusData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#82ca9d"
+                  label
+                >
+                  {demandaStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend content={renderLegend} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Gráfico de Origens das Demandas */}
+      <Card className="bg-white shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Origens das Demandas Não Respondidas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={origensData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#ffc658"
+                  label
+                >
+                  {origensData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend content={renderLegend} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 export default NotificationStats;
-

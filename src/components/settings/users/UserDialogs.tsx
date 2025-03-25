@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { User, UserFormData, SupervisaoTecnica, Coordenacao, Cargo } from './types';
-import UserInviteDialog from './UserInviteDialog';
-import UserEditDialog from './UserEditDialog';
-import UserDeleteDialog from './UserDeleteDialog';
+import { User, UserFormData, SupervisaoTecnica, Cargo, Coordenacao } from './types';
+import InviteUserDialog from './InviteUserDialog';
+import EditUserDialog from './EditUserDialog';
+import DeleteUserDialog from './DeleteUserDialog';
 
 interface UserDialogsProps {
   supervisoesTecnicas: SupervisaoTecnica[];
@@ -42,7 +42,7 @@ const UserDialogs: React.FC<UserDialogsProps> = ({
 }) => {
   return (
     <>
-      <UserInviteDialog
+      <InviteUserDialog
         open={isInviteDialogOpen}
         onOpenChange={setIsInviteDialogOpen}
         onSubmit={handleInviteUser}
@@ -51,7 +51,7 @@ const UserDialogs: React.FC<UserDialogsProps> = ({
         coordenacoes={coordenacoes}
       />
       
-      <UserEditDialog
+      <EditUserDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         user={selectedUser}
@@ -62,11 +62,11 @@ const UserDialogs: React.FC<UserDialogsProps> = ({
         isSubmitting={isEditSubmitting}
       />
       
-      <UserDeleteDialog
+      <DeleteUserDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         user={userToDelete}
-        onConfirm={handleDeleteUser}
+        onDelete={handleDeleteUser}
       />
     </>
   );
