@@ -257,7 +257,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
                 <SelectValue placeholder="Selecione um cargo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Selecione um cargo</SelectItem>
+                <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
                 {cargos.map(cargo => (
                   <SelectItem key={cargo.id} value={cargo.id}>
                     {cargo.descricao}
@@ -282,7 +282,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
                 <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Selecione uma coordenação</SelectItem>
+                <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
                 {coordenacoes.map(coord => (
                   <SelectItem key={coord.id} value={coord.id}>
                     {coord.descricao}
@@ -309,18 +309,24 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
                 } />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">
-                  {!watchedCoordenacao 
-                    ? "Selecione uma coordenação primeiro" 
-                    : filteredAreas.length === 0 
-                      ? "Nenhuma supervisão técnica para esta coordenação" 
-                      : "Selecione uma supervisão técnica"}
-                </SelectItem>
-                {filteredAreas.map(area => (
-                  <SelectItem key={area.id} value={area.id}>
-                    {area.descricao}
+                {!watchedCoordenacao ? (
+                  <SelectItem value="no-coordenacao">
+                    Selecione uma coordenação primeiro
                   </SelectItem>
-                ))}
+                ) : filteredAreas.length === 0 ? (
+                  <SelectItem value="no-supervisions">
+                    Nenhuma supervisão técnica para esta coordenação
+                  </SelectItem>
+                ) : (
+                  <>
+                    <SelectItem value="select-supervision">Selecione uma supervisão técnica</SelectItem>
+                    {filteredAreas.map(area => (
+                      <SelectItem key={area.id} value={area.id}>
+                        {area.descricao}
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>

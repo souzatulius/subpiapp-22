@@ -99,7 +99,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                 </SelectItem>
               ) : (
                 <>
-                  <SelectItem value="">Selecione um cargo</SelectItem>
+                  <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
                   {roles.map(role => (
                     <SelectItem key={role.id} value={role.id}>
                       {role.value}
@@ -144,7 +144,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                 </SelectItem>
               ) : (
                 <>
-                  <SelectItem value="">Selecione uma coordenação</SelectItem>
+                  <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
                   {coordenacoes.map(coord => (
                     <SelectItem key={coord.id} value={coord.id}>
                       {coord.value}
@@ -180,16 +180,16 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             </SelectTrigger>
             <SelectContent>
               {!coordenacao ? (
-                <SelectItem value="no-options" disabled>
+                <SelectItem value="no-coordenacao" disabled>
                   Selecione uma coordenação primeiro
                 </SelectItem>
               ) : filteredAreas.length === 0 ? (
-                <SelectItem value="no-options" disabled>
+                <SelectItem value="no-supervisions" disabled>
                   Nenhuma supervisão técnica disponível para esta coordenação
                 </SelectItem>
               ) : (
                 <>
-                  <SelectItem value="">Selecione uma supervisão técnica</SelectItem>
+                  <SelectItem value="select-area">Selecione uma supervisão técnica</SelectItem>
                   {filteredAreas.map(area => (
                     <SelectItem key={area.id} value={area.id}>
                       {area.value}

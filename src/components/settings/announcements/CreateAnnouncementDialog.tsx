@@ -12,6 +12,7 @@ import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+
 interface CreateAnnouncementDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -31,6 +32,7 @@ interface CreateAnnouncementDialogProps {
     descricao: string;
   }[];
 }
+
 const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> = ({
   open,
   setOpen,
@@ -45,7 +47,6 @@ const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> = ({
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
 
-  // Efeito para atualizar o campo de destinatários ao mudar a seleção
   useEffect(() => {
     const destinatariosValue = destinationType === 'todos' ? 'Todos' : destinationType === 'usuarios' ? JSON.stringify({
       type: 'usuarios',
@@ -60,7 +61,6 @@ const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> = ({
     form.setValue('destinatarios', destinatariosValue);
   }, [destinationType, selectedUsers, form]);
 
-  // Função para lidar com a adição/remoção de usuários
   const toggleUser = (userId: string) => {
     if (selectedUsers.includes(userId)) {
       setSelectedUsers(selectedUsers.filter(id => id !== userId));
@@ -69,11 +69,11 @@ const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> = ({
     }
   };
 
-  // Função para buscar o nome completo do usuário pelo ID
   const getUserName = (userId: string) => {
     const user = users.find(user => user.id === userId);
     return user ? user.nome_completo : userId;
   };
+
   return <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-2xl bg-zinc-100">
         <DialogHeader>
@@ -237,4 +237,5 @@ const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> = ({
       </DialogContent>
     </Dialog>;
 };
+
 export default CreateAnnouncementDialog;

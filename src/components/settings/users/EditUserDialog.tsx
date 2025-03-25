@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -93,14 +92,12 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     },
   });
 
-  // Fetch coordenações when dialog opens
   useEffect(() => {
     const fetchCoordenacoes = async () => {
       if (!open) return;
       
       setLoading(true);
       try {
-        // Fetch coordenações (is_supervision = false)
         const { data, error } = await supabase
           .from('areas_coordenacao')
           .select('id, descricao')
@@ -124,7 +121,6 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     fetchCoordenacoes();
   }, [open]);
 
-  // Reset form when user data changes
   useEffect(() => {
     if (user) {
       const aniversario = user.aniversario ? new Date(user.aniversario) : undefined;
@@ -139,14 +135,12 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         aniversario: aniversario,
       });
       
-      // If the user has a coordination, fetch related supervisions
       if (user.coordenacao_id) {
         fetchFilteredAreas(user.coordenacao_id);
       }
     }
   }, [user, form]);
 
-  // Function to fetch filtered areas by coordination
   const fetchFilteredAreas = async (coordenacaoId: string) => {
     setLoading(true);
     try {
@@ -168,17 +162,14 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     }
   };
 
-  // Watch for coordenacao_id changes to filter areas
   const coordenacaoId = form.watch('coordenacao_id');
   
   useEffect(() => {
     if (coordenacaoId) {
       fetchFilteredAreas(coordenacaoId);
       
-      // Clear area selection if coordination changes
       const currentAreaId = form.getValues('area_coordenacao_id');
       if (currentAreaId) {
-        // We'll check if this area belongs to the selected coordination in fetchFilteredAreas
       }
     } else {
       setFilteredAreas([]);
@@ -257,7 +248,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Selecione um cargo</SelectItem>
+                      <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
                       {cargos.map((cargo) => (
                         <SelectItem key={cargo.id} value={cargo.id}>
                           {cargo.descricao}
@@ -279,7 +270,6 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                   <Select 
                     onValueChange={(value) => {
                       field.onChange(value);
-                      // Clear area selection when coordenação changes
                       form.setValue('area_coordenacao_id', undefined);
                     }} 
                     value={field.value}
@@ -290,7 +280,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Selecione uma coordenação</SelectItem>
+                      <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
                       {coordenacoes.map((coord) => (
                         <SelectItem key={coord.id} value={coord.id}>
                           {coord.descricao}
@@ -328,18 +318,24 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">
-                        {!form.getValues('coordenacao_id') 
-                          ? "Selecione uma coordenação primeiro" 
-                          : filteredAreas.length === 0 
-                            ? "Nenhuma supervisão técnica para esta coordenação" 
-                            : "Selecione uma supervisão técnica"}
-                      </SelectItem>
-                      {filteredAreas.map((area) => (
-                        <SelectItem key={area.id} value={area.id}>
-                          {area.descricao}
+                      {!form.getValues('coordenacao_id') ? (
+                        <SelectItem value="no-coordenacao">
+                          Selecione uma coordenação primeiro
                         </SelectItem>
-                      ))}
+                      ) : filteredAreas.length === 0 ? (
+                        <SelectItem value="no-supervisions">
+                          Nenhuma supervisão técnica para esta coordenação
+                        </SelectItem>
+                      ) : (
+                        <>
+                          <SelectItem value="select-supervision">Selecione uma supervisão técnica</SelectItem>
+                          {filteredAreas.map((area) => (
+                            <SelectItem key={area.id} value={area.id}>
+                              {area.descricao}
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
