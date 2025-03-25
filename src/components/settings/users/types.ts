@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   nome_completo: string;
@@ -6,6 +7,7 @@ export interface User {
   aniversario?: string;
   foto_perfil_url?: string;
   cargo_id?: string;
+  coordenacao_id?: string;
   area_coordenacao_id?: string;
   criado_em: string;
   cargos?: {
@@ -15,6 +17,8 @@ export interface User {
   areas_coordenacao?: {
     id: string;
     descricao: string;
+    coordenacao_id?: string;
+    coordenacao?: string;
   };
   permissoes: Permission[];
 }
@@ -23,6 +27,7 @@ export interface UserFormData {
   nome_completo: string;
   email: string;
   cargo_id?: string;
+  coordenacao_id?: string;
   area_coordenacao_id?: string;
   whatsapp?: string;
   aniversario?: Date;
@@ -42,6 +47,8 @@ export interface Cargo {
 export interface Area {
   id: string;
   descricao: string;
+  coordenacao_id?: string;
+  coordenacao?: string;
 }
 
 export interface UsersLayoutProps {
@@ -51,6 +58,7 @@ export interface UsersLayoutProps {
   setFilter: (value: string) => void;
   areas: Area[];
   cargos: Cargo[];
+  coordenacoes: { coordenacao_id: string; coordenacao: string }[];
   isInviteDialogOpen: boolean;
   setIsInviteDialogOpen: (open: boolean) => void;
   handleInviteUser: (data: any) => Promise<void>;

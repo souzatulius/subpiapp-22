@@ -16,6 +16,7 @@ interface ProfileFormData {
   whatsapp: string;
   aniversario: string;
   cargo_id: string;
+  coordenacao_id: string;
   area_coordenacao_id: string;
 }
 
@@ -30,23 +31,53 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   const [submitting, setSubmitting] = useState(false);
   const [areas, setAreas] = useState<any[]>([]);
   const [cargos, setCargos] = useState<any[]>([]);
+  const [coordenacoes, setCoordenacoes] = useState<any[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<any[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
+  const [selectedCoordenacao, setSelectedCoordenacao] = useState<string>('');
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>();
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ProfileFormData>();
+  
+  const watchedCoordenacao = watch('coordenacao_id');
 
-  // Fetch areas and cargos on mount
+  // Fetch options on mount
   useEffect(() => {
     const fetchOptions = async () => {
       setLoadingOptions(true);
       try {
-        const { data: areasData, error: areasError } = await supabase.from('areas_coordenacao').select('*').order('descricao');
+        // Fetch cargos
         const { data: cargosData, error: cargosError } = await supabase.from('cargos').select('*').order('descricao');
         
-        if (areasError) throw areasError;
-        if (cargosError) throw cargosError;
+        // Fetch coordenações
+        const { data: coordenacoesData, error: coordenacoesError } = await supabase.rpc('get_unique_coordenacoes');
         
-        if (areasData) setAreas(areasData);
+        // Fetch areas
+        const { data: areasData, error: areasError } = await supabase.from('areas_coordenacao').select('*').order('descricao');
+        
+        if (cargosError) throw cargosError;
+        if (coordenacoesError) throw coordenacoesError;
+        if (areasError) throw areasError;
+        
         if (cargosData) setCargos(cargosData);
+        if (coordenacoesData) setCoordenacoes(coordenacoesData);
+        if (areasData) setAreas(areasData);
+        
+        // Get user's current coordenacao_id if available
+        if (userProfile && userProfile.area_coordenacao_id) {
+          const area = areasData?.find(a => a.id === userProfile.area_coordenacao_id);
+          if (area && area.coordenacao_id) {
+            setSelectedCoordenacao(area.coordenacao_id);
+            setValue('coordenacao_id', area.coordenacao_id);
+            
+            // Filter areas based on this coordenação
+            const filteredAreas = areasData?.filter(a => a.coordenacao_id === area.coordenacao_id) || [];
+            setFilteredAreas(filteredAreas);
+          } else {
+            setFilteredAreas(areasData || []);
+          }
+        } else {
+          setFilteredAreas(areasData || []);
+        }
       } catch (error) {
         console.error('Erro ao buscar opções:', error);
         toast({
@@ -62,20 +93,48 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     if (isOpen) {
       fetchOptions();
     }
-  }, [isOpen]);
+  }, [isOpen, userProfile]);
+
+  // Filter areas when coordenação changes
+  useEffect(() => {
+    if (watchedCoordenacao && areas.length > 0) {
+      const filtered = areas.filter(area => area.coordenacao_id === watchedCoordenacao);
+      setFilteredAreas(filtered);
+      
+      // If the current area_coordenacao_id isn't in the filtered list, clear it
+      const currentAreaId = watch('area_coordenacao_id');
+      if (currentAreaId && !filtered.some(area => area.id === currentAreaId)) {
+        setValue('area_coordenacao_id', '');
+      }
+    } else {
+      setFilteredAreas(areas);
+    }
+  }, [watchedCoordenacao, areas, setValue, watch]);
 
   // Reset form when profile data changes
   useEffect(() => {
     if (userProfile) {
+      // Find coordenacao_id from area_coordenacao_id
+      let coordenacaoId = '';
+      if (userProfile.area_coordenacao_id) {
+        const area = areas.find(a => a.id === userProfile.area_coordenacao_id);
+        if (area) {
+          coordenacaoId = area.coordenacao_id || '';
+        }
+      }
+      
       reset({
         nome_completo: userProfile.nome_completo || '',
         whatsapp: userProfile.whatsapp || '',
         aniversario: userProfile.aniversario ? userProfile.aniversario.split('T')[0] : '',
         cargo_id: userProfile.cargo_id || '',
+        coordenacao_id: coordenacaoId,
         area_coordenacao_id: userProfile.area_coordenacao_id || '',
       });
+      
+      setSelectedCoordenacao(coordenacaoId);
     }
-  }, [userProfile, reset]);
+  }, [userProfile, reset, areas]);
 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) return;
@@ -174,15 +233,43 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
+            <Label htmlFor="coordenacao_id">Coordenação</Label>
+            <select
+              id="coordenacao_id"
+              {...register('coordenacao_id')}
+              className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 shadow-sm transition-all duration-300"
+              disabled={loadingOptions}
+              onChange={(e) => {
+                setValue('coordenacao_id', e.target.value);
+                // Clear area_coordenacao_id when coordenação changes
+                setValue('area_coordenacao_id', '');
+              }}
+            >
+              <option value="">Selecione uma coordenação</option>
+              {coordenacoes.map(coord => (
+                <option key={coord.coordenacao_id} value={coord.coordenacao_id}>
+                  {coord.coordenacao}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="area_coordenacao_id">Supervisão Técnica</Label>
             <select
               id="area_coordenacao_id"
               {...register('area_coordenacao_id')}
               className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 shadow-sm transition-all duration-300"
-              disabled={loadingOptions}
+              disabled={loadingOptions || filteredAreas.length === 0}
             >
-              <option value="">Selecione uma área</option>
-              {areas.map(area => (
+              <option value="">
+                {watchedCoordenacao 
+                  ? filteredAreas.length === 0 
+                    ? "Nenhuma supervisão técnica para esta coordenação" 
+                    : "Selecione uma supervisão técnica"
+                  : "Selecione uma coordenação primeiro"}
+              </option>
+              {filteredAreas.map(area => (
                 <option key={area.id} value={area.id}>
                   {area.descricao}
                 </option>

@@ -1,4 +1,11 @@
 
+export interface RegisterFormProps {
+  roles: SelectOption[];
+  areas: SelectOption[];
+  coordenacoes: SelectOption[];
+  loadingOptions: boolean;
+}
+
 export interface FormData {
   name: string;
   email: string;
@@ -6,6 +13,7 @@ export interface FormData {
   whatsapp: string;
   role: string;
   area: string;
+  coordenacao: string;
   confirmPassword: string;
 }
 
@@ -14,8 +22,8 @@ export interface SelectOption {
   value: string;
 }
 
-export interface RegisterFormProps {
-  roles: SelectOption[];
-  areas: SelectOption[];
-  loadingOptions: boolean;
+export interface PasswordRequirement {
+  regex: RegExp;
+  text: string;
+  fulfilled: boolean;
 }

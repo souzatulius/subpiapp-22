@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
 const Register = () => {
-  const { roles, areas, loadingOptions } = useRegisterOptions();
+  const { roles, areas, coordenacoes, loadingOptions } = useRegisterOptions();
   const { session } = useAuth();
   const navigate = useNavigate();
   
@@ -16,8 +16,9 @@ const Register = () => {
     console.log('Register page loaded');
     console.log('Roles:', roles);
     console.log('Areas:', areas);
+    console.log('Coordenacoes:', coordenacoes);
     console.log('Loading options:', loadingOptions);
-  }, [roles, areas, loadingOptions]);
+  }, [roles, areas, coordenacoes, loadingOptions]);
   
   useEffect(() => {
     if (session) {
@@ -29,7 +30,8 @@ const Register = () => {
     <AuthLayout>
       <RegisterForm 
         roles={roles} 
-        areas={areas} 
+        areas={areas}
+        coordenacoes={coordenacoes}
         loadingOptions={loadingOptions} 
       />
     </AuthLayout>

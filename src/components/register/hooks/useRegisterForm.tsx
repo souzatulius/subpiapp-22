@@ -19,6 +19,7 @@ export const useRegisterForm = () => {
     whatsapp: '',
     role: '',
     area: '',
+    coordenacao: '',
     confirmPassword: ''
   });
 
@@ -79,7 +80,8 @@ export const useRegisterForm = () => {
     if (!formData.birthday) newErrors.birthday = true;
     if (!formData.whatsapp) newErrors.whatsapp = true;
     if (!formData.role) newErrors.role = true;
-    if (!formData.area) newErrors.area = true;
+    if (!formData.coordenacao) newErrors.coordenacao = true;
+    // Area is optional if the coordenação doesn't have supervisões técnicas
     if (!password) newErrors.password = true;
     if (!formData.confirmPassword) newErrors.confirmPassword = true;
 
@@ -109,8 +111,9 @@ export const useRegisterForm = () => {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
-        cargo_id: formData.role,         // Passing the ID of the cargo
-        area_coordenacao_id: formData.area  // Passing the ID of the area
+        cargo_id: formData.role,
+        area_coordenacao_id: formData.area || null,
+        coordenacao_id: formData.coordenacao
       });
 
       if (error) {

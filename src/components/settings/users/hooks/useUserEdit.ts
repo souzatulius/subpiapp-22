@@ -17,6 +17,7 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         .update({
           nome_completo: data.nome_completo,
           cargo_id: data.cargo_id || null,
+          coordenacao_id: data.coordenacao_id || null,
           area_coordenacao_id: data.area_coordenacao_id || null,
           whatsapp: data.whatsapp || null,
           aniversario: data.aniversario ? data.aniversario.toISOString() : null,

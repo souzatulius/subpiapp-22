@@ -11,6 +11,7 @@ import { RegisterFormProps } from './types';
 const RegisterForm: React.FC<RegisterFormProps> = ({
   roles,
   areas,
+  coordenacoes,
   loadingOptions
 }) => {
   const {
@@ -31,8 +32,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     console.log('RegisterForm received props:');
     console.log('Roles:', roles);
     console.log('Areas:', areas);
+    console.log('Coordenacoes:', coordenacoes);
     console.log('Loading options:', loadingOptions);
-  }, [roles, areas, loadingOptions]);
+  }, [roles, areas, coordenacoes, loadingOptions]);
 
   if (loading) {
     return (
@@ -60,9 +62,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           
           <PositionFields 
             role={formData.role} 
-            area={formData.area} 
+            area={formData.area}
+            coordenacao={formData.coordenacao}
             roles={roles} 
-            areas={areas} 
+            areas={areas}
+            coordenacoes={coordenacoes}
             loadingOptions={loadingOptions} 
             errors={errors} 
             handleChange={(name, value) => handleChange(name, value)} 

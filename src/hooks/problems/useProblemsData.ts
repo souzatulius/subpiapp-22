@@ -27,7 +27,21 @@ export const useProblemsData = () => {
 
       if (problemsError) throw problemsError;
       
-      setProblems(problemsData || []);
+      // Ensure properly typed data before setting state
+      const typedProblems: Problem[] = problemsData ? problemsData.map(problem => ({
+        id: problem.id,
+        descricao: problem.descricao,
+        area_coordenacao_id: problem.area_coordenacao_id,
+        areas_coordenacao: problem.areas_coordenacao ? {
+          id: problem.areas_coordenacao.id,
+          descricao: problem.areas_coordenacao.descricao,
+          coordenacao_id: problem.areas_coordenacao.coordenacao_id
+        } : undefined,
+        criado_em: problem.criado_em,
+        atualizado_em: problem.atualizado_em
+      })) : [];
+      
+      setProblems(typedProblems);
     } catch (error: any) {
       console.error('Erro ao buscar problemas:', error);
       toast({

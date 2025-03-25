@@ -8,16 +8,20 @@ export interface UserProfile {
   nome_completo: string;
   cargo?: string;
   area?: string;
+  coordenacao?: string;
   foto_perfil_url?: string;
   whatsapp?: string;
   aniversario?: string;
   cargo_id?: string;
   area_coordenacao_id?: string;
+  coordenacao_id?: string;
   cargos?: {
     descricao: string;
   };
   areas_coordenacao?: {
     descricao: string;
+    coordenacao_id?: string;
+    coordenacao?: string;
   };
 }
 
@@ -63,16 +67,25 @@ export const useUserProfile = () => {
         }
       }
       
-      let areaInfo = { descricao: '' };
+      let areaInfo = { 
+        descricao: '',
+        coordenacao_id: '',
+        coordenacao: ''
+      };
+      
       if (userData.area_coordenacao_id) {
         const { data: areaData, error: areaError } = await supabase
           .from('areas_coordenacao')
-          .select('descricao')
+          .select('descricao, coordenacao_id, coordenacao')
           .eq('id', userData.area_coordenacao_id)
           .single();
           
         if (!areaError && areaData) {
-          areaInfo = { descricao: areaData.descricao };
+          areaInfo = { 
+            descricao: areaData.descricao,
+            coordenacao_id: areaData.coordenacao_id || '',
+            coordenacao: areaData.coordenacao || ''
+          };
         }
       }
       
@@ -80,11 +93,13 @@ export const useUserProfile = () => {
         nome_completo: userData.nome_completo,
         cargo: cargoInfo.descricao,
         area: areaInfo.descricao,
+        coordenacao: areaInfo.coordenacao,
         foto_perfil_url: userData.foto_perfil_url,
         whatsapp: userData.whatsapp,
         aniversario: userData.aniversario,
         cargo_id: userData.cargo_id,
         area_coordenacao_id: userData.area_coordenacao_id,
+        coordenacao_id: areaInfo.coordenacao_id,
         cargos: cargoInfo,
         areas_coordenacao: areaInfo
       });

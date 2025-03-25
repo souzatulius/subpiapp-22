@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUsersManagement } from './users/useUsersManagement';
 import UsersLayout from './users/UsersLayout';
 import { useUserActions } from './users/useUserActions';
@@ -8,6 +8,7 @@ import { useUserDelete } from './users/hooks/useUserDelete';
 import { usePasswordReset } from './users/hooks/usePasswordReset';
 import { useUserApproval } from './users/hooks/useUserApproval';
 import { useUserAccessRemoval } from './users/hooks/useUserAccessRemoval';
+import { supabase } from '@/integrations/supabase/client';
 
 const UsersManagement = () => {
   const {
@@ -24,6 +25,28 @@ const UsersManagement = () => {
     loading,
     fetchData
   } = useUsersManagement();
+
+  const [coordenacoes, setCoordenacoes] = useState<{coordenacao_id: string, coordenacao: string}[]>([]);
+
+  // Fetch coordenações
+  useEffect(() => {
+    const fetchCoordenacoes = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_unique_coordenacoes');
+        
+        if (error) {
+          console.error('Error fetching coordenações:', error);
+          return;
+        }
+        
+        setCoordenacoes(data || []);
+      } catch (error) {
+        console.error('Error in fetchCoordenacoes:', error);
+      }
+    };
+    
+    fetchCoordenacoes();
+  }, []);
 
   // Initialize user management hooks
   const {
@@ -67,6 +90,7 @@ const UsersManagement = () => {
     setFilter: setSearchQuery,
     areas,
     cargos,
+    coordenacoes,
     isInviteDialogOpen: false, // This would be managed in a separate hook
     setIsInviteDialogOpen: () => {}, // Placeholder for now
     handleInviteUser: async () => {}, // Placeholder for now

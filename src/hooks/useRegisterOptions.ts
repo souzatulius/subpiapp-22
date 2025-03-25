@@ -6,6 +6,7 @@ import { SelectOption } from '@/components/register/types';
 export const useRegisterOptions = () => {
   const [roles, setRoles] = useState<SelectOption[]>([]);
   const [areas, setAreas] = useState<SelectOption[]>([]);
+  const [coordenacoes, setCoordenacoes] = useState<SelectOption[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   useEffect(() => {
@@ -34,6 +35,45 @@ export const useRegisterOptions = () => {
         if (areasError) throw areasError;
         
         console.log('Areas data received:', areasData);
+        
+        // Fetch coordenações (from areas_coordenacao table where the coordenacao_id is not null and is unique)
+        console.log('Fetching coordenações from Supabase...');
+        const { data: coordenacoesData, error: coordenacoesError } = await supabase.rpc('get_unique_coordenacoes');
+        
+        if (coordenacoesError) {
+          console.error('Error fetching coordenações:', coordenacoesError);
+          // Fallback if the RPC function isn't available - simpler version without labels
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('areas_coordenacao')
+            .select('coordenacao_id, coordenacao')
+            .not('coordenacao_id', 'is', null)
+            .order('coordenacao', { ascending: true });
+            
+          if (fallbackError) throw fallbackError;
+          
+          // Remove duplicates by coordenacao_id
+          const uniqueCoordenacoes = fallbackData ? 
+            Array.from(new Set(fallbackData.map(c => c.coordenacao_id)))
+              .map(id => {
+                const coord = fallbackData.find(c => c.coordenacao_id === id);
+                return {
+                  id: coord?.coordenacao_id || '',
+                  value: coord?.coordenacao || ''
+                };
+              })
+              .filter(c => c.id && c.value) : [];
+              
+          setCoordenacoes(uniqueCoordenacoes);
+        } else {
+          console.log('Coordenações data received:', coordenacoesData);
+          const formattedCoordenacoes = coordenacoesData ? 
+            coordenacoesData.map(coord => ({
+              id: coord.coordenacao_id || '',
+              value: coord.coordenacao || ''
+            }))
+            .filter(c => c.id && c.value) : [];
+          setCoordenacoes(formattedCoordenacoes);
+        }
         
         // Format data for select components
         if (cargosData) {
@@ -65,5 +105,5 @@ export const useRegisterOptions = () => {
     fetchOptions();
   }, []);
 
-  return { roles, areas, loadingOptions };
+  return { roles, areas, coordenacoes, loadingOptions };
 };
