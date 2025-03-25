@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { User, Notification } from './types';
+import { User } from './types';
 
 export const useNotifications = () => {
   const createNotificationsForRecipients = async (
@@ -61,8 +61,6 @@ export const useNotifications = () => {
         usuario_id: usuarioId,
         data_envio: new Date().toISOString(),
         lida: false,
-        excluida: false,
-        tipo: 'comunicado'
       }));
       
       // Inserir notificações

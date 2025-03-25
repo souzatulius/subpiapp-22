@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Card, 
@@ -35,7 +36,16 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Notification } from '@/components/settings/announcements/types';
+
+interface Notification {
+  id: string;
+  mensagem: string;
+  usuario_id: string;
+  data_envio: string;
+  lida: boolean;
+  tipo?: string;
+  referencia_id?: string;
+}
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -53,7 +63,6 @@ const Notifications: React.FC = () => {
       const { data, error } = await supabase
         .from('notificacoes')
         .select('*')
-        .eq('excluida', false)
         .order('data_envio', { ascending: false });
       
       if (error) throw error;
@@ -83,12 +92,14 @@ const Notifications: React.FC = () => {
   ) => {
     let filtered = [...data];
     
+    // Aplicar filtro de status
     if (status === 'read') {
       filtered = filtered.filter(n => n.lida);
     } else if (status === 'unread') {
       filtered = filtered.filter(n => !n.lida);
     }
     
+    // Aplicar filtro de busca
     if (search.trim()) {
       const term = search.toLowerCase();
       filtered = filtered.filter(n => 
@@ -167,7 +178,7 @@ const Notifications: React.FC = () => {
     try {
       const { error } = await supabase
         .from('notificacoes')
-        .update({ excluida: true })
+        .delete()
         .eq('id', selectedNotification.id);
       
       if (error) throw error;
@@ -195,17 +206,27 @@ const Notifications: React.FC = () => {
 
   const handleBulkDeleteConfirm = async () => {
     try {
-      const idsToDelete = filteredNotifications.map(n => n.id);
+      let query = supabase.from('notificacoes').delete();
       
-      if (idsToDelete.length === 0) return;
+      // Se estamos filtrando por status, aplicar o mesmo filtro na exclusão
+      if (statusFilter === 'read') {
+        query = query.eq('lida', true);
+      } else if (statusFilter === 'unread') {
+        query = query.eq('lida', false);
+      }
       
-      const { error } = await supabase
-        .from('notificacoes')
-        .update({ excluida: true })
-        .in('id', idsToDelete);
+      // Se há um termo de busca, não podemos aplicá-lo diretamente no Supabase
+      // Então vamos excluir apenas os IDs que estão em nossa lista filtrada
+      if (searchTerm.trim()) {
+        const idsToDelete = filteredNotifications.map(n => n.id);
+        query = query.in('id', idsToDelete);
+      }
+      
+      const { error } = await query;
       
       if (error) throw error;
       
+      // Recarregar notificações após exclusão em massa
       await fetchNotifications();
       
       toast({
@@ -226,16 +247,19 @@ const Notifications: React.FC = () => {
 
   const exportToCSV = () => {
     try {
+      // Preparar dados para exportação
       const csvData = filteredNotifications.map(notification => ({
         Mensagem: notification.mensagem,
         Status: notification.lida ? 'Lida' : 'Não lida',
         'Data de Envio': format(new Date(notification.data_envio), 'dd/MM/yyyy HH:mm')
       }));
       
+      // Converter para CSV
       const headers = Object.keys(csvData[0]).join(',');
       const rows = csvData.map(row => Object.values(row).join(','));
       const csv = [headers, ...rows].join('\n');
       
+      // Criar blob e download
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -262,6 +286,7 @@ const Notifications: React.FC = () => {
 
   const markAllAsRead = async () => {
     try {
+      // Atualizar todas as notificações filtradas que não estão lidas
       const unreadIds = filteredNotifications
         .filter(n => !n.lida)
         .map(n => n.id);
@@ -281,6 +306,7 @@ const Notifications: React.FC = () => {
       
       if (error) throw error;
       
+      // Atualizar o estado local
       setNotifications(prevNotifications => 
         prevNotifications.map(n => 
           unreadIds.includes(n.id) ? { ...n, lida: true } : n
@@ -494,6 +520,7 @@ const Notifications: React.FC = () => {
         </div>
       </CardFooter>
       
+      {/* Dialog de confirmação para exclusão individual */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -511,6 +538,7 @@ const Notifications: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
       
+      {/* Dialog de confirmação para exclusão em massa */}
       <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

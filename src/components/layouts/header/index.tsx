@@ -1,71 +1,49 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
+import { NotificationsPopover } from './NotificationsPopover';
+import { ProfileMenu } from './ProfileMenu';
+import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import ProfileMenu from './ProfileMenu';
-import NotificationsPopover from './NotificationsPopover';
-import { useNotifications } from './useNotifications';
 
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
+const Header: React.FC<HeaderProps> = ({
   showControls = false,
   toggleSidebar
 }) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { fetchNotifications, notifications, unreadCount, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
-  
-  // Fetch notifications when component mounts or when user changes
-  useEffect(() => {
-    if (user) {
-      fetchNotifications();
-    }
-  }, [user, fetchNotifications]);
 
   return (
-    <header className="bg-white border-b border-gray-200 z-30 sticky top-0">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            {showControls && toggleSidebar && (
-              <button 
-                onClick={toggleSidebar}
-                className="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
-              >
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open sidebar</span>
-              </button>
-            )}
-            
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <img
-                className="h-10 w-auto"
-                src="/lovable-uploads/5b8c78fb-e26a-45d0-844e-df1dea58037b.png"
-                alt="SUBPI"
-              />
-            </Link>
+    <header className="w-full px-6 py-3 border-b border-gray-200 flex justify-between items-center bg-white">
+      <div className="flex-1 flex justify-start">
+        {showControls && (
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-4 px-0">
+            <Menu className="h-5 w-5 text-[#003570]" />
+          </Button>
+        )}
+      </div>
+      
+      <div className="flex-1 flex justify-center">
+        <img 
+          src="/lovable-uploads/a1cc6031-8d9a-4b53-b579-c990a3156837.png" 
+          alt="Logo Prefeitura de São Paulo" 
+          className="h-10" 
+        />
+      </div>
+      
+      <div className="flex-1 flex justify-end">
+        {showControls && user && (
+          <div className="flex items-center gap-2">
+            <NotificationsPopover />
+            <ProfileMenu />
           </div>
-          
-          <div className="flex items-center gap-4">
-            {user && (
-              <>
-                <NotificationsPopover 
-                  notifications={notifications}
-                  unreadCount={unreadCount}
-                  onMarkAsRead={markAsRead}
-                  onDeleteNotification={deleteNotification}
-                  onMarkAllAsRead={markAllAsRead}
-                  onRefresh={fetchNotifications}
-                />
-                <ProfileMenu />
-              </>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </header>
   );

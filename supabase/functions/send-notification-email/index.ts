@@ -76,8 +76,7 @@ serve(async (req) => {
         usuario_id: userId,
         mensagem: content,
         tipo: notificationType || "email",
-        lida: false,
-        excluida: false
+        lida: false
       });
       
     if (notificationError) {
