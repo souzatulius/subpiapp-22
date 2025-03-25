@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Area } from '@/hooks/problems/types';
+import IconSelector from './IconSelector';
 
 interface ProblemFormProps {
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => Promise<void>;
   onCancel: () => void;
   areas: Area[];
   isSubmitting: boolean;
@@ -18,11 +19,17 @@ const ProblemForm = ({ onSubmit, onCancel, areas, isSubmitting }: ProblemFormPro
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
       descricao: '',
-      supervisao_tecnica_id: ''
+      supervisao_tecnica_id: '',
+      icone: ''
     }
   });
 
   const selectedArea = watch('supervisao_tecnica_id');
+  const selectedIcon = watch('icone');
+
+  const handleIconSelect = (icon: string) => {
+    setValue('icone', icon);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -59,6 +66,11 @@ const ProblemForm = ({ onSubmit, onCancel, areas, isSubmitting }: ProblemFormPro
         {errors.supervisao_tecnica_id && (
           <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <Label>Ícone</Label>
+        <IconSelector selectedIcon={selectedIcon} onSelectIcon={handleIconSelect} />
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">

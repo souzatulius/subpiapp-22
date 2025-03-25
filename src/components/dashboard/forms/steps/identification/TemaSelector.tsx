@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ValidationError } from '@/lib/formValidationUtils';
-import { AreaIcon } from './AreaIcon';
+import { renderIcon } from '@/components/settings/problems/renderIcon';
 
 interface TemaSelectorProps {
   problemas: any[];
@@ -42,7 +42,9 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
             }`} 
             onClick={() => handleSelectChange('problema_id', tema.id)}
           >
-            {tema.areas_coordenacao && <AreaIcon descricao={tema.areas_coordenacao.descricao} />}
+            <div className="w-6 h-6 flex items-center justify-center">
+              {renderIcon(tema.icone)}
+            </div>
             <span className="text-sm font-semibold">{tema.descricao}</span>
           </Button>
         ))}

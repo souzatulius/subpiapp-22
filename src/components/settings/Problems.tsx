@@ -6,6 +6,7 @@ import { SupervisaoTecnica } from '@/types/common';
 import DataTable from './data-table/DataTable';
 import ProblemForm from './problems/ProblemForm';
 import ProblemEditDialog from './problems/ProblemEditDialog';
+import { renderIcon } from './problems/renderIcon';
 
 const Problems = () => {
   const { problems, areas, isLoading, fetchProblems } = useProblemsData();
@@ -38,7 +39,7 @@ const Problems = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
     if (!editingProblem) return Promise.reject(new Error('Nenhum problema selecionado'));
     
     try {
@@ -51,7 +52,7 @@ const Problems = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
     try {
       await addProblem(data);
       closeAddForm();
@@ -68,6 +69,12 @@ const Problems = () => {
 
   const columns = [
     {
+      key: 'icone',
+      header: 'Ícone',
+      render: (row: Problem) => renderIcon(row.icone),
+      width: '60px'
+    },
+    {
       key: 'descricao',
       header: 'Descrição',
     },
@@ -75,12 +82,7 @@ const Problems = () => {
       key: 'supervisao_tecnica',
       header: 'Supervisão Técnica',
       render: (row: Problem) => row.supervisao_tecnica?.descricao || '-',
-    },
-    {
-      key: 'criado_em',
-      header: 'Data de Criação',
-      render: (row: Problem) => new Date(row.criado_em || '').toLocaleDateString('pt-BR'),
-    },
+    }
   ];
 
   const renderForm = (onClose: () => void) => {

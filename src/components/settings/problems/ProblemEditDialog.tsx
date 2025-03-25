@@ -13,13 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useForm } from 'react-hook-form';
 import { Problem } from '@/hooks/problems/types';
 import { Area } from '@/hooks/problems/types';
+import IconSelector from './IconSelector';
 
 interface ProblemEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   problem: Problem | null;
   areas: Area[];
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -27,7 +28,8 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
   const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm({
     defaultValues: {
       descricao: problem?.descricao || '',
-      supervisao_tecnica_id: problem?.supervisao_tecnica_id || ''
+      supervisao_tecnica_id: problem?.supervisao_tecnica_id || '',
+      icone: problem?.icone || ''
     }
   });
 
@@ -35,12 +37,18 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
     if (problem) {
       reset({
         descricao: problem.descricao,
-        supervisao_tecnica_id: problem.supervisao_tecnica_id
+        supervisao_tecnica_id: problem.supervisao_tecnica_id,
+        icone: problem.icone || ''
       });
     }
   }, [problem, reset]);
 
   const selectedArea = watch('supervisao_tecnica_id');
+  const selectedIcon = watch('icone');
+
+  const handleIconSelect = (icon: string) => {
+    setValue('icone', icon);
+  };
 
   const handleFormSubmit = async (data: any) => {
     await onSubmit(data);
@@ -49,7 +57,7 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle>Editar Problema</DialogTitle>
         </DialogHeader>
@@ -85,6 +93,11 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
             {errors.supervisao_tecnica_id && (
               <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ícone</Label>
+            <IconSelector selectedIcon={selectedIcon} onSelectIcon={handleIconSelect} />
           </div>
 
           <div className="flex justify-end space-x-2">
