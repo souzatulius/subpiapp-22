@@ -1,4 +1,3 @@
-
 export interface Demanda {
   id: string;
   titulo: string;
@@ -31,3 +30,7 @@ export interface Area {
 }
 
 export type ViewMode = 'list' | 'cards';
+
+export interface ResponderDemandaFormProps {
+  onClose: () => void;
+}

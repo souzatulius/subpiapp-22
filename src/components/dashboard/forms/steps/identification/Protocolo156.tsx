@@ -9,7 +9,7 @@ interface Protocolo156Props {
   temProtocolo156: boolean;
   numeroProtocolo156: string;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
   errors?: ValidationError[];
 }
 
@@ -24,6 +24,7 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
   const getErrorMessage = (field: string) => getFieldErrorMessage(field, errors);
 
   const handleProtocoloChange = (value: string) => {
+    // Convert string 'true' or 'false' to boolean
     handleSelectChange('tem_protocolo_156', value === 'true');
   };
 

@@ -5,7 +5,7 @@ import DetalhesInput from './identification/DetalhesInput';
 import Protocolo156 from './identification/Protocolo156';
 import { ValidationError } from '@/lib/formValidationUtils';
 
-interface IdentificationStepProps {
+export interface IdentificationStepProps {
   formData: {
     problema_id: string;
     detalhes_solicitacao: string;
@@ -16,6 +16,11 @@ interface IdentificationStepProps {
   handleSelectChange: (name: string, value: string | boolean) => void;
   problemas: any[];
   errors?: ValidationError[];
+  // These props are passed but not used in this component anymore
+  handleServiceSelect?: (serviceId: string) => void;
+  filteredServicesBySearch?: any[];
+  serviceSearch?: string;
+  servicos?: any[];
 }
 
 const IdentificationStep: React.FC<IdentificationStepProps> = ({
