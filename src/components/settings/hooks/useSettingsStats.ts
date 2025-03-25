@@ -57,6 +57,9 @@ export const useSettingsStats = () => {
       
       if (coordinationsError) throw coordinationsError;
 
+      console.log('Fetched supervisions:', supervisions?.length);
+      console.log('Fetched coordinations:', coordinations?.length);
+
       // Fetch counts for other entities
       const { data: positions, error: positionsError } = await supabase
         .from('cargos')

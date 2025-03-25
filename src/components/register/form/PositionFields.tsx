@@ -43,7 +43,8 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           const { data, error } = await supabase
             .from('areas_coordenacao')
             .select('id, descricao')
-            .eq('coordenacao', selectedCoord.value);
+            .eq('is_supervision', true)
+            .eq('coordenacao_id', coordenacao);
             
           if (error) throw error;
           
