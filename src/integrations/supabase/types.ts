@@ -417,7 +417,6 @@ export type Database = {
       notificacoes: {
         Row: {
           data_envio: string
-          excluida: boolean
           id: string
           lida: boolean
           mensagem: string
@@ -426,7 +425,6 @@ export type Database = {
         }
         Insert: {
           data_envio?: string
-          excluida?: boolean
           id?: string
           lida?: boolean
           mensagem: string
@@ -435,7 +433,6 @@ export type Database = {
         }
         Update: {
           data_envio?: string
-          excluida?: boolean
           id?: string
           lida?: boolean
           mensagem?: string

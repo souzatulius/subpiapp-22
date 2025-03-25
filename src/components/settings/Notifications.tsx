@@ -35,7 +35,17 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Notification } from '@/components/settings/announcements/types';
+
+interface Notification {
+  id: string;
+  mensagem: string;
+  usuario_id: string;
+  data_envio: string;
+  lida: boolean;
+  tipo?: string;
+  referencia_id?: string;
+  excluida?: boolean;
+}
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);

@@ -3,7 +3,17 @@ import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
-import { Notification } from '@/components/settings/announcements/types';
+
+export interface Notification {
+  id: string;
+  tipo?: string;
+  mensagem: string;
+  data_envio: string;
+  lida: boolean;
+  usuario_id?: string;
+  referencia_id?: string;
+  excluida?: boolean;
+}
 
 export const useNotifications = () => {
   const { user } = useAuth();
