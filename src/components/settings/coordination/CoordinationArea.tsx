@@ -9,10 +9,10 @@ import { toast } from '@/components/ui/use-toast';
 const CoordinationArea = () => {
   const {
     coordinations,
-    loading,
+    isLoading: loading,
     isSubmitting,
     addCoordination,
-    updateCoordination,
+    updateCoordination: editCoordination,
     deleteCoordination
   } = useCoordination();
   
@@ -42,7 +42,7 @@ const CoordinationArea = () => {
     if (!editingCoordination) return Promise.reject(new Error('Nenhuma coordenação selecionada'));
     
     try {
-      await updateCoordination(editingCoordination.id, data);
+      await editCoordination({ id: editingCoordination.id, data });
       closeEditForm();
       return Promise.resolve();
     } catch (error) {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -46,24 +45,20 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   
   const watchedCoordenacao = watch('coordenacao_id');
 
-  // Fetch options on mount
   useEffect(() => {
     const fetchOptions = async () => {
       setLoadingOptions(true);
       try {
-        // Fetch cargos
         const { data: cargosData, error: cargosError } = await supabase
           .from('cargos')
           .select('*')
           .order('descricao');
         
-        // Fetch coordenacoes
         const { data: coordenacoesData, error: coordenacoesError } = await supabase
           .from('coordenacoes')
           .select('id, descricao')
           .order('descricao');
         
-        // Fetch all supervisions
         const { data: supervisoesData, error: supervisoesError } = await supabase
           .from('supervisoes_tecnicas')
           .select('*')
@@ -80,11 +75,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         console.log('Coordenações loaded:', coordenacoesData?.length);
         console.log('All supervisions loaded:', supervisoesData?.length);
         
-        // Get user's current coordenacao_id if available
         if (userProfile && userProfile.coordenacao_id) {
           setValue('coordenacao_id', userProfile.coordenacao_id);
           
-          // Filter areas based on this coordenação
           const filtered = supervisoesData?.filter(supervisao => 
             supervisao.coordenacao_id === userProfile.coordenacao_id
           ) || [];
@@ -111,16 +104,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     }
   }, [isOpen, userProfile, setValue]);
 
-  // Filter supervisions when coordenação changes
   useEffect(() => {
     if (watchedCoordenacao && watchedCoordenacao !== 'select-coordenacao') {
       console.log(`Filtering supervisions for coordination ID: ${watchedCoordenacao}`);
-      // Filter the cached supervisions directly to avoid extra API calls
       const filtered = supervisoes.filter(supervisao => supervisao.coordenacao_id === watchedCoordenacao);
       console.log(`Found ${filtered.length} supervisions for coordination ${watchedCoordenacao}`);
       setFilteredSupervisoes(filtered);
       
-      // If the current supervisao_tecnica_id isn't in the filtered list, clear it
       const currentSupervisaoId = watch('supervisao_tecnica_id');
       if (currentSupervisaoId && !filtered.some(supervisao => supervisao.id === currentSupervisaoId)) {
         setValue('supervisao_tecnica_id', '');
@@ -130,13 +120,16 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     }
   }, [watchedCoordenacao, supervisoes, setValue, watch]);
 
-  // Reset form when profile data changes
   useEffect(() => {
     if (userProfile) {
       reset({
         nome_completo: userProfile.nome_completo || '',
         whatsapp: userProfile.whatsapp || '',
-        aniversario: userProfile.aniversario ? userProfile.aniversario.split('T')[0] : '',
+        aniversario: userProfile.aniversario 
+          ? (typeof userProfile.aniversario === 'string' 
+             ? userProfile.aniversario.split('T')[0] 
+             : new Date(userProfile.aniversario).toISOString().split('T')[0]) 
+          : '',
         cargo_id: userProfile.cargo_id || '',
         coordenacao_id: userProfile.coordenacao_id || '',
         supervisao_tecnica_id: userProfile.supervisao_tecnica_id || '',
@@ -250,7 +243,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
               value={watch('coordenacao_id')}
               onValueChange={(value) => {
                 setValue('coordenacao_id', value);
-                // Clear supervisao_tecnica_id when coordenação changes
                 setValue('supervisao_tecnica_id', '');
               }}
               disabled={loadingOptions}

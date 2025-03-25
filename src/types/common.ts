@@ -32,6 +32,7 @@ export interface User {
   coordenacao?: {
     descricao: string;
   };
+  criado_em?: string;
 }
 
 export interface UserProfile {
@@ -65,11 +66,6 @@ export interface UserFormData {
   supervisao_tecnica_id?: string;
   whatsapp?: string;
   aniversario?: Date;
-}
-
-export interface Cargo {
-  id: string;
-  descricao: string;
 }
 
 export const formatDate = (dateString: string): string => {

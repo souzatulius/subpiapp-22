@@ -1,4 +1,6 @@
 
+import { User, SupervisaoTecnica, Cargo, Coordenacao, UserFormData } from '@/types/common';
+
 export interface UsersLayoutProps {
   users: User[];
   loading: boolean;
@@ -34,5 +36,3 @@ export interface UsersTableProps {
   onApprove?: (user: User, permissionLevel: string) => void;
   onRemoveAccess?: (user: User) => void;
 }
-
-import { User, SupervisaoTecnica, Cargo, Coordenacao, UserFormData } from '@/types/common';

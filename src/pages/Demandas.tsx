@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout, DemandFilter, DemandList, DemandCards } from '@/components/demandas';
@@ -16,22 +15,22 @@ interface Demand {
   prioridade: string;
   horario_publicacao: string;
   prazo_resposta: string;
-  area_coordenacao: {
+  supervisao_tecnica?: {
     descricao: string;
   } | null;
-  servico: {
+  servico?: {
     descricao: string;
   } | null;
-  origem: {
+  origem?: {
     descricao: string;
   } | null;
-  tipo_midia: {
+  tipo_midia?: {
     descricao: string;
   } | null;
-  bairro: {
+  bairro?: {
     nome: string;
   } | null;
-  autor: {
+  autor?: {
     nome_completo: string;
   } | null;
   endereco: string | null;
@@ -58,128 +57,121 @@ const Demandas = () => {
   } = useQuery({
     queryKey: ['demandas', filterStatus],
     queryFn: async () => {
-      // Construir a consulta base
-      let query = supabase.from('demandas')
-        .select(`
-          id,
-          titulo,
-          status,
-          prioridade,
-          horario_publicacao,
-          prazo_resposta,
-          area_coordenacao_id,
-          servico_id,
-          origem_id,
-          tipo_midia_id,
-          bairro_id,
-          autor_id,
-          endereco,
-          nome_solicitante,
-          email_solicitante,
-          telefone_solicitante,
-          veiculo_imprensa,
-          detalhes_solicitacao,
-          perguntas
-        `);
+      try {
+        // Construir a consulta base
+        let query = supabase.from('demandas')
+          .select(`
+            id,
+            titulo,
+            status,
+            prioridade,
+            horario_publicacao,
+            prazo_resposta,
+            supervisao_tecnica_id,
+            servico_id,
+            origem_id,
+            tipo_midia_id,
+            bairro_id,
+            autor_id,
+            endereco,
+            nome_solicitante,
+            email_solicitante,
+            telefone_solicitante,
+            veiculo_imprensa,
+            detalhes_solicitacao,
+            perguntas
+          `);
+          
+        // Aplicar filtro de status se não for 'todos'
+        if (filterStatus !== 'todos') {
+          query = query.eq('status', filterStatus);
+        }
         
-      // Aplicar filtro de status se não for 'todos'
-      if (filterStatus !== 'todos') {
-        query = query.eq('status', filterStatus);
+        // Executar a consulta principal
+        const { data, error } = await query.order('horario_publicacao', {
+          ascending: false
+        });
+        
+        if (error) throw error;
+        
+        // Agora vamos buscar as informações relacionadas em consultas separadas
+        const enhancedData = await Promise.all((data || []).map(async (demanda) => {
+          let enhancedDemand = { ...demanda };
+          
+          // Buscar supervisão técnica
+          if (demanda.supervisao_tecnica_id) {
+            const { data: stData } = await supabase
+              .from('supervisoes_tecnicas')
+              .select('descricao')
+              .eq('id', demanda.supervisao_tecnica_id)
+              .single();
+              
+            enhancedDemand.supervisao_tecnica = stData;
+          }
+          
+          // Buscar serviço
+          if (demanda.servico_id) {
+            const { data: servicoData } = await supabase
+              .from('servicos')
+              .select('descricao')
+              .eq('id', demanda.servico_id)
+              .single();
+              
+            enhancedDemand.servico = servicoData;
+          }
+          
+          // Buscar origem
+          if (demanda.origem_id) {
+            const { data: origemData } = await supabase
+              .from('origens_demandas')
+              .select('descricao')
+              .eq('id', demanda.origem_id)
+              .single();
+              
+            enhancedDemand.origem = origemData;
+          }
+          
+          // Buscar tipo de mídia
+          if (demanda.tipo_midia_id) {
+            const { data: midiaData } = await supabase
+              .from('tipos_midia')
+              .select('descricao')
+              .eq('id', demanda.tipo_midia_id)
+              .single();
+              
+            enhancedDemand.tipo_midia = midiaData;
+          }
+          
+          // Buscar bairro
+          if (demanda.bairro_id) {
+            const { data: bairroData } = await supabase
+              .from('bairros')
+              .select('nome')
+              .eq('id', demanda.bairro_id)
+              .single();
+              
+            enhancedDemand.bairro = bairroData;
+          }
+          
+          // Buscar autor
+          if (demanda.autor_id) {
+            const { data: autorData } = await supabase
+              .from('usuarios')
+              .select('nome_completo')
+              .eq('id', demanda.autor_id)
+              .single();
+              
+            enhancedDemand.autor = autorData;
+          }
+          
+          return enhancedDemand;
+        }));
+        
+        return enhancedData || [];
+      } catch (error) {
+        console.error("Error fetching demands:", error);
+        throw error;
       }
-      
-      // Executar a consulta principal
-      const { data, error } = await query.order('horario_publicacao', {
-        ascending: false
-      });
-      
-      if (error) throw error;
-      
-      // Agora vamos buscar as informações relacionadas em consultas separadas
-      const enhancedData = await Promise.all(data.map(async (demanda) => {
-        // Buscar área de coordenação
-        let areaCoord = null;
-        if (demanda.area_coordenacao_id) {
-          const { data: areaData } = await supabase
-            .from('areas_coordenacao')
-            .select('descricao')
-            .eq('id', demanda.area_coordenacao_id)
-            .single();
-            
-          areaCoord = areaData;
-        }
-        
-        // Buscar serviço
-        let servico = null;
-        if (demanda.servico_id) {
-          const { data: servicoData } = await supabase
-            .from('servicos')
-            .select('descricao')
-            .eq('id', demanda.servico_id)
-            .single();
-            
-          servico = servicoData;
-        }
-        
-        // Buscar origem
-        let origem = null;
-        if (demanda.origem_id) {
-          const { data: origemData } = await supabase
-            .from('origens_demandas')
-            .select('descricao')
-            .eq('id', demanda.origem_id)
-            .single();
-            
-          origem = origemData;
-        }
-        
-        // Buscar tipo de mídia
-        let tipoMidia = null;
-        if (demanda.tipo_midia_id) {
-          const { data: midiaData } = await supabase
-            .from('tipos_midia')
-            .select('descricao')
-            .eq('id', demanda.tipo_midia_id)
-            .single();
-            
-          tipoMidia = midiaData;
-        }
-        
-        // Buscar bairro
-        let bairro = null;
-        if (demanda.bairro_id) {
-          const { data: bairroData } = await supabase
-            .from('bairros')
-            .select('nome')
-            .eq('id', demanda.bairro_id)
-            .single();
-            
-          bairro = bairroData;
-        }
-        
-        // Buscar autor
-        let autor = null;
-        if (demanda.autor_id) {
-          const { data: autorData } = await supabase
-            .from('usuarios')
-            .select('nome_completo')
-            .eq('id', demanda.autor_id)
-            .single();
-            
-          autor = autorData;
-        }
-        
-        return {
-          ...demanda,
-          area_coordenacao: areaCoord,
-          servico: servico,
-          origem: origem,
-          tipo_midia: tipoMidia,
-          bairro: bairro,
-          autor: autor
-        };
-      }));
-      
-      return enhancedData || [];
     },
     meta: {
       onError: (err: any) => {

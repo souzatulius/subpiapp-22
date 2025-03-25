@@ -5,6 +5,9 @@ import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Coordenacao } from '@/types/common';
 
+// Export the Coordination type as an alias to Coordenacao for backward compatibility
+export type Coordination = Coordenacao;
+
 export const useCoordination = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -154,10 +157,14 @@ export const useCoordination = () => {
     error,
     refetch,
     addCoordination: addCoordinationMutation.mutate,
-    editCoordination: editCoordinationMutation.mutate,
+    updateCoordination: editCoordinationMutation.mutate,
     deleteCoordination: deleteCoordinationMutation.mutate,
     isAddingCoordination: addCoordinationMutation.isPending,
     isEditingCoordination: editCoordinationMutation.isPending,
     isDeletingCoordination: deleteCoordinationMutation.isPending,
+    
+    // Add these properties for backward compatibility
+    loading: isLoading,
+    isSubmitting: addCoordinationMutation.isPending || editCoordinationMutation.isPending,
   };
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -58,7 +57,11 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
         </div>
       ) : (
         <div className="flex flex-col items-center space-y-4">
-          <AvatarDisplay userProfile={userProfile} previewUrl={previewUrl} />
+          <AvatarDisplay 
+            nome={userProfile?.nome_completo} 
+            imageSrc={previewUrl || userProfile?.foto_perfil_url} 
+            size="xl" 
+          />
           
           <input
             type="file"

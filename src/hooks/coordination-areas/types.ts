@@ -20,3 +20,6 @@ export const areaSchema = z.object({
   sigla: z.string().optional(),
   coordenacao_id: z.string().optional()
 });
+
+// Correctly export these types using export type syntax
+export type { Coordination } from '@/hooks/settings/useCoordination';

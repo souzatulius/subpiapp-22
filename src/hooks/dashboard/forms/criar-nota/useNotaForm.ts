@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -58,6 +57,17 @@ export const useNotaForm = (onClose: () => void) => {
     setStep('select-demand');
     setSelectedDemanda(null);
     setDemandaResponse(null);
+  };
+
+  const formatDemandInfo = (demand: Demand): string => {
+    const parts = [
+      `Título: ${demand.titulo}`,
+      `Status: ${demand.status}`,
+      `Supervisão Técnica: ${demand.supervisao_tecnica?.descricao || 'Não definida'}`,
+      `Descrição: ${demand.detalhes_solicitacao || 'Não informada'}`
+    ];
+
+    return parts.join('\n');
   };
 
   const handleSubmit = async () => {

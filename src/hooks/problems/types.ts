@@ -1,8 +1,21 @@
 
-// Este arquivo será substituído pela referência centralizada
-// Importar do novo local centralizado
-export type { Problem } from '@/types/problem';
-export { problemSchema } from '@/types/problem';
-export type { SupervisaoTecnica } from '@/types/common';
-// Alias para compatibilidade
-export type Area = SupervisaoTecnica;
+import { z } from 'zod';
+import { SupervisaoTecnica } from '@/types/common';
+
+export interface Problem {
+  id: string;
+  descricao: string;
+  supervisao_tecnica_id: string;
+  supervisao_tecnica?: SupervisaoTecnica;
+  criado_em?: string;
+  atualizado_em?: string;
+}
+
+export const problemSchema = z.object({
+  id: z.string().optional(),
+  descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" }),
+  supervisao_tecnica_id: z.string({ required_error: "A supervisão técnica é obrigatória" })
+});
+
+// Use 'export type' syntax for re-exporting types
+export type { SupervisaoTecnica };
