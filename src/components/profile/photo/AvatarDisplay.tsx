@@ -2,14 +2,15 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvatarDisplayProps } from './types';
+import { UserProfile } from '@/types/common';
+
+interface ExtendedAvatarDisplayProps extends AvatarDisplayProps {
+  userProfile?: UserProfile;
+  previewUrl?: string;
+}
 
 // This component can accept both old and new prop patterns for compatibility
-const AvatarDisplay: React.FC<
-  AvatarDisplayProps & { 
-    userProfile?: { nome_completo?: string; foto_perfil_url?: string; },
-    previewUrl?: string 
-  }
-> = ({
+const AvatarDisplay: React.FC<ExtendedAvatarDisplayProps> = ({
   nome,
   imageSrc,
   size = 'md',
@@ -19,7 +20,7 @@ const AvatarDisplay: React.FC<
 }) => {
   // Support both old and new prop patterns
   const displayName = nome || userProfile?.nome_completo || '';
-  const imageSource = previewUrl || imageSrc || userProfile?.foto_perfil_url || '';
+  const imageSource = previewUrl || imageSrc || userProfile?.foto_perfil_url || userProfile?.avatar_url || '';
 
   // Generate initials from name
   const getInitials = (name: string) => {

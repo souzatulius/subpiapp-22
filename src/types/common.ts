@@ -12,6 +12,66 @@ export interface Coordenacao {
   sigla?: string;
 }
 
+export interface User {
+  id: string;
+  nome_completo: string;
+  email: string;
+  cargo_id?: string;
+  supervisao_tecnica_id?: string;
+  coordenacao_id?: string;
+  whatsapp?: string;
+  aniversario?: string | Date;
+  foto_perfil_url?: string;
+  permissoes?: any[];
+  cargos?: {
+    descricao: string;
+  };
+  supervisao_tecnica?: {
+    descricao: string;
+  };
+  coordenacao?: {
+    descricao: string;
+  };
+}
+
+export interface UserProfile {
+  id?: string;
+  nome_completo: string;
+  cargo?: string;
+  supervisao_tecnica?: string;
+  coordenacao?: string;
+  foto_perfil_url?: string;
+  avatar_url?: string; // Alias for foto_perfil_url
+  whatsapp?: string;
+  aniversario?: string | Date;
+  email?: string;
+  cargo_id?: string;
+  supervisao_tecnica_id?: string;
+  coordenacao_id?: string;
+  cargos?: {
+    descricao: string;
+  };
+  supervisao_tecnica_info?: {
+    descricao: string;
+    coordenacao_id: string;
+  };
+}
+
+export interface UserFormData {
+  nome_completo: string;
+  email: string;
+  cargo_id?: string;
+  coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
+  whatsapp?: string;
+  aniversario?: Date;
+}
+
+export interface Cargo {
+  id: string;
+  descricao: string;
+}
+
 export const formatDate = (dateString: string): string => {
   if (!dateString) return '';
   

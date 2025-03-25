@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { User } from './types';
+import { User } from '@/types/common';
 
 export const useNotifications = () => {
   const createNotificationsForRecipients = async (
@@ -29,10 +29,10 @@ export const useNotifications = () => {
             const { data, error } = await supabase
               .from('usuarios')
               .select('id')
-              .in('area_coordenacao_id', destinatariosObj.ids);
+              .in('supervisao_tecnica_id', destinatariosObj.ids);
               
             if (error) throw error;
-            recipientIds = data.map(u => u.id);
+            recipientIds = data ? data.map(u => u.id) : [];
           } else if (destinatariosObj.type === 'cargos') {
             // Usuários com um cargo específico
             const { data, error } = await supabase
@@ -41,7 +41,7 @@ export const useNotifications = () => {
               .in('cargo_id', destinatariosObj.ids);
               
             if (error) throw error;
-            recipientIds = data.map(u => u.id);
+            recipientIds = data ? data.map(u => u.id) : [];
           }
         } catch (e) {
           console.error('Erro ao processar destinatários:', e);

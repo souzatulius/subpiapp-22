@@ -6,6 +6,7 @@ export interface Service {
   id: string;
   descricao: string;
   supervisao_tecnica_id: string;
+  supervisao_id?: string; // Add this for backward compatibility
   supervisao_tecnica?: SupervisaoTecnica;
   criado_em?: string;
 }

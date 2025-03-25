@@ -5,5 +5,5 @@ export interface CriarNotaFormProps {
   onClose: () => void;
 }
 
-// Re-export for convenience
-export { Demand, DemandResponse, ResponseQA };
+// Re-export for convenience with correct export type syntax
+export type { Demand, DemandResponse, ResponseQA };

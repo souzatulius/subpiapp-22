@@ -35,7 +35,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
         onCancel={onClose}
         defaultValues={{
           descricao: service.descricao,
-          supervisao_tecnica_id: service.supervisao_id || '',
+          supervisao_tecnica_id: service.supervisao_tecnica_id || service.supervisao_id || '',
         }}
         areas={areas}
         isSubmitting={isSubmitting}

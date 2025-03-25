@@ -1,108 +1,44 @@
 
-import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Area } from '../types';
+import { SupervisaoTecnica } from '@/types/common';
 
-export const useDeleteArea = (
-  areas: Area[],
-  setAreas: React.Dispatch<React.SetStateAction<Area[]>>
-) => {
-  const [isDeleting, setIsDeleting] = useState(false);
+export const useDeleteArea = () => {
+  const queryClient = useQueryClient();
 
-  const deleteArea = async (id: string) => {
-    try {
-      setIsDeleting(true);
-      
-      // First check if area is used by any services
-      const { data: servicesData, error: servicesError } = await supabase
-        .from('servicos')
-        .select('id')
-        .eq('area_coordenacao_id', id);
-        
-      if (servicesError) throw servicesError;
-      
-      if (servicesData && servicesData.length > 0) {
-        toast({
-          title: "Erro",
-          description: "Esta supervisão técnica está sendo utilizada por serviços e não pode ser excluída.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      // Then check if area is used by any problems
-      const { data: problemsData, error: problemsError } = await supabase
-        .from('problemas')
-        .select('id')
-        .eq('area_coordenacao_id', id);
-        
-      if (problemsError) throw problemsError;
-      
-      if (problemsData && problemsData.length > 0) {
-        toast({
-          title: "Erro",
-          description: "Esta supervisão técnica está sendo utilizada por problemas/temas e não pode ser excluída.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      // Check if area is used as coordenacao_id in other areas
-      const { data: referencedData, error: referencedError } = await supabase
-        .from('areas_coordenacao')
-        .select('id')
-        .eq('coordenacao_id', id);
-        
-      if (referencedError) throw referencedError;
-      
-      if (referencedData && referencedData.length > 0) {
-        toast({
-          title: "Erro",
-          description: "Esta supervisão técnica está sendo utilizada como coordenação para outras supervisões e não pode ser excluída.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
+  const deleteAreaMutation = useMutation({
+    mutationFn: async (areaId: string) => {
       const { error } = await supabase
-        .from('areas_coordenacao')
+        .from('supervisoes_tecnicas')
         .delete()
-        .eq('id', id);
+        .eq('id', areaId);
 
       if (error) throw error;
-      
-      setAreas(areas.filter(area => area.id !== id));
-      toast({
-        title: "Supervisão técnica removida",
-        description: "Supervisão técnica removida com sucesso.",
-      });
-      return true;
-    } catch (error: any) {
-      console.error('Erro ao remover supervisão técnica:', error);
-      
-      // Check for foreign key constraint error
-      if (error.code === '23503') {
-        toast({
-          title: "Erro",
-          description: "Esta supervisão técnica está em uso e não pode ser removida.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: "Não foi possível remover a supervisão técnica.",
-          variant: "destructive",
-        });
-      }
-      return false;
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+      return areaId;
+    },
+    onSuccess: (deletedAreaId) => {
+      // Atualizar o cache de áreas removendo a área excluída
+      queryClient.setQueryData<SupervisaoTecnica[]>(
+        ['areas'],
+        (old) => old ? old.filter(area => area.id !== deletedAreaId) : []
+      );
 
-  return {
-    isDeleting,
-    deleteArea
-  };
+      toast({
+        title: "Supervisão técnica excluída",
+        description: "A supervisão técnica foi excluída com sucesso.",
+      });
+    },
+    onError: (error) => {
+      console.error('Erro ao excluir área:', error);
+      toast({
+        title: "Erro ao excluir supervisão técnica",
+        description:
+          "Não foi possível excluir a supervisão técnica. Verifique se não existem serviços, problemas ou usuários associados.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  return deleteAreaMutation;
 };

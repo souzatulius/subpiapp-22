@@ -49,20 +49,20 @@ export const useDemandasData = () => {
         console.log('Demandas with notas:', demandasComNotas.size);
         console.log('Demandas without notas:', demandasSemNotas.length);
         
-        // Buscar informações de área para cada demanda
-        const demandasComArea = await Promise.all(
+        // Buscar informações de supervisão técnica para cada demanda
+        const demandasProcessadas = await Promise.all(
           demandasSemNotas.map(async (demanda) => {
             if (demanda.supervisao_tecnica_id) {
-              const { data: areaData } = await supabase
+              const { data: supervisaoData } = await supabase
                 .from('supervisoes_tecnicas')
                 .select('id, descricao')
                 .eq('id', demanda.supervisao_tecnica_id)
                 .single();
               
+              // Criar objeto completo da demanda com todas as propriedades necessárias
               return {
                 ...demanda,
-                supervisao_tecnica: areaData || null,
-                // Add all required fields for a valid Demand
+                supervisao_tecnica: supervisaoData || null,
                 prioridade: "",
                 horario_publicacao: "",
                 prazo_resposta: "",
@@ -70,13 +70,19 @@ export const useDemandasData = () => {
                 nome_solicitante: null,
                 email_solicitante: null,
                 telefone_solicitante: null,
-                veiculo_imprensa: null
+                veiculo_imprensa: null,
+                origem: null,
+                servico: null,
+                tipo_midia: null,
+                bairro: null,
+                autor: null
               } as Demand;
             }
+            
+            // Se não tiver supervisão técnica, criar objeto com valores padrão
             return {
               ...demanda,
               supervisao_tecnica: null,
-              // Add all required fields for a valid Demand
               prioridade: "",
               horario_publicacao: "",
               prazo_resposta: "",
@@ -84,19 +90,18 @@ export const useDemandasData = () => {
               nome_solicitante: null,
               email_solicitante: null,
               telefone_solicitante: null,
-              veiculo_imprensa: null
+              veiculo_imprensa: null,
+              origem: null,
+              servico: null,
+              tipo_midia: null,
+              bairro: null,
+              autor: null
             } as Demand;
           })
         );
         
-        // Garantir que perguntas seja tratado corretamente
-        const typedData = demandasComArea.map(item => ({
-          ...item,
-          perguntas: item.perguntas as Record<string, string> | null
-        }));
-        
-        setDemandas(typedData);
-        setFilteredDemandas(typedData);
+        setDemandas(demandasProcessadas);
+        setFilteredDemandas(demandasProcessadas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
         toast({

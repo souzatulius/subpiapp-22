@@ -80,10 +80,10 @@ export const useNotaForm = (onClose: () => void) => {
       return;
     }
 
-    if (!selectedDemanda || !selectedDemanda.area_coordenacao) {
+    if (!selectedDemanda || !selectedDemanda.supervisao_tecnica) {
       toast({
         title: "Demanda inválida",
-        description: "A demanda selecionada não possui área de coordenação.",
+        description: "A demanda selecionada não possui supervisão técnica.",
         variant: "destructive"
       });
       return;
@@ -108,7 +108,7 @@ export const useNotaForm = (onClose: () => void) => {
           .from('problemas')
           .insert({ 
             descricao: 'Problema Padrão',
-            supervisao_tecnica_id: selectedDemanda.area_coordenacao.id 
+            supervisao_tecnica_id: selectedDemanda.supervisao_tecnica.id 
           })
           .select();
           
@@ -125,7 +125,7 @@ export const useNotaForm = (onClose: () => void) => {
         .insert({
           titulo,
           texto,
-          supervisao_tecnica_id: selectedDemanda.area_coordenacao.id,
+          supervisao_tecnica_id: selectedDemanda.supervisao_tecnica.id,
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId,

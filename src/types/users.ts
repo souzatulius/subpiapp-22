@@ -35,4 +35,4 @@ export interface UsersTableProps {
   onRemoveAccess?: (user: User) => void;
 }
 
-import { User, SupervisaoTecnica, Cargo, Coordenacao, UserFormData } from './common';
+import { User, SupervisaoTecnica, Cargo, Coordenacao, UserFormData } from '@/types/common';

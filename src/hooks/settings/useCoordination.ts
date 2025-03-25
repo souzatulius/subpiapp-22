@@ -1,194 +1,163 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-
-export type Coordination = {
-  id: string;
-  descricao: string;
-  sigla: string;
-  criado_em?: string;
-};
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Coordenacao } from '@/types/common';
 
 export const useCoordination = () => {
-  const [coordinations, setCoordinations] = useState<Coordination[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAdding, setIsAdding] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const fetchCoordinations = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      console.log('Fetching coordinations with is_supervision=false...');
+  // Função para buscar coordenações
+  const fetchCoordinations = async (): Promise<Coordenacao[]> => {
+    const { data, error } = await supabase
+      .from('coordenacoes')
+      .select('*')
+      .order('descricao', { ascending: true });
+
+    if (error) throw error;
+    console.log('Fetched coordenações:', data);
+    return data || [];
+  };
+
+  // Query para buscar coordenações
+  const {
+    data: coordinations = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['coordinations'],
+    queryFn: fetchCoordinations,
+    meta: {
+      onError: (err: any) => {
+        console.error('Erro ao buscar coordenações:', err);
+        toast({
+          title: 'Erro ao carregar coordenações',
+          description: err.message || 'Ocorreu um erro ao carregar as coordenações.',
+          variant: 'destructive',
+        });
+      },
+    },
+  });
+
+  // Mutation para adicionar coordenação
+  const addCoordinationMutation = useMutation({
+    mutationFn: async (newCoordination: { descricao: string; sigla?: string }) => {
       const { data, error } = await supabase
-        .from('areas_coordenacao')
-        .select('*')
-        .is('coordenacao_id', null) // Select only top-level coordinations
-        .eq('is_supervision', false) // Explicitly filter for coordinations only
-        .order('descricao');
-
-      if (error) throw error;
-      
-      console.log('Fetched coordinations from Supabase:', data);
-      setCoordinations(data || []);
-    } catch (error: any) {
-      console.error('Erro ao buscar coordenações:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as coordenações.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCoordinations();
-  }, [fetchCoordinations]);
-
-  const addCoordination = async (data: { descricao: string, sigla: string }) => {
-    try {
-      setIsAdding(true);
-      
-      console.log('Adding new coordination with data:', data);
-      
-      // Make sure to explicitly set is_supervision to false
-      const { data: newCoordination, error } = await supabase
-        .from('areas_coordenacao')
-        .insert({
-          ...data,
-          is_supervision: false // Explicitly mark as coordination, not supervision
-        })
+        .from('coordenacoes')
+        .insert(newCoordination)
         .select()
         .single();
 
       if (error) throw error;
-      
-      console.log('Added new coordination successfully:', newCoordination);
-      setCoordinations([...coordinations, newCoordination]);
+      return data;
+    },
+    onSuccess: (newCoordination) => {
+      // Atualizar o cache de coordenações
+      queryClient.setQueryData<Coordenacao[]>(
+        ['coordinations'],
+        (old) => old ? [...old, newCoordination] : [newCoordination]
+      );
+
       toast({
-        title: "Coordenação adicionada",
-        description: "Coordenação adicionada com sucesso.",
+        title: 'Coordenação adicionada',
+        description: 'A coordenação foi adicionada com sucesso.',
       });
-      return true;
-    } catch (error: any) {
+    },
+    onError: (error) => {
       console.error('Erro ao adicionar coordenação:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível adicionar a coordenação.",
-        variant: "destructive",
+        title: 'Erro ao adicionar coordenação',
+        description: error.message || 'Ocorreu um erro ao adicionar a coordenação.',
+        variant: 'destructive',
       });
-      return false;
-    } finally {
-      setIsAdding(false);
-    }
-  };
+    },
+  });
 
-  const updateCoordination = async (id: string, data: { descricao: string, sigla: string }) => {
-    try {
-      setIsEditing(true);
-      console.log('Updating coordination with id:', id, 'and data:', data);
-      
-      const { error } = await supabase
-        .from('areas_coordenacao')
-        .update({
-          ...data,
-          is_supervision: false // Ensure it's still marked as coordination
-        })
-        .eq('id', id);
+  // Mutation para editar coordenação
+  const editCoordinationMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: { descricao: string; sigla?: string } }) => {
+      const { data: updatedCoordination, error } = await supabase
+        .from('coordenacoes')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
 
       if (error) throw error;
-      
-      console.log('Coordination updated successfully');
-      setCoordinations(coordinations.map(coordination => 
-        coordination.id === id ? { ...coordination, ...data } : coordination
-      ));
-      
-      toast({
-        title: "Coordenação atualizada",
-        description: "Coordenação atualizada com sucesso.",
-      });
-      return true;
-    } catch (error: any) {
-      console.error('Erro ao atualizar coordenação:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar a coordenação.",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsEditing(false);
-    }
-  };
+      return updatedCoordination;
+    },
+    onSuccess: (updatedCoordination) => {
+      // Atualizar o cache de coordenações
+      queryClient.setQueryData<Coordenacao[]>(
+        ['coordinations'],
+        (old) => old ? old.map(coord => 
+          coord.id === updatedCoordination.id ? updatedCoordination : coord
+        ) : []
+      );
 
-  const deleteCoordination = async (id: string) => {
-    try {
-      setIsDeleting(true);
-      
-      // Check if there are any temas using this coordination
-      const { data: temasData, error: temasError } = await supabase
-        .from('problemas')
-        .select('id')
-        .eq('area_coordenacao_id', id);
-      
-      if (temasError) throw temasError;
-      
-      if (temasData && temasData.length > 0) {
-        toast({
-          title: "Erro",
-          description: "Esta coordenação está associada a temas e não pode ser excluída.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
+      toast({
+        title: 'Coordenação atualizada',
+        description: 'A coordenação foi atualizada com sucesso.',
+      });
+    },
+    onError: (error) => {
+      console.error('Erro ao editar coordenação:', error);
+      toast({
+        title: 'Erro ao editar coordenação',
+        description: error.message || 'Ocorreu um erro ao editar a coordenação.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Mutation para excluir coordenação
+  const deleteCoordinationMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('areas_coordenacao')
+        .from('coordenacoes')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-      
-      setCoordinations(coordinations.filter(coordination => coordination.id !== id));
+      return id;
+    },
+    onSuccess: (deletedId) => {
+      // Atualizar o cache de coordenações
+      queryClient.setQueryData<Coordenacao[]>(
+        ['coordinations'],
+        (old) => old ? old.filter(coord => coord.id !== deletedId) : []
+      );
+
       toast({
-        title: "Coordenação removida",
-        description: "Coordenação removida com sucesso.",
+        title: 'Coordenação excluída',
+        description: 'A coordenação foi excluída com sucesso.',
       });
-      return true;
-    } catch (error: any) {
-      console.error('Erro ao remover coordenação:', error);
-      
-      // Check for foreign key constraint error
-      if (error.code === '23503') {
-        toast({
-          title: "Erro",
-          description: "Esta coordenação está em uso e não pode ser removida.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: "Não foi possível remover a coordenação.",
-          variant: "destructive",
-        });
-      }
-      return false;
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+    },
+    onError: (error) => {
+      console.error('Erro ao excluir coordenação:', error);
+      toast({
+        title: 'Erro ao excluir coordenação',
+        description: error.message || 'Não foi possível excluir a coordenação. Verifique se não existem áreas associadas.',
+        variant: 'destructive',
+      });
+    },
+  });
 
   return {
     coordinations,
-    loading: isLoading,
-    isSubmitting: isAdding || isEditing,
-    isDeleting,
-    fetchCoordinations,
-    addCoordination,
-    updateCoordination,
-    deleteCoordination,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    addCoordination: addCoordinationMutation.mutate,
+    editCoordination: editCoordinationMutation.mutate,
+    deleteCoordination: deleteCoordinationMutation.mutate,
+    isAddingCoordination: addCoordinationMutation.isPending,
+    isEditingCoordination: editCoordinationMutation.isPending,
+    isDeletingCoordination: deleteCoordinationMutation.isPending,
   };
 };
