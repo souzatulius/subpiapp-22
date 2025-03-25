@@ -1,10 +1,12 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
   Settings, Users, ListChecks, Briefcase, LayoutDashboard, 
   MessageSquare, Bell, ShieldCheck, Building, UserCheck, 
-  Globe, AlertTriangle, Image, FileText, MapPin, Send, Map
+  Globe, AlertTriangle, Image, FileText, MapPin, Send, Map,
+  Layers // Add the missing Layers icon import
 } from 'lucide-react';
 
 interface SettingsCardProps {
