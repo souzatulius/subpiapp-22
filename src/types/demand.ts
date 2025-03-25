@@ -44,7 +44,10 @@ export interface Demand {
   prazo_resposta: string;
   supervisao_tecnica_id?: string;
   supervisao_tecnica?: {
-    id: string;
+    id?: string;
+    descricao: string;
+  } | null;
+  area_coordenacao?: {
     descricao: string;
   } | null;
   servico?: {

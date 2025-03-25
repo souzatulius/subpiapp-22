@@ -4,28 +4,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { AlertCircle, Clock, CheckCircle2, Archive, XCircle, FileText, Clock3, FileCheck } from 'lucide-react';
-
-interface Demand {
-  id: string;
-  titulo: string;
-  status: string;
-  prioridade: string;
-  horario_publicacao: string;
-  prazo_resposta: string;
-  area_coordenacao: { descricao: string } | null;
-  servico: { descricao: string } | null;
-  origem: { descricao: string } | null;
-  tipo_midia: { descricao: string } | null;
-  bairro: { nome: string } | null;
-  autor: { nome_completo: string } | null;
-  endereco: string | null;
-  nome_solicitante: string | null;
-  email_solicitante: string | null;
-  telefone_solicitante: string | null;
-  veiculo_imprensa: string | null;
-  detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null;
-}
+import { Demand } from '@/types/demand';
 
 interface DemandCardsProps {
   demandas: Demand[];

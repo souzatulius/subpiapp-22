@@ -8,40 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface Demand {
-  id: string;
-  titulo: string;
-  status: string;
-  prioridade: string;
-  horario_publicacao: string;
-  prazo_resposta: string;
-  supervisao_tecnica?: {
-    descricao: string;
-  } | null;
-  servico?: {
-    descricao: string;
-  } | null;
-  origem?: {
-    descricao: string;
-  } | null;
-  tipo_midia?: {
-    descricao: string;
-  } | null;
-  bairro?: {
-    nome: string;
-  } | null;
-  autor?: {
-    nome_completo: string;
-  } | null;
-  endereco: string | null;
-  nome_solicitante: string | null;
-  email_solicitante: string | null;
-  telefone_solicitante: string | null;
-  veiculo_imprensa: string | null;
-  detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null | any;
-}
+import { Demand } from '@/types/demand'; // Import Demand type from central location
 
 const Demandas = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
@@ -97,7 +64,17 @@ const Demandas = () => {
         
         // Agora vamos buscar as informações relacionadas em consultas separadas
         const enhancedData = await Promise.all((data || []).map(async (demanda) => {
-          let enhancedDemand: any = { ...demanda };
+          // Create an enhanced demand object with all required properties
+          let enhancedDemand: any = { 
+            ...demanda,
+            supervisao_tecnica: null,
+            servico: null, 
+            origem: null,
+            tipo_midia: null,
+            bairro: null,
+            autor: null,
+            area_coordenacao: null // Add the required area_coordenacao property
+          };
           
           // Buscar supervisão técnica
           if (demanda.supervisao_tecnica_id) {
@@ -108,6 +85,8 @@ const Demandas = () => {
               .single();
               
             enhancedDemand.supervisao_tecnica = stData;
+            // Also set area_coordenacao to match the supervisao_tecnica
+            enhancedDemand.area_coordenacao = stData;
           }
           
           // Buscar serviço
