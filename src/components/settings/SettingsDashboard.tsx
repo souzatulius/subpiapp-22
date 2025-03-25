@@ -10,7 +10,7 @@ import MiniBarChart from './components/MiniBarChart';
 import MiniDonutChart from './components/MiniDonutChart';
 import StatCard from './components/StatCard';
 import { usePositions } from '@/hooks/usePositions';
-import { useProblems } from '@/hooks/useProblems';
+import { useProblemsData } from '@/hooks/useProblems';
 import { useServices } from '@/hooks/services';
 import { useCoordinationAreas } from '@/hooks/coordination-areas/useCoordinationAreas';
 import { useDemandOrigins } from '@/hooks/useDemandOrigins';
@@ -24,10 +24,10 @@ interface SettingsDashboardProps {
 const SettingsDashboard: React.FC<SettingsDashboardProps> = ({ searchQuery = '' }) => {
   // Fetch counts from hooks
   const { positions, loading: positionsLoading } = usePositions();
-  const { problems, loading: problemsLoading } = useProblems();
+  const { problems, loading: problemsLoading } = useProblemsData();
   const { services, loading: servicesLoading } = useServices();
   const { areas, coordinations, loading: areasLoading } = useCoordinationAreas();
-  const { demandOrigins, loading: originsLoading } = useDemandOrigins();
+  const { origins, loading: originsLoading } = useDemandOrigins();
   const { mediaTypes, loading: mediaTypesLoading } = useMediaTypes();
   
   // Sample data for charts (replace with real data when available)
@@ -135,7 +135,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({ searchQuery = '' 
       icon: <Globe className="h-5 w-5" />,
       link: "/settings?tab=origens_demanda",
       color: "bg-green-600",
-      count: demandOrigins?.length || 0,
+      count: origins?.length || 0,
       category: "Gestão Operacional",
       loading: originsLoading
     },

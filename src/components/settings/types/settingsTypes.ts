@@ -1,5 +1,6 @@
 
 export interface SettingsStats {
+  // English names (legacy)
   users: number;
   areas: number;
   positions: number;
@@ -8,8 +9,10 @@ export interface SettingsStats {
   neighborhoods: number;
   announcements: number;
   notifications: number;
+  
+  // Portuguese names (current)
   usuarios: number;
-  supervisoesTecnicas: number; // Renamed from areasCoordenacao
+  supervisoesTecnicas: number;
   coordenacoes: number;
   cargos: number;
   problemas: number;
@@ -21,15 +24,4 @@ export interface SettingsStats {
   configuracoesNotificacoes: number;
   permissoes: number;
   temas: number;
-}
-
-export interface StatCardProps {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-  description: string;
-  section: string;
-  highlight?: boolean;
-  unreadCount?: number;
-  onClick?: () => void;
 }
