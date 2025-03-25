@@ -13,7 +13,7 @@ export const useUserAccessRemoval = (fetchData: () => Promise<void>) => {
     try {
       // Remove all permissions for this user
       const { error } = await supabase
-        .from('usuarios_permissoes')
+        .from('usuario_permissoes')
         .delete()
         .eq('usuario_id', userId);
       

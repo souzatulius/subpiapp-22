@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +28,7 @@ export const useUserApproval = (fetchData: () => Promise<void>) => {
       
       // 2. Associate the user with the permission
       const { error: assignError } = await supabase
-        .from('usuarios_permissoes')
+        .from('usuario_permissoes')
         .insert({
           usuario_id: userId,
           permissao_id: permissionData.id

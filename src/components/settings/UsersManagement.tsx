@@ -44,7 +44,7 @@ const UsersManagement = () => {
     deleteUser
   } = useUserDelete(fetchData);
 
-  const { resetPassword } = usePasswordReset();
+  const { handleSendPasswordReset: resetPassword } = usePasswordReset();
   const { approveUser, approving } = useUserApproval(fetchData);
   const { removeAccess, removing } = useUserAccessRemoval(fetchData);
 
