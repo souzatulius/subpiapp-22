@@ -1,11 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useSGZData } from '@/hooks/ranking/useSGZData';
 import SGZUploadSection from './sgz/SGZUploadSection';
 import SGZFilters from './sgz/SGZFilters';
 import SGZCharts from './sgz/SGZCharts';
-import { toast } from 'sonner';
 
 const SGZContent = () => {
   const { user } = useAuth();

@@ -1,47 +1,84 @@
 
 import React from 'react';
 import { Bar, Pie, Line } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, BarElement, Title, Tooltip, Legend, LineElement } from 'chart.js';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+} from 'chart.js';
+import { NoDataMessage } from '../charts/NoDataMessage';
 
 // Register ChartJS components
-ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, BarElement, Title, Tooltip, Legend, LineElement);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+);
 
 interface SGZChartProps {
   type: 'bar' | 'pie' | 'line';
   data: any;
-  options?: any;
 }
 
-const SGZChart: React.FC<SGZChartProps> = ({ type, data, options }) => {
-  const defaultOptions = {
+const SGZChart: React.FC<SGZChartProps> = ({ type, data }) => {
+  // Check if data is valid for rendering
+  const isDataValid = data && 
+    data.labels && 
+    data.labels.length > 0 && 
+    data.datasets && 
+    data.datasets.length > 0 &&
+    data.datasets[0].data && 
+    data.datasets[0].data.length > 0;
+
+  if (!isDataValid) {
+    return <NoDataMessage message="Sem dados para exibir" />;
+  }
+
+  // Common options for all chart types
+  const commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom' as const,
+        display: true,
+        position: 'top' as const,
       },
     },
   };
 
-  const mergedOptions = { ...defaultOptions, ...options };
+  // Bar chart options
+  const barOptions = {
+    ...commonOptions,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
 
-  if (!data) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Dados não disponíveis</p>
-      </div>
-    );
-  }
-
+  // Render the appropriate chart type
   switch (type) {
     case 'bar':
-      return <Bar data={data} options={mergedOptions} />;
+      return <Bar data={data} options={barOptions} />;
     case 'pie':
-      return <Pie data={data} options={mergedOptions} />;
+      return <Pie data={data} options={commonOptions} />;
     case 'line':
-      return <Line data={data} options={mergedOptions} />;
+      return <Line data={data} options={barOptions} />;
     default:
-      return <Bar data={data} options={mergedOptions} />;
+      return <NoDataMessage message="Tipo de gráfico não suportado" />;
   }
 };
 

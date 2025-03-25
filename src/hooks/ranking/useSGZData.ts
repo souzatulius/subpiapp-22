@@ -275,17 +275,15 @@ export const useSGZData = (user: User | null) => {
   // Handle file upload
   const handleFileUpload = async (file: File) => {
     if (!user) {
-      toast.error('Você precisa estar logado para fazer upload');
-      return;
+      throw new Error('Você precisa estar logado para fazer upload');
     }
 
     if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-      toast.error('Por favor, selecione um arquivo Excel (.xlsx ou .xls)');
-      return;
+      throw new Error('Por favor, selecione um arquivo Excel (.xlsx ou .xls)');
     }
 
     setIsUploading(true);
-    setUploadProgress(10);
+    setUploadProgress(5);
 
     try {
       // First, create upload record
@@ -305,11 +303,18 @@ export const useSGZData = (user: User | null) => {
       }
 
       const uploadId = uploadData[0].id;
-      setUploadProgress(30);
+      setUploadProgress(20);
 
       // Process the file
       const ordensData = await processExcelFile(file);
-      setUploadProgress(50);
+      setUploadProgress(40);
+
+      // Validate the area_tecnica field in each row
+      ordensData.forEach(ordem => {
+        if (!ordem.sgz_area_tecnica || (ordem.sgz_area_tecnica !== 'STM' && ordem.sgz_area_tecnica !== 'STLP')) {
+          throw new Error(`Valor inválido para Área Técnica: "${ordem.sgz_area_tecnica}". Apenas "STM" ou "STLP" são permitidos.`);
+        }
+      });
 
       // Prepare orders for database
       const ordensToInsert = ordensData.map(ordem => ({
@@ -317,7 +322,7 @@ export const useSGZData = (user: User | null) => {
         planilha_referencia: uploadId
       }));
 
-      setUploadProgress(70);
+      setUploadProgress(60);
 
       // Insert service orders in batches to avoid hitting request size limits
       const batchSize = 100;
@@ -329,7 +334,8 @@ export const useSGZData = (user: User | null) => {
 
         if (error) throw error;
         
-        setUploadProgress(70 + (i / ordensToInsert.length) * 20);
+        const progress = 60 + ((i / ordensToInsert.length) * 30);
+        setUploadProgress(Math.min(90, progress));
       }
 
       // Update upload record with results
@@ -349,9 +355,15 @@ export const useSGZData = (user: User | null) => {
       setUploadProgress(100);
 
       toast.success('Planilha processada com sucesso');
+      
+      // Small delay to show 100% progress
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      return true;
     } catch (error: any) {
       console.error('Error uploading file:', error);
       toast.error(`Erro ao processar planilha: ${error.message}`);
+      throw error;
     } finally {
       setIsUploading(false);
       setUploadProgress(0);

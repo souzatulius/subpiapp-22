@@ -1,28 +1,23 @@
 
+// Add or update the following types
 export type SGZAreaTecnica = "STM" | "STLP";
 
-export const isValidSGZAreaTecnica = (value: string): value is SGZAreaTecnica => {
-  return value === "STM" || value === "STLP";
-};
-
 export interface SGZOrdemServico {
+  id: string;
   ordem_servico: string;
-  sgz_classificacao_servico: string;
   sgz_area_tecnica: SGZAreaTecnica;
-  sgz_fornecedor?: string;
+  sgz_classificacao_servico: string;
   sgz_status: string;
-  sgz_data_status: string;
-  sgz_criado_em: string;
-  sgz_prioridade?: string;
-  sgz_logradouro?: string;
-  sgz_numero?: string;
-  sgz_bairro?: string;
-  sgz_distrito?: string;
-  sgz_cep?: string;
-  sgz_dias_ate_status_atual?: number;
-  id?: string;
-  planilha_referencia?: string;
-  data_upload?: string;
+  sgz_fornecedor: string | null;
+  sgz_distrito: string | null;
+  sgz_bairro: string | null;
+  sgz_logradouro: string | null;
+  sgz_numero: string | null;
+  sgz_cep: string | null;
+  sgz_criado_em: string | null;
+  sgz_data_status: string | null;
+  sgz_dias_ate_status_atual: number | null;
+  planilha_referencia: string | null;
 }
 
 export interface SGZPlanilhaUpload {
@@ -30,27 +25,16 @@ export interface SGZPlanilhaUpload {
   arquivo_nome: string;
   data_upload?: string;
   usuario_upload?: string;
+  status_upload?: string;
   qtd_ordens_processadas?: number;
   qtd_ordens_validas?: number;
-  status_upload?: string;
 }
 
-export interface SGZStatusHistorico {
-  id?: string;
-  ordem_servico: string;
-  status_antigo?: string;
-  status_novo: string;
-  data_mudanca?: string;
-  planilha_origem: string;
-}
-
-export interface SGZConfiguracoesUsuario {
-  id?: string;
-  usuario_id: string;
-  filtros_ativos?: Record<string, any>;
-  ordem_dos_cards?: Record<string, any>;
-  cards_visiveis?: string[];
-  data_atualizacao?: string;
+export interface SGZFilterOptions {
+  status: string[];
+  areaTecnica: string;
+  distrito: string[];
+  fornecedor: string[];
 }
 
 export interface SGZChartData {
@@ -63,11 +47,6 @@ export interface SGZChartData {
   lastUpdated: string;
 }
 
-export interface SGZFilterOptions {
-  status: string[];
-  areaTecnica: 'Todos' | SGZAreaTecnica;
-  distrito: string[];
-  dataDe?: Date;
-  dataAte?: Date;
-  fornecedor: string[];
-}
+export const isValidSGZAreaTecnica = (value: string): value is SGZAreaTecnica => {
+  return value === "STM" || value === "STLP";
+};
