@@ -1,44 +1,73 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { User } from './types';
+import { Loader2 } from 'lucide-react';
 
 interface DeleteUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User | null;
   onDelete: () => Promise<void>;
+  isSubmitting?: boolean;
 }
 
 const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   open,
   onOpenChange,
   user,
-  onDelete
+  onDelete,
+  isSubmitting = false,
 }) => {
+  const handleDelete = async () => {
+    await onDelete();
+    onOpenChange(false);
+  };
+
   if (!user) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Confirmar Exclusão</DialogTitle>
-          <DialogDescription>
-            Tem certeza que deseja excluir o usuário <span className="font-semibold">{user.nome_completo}</span>?
-            Esta ação não pode ser desfeita.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="bg-white rounded-xl">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-xl text-red-600 font-semibold">Remover Usuário</AlertDialogTitle>
+          <AlertDialogDescription className="text-subpi-gray-secondary">
+            Você está prestes a remover o acesso de <strong>{user.nome_completo}</strong>. Esta ação não pode ser desfeita. Deseja continuar?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="mt-6">
+          <AlertDialogCancel 
+            className="rounded-xl"
+            disabled={isSubmitting}
+          >
             Cancelar
-          </Button>
-          <Button variant="destructive" onClick={onDelete}>
-            Excluir
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleDelete}
+            className="rounded-xl bg-red-600 hover:bg-red-700"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Removendo...
+              </>
+            ) : (
+              'Sim, remover'
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

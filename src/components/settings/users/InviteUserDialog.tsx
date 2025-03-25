@@ -11,6 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Area, Cargo } from './types';
 import EmailSuffix from '@/components/EmailSuffix';
 import { toast } from '@/components/ui/use-toast';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 const inviteUserSchema = z.object({
   email: z.string().min(1, 'Email é obrigatório'),
@@ -106,9 +113,9 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-100">
+      <DialogContent className="bg-gray-50 rounded-xl">
         <DialogHeader>
-          <DialogTitle>Convidar Novo Usuário</DialogTitle>
+          <DialogTitle className="text-xl text-subpi-blue font-semibold">Convidar Novo Usuário</DialogTitle>
           <DialogDescription>
             Envie um convite para um novo usuário se juntar à plataforma.
           </DialogDescription>
@@ -116,130 +123,164 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField 
-              control={form.control} 
-              name="nome_completo" 
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome Completo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome do usuário" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} 
-            />
+            <div className="bg-white p-5 rounded-xl space-y-4">
+              <FormField 
+                control={form.control} 
+                name="nome_completo" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-subpi-gray-text">Nome Completo</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Nome do usuário" 
+                        {...field} 
+                        className="rounded-xl border-gray-300 focus:border-subpi-blue focus:ring-subpi-blue"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
+              
+              <FormField 
+                control={form.control} 
+                name="email" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-subpi-gray-text">Email</FormLabel>
+                    <FormControl>
+                      <EmailSuffix 
+                        value={field.value} 
+                        onChange={field.onChange} 
+                        suffix="@smsub.prefeitura.sp.gov.br" 
+                        placeholder="email.usuario" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
+              
+              <FormField 
+                control={form.control} 
+                name="cargo_id" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-subpi-gray-text">Cargo</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="h-12 rounded-xl border-gray-300">
+                          <SelectValue placeholder="Selecione um cargo" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
+                          {cargos.map(cargo => (
+                            <SelectItem key={cargo.id} value={cargo.id}>
+                              {cargo.descricao}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
+              
+              <FormField 
+                control={form.control} 
+                name="coordenacao_id" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-subpi-gray-text">Coordenação</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Clear area selection when coordenação changes
+                          form.setValue('area_coordenacao_id', undefined);
+                        }}
+                      >
+                        <SelectTrigger className="h-12 rounded-xl border-gray-300">
+                          <SelectValue placeholder="Selecione uma coordenação" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
+                          {coordenacoes.map(coord => (
+                            <SelectItem key={coord.coordenacao_id} value={coord.coordenacao_id}>
+                              {coord.coordenacao}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
+              
+              <FormField 
+                control={form.control} 
+                name="area_coordenacao_id" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-subpi-gray-text">Supervisão Técnica</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={!form.getValues('coordenacao_id') || filteredAreas.length === 0 || form.getValues('coordenacao_id') === 'select-coordenacao'}
+                      >
+                        <SelectTrigger className="h-12 rounded-xl border-gray-300">
+                          <SelectValue placeholder={
+                            !form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'select-coordenacao'
+                              ? "Selecione uma coordenação primeiro"
+                              : filteredAreas.length === 0
+                              ? "Nenhuma supervisão técnica para esta coordenação"
+                              : "Selecione uma supervisão técnica"
+                          } />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="select-area">
+                            {!form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'select-coordenacao'
+                              ? "Selecione uma coordenação primeiro"
+                              : filteredAreas.length === 0
+                              ? "Nenhuma supervisão técnica para esta coordenação"
+                              : "Selecione uma supervisão técnica"}
+                          </SelectItem>
+                          {filteredAreas.map(area => (
+                            <SelectItem key={area.id} value={area.id}>
+                              {area.descricao}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
+            </div>
             
-            <FormField 
-              control={form.control} 
-              name="email" 
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <EmailSuffix 
-                      value={field.value} 
-                      onChange={field.onChange} 
-                      suffix="@smsub.prefeitura.sp.gov.br" 
-                      placeholder="email.usuario" 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} 
-            />
-            
-            <FormField 
-              control={form.control} 
-              name="cargo_id" 
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cargo</FormLabel>
-                  <FormControl>
-                    <select
-                      className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
-                      value={field.value}
-                      onChange={field.onChange}
-                    >
-                      <option value="select-cargo">Selecione um cargo</option>
-                      {cargos.map(cargo => (
-                        <option key={cargo.id} value={cargo.id}>
-                          {cargo.descricao}
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} 
-            />
-            
-            <FormField 
-              control={form.control} 
-              name="coordenacao_id" 
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Coordenação</FormLabel>
-                  <FormControl>
-                    <select
-                      className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
-                      value={field.value}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        // Clear area selection when coordenação changes
-                        form.setValue('area_coordenacao_id', undefined);
-                      }}
-                    >
-                      <option value="select-coordenacao">Selecione uma coordenação</option>
-                      {coordenacoes.map(coord => (
-                        <option key={coord.coordenacao_id} value={coord.coordenacao_id}>
-                          {coord.coordenacao}
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} 
-            />
-            
-            <FormField 
-              control={form.control} 
-              name="area_coordenacao_id" 
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Supervisão Técnica</FormLabel>
-                  <FormControl>
-                    <select
-                      className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={!form.getValues('coordenacao_id') || filteredAreas.length === 0 || form.getValues('coordenacao_id') === 'select-coordenacao'}
-                    >
-                      <option value="select-area">
-                        {!form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'select-coordenacao'
-                          ? "Selecione uma coordenação primeiro"
-                          : filteredAreas.length === 0
-                          ? "Nenhuma supervisão técnica para esta coordenação"
-                          : "Selecione uma supervisão técnica"}
-                      </option>
-                      {filteredAreas.map(area => (
-                        <option key={area.id} value={area.id}>
-                          {area.descricao}
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} 
-            />
-            
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <DialogFooter className="mt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => onOpenChange(false)} 
+                disabled={isSubmitting}
+                className="rounded-xl"
+              >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="rounded-xl bg-subpi-blue hover:bg-subpi-blue-dark"
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

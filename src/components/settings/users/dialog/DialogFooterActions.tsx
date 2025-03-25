@@ -14,16 +14,21 @@ const DialogFooterActions: React.FC<DialogFooterActionsProps> = ({
   onCancel
 }) => {
   return (
-    <DialogFooter>
+    <DialogFooter className="mt-6">
       <Button 
         type="button" 
         variant="outline" 
         onClick={onCancel}
         disabled={isSubmitting}
+        className="rounded-xl"
       >
         Cancelar
       </Button>
-      <Button type="submit" disabled={isSubmitting}>
+      <Button 
+        type="submit" 
+        disabled={isSubmitting}
+        className="rounded-xl bg-subpi-blue hover:bg-subpi-blue-dark"
+      >
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
