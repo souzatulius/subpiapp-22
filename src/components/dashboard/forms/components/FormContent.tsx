@@ -106,6 +106,7 @@ const FormContent: React.FC<FormContentProps> = ({
       return (
         <OriginClassificationStep
           formData={formData}
+          handleChange={handleChange}
           handleSelectChange={handleSelectChange}
           origens={origens}
           tiposMidia={tiposMidia}
@@ -139,6 +140,7 @@ const FormContent: React.FC<FormContentProps> = ({
           formData={formData}
           handleChange={handleChange}
           handlePerguntaChange={handlePerguntaChange}
+          handleSelectChange={handleSelectChange}
           errors={errors.filter(err => FORM_STEPS[4].fields.includes(err.field))}
         />
       );
@@ -146,7 +148,6 @@ const FormContent: React.FC<FormContentProps> = ({
       return (
         <PriorityDeadlineStep
           formData={formData}
-          handleChange={handleChange}
           handleSelectChange={handleSelectChange}
           errors={errors.filter(err => FORM_STEPS[5].fields.includes(err.field))}
         />
