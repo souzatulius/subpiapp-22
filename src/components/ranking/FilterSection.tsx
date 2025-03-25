@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FilterOptions, ChartVisibility } from './types';
 import DateRangeFilter from './filters/DateRangeFilter';
@@ -8,6 +8,8 @@ import ServiceTypeFilter from './filters/ServiceTypeFilter';
 import DistrictFilter from './filters/DistrictFilter';
 import ActiveFilters from './filters/ActiveFilters';
 import ChartVisibilityManager from './filters/ChartVisibilityManager';
+import { motion } from 'framer-motion';
+import { ChevronDown, ChevronUp, SlidersHorizontal, BarChart } from 'lucide-react';
 
 interface FilterSectionProps {
   filters: FilterOptions;
@@ -22,6 +24,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   chartVisibility,
   onChartVisibilityChange
 }) => {
+  const [expandedFilter, setExpandedFilter] = useState<string>('filtros');
+  
   const handleDateRangeChange = (range: any) => {
     onFiltersChange({ dateRange: range });
   };
@@ -115,50 +119,111 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       [chart]: !chartVisibility[chart] 
     });
   };
+  
+  const toggleSection = (section: string) => {
+    if (expandedFilter === section) {
+      setExpandedFilter('');
+    } else {
+      setExpandedFilter(section);
+    }
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Filtros e Gerenciamento de Exibição</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <DateRangeFilter 
-              dateRange={filters.dateRange}
-              onDateRangeChange={handleDateRangeChange}
-            />
+    <Card className="border border-gray-200 shadow-md overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 border-b border-orange-200">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <CardTitle className="text-orange-800 flex items-center gap-2">
+            <SlidersHorizontal className="h-5 w-5 text-orange-600" />
+            Filtros e Gerenciamento de Visualização
+          </CardTitle>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => toggleSection('filtros')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1.5 transition-colors ${
+                expandedFilter === 'filtros' 
+                  ? 'bg-orange-500 text-white' 
+                  : 'bg-white text-orange-700 border border-orange-300 hover:bg-orange-50'
+              }`}
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Filtros
+              {expandedFilter === 'filtros' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
             
-            <StatusFilter
-              statuses={filters.statuses}
-              onStatusChange={handleStatusChange}
-            />
-            
-            <ServiceTypeFilter
-              serviceTypes={filters.serviceTypes}
-              onServiceTypeChange={handleServiceTypeChange}
-            />
-            
-            <DistrictFilter
-              districts={filters.districts}
-              onDistrictChange={handleDistrictChange}
-            />
+            <button
+              onClick={() => toggleSection('graficos')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1.5 transition-colors ${
+                expandedFilter === 'graficos' 
+                  ? 'bg-orange-500 text-white' 
+                  : 'bg-white text-orange-700 border border-orange-300 hover:bg-orange-50'
+              }`}
+            >
+              <BarChart className="h-4 w-4" />
+              Gráficos
+              {expandedFilter === 'graficos' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
           </div>
-          
-          <ActiveFilters
-            filters={filters}
-            onDateRangeClear={() => onFiltersChange({ dateRange: undefined })}
-            onStatusChange={handleStatusChange}
-            onServiceTypeChange={handleServiceTypeChange}
-            onDistrictChange={handleDistrictChange}
-            onClearAllFilters={clearFilters}
-          />
-          
-          <ChartVisibilityManager
-            chartVisibility={chartVisibility}
-            onChartVisibilityToggle={handleChartVisibilityToggle}
-          />
         </div>
+      </CardHeader>
+      
+      <CardContent className="p-0">
+        {expandedFilter === 'filtros' && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="p-6 border-b border-gray-200"
+          >
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <DateRangeFilter 
+                  dateRange={filters.dateRange}
+                  onDateRangeChange={handleDateRangeChange}
+                />
+                
+                <StatusFilter
+                  statuses={filters.statuses}
+                  onStatusChange={handleStatusChange}
+                />
+                
+                <ServiceTypeFilter
+                  serviceTypes={filters.serviceTypes}
+                  onServiceTypeChange={handleServiceTypeChange}
+                />
+                
+                <DistrictFilter
+                  districts={filters.districts}
+                  onDistrictChange={handleDistrictChange}
+                />
+              </div>
+              
+              <ActiveFilters
+                filters={filters}
+                onDateRangeClear={() => onFiltersChange({ dateRange: undefined })}
+                onStatusChange={handleStatusChange}
+                onServiceTypeChange={handleServiceTypeChange}
+                onDistrictChange={handleDistrictChange}
+                onClearAllFilters={clearFilters}
+              />
+            </div>
+          </motion.div>
+        )}
+        
+        {expandedFilter === 'graficos' && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="p-6"
+          >
+            <ChartVisibilityManager
+              chartVisibility={chartVisibility}
+              onChartVisibilityToggle={handleChartVisibilityToggle}
+            />
+          </motion.div>
+        )}
       </CardContent>
     </Card>
   );

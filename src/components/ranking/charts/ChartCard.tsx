@@ -16,14 +16,16 @@ const ChartCard: React.FC<ChartCardProps> = ({
   isLoading, 
   children 
 }) => (
-  <Card className="h-full">
-    <CardHeader className="pb-2">
-      <CardTitle className="text-lg">{title}</CardTitle>
-      <div className="text-2xl font-bold">
-        {isLoading ? <Skeleton className="h-8 w-24" /> : value}
+  <Card className="h-full border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+    <CardHeader className="pb-2 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white">
+      <div className="flex flex-col">
+        <CardTitle className="text-lg text-orange-800">{title}</CardTitle>
+        <div className="text-2xl font-bold text-orange-700">
+          {isLoading ? <Skeleton className="h-8 w-24" /> : value}
+        </div>
       </div>
     </CardHeader>
-    <CardContent>
+    <CardContent className="p-4">
       {isLoading ? (
         <Skeleton className="h-[200px] w-full" />
       ) : (
