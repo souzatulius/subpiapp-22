@@ -13,118 +13,167 @@ export const useSettingsStats = () => {
     neighborhoods: 0,
     announcements: 0,
     notifications: 0,
-    // Additional properties for Portuguese UI
     usuarios: 0,
-    supervisoesTecnicas: 0, // Renamed from areasCoordenacao
+    supervisoesTecnicas: 0,
     coordenacoes: 0,
     cargos: 0,
     problemas: 0,
-    temas: 0,
     tiposMidia: 0,
     origensDemanda: 0,
     distritos: 0,
     bairros: 0,
     comunicados: 0,
     configuracoesNotificacoes: 0,
-    permissoes: 0
+    permissoes: 0,
+    temas: 0
   });
   const [loading, setLoading] = useState(true);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  
+
+  useEffect(() => {
+    fetchStats();
+    return () => {
+      // Cleanup
+    };
+  }, []);
+
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const [{
-        count: usersCount
-      }, {
-        count: areasCount
-      }, {
-        count: positionsCount
-      }, {
-        count: servicesCount
-      }, {
-        count: districtsCount
-      }, {
-        count: neighborhoodsCount
-      }, {
-        count: announcementsCount
-      }, {
-        count: notificationsCount
-      }, {
-        count: unreadNotificationsCount
-      }, {
-        count: temasCount
-      }, {
-        count: tiposMidiaCount
-      }, {
-        count: origensDemandaCount
-      }] = await Promise.all([
-        supabase.from('usuarios').select('*', { count: 'exact', head: true }),
-        supabase.from('areas_coordenacao').select('*', { count: 'exact', head: true }),
-        supabase.from('cargos').select('*', { count: 'exact', head: true }),
-        supabase.from('servicos').select('*', { count: 'exact', head: true }),
-        supabase.from('distritos').select('*', { count: 'exact', head: true }),
-        supabase.from('bairros').select('*', { count: 'exact', head: true }),
-        supabase.from('comunicados').select('*', { count: 'exact', head: true }),
-        supabase.from('notificacoes').select('*', { count: 'exact', head: true }),
-        supabase.from('notificacoes').select('*', { count: 'exact', head: true }).eq('lida', false),
-        supabase.from('problemas').select('*', { count: 'exact', head: true }),
-        supabase.from('tipos_midia').select('*', { count: 'exact', head: true }),
-        supabase.from('origens_demandas').select('*', { count: 'exact', head: true })
-      ]);
       
-      // Count coordenacoes based on distinct values in areas_coordenacao table
-      const { data: coordenacoesData } = await supabase
+      // Fetch supervisions count (is_supervision = true)
+      const { data: supervisions, error: supervisionsError } = await supabase
         .from('areas_coordenacao')
-        .select('coordenacao')
-        .not('coordenacao', 'is', null);
+        .select('id')
+        .eq('is_supervision', true);
       
-      const coordenacoesCount = coordenacoesData ? 
-        new Set(coordenacoesData.map(item => item.coordenacao).filter(Boolean)).size : 0;
+      if (supervisionsError) throw supervisionsError;
       
+      // Fetch coordinations count (is_supervision = false)
+      const { data: coordinations, error: coordinationsError } = await supabase
+        .from('areas_coordenacao')
+        .select('id')
+        .eq('is_supervision', false);
+      
+      if (coordinationsError) throw coordinationsError;
+
+      // Fetch counts for other entities
+      const { data: positions, error: positionsError } = await supabase
+        .from('cargos')
+        .select('id');
+      
+      if (positionsError) throw positionsError;
+      
+      const { data: problems, error: problemsError } = await supabase
+        .from('problemas')
+        .select('id');
+      
+      if (problemsError) throw problemsError;
+      
+      const { data: mediaTypes, error: mediaTypesError } = await supabase
+        .from('tipos_midia')
+        .select('id');
+      
+      if (mediaTypesError) throw mediaTypesError;
+      
+      const { data: demandOrigins, error: demandOriginsError } = await supabase
+        .from('origens_demandas')
+        .select('id');
+      
+      if (demandOriginsError) throw demandOriginsError;
+      
+      const { data: districts, error: districtsError } = await supabase
+        .from('distritos')
+        .select('id');
+      
+      if (districtsError) throw districtsError;
+      
+      const { data: neighborhoods, error: neighborhoodsError } = await supabase
+        .from('bairros')
+        .select('id');
+      
+      if (neighborhoodsError) throw neighborhoodsError;
+      
+      const { data: announcements, error: announcementsError } = await supabase
+        .from('comunicados')
+        .select('id');
+      
+      if (announcementsError) throw announcementsError;
+      
+      const { data: users, error: usersError } = await supabase
+        .from('usuarios')
+        .select('id');
+      
+      if (usersError) throw usersError;
+      
+      const { data: permissions, error: permissionsError } = await supabase
+        .from('permissoes')
+        .select('id');
+      
+      if (permissionsError) throw permissionsError;
+      
+      const { data: themes, error: themesError } = await supabase
+        .from('problemas')
+        .select('id');
+      
+      if (themesError) throw themesError;
+      
+      const { data: notifications, error: notificationsError } = await supabase
+        .from('notificacoes')
+        .select('id');
+      
+      if (notificationsError) throw notificationsError;
+      
+      const { data: unreadNotifs, error: unreadNotifsError } = await supabase
+        .from('notificacoes')
+        .select('id')
+        .eq('lida', false);
+      
+      if (unreadNotifsError) throw unreadNotifsError;
+      
+      const { data: notificationSettings, error: notificationSettingsError } = await supabase
+        .from('configuracoes_notificacoes')
+        .select('id');
+      
+      if (notificationSettingsError) throw notificationSettingsError;
+      
+      // Update the stats
       setStats({
-        // English properties
-        users: usersCount || 0,
-        areas: areasCount || 0,
-        positions: positionsCount || 0,
-        services: servicesCount || 0,
-        districts: districtsCount || 0,
-        neighborhoods: neighborhoodsCount || 0,
-        announcements: announcementsCount || 0,
-        notifications: notificationsCount || 0,
-        
-        // Portuguese UI properties
-        usuarios: usersCount || 0,
-        supervisoesTecnicas: areasCount || 0, // Renamed from areasCoordenacao
-        coordenacoes: coordenacoesCount || 0,
-        cargos: positionsCount || 0,
-        problemas: servicesCount || 0, // Now using servicesCount for problemas
-        temas: temasCount || 0,
-        tiposMidia: tiposMidiaCount || 0,
-        origensDemanda: origensDemandaCount || 0,
-        distritos: districtsCount || 0,
-        bairros: neighborhoodsCount || 0,
-        comunicados: announcementsCount || 0,
-        configuracoesNotificacoes: notificationsCount || 0,
-        permissoes: 0  // This might need to come from another table
+        users: users?.length || 0,
+        areas: supervisions?.length || 0,
+        positions: positions?.length || 0,
+        services: 0, // Will be updated in a more complex query if needed
+        districts: districts?.length || 0,
+        neighborhoods: neighborhoods?.length || 0,
+        announcements: announcements?.length || 0,
+        notifications: notifications?.length || 0,
+        usuarios: users?.length || 0,
+        supervisoesTecnicas: supervisions?.length || 0,
+        coordenacoes: coordinations?.length || 0,
+        cargos: positions?.length || 0,
+        problemas: problems?.length || 0,
+        tiposMidia: mediaTypes?.length || 0,
+        origensDemanda: demandOrigins?.length || 0,
+        distritos: districts?.length || 0,
+        bairros: neighborhoods?.length || 0,
+        comunicados: announcements?.length || 0,
+        configuracoesNotificacoes: notificationSettings?.length || 0,
+        permissoes: permissions?.length || 0,
+        temas: themes?.length || 0
       });
       
-      setUnreadNotifications(unreadNotificationsCount || 0);
+      setUnreadNotifications(unreadNotifs?.length || 0);
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
+      console.error('Error fetching settings stats:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-  
   return {
     stats,
     loading,
     unreadNotifications,
-    fetchStats
+    refreshStats: fetchStats
   };
 };

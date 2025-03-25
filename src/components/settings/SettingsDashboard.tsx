@@ -35,7 +35,7 @@ const SettingsDashboard = () => {
       title: 'Coordenações',
       icon: <Building className="h-6 w-6" />,
       description: 'Gerencie as coordenações',
-      count: stats.coordenacoes || 0
+      count: stats.coordenacoes
     },
     {
       id: 'cargos',
@@ -63,14 +63,14 @@ const SettingsDashboard = () => {
       title: 'Tipos de Mídia',
       icon: <Newspaper className="h-6 w-6" />,
       description: 'Gerencie os tipos de mídia',
-      count: stats.tiposMidia || 0
+      count: stats.tiposMidia
     },
     {
       id: 'origens_demanda',
       title: 'Origens das Demandas',
       icon: <Home className="h-6 w-6" />,
       description: 'Gerencie as origens das demandas',
-      count: stats.origensDemanda || 0
+      count: stats.origensDemanda
     },
     {
       id: 'distritos_bairros',
@@ -98,7 +98,7 @@ const SettingsDashboard = () => {
       title: 'Permissões',
       icon: <Shield className="h-6 w-6" />,
       description: 'Gerencie as permissões dos usuários',
-      count: stats.permissoes || 0
+      count: stats.permissoes
     }
   ];
 

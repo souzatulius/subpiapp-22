@@ -20,6 +20,7 @@ export const useCoordination = () => {
   const fetchCoordinations = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching coordinations with is_supervision=false...');
       const { data, error } = await supabase
         .from('areas_coordenacao')
         .select('*')
@@ -29,7 +30,7 @@ export const useCoordination = () => {
 
       if (error) throw error;
       
-      console.log('Fetched coordinations:', data);
+      console.log('Fetched coordinations from Supabase:', data);
       setCoordinations(data || []);
     } catch (error: any) {
       console.error('Erro ao buscar coordenações:', error);
@@ -51,6 +52,8 @@ export const useCoordination = () => {
     try {
       setIsAdding(true);
       
+      console.log('Adding new coordination with data:', data);
+      
       // Make sure to explicitly set is_supervision to false
       const { data: newCoordination, error } = await supabase
         .from('areas_coordenacao')
@@ -63,7 +66,7 @@ export const useCoordination = () => {
 
       if (error) throw error;
       
-      console.log('Added new coordination:', newCoordination);
+      console.log('Added new coordination successfully:', newCoordination);
       setCoordinations([...coordinations, newCoordination]);
       toast({
         title: "Coordenação adicionada",
@@ -86,6 +89,8 @@ export const useCoordination = () => {
   const updateCoordination = async (id: string, data: { descricao: string, sigla: string }) => {
     try {
       setIsEditing(true);
+      console.log('Updating coordination with id:', id, 'and data:', data);
+      
       const { error } = await supabase
         .from('areas_coordenacao')
         .update({
@@ -96,6 +101,7 @@ export const useCoordination = () => {
 
       if (error) throw error;
       
+      console.log('Coordination updated successfully');
       setCoordinations(coordinations.map(coordination => 
         coordination.id === id ? { ...coordination, ...data } : coordination
       ));
