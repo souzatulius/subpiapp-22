@@ -53,8 +53,6 @@ export const useSettingsStats = () => {
       }, {
         count: unreadNotificationsCount
       }, {
-        count: coordenacoesCount
-      }, {
         count: temasCount
       }, {
         count: tiposMidiaCount
@@ -70,11 +68,19 @@ export const useSettingsStats = () => {
         supabase.from('comunicados').select('*', { count: 'exact', head: true }),
         supabase.from('notificacoes').select('*', { count: 'exact', head: true }),
         supabase.from('notificacoes').select('*', { count: 'exact', head: true }).eq('lida', false),
-        supabase.from('coordenacoes').select('*', { count: 'exact', head: true }),
         supabase.from('problemas').select('*', { count: 'exact', head: true }),
         supabase.from('tipos_midia').select('*', { count: 'exact', head: true }),
-        supabase.from('origens_demanda').select('*', { count: 'exact', head: true })
+        supabase.from('origens_demandas').select('*', { count: 'exact', head: true })
       ]);
+      
+      // Count coordenacoes based on distinct values in areas_coordenacao table
+      const { data: coordenacoesData } = await supabase
+        .from('areas_coordenacao')
+        .select('coordenacao')
+        .not('coordenacao', 'is', null);
+      
+      const coordenacoesCount = coordenacoesData ? 
+        new Set(coordenacoesData.map(item => item.coordenacao).filter(Boolean)).size : 0;
       
       setStats({
         // English properties

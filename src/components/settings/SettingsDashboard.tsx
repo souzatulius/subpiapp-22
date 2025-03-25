@@ -21,14 +21,14 @@ const SettingsDashboard = () => {
       title: 'Usuários',
       icon: <Users className="h-6 w-6" />,
       description: 'Gerencie os usuários da plataforma',
-      count: stats.users
+      count: stats.usuarios
     },
     {
       id: 'areas',
       title: 'Áreas de Coordenação',
       icon: <Briefcase className="h-6 w-6" />,
       description: 'Gerencie as áreas de coordenação',
-      count: stats.areas
+      count: stats.areasCoordenacao
     },
     {
       id: 'coordenacao',
@@ -42,7 +42,7 @@ const SettingsDashboard = () => {
       title: 'Cargos',
       icon: <BookText className="h-6 w-6" />,
       description: 'Gerencie os cargos disponíveis',
-      count: stats.positions
+      count: stats.cargos
     },
     {
       id: 'temas',
@@ -77,21 +77,21 @@ const SettingsDashboard = () => {
       title: 'Distritos e Bairros',
       icon: <Map className="h-6 w-6" />,
       description: 'Gerencie distritos e bairros',
-      count: (stats.districts || 0) + (stats.neighborhoods || 0)
+      count: (stats.distritos || 0) + (stats.bairros || 0)
     },
     {
       id: 'comunicados',
       title: 'Comunicados',
       icon: <MessageCircle className="h-6 w-6" />,
       description: 'Gerencie os comunicados',
-      count: stats.announcements
+      count: stats.comunicados
     },
     {
       id: 'notificacoes',
       title: 'Configurações de Notificações',
       icon: <Bell className="h-6 w-6" />,
       description: 'Configure as notificações do sistema',
-      count: stats.notifications
+      count: stats.configuracoesNotificacoes
     },
     {
       id: 'permissoes',

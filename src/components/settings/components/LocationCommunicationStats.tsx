@@ -19,21 +19,21 @@ const LocationCommunicationStats: React.FC<LocationCommunicationStatsProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard 
         title="Distritos" 
-        value={loading ? 0 : stats.districts} 
+        value={loading ? 0 : stats.distritos} 
         icon={<Map className="h-4 w-4 text-muted-foreground" />} 
         description="Distritos registrados"
         section="distritos_bairros"
       />
       <StatCard 
         title="Bairros" 
-        value={loading ? 0 : stats.neighborhoods} 
+        value={loading ? 0 : stats.bairros} 
         icon={<Map className="h-4 w-4 text-muted-foreground" />} 
         description="Bairros cadastrados"
         section="distritos_bairros"
       />
       <StatCard 
         title="Comunicados" 
-        value={loading ? 0 : stats.announcements} 
+        value={loading ? 0 : stats.comunicados} 
         icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />} 
         description="Comunicados enviados"
         section="comunicados"

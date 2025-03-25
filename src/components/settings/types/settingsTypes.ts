@@ -31,5 +31,5 @@ export interface StatCardProps {
   section: string;
   highlight?: boolean;
   unreadCount?: number;
+  onClick?: () => void;
 }
-
