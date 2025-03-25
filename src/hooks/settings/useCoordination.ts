@@ -23,6 +23,8 @@ export const useCoordination = () => {
       const { data, error } = await supabase
         .from('areas_coordenacao')
         .select('*')
+        .is('coordenacao_id', null) // Select only top-level coordinations
+        .is('is_supervision', false) // Only get items marked as coordinations
         .order('descricao');
 
       if (error) throw error;
@@ -49,7 +51,10 @@ export const useCoordination = () => {
       setIsAdding(true);
       const { data: newCoordination, error } = await supabase
         .from('areas_coordenacao')
-        .insert(data)
+        .insert({
+          ...data,
+          is_supervision: false // Mark as coordination, not supervision
+        })
         .select()
         .single();
 
@@ -79,7 +84,10 @@ export const useCoordination = () => {
       setIsEditing(true);
       const { error } = await supabase
         .from('areas_coordenacao')
-        .update(data)
+        .update({
+          ...data,
+          is_supervision: false // Ensure it's still marked as coordination
+        })
         .eq('id', id);
 
       if (error) throw error;

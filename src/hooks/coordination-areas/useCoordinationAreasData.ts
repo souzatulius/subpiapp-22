@@ -16,6 +16,7 @@ export const useCoordinationAreasData = () => {
       const { data, error } = await supabase
         .from('areas_coordenacao')
         .select('id, descricao, sigla, coordenacao, coordenacao_id')
+        .eq('is_supervision', true) // Only get items marked as supervisions
         .order('descricao');
 
       if (error) throw error;
@@ -36,43 +37,15 @@ export const useCoordinationAreasData = () => {
   const fetchCoordinations = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.rpc('get_unique_coordenacoes');
+      const { data, error } = await supabase
+        .from('areas_coordenacao')
+        .select('id, descricao, sigla, criado_em')
+        .eq('is_supervision', false) // Only fetch coordinations, not supervisions
+        .order('descricao');
 
-      if (error) {
-        console.error('Error fetching coordinations:', error);
-        // Fallback if RPC fails
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('areas_coordenacao')
-          .select('id, descricao, coordenacao')
-          .not('coordenacao', 'is', null)
-          .order('descricao');
-          
-        if (fallbackError) throw fallbackError;
-        
-        // Convert to coordination type and remove duplicates
-        const uniqueCoords = Array.from(new Set(fallbackData?.map(c => c.coordenacao) || []))
-          .map(coord => {
-            const coordItem = fallbackData?.find(c => c.coordenacao === coord);
-            return {
-              id: coordItem?.id || '',
-              descricao: coord || '',
-              sigla: '',
-              criado_em: ''
-            };
-          });
-          
-        setCoordinations(uniqueCoords);
-      } else {
-        // Format coordinations from RPC
-        const mappedCoordinations = data?.map(c => ({
-          id: c.coordenacao_id || '',
-          descricao: c.coordenacao || '',
-          sigla: '',
-          criado_em: ''
-        })) || [];
-        
-        setCoordinations(mappedCoordinations);
-      }
+      if (error) throw error;
+      
+      setCoordinations(data || []);
     } catch (error: any) {
       console.error('Erro ao buscar coordenações:', error);
       toast({

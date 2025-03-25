@@ -22,7 +22,8 @@ export const useCoordinationAreasCrud = (
           .rpc('insert_supervision_with_coordination', {
             p_descricao: data.descricao,
             p_sigla: data.sigla || null,
-            p_coordenacao_id: data.coordenacao_id
+            p_coordenacao_id: data.coordenacao_id,
+            p_is_supervision: true // Add flag to mark as supervision
           });
           
         if (rpcError) throw rpcError;
@@ -43,7 +44,8 @@ export const useCoordinationAreasCrud = (
           .from('areas_coordenacao')
           .insert({
             descricao: data.descricao,
-            sigla: data.sigla || null
+            sigla: data.sigla || null,
+            is_supervision: true // Mark as supervision, not coordination
           })
           .select()
           .single();
@@ -96,7 +98,8 @@ export const useCoordinationAreasCrud = (
         // Add coordenacao field
         const updatedArea = {
           ...updateData,
-          coordenacao: coordData.descricao
+          coordenacao: coordData.descricao,
+          is_supervision: true // Ensure it's still marked as supervision
         };
         
         // Update with both fields
@@ -109,7 +112,8 @@ export const useCoordinationAreasCrud = (
         // If removing coordenacao_id, also null out coordenacao
         const updatedArea = {
           ...updateData,
-          coordenacao: null
+          coordenacao: null,
+          is_supervision: true // Ensure it's still marked as supervision
         };
         
         updateResult = await supabase
