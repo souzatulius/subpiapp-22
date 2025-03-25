@@ -19,7 +19,7 @@ export const useNotifications = () => {
         .from('notificacoes')
         .select('*')
         .eq('usuario_id', user.id)
-        .eq('excluida', false) // Ensure we fetch only non-deleted notifications
+        .eq('excluida', false) // Fetch only non-deleted notifications
         .order('data_envio', { ascending: false })
         .limit(10);
 
