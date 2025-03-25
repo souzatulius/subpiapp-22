@@ -2,30 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { z } from 'zod';
-
-// Define types
-export type Problem = {
-  id: string;
-  descricao: string;
-  area_coordenacao_id: string;
-  area_coordenacao?: {
-    descricao: string;
-  };
-  criado_em?: string;
-  atualizado_em?: string;
-};
-
-export type Area = {
-  id: string;
-  descricao: string;
-};
-
-// Schema for validation
-export const problemSchema = z.object({
-  descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" }),
-  area_coordenacao_id: z.string().uuid({ message: "Área de coordenação inválida" })
-});
+import { Problem, Area, problemSchema } from './types';
 
 export const useProblemsData = () => {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -41,7 +18,7 @@ export const useProblemsData = () => {
         .from('problemas')
         .select(`
           *,
-          area_coordenacao:area_coordenacao_id (descricao)
+          areas_coordenacao:area_coordenacao_id (id, descricao)
         `)
         .order('descricao');
 

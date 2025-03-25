@@ -63,7 +63,7 @@ const Problems = () => {
     {
       key: 'area_coordenacao',
       header: 'Área de Coordenação',
-      render: (row: Problem) => row.area_coordenacao?.descricao || '-',
+      render: (row: Problem) => row.areas_coordenacao?.descricao || '-',
     },
     {
       key: 'criado_em',
@@ -77,7 +77,7 @@ const Problems = () => {
       <ProblemForm
         onSubmit={handleAdd}
         onCancel={onClose}
-        areas={areas}
+        areas={areas as any}
         isSubmitting={isSubmitting}
       />
     );
@@ -101,7 +101,7 @@ const Problems = () => {
         isOpen={isEditFormOpen}
         onClose={closeEditForm}
         problem={editingProblem}
-        areas={areas}
+        areas={areas as any}
         onSubmit={handleEdit}
         isSubmitting={isSubmitting}
       />
