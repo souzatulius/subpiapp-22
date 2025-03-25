@@ -19,6 +19,8 @@ const Settings = () => {
     const tab = searchParams.get('tab');
     if (tab) {
       setActiveSection(tab);
+    } else {
+      setActiveSection('dashboard');
     }
   }, [location.search]);
   

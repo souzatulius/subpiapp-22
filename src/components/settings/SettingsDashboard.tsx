@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bell, Users, Briefcase, FileStack, Image, Inbox, MapPin, AlertTriangle } from 'lucide-react';
+import { Bell, Users, Briefcase, FileStack, Image, Inbox, MapPin, AlertTriangle, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const SettingsDashboard = () => {
@@ -11,6 +11,13 @@ const SettingsDashboard = () => {
         title="Usuários"
         description="Gerencie os usuários do sistema, atribua permissões e papéis"
         to="/settings?tab=usuarios"
+      />
+      
+      <SettingsCard
+        icon={<Layers className="h-8 w-8" />}
+        title="Áreas de Coordenação"
+        description="Gerencie as áreas de coordenação do sistema"
+        to="/settings?tab=areas"
       />
       
       <SettingsCard
