@@ -1,4 +1,3 @@
-
 import { DemandFormData } from '@/hooks/demandForm/types';
 
 export interface ValidationError {
@@ -22,13 +21,6 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       errors.push({
         field: 'problema_id',
         message: 'Selecione um tema'
-      });
-    }
-    
-    if (!formData.servico_id) {
-      errors.push({
-        field: 'servico_id',
-        message: 'Selecione um serviço'
       });
     }
   }

@@ -2,7 +2,7 @@
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
-  servico_id: string;
+  servico_id?: string; // Make optional
   origem_id: string;
   tipo_midia_id: string;
   prioridade: string;

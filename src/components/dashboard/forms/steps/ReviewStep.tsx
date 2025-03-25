@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface ReviewStepProps {
@@ -31,6 +31,11 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     return error ? error.message : '';
   };
 
+  const selectedProblema = problemas.find(p => p.id === formData.problema_id);
+  const selectedOrigem = origens.find(o => o.id === formData.origem_id);
+  const selectedTipoMidia = tiposMidia.find(t => t.id === formData.tipo_midia_id);
+  const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
+  
   return (
     <div className="space-y-6">
       <div>
@@ -42,116 +47,113 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           name="titulo"
           value={formData.titulo}
           onChange={handleChange}
-          className={hasError('titulo') ? 'border-orange-500' : ''}
+          className={hasError('titulo') ? 'border-orange-500 focus:ring-orange-500' : ''}
           placeholder="Título da demanda"
         />
-        {hasError('titulo') && (
-          <p className="text-orange-500 text-sm mt-1">
-            {getErrorMessage('titulo')}
-          </p>
-        )}
-        <p className="text-xs text-gray-500 mt-1">
-          Sugestão baseada no serviço e bairro selecionados. Você pode editá-lo conforme necessário.
-        </p>
+        {hasError('titulo') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>}
       </div>
-      
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">Resumo da Demanda</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-semibold">Tema:</p>
-            <p className="text-sm text-gray-700">
-              {problemas.find(p => p.id === formData.problema_id)?.descricao || '-'}
-            </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label className="block mb-2">Tema</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {selectedProblema ? selectedProblema.descricao : 'Não selecionado'}
           </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Serviço:</p>
-            <p className="text-sm text-gray-700">
-              {servicos.find(s => s.id === formData.servico_id)?.descricao || '-'}
-            </p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Origem:</p>
-            <p className="text-sm text-gray-700">
-              {origens.find(o => o.id === formData.origem_id)?.descricao || '-'}
-            </p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Tipo de Mídia:</p>
-            <p className="text-sm text-gray-700">
-              {tiposMidia.find(t => t.id === formData.tipo_midia_id)?.descricao || '-'}
-            </p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Solicitante:</p>
-            <p className="text-sm text-gray-700">{formData.nome_solicitante || '-'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Prioridade:</p>
-            <p className="text-sm text-gray-700">{formData.prioridade || '-'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Prazo de Resposta:</p>
-            <p className="text-sm text-gray-700">
-              {formData.prazo_resposta ? new Date(formData.prazo_resposta).toLocaleDateString('pt-BR') : '-'}
-            </p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Bairro:</p>
-            <p className="text-sm text-gray-700">
-              {filteredBairros.find(b => b.id === formData.bairro_id)?.nome || '-'}
-            </p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-semibold">Endereço:</p>
-            <p className="text-sm text-gray-700">{formData.endereco || '-'}</p>
-          </div>
-          
-          {formData.veiculo_imprensa && (
-            <div>
-              <p className="text-sm font-semibold">Veículo de Imprensa:</p>
-              <p className="text-sm text-gray-700">{formData.veiculo_imprensa}</p>
-            </div>
-          )}
         </div>
         
-        <div className="mt-4">
-          <p className="text-sm font-semibold">Detalhes da Solicitação:</p>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap">{formData.detalhes_solicitacao || '-'}</p>
+        {/* Service information is now omitted since it will be selected later */}
+
+        <div>
+          <Label className="block mb-2">Origem</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {selectedOrigem ? selectedOrigem.descricao : 'Não selecionada'}
+          </div>
         </div>
-        
-        {formData.perguntas.some(p => p.trim() !== '') && (
-          <div className="mt-4">
-            <p className="text-sm font-semibold">Perguntas para a Área Técnica:</p>
-            <ul className="list-disc pl-5 text-sm text-gray-700">
-              {formData.perguntas.filter(p => p.trim() !== '').map((pergunta, index) => (
+
+        <div>
+          <Label className="block mb-2">Tipo de Mídia</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {selectedTipoMidia ? selectedTipoMidia.descricao : 'Não selecionado'}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Prioridade</Label>
+          <div className="p-2 border rounded-md bg-gray-50 capitalize">
+            {formData.prioridade}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Prazo</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {formData.prazo_resposta ? new Date(formData.prazo_resposta).toLocaleDateString('pt-BR') : 'Não definido'}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Solicitante</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {formData.nome_solicitante || 'Não informado'}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Telefone</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {formData.telefone_solicitante || 'Não informado'}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Email</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {formData.email_solicitante || 'Não informado'}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Veículo de Imprensa</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {formData.veiculo_imprensa || 'Não informado'}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Endereço</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {formData.endereco || 'Não informado'}
+          </div>
+        </div>
+
+        <div>
+          <Label className="block mb-2">Bairro</Label>
+          <div className="p-2 border rounded-md bg-gray-50">
+            {selectedBairro ? selectedBairro.nome : 'Não selecionado'}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <Label className="block mb-2">Perguntas</Label>
+        <div className="p-3 border rounded-md bg-gray-50">
+          {formData.perguntas.filter(Boolean).length > 0 ? (
+            <ul className="list-disc pl-5 space-y-1">
+              {formData.perguntas.filter(Boolean).map((pergunta: string, index: number) => (
                 <li key={index}>{pergunta}</li>
               ))}
             </ul>
-          </div>
-        )}
-        
-        {formData.anexos && formData.anexos.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm font-semibold">Anexos:</p>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {formData.anexos.map((anexo, index) => (
-                <div key={index} className="bg-blue-50 px-2 py-1 rounded text-xs text-blue-700">
-                  Arquivo {index + 1}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-gray-500">Nenhuma pergunta cadastrada</p>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <Label className="block mb-2">Detalhes da Solicitação</Label>
+        <div className="p-3 border rounded-md bg-gray-50 whitespace-pre-line">
+          {formData.detalhes_solicitacao || 'Não informado'}
+        </div>
       </div>
     </div>
   );
