@@ -16,6 +16,7 @@ export type Service = {
   id: string;
   descricao: string;
   area_coordenacao_id: string;
+  problema_id: string;
   areas_coordenacao?: {
     id: string;
     descricao: string;
