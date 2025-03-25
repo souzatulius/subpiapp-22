@@ -1575,6 +1575,27 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_demandas_por_origem: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          origem_id: string
+          count: number
+        }[]
+      }
+      get_demandas_por_status: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          status: string
+          count: number
+        }[]
+      }
+      get_notificacoes_por_coordenacao: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          coordenacao_id: string
+          count: number
+        }[]
+      }
       get_unique_coordenacoes: {
         Args: Record<PropertyKey, never>
         Returns: {

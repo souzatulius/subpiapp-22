@@ -58,7 +58,7 @@ const NotificationStats: React.FC<NotificationStatsProps> = () => {
 
       if (coordenacoesError) throw coordenacoesError;
 
-      // Use this format for count queries:
+      // Use RPC function for notificacoes por coordenacao
       const { data: notificacoesCoordenacaoData, error: coordError } = await supabase
         .rpc('get_notificacoes_por_coordenacao');
 
@@ -76,7 +76,7 @@ const NotificationStats: React.FC<NotificationStatsProps> = () => {
 
       setCoordenacoesData(formattedCoordenacoesData);
 
-      // Use RPC function for status grouping instead of direct query with group
+      // Use RPC function for status grouping
       const { data: demandasStatusData, error: statusError } = await supabase
         .rpc('get_demandas_por_status');
 
