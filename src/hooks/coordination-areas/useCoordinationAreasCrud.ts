@@ -94,21 +94,27 @@ export const useCoordinationAreasCrud = (
         if (coordError) throw coordError;
         
         // Add coordenacao field
-        updateData.coordenacao = coordData.descricao;
+        const updatedArea = {
+          ...updateData,
+          coordenacao: coordData.descricao
+        };
         
         // Update with both fields
         updateResult = await supabase
           .from('areas_coordenacao')
-          .update(updateData)
+          .update(updatedArea)
           .eq('id', id)
           .select();
       } else {
         // If removing coordenacao_id, also null out coordenacao
-        updateData.coordenacao = null;
+        const updatedArea = {
+          ...updateData,
+          coordenacao: null
+        };
         
         updateResult = await supabase
           .from('areas_coordenacao')
-          .update(updateData)
+          .update(updatedArea)
           .eq('id', id)
           .select();
       }
@@ -117,7 +123,7 @@ export const useCoordinationAreasCrud = (
       
       // Update local state
       setAreas(areas.map(area => 
-        area.id === id ? { ...area, ...updateData } : area
+        area.id === id ? { ...area, ...updateData, coordenacao: updateData.coordenacao_id ? updateResult.data[0].coordenacao : null } : area
       ));
       
       toast({
