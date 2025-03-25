@@ -42,19 +42,20 @@ export const showAuthError = (error: any) => {
 // Check if a user is approved to access the system
 export const isUserApproved = async (userId: string): Promise<boolean> => {
   try {
-    // Query the 'usuarios' table to check if the user is approved
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('aprovado')
-      .eq('id', userId)
+    // Check if the user has admin permissions, which indicates approval
+    const { data: permissionsData, error: permissionsError } = await supabase
+      .from('usuario_permissoes')
+      .select('permissao_id')
+      .eq('usuario_id', userId)
       .single();
     
-    if (error) {
-      console.error('Erro ao verificar aprovação do usuário:', error);
+    if (permissionsError) {
+      console.error('Erro ao verificar permissões do usuário:', permissionsError);
       return false;
     }
     
-    return data?.aprovado === true;
+    // If the user has any permissions assigned, consider them approved
+    return permissionsData !== null;
   } catch (error) {
     console.error('Erro ao verificar aprovação do usuário:', error);
     return false;
@@ -70,11 +71,10 @@ export const createAdminNotification = async (
   try {
     // Create a notification in the notifications table
     await supabase.from('notificacoes').insert({
-      titulo: 'Novo usuário registrado',
       mensagem: `${userName} (${email}) solicitou acesso ao sistema.`,
       tipo: 'user_registration',
-      user_id: userId,
-      for_admins: true,
+      usuario_id: userId,
+      // Removed the 'titulo' field since it doesn't exist in the schema
     });
     
     console.log('Notificação de novo registro criada com sucesso');
