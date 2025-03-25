@@ -69,16 +69,23 @@ export const ProfileMenu: React.FC = () => {
         </PopoverTrigger>
         <PopoverContent className="w-64 p-0 overflow-hidden">
           <div className="bg-gray-100 p-4 px-0 rounded-none">
-            <div className="flex items-center space-x-3 bg-transparent my-0">
+            <div className="flex items-center space-x-3 bg-transparent my-0 px-4">
               <AvatarDisplay userProfile={userProfile} previewUrl={null} size="md" />
-              <div>
+              <div className="flex flex-col">
                 <h3 className="text-gray-900 text-base font-bold">{userProfile?.nome_completo || 'Usuário'}</h3>
                 <p className="text-gray-500 text-sm font-medium">
-                  {userProfile?.areas_coordenacao?.descricao || 'Área não definida'}
-                </p>
-                <p className="text-xs text-slate-900">
                   {userProfile?.cargos?.descricao || 'Cargo não definido'}
                 </p>
+                {userProfile?.areas_coordenacao?.descricao && (
+                  <p className="text-xs text-slate-900">
+                    {userProfile?.areas_coordenacao?.descricao || ''}
+                  </p>
+                )}
+                {userProfile?.areas_coordenacao?.coordenacao && (
+                  <p className="text-xs text-slate-700">
+                    {userProfile?.areas_coordenacao?.coordenacao || ''}
+                  </p>
+                )}
               </div>
             </div>
           </div>
