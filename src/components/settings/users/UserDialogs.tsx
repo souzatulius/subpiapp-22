@@ -52,7 +52,7 @@ const UserDialogs: React.FC<UserDialogsProps> = ({
         open={isInviteDialogOpen}
         onOpenChange={setIsInviteDialogOpen}
         onSubmit={handleInviteUser}
-        supervisoesTecnicas={supervisoesTecnicas}
+        areas={supervisoesTecnicas}
         cargos={cargos}
         coordenacoes={formattedCoordenacoes}
       />
