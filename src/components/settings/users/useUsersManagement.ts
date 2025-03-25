@@ -1,85 +1,61 @@
 
+import { useState, useEffect } from 'react';
 import { useUsersData } from './useUsersData';
-import { useUsersFilter } from './useUsersFilter';
-import { useUserInvite } from './hooks/useUserInvite';
-import { useUserEdit } from './hooks/useUserEdit';
-import { useUserDelete } from './hooks/useUserDelete';
-import { usePasswordReset } from './hooks/usePasswordReset';
-import { useUserActions } from './useUserActions';
-import { useUserApproval } from './hooks/useUserApproval';
-import { useUserAccessRemoval } from './hooks/useUserAccessRemoval';
-import { User } from './types';
+import { supabase } from '@/integrations/supabase/client';
+import { Area, Cargo } from './types';
 
 export const useUsersManagement = () => {
-  // Fetch users data
-  const { users, areas, cargos, loading, fetchData } = useUsersData();
-  
-  // Filter users
-  const { filter, setFilter, filteredUsers } = useUsersFilter(users);
-  
-  // User invite functionality
-  const { isInviteDialogOpen, setIsInviteDialogOpen, handleInviteUser } = useUserInvite(fetchData);
-  
-  // User edit functionality  
-  const { 
-    isEditDialogOpen, 
-    setIsEditDialogOpen, 
-    currentUser: selectedUser, 
-    setCurrentUser: setSelectedUser,
-    handleEditUser,
-    openEditDialog
-  } = useUserEdit(fetchData);
-  
-  // User delete functionality
-  const { 
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    currentUser: userToDelete,
-    setCurrentUser: setUserToDelete,
-    handleDeleteUser,
-    openDeleteDialog
-  } = useUserDelete(fetchData);
-  
-  // Password reset functionality
-  const { handleSendPasswordReset: resetPassword } = usePasswordReset();
-  
-  // User approval functionality
-  const { approving, approveUser } = useUserApproval(fetchData);
-  
-  // User access removal functionality
-  const { removing, removeUserAccess } = useUserAccessRemoval(fetchData);
-  
-  // User actions
-  const userActions = useUserActions({
-    setIsEditDialogOpen,
-    setSelectedUser: setSelectedUser,
-    setIsDeleteDialogOpen,
-    setUserToDelete: setUserToDelete,
-    resetPassword,
-    approveUser,
-    removeAccess: removeUserAccess
-  });
-  
+  const { users, filteredUsers, isLoading, searchQuery, setSearchQuery, statusFilter, setStatusFilter, refreshUsers } = useUsersData();
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [cargos, setCargos] = useState<Cargo[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Buscar áreas
+      const { data: areasData, error: areasError } = await supabase
+        .from('areas_coordenacao')
+        .select('id, descricao')
+        .order('descricao');
+      
+      if (areasError) throw areasError;
+      setAreas(areasData || []);
+      
+      // Buscar cargos
+      const { data: cargosData, error: cargosError } = await supabase
+        .from('cargos')
+        .select('id, descricao')
+        .order('descricao');
+      
+      if (cargosError) throw cargosError;
+      setCargos(cargosData || []);
+      
+      // Buscar usuários
+      await refreshUsers();
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return {
-    users: filteredUsers,
-    loading,
-    filter,
-    setFilter,
+    users,
+    filteredUsers,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    refreshUsers,
     areas,
     cargos,
-    isInviteDialogOpen,
-    setIsInviteDialogOpen,
-    handleInviteUser,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    selectedUser,
-    handleEditUser,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    userToDelete,
-    handleDeleteUser,
-    userActions,
-    approving,
-    removing
+    loading,
+    fetchData
   };
 };

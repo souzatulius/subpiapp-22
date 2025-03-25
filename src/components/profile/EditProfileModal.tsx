@@ -26,7 +26,7 @@ interface EditProfileModalProps {
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) => {
   const { updateProfile, user } = useAuth();
-  const { userProfile, fetchUserProfile, loading: profileLoading } = useUserProfile();
+  const { userProfile, fetchUserProfile, isLoading: profileLoading } = useUserProfile();
   const [submitting, setSubmitting] = useState(false);
   const [areas, setAreas] = useState<any[]>([]);
   const [cargos, setCargos] = useState<any[]>([]);

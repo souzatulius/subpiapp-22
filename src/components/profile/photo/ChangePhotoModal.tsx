@@ -14,7 +14,7 @@ interface ChangePhotoModalProps {
 }
 
 const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) => {
-  const { userProfile, fetchUserProfile, loading: profileLoading } = useUserProfile();
+  const { userProfile, fetchUserProfile, isLoading: profileLoading } = useUserProfile();
   
   const {
     loading,

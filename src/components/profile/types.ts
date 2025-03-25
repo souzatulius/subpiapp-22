@@ -1,11 +1,13 @@
 
 export interface UserProfile {
   nome_completo: string;
-  cargo_id: string;
-  area_coordenacao_id: string;
+  cargo_id?: string;
+  area_coordenacao_id?: string;
   foto_perfil_url?: string;
   whatsapp?: string;
   aniversario?: string;
+  cargo?: string;
+  area?: string;
   cargos?: {
     descricao: string;
   };

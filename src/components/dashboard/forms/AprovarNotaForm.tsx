@@ -28,12 +28,12 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const fetchNotas = async () => {
     try {
       setIsLoading(true);
-      // Buscar notas com join em autores
+      // Buscar notas com join em autores, usando alias para evitar conflitos
       const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
         .select(`
           id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id, problema_id,
-          autor:autor_id(id, nome_completo)
+          autores:autor_id(id, nome_completo)
         `)
         .eq('status', 'pendente')  // Apenas notas pendentes
         .order('criado_em', { ascending: false });
@@ -62,7 +62,10 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         return {
           ...nota,
           areas_coordenacao: areaInfo,
-          autor: nota.autor || { nome_completo: 'Desconhecido' }
+          autor: {
+            id: nota.autores?.id,
+            nome_completo: nota.autores?.nome_completo || 'Desconhecido'
+          }
         };
       }));
       
