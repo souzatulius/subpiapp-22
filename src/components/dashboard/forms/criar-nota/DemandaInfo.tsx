@@ -43,7 +43,7 @@ const DemandaInfo: React.FC<DemandaInfoProps> = ({
           <div className="space-y-2 mt-2">
             {Object.entries(selectedDemanda.perguntas).map(([key, question]) => (
               <div key={key} className="bg-white p-3 rounded border">
-                <p className="font-medium">{question}</p>
+                <p className="font-medium">{String(question)}</p>
               </div>
             ))}
           </div>

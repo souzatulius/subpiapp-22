@@ -37,19 +37,19 @@ export const useDemandFormSubmit = (
       // Formatar data corretamente
       const prazoResposta = formData.prazo_resposta ? new Date(formData.prazo_resposta).toISOString() : null;
       
-      // Obter a área de coordenação do problema selecionado
-      let area_coordenacao_id = null;
+      // Obter a supervisão técnica do problema selecionado
+      let supervisao_tecnica_id = null;
       
       if (formData.problema_id) {
         const { data: problemaData, error: problemaError } = await supabase
           .from('problemas')
-          .select('area_coordenacao_id')
+          .select('supervisao_tecnica_id')
           .eq('id', formData.problema_id)
           .single();
           
         if (problemaError) throw problemaError;
         
-        area_coordenacao_id = problemaData.area_coordenacao_id;
+        supervisao_tecnica_id = problemaData.supervisao_tecnica_id;
       }
       
       // Preparar dados para inserção
@@ -60,7 +60,7 @@ export const useDemandFormSubmit = (
         autor_id: userId,
         status: 'pendente',
         titulo: formData.titulo,
-        area_coordenacao_id: area_coordenacao_id,
+        supervisao_tecnica_id: supervisao_tecnica_id,
         problema_id: formData.problema_id,
         servico_id: formData.servico_id,
         origem_id: formData.origem_id,

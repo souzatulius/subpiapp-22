@@ -1,3 +1,3 @@
 
 // Import from centralized type definitions
-export { NotaOficial, UseNotasDataReturn } from '@/types/nota';
+export type { NotaOficial, UseNotasDataReturn } from '@/types/nota';

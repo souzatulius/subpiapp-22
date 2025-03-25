@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/hooks/dashboard/forms/criar-nota/types';
+import { Demand } from '@/types/demand';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -61,13 +61,31 @@ export const useDemandasData = () => {
               
               return {
                 ...demanda,
-                supervisao_tecnica: areaData || null
-              };
+                supervisao_tecnica: areaData || null,
+                // Add all required fields for a valid Demand
+                prioridade: "",
+                horario_publicacao: "",
+                prazo_resposta: "",
+                endereco: null,
+                nome_solicitante: null,
+                email_solicitante: null,
+                telefone_solicitante: null,
+                veiculo_imprensa: null
+              } as Demand;
             }
             return {
               ...demanda,
-              supervisao_tecnica: null
-            };
+              supervisao_tecnica: null,
+              // Add all required fields for a valid Demand
+              prioridade: "",
+              horario_publicacao: "",
+              prazo_resposta: "",
+              endereco: null,
+              nome_solicitante: null,
+              email_solicitante: null,
+              telefone_solicitante: null,
+              veiculo_imprensa: null
+            } as Demand;
           })
         );
         

@@ -65,15 +65,15 @@ export const useSpecialCardsData = () => {
         if (user.id) {
           const { data: userData, error: userError } = await supabase
             .from('usuarios')
-            .select('area_coordenacao_id')
+            .select('supervisao_tecnica_id')
             .eq('id', user.id)
             .single();
           
-          if (!userError && userData?.area_coordenacao_id) {
+          if (!userError && userData?.supervisao_tecnica_id) {
             const { data: responsesData, error: responsesError } = await supabase
               .from('demandas')
               .select('id')
-              .eq('area_coordenacao_id', userData.area_coordenacao_id)
+              .eq('supervisao_tecnica_id', userData.supervisao_tecnica_id)
               .eq('status', 'em_analise')
               .limit(10);
               

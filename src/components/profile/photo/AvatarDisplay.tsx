@@ -1,44 +1,51 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User } from 'lucide-react';
+import { AvatarDisplayProps } from './types';
 
-export interface AvatarDisplayProps {
-  nome?: string;
-  imageSrc?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  className?: string;
-}
-
-const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ 
-  nome = '',
+// This component can accept both old and new prop patterns for compatibility
+const AvatarDisplay: React.FC<
+  AvatarDisplayProps & { 
+    userProfile?: { nome_completo?: string; foto_perfil_url?: string; },
+    previewUrl?: string 
+  }
+> = ({
+  nome,
   imageSrc,
   size = 'md',
-  className = ''
+  className = '',
+  userProfile,
+  previewUrl
 }) => {
-  const getInitials = (name: string): string => {
+  // Support both old and new prop patterns
+  const displayName = nome || userProfile?.nome_completo || '';
+  const imageSource = previewUrl || imageSrc || userProfile?.foto_perfil_url || '';
+
+  // Generate initials from name
+  const getInitials = (name: string) => {
     if (!name) return '';
-    const words = name.split(' ');
-    if (words.length === 1) {
-      return words[0].charAt(0).toUpperCase();
-    }
-    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
-  const sizeClasses = {
-    sm: 'h-8 w-8 text-xs',
-    md: 'h-10 w-10 text-sm',
-    lg: 'h-16 w-16 text-lg',
-    xl: 'h-24 w-24 text-xl'
-  };
+  const initials = getInitials(displayName);
   
-  const initials = getInitials(nome);
+  const sizeClasses = {
+    'sm': 'h-8 w-8 text-xs',
+    'md': 'h-10 w-10 text-sm',
+    'lg': 'h-16 w-16 text-lg',
+    'xl': 'h-24 w-24 text-xl'
+  };
 
   return (
     <Avatar className={`${sizeClasses[size]} ${className}`}>
-      <AvatarImage src={imageSrc} alt={nome} />
-      <AvatarFallback className="bg-primary/10 text-primary">
-        {initials || <User className="h-5 w-5" />}
+      <AvatarImage src={imageSource} alt={displayName} />
+      <AvatarFallback className="bg-indigo-100 text-indigo-700">
+        {initials}
       </AvatarFallback>
     </Avatar>
   );

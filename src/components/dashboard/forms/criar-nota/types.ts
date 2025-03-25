@@ -6,4 +6,4 @@ export interface CriarNotaFormProps {
 }
 
 // Re-export for convenience
-export { Demand, ResponseQA };
+export type { Demand, ResponseQA };

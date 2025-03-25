@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, X } from 'lucide-react';
-import { useDemandasData } from '@/hooks/dashboard/forms/criar-nota/useDemandasData';
+import { useDemandasData } from '@/components/dashboard/forms/criar-nota/useDemandasData';
 import { useNotaForm } from '@/hooks/dashboard/forms/criar-nota/useNotaForm';
 import DemandaSelection from './criar-nota/DemandaSelection';
 import DemandaInfo from './criar-nota/DemandaInfo';

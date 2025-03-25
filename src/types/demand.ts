@@ -80,3 +80,7 @@ export interface ResponseQA {
   question: string;
   answer: string;
 }
+
+export interface CriarNotaFormProps {
+  onClose: () => void;
+}
