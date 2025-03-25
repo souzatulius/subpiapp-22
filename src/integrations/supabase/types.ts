@@ -12,6 +12,7 @@ export type Database = {
       areas_coordenacao: {
         Row: {
           coordenacao: string | null
+          coordenacao_id: string | null
           criado_em: string | null
           descricao: string
           id: string
@@ -19,6 +20,7 @@ export type Database = {
         }
         Insert: {
           coordenacao?: string | null
+          coordenacao_id?: string | null
           criado_em?: string | null
           descricao: string
           id?: string
@@ -26,12 +28,21 @@ export type Database = {
         }
         Update: {
           coordenacao?: string | null
+          coordenacao_id?: string | null
           criado_em?: string | null
           descricao?: string
           id?: string
           sigla?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "areas_coordenacao_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bairros: {
         Row: {
