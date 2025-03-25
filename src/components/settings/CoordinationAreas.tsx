@@ -43,10 +43,8 @@ const CoordinationAreas = () => {
     if (!editingArea) return Promise.reject(new Error('Nenhuma supervisão técnica selecionada'));
     
     try {
-      const success = await updateArea(editingArea.id, data);
-      if (success) {
-        closeEditForm();
-      }
+      await updateArea(editingArea.id, data);
+      closeEditForm();
       return Promise.resolve();
     } catch (error) {
       console.error('Error in handleEdit:', error);
@@ -57,10 +55,8 @@ const CoordinationAreas = () => {
   const handleAdd = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       console.log('CoordinationAreas handling add:', data);
-      const success = await addArea(data);
-      if (success) {
-        closeAddForm();
-      }
+      await addArea(data);
+      closeAddForm();
       return Promise.resolve();
     } catch (error) {
       console.error('Error in handleAdd:', error);

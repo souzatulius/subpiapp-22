@@ -12,6 +12,11 @@ export interface Coordenacao {
   sigla?: string;
 }
 
+export interface Cargo {
+  id: string;
+  descricao: string;
+}
+
 export interface User {
   id: string;
   nome_completo: string;

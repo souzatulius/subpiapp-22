@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout, DemandFilter, DemandList, DemandCards } from '@/components/demandas';
@@ -39,7 +40,7 @@ interface Demand {
   telefone_solicitante: string | null;
   veiculo_imprensa: string | null;
   detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null;
+  perguntas: Record<string, string> | null | any;
 }
 
 const Demandas = () => {
@@ -96,7 +97,7 @@ const Demandas = () => {
         
         // Agora vamos buscar as informações relacionadas em consultas separadas
         const enhancedData = await Promise.all((data || []).map(async (demanda) => {
-          let enhancedDemand = { ...demanda };
+          let enhancedDemand: any = { ...demanda };
           
           // Buscar supervisão técnica
           if (demanda.supervisao_tecnica_id) {
@@ -164,7 +165,7 @@ const Demandas = () => {
             enhancedDemand.autor = autorData;
           }
           
-          return enhancedDemand;
+          return enhancedDemand as Demand;
         }));
         
         return enhancedData || [];
