@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SelectOption } from '@/components/register/types';
+import { toast } from 'sonner';
 
 export const useRegisterOptions = () => {
   const [roles, setRoles] = useState<SelectOption[]>([]);
@@ -12,91 +13,73 @@ export const useRegisterOptions = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       setLoadingOptions(true);
-      
       try {
-        // Fetch cargos
+        // Fetch positions from cargos table - add console logs to debug
         console.log('Fetching cargos from Supabase...');
         const { data: cargosData, error: cargosError } = await supabase
           .from('cargos')
           .select('id, descricao')
           .order('descricao', { ascending: true });
-          
-        if (cargosError) throw cargosError;
+        
+        if (cargosError) {
+          console.error('Error fetching cargos:', cargosError);
+          throw cargosError;
+        }
         
         console.log('Cargos data received:', cargosData);
         
-        // Fetch areas
+        // Fetch coordination areas from areas_coordenacao table
         console.log('Fetching areas from Supabase...');
         const { data: areasData, error: areasError } = await supabase
           .from('areas_coordenacao')
           .select('id, descricao')
           .order('descricao', { ascending: true });
-          
-        if (areasError) throw areasError;
+        
+        if (areasError) {
+          console.error('Error fetching areas:', areasError);
+          throw areasError;
+        }
         
         console.log('Areas data received:', areasData);
         
         // Fetch coordenações using the RPC function
         console.log('Fetching coordenações from Supabase...');
-        const { data: coordenacoesData, error: coordenacoesError } = await supabase.rpc('get_unique_coordenacoes');
+        const { data: coordenacoesData, error: coordenacoesError } = await supabase
+          .rpc('get_unique_coordenacoes');
         
         if (coordenacoesError) {
           console.error('Error fetching coordenações:', coordenacoesError);
-          // Fallback if the RPC function isn't available - simpler version without labels
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('areas_coordenacao')
-            .select('id, coordenacao')
-            .not('coordenacao', 'is', null)
-            .order('coordenacao', { ascending: true });
-            
-          if (fallbackError) throw fallbackError;
-          
-          // Remove duplicates by coordenacao
-          const uniqueCoordenacoes = fallbackData ? 
-            Array.from(new Set(fallbackData.map(c => c.coordenacao)))
-              .map(coordName => {
-                const coord = fallbackData.find(c => c.coordenacao === coordName);
-                return {
-                  id: coord?.id || '',
-                  value: coord?.coordenacao || ''
-                };
-              })
-              .filter(c => c.id && c.value) : [];
-              
-          setCoordenacoes(uniqueCoordenacoes);
-        } else {
-          console.log('Coordenações data received:', coordenacoesData);
-          const formattedCoordenacoes = coordenacoesData ? 
-            coordenacoesData.map(coord => ({
-              id: coord.coordenacao_id || '',
-              value: coord.coordenacao || ''
-            }))
-            .filter(c => c.id && c.value) : [];
-          setCoordenacoes(formattedCoordenacoes);
+          throw coordenacoesError;
         }
         
-        // Format data for select components
-        if (cargosData) {
-          const formattedRoles = cargosData.map(cargo => ({
-            id: cargo.id,
-            value: cargo.descricao
-          }));
-          setRoles(formattedRoles);
-        } else {
+        console.log('Coordenações data received:', coordenacoesData);
+        
+        if (!cargosData || cargosData.length === 0) {
           console.warn('No cargos found in the database');
         }
         
-        if (areasData) {
-          const formattedAreas = areasData.map(area => ({
-            id: area.id,
-            value: area.descricao
-          }));
-          setAreas(formattedAreas);
-        } else {
+        if (!areasData || areasData.length === 0) {
           console.warn('No areas found in the database');
         }
+        
+        if (!coordenacoesData || coordenacoesData.length === 0) {
+          console.warn('No coordenações found in the database');
+        }
+        
+        // Transform data to options format
+        setRoles(cargosData?.map(item => ({ id: item.id, value: item.descricao })) || []);
+        setAreas(areasData?.map(item => ({ id: item.id, value: item.descricao })) || []);
+        setCoordenacoes(coordenacoesData?.map(item => ({ 
+          id: item.coordenacao_id, 
+          value: item.coordenacao 
+        })) || []);
       } catch (error) {
-        console.error('Error fetching register options:', error);
+        console.error('Error fetching options:', error);
+        toast.error('Erro ao carregar opções de cargos e áreas');
+        // Define empty values in case of error
+        setRoles([]);
+        setAreas([]);
+        setCoordenacoes([]);
       } finally {
         setLoadingOptions(false);
       }

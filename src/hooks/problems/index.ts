@@ -18,7 +18,7 @@ export const useProblemsData = () => {
         .from('problemas')
         .select(`
           *,
-          areas_coordenacao:area_coordenacao_id (id, descricao)
+          areas_coordenacao:area_coordenacao_id (id, descricao, coordenacao, coordenacao_id)
         `)
         .order('descricao');
 
