@@ -1,13 +1,23 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Edit, Plus, Trash2, Loader2, ToggleLeft, Info } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
+import { ToggleLeft } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,445 +25,784 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface NotificationConfig {
   id: string;
   titulo: string;
   tipo: string;
-  descricao: string | null;
-  frequencia: string;
-  ativo: boolean;
-}
-
-interface ConfigFormData {
-  id?: string;
-  titulo: string;
-  tipo: string;
   descricao: string;
-  frequencia: string;
   ativo: boolean;
+  frequencia: string;
 }
 
-const NotificationConfigurations: React.FC = () => {
-  const { toast } = useToast();
+interface NotificationTemplate {
+  id: string;
+  configuracao_id: string;
+  tipo_envio: string;
+  conteudo: string;
+}
+
+const NotificationConfigurations = () => {
   const [configs, setConfigs] = useState<NotificationConfig[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState<ConfigFormData>({
-    titulo: '',
-    tipo: 'demanda',
-    descricao: '',
-    frequencia: 'imediata',
-    ativo: true,
-  });
+  const [templates, setTemplates] = useState<{ [key: string]: NotificationTemplate[] }>({});
+  const [loading, setLoading] = useState(true);
+  const [editingConfig, setEditingConfig] = useState<NotificationConfig | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<NotificationTemplate | null>(null);
+  
+  // Form states
+  const [title, setTitle] = useState('');
+  const [type, setType] = useState('');
+  const [description, setDescription] = useState('');
+  const [active, setActive] = useState(true);
+  const [frequency, setFrequency] = useState('imediata');
+  const [templateContent, setTemplateContent] = useState('');
+  const [templateType, setTemplateType] = useState('app');
+  
+  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isTemplateDeleteDialogOpen, setIsTemplateDeleteDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchConfigurations();
   }, []);
 
   const fetchConfigurations = async () => {
+    setLoading(true);
     try {
-      setIsLoading(true);
-      const { data, error } = await supabase
+      // Fetch notification configurations
+      const { data: configsData, error: configsError } = await supabase
         .from('configuracoes_notificacoes')
         .select('*')
-        .order('tipo', { ascending: true });
+        .order('titulo');
+
+      if (configsError) throw configsError;
+      setConfigs(configsData || []);
+
+      // Fetch templates for each configuration
+      const templatesMap: { [key: string]: NotificationTemplate[] } = {};
       
-      if (error) throw error;
+      for (const config of configsData || []) {
+        const { data: templatesData, error: templatesError } = await supabase
+          .from('templates_notificacoes')
+          .select('*')
+          .eq('configuracao_id', config.id);
+          
+        if (templatesError) throw templatesError;
+        templatesMap[config.id] = templatesData || [];
+      }
       
-      setConfigs(data || []);
+      setTemplates(templatesMap);
     } catch (error) {
-      console.error('Erro ao buscar configurações:', error);
+      console.error('Erro ao carregar configurações:', error);
       toast({
-        title: "Erro ao carregar configurações",
-        description: "Não foi possível carregar as configurações de notificação.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível carregar as configurações. Tente novamente.',
+        variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleEdit = (config: NotificationConfig) => {
-    setFormData({
-      id: config.id,
-      titulo: config.titulo,
-      tipo: config.tipo,
-      descricao: config.descricao || '',
-      frequencia: config.frequencia || 'imediata',
-      ativo: config.ativo,
-    });
-    setIsEditing(true);
-    setIsDialogOpen(true);
-  };
-
-  const handleToggleActive = async (id: string, currentActive: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('configuracoes_notificacoes')
-        .update({ ativo: !currentActive })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      setConfigs(configs.map(config => 
-        config.id === id ? { ...config, ativo: !currentActive } : config
-      ));
-      
-      toast({
-        title: `Notificação ${!currentActive ? 'ativada' : 'desativada'}`,
-        description: `A notificação foi ${!currentActive ? 'ativada' : 'desativada'} com sucesso.`,
-        variant: "success",
-      });
-    } catch (error) {
-      console.error('Erro ao atualizar status:', error);
-      toast({
-        title: "Erro ao atualizar status",
-        description: "Não foi possível atualizar o status da notificação.",
-        variant: "destructive",
-      });
+  const openConfigDialog = (config?: NotificationConfig) => {
+    if (config) {
+      // Edit existing config
+      setEditingConfig(config);
+      setTitle(config.titulo);
+      setType(config.tipo);
+      setDescription(config.descricao || '');
+      setActive(config.ativo);
+      setFrequency(config.frequencia || 'imediata');
+    } else {
+      // New config
+      setEditingConfig(null);
+      setTitle('');
+      setType('');
+      setDescription('');
+      setActive(true);
+      setFrequency('imediata');
     }
+    setIsConfigDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('configuracoes_notificacoes')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      setConfigs(configs.filter(config => config.id !== id));
-      
-      toast({
-        title: "Configuração excluída",
-        description: "A configuração de notificação foi excluída com sucesso.",
-        variant: "success",
-      });
-    } catch (error) {
-      console.error('Erro ao excluir configuração:', error);
-      toast({
-        title: "Erro ao excluir",
-        description: "Não foi possível excluir a configuração de notificação.",
-        variant: "destructive",
-      });
+  const openTemplateDialog = (configId: string, template?: NotificationTemplate) => {
+    if (template) {
+      // Edit existing template
+      setEditingTemplate(template);
+      setTemplateContent(template.conteudo);
+      setTemplateType(template.tipo_envio);
+    } else {
+      // New template
+      setEditingTemplate(null);
+      setTemplateContent('');
+      setTemplateType('app');
     }
+    // Set the associated config ID
+    const config = configs.find(c => c.id === configId);
+    if (config) {
+      setEditingConfig(config);
+    }
+    setIsTemplateDialogOpen(true);
   };
 
-  const handleSubmit = async () => {
+  const handleSaveConfig = async () => {
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      
-      if (!formData.titulo || !formData.tipo) {
-        toast({
-          title: "Campos obrigatórios",
-          description: "Preencha todos os campos obrigatórios.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (isEditing && formData.id) {
-        const { error } = await supabase
+      const configData = {
+        titulo: title,
+        tipo: type,
+        descricao: description,
+        ativo: active,
+        frequencia: frequency,
+      };
+
+      let result;
+      if (editingConfig) {
+        // Update existing config
+        const { data, error } = await supabase
           .from('configuracoes_notificacoes')
-          .update({
-            titulo: formData.titulo,
-            tipo: formData.tipo,
-            descricao: formData.descricao || null,
-            frequencia: formData.frequencia,
-            ativo: formData.ativo,
-            atualizado_em: new Date().toISOString(),
-          })
-          .eq('id', formData.id);
-        
+          .update(configData)
+          .eq('id', editingConfig.id)
+          .select();
+          
         if (error) throw error;
+        result = data?.[0];
         
-        toast({
-          title: "Configuração atualizada",
-          description: "A configuração de notificação foi atualizada com sucesso.",
-          variant: "success",
-        });
+        // Update in state
+        setConfigs(configs.map(c => 
+          c.id === editingConfig.id ? { ...c, ...configData } : c
+        ));
       } else {
-        const { error } = await supabase
+        // Insert new config
+        const { data, error } = await supabase
           .from('configuracoes_notificacoes')
-          .insert({
-            titulo: formData.titulo,
-            tipo: formData.tipo,
-            descricao: formData.descricao || null,
-            frequencia: formData.frequencia,
-            ativo: formData.ativo,
-          });
-        
+          .insert(configData)
+          .select();
+          
         if (error) throw error;
+        result = data?.[0];
         
-        toast({
-          title: "Configuração criada",
-          description: "A configuração de notificação foi criada com sucesso.",
-          variant: "success",
-        });
+        // Add to state
+        if (result) {
+          setConfigs([...configs, result]);
+          setTemplates({
+            ...templates,
+            [result.id]: []
+          });
+        }
       }
+
+      toast({
+        title: editingConfig ? 'Configuração atualizada' : 'Configuração criada',
+        description: editingConfig 
+          ? 'A configuração foi atualizada com sucesso.'
+          : 'Uma nova configuração foi criada com sucesso.',
+      });
       
-      fetchConfigurations();
-      
-      resetForm();
-      setIsDialogOpen(false);
+      setIsConfigDialogOpen(false);
     } catch (error) {
       console.error('Erro ao salvar configuração:', error);
       toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar a configuração de notificação.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível salvar a configuração. Tente novamente.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      titulo: '',
-      tipo: 'demanda',
-      descricao: '',
-      frequencia: 'imediata',
-      ativo: true,
-    });
-    setIsEditing(false);
-  };
+  const handleSaveTemplate = async () => {
+    if (!editingConfig) return;
+    
+    setIsSubmitting(true);
+    try {
+      const templateData = {
+        configuracao_id: editingConfig.id,
+        tipo_envio: templateType,
+        conteudo: templateContent,
+      };
 
-  const handleDialogClose = () => {
-    resetForm();
-    setIsDialogOpen(false);
-  };
+      let result;
+      if (editingTemplate) {
+        // Update existing template
+        const { data, error } = await supabase
+          .from('templates_notificacoes')
+          .update(templateData)
+          .eq('id', editingTemplate.id)
+          .select();
+          
+        if (error) throw error;
+        result = data?.[0];
+        
+        // Update in state
+        const updatedTemplates = { ...templates };
+        updatedTemplates[editingConfig.id] = (updatedTemplates[editingConfig.id] || []).map(t => 
+          t.id === editingTemplate.id ? { ...t, ...templateData } : t
+        );
+        setTemplates(updatedTemplates);
+      } else {
+        // Insert new template
+        const { data, error } = await supabase
+          .from('templates_notificacoes')
+          .insert(templateData)
+          .select();
+          
+        if (error) throw error;
+        result = data?.[0];
+        
+        // Add to state
+        if (result) {
+          const updatedTemplates = { ...templates };
+          updatedTemplates[editingConfig.id] = [
+            ...(updatedTemplates[editingConfig.id] || []),
+            result
+          ];
+          setTemplates(updatedTemplates);
+        }
+      }
 
-  const renderNotificationType = (type: string) => {
-    switch (type) {
-      case 'demanda':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">Demanda</Badge>;
-      case 'nota':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">Nota Oficial</Badge>;
-      case 'sistema':
-        return <Badge variant="outline" className="bg-purple-100 text-purple-800 hover:bg-purple-100 border-purple-200">Sistema</Badge>;
-      case 'comunicado':
-        return <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">Comunicado</Badge>;
-      default:
-        return <Badge variant="outline">{type}</Badge>;
+      toast({
+        title: editingTemplate ? 'Template atualizado' : 'Template criado',
+        description: editingTemplate 
+          ? 'O template foi atualizado com sucesso.'
+          : 'Um novo template foi criado com sucesso.',
+      });
+      
+      setIsTemplateDialogOpen(false);
+    } catch (error) {
+      console.error('Erro ao salvar template:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar o template. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const renderFrequency = (frequency: string) => {
-    switch (frequency) {
+  const handleDeleteConfig = async () => {
+    if (!editingConfig) return;
+    
+    setIsSubmitting(true);
+    try {
+      // First, delete all associated templates
+      await supabase
+        .from('templates_notificacoes')
+        .delete()
+        .eq('configuracao_id', editingConfig.id);
+      
+      // Then delete the config
+      const { error } = await supabase
+        .from('configuracoes_notificacoes')
+        .delete()
+        .eq('id', editingConfig.id);
+        
+      if (error) throw error;
+      
+      // Update state
+      setConfigs(configs.filter(c => c.id !== editingConfig.id));
+      
+      // Remove templates for this config
+      const updatedTemplates = { ...templates };
+      delete updatedTemplates[editingConfig.id];
+      setTemplates(updatedTemplates);
+
+      toast({
+        title: 'Configuração excluída',
+        description: 'A configuração foi excluída com sucesso.',
+      });
+      
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('Erro ao excluir configuração:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir a configuração. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteTemplate = async () => {
+    if (!editingTemplate) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('templates_notificacoes')
+        .delete()
+        .eq('id', editingTemplate.id);
+        
+      if (error) throw error;
+      
+      // Update state
+      if (editingConfig) {
+        const updatedTemplates = { ...templates };
+        updatedTemplates[editingConfig.id] = (updatedTemplates[editingConfig.id] || [])
+          .filter(t => t.id !== editingTemplate.id);
+        setTemplates(updatedTemplates);
+      }
+
+      toast({
+        title: 'Template excluído',
+        description: 'O template foi excluído com sucesso.',
+      });
+      
+      setIsTemplateDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('Erro ao excluir template:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir o template. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const toggleConfigActive = async (config: NotificationConfig) => {
+    try {
+      const newActiveState = !config.ativo;
+      
+      const { error } = await supabase
+        .from('configuracoes_notificacoes')
+        .update({ ativo: newActiveState })
+        .eq('id', config.id);
+        
+      if (error) throw error;
+      
+      // Update state
+      setConfigs(configs.map(c => 
+        c.id === config.id ? { ...c, ativo: newActiveState } : c
+      ));
+
+      toast({
+        title: newActiveState ? 'Configuração ativada' : 'Configuração desativada',
+        description: `A configuração "${config.titulo}" foi ${newActiveState ? 'ativada' : 'desativada'} com sucesso.`,
+      });
+    } catch (error) {
+      console.error('Erro ao alterar status da configuração:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível alterar o status da configuração. Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const getFrequencyLabel = (value: string): string => {
+    switch (value) {
       case 'imediata':
         return 'Imediata';
-      case 'agrupada':
-        return 'Agrupada (a cada hora)';
-      case 'diaria':
-        return 'Diária (resumo)';
+      case 'diario':
+        return 'Diário';
+      case 'semanal':
+        return 'Semanal';
       default:
-        return frequency;
+        return value;
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    );
-  }
+  const getTemplateTypeLabel = (value: string): string => {
+    switch (value) {
+      case 'app':
+        return 'Aplicativo';
+      case 'email':
+        return 'Email';
+      case 'sms':
+        return 'SMS';
+      default:
+        return value;
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div>
-            <CardTitle className="text-lg">Configurações de Notificações</CardTitle>
-            <CardDescription>
-              Gerencie os tipos de notificações que o sistema pode enviar
-            </CardDescription>
-          </div>
-          <Button 
-            onClick={() => {
-              resetForm();
-              setIsDialogOpen(true);
-            }}
-            className="flex items-center gap-1"
-          >
-            <Plus className="h-4 w-4" />
-            Nova Configuração
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {configs.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Info className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-              <p className="text-lg font-medium mb-1">Nenhuma configuração encontrada</p>
-              <p className="text-sm">
-                Clique em "Nova Configuração" para criar sua primeira configuração de notificação.
-              </p>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Título</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Frequência</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {configs.map((config) => (
-                    <TableRow key={config.id}>
-                      <TableCell className="font-medium">
-                        {config.titulo}
-                      </TableCell>
-                      <TableCell>
-                        {renderNotificationType(config.tipo)}
-                      </TableCell>
-                      <TableCell>
-                        {renderFrequency(config.frequencia)}
-                      </TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={config.ativo} 
-                          onCheckedChange={() => handleToggleActive(config.id, config.ativo)}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(config)}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Configurações de Notificações</h2>
+        <Button onClick={() => openConfigDialog()}>Nova Configuração</Button>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-10">Carregando configurações...</div>
+      ) : configs.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-10">
+            <p className="text-muted-foreground">Nenhuma configuração encontrada.</p>
+            <Button 
+              onClick={() => openConfigDialog()} 
+              className="mt-4"
+            >
+              Criar primeira configuração
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        configs.map((config) => (
+          <Card key={config.id} className={!config.ativo ? 'opacity-70' : ''}>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    {config.titulo}
+                    <span className="text-sm font-normal bg-slate-100 px-2 py-1 rounded">
+                      {config.tipo}
+                    </span>
+                    {!config.ativo && (
+                      <span className="text-sm font-normal bg-red-100 text-red-800 px-2 py-1 rounded">
+                        Desativado
+                      </span>
+                    )}
+                  </CardTitle>
+                  {config.descricao && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {config.descricao}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={config.ativo}
+                    onCheckedChange={() => toggleConfigActive(config)}
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => openConfigDialog(config)}
+                  >
+                    Editar
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => {
+                      setEditingConfig(config);
+                      setIsDeleteDialogOpen(true);
+                    }}
+                  >
+                    Excluir
+                  </Button>
+                </div>
+              </div>
+              <div className="flex gap-4 mt-2 text-sm">
+                <span className="text-muted-foreground">
+                  Frequência: {getFrequencyLabel(config.frequencia || 'imediata')}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 flex justify-between items-center">
+                <h3 className="font-medium">Templates</h3>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => openTemplateDialog(config.id)}
+                >
+                  Adicionar Template
+                </Button>
+              </div>
+              
+              {templates[config.id]?.length > 0 ? (
+                <div className="space-y-4">
+                  {templates[config.id].map((template) => (
+                    <div 
+                      key={template.id} 
+                      className="p-4 border rounded-lg"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 text-sm rounded">
+                          {getTemplateTypeLabel(template.tipo_envio)}
+                        </span>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => openTemplateDialog(config.id, template)}
                           >
-                            <Edit className="h-4 w-4" />
+                            Editar
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(config.id)}
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                            onClick={() => {
+                              setEditingTemplate(template);
+                              setEditingConfig(config);
+                              setIsTemplateDeleteDialogOpen(true);
+                            }}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            Excluir
                           </Button>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                      <div className="whitespace-pre-wrap bg-slate-50 p-2 rounded-md text-sm">
+                        {template.conteudo}
+                      </div>
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  Nenhum template definido para esta configuração.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))
+      )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+      {/* Configuration Dialog */}
+      <Dialog open={isConfigDialogOpen} onOpenChange={setIsConfigDialogOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {isEditing ? "Editar Configuração" : "Nova Configuração de Notificação"}
-            </DialogTitle>
+            <DialogTitle>{editingConfig ? 'Editar Configuração' : 'Nova Configuração'}</DialogTitle>
             <DialogDescription>
-              {isEditing 
-                ? "Atualize os detalhes da configuração de notificação."
-                : "Defina como e quando as notificações serão enviadas."}
+              {editingConfig 
+                ? 'Edite os detalhes da configuração de notificação.'
+                : 'Defina os detalhes para a nova configuração de notificação.'
+              }
             </DialogDescription>
           </DialogHeader>
+          
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="titulo" className="text-right">
-                Título
-              </Label>
+            <div className="grid gap-2">
+              <Label htmlFor="title">Título</Label>
               <Input
-                id="titulo"
-                value={formData.titulo}
-                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                className="col-span-3"
-                placeholder="Ex: Notificação de Nova Demanda"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="ex: Nova Demanda Criada"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="tipo" className="text-right">
-                Tipo
-              </Label>
-              <Select
-                value={formData.tipo}
-                onValueChange={(value) => setFormData({ ...formData, tipo: value })}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="demanda">Demanda</SelectItem>
-                  <SelectItem value="nota">Nota Oficial</SelectItem>
-                  <SelectItem value="sistema">Sistema</SelectItem>
-                  <SelectItem value="comunicado">Comunicado</SelectItem>
-                </SelectContent>
-              </Select>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="type">Tipo</Label>
+              <Input
+                id="type"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                placeholder="ex: demanda_criada"
+              />
+              <p className="text-xs text-muted-foreground">
+                Identificador único para este tipo de notificação (sem espaços ou caracteres especiais)
+              </p>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="descricao" className="text-right">
-                Descrição
-              </Label>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="description">Descrição (opcional)</Label>
               <Textarea
-                id="descricao"
-                value={formData.descricao}
-                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                className="col-span-3"
-                placeholder="Descrição opcional"
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Descrição detalhada desta configuração..."
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="frequencia" className="text-right">
-                Frequência
-              </Label>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="frequency">Frequência</Label>
               <Select
-                value={formData.frequencia}
-                onValueChange={(value) => setFormData({ ...formData, frequencia: value })}
+                value={frequency}
+                onValueChange={setFrequency}
               >
-                <SelectTrigger className="col-span-3">
+                <SelectTrigger id="frequency">
                   <SelectValue placeholder="Selecione a frequência" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="imediata">Imediata</SelectItem>
-                  <SelectItem value="agrupada">Agrupada (a cada hora)</SelectItem>
-                  <SelectItem value="diaria">Diária (resumo)</SelectItem>
+                  <SelectItem value="diario">Diário</SelectItem>
+                  <SelectItem value="semanal">Semanal</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Ativo
-              </Label>
-              <div className="col-span-3 flex items-center space-x-2">
-                <Switch
-                  id="status"
-                  checked={formData.ativo}
-                  onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
-                />
-                <Label htmlFor="status" className="cursor-pointer">
-                  {formData.ativo ? "Sim" : "Não"}
-                </Label>
-              </div>
+            
+            <div className="flex items-center gap-2">
+              <Switch
+                id="active"
+                checked={active}
+                onCheckedChange={setActive}
+              />
+              <Label htmlFor="active">Ativo</Label>
             </div>
           </div>
+          
           <DialogFooter>
-            <Button variant="outline" onClick={handleDialogClose}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsConfigDialogOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? "Atualizar" : "Salvar"}
+            <Button 
+              onClick={handleSaveConfig}
+              disabled={isSubmitting || !title || !type}
+            >
+              {isSubmitting ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Dialog */}
+      <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingTemplate ? 'Editar Template' : 'Novo Template'}
+              {editingConfig && (
+                <span className="ml-2 font-normal text-base">
+                  para "{editingConfig.titulo}"
+                </span>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {editingTemplate 
+                ? 'Edite o conteúdo do template para este tipo de notificação.'
+                : 'Defina o conteúdo para o novo template de notificação.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="templateType">Tipo de Envio</Label>
+              <Select
+                value={templateType}
+                onValueChange={setTemplateType}
+              >
+                <SelectTrigger id="templateType">
+                  <SelectValue placeholder="Selecione o tipo de envio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="app">Aplicativo</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="sms">SMS</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="templateContent">Conteúdo do Template</Label>
+              <Textarea
+                id="templateContent"
+                value={templateContent}
+                onChange={(e) => setTemplateContent(e.target.value)}
+                placeholder="Conteúdo do template..."
+                className="min-h-[200px]"
+              />
+              <p className="text-xs text-muted-foreground">
+                Use placeholders como {'{nome_usuario}'}, {'{titulo_demanda}'}, etc. para dados dinâmicos.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsTemplateDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveTemplate}
+              disabled={isSubmitting || !templateContent}
+            >
+              {isSubmitting ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Configuration Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir Configuração</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir esta configuração de notificação?
+              {editingConfig?.titulo && (
+                <span className="font-semibold block mt-2">
+                  "{editingConfig.titulo}"
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <p className="text-sm text-red-600">
+            Atenção: Esta ação não pode ser desfeita. Todos os templates associados também serão excluídos.
+          </p>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteConfig}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Excluindo...' : 'Excluir Permanentemente'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Template Dialog */}
+      <Dialog open={isTemplateDeleteDialogOpen} onOpenChange={setIsTemplateDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir Template</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este template de notificação?
+              {editingConfig?.titulo && (
+                <span className="block mt-2">
+                  Tipo: <span className="font-semibold">{editingTemplate?.tipo_envio}</span>
+                  <br />
+                  Configuração: <span className="font-semibold">{editingConfig.titulo}</span>
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <p className="text-sm text-red-600">
+            Atenção: Esta ação não pode ser desfeita.
+          </p>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsTemplateDeleteDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteTemplate}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Excluindo...' : 'Excluir Permanentemente'}
             </Button>
           </DialogFooter>
         </DialogContent>

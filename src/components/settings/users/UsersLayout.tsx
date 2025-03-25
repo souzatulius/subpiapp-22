@@ -1,18 +1,18 @@
 
-import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuTrigger, 
-  DropdownMenuContent, 
-  DropdownMenuRadioGroup, 
-  DropdownMenuRadioItem 
-} from '@/components/ui/dropdown-menu';
-import { UserPlus, Filter } from 'lucide-react';
-import UsersDialogs from './UsersDialogs';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { User, UsersLayoutProps } from './types';
 import UsersTable from './UsersTable';
-import { UsersLayoutProps } from '@/types/users';
+import UserDialogs from './UserDialogs';
+import { FileSpreadsheet, RefreshCw, UserPlus } from 'lucide-react';
 
 const UsersLayout: React.FC<UsersLayoutProps> = ({
   users,
@@ -21,7 +21,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   setFilter,
   supervisoesTecnicas,
   cargos,
-  coordenacoes = [],
+  coordenacoes,
   isInviteDialogOpen,
   setIsInviteDialogOpen,
   handleInviteUser,
@@ -36,122 +36,62 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   userActions,
   approving,
   removing,
-  isEditSubmitting
+  isEditSubmitting,
+  onRefresh
 }) => {
-  const [statusFilter, setStatusFilter] = useState<string>('todos');
-  const [filteredUsers, setFilteredUsers] = useState<typeof users>(users);
-
-  // Apply filtering based on search text and status
-  useEffect(() => {
-    let filtered = users;
-    
-    // Filter by text
-    if (filter) {
-      const searchTerm = filter.toLowerCase();
-      filtered = filtered.filter(user => 
-        user.nome_completo?.toLowerCase().includes(searchTerm) ||
-        user.email?.toLowerCase().includes(searchTerm) ||
-        user.cargos?.descricao?.toLowerCase().includes(searchTerm) ||
-        user.supervisao_tecnica?.descricao?.toLowerCase().includes(searchTerm) ||
-        user.coordenacao?.descricao?.toLowerCase().includes(searchTerm)
-      );
-    }
-    
-    // Filter by status
-    if (statusFilter !== 'todos') {
-      if (statusFilter === 'ativos') {
-        filtered = filtered.filter(user => 
-          user.permissoes && user.permissoes.length > 0
-        );
-      } else if (statusFilter === 'inativos') {
-        filtered = filtered.filter(user => 
-          !user.permissoes || user.permissoes.length === 0
-        );
-      }
-    }
-    
-    setFilteredUsers(filtered);
-  }, [users, filter, statusFilter]);
-
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
-        <div className="relative w-full sm:w-72">
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="flex-1">
           <Input
             placeholder="Buscar usuários..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="pl-10"
+            className="max-w-sm"
           />
-          <span className="absolute left-3 top-2.5 text-gray-400">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </span>
         </div>
-
-        <div className="flex space-x-2 w-full sm:w-auto justify-between sm:justify-start">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center">
-                <Filter className="mr-2 h-4 w-4" />
-                {statusFilter === 'todos'
-                  ? 'Todos'
-                  : statusFilter === 'ativos'
-                  ? 'Ativos'
-                  : 'Pendentes'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuRadioGroup
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-              >
-                <DropdownMenuRadioItem value="todos">
-                  Todos
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="ativos">
-                  Ativos
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="inativos">
-                  Pendentes
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button onClick={() => setIsInviteDialogOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Convidar
+        <div className="flex gap-2">
+          {onRefresh && (
+            <Button 
+              variant="outline" 
+              onClick={onRefresh}
+              title="Atualizar lista"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Atualizar
+            </Button>
+          )}
+          <Button 
+            variant="outline"
+            className="gap-2"
+            onClick={() => {}}
+            title="Exportar lista de usuários"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            Exportar
+          </Button>
+          <Button 
+            onClick={() => setIsInviteDialogOpen(true)}
+            className="gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Convidar Usuário
           </Button>
         </div>
       </div>
 
-      <UsersTable 
-        users={filteredUsers} 
-        loading={loading} 
-        filter={filter}
-        onEdit={(user) => userActions.handleEdit(user)}
-        onDelete={(user) => userActions.handleDelete(user)}
-        onResetPassword={(user) => userActions.handleResetPassword(user)}
-        onApprove={(user, roleName) => userActions.handleApprove(user, roleName)}
+      <UsersTable
+        users={users}
+        loading={loading}
+        onEdit={userActions.handleEdit}
+        onDelete={userActions.handleDelete}
+        onResetPassword={userActions.handleResetPassword}
+        onApprove={userActions.handleApprove}
         onRemoveAccess={userActions.handleRemoveAccess}
         onManageRoles={userActions.handleManageRoles}
       />
 
-      {/* Dialogs for user management */}
-      <UsersDialogs
+      <UserDialogs
         supervisoesTecnicas={supervisoesTecnicas}
         cargos={cargos}
         coordenacoes={coordenacoes}

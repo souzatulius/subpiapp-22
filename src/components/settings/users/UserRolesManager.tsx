@@ -2,12 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusCircle, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useUserRoles } from './hooks/useUserRoles';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from '@/components/ui/select';
 
 interface Role {
   id: number;
@@ -56,13 +63,12 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
   const [coordenacoes, setCoordenacoes] = useState<Coordenacao[]>([]);
   const [supervisoes, setSupervisoes] = useState<SupervisaoTecnica[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [selectedCoord, setSelectedCoord] = useState<string>('');
   const [selectedSuper, setSelectedSuper] = useState<string>('');
   const [filteredSupervisoes, setFilteredSupervisoes] = useState<SupervisaoTecnica[]>([]);
   
-  const { updating, addRole, removeRole } = useUserRoles(fetchUserRoles);
-
   // Fetch all available roles, coordenações, and supervisões
   useEffect(() => {
     const fetchData = async () => {
@@ -143,53 +149,168 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
       }
     } catch (error) {
       console.error('Error fetching user roles:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as permissões do usuário.',
+        variant: 'destructive',
+      });
     }
   }
 
   const handleToggleRole = async (role: Role, checked: boolean) => {
-    if (checked) {
-      // Add role
-      await addRole(userId, role.id);
-    } else {
-      // Find the role entry to remove (without context)
-      const roleEntry = userRoles.find(ur => 
-        ur.role_id === role.id && 
-        !ur.coordenacao_id && 
-        !ur.supervisao_tecnica_id
-      );
-      
-      if (roleEntry) {
-        await removeRole(userId, role.id);
+    if (!userId) return;
+    
+    setUpdating(true);
+    try {
+      if (checked) {
+        // Add role
+        const { error } = await supabase
+          .from('usuario_roles')
+          .insert({
+            usuario_id: userId,
+            role_id: role.id,
+          });
+        
+        if (error) throw error;
+        
+        // Update local state (for immediate UI update)
+        const newRole: UserRole = {
+          id: Date.now().toString(), // temporary ID until we refresh
+          role_id: role.id,
+          role: {
+            role_nome: role.role_nome,
+            descricao: role.descricao
+          }
+        };
+        
+        setUserRoles([...userRoles, newRole]);
+        
+        toast({
+          title: 'Permissão adicionada',
+          description: `A permissão "${role.descricao}" foi adicionada com sucesso.`,
+        });
+      } else {
+        // Find the role entry to remove (without context)
+        const roleEntry = userRoles.find(ur => 
+          ur.role_id === role.id && 
+          !ur.coordenacao_id && 
+          !ur.supervisao_tecnica_id
+        );
+        
+        if (roleEntry) {
+          const { error } = await supabase
+            .from('usuario_roles')
+            .delete()
+            .eq('id', roleEntry.id);
+          
+          if (error) throw error;
+          
+          // Update local state
+          setUserRoles(userRoles.filter(ur => ur.id !== roleEntry.id));
+          
+          toast({
+            title: 'Permissão removida',
+            description: `A permissão "${role.descricao}" foi removida com sucesso.`,
+          });
+        }
       }
+    } catch (error: any) {
+      console.error('Erro ao gerenciar permissão:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao gerenciar a permissão.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdating(false);
     }
   };
 
   const handleAddContextualRole = async () => {
-    if (!selectedRole) return;
+    if (!selectedRole || !userId) return;
     
-    const roleId = parseInt(selectedRole);
-    const contextData = {
-      coordenacao_id: selectedCoord || undefined,
-      supervisao_tecnica_id: selectedSuper || undefined
-    };
-    
-    await addRole(userId, roleId, contextData);
-    
-    // Reset selections
-    setSelectedRole('');
-    setSelectedCoord('');
-    setSelectedSuper('');
+    setUpdating(true);
+    try {
+      const roleId = parseInt(selectedRole);
+      const selectedRole_obj = roles.find(r => r.id === roleId);
+      
+      const contextData = {
+        usuario_id: userId,
+        role_id: roleId,
+        coordenacao_id: selectedCoord || null,
+        supervisao_tecnica_id: selectedSuper || null
+      };
+      
+      const { data, error } = await supabase
+        .from('usuario_roles')
+        .insert(contextData)
+        .select(`
+          id,
+          role_id,
+          coordenacao_id,
+          supervisao_tecnica_id,
+          roles:role_id(id, role_nome, descricao),
+          coordenacao:coordenacao_id(id, descricao),
+          supervisao_tecnica:supervisao_tecnica_id(id, descricao)
+        `);
+      
+      if (error) throw error;
+      
+      // Update local state with the returned data
+      if (data && data.length > 0) {
+        setUserRoles([...userRoles, data[0]]);
+      }
+      
+      toast({
+        title: 'Permissão contextual adicionada',
+        description: `A permissão contextual "${selectedRole_obj?.descricao}" foi adicionada com sucesso.`,
+      });
+      
+      // Reset selections
+      setSelectedRole('');
+      setSelectedCoord('');
+      setSelectedSuper('');
+    } catch (error: any) {
+      console.error('Erro ao adicionar permissão contextual:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao adicionar a permissão contextual.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const handleRemoveContextualRole = async (roleEntry: UserRole) => {
-    if (!roleEntry.role_id) return;
+    if (!roleEntry.id || !userId) return;
     
-    const contextData = {
-      coordenacao_id: roleEntry.coordenacao_id,
-      supervisao_tecnica_id: roleEntry.supervisao_tecnica_id
-    };
-    
-    await removeRole(userId, roleEntry.role_id, contextData);
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('usuario_roles')
+        .delete()
+        .eq('id', roleEntry.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setUserRoles(userRoles.filter(ur => ur.id !== roleEntry.id));
+      
+      toast({
+        title: 'Permissão contextual removida',
+        description: 'A permissão contextual foi removida com sucesso.',
+      });
+    } catch (error: any) {
+      console.error('Erro ao remover permissão contextual:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro ao remover a permissão contextual.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const hasGeneralRole = (roleId: number) => {
@@ -308,7 +429,7 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
               </div>
             </div>
             
-            <button 
+            <Button 
               onClick={handleAddContextualRole}
               disabled={!selectedRole || updating}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors w-fit mt-2"
@@ -319,9 +440,12 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
                   Adicionando...
                 </div>
               ) : (
-                "Adicionar Permissão"
+                <>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Adicionar Permissão
+                </>
               )}
-            </button>
+            </Button>
           </div>
           
           {/* List of current contextual permissions */}
@@ -351,13 +475,16 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
                           )}
                         </div>
                       </div>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleRemoveContextualRole(roleEntry)}
-                        className="text-red-500 hover:text-red-700 text-sm"
                         disabled={updating}
+                        className="text-red-500 hover:text-red-700"
                       >
+                        <X className="h-4 w-4 mr-1" />
                         Remover
-                      </button>
+                      </Button>
                     </li>
                   ))}
               </ul>

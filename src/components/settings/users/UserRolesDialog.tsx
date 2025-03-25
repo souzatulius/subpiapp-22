@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { User } from '@/types/common';
+import { User } from './types';
 import UserRolesManager from './UserRolesManager';
 
 interface UserRolesDialogProps {
@@ -28,7 +28,14 @@ const UserRolesDialog: React.FC<UserRolesDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Gerenciar Permissões - {user.nome_completo}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            Gerenciar Permissões - {user.nome_completo}
+          </DialogTitle>
+          <div className="text-sm text-gray-500 mt-2">
+            <p>Cargo: {user.cargos?.descricao || '-'}</p>
+            <p>Coordenação: {user.coordenacao?.descricao || '-'}</p>
+            <p>Supervisão Técnica: {user.supervisao_tecnica?.descricao || '-'}</p>
+          </div>
         </DialogHeader>
         
         <UserRolesManager userId={user.id} />
@@ -36,6 +43,7 @@ const UserRolesDialog: React.FC<UserRolesDialogProps> = ({
         <DialogFooter>
           <Button
             onClick={() => onOpenChange(false)}
+            className="mt-4"
           >
             Fechar
           </Button>

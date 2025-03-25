@@ -1,37 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePickerWithRange } from "./DateRangePickerWrapper";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Bell, UserCheck, UserX, BarChart3 } from "lucide-react";
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend,
-  ArcElement
-} from 'chart.js';
-import { Bar, Pie } from 'react-chartjs-2';
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { addDays, format, subDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { DateRange } from "react-day-picker";
 
-ChartJS.register(
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend,
-  ArcElement
-);
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { supabase } from '@/integrations/supabase/client';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 interface NotificationStat {
   tipo: string;
@@ -48,355 +24,311 @@ interface ReadStat {
   count: number;
 }
 
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    backgroundColor: string[];
-    borderColor: string[];
-    borderWidth: number;
-  }[];
-}
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-const NotificationStats: React.FC = () => {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
+const NotificationStats = () => {
   const [typeStats, setTypeStats] = useState<NotificationStat[]>([]);
   const [userStats, setUserStats] = useState<UserStat[]>([]);
-  const [readStats, setReadStats] = useState<{read: number, unread: number}>({read: 0, unread: 0});
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: subDays(new Date(), 30),
-    to: new Date()
+  const [readStats, setReadStats] = useState<{ lidas: number; naoLidas: number }>({ lidas: 0, naoLidas: 0 });
+  const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState({
+    from: new Date(new Date().setDate(new Date().getDate() - 30)),
+    to: new Date(),
   });
-  const [selectedTab, setSelectedTab] = useState('tipos');
-  const [selectedPeriod, setSelectedPeriod] = useState('30d');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   useEffect(() => {
     fetchStats();
-  }, [dateRange, selectedPeriod]);
+  }, [dateRange]);
 
   const fetchStats = async () => {
+    setLoading(true);
     try {
-      setIsLoading(true);
+      // Fetch notification stats by type
+      const typeStatsResponse = await supabase
+        .from('notificacoes')
+        .select('tipo, count(*)')
+        .gte('data_envio', dateRange.from.toISOString())
+        .lte('data_envio', dateRange.to.toISOString())
+        .group('tipo');
+
+      if (typeStatsResponse.error) throw typeStatsResponse.error;
+      setTypeStats(typeStatsResponse.data as NotificationStat[]);
+
+      // Fetch notification stats by user
+      const userStatsResponse = await supabase
+        .from('notificacoes')
+        .select('usuario_id, usuarios!inner(nome_completo), count(*)')
+        .gte('data_envio', dateRange.from.toISOString())
+        .lte('data_envio', dateRange.to.toISOString())
+        .group('usuario_id, usuarios.nome_completo');
+
+      if (userStatsResponse.error) throw userStatsResponse.error;
       
-      // Format dates for query
-      const from = dateRange.from?.toISOString() || '';
-      const to = dateRange.to?.toISOString() || '';
+      const formattedUserStats = userStatsResponse.data.map(item => ({
+        usuario_nome: item.usuarios?.nome_completo || 'Desconhecido',
+        count: parseInt(item.count)
+      }));
       
-      // Fetch type stats using regular query instead of RPC
-      const { data: typeData, error: typeError } = await supabase
-        .from('notification_type_stats')
-        .select('*')
-        .gte('data_envio', from)
-        .lte('data_envio', to);
+      setUserStats(formattedUserStats);
+
+      // Fetch notification stats by read status
+      const readStatsResponse = await supabase
+        .from('notificacoes')
+        .select('lida, count(*)')
+        .gte('data_envio', dateRange.from.toISOString())
+        .lte('data_envio', dateRange.to.toISOString())
+        .group('lida');
+
+      if (readStatsResponse.error) throw readStatsResponse.error;
       
-      if (typeError) throw typeError;
-      setTypeStats(typeData as NotificationStat[] || []);
+      let lidas = 0;
+      let naoLidas = 0;
       
-      // Fetch user stats using regular query
-      const { data: userData, error: userError } = await supabase
-        .from('notification_user_stats')
-        .select('*')
-        .gte('data_envio', from)
-        .lte('data_envio', to);
-      
-      if (userError) throw userError;
-      setUserStats(userData as UserStat[] || []);
-      
-      // Fetch read/unread stats using regular query
-      const { data: readData, error: readError } = await supabase
-        .from('notification_read_stats')
-        .select('*')
-        .gte('data_envio', from)
-        .lte('data_envio', to);
-      
-      if (readError) throw readError;
-      
-      if (readData && Array.isArray(readData) && readData.length > 0) {
-        const read = readData.find((item: ReadStat) => item.lida === true)?.count || 0;
-        const unread = readData.find((item: ReadStat) => item.lida === false)?.count || 0;
-        setReadStats({ read, unread });
-      }
-      
-    } catch (error) {
-      console.error('Erro ao buscar estatísticas:', error);
-      toast({
-        title: "Erro ao carregar estatísticas",
-        description: "Não foi possível carregar as estatísticas de notificações.",
-        variant: "destructive",
+      readStatsResponse.data.forEach((item: any) => {
+        if (item.lida === true) {
+          lidas = parseInt(item.count);
+        } else {
+          naoLidas = parseInt(item.count);
+        }
       });
+      
+      setReadStats({ lidas, naoLidas });
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas de notificações:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handlePeriodChange = (value: string) => {
-    setSelectedPeriod(value);
-    const today = new Date();
-    
-    switch (value) {
-      case '7d':
-        setDateRange({
-          from: subDays(today, 7),
-          to: today
-        });
-        break;
-      case '30d':
-        setDateRange({
-          from: subDays(today, 30),
-          to: today
-        });
-        break;
-      case '90d':
-        setDateRange({
-          from: subDays(today, 90),
-          to: today
-        });
-        break;
-      case 'custom':
-        // When selecting custom, keep the current date range
-        break;
+  const handleRangeChange = (range: { from?: Date; to?: Date }) => {
+    if (range.from && range.to) {
+      setDateRange({
+        from: range.from,
+        to: range.to,
+      });
     }
   };
 
-  const renderTypesChart = () => {
-    if (typeStats.length === 0) return <div className="text-center py-10 text-gray-500">Sem dados para exibir</div>;
-    
-    const data: ChartData = {
-      labels: typeStats.map(item => getNotificationType(item.tipo)),
-      datasets: [
-        {
-          label: 'Quantidade',
-          data: typeStats.map(item => item.count),
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
-          ],
-          borderColor: [
-            'rgba(75, 192, 192, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(153, 102, 255, 1)',
-          ],
-          borderWidth: 1,
-        },
-      ],
-    };
-    
-    return <Bar 
-      data={data} 
-      options={{
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-          },
-          title: {
-            display: true,
-            text: 'Notificações por Tipo',
-          },
-        },
-      }} 
-    />;
-  };
-
-  const renderUsersChart = () => {
-    if (userStats.length === 0) return <div className="text-center py-10 text-gray-500">Sem dados para exibir</div>;
-    
-    // Limit to top 10 users for better visualization
-    const topUsers = userStats.slice(0, 10);
-    
-    const data: ChartData = {
-      labels: topUsers.map(item => item.usuario_nome),
-      datasets: [
-        {
-          label: 'Notificações Recebidas',
-          data: topUsers.map(item => item.count),
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1,
-        },
-      ],
-    };
-    
-    return <Bar 
-      data={data} 
-      options={{
-        responsive: true,
-        indexAxis: 'y',
-        plugins: {
-          legend: {
-            position: 'bottom',
-          },
-          title: {
-            display: true,
-            text: 'Top 10 Usuários - Notificações Recebidas',
-          },
-        },
-      }} 
-    />;
-  };
-
-  const renderReadUnreadChart = () => {
-    if (readStats.read === 0 && readStats.unread === 0) {
-      return <div className="text-center py-10 text-gray-500">Sem dados para exibir</div>;
-    }
-    
-    const data = {
-      labels: ['Lidas', 'Não Lidas'],
-      datasets: [
-        {
-          data: [readStats.read, readStats.unread],
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(255, 99, 132, 0.6)',
-          ],
-          borderColor: [
-            'rgba(75, 192, 192, 1)',
-            'rgba(255, 99, 132, 1)',
-          ],
-          borderWidth: 1,
-        },
-      ],
-    };
-    
-    return <div className="max-w-[300px] mx-auto">
-      <Pie 
-        data={data} 
-        options={{
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-            title: {
-              display: true,
-              text: 'Status das Notificações',
-            },
-          },
-        }} 
-      />
-    </div>;
-  };
-
-  const getNotificationType = (type: string) => {
-    switch (type) {
-      case 'demanda_criada':
-        return 'Nova Demanda';
-      case 'demanda_respondida':
-        return 'Demanda Respondida';
-      case 'nota_pendente_aprov':
-        return 'Nota Pendente';
-      case 'nota_aprovada':
-        return 'Nota Aprovada';
-      case 'comunicado':
-        return 'Comunicado';
-      default:
-        return type;
+  const toggleTypeFilter = (tipo: string) => {
+    if (selectedTypes.includes(tipo)) {
+      setSelectedTypes(selectedTypes.filter(t => t !== tipo));
+    } else {
+      setSelectedTypes([...selectedTypes, tipo]);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    );
-  }
+  const toggleUserFilter = (usuario: string) => {
+    if (selectedUsers.includes(usuario)) {
+      setSelectedUsers(selectedUsers.filter(u => u !== usuario));
+    } else {
+      setSelectedUsers([...selectedUsers, usuario]);
+    }
+  };
+
+  const filteredTypeStats = selectedTypes.length
+    ? typeStats.filter(stat => selectedTypes.includes(stat.tipo))
+    : typeStats;
+
+  const filteredUserStats = selectedUsers.length
+    ? userStats.filter(stat => selectedUsers.includes(stat.usuario_nome))
+    : userStats;
+
+  const readStatsData = [
+    { name: 'Lidas', value: readStats.lidas },
+    { name: 'Não Lidas', value: readStats.naoLidas },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Estatísticas de Notificações</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle>Estatísticas de Notificações</CardTitle>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-2">
+            <DatePickerWithRange
+              dateRange={dateRange}
+              onRangeChange={handleRangeChange}
+            />
+            <Button
+              onClick={fetchStats}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {loading ? 'Carregando...' : 'Atualizar'}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="w-full md:w-1/3">
-              <div className="space-y-2">
-                <Label htmlFor="period">Período</Label>
-                <Select
-                  value={selectedPeriod}
-                  onValueChange={handlePeriodChange}
-                >
-                  <SelectTrigger id="period">
-                    <SelectValue placeholder="Selecione o período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7d">Últimos 7 dias</SelectItem>
-                    <SelectItem value="30d">Últimos 30 dias</SelectItem>
-                    <SelectItem value="90d">Últimos 90 dias</SelectItem>
-                    <SelectItem value="custom">Período Personalizado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            {selectedPeriod === 'custom' && (
-              <div className="w-full md:w-2/3">
-                <div className="space-y-2">
-                  <Label>Intervalo de datas</Label>
-                  <DatePickerWithRange
-                    value={dateRange}
-                    onChange={(range) => {
-                      if (range?.from && range?.to) {
-                        setDateRange({ from: range.from, to: range.to });
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="space-y-6">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-              <TabsList className="grid grid-cols-3 mb-6">
-                <TabsTrigger value="tipos" className="flex items-center gap-2">
-                  <Bell className="h-4 w-4" />
-                  Tipos
-                </TabsTrigger>
-                <TabsTrigger value="usuarios" className="flex items-center gap-2">
-                  <UserCheck className="h-4 w-4" />
-                  Usuários
-                </TabsTrigger>
-                <TabsTrigger value="status" className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  Status
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="tipos" className="h-[400px] flex items-center justify-center">
-                {renderTypesChart()}
-              </TabsContent>
-              
-              <TabsContent value="usuarios" className="h-[400px] flex items-center justify-center">
-                {renderUsersChart()}
-              </TabsContent>
-              
-              <TabsContent value="status" className="h-[400px] flex items-center justify-center">
-                {renderReadUnreadChart()}
-              </TabsContent>
-            </Tabs>
-            
-            <div className="text-center text-sm text-gray-500">
-              {selectedPeriod === 'custom' 
-                ? `Período: ${dateRange.from ? format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR }) : '-'} a ${dateRange.to ? format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR }) : '-'}`
-                : selectedPeriod === '7d'
-                  ? 'Últimos 7 dias'
-                  : selectedPeriod === '30d'
-                    ? 'Últimos 30 dias'
-                    : 'Últimos 90 dias'
-              }
-            </div>
-          </div>
-        </CardContent>
       </Card>
+
+      <Tabs defaultValue="tipo">
+        <TabsList className="w-full">
+          <TabsTrigger value="tipo" className="flex-1">Por Tipo</TabsTrigger>
+          <TabsTrigger value="usuario" className="flex-1">Por Usuário</TabsTrigger>
+          <TabsTrigger value="leitura" className="flex-1">Por Leitura</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="tipo">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notificações por Tipo</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {typeStats.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Nenhum dado disponível para o período selecionado.
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {typeStats.map(stat => (
+                      <Button
+                        key={stat.tipo}
+                        variant={selectedTypes.includes(stat.tipo) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => toggleTypeFilter(stat.tipo)}
+                      >
+                        {stat.tipo}
+                      </Button>
+                    ))}
+                    {selectedTypes.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedTypes([])}
+                      >
+                        Limpar filtros
+                      </Button>
+                    )}
+                  </div>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={filteredTypeStats}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="tipo" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value: number) => [value, 'Notificações']}
+                          labelFormatter={(label) => `Tipo: ${label}`}
+                        />
+                        <Bar dataKey="count" fill="#8884d8" name="Quantidade" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="usuario">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notificações por Usuário</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {userStats.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Nenhum dado disponível para o período selecionado.
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {userStats.map(stat => (
+                      <Button
+                        key={stat.usuario_nome}
+                        variant={selectedUsers.includes(stat.usuario_nome) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => toggleUserFilter(stat.usuario_nome)}
+                      >
+                        {stat.usuario_nome}
+                      </Button>
+                    ))}
+                    {selectedUsers.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedUsers([])}
+                      >
+                        Limpar filtros
+                      </Button>
+                    )}
+                  </div>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={filteredUserStats}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="usuario_nome" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value: number) => [value, 'Notificações']}
+                          labelFormatter={(label) => `Usuário: ${label}`}
+                        />
+                        <Bar dataKey="count" fill="#82ca9d" name="Quantidade" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="leitura">
+          <Card>
+            <CardHeader>
+              <CardTitle>Status de Leitura de Notificações</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {readStats.lidas === 0 && readStats.naoLidas === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Nenhum dado disponível para o período selecionado.
+                </div>
+              ) : (
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={readStatsData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {readStatsData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === 0 ? '#00C49F' : '#FF8042'} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value: number) => [value, 'Notificações']}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center gap-8 mt-4">
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 mr-2 bg-[#00C49F] rounded-sm"></div>
+                      <span>Lidas: {readStats.lidas}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 mr-2 bg-[#FF8042] rounded-sm"></div>
+                      <span>Não Lidas: {readStats.naoLidas}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

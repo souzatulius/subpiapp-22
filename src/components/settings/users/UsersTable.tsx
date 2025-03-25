@@ -1,16 +1,51 @@
+
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
-import UserActionsMenu from './UserActionsMenu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UsersTableProps } from '@/types/users';
-import { formatDate } from '@/types/common';
+import { Badge } from '@/components/ui/badge';
+import { 
+  MoreHorizontal, 
+  Edit, 
+  Trash, 
+  KeyRound, 
+  UserCheck, 
+  UserX,
+  ShieldCheck
+} from 'lucide-react';
+import { User } from './types';
+import LoadingSkeleton from '@/components/ui/loading-skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
+
+interface UsersTableProps {
+  users: User[];
+  loading: boolean;
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
+  onResetPassword?: (user: User) => void;
+  onApprove?: (user: User, roleName?: string) => void;
+  onRemoveAccess?: (user: User) => void;
+  onManageRoles?: (user: User) => void;
+}
 
 const UsersTable: React.FC<UsersTableProps> = ({
   users,
   loading,
-  filter,
   onEdit,
   onDelete,
   onResetPassword,
@@ -18,114 +53,163 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onRemoveAccess,
   onManageRoles
 }) => {
-  // Status badge color mapping
-  const getStatusBadge = (hasPermissions: boolean) => {
-    if (hasPermissions) {
-      return <Badge className="bg-green-500">Ativo</Badge>;
-    }
-    return <Badge variant="outline" className="text-amber-500 border-amber-500">Pendente</Badge>;
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   };
 
-  // Get user initials for avatar
-  const getUserInitials = (name: string) => {
-    if (!name) return '??';
-    
-    const parts = name.split(' ');
-    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-    
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  };
-
-  // Get summary of user roles
-  const getUserRolesSummary = (permissoes: any[] | undefined) => {
-    if (!permissoes || permissoes.length === 0) {
-      return 'Sem permissões';
-    }
-    
-    // If there are many roles, summarize
-    if (permissoes.length > 2) {
-      return `${permissoes[0]?.descricao}, ${permissoes[1]?.descricao} + ${permissoes.length - 2}`;
-    }
-    
-    // Otherwise list them
-    return permissoes.map(p => p?.descricao).join(', ');
+  const hasPermissions = (user: User) => {
+    return user.permissoes && user.permissoes.length > 0;
   };
 
   if (loading) {
-    return (
-      <div className="p-8 flex justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (users.length === 0) {
-    return (
-      <Card className="p-6 text-center text-muted-foreground">
-        {filter ? 'Nenhum usuário corresponde à busca.' : 'Nenhum usuário cadastrado.'}
-      </Card>
-    );
+    return <LoadingSkeleton rows={5} columns={5} />;
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-muted/50">
-            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Usuário</th>
-            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Cargo</th>
-            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Área</th>
-            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Permissões</th>
-            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Status</th>
-            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Cadastro</th>
-            <th className="p-3 text-center font-medium text-sm text-muted-foreground">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id} className="border-b hover:bg-muted/30">
-              <td className="p-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.foto_perfil_url || ''} alt={user.nome_completo} />
-                    <AvatarFallback>{getUserInitials(user.nome_completo)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{user.nome_completo}</div>
-                    <div className="text-sm text-muted-foreground">{user.email}</div>
+    <div className="rounded-md border overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50">
+            <TableHead className="w-[280px]">Usuário</TableHead>
+            <TableHead>Equipe</TableHead>
+            <TableHead>Contato</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {users.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="h-24 text-center">
+                Nenhum usuário encontrado.
+              </TableCell>
+            </TableRow>
+          ) : (
+            users.map(user => (
+              <TableRow key={user.id}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-9 w-9">
+                      {user.foto_perfil_url ? (
+                        <AvatarImage src={user.foto_perfil_url} alt={user.nome_completo} />
+                      ) : null}
+                      <AvatarFallback>{getInitials(user.nome_completo)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{user.nome_completo}</div>
+                      <div className="text-sm text-muted-foreground">{user.email}</div>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td className="p-3 text-sm">{user.cargos?.descricao || '-'}</td>
-              <td className="p-3 text-sm">
-                {user.supervisao_tecnica?.descricao || user.coordenacao?.descricao || '-'}
-              </td>
-              <td className="p-3 text-sm">
-                {getUserRolesSummary(user.permissoes)}
-              </td>
-              <td className="p-3">
-                {getStatusBadge(user.permissoes && user.permissoes.length > 0)}
-              </td>
-              <td className="p-3 text-sm">
-                {formatDate(user.criado_em)}
-              </td>
-              <td className="p-3">
-                <div className="flex justify-center">
-                  <UserActionsMenu
-                    user={user}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onResetPassword={onResetPassword}
-                    onApprove={onApprove}
-                    onRemoveAccess={onRemoveAccess}
-                    onManageRoles={onManageRoles}
-                  />
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    {user.cargos?.descricao && (
+                      <div className="text-sm">{user.cargos.descricao}</div>
+                    )}
+                    {user.coordenacao?.descricao && (
+                      <div className="text-sm text-muted-foreground">
+                        {user.coordenacao.descricao}
+                        {user.supervisao_tecnica?.descricao 
+                          ? ` / ${user.supervisao_tecnica.descricao}` 
+                          : ''}
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    {user.whatsapp && (
+                      <div className="text-sm">{user.whatsapp}</div>
+                    )}
+                    {user.aniversario && (
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(user.aniversario), 'dd/MM/yyyy', { locale: pt })}
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {hasPermissions(user) ? (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      Ativo
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                      Aguardando aprovação
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    {onManageRoles && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onManageRoles(user)}
+                        title="Gerenciar permissões"
+                      >
+                        <ShieldCheck className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onEdit(user)}
+                      title="Editar usuário"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {onResetPassword && (
+                          <DropdownMenuItem onClick={() => onResetPassword(user)}>
+                            <KeyRound className="h-4 w-4 mr-2" />
+                            Resetar senha
+                          </DropdownMenuItem>
+                        )}
+                        
+                        {onApprove && !hasPermissions(user) && (
+                          <DropdownMenuItem onClick={() => onApprove(user)}>
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            Aprovar acesso
+                          </DropdownMenuItem>
+                        )}
+                        
+                        {onRemoveAccess && hasPermissions(user) && (
+                          <DropdownMenuItem onClick={() => onRemoveAccess(user)}>
+                            <UserX className="h-4 w-4 mr-2" />
+                            Remover acesso
+                          </DropdownMenuItem>
+                        )}
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem 
+                          onClick={() => onDelete(user)}
+                          className="text-red-600 focus:text-red-700"
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Excluir usuário
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 };

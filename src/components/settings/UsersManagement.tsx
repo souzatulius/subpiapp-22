@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useUsersManagement } from './users/useUsersManagement';
 import UsersLayout from './users/UsersLayout';
@@ -98,11 +99,12 @@ const UsersManagement = () => {
   };
 
   const handleEdit = (user: User) => {
-    setSelectedUser(user);
+    openEditDialog(user);
   };
 
   const handleDelete = (user: User) => {
     setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleApprove = (user: User, roleName?: string) => {
@@ -120,6 +122,10 @@ const UsersManagement = () => {
   const handleResetPassword = (user: User) => {
     resetPassword.handleSendPasswordReset(user);
   };
+  
+  const handleRefreshData = () => {
+    fetchData();
+  };
 
   const userActions = useUserActions({
     setIsEditDialogOpen,
@@ -128,7 +134,8 @@ const UsersManagement = () => {
     setUserToDelete: handleDelete,
     resetPassword: handleResetPassword,
     approveUser: handleApprove,
-    removeAccess: handleRemoveAccess
+    removeAccess: handleRemoveAccess,
+    manageRoles: openRolesDialog
   });
 
   const usersManagementProps = {
@@ -156,7 +163,8 @@ const UsersManagement = () => {
     },
     approving,
     removing,
-    isEditSubmitting
+    isEditSubmitting,
+    onRefresh: handleRefreshData
   };
   
   return (

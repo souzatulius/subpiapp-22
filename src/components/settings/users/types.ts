@@ -28,6 +28,14 @@ export type User = {
     descricao: string;
     nivel_acesso: number;
   }>;
+  roles?: Array<{
+    id: string;
+    role_id: number;
+    role_nome: string;
+    descricao: string;
+    coordenacao_id?: string;
+    supervisao_tecnica_id?: string;
+  }>;
 };
 
 export type SupervisaoTecnica = {
@@ -79,8 +87,16 @@ export interface UsersLayoutProps {
   setIsDeleteDialogOpen: (open: boolean) => void;
   userToDelete: User | null;
   handleDeleteUser: () => Promise<void>;
-  userActions: any;
+  userActions: {
+    handleEdit: (user: User) => void;
+    handleDelete: (user: User) => void;
+    handleResetPassword: (user: User) => void;
+    handleApprove: (user: User, roleName?: string) => void;
+    handleRemoveAccess: (user: User) => void;
+    handleManageRoles: (user: User) => void;
+  };
   approving: boolean;
   removing: boolean;
   isEditSubmitting?: boolean;
+  onRefresh?: () => void;
 }

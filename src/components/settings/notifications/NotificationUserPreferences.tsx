@@ -1,239 +1,230 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useToast } from "@/components/ui/use-toast";
-import { useNotifications } from "@/hooks/notifications";
-import { useAuth } from "@/hooks/useSupabaseAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Bell, Mail, MessageSquare } from "lucide-react";
-import AttentionBox from "@/components/ui/attention-box";
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
+import { ToggleLeft } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface NotificationPreferences {
   app: boolean;
   email: boolean;
   resumo_diario: boolean;
-  frequencia?: string;
 }
 
-const NotificationUserPreferences: React.FC = () => {
-  const { toast } = useToast();
+interface FrequencyState {
+  value: string;
+  label: string;
+}
+
+const NotificationUserPreferences = () => {
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     app: true,
     email: true,
     resumo_diario: true,
   });
-  const [frequency, setFrequency] = useState<string>("imediata");
-  const { requestPermissionAndRegisterToken, isNotificationsSupported } = useNotifications();
+  const [frequency, setFrequency] = useState<FrequencyState>({
+    value: 'diario',
+    label: 'Diário',
+  });
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
-      loadUserPreferences();
+      fetchUserPreferences();
     }
   }, [user]);
 
-  const loadUserPreferences = async () => {
+  const fetchUserPreferences = async () => {
     try {
-      setIsLoading(true);
       const { data, error } = await supabase
         .from('usuarios')
-        .select('configuracoes_notificacao')
+        .select('configuracoes_notificacao, configuracoes_notificacao->frequencia')
         .eq('id', user?.id)
         .single();
-      
+
       if (error) throw error;
-      
-      if (data?.configuracoes_notificacao) {
-        const userPrefs = data.configuracoes_notificacao as NotificationPreferences;
+
+      if (data && data.configuracoes_notificacao) {
+        // Ensure configuracoes_notificacao is treated correctly as an object
+        const configData = data.configuracoes_notificacao as unknown as NotificationPreferences;
         setPreferences({
-          app: userPrefs.app ?? true,
-          email: userPrefs.email ?? true,
-          resumo_diario: userPrefs.resumo_diario ?? true
+          app: configData.app !== undefined ? configData.app : true,
+          email: configData.email !== undefined ? configData.email : true,
+          resumo_diario: configData.resumo_diario !== undefined ? configData.resumo_diario : true,
         });
-        
-        if (userPrefs.frequencia) {
-          setFrequency(userPrefs.frequencia);
-        }
+
+        // Set frequency from the data
+        const frequencyValue = data.configuracoes_notificacao?.frequencia as string || 'diario';
+        setFrequency({
+          value: frequencyValue,
+          label: getFrequencyLabel(frequencyValue),
+        });
       }
     } catch (error) {
-      console.error('Erro ao carregar preferências:', error);
-      toast({
-        title: "Erro ao carregar configurações",
-        description: "Não foi possível carregar suas preferências de notificação.",
-        variant: "destructive",
-      });
+      console.error('Erro ao buscar preferências:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const savePreferences = async () => {
-    if (!user) return;
-    
+  const getFrequencyLabel = (value: string): string => {
+    switch (value) {
+      case 'imediata':
+        return 'Imediata';
+      case 'diario':
+        return 'Diário';
+      case 'semanal':
+        return 'Semanal';
+      default:
+        return 'Diário';
+    }
+  };
+
+  const updatePreference = async (key: keyof NotificationPreferences, value: boolean) => {
     try {
-      setIsSaving(true);
-      
-      const updatedPreferences = {
-        ...preferences,
-        frequencia: frequency
-      };
+      const newPreferences = { ...preferences, [key]: value };
+      setPreferences(newPreferences);
+
+      const { error } = await supabase
+        .from('usuarios')
+        .update({
+          configuracoes_notificacao: newPreferences,
+        })
+        .eq('id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Preferências atualizadas',
+        description: 'Suas preferências de notificação foram atualizadas com sucesso.',
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar preferências:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar suas preferências. Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const updateFrequency = async (value: string) => {
+    try {
+      const label = getFrequencyLabel(value);
+      setFrequency({ value, label });
+
+      const newPreferences = { ...preferences, frequencia: value };
       
       const { error } = await supabase
         .from('usuarios')
-        .update({ 
-          configuracoes_notificacao: updatedPreferences
+        .update({
+          configuracoes_notificacao: newPreferences,
         })
-        .eq('id', user.id);
-      
+        .eq('id', user?.id);
+
       if (error) throw error;
-      
+
       toast({
-        title: "Preferências salvas",
-        description: "Suas preferências de notificação foram atualizadas com sucesso.",
-        variant: "success",
+        title: 'Frequência atualizada',
+        description: `Agora você receberá resumos ${label.toLowerCase()}.`,
       });
     } catch (error) {
-      console.error('Erro ao salvar preferências:', error);
+      console.error('Erro ao atualizar frequência:', error);
       toast({
-        title: "Erro ao salvar configurações",
-        description: "Não foi possível salvar suas preferências de notificação.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const enableBrowserNotifications = async () => {
-    const success = await requestPermissionAndRegisterToken();
-    if (success) {
-      setPreferences(prev => ({ ...prev, app: true }));
-      toast({
-        title: "Notificações do navegador ativadas",
-        description: "Você receberá notificações diretamente neste dispositivo.",
-        variant: "success",
+        title: 'Erro',
+        description: 'Não foi possível atualizar a frequência. Tente novamente.',
+        variant: 'destructive',
       });
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    );
+  if (loading) {
+    return <div>Carregando preferências...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Canais de Notificação</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Bell className="h-5 w-5 text-gray-500" />
-                <Label htmlFor="app-notif" className="font-medium">
-                  Notificações no aplicativo
-                </Label>
-              </div>
-              <Switch 
-                id="app-notif" 
-                checked={preferences.app}
-                onCheckedChange={(checked) => {
-                  if (checked && isNotificationsSupported) {
-                    enableBrowserNotifications();
-                  } else {
-                    setPreferences(prev => ({ ...prev, app: checked }));
-                  }
-                }}
-              />
+    <Card>
+      <CardHeader>
+        <CardTitle>Preferências de Notificação</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app-notifications" className="text-base">Notificações no Aplicativo</Label>
+              <p className="text-sm text-muted-foreground">
+                Receba notificações diretamente na plataforma
+              </p>
             </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Mail className="h-5 w-5 text-gray-500" />
-                <Label htmlFor="email-notif" className="font-medium">
-                  Notificações por e-mail
-                </Label>
-              </div>
-              <Switch 
-                id="email-notif" 
-                checked={preferences.email}
-                onCheckedChange={(checked) => 
-                  setPreferences(prev => ({ ...prev, email: checked }))
-                }
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <MessageSquare className="h-5 w-5 text-gray-500" />
-                <Label htmlFor="resumo-notif" className="font-medium">
-                  Receber resumo diário
-                </Label>
-              </div>
-              <Switch 
-                id="resumo-notif" 
-                checked={preferences.resumo_diario}
-                onCheckedChange={(checked) => 
-                  setPreferences(prev => ({ ...prev, resumo_diario: checked }))
-                }
-              />
-            </div>
+            <Switch
+              id="app-notifications"
+              checked={preferences.app}
+              onCheckedChange={(value) => updatePreference('app', value)}
+            />
           </div>
-          
-          {isNotificationsSupported === false && preferences.app && (
-            <AttentionBox 
-              title="Notificações não suportadas" 
-              variant="warning"
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email-notifications" className="text-base">Notificações por Email</Label>
+              <p className="text-sm text-muted-foreground">
+                Receba notificações importantes por email
+              </p>
+            </div>
+            <Switch
+              id="email-notifications"
+              checked={preferences.email}
+              onCheckedChange={(value) => updatePreference('email', value)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="daily-summary" className="text-base">Resumo de Atividades</Label>
+              <p className="text-sm text-muted-foreground">
+                Receba um resumo das atividades e notificações
+              </p>
+            </div>
+            <Switch
+              id="daily-summary"
+              checked={preferences.resumo_diario}
+              onCheckedChange={(value) => updatePreference('resumo_diario', value)}
+            />
+          </div>
+        </div>
+
+        {preferences.resumo_diario && (
+          <div>
+            <Label htmlFor="frequency-select" className="text-base mb-2 block">
+              Frequência do Resumo
+            </Label>
+            <Select
+              value={frequency.value}
+              onValueChange={updateFrequency}
             >
-              Seu navegador não suporta notificações ou elas foram bloqueadas. 
-              Verifique as permissões do seu navegador.
-            </AttentionBox>
-          )}
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Frequência de Notificações</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <RadioGroup value={frequency} onValueChange={setFrequency}>
-            <div className="flex items-center space-x-2 py-2">
-              <RadioGroupItem value="imediata" id="imediata" />
-              <Label htmlFor="imediata">Imediata (receber em tempo real)</Label>
-            </div>
-            <div className="flex items-center space-x-2 py-2">
-              <RadioGroupItem value="agrupada" id="agrupada" />
-              <Label htmlFor="agrupada">Agrupada (receber a cada hora)</Label>
-            </div>
-            <div className="flex items-center space-x-2 py-2">
-              <RadioGroupItem value="diaria" id="diaria" />
-              <Label htmlFor="diaria">Diária (receber uma vez ao dia)</Label>
-            </div>
-          </RadioGroup>
-        </CardContent>
-      </Card>
-      
-      <div className="flex justify-end">
-        <Button 
-          onClick={savePreferences} 
-          disabled={isSaving}
-        >
-          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Salvar Preferências
-        </Button>
-      </div>
-    </div>
+              <SelectTrigger id="frequency-select">
+                <SelectValue placeholder={frequency.label} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="imediata">Imediata</SelectItem>
+                <SelectItem value="diario">Diário</SelectItem>
+                <SelectItem value="semanal">Semanal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
