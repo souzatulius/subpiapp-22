@@ -4,7 +4,7 @@ import UsersHeader from './UsersHeader';
 import UsersTable from './UsersTable';
 import UsersDialogs from './UsersDialogs';
 
-const UsersLayout = (props: any) => {
+const UsersLayout = (props) => {
   const {
     users,
     loading,

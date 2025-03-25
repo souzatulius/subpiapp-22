@@ -1,115 +1,55 @@
-
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { sendApprovalEmail } from '@/lib/authUtils';
+import { supabase } from '@/integrations/supabase/client';
 
-export const useUserApproval = (fetchUsers: () => Promise<void>) => {
+export const useUserApproval = (fetchData: () => Promise<void>) => {
   const [approving, setApproving] = useState(false);
 
-  // Function to approve a user by assigning them the specified permission
-  const approveUser = async (userId: string, userName: string, userEmail: string, permissionLevel = "Restrito") => {
-    setApproving(true);
-    console.log(`Approving user ${userId} with permission level ${permissionLevel}`);
+  const approveUser = async (userId: string, userName: string, userEmail: string, permissionLevel?: string) => {
+    if (!userId) return;
     
+    setApproving(true);
     try {
-      // Get permission ID for the specified level
-      const { data: permission, error: permissionError } = await supabase
+      // 1. Get the permission ID based on the level
+      const permissionLevel_ = permissionLevel || 'Restrito';
+      
+      const { data: permissionData, error: permissionError } = await supabase
         .from('permissoes')
         .select('id')
-        .eq('descricao', permissionLevel)
-        .maybeSingle();
-        
-      if (permissionError) {
-        console.error('Error fetching permission:', permissionError);
-        throw permissionError;
+        .eq('descricao', permissionLevel_)
+        .single();
+      
+      if (permissionError) throw permissionError;
+      
+      if (!permissionData) {
+        throw new Error(`Permissão "${permissionLevel_}" não encontrada.`);
       }
       
-      let permissionId;
-      
-      // If permission doesn't exist, create it
-      if (!permission) {
-        console.log(`Permission "${permissionLevel}" not found, creating it...`);
-        
-        // Determine nivel_acesso based on permissionLevel
-        let nivelAcesso = 10; // Default for Restrito
-        
-        switch (permissionLevel) {
-          case 'Admin':
-            nivelAcesso = 100;
-            break;
-          case 'Subprefeito':
-            nivelAcesso = 90;
-            break;
-          case 'Time de Comunicação':
-            nivelAcesso = 80;
-            break;
-          case 'Gestores':
-            nivelAcesso = 70;
-            break;
-          // Restrito stays at 10
-        }
-        
-        // Insert the permission with appropriate nivel_acesso
-        const { data: newPermission, error: createError } = await supabase
-          .from('permissoes')
-          .insert({
-            descricao: permissionLevel,
-            nivel_acesso: nivelAcesso
-          })
-          .select('id')
-          .single();
-        
-        if (createError) {
-          console.error('Error creating permission:', createError);
-          throw createError;
-        }
-        
-        if (!newPermission) throw new Error(`Não foi possível criar a permissão "${permissionLevel}"`);
-        
-        permissionId = newPermission.id;
-        console.log(`Created "${permissionLevel}" permission with ID: ${permissionId}`);
-      } else {
-        permissionId = permission.id;
-      }
-      
-      // Assign permission to user
+      // 2. Associate the user with the permission
       const { error: assignError } = await supabase
-        .from('usuario_permissoes')
+        .from('usuarios_permissoes')
         .insert({
           usuario_id: userId,
-          permissao_id: permissionId
+          permissao_id: permissionData.id
         });
-        
-      if (assignError) {
-        console.error('Error assigning permission:', assignError);
-        throw assignError;
-      }
       
-      // Send approval email
-      await sendApprovalEmail(userId);
+      if (assignError) throw assignError;
       
-      // Create notification for the user
-      await supabase
-        .from('notificacoes')
-        .insert({
-          usuario_id: userId,
-          mensagem: `Seu cadastro foi aprovado com nível de acesso "${permissionLevel}". Você já pode acessar o sistema.`,
-          tipo: 'sistema'
-        });
+      // 3. Send approval notification if needed
+      // This could call a serverless function to send an email
       
       toast({
-        title: 'Usuário aprovado',
-        description: `${userName} (${userEmail}) agora tem acesso ao sistema com nível "${permissionLevel}".`,
+        title: 'Acesso aprovado',
+        description: `O usuário ${userName} agora tem acesso como "${permissionLevel_}".`,
       });
       
-      // Refresh users list
-      await fetchUsers();
+      // Refresh users data
+      await fetchData();
     } catch (error: any) {
       console.error('Erro ao aprovar usuário:', error);
       toast({
-        title: 'Erro ao aprovar usuário',
-        description: error.message || 'Ocorreu um erro ao aprovar o usuário.',
+        title: 'Erro',
+        description: error.message || 'Não foi possível aprovar o acesso do usuário. Por favor, tente novamente.',
         variant: 'destructive',
       });
     } finally {

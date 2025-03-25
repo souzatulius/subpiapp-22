@@ -6,16 +6,16 @@ import { User } from '../types';
 
 export const useUserDelete = (fetchData: () => Promise<void>) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const handleDeleteUser = async () => {
-    if (!currentUser?.id) return;
+    if (!userToDelete?.id) return;
     
     try {
-      // First, delete from auth.users (which will cascade to public.usuarios)
-      const { error } = await supabase.auth.admin.deleteUser(
-        currentUser.id
-      );
+      const { error } = await supabase
+        .from('usuarios')
+        .delete()
+        .eq('id', userToDelete.id);
       
       if (error) throw error;
       
@@ -39,17 +39,17 @@ export const useUserDelete = (fetchData: () => Promise<void>) => {
     }
   };
 
-  const openDeleteDialog = (user: User) => {
-    setCurrentUser(user);
+  const deleteUser = (user: User) => {
+    setUserToDelete(user);
     setIsDeleteDialogOpen(true);
   };
 
   return {
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
-    currentUser,
-    setCurrentUser,
+    userToDelete,
+    setUserToDelete,
     handleDeleteUser,
-    openDeleteDialog,
+    deleteUser,
   };
 };

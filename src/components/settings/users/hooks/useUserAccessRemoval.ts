@@ -1,20 +1,19 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useUserAccessRemoval = (fetchData: () => Promise<void>) => {
   const [removing, setRemoving] = useState(false);
 
-  const removeUserAccess = async (userId: string, userName: string) => {
+  const removeAccess = async (userId: string, userName: string) => {
     if (!userId) return;
     
     setRemoving(true);
-    
     try {
-      // Delete all permissions for the user
+      // Remove all permissions for this user
       const { error } = await supabase
-        .from('usuario_permissoes')
+        .from('usuarios_permissoes')
         .delete()
         .eq('usuario_id', userId);
       
@@ -22,25 +21,25 @@ export const useUserAccessRemoval = (fetchData: () => Promise<void>) => {
       
       toast({
         title: 'Acesso removido',
-        description: `O acesso de ${userName} foi removido com sucesso.`,
+        description: `Todas as permissões de ${userName} foram removidas.`,
       });
       
-      // Refresh data to update the UI
+      // Refresh users data
       await fetchData();
     } catch (error: any) {
       console.error('Erro ao remover acesso do usuário:', error);
       toast({
         title: 'Erro',
-        description: `Não foi possível remover o acesso: ${error.message}`,
+        description: error.message || 'Não foi possível remover o acesso do usuário. Por favor, tente novamente.',
         variant: 'destructive',
       });
     } finally {
       setRemoving(false);
     }
   };
-  
+
   return {
     removing,
-    removeUserAccess
+    removeAccess
   };
 };
