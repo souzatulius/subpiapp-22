@@ -4,14 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BellOff, X, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNotifications } from '@/hooks/notifications';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 const NotificationsEnabler: React.FC = () => {
   const { 
     isNotificationsSupported, 
     notificationsPermission, 
     requestPermissionAndRegisterToken, 
-    isLoading
+    isLoading 
   } = useNotifications();
   
   const [isVisible, setIsVisible] = useState(true);

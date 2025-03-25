@@ -17,6 +17,7 @@ export const useNotifications = () => {
   const { user } = useAuth();
   const [notificationsPermission, setNotificationsPermission] = useState<NotificationPermission>('default');
   const [isNotificationsSupported, setIsNotificationsSupported] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
     // Check if browser supports notifications
@@ -30,6 +31,8 @@ export const useNotifications = () => {
     if (!user || !('Notification' in window)) return false;
     
     try {
+      setIsLoading(true);
+      
       // Request permission
       const permission = await Notification.requestPermission();
       setNotificationsPermission(permission);
@@ -47,10 +50,10 @@ export const useNotifications = () => {
         .from('tokens_notificacoes')
         .upsert({
           user_id: user.id,
-          token: mockToken,
-          device_type: 'browser',
-          created_at: new Date().toISOString()
-        }, { onConflict: 'user_id,token' });
+          fcm_token: mockToken,
+          navegador: navigator.userAgent,
+          criado_em: new Date().toISOString()
+        }, { onConflict: 'user_id,fcm_token' });
         
       if (error) throw error;
       
@@ -58,12 +61,15 @@ export const useNotifications = () => {
     } catch (error) {
       console.error('Erro ao registrar token de notificação:', error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   }, [user]);
   
   return {
     notificationsPermission,
     isNotificationsSupported,
-    requestPermissionAndRegisterToken
+    requestPermissionAndRegisterToken,
+    isLoading
   };
 };

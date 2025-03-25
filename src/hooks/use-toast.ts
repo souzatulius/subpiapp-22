@@ -159,7 +159,8 @@ export const useToast = () => {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast(props: Toast) {
+// Make sure we export the toast function
+export function toast(props: Toast) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
