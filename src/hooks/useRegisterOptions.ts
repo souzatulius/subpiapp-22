@@ -28,27 +28,25 @@ export const useRegisterOptions = () => {
         
         console.log('Cargos data received:', cargosData);
         
-        // Fetch supervisions from areas_coordenacao table
+        // Fetch supervisions from supervisoes_tecnicas table
         console.log('Fetching supervisions from Supabase...');
-        const { data: areasData, error: areasError } = await supabase
-          .from('areas_coordenacao')
+        const { data: supervisoesData, error: supervisoesError } = await supabase
+          .from('supervisoes_tecnicas')
           .select('id, descricao')
-          .eq('is_supervision', true)
           .order('descricao', { ascending: true });
         
-        if (areasError) {
-          console.error('Error fetching areas:', areasError);
-          throw areasError;
+        if (supervisoesError) {
+          console.error('Error fetching supervisions:', supervisoesError);
+          throw supervisoesError;
         }
         
-        console.log('Supervisions data received:', areasData);
+        console.log('Supervisions data received:', supervisoesData);
         
-        // Fetch coordenações directly from the table
+        // Fetch coordenações from the new table
         console.log('Fetching coordenações from Supabase...');
         const { data: coordenacoesData, error: coordenacoesError } = await supabase
-          .from('areas_coordenacao')
+          .from('coordenacoes')
           .select('id, descricao')
-          .eq('is_supervision', false)
           .order('descricao', { ascending: true });
         
         if (coordenacoesError) {
@@ -62,7 +60,7 @@ export const useRegisterOptions = () => {
           console.warn('No cargos found in the database');
         }
         
-        if (!areasData || areasData.length === 0) {
+        if (!supervisoesData || supervisoesData.length === 0) {
           console.warn('No supervisions found in the database');
         }
         
@@ -72,7 +70,7 @@ export const useRegisterOptions = () => {
         
         // Transform data to options format
         setRoles(cargosData?.map(item => ({ id: item.id, value: item.descricao })) || []);
-        setAreas(areasData?.map(item => ({ id: item.id, value: item.descricao })) || []);
+        setAreas(supervisoesData?.map(item => ({ id: item.id, value: item.descricao })) || []);
         setCoordenacoes(coordenacoesData?.map(item => ({ 
           id: item.id, 
           value: item.descricao 

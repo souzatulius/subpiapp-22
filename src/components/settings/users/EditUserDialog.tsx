@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
-import { User, UserFormData, Area, Cargo } from './types';
+import { User, UserFormData, SupervisaoTecnica, Cargo, Coordenacao } from './types';
 import UserFormFields from './dialog/UserFormFields';
 import DialogFooterActions from './dialog/DialogFooterActions';
 import useUserFormLogic from './dialog/useUserFormLogic';
@@ -17,9 +17,9 @@ interface EditUserDialogProps {
   onOpenChange: (open: boolean) => void;
   user: User | null;
   onSubmit: (data: UserFormData) => Promise<void>;
-  areas: Area[];
+  supervisoesTecnicas: SupervisaoTecnica[];
   cargos: Cargo[];
-  coordenacoes?: {coordenacao_id: string, coordenacao: string}[];
+  coordenacoes?: Coordenacao[];
   isSubmitting?: boolean;
 }
 
@@ -28,7 +28,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   onOpenChange,
   user,
   onSubmit,
-  areas,
+  supervisoesTecnicas,
   cargos,
   coordenacoes = [],
   isSubmitting = false
@@ -43,12 +43,12 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   } = useForm<UserFormData>();
 
   const coordenacao = watch('coordenacao_id') || '';
-  const { filterAreasByCoordination } = useUserFormLogic(areas);
+  const { filterSupervisoesByCoordination } = useUserFormLogic(supervisoesTecnicas);
   
-  // Filter areas based on the selected coordination
-  const filteredAreas = React.useMemo(() => 
-    filterAreasByCoordination(coordenacao), 
-    [coordenacao, areas]
+  // Filter supervisions based on the selected coordination
+  const filteredSupervisoes = React.useMemo(() => 
+    filterSupervisoesByCoordination(coordenacao), 
+    [coordenacao, supervisoesTecnicas]
   );
 
   // Reset form when opening or changing user
@@ -58,8 +58,8 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         nome_completo: user.nome_completo,
         email: user.email,
         cargo_id: user.cargo_id || '',
-        coordenacao_id: user.coordenacao_id || user.areas_coordenacao?.coordenacao_id || '',
-        area_coordenacao_id: user.area_coordenacao_id || '',
+        coordenacao_id: user.coordenacao_id || '',
+        supervisao_tecnica_id: user.supervisao_tecnica_id || '',
         whatsapp: user.whatsapp || '',
         aniversario: user.aniversario ? new Date(user.aniversario) : undefined
       });
@@ -69,7 +69,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         email: '',
         cargo_id: '',
         coordenacao_id: '',
-        area_coordenacao_id: '',
+        supervisao_tecnica_id: '',
         whatsapp: '',
         aniversario: undefined
       });
@@ -91,11 +91,11 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
             watch={watch}
             setValue={setValue}
             errors={errors}
-            areas={areas}
+            supervisoesTecnicas={supervisoesTecnicas}
             cargos={cargos}
             coordenacoes={coordenacoes}
             register={register}
-            filteredAreas={filteredAreas}
+            filteredSupervisoes={filteredSupervisoes}
             coordenacao={coordenacao}
           />
           <DialogFooterActions 

@@ -223,9 +223,29 @@ export type Database = {
         }
         Relationships: []
       }
+      coordenacoes: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+          sigla: string | null
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+          sigla?: string | null
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+          sigla?: string | null
+        }
+        Relationships: []
+      }
       demandas: {
         Row: {
-          area_coordenacao_id: string | null
           arquivo_url: string | null
           atualizado_em: string
           autor_id: string
@@ -244,13 +264,13 @@ export type Database = {
           protocolo: string | null
           servico_id: string | null
           status: string
+          supervisao_tecnica_id: string | null
           telefone_solicitante: string | null
           tipo_midia_id: string | null
           titulo: string
           veiculo_imprensa: string | null
         }
         Insert: {
-          area_coordenacao_id?: string | null
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id: string
@@ -269,13 +289,13 @@ export type Database = {
           protocolo?: string | null
           servico_id?: string | null
           status: string
+          supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
           tipo_midia_id?: string | null
           titulo: string
           veiculo_imprensa?: string | null
         }
         Update: {
-          area_coordenacao_id?: string | null
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id?: string
@@ -294,6 +314,7 @@ export type Database = {
           protocolo?: string | null
           servico_id?: string | null
           status?: string
+          supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
           tipo_midia_id?: string | null
           titulo?: string
@@ -336,6 +357,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_supervisao_tecnica_id_fkey"
+            columns: ["supervisao_tecnica_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoes_tecnicas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_tipo_midia_id_fkey"
             columns: ["tipo_midia_id"]
             isOneToOne: false
@@ -365,7 +393,6 @@ export type Database = {
       notas_oficiais: {
         Row: {
           aprovador_id: string | null
-          area_coordenacao_id: string | null
           atualizado_em: string
           autor_id: string
           criado_em: string
@@ -373,12 +400,12 @@ export type Database = {
           id: string
           problema_id: string
           status: string
+          supervisao_tecnica_id: string | null
           texto: string
           titulo: string
         }
         Insert: {
           aprovador_id?: string | null
-          area_coordenacao_id?: string | null
           atualizado_em?: string
           autor_id: string
           criado_em?: string
@@ -386,12 +413,12 @@ export type Database = {
           id?: string
           problema_id: string
           status?: string
+          supervisao_tecnica_id?: string | null
           texto: string
           titulo: string
         }
         Update: {
           aprovador_id?: string | null
-          area_coordenacao_id?: string | null
           atualizado_em?: string
           autor_id?: string
           criado_em?: string
@@ -399,6 +426,7 @@ export type Database = {
           id?: string
           problema_id?: string
           status?: string
+          supervisao_tecnica_id?: string | null
           texto?: string
           titulo?: string
         }
@@ -436,6 +464,13 @@ export type Database = {
             columns: ["demanda_id"]
             isOneToOne: false
             referencedRelation: "demandas_visiveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_oficiais_supervisao_tecnica_id_fkey"
+            columns: ["supervisao_tecnica_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoes_tecnicas"
             referencedColumns: ["id"]
           },
         ]
@@ -756,30 +791,30 @@ export type Database = {
       }
       problemas: {
         Row: {
-          area_coordenacao_id: string
           atualizado_em: string | null
           criado_em: string
           descricao: string
           id: string
+          supervisao_tecnica_id: string
         }
         Insert: {
-          area_coordenacao_id: string
           atualizado_em?: string | null
           criado_em?: string
           descricao: string
           id?: string
+          supervisao_tecnica_id: string
         }
         Update: {
-          area_coordenacao_id?: string
           atualizado_em?: string | null
           criado_em?: string
           descricao?: string
           id?: string
+          supervisao_tecnica_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "problemas_area_coordenacao_id_fkey"
-            columns: ["area_coordenacao_id"]
+            columns: ["supervisao_tecnica_id"]
             isOneToOne: false
             referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
@@ -917,25 +952,25 @@ export type Database = {
       }
       servicos: {
         Row: {
-          area_coordenacao_id: string | null
           criado_em: string
           descricao: string
           id: string
           problema_id: string
+          supervisao_id: string | null
         }
         Insert: {
-          area_coordenacao_id?: string | null
           criado_em?: string
           descricao: string
           id?: string
           problema_id: string
+          supervisao_id?: string | null
         }
         Update: {
-          area_coordenacao_id?: string | null
           criado_em?: string
           descricao?: string
           id?: string
           problema_id?: string
+          supervisao_id?: string | null
         }
         Relationships: [
           {
@@ -943,13 +978,6 @@ export type Database = {
             columns: ["problema_id"]
             isOneToOne: false
             referencedRelation: "problemas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "servicos_area_coordenacao_id_fkey1"
-            columns: ["area_coordenacao_id"]
-            isOneToOne: false
-            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
         ]
@@ -985,6 +1013,38 @@ export type Database = {
             columns: ["planilha_origem"]
             isOneToOne: false
             referencedRelation: "planilhas_upload"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supervisoes_tecnicas: {
+        Row: {
+          coordenacao_id: string | null
+          criado_em: string
+          descricao: string
+          id: string
+          sigla: string | null
+        }
+        Insert: {
+          coordenacao_id?: string | null
+          criado_em?: string
+          descricao: string
+          id?: string
+          sigla?: string | null
+        }
+        Update: {
+          coordenacao_id?: string | null
+          criado_em?: string
+          descricao?: string
+          id?: string
+          sigla?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supervisoes_tecnicas_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "coordenacoes"
             referencedColumns: ["id"]
           },
         ]
@@ -1156,7 +1216,6 @@ export type Database = {
       usuarios: {
         Row: {
           aniversario: string | null
-          area_coordenacao_id: string | null
           cargo_id: string | null
           configuracoes_notificacao: Json | null
           coordenacao_id: string | null
@@ -1166,11 +1225,11 @@ export type Database = {
           id: string
           nome_completo: string
           problema_id: string | null
+          supervisao_tecnica_id: string | null
           whatsapp: string | null
         }
         Insert: {
           aniversario?: string | null
-          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           coordenacao_id?: string | null
@@ -1180,11 +1239,11 @@ export type Database = {
           id: string
           nome_completo: string
           problema_id?: string | null
+          supervisao_tecnica_id?: string | null
           whatsapp?: string | null
         }
         Update: {
           aniversario?: string | null
-          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           coordenacao_id?: string | null
@@ -1194,6 +1253,7 @@ export type Database = {
           id?: string
           nome_completo?: string
           problema_id?: string | null
+          supervisao_tecnica_id?: string | null
           whatsapp?: string | null
         }
         Relationships: [
@@ -1212,16 +1272,35 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "usuarios_coordenacao_id_fkey"
+            foreignKeyName: "usuarios_coordenacao_id_fkey1"
             columns: ["coordenacao_id"]
             isOneToOne: false
-            referencedRelation: "areas_coordenacao"
+            referencedRelation: "coordenacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuarios_supervisao_tecnica_id_fkey"
+            columns: ["supervisao_tecnica_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoes_tecnicas"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Views: {
+      areas_coordenacao_view: {
+        Row: {
+          coordenacao: string | null
+          coordenacao_id: string | null
+          criado_em: string | null
+          descricao: string | null
+          id: string | null
+          is_supervision: boolean | null
+          sigla: string | null
+        }
+        Relationships: []
+      }
       demandas_visiveis: {
         Row: {
           arquivo_url: string | null

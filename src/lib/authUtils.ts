@@ -74,7 +74,6 @@ export const createAdminNotification = async (
       mensagem: `${userName} (${email}) solicitou acesso ao sistema.`,
       tipo: 'user_registration',
       usuario_id: userId,
-      // Removed the 'titulo' field since it doesn't exist in the schema
     });
     
     console.log('Notificação de novo registro criada com sucesso');
@@ -94,7 +93,7 @@ export const updateUserProfile = async (userId: string, userData: any): Promise<
         aniversario: userData.aniversario,
         whatsapp: userData.whatsapp,
         cargo_id: userData.cargo_id,
-        area_coordenacao_id: userData.area_coordenacao_id,
+        supervisao_tecnica_id: userData.supervisao_tecnica_id,
         coordenacao_id: userData.coordenacao_id,
       })
       .eq('id', userId);

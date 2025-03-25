@@ -15,7 +15,7 @@ export const useUsersData = () => {
     try {
       setIsLoading(true);
       
-      // Buscar usuários - selecionando apenas colunas básicas
+      // Fetch users with basic columns
       const { data: usersData, error: usersError } = await supabase
         .from('usuarios')
         .select(`
@@ -26,7 +26,7 @@ export const useUsersData = () => {
           aniversario,
           foto_perfil_url,
           cargo_id,
-          area_coordenacao_id,
+          supervisao_tecnica_id,
           coordenacao_id,
           criado_em
         `)
@@ -34,9 +34,9 @@ export const useUsersData = () => {
       
       if (usersError) throw usersError;
       
-      // Processar para adicionar dados relacionados
+      // Process to add related data
       const processedUsers = await Promise.all((usersData || []).map(async (user) => {
-        // Buscar cargo
+        // Fetch position
         let cargoInfo = { id: '', descricao: '' };
         if (user.cargo_id) {
           const { data: cargoData, error: cargoError } = await supabase
@@ -50,42 +50,42 @@ export const useUsersData = () => {
           }
         }
         
-        // Buscar área e coordenação
-        let areaInfo = { id: '', descricao: '', coordenacao: '', coordenacao_id: '' };
-        if (user.area_coordenacao_id) {
-          const { data: areaData, error: areaError } = await supabase
-            .from('areas_coordenacao')
-            .select('id, descricao, coordenacao, coordenacao_id')
-            .eq('id', user.area_coordenacao_id)
+        // Fetch technical supervision
+        let supervisaoTecnica = { id: '', descricao: '', coordenacao_id: '' };
+        if (user.supervisao_tecnica_id) {
+          const { data: supervisaoData, error: supervisaoError } = await supabase
+            .from('supervisoes_tecnicas')
+            .select('id, descricao, coordenacao_id')
+            .eq('id', user.supervisao_tecnica_id)
             .maybeSingle();
             
-          if (!areaError && areaData) {
-            areaInfo = {
-              id: areaData.id || '',
-              descricao: areaData.descricao || '',
-              coordenacao: areaData.coordenacao || '',
-              coordenacao_id: areaData.coordenacao_id || ''
-            };
-          }
-        } else if (user.coordenacao_id) {
-          // If no area but has coordenacao, fetch coordenacao details
-          const { data: coordData, error: coordError } = await supabase
-            .from('areas_coordenacao')
-            .select('id, descricao')
-            .eq('id', user.coordenacao_id)
-            .maybeSingle();
-            
-          if (!coordError && coordData) {
-            areaInfo = {
-              id: '',
-              descricao: '',
-              coordenacao: coordData.descricao || '',
-              coordenacao_id: user.coordenacao_id
+          if (!supervisaoError && supervisaoData) {
+            supervisaoTecnica = {
+              id: supervisaoData.id || '',
+              descricao: supervisaoData.descricao || '',
+              coordenacao_id: supervisaoData.coordenacao_id || ''
             };
           }
         }
         
-        // Buscar permissões
+        // Fetch coordination
+        let coordenacao = { id: '', descricao: '' };
+        if (user.coordenacao_id) {
+          const { data: coordenacaoData, error: coordenacaoError } = await supabase
+            .from('coordenacoes')
+            .select('id, descricao')
+            .eq('id', user.coordenacao_id)
+            .maybeSingle();
+            
+          if (!coordenacaoError && coordenacaoData) {
+            coordenacao = {
+              id: coordenacaoData.id || '',
+              descricao: coordenacaoData.descricao || ''
+            };
+          }
+        }
+        
+        // Fetch permissions
         const { data: permissionsData, error: permissionsError } = await supabase
           .from('usuario_permissoes')
           .select(`
@@ -103,7 +103,8 @@ export const useUsersData = () => {
         return { 
           ...user, 
           cargos: cargoInfo,
-          areas_coordenacao: areaInfo,
+          supervisao_tecnica: supervisaoTecnica,
+          coordenacao: coordenacao,
           permissoes
         } as User;
       }));
@@ -122,23 +123,23 @@ export const useUsersData = () => {
     }
   };
 
-  // Filtrar usuários com base na pesquisa e filtro de status
+  // Filter users based on search and status
   useEffect(() => {
     let filtered = users;
     
-    // Aplicar filtro de pesquisa
+    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(user => 
         user.nome_completo.toLowerCase().includes(query) ||
         user.email.toLowerCase().includes(query) ||
         user.cargos?.descricao.toLowerCase().includes(query) ||
-        user.areas_coordenacao?.descricao?.toLowerCase().includes(query) ||
-        user.areas_coordenacao?.coordenacao?.toLowerCase().includes(query)
+        user.supervisao_tecnica?.descricao?.toLowerCase().includes(query) ||
+        user.coordenacao?.descricao?.toLowerCase().includes(query)
       );
     }
     
-    // Aplicar filtro de status
+    // Apply status filter
     if (statusFilter !== 'todos') {
       if (statusFilter === 'ativos') {
         filtered = filtered.filter(user => user.permissoes && user.permissoes.length > 0);

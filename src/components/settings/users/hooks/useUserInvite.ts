@@ -9,7 +9,7 @@ interface InviteUserData {
   nome_completo: string;
   cargo_id?: string;
   coordenacao_id?: string;
-  area_coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
 }
 
 export const useUserInvite = (fetchData: () => Promise<void>) => {
@@ -35,8 +35,8 @@ export const useUserInvite = (fetchData: () => Promise<void>) => {
         cleanData.coordenacao_id = data.coordenacao_id;
       }
       
-      if (data.area_coordenacao_id && data.area_coordenacao_id !== 'select-area') {
-        cleanData.area_coordenacao_id = data.area_coordenacao_id;
+      if (data.supervisao_tecnica_id && data.supervisao_tecnica_id !== 'select-supervisao') {
+        cleanData.supervisao_tecnica_id = data.supervisao_tecnica_id;
       }
       
       console.log('Inviting user with data:', cleanData);
@@ -50,7 +50,7 @@ export const useUserInvite = (fetchData: () => Promise<void>) => {
             name: data.nome_completo,
             role_id: cleanData.cargo_id || null,
             coordenacao_id: cleanData.coordenacao_id || null,
-            area_id: cleanData.area_coordenacao_id || null,
+            supervision_id: cleanData.supervisao_tecnica_id || null,
           }
         }
       });

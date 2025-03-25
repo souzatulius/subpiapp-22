@@ -2,27 +2,27 @@
 import { useState, useEffect } from 'react';
 import { useUsersData } from './useUsersData';
 import { supabase } from '@/integrations/supabase/client';
-import { Area, Cargo } from './types';
+import { SupervisaoTecnica, Cargo } from './types';
 
 export const useUsersManagement = () => {
   const { users, filteredUsers, isLoading, searchQuery, setSearchQuery, statusFilter, setStatusFilter, refreshUsers } = useUsersData();
-  const [areas, setAreas] = useState<Area[]>([]);
+  const [supervisoesTecnicas, setSupervisoesTecnicas] = useState<SupervisaoTecnica[]>([]);
   const [cargos, setCargos] = useState<Cargo[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Buscar áreas
-      const { data: areasData, error: areasError } = await supabase
-        .from('areas_coordenacao')
-        .select('id, descricao')
+      // Fetch technical supervisions
+      const { data: supervisoesData, error: supervisoesError } = await supabase
+        .from('supervisoes_tecnicas')
+        .select('id, descricao, coordenacao_id')
         .order('descricao');
       
-      if (areasError) throw areasError;
-      setAreas(areasData || []);
+      if (supervisoesError) throw supervisoesError;
+      setSupervisoesTecnicas(supervisoesData || []);
       
-      // Buscar cargos
+      // Fetch positions
       const { data: cargosData, error: cargosError } = await supabase
         .from('cargos')
         .select('id, descricao')
@@ -31,7 +31,7 @@ export const useUsersManagement = () => {
       if (cargosError) throw cargosError;
       setCargos(cargosData || []);
       
-      // Buscar usuários
+      // Fetch users
       await refreshUsers();
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
@@ -53,7 +53,7 @@ export const useUsersManagement = () => {
     statusFilter,
     setStatusFilter,
     refreshUsers,
-    areas,
+    supervisoesTecnicas,
     cargos,
     loading,
     fetchData

@@ -40,9 +40,8 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           
           // Fetch technical supervisions for this coordination
           const { data, error } = await supabase
-            .from('areas_coordenacao')
+            .from('supervisoes_tecnicas')
             .select('id, descricao')
-            .eq('is_supervision', true)
             .eq('coordenacao_id', coordenacao);
             
           if (error) throw error;

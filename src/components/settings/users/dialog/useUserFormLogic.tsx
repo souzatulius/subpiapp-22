@@ -1,19 +1,19 @@
 
 import React from 'react';
-import { User, Area } from '../types';
+import { User, SupervisaoTecnica } from '../types';
 
-export const useUserFormLogic = (areas: Area[]) => {
-  // Handle coordination and area filtering
-  const filterAreasByCoordination = (coordenacao: string) => {
-    if (!coordenacao || coordenacao === 'select-coordenacao') return [];
+export const useUserFormLogic = (supervisoesTecnicas: SupervisaoTecnica[]) => {
+  // Handle coordination and supervision filtering
+  const filterSupervisoesByCoordination = (coordenacaoId: string) => {
+    if (!coordenacaoId || coordenacaoId === 'select-coordenacao') return [];
     
-    const filtered = areas.filter(a => a.coordenacao_id === coordenacao);
-    console.log(`Filtered ${filtered.length} supervisions for coordination ${coordenacao}`);
+    const filtered = supervisoesTecnicas.filter(s => s.coordenacao_id === coordenacaoId);
+    console.log(`Filtered ${filtered.length} supervisions for coordination ${coordenacaoId}`);
     return filtered;
   };
   
   return {
-    filterAreasByCoordination
+    filterSupervisoesByCoordination
   };
 };
 

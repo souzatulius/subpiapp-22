@@ -22,7 +22,7 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         aniversario: data.aniversario ? data.aniversario.toISOString() : null,
       };
       
-      // Process coordination fields
+      // Process fields
       // Set to null if not selected or "select-" default value
       cleanData.cargo_id = data.cargo_id && !data.cargo_id.startsWith('select-') 
         ? data.cargo_id 
@@ -32,8 +32,8 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         ? data.coordenacao_id 
         : null;
         
-      cleanData.area_coordenacao_id = data.area_coordenacao_id && !data.area_coordenacao_id.startsWith('select-')
-        ? data.area_coordenacao_id 
+      cleanData.supervisao_tecnica_id = data.supervisao_tecnica_id && !data.supervisao_tecnica_id.startsWith('select-')
+        ? data.supervisao_tecnica_id 
         : null;
       
       console.log('Updating user with data:', cleanData);

@@ -7,18 +7,21 @@ export type User = {
   aniversario?: string;
   foto_perfil_url?: string;
   cargo_id?: string;
-  area_coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
   coordenacao_id?: string;
   criado_em?: string;
   cargos?: {
     id: string;
     descricao: string;
   };
-  areas_coordenacao?: {
+  supervisao_tecnica?: {
     id: string;
     descricao: string;
-    coordenacao?: string;
     coordenacao_id?: string;
+  };
+  coordenacao?: {
+    id: string;
+    descricao: string;
   };
   permissoes?: Array<{
     id: string;
@@ -27,12 +30,17 @@ export type User = {
   }>;
 };
 
-export type Area = {
+export type SupervisaoTecnica = {
   id: string;
   descricao: string;
   sigla?: string;
-  coordenacao?: string;
   coordenacao_id?: string;
+};
+
+export type Coordenacao = {
+  id: string;
+  descricao: string;
+  sigla?: string;
 };
 
 export type Cargo = {
@@ -45,7 +53,7 @@ export interface UserFormData {
   email?: string;
   cargo_id?: string;
   coordenacao_id?: string;
-  area_coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
   whatsapp?: string;
   aniversario?: Date;
 }
@@ -55,9 +63,9 @@ export interface UsersLayoutProps {
   loading: boolean;
   filter: string;
   setFilter: (filter: string) => void;
-  areas: Area[];
+  supervisoesTecnicas: SupervisaoTecnica[];
   cargos: Cargo[];
-  coordenacoes?: {coordenacao_id: string, coordenacao: string}[];
+  coordenacoes?: Coordenacao[];
   isInviteDialogOpen: boolean;
   setIsInviteDialogOpen: (open: boolean) => void;
   handleInviteUser: (data: any) => Promise<void>;

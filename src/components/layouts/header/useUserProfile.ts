@@ -7,21 +7,20 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 export interface UserProfile {
   nome_completo: string;
   cargo?: string;
-  area?: string;
+  supervisao_tecnica?: string;
   coordenacao?: string;
   foto_perfil_url?: string;
   whatsapp?: string;
   aniversario?: string;
   cargo_id?: string;
-  area_coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
   coordenacao_id?: string;
   cargos?: {
     descricao: string;
   };
-  areas_coordenacao?: {
+  supervisao_tecnica?: {
     descricao: string;
     coordenacao_id?: string;
-    coordenacao?: string;
   };
 }
 
@@ -37,13 +36,13 @@ export const useUserProfile = () => {
     
     try {
       setIsLoading(true);
-      // Buscar perfil do usuário
+      // Fetch user profile
       const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .select(`
           nome_completo,
           cargo_id,
-          area_coordenacao_id,
+          supervisao_tecnica_id,
           coordenacao_id,
           foto_perfil_url,
           whatsapp,
@@ -54,7 +53,7 @@ export const useUserProfile = () => {
       
       if (userError) throw userError;
       
-      // Buscar cargo e área separadamente para evitar erros de relação
+      // Fetch position and area separately to avoid relation errors
       let cargoInfo = { descricao: '' };
       if (userData.cargo_id) {
         const { data: cargoData, error: cargoError } = await supabase
@@ -68,41 +67,53 @@ export const useUserProfile = () => {
         }
       }
       
-      let areaInfo = { 
+      let supervisaoTecnicaInfo = { 
         descricao: '',
-        coordenacao_id: '',
-        coordenacao: ''
+        coordenacao_id: ''
       };
       
-      if (userData.area_coordenacao_id) {
-        const { data: areaData, error: areaError } = await supabase
-          .from('areas_coordenacao')
-          .select('descricao, coordenacao')
-          .eq('id', userData.area_coordenacao_id)
+      if (userData.supervisao_tecnica_id) {
+        const { data: supervisaoData, error: supervisaoError } = await supabase
+          .from('supervisoes_tecnicas')
+          .select('descricao, coordenacao_id')
+          .eq('id', userData.supervisao_tecnica_id)
           .single();
           
-        if (!areaError && areaData) {
-          areaInfo = { 
-            descricao: areaData.descricao,
-            coordenacao_id: userData.coordenacao_id || '',
-            coordenacao: areaData.coordenacao || ''
+        if (!supervisaoError && supervisaoData) {
+          supervisaoTecnicaInfo = { 
+            descricao: supervisaoData.descricao,
+            coordenacao_id: supervisaoData.coordenacao_id || ''
           };
+        }
+      }
+      
+      // Fetch coordination
+      let coordenacaoInfo = { descricao: '' };
+      if (userData.coordenacao_id) {
+        const { data: coordenacaoData, error: coordenacaoError } = await supabase
+          .from('coordenacoes')
+          .select('descricao')
+          .eq('id', userData.coordenacao_id)
+          .single();
+          
+        if (!coordenacaoError && coordenacaoData) {
+          coordenacaoInfo = { descricao: coordenacaoData.descricao };
         }
       }
       
       setUserProfile({
         nome_completo: userData.nome_completo,
         cargo: cargoInfo.descricao,
-        area: areaInfo.descricao,
-        coordenacao: areaInfo.coordenacao,
+        supervisao_tecnica: supervisaoTecnicaInfo.descricao,
+        coordenacao: coordenacaoInfo.descricao,
         foto_perfil_url: userData.foto_perfil_url,
         whatsapp: userData.whatsapp,
         aniversario: userData.aniversario,
         cargo_id: userData.cargo_id,
-        area_coordenacao_id: userData.area_coordenacao_id,
+        supervisao_tecnica_id: userData.supervisao_tecnica_id,
         coordenacao_id: userData.coordenacao_id,
         cargos: cargoInfo,
-        areas_coordenacao: areaInfo
+        supervisao_tecnica: supervisaoTecnicaInfo
       });
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);

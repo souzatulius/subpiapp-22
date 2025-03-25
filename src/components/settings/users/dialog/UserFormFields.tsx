@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { User, Area, Cargo } from '../types';
+import { User, SupervisaoTecnica, Cargo, Coordenacao } from '../types';
 import { UseFormWatch, UseFormSetValue, FieldErrors } from 'react-hook-form';
 import { UserFormData } from '../types';
 
@@ -17,11 +17,11 @@ interface UserFormFieldsProps {
   watch: UseFormWatch<UserFormData>;
   setValue: UseFormSetValue<UserFormData>;
   errors: FieldErrors<UserFormData>;
-  areas: Area[];
+  supervisoesTecnicas: SupervisaoTecnica[];
   cargos: Cargo[];
-  coordenacoes?: {coordenacao_id: string, coordenacao: string}[];
+  coordenacoes?: Coordenacao[];
   register: any;
-  filteredAreas: Area[];
+  filteredSupervisoes: SupervisaoTecnica[];
   coordenacao: string;
 }
 
@@ -29,11 +29,11 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
   watch,
   setValue,
   errors,
-  areas,
+  supervisoesTecnicas,
   cargos,
   coordenacoes = [],
   register,
-  filteredAreas,
+  filteredSupervisoes,
   coordenacao
 }) => {
   return (
@@ -110,8 +110,8 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           value={watch('coordenacao_id')}
           onValueChange={(value) => {
             setValue('coordenacao_id', value);
-            // Reset area_coordenacao_id when coordination changes
-            setValue('area_coordenacao_id', '');
+            // Reset supervisao_tecnica_id when coordination changes
+            setValue('supervisao_tecnica_id', '');
           }}
         >
           <SelectTrigger id="coordenacao_id" className="rounded-xl border-gray-300 h-12">
@@ -120,8 +120,8 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           <SelectContent className="rounded-xl">
             <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
             {coordenacoes.map(coord => (
-              <SelectItem key={coord.coordenacao_id} value={coord.coordenacao_id}>
-                {coord.coordenacao}
+              <SelectItem key={coord.id} value={coord.id}>
+                {coord.descricao}
               </SelectItem>
             ))}
           </SelectContent>
@@ -132,44 +132,44 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="area_coordenacao_id" className="text-subpi-gray-text">Supervisão Técnica (Opcional)</Label>
+        <Label htmlFor="supervisao_tecnica_id" className="text-subpi-gray-text">Supervisão Técnica (Opcional)</Label>
         <Select
-          value={watch('area_coordenacao_id')}
-          onValueChange={(value) => setValue('area_coordenacao_id', value)}
+          value={watch('supervisao_tecnica_id')}
+          onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
           disabled={!coordenacao || coordenacao === 'select-coordenacao'}
         >
-          <SelectTrigger id="area_coordenacao_id" className="rounded-xl border-gray-300 h-12">
+          <SelectTrigger id="supervisao_tecnica_id" className="rounded-xl border-gray-300 h-12">
             <SelectValue placeholder={
               !coordenacao || coordenacao === 'select-coordenacao'
                 ? 'Selecione uma coordenação primeiro' 
-                : filteredAreas.length === 0 
+                : filteredSupervisoes.length === 0 
                   ? 'Nenhuma supervisão técnica disponível' 
                   : 'Selecione uma supervisão técnica'
             } />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             {!coordenacao || coordenacao === 'select-coordenacao' ? (
-              <SelectItem value="select-area">
+              <SelectItem value="select-supervisao">
                 Selecione uma coordenação primeiro
               </SelectItem>
-            ) : filteredAreas.length === 0 ? (
-              <SelectItem value="select-area">
+            ) : filteredSupervisoes.length === 0 ? (
+              <SelectItem value="select-supervisao">
                 Nenhuma supervisão técnica disponível
               </SelectItem>
             ) : (
               <>
-                <SelectItem value="select-area">Selecione uma supervisão técnica</SelectItem>
-                {filteredAreas.map(area => (
-                  <SelectItem key={area.id} value={area.id}>
-                    {area.descricao}
+                <SelectItem value="select-supervisao">Selecione uma supervisão técnica</SelectItem>
+                {filteredSupervisoes.map(supervisao => (
+                  <SelectItem key={supervisao.id} value={supervisao.id}>
+                    {supervisao.descricao}
                   </SelectItem>
                 ))}
               </>
             )}
           </SelectContent>
         </Select>
-        {errors.area_coordenacao_id && (
-          <p className="text-sm text-red-500">{errors.area_coordenacao_id.message}</p>
+        {errors.supervisao_tecnica_id && (
+          <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
         )}
       </div>
     </div>

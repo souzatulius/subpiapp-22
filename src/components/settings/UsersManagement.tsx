@@ -21,23 +21,22 @@ const UsersManagement = () => {
     statusFilter,
     setStatusFilter,
     refreshUsers,
-    areas,
+    supervisoesTecnicas,
     cargos,
     loading,
     fetchData
   } = useUsersManagement();
 
-  const [coordenacoes, setCoordenacoes] = useState<{coordenacao_id: string, coordenacao: string}[]>([]);
+  const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
 
-  // Fetch coordenações
+  // Fetch coordenacoes
   useEffect(() => {
     const fetchCoordenacoes = async () => {
       try {
-        // Buscar todas as coordenações diretamente da tabela, em vez de usar a função RPC
+        // Fetch coordenações from the new table
         const { data, error } = await supabase
-          .from('areas_coordenacao')
+          .from('coordenacoes')
           .select('id, descricao')
-          .eq('is_supervision', false)
           .order('descricao');
           
         if (error) {
@@ -45,14 +44,8 @@ const UsersManagement = () => {
           return;
         }
         
-        // Transformar dados para o formato esperado pelo componente
-        const formattedData = data.map(item => ({
-          coordenacao_id: item.id,
-          coordenacao: item.descricao
-        }));
-        
-        console.log('Fetched coordenações:', formattedData);
-        setCoordenacoes(formattedData || []);
+        console.log('Fetched coordenações:', data);
+        setCoordenacoes(data || []);
       } catch (error) {
         console.error('Error in fetchCoordenacoes:', error);
       }
@@ -108,7 +101,7 @@ const UsersManagement = () => {
     loading: isLoading || loading,
     filter: searchQuery,
     setFilter: setSearchQuery,
-    areas,
+    supervisoesTecnicas,
     cargos,
     coordenacoes,
     isInviteDialogOpen,

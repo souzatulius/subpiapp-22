@@ -24,7 +24,7 @@ interface ProfileFormData {
   aniversario: string;
   cargo_id: string;
   coordenacao_id: string;
-  area_coordenacao_id: string;
+  supervisao_tecnica_id: string;
 }
 
 interface EditProfileModalProps {
@@ -36,10 +36,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   const { updateProfile, user } = useAuth();
   const { userProfile, fetchUserProfile, isLoading: profileLoading } = useUserProfile();
   const [submitting, setSubmitting] = useState(false);
-  const [areas, setAreas] = useState<any[]>([]);
+  const [supervisoes, setSupervisoes] = useState<any[]>([]);
   const [cargos, setCargos] = useState<any[]>([]);
   const [coordenacoes, setCoordenacoes] = useState<any[]>([]);
-  const [filteredAreas, setFilteredAreas] = useState<any[]>([]);
+  const [filteredSupervisoes, setFilteredSupervisoes] = useState<any[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ProfileFormData>();
@@ -57,44 +57,42 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           .select('*')
           .order('descricao');
         
-        // Fetch coordenações (is_supervision = false)
+        // Fetch coordenacoes
         const { data: coordenacoesData, error: coordenacoesError } = await supabase
-          .from('areas_coordenacao')
+          .from('coordenacoes')
           .select('id, descricao')
-          .eq('is_supervision', false)
           .order('descricao');
         
         // Fetch all supervisions
-        const { data: areasData, error: areasError } = await supabase
-          .from('areas_coordenacao')
+        const { data: supervisoesData, error: supervisoesError } = await supabase
+          .from('supervisoes_tecnicas')
           .select('*')
-          .eq('is_supervision', true)
           .order('descricao');
         
         if (cargosError) throw cargosError;
         if (coordenacoesError) throw coordenacoesError;
-        if (areasError) throw areasError;
+        if (supervisoesError) throw supervisoesError;
         
         if (cargosData) setCargos(cargosData);
         if (coordenacoesData) setCoordenacoes(coordenacoesData);
-        if (areasData) setAreas(areasData);
+        if (supervisoesData) setSupervisoes(supervisoesData);
         
         console.log('Coordenações loaded:', coordenacoesData?.length);
-        console.log('All supervisions loaded:', areasData?.length);
+        console.log('All supervisions loaded:', supervisoesData?.length);
         
         // Get user's current coordenacao_id if available
         if (userProfile && userProfile.coordenacao_id) {
           setValue('coordenacao_id', userProfile.coordenacao_id);
           
           // Filter areas based on this coordenação
-          const filtered = areasData?.filter(area => 
-            area.coordenacao_id === userProfile.coordenacao_id
+          const filtered = supervisoesData?.filter(supervisao => 
+            supervisao.coordenacao_id === userProfile.coordenacao_id
           ) || [];
           
           console.log(`Filtered ${filtered.length} supervisions for coordination ${userProfile.coordenacao_id}`);
-          setFilteredAreas(filtered);
+          setFilteredSupervisoes(filtered);
         } else {
-          setFilteredAreas([]);
+          setFilteredSupervisoes([]);
         }
       } catch (error) {
         console.error('Erro ao buscar opções:', error);
@@ -113,24 +111,24 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     }
   }, [isOpen, userProfile, setValue]);
 
-  // Filter areas when coordenação changes
+  // Filter supervisions when coordenação changes
   useEffect(() => {
     if (watchedCoordenacao && watchedCoordenacao !== 'select-coordenacao') {
-      console.log(`Filtering areas for coordination ID: ${watchedCoordenacao}`);
-      // Filter the cached areas directly to avoid extra API calls
-      const filtered = areas.filter(area => area.coordenacao_id === watchedCoordenacao);
+      console.log(`Filtering supervisions for coordination ID: ${watchedCoordenacao}`);
+      // Filter the cached supervisions directly to avoid extra API calls
+      const filtered = supervisoes.filter(supervisao => supervisao.coordenacao_id === watchedCoordenacao);
       console.log(`Found ${filtered.length} supervisions for coordination ${watchedCoordenacao}`);
-      setFilteredAreas(filtered);
+      setFilteredSupervisoes(filtered);
       
-      // If the current area_coordenacao_id isn't in the filtered list, clear it
-      const currentAreaId = watch('area_coordenacao_id');
-      if (currentAreaId && !filtered.some(area => area.id === currentAreaId)) {
-        setValue('area_coordenacao_id', '');
+      // If the current supervisao_tecnica_id isn't in the filtered list, clear it
+      const currentSupervisaoId = watch('supervisao_tecnica_id');
+      if (currentSupervisaoId && !filtered.some(supervisao => supervisao.id === currentSupervisaoId)) {
+        setValue('supervisao_tecnica_id', '');
       }
     } else {
-      setFilteredAreas([]);
+      setFilteredSupervisoes([]);
     }
-  }, [watchedCoordenacao, areas, setValue, watch]);
+  }, [watchedCoordenacao, supervisoes, setValue, watch]);
 
   // Reset form when profile data changes
   useEffect(() => {
@@ -141,7 +139,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         aniversario: userProfile.aniversario ? userProfile.aniversario.split('T')[0] : '',
         cargo_id: userProfile.cargo_id || '',
         coordenacao_id: userProfile.coordenacao_id || '',
-        area_coordenacao_id: userProfile.area_coordenacao_id || '',
+        supervisao_tecnica_id: userProfile.supervisao_tecnica_id || '',
       });
     }
   }, [userProfile, reset]);
@@ -252,8 +250,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
               value={watch('coordenacao_id')}
               onValueChange={(value) => {
                 setValue('coordenacao_id', value);
-                // Clear area_coordenacao_id when coordenação changes
-                setValue('area_coordenacao_id', '');
+                // Clear supervisao_tecnica_id when coordenação changes
+                setValue('supervisao_tecnica_id', '');
               }}
               disabled={loadingOptions}
             >
@@ -272,17 +270,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="area_coordenacao_id">Supervisão Técnica</Label>
+            <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
             <Select
-              value={watch('area_coordenacao_id')}
-              onValueChange={(value) => setValue('area_coordenacao_id', value)}
-              disabled={loadingOptions || !watchedCoordenacao || watchedCoordenacao === 'select-coordenacao' || filteredAreas.length === 0}
+              value={watch('supervisao_tecnica_id')}
+              onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
+              disabled={loadingOptions || !watchedCoordenacao || watchedCoordenacao === 'select-coordenacao' || filteredSupervisoes.length === 0}
             >
               <SelectTrigger className="h-12 rounded-xl">
                 <SelectValue placeholder={
                   !watchedCoordenacao || watchedCoordenacao === 'select-coordenacao'
                     ? "Selecione uma coordenação primeiro" 
-                    : filteredAreas.length === 0 
+                    : filteredSupervisoes.length === 0 
                       ? "Nenhuma supervisão técnica para esta coordenação" 
                       : "Selecione uma supervisão técnica"
                 } />
@@ -292,16 +290,16 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
                   <SelectItem value="no-coordenacao">
                     Selecione uma coordenação primeiro
                   </SelectItem>
-                ) : filteredAreas.length === 0 ? (
+                ) : filteredSupervisoes.length === 0 ? (
                   <SelectItem value="no-supervisions">
                     Nenhuma supervisão técnica para esta coordenação
                   </SelectItem>
                 ) : (
                   <>
                     <SelectItem value="select-supervision">Selecione uma supervisão técnica</SelectItem>
-                    {filteredAreas.map(area => (
-                      <SelectItem key={area.id} value={area.id}>
-                        {area.descricao}
+                    {filteredSupervisoes.map(supervisao => (
+                      <SelectItem key={supervisao.id} value={supervisao.id}>
+                        {supervisao.descricao}
                       </SelectItem>
                     ))}
                   </>
