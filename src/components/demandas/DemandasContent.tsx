@@ -6,19 +6,35 @@ import DemandCards from './DemandCards';
 import DemandList from './DemandList';
 import DemandDetail from './DemandDetail';
 import { useDemandas } from '@/hooks/demandas/useDemandas';
+import { Demand as AppDemand } from '@/types/demand';
+
+// Extend the Demand type to include missing properties if needed
+interface DemandWithService extends AppDemand {
+  servico: {
+    descricao: string;
+  } | null;
+}
 
 const DemandasContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [filterStatus, setFilterStatus] = useState<string>('pendente');
   
   const {
-    demandas,
+    demandas: fetchedDemandas,
     isLoading,
     selectedDemand,
     isDetailOpen,
     handleSelectDemand,
     handleCloseDetail
   } = useDemandas(filterStatus);
+
+  // Convert fetched demandas to include servico property
+  const demandas = fetchedDemandas.map(demand => {
+    return {
+      ...demand,
+      servico: null // Add null servico since it's required by the interface
+    } as DemandWithService;
+  });
 
   return (
     <Card className="bg-white shadow-sm">

@@ -1,13 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Upload } from 'lucide-react';
 import { formatarData } from '../utils/formatters';
 import { Demanda } from '../types';
-import { useServicesData } from '@/hooks/services/useServicesData';
 
 interface RespostaFormProps {
   selectedDemanda: Demanda;
@@ -26,20 +24,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   isLoading,
   onSubmit
 }) => {
-  const [selectedServico, setSelectedServico] = useState<string>('');
-  const { services, areas } = useServicesData();
-  const [filteredServices, setFilteredServices] = useState<any[]>([]);
-  
-  // Filter services based on the problema_id
-  useEffect(() => {
-    if (selectedDemanda.problema_id && services) {
-      const filtered = services.filter(service => 
-        service.problema_id === selectedDemanda.problema_id
-      );
-      setFilteredServices(filtered);
-    }
-  }, [selectedDemanda.problema_id, services]);
-  
   // Helper function to render perguntas safely
   const renderPerguntas = () => {
     const { perguntas } = selectedDemanda;
@@ -72,14 +56,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     // If perguntas is a string, just display it without calling toString()
     return <p className="text-sm">{String(perguntas)}</p>;
   };
-  
-  // Update the service when submitting
-  const handleSubmitWithService = () => {
-    // We should update the demanda's service_id here in a real implementation
-    // For now, let's just log it
-    console.log('Selected service before submit:', selectedServico);
-    onSubmit();
-  };
 
   return (
     <div className="animate-fade-in">
@@ -93,32 +69,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           <div>
             <p className="text-sm font-medium text-gray-500">Área de Coordenação</p>
             <p>{selectedDemanda.areas_coordenacao?.descricao || 'Não informada'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500">Serviço</p>
-            <div className="mt-1">
-              <Select 
-                value={selectedServico} 
-                onValueChange={setSelectedServico}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione um serviço" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredServices.map(service => (
-                    <SelectItem key={service.id} value={service.id}>
-                      {service.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedServico === '' && (
-                <p className="text-sm text-amber-600 mt-1">
-                  Por favor, selecione um serviço antes de enviar a resposta
-                </p>
-              )}
-            </div>
           </div>
           
           <div>
@@ -183,8 +133,8 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         
         <div className="mt-8 flex justify-end">
           <Button 
-            onClick={handleSubmitWithService} 
-            disabled={isLoading || !resposta.trim() || !selectedServico} 
+            onClick={onSubmit} 
+            disabled={isLoading || !resposta.trim()} 
             className="bg-[#003570] hover:bg-[#002855]"
           >
             {isLoading ? "Enviando..." : "Enviar Resposta"}

@@ -49,9 +49,9 @@ export const useDemandasData = () => {
         console.log('Demandas with notas:', demandasComNotas.size);
         console.log('Demandas without notas:', demandasSemNotas.length);
         
-        // Buscar informações de supervisão técnica para cada demanda
-        const demandasProcessadas = await Promise.all(
-          demandasSemNotas.map(async (demanda) => {
+        // Processar as demandas para adicionar informações de área
+        const processedDemandas = await Promise.all(
+          demandasSemNotas.map(async (demanda: any) => {
             if (demanda.supervisao_tecnica_id) {
               const { data: supervisaoData } = await supabase
                 .from('supervisoes_tecnicas')
@@ -60,7 +60,7 @@ export const useDemandasData = () => {
                 .single();
               
               // Criar objeto completo da demanda com todas as propriedades necessárias
-              return {
+              const enhancedDemand = {
                 ...demanda,
                 supervisao_tecnica: supervisaoData || null,
                 area_coordenacao: supervisaoData ? { descricao: supervisaoData.descricao } : null,
@@ -76,11 +76,13 @@ export const useDemandasData = () => {
                 tipo_midia: null,
                 bairro: null,
                 autor: null
-              } as Demand;
+              };
+              
+              return enhancedDemand as Demand;
             }
             
             // Se não tiver supervisão técnica, criar objeto com valores padrão
-            return {
+            const defaultDemand = {
               ...demanda,
               supervisao_tecnica: null,
               area_coordenacao: null,
@@ -96,12 +98,14 @@ export const useDemandasData = () => {
               tipo_midia: null,
               bairro: null,
               autor: null
-            } as Demand;
+            };
+            
+            return defaultDemand as Demand;
           })
         );
         
-        setDemandas(demandasProcessadas);
-        setFilteredDemandas(demandasProcessadas);
+        setDemandas(processedDemandas);
+        setFilteredDemandas(processedDemandas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
         toast({
