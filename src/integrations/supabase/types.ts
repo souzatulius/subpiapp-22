@@ -11,19 +11,25 @@ export type Database = {
     Tables: {
       areas_coordenacao: {
         Row: {
+          coordenacao: string | null
           criado_em: string | null
           descricao: string
           id: string
+          sigla: string | null
         }
         Insert: {
+          coordenacao?: string | null
           criado_em?: string | null
           descricao: string
           id?: string
+          sigla?: string | null
         }
         Update: {
+          coordenacao?: string | null
           criado_em?: string | null
           descricao?: string
           id?: string
+          sigla?: string | null
         }
         Relationships: []
       }

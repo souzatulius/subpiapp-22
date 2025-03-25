@@ -8,7 +8,7 @@ interface CoordinationAreaEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   area: Area | null;
-  onSubmit: (data: { descricao: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string, sigla?: string, coordenacao?: string }) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -30,7 +30,11 @@ const CoordinationAreaEditDialog: React.FC<CoordinationAreaEditDialogProps> = ({
       <CoordinationAreaForm
         onSubmit={onSubmit}
         onCancel={onClose}
-        defaultValue={area.descricao}
+        defaultValues={{
+          descricao: area.descricao,
+          sigla: area.sigla || '',
+          coordenacao: area.coordenacao || '',
+        }}
         isSubmitting={isSubmitting}
         submitText="Salvar Alterações"
       />

@@ -38,11 +38,11 @@ const CoordinationAreas = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string }) => {
+  const handleEdit = async (data: { descricao: string, sigla?: string, coordenacao?: string }) => {
     if (!editingArea) return Promise.reject(new Error('Nenhuma área selecionada'));
     
     try {
-      await updateArea(editingArea.id, data.descricao);
+      await updateArea(editingArea.id, data);
       closeEditForm();
       return Promise.resolve();
     } catch (error) {
@@ -51,10 +51,10 @@ const CoordinationAreas = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string }) => {
+  const handleAdd = async (data: { descricao: string, sigla?: string, coordenacao?: string }) => {
     try {
       console.log('CoordinationAreas handling add:', data);
-      await addArea(data.descricao);
+      await addArea(data);
       closeAddForm();
       return Promise.resolve();
     } catch (error) {
@@ -72,6 +72,16 @@ const CoordinationAreas = () => {
     {
       key: 'descricao',
       header: 'Descrição',
+    },
+    {
+      key: 'sigla',
+      header: 'Sigla',
+      render: (row: any) => row.sigla || '-',
+    },
+    {
+      key: 'coordenacao',
+      header: 'Coordenação',
+      render: (row: any) => row.coordenacao || '-',
     },
     {
       key: 'criado_em',

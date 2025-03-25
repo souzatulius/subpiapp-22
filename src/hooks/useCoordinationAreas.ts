@@ -8,6 +8,8 @@ import { z } from 'zod';
 export type CoordinationArea = {
   id: string;
   descricao: string;
+  sigla?: string;
+  coordenacao?: string;
   criado_em?: string;
 };
 
@@ -16,7 +18,9 @@ export type Area = CoordinationArea;
 
 // Schema para validação de formulários
 export const areaSchema = z.object({
-  descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" })
+  descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" }),
+  sigla: z.string().optional(),
+  coordenacao: z.string().optional()
 });
 
 export const useCoordinationAreas = () => {
@@ -53,18 +57,18 @@ export const useCoordinationAreas = () => {
     fetchAreas();
   }, [fetchAreas]);
 
-  const addArea = async (descricao: string) => {
+  const addArea = async (data: { descricao: string, sigla?: string, coordenacao?: string }) => {
     try {
       setIsAdding(true);
-      const { data, error } = await supabase
+      const { data: newArea, error } = await supabase
         .from('areas_coordenacao')
-        .insert({ descricao })
+        .insert(data)
         .select()
         .single();
 
       if (error) throw error;
       
-      setAreas([...areas, data]);
+      setAreas([...areas, newArea]);
       toast({
         title: "Área adicionada",
         description: "Área de coordenação adicionada com sucesso.",
@@ -83,18 +87,18 @@ export const useCoordinationAreas = () => {
     }
   };
 
-  const updateArea = async (id: string, descricao: string) => {
+  const updateArea = async (id: string, data: { descricao: string, sigla?: string, coordenacao?: string }) => {
     try {
       setIsEditing(true);
       const { error } = await supabase
         .from('areas_coordenacao')
-        .update({ descricao })
+        .update(data)
         .eq('id', id);
 
       if (error) throw error;
       
       setAreas(areas.map(area => 
-        area.id === id ? { ...area, descricao } : area
+        area.id === id ? { ...area, ...data } : area
       ));
       
       toast({
