@@ -1109,7 +1109,6 @@ export type Database = {
           planilha_referencia: string | null
           sgz_bairro: string | null
           sgz_criado_em: string
-          sgz_data_status: string | null
           sgz_departamento_tecnico: string
           sgz_dias_ate_status_atual: number | null
           sgz_distrito: string
@@ -1124,7 +1123,6 @@ export type Database = {
           planilha_referencia?: string | null
           sgz_bairro?: string | null
           sgz_criado_em: string
-          sgz_data_status?: string | null
           sgz_departamento_tecnico: string
           sgz_dias_ate_status_atual?: number | null
           sgz_distrito: string
@@ -1139,7 +1137,6 @@ export type Database = {
           planilha_referencia?: string | null
           sgz_bairro?: string | null
           sgz_criado_em?: string
-          sgz_data_status?: string | null
           sgz_departamento_tecnico?: string
           sgz_dias_ate_status_atual?: number | null
           sgz_distrito?: string
@@ -1154,6 +1151,13 @@ export type Database = {
             columns: ["planilha_referencia"]
             isOneToOne: false
             referencedRelation: "sgz_uploads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sgz_ordens_servico_sgz_departamento_tecnico_fkey"
+            columns: ["sgz_departamento_tecnico"]
+            isOneToOne: false
+            referencedRelation: "sgz_departamentos_tecnicos"
             referencedColumns: ["id"]
           },
         ]

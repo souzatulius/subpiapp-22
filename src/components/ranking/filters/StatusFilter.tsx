@@ -1,45 +1,132 @@
 
 import React from 'react';
-import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { FilterOptions } from '@/components/ranking/types';
+import { 
+  Card, 
+  CardContent 
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface StatusFilterProps {
-  statuses: FilterOptions['statuses'];
+  statuses: string[];
   onStatusChange: (status: string) => void;
 }
 
-const StatusFilter: React.FC<StatusFilterProps> = ({ statuses, onStatusChange }) => {
+const StatusFilter: React.FC<StatusFilterProps> = ({ 
+  statuses, 
+  onStatusChange 
+}) => {
   return (
-    <div className="space-y-2">
-      <Label>Status</Label>
-      <Select>
-        <SelectTrigger className="border-orange-200">
-          <SelectValue placeholder="Filtrar por status" />
-        </SelectTrigger>
-        <SelectContent>
-          <div className="space-y-1 p-1">
-            {['Todos', 'Concluído', 'PREPLAN', 'PRECANC', 'Aprovado', 'Em Andamento'].map((status) => (
-              <div key={status} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`status-${status}`} 
-                  checked={statuses.includes(status as any)}
-                  onCheckedChange={() => onStatusChange(status)}
-                  className="border-orange-400 data-[state=checked]:bg-orange-600"
-                />
-                <label 
-                  htmlFor={`status-${status}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  {status}
-                </label>
-              </div>
-            ))}
+    <Card>
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <h3 className="font-medium text-sm mb-2">Status</h3>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="status-all" 
+              checked={statuses.includes('Todos')} 
+              onCheckedChange={() => onStatusChange('Todos')}
+            />
+            <label 
+              htmlFor="status-all"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Todos os Status
+            </label>
           </div>
-        </SelectContent>
-      </Select>
-    </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="status-conc" 
+              checked={statuses.includes('Concluído')} 
+              onCheckedChange={() => onStatusChange('Concluído')}
+              disabled={statuses.includes('Todos')}
+            />
+            <label 
+              htmlFor="status-conc"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Concluído (CONC)
+            </label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="status-fechado" 
+              checked={statuses.includes('FECHADO')} 
+              onCheckedChange={() => onStatusChange('FECHADO')}
+              disabled={statuses.includes('Todos')}
+            />
+            <label 
+              htmlFor="status-fechado"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Fechado
+            </label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="status-preplan" 
+              checked={statuses.includes('PREPLAN')} 
+              onCheckedChange={() => onStatusChange('PREPLAN')}
+              disabled={statuses.includes('Todos')}
+            />
+            <label 
+              htmlFor="status-preplan"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              PREPLAN
+            </label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="status-precanc" 
+              checked={statuses.includes('PRECANC')} 
+              onCheckedChange={() => onStatusChange('PRECANC')}
+              disabled={statuses.includes('Todos')}
+            />
+            <label 
+              htmlFor="status-precanc"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              PRECANC
+            </label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="status-em-andamento" 
+              checked={statuses.includes('Em Andamento')} 
+              onCheckedChange={() => onStatusChange('Em Andamento')}
+              disabled={statuses.includes('Todos')}
+            />
+            <label 
+              htmlFor="status-em-andamento"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Em Andamento
+            </label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="status-aprovado" 
+              checked={statuses.includes('Aprovado')} 
+              onCheckedChange={() => onStatusChange('Aprovado')}
+              disabled={statuses.includes('Todos')}
+            />
+            <label 
+              htmlFor="status-aprovado"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Aprovado
+            </label>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,90 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { FilterOptions } from '@/components/ranking/types';
+import { FilterOptions, SGZOrdemServico } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
-
-type SGZOrdemServico = {
-  id: string;
-  ordem_servico: string;
-  sgz_status: string;
-  sgz_departamento_tecnico: "STM" | "STLP";
-  sgz_distrito: string;
-  sgz_bairro: string;
-  sgz_tipo_servico: string;
-  sgz_empresa: string;
-  sgz_criado_em: string;
-  sgz_modificado_em: string;
-  sgz_dias_ate_status_atual?: number;
-}
-
-// Sample data for testing the implementation
-const sampleSGZData: SGZOrdemServico[] = [
-  {
-    id: '1',
-    ordem_servico: 'OS-1001',
-    sgz_departamento_tecnico: 'STM',
-    sgz_status: 'Concluído',
-    sgz_distrito: 'Pinheiros',
-    sgz_bairro: 'Cerqueira César',
-    sgz_criado_em: '2025-03-01T00:00:00Z',
-    sgz_modificado_em: '2025-03-05T00:00:00Z',
-    sgz_empresa: 'Zelar Serviços',
-    sgz_tipo_servico: 'Tapa-buraco',
-    sgz_dias_ate_status_atual: 4
-  },
-  {
-    id: '2',
-    ordem_servico: 'OS-1002',
-    sgz_departamento_tecnico: 'STLP',
-    sgz_status: 'PREPLAN',
-    sgz_distrito: 'Itaim Bibi',
-    sgz_bairro: 'Vila Olímpia',
-    sgz_criado_em: '2025-03-02T00:00:00Z',
-    sgz_modificado_em: '2025-03-06T00:00:00Z',
-    sgz_empresa: 'Urbano Engenharia',
-    sgz_tipo_servico: 'Poda de árvore',
-    sgz_dias_ate_status_atual: 4
-  },
-  {
-    id: '3',
-    ordem_servico: 'OS-1003',
-    sgz_departamento_tecnico: 'STM',
-    sgz_status: 'Aprovado',
-    sgz_distrito: 'Jardim Paulista',
-    sgz_bairro: 'Jardins',
-    sgz_criado_em: '2025-03-03T00:00:00Z',
-    sgz_modificado_em: '2025-03-07T00:00:00Z',
-    sgz_empresa: 'Infra SP',
-    sgz_tipo_servico: 'Recapeamento',
-    sgz_dias_ate_status_atual: 4
-  },
-  {
-    id: '4',
-    ordem_servico: 'OS-1004',
-    sgz_departamento_tecnico: 'STLP',
-    sgz_status: 'PRECANC',
-    sgz_distrito: 'Alto de Pinheiros',
-    sgz_bairro: 'Alto da Lapa',
-    sgz_criado_em: '2025-03-04T00:00:00Z',
-    sgz_modificado_em: '2025-03-08T00:00:00Z',
-    sgz_empresa: 'Zelar Serviços',
-    sgz_tipo_servico: 'Limpeza de boca de lobo',
-    sgz_dias_ate_status_atual: 4
-  },
-  {
-    id: '5',
-    ordem_servico: 'OS-1005',
-    sgz_departamento_tecnico: 'STM',
-    sgz_status: 'Em Andamento',
-    sgz_distrito: 'Pinheiros',
-    sgz_bairro: 'Pinheiros',
-    sgz_criado_em: '2025-03-05T00:00:00Z',
-    sgz_modificado_em: '2025-03-09T00:00:00Z',
-    sgz_empresa: 'Urbano Engenharia',
-    sgz_tipo_servico: 'Manutenção de calçada',
-    sgz_dias_ate_status_atual: 4
-  }
-];
 
 // Helper functions for chart data generation
 const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
@@ -121,6 +38,10 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
       filters.serviceTypes.some(type => item.sgz_tipo_servico.includes(type))
     );
   }
+  
+  // Filter to only include the 4 official districts
+  const validDistricts = ['Pinheiros', 'Itaim Bibi', 'Jardim Paulista', 'Alto de Pinheiros'];
+  filteredData = filteredData.filter(item => validDistricts.includes(item.sgz_distrito));
   
   // Generate chart data objects
   return {
@@ -181,18 +102,18 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
     // 3. Companies with most completed orders
     topCompanies: {
       labels: Array.from(new Set(filteredData
-        .filter(item => item.sgz_status === 'Concluído')
+        .filter(item => item.sgz_status === 'Concluído' || item.sgz_status === 'FECHADO')
         .map(item => item.sgz_empresa)))
         .filter(Boolean),
       datasets: [
         {
           label: 'Ordens Concluídas',
           data: Array.from(new Set(filteredData
-            .filter(item => item.sgz_status === 'Concluído')
+            .filter(item => item.sgz_status === 'Concluído' || item.sgz_status === 'FECHADO')
             .map(item => item.sgz_empresa)))
             .filter(Boolean)
             .map(company => filteredData
-              .filter(item => item.sgz_status === 'Concluído' && item.sgz_empresa === company)
+              .filter(item => (item.sgz_status === 'Concluído' || item.sgz_status === 'FECHADO') && item.sgz_empresa === company)
               .length),
           backgroundColor: 'rgba(255, 159, 64, 0.7)',
         },
@@ -265,9 +186,9 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
       ],
     },
     
-    // 7. Average time comparison (Completed vs Closed)
+    // 7. Average time comparison by status
     timeComparison: {
-      labels: ['Concluído', 'Aprovado', 'Em Andamento', 'PREPLAN', 'PRECANC'],
+      labels: ['Concluído', 'FECHADO', 'Aprovado', 'Em Andamento', 'PREPLAN', 'PRECANC'],
       datasets: [
         {
           label: 'Tempo Médio (dias)',
@@ -276,6 +197,10 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
             Math.round(filteredData.filter(item => item.sgz_status === 'Concluído')
               .reduce((acc, item) => acc + (item.sgz_dias_ate_status_atual || 0), 0) / 
               (filteredData.filter(item => item.sgz_status === 'Concluído').length || 1)),
+            // FECHADO
+            Math.round(filteredData.filter(item => item.sgz_status === 'FECHADO')
+              .reduce((acc, item) => acc + (item.sgz_dias_ate_status_atual || 0), 0) / 
+              (filteredData.filter(item => item.sgz_status === 'FECHADO').length || 1)),  
             // Aprovado
             Math.round(filteredData.filter(item => item.sgz_status === 'Aprovado')
               .reduce((acc, item) => acc + (item.sgz_dias_ate_status_atual || 0), 0) / 
@@ -295,6 +220,7 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
           ],
           backgroundColor: [
             'rgba(75, 192, 192, 0.7)',   // Concluído - green
+            'rgba(50, 168, 168, 0.7)',   // FECHADO - darker green
             'rgba(54, 162, 235, 0.7)',   // Aprovado - blue
             'rgba(153, 102, 255, 0.7)',  // Em Andamento - purple
             'rgba(255, 206, 86, 0.7)',   // PREPLAN - yellow
@@ -315,7 +241,7 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
             Math.round(filteredData
               .reduce((acc, item) => acc + (item.sgz_dias_ate_status_atual || 0), 0) / 
               (filteredData.length || 1)),
-            // Excluding "Zelar Serviços" and "Urbano Engenharia" (third parties)
+            // Excluding third-party companies
             Math.round(filteredData
               .filter(item => !['Zelar Serviços', 'Urbano Engenharia'].includes(item.sgz_empresa || ''))
               .reduce((acc, item) => acc + (item.sgz_dias_ate_status_atual || 0), 0) / 
@@ -398,7 +324,7 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
             data: [
               districtData.length, // Total orders
               invertedTime, // Inverted avg time (lower time is better)
-              districtData.filter(item => item.sgz_status === 'Concluído').length, // Completed orders
+              districtData.filter(item => item.sgz_status === 'Concluído' || item.sgz_status === 'FECHADO').length, // Completed orders
               new Set(districtData.map(item => item.sgz_tipo_servico)).size, // Service variety
               new Set(districtData.map(item => item.sgz_empresa)).size, // Active companies
             ],
@@ -415,7 +341,7 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
         }),
     },
     
-    // 12. Status transition over days
+    // 12. Status transition over days (this will be populated from history table in the future)
     statusTransition: {
       labels: ['Dia 1', 'Dia 2', 'Dia 3', 'Dia 4', 'Dia 5'],
       datasets: [
@@ -454,12 +380,19 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           fill: true,
         },
+        {
+          label: 'FECHADO',
+          data: [0, 0, 0, 0, 1],
+          borderColor: 'rgb(50, 168, 168)',
+          backgroundColor: 'rgba(50, 168, 168, 0.2)',
+          fill: true,
+        },
       ],
     },
     
     // 13. Critical status analysis
     criticalStatus: {
-      labels: ['PREPLAN', 'PRECANC', 'Concluído'],
+      labels: ['PREPLAN', 'PRECANC', 'Concluído', 'FECHADO'],
       datasets: [
         {
           label: 'Quantidade',
@@ -467,11 +400,13 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
             filteredData.filter(item => item.sgz_status === 'PREPLAN').length,
             filteredData.filter(item => item.sgz_status === 'PRECANC').length,
             filteredData.filter(item => item.sgz_status === 'Concluído').length,
+            filteredData.filter(item => item.sgz_status === 'FECHADO').length,
           ],
           backgroundColor: [
             'rgba(255, 206, 86, 0.7)',   // yellow (warning)
             'rgba(255, 99, 132, 0.7)',   // red (danger)
             'rgba(75, 192, 192, 0.7)',   // green (success)
+            'rgba(50, 168, 168, 0.7)',   // darker green (final success)
           ],
         },
       ],
@@ -488,7 +423,7 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
             filteredData.filter(item => item.sgz_distrito === 'Itaim Bibi').length,
             filteredData.filter(item => item.sgz_distrito === 'Alto de Pinheiros').length,
             filteredData.filter(item => item.sgz_distrito === 'Jardim Paulista').length,
-            filteredData.filter(item => 
+            data.filter(item => 
               !['Pinheiros', 'Itaim Bibi', 'Alto de Pinheiros', 'Jardim Paulista'].includes(item.sgz_distrito)
             ).length,
           ],
@@ -529,17 +464,23 @@ const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
       labels: Array.from(new Set(filteredData.map(item => item.sgz_distrito))),
       datasets: [
         {
-          label: 'Tempo estimado até fechamento (dias)',
+          label: 'Tempo até fechamento (dias)',
           data: Array.from(new Set(filteredData.map(item => item.sgz_distrito)))
             .map(district => {
               const districtItems = filteredData.filter(item => item.sgz_distrito === district);
+              // Compare CONC and FECHADO times
               const avgCompletionTime = districtItems
                 .filter(item => item.sgz_status === 'Concluído')
                 .reduce((acc, item) => acc + (item.sgz_dias_ate_status_atual || 0), 0) / 
                 (districtItems.filter(item => item.sgz_status === 'Concluído').length || 1);
-              
-              // Add 20% more time as an estimate for full closure
-              return Math.round(avgCompletionTime * 1.2);
+                
+              const avgClosureTime = districtItems
+                .filter(item => item.sgz_status === 'FECHADO')
+                .reduce((acc, item) => acc + (item.sgz_dias_ate_status_atual || 0), 0) / 
+                (districtItems.filter(item => item.sgz_status === 'FECHADO').length || 1);
+                
+              // Use FECHADO time if available, otherwise estimate from CONC time
+              return Math.round(avgClosureTime > 0 ? avgClosureTime : avgCompletionTime * 1.2);
             }),
           backgroundColor: 'rgba(255, 159, 64, 0.7)',
         },
@@ -552,20 +493,40 @@ export const useChartData = (filters: FilterOptions) => {
   const [chartData, setChartData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const [ordensData, setOrdensData] = useState<SGZOrdemServico[]>([]);
+
+  const fetchSGZData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch all SGZ data
+      const { data, error } = await supabase
+        .from('sgz_ordens_servico')
+        .select('*')
+        .order('sgz_criado_em', { ascending: false });
+      
+      if (error) throw error;
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching SGZ data:', error);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     
     try {
-      // In a production environment, this would fetch data from Supabase
-      // For now, we'll use the sample data
+      // Fetch data from Supabase
+      const data = await fetchSGZData();
+      setOrdensData(data);
       
-      // Simulate a delay to show loading state
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Use the sample data to generate chart data
-      const data = generateChartData(sampleSGZData, filters);
-      setChartData(data);
+      // Generate chart data with the fetched data
+      const generatedChartData = generateChartData(data, filters);
+      setChartData(generatedChartData);
       
       // Set last update time
       setLastUpdate(new Date().toLocaleString('pt-BR'));
@@ -574,11 +535,19 @@ export const useChartData = (filters: FilterOptions) => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, fetchSGZData]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Update charts whenever filters change
+  useEffect(() => {
+    if (ordensData.length > 0) {
+      const generatedChartData = generateChartData(ordensData, filters);
+      setChartData(generatedChartData);
+    }
+  }, [filters, ordensData]);
 
   return {
     chartData,

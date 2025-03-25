@@ -1,9 +1,9 @@
 
-import { DateRange } from 'react-day-picker';
-
-export type OrderStatus = 'PREPLAN' | 'PRECANC' | 'Concluído' | 'Aprovado' | 'Em Andamento' | 'Todos';
-export type ServiceType = 'Tapa-buraco' | 'Poda de árvore' | 'Recapeamento' | 'Limpeza de boca de lobo' | 'Manutenção de calçada' | 'Todos';
-export type District = 'Itaim Bibi' | 'Pinheiros' | 'Alto de Pinheiros' | 'Jardim Paulista' | 'Todos';
+export interface UploadInfo {
+  id: string;
+  fileName: string;
+  uploadDate: string;
+}
 
 export interface ChartVisibility {
   statusDistribution: boolean;
@@ -25,14 +25,34 @@ export interface ChartVisibility {
 }
 
 export interface FilterOptions {
-  dateRange: DateRange | undefined;
-  statuses: OrderStatus[];
-  serviceTypes: ServiceType[];
-  districts: District[];
+  dateRange?: {
+    from: Date;
+    to: Date;
+  };
+  statuses: ('Todos' | 'PREPLAN' | 'PRECANC' | 'Aprovado' | 'Em Andamento' | 'Concluído' | 'FECHADO')[];
+  serviceTypes: ('Todos' | string)[];
+  districts: ('Todos' | 'Pinheiros' | 'Itaim Bibi' | 'Alto de Pinheiros' | 'Jardim Paulista')[];
 }
 
-export interface UploadInfo {
+export interface SGZOrdemServico {
   id: string;
-  fileName: string;
-  uploadDate: string;
+  ordem_servico: string;
+  sgz_status: string;
+  sgz_departamento_tecnico: "STM" | "STLP";
+  sgz_bairro: string;
+  sgz_distrito: string;
+  sgz_tipo_servico: string;
+  sgz_empresa: string;
+  sgz_criado_em: string;
+  sgz_modificado_em: string;
+  sgz_dias_ate_status_atual?: number;
+  planilha_referencia: string;
+}
+
+export interface SGZUpload {
+  id: string;
+  nome_arquivo: string;
+  data_upload: string;
+  usuario_id: string;
+  processado: boolean;
 }

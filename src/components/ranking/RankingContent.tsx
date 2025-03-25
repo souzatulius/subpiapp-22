@@ -18,6 +18,7 @@ const RankingContent = () => {
   const {
     lastUpload,
     isLoading: isUploadLoading,
+    uploads,
     fetchLastUpload,
     handleUpload,
     handleDeleteUpload
@@ -42,7 +43,7 @@ const RankingContent = () => {
     if (user) {
       fetchLastUpload();
     }
-  }, [user]);
+  }, [user, fetchLastUpload]);
   
   return (
     <div className="space-y-6">
@@ -80,7 +81,8 @@ const RankingContent = () => {
         lastUpload={lastUpload} 
         onDelete={handleDeleteUpload} 
         isLoading={isLoading}
-        onRefreshCharts={refreshData} 
+        onRefreshCharts={refreshData}
+        uploads={uploads}
       />
       
       <FilterSection 
