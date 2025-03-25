@@ -20,6 +20,15 @@ export interface User {
   permissoes: Permission[];
 }
 
+export interface UserFormData {
+  nome_completo: string;
+  email: string;
+  cargo_id?: string;
+  area_coordenacao_id?: string;
+  whatsapp?: string;
+  aniversario?: Date;
+}
+
 export interface Permission {
   id: string;
   descricao: string;

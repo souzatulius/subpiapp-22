@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,8 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
 import { Search } from 'lucide-react';
-import NotasList from './components/NotasList';
-import NotaDetail from './components/NotaDetail';
 import { LoadingState, EmptyState } from './components/NotasListStates';
 import { NotaOficial } from './types';
 
@@ -27,31 +26,48 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const fetchNotas = async () => {
     setIsLoading(true);
     try {
+      // Fetch notas with basic info
       const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
-        .select('*, demanda_id, problema_id, areas_coordenacao(id, descricao)')
+        .select('*')
         .eq('status', 'pendente')
         .order('criado_em', { ascending: false });
       
       if (notasError) throw notasError;
       
+      // Process data to add related info
       const processedNotas = await Promise.all((notasData || []).map(async (nota) => {
-        let autor = { id: nota.autor_id, nome_completo: 'Usuário não encontrado' };
-        
+        // Get author info
         const { data: authorData, error: authorError } = await supabase
           .from('usuarios')
           .select('id, nome_completo')
           .eq('id', nota.autor_id)
           .single();
         
+        let autor = { id: nota.autor_id, nome_completo: 'Usuário não encontrado' };
         if (!authorError && authorData) {
           autor = authorData;
         }
         
+        // Get area info
+        let areaInfo = { id: '', descricao: 'Área não especificada' };
+        if (nota.area_coordenacao_id) {
+          const { data: areaData, error: areaError } = await supabase
+            .from('areas_coordenacao')
+            .select('id, descricao')
+            .eq('id', nota.area_coordenacao_id)
+            .single();
+            
+          if (!areaError && areaData) {
+            areaInfo = areaData;
+          }
+        }
+        
         return {
           ...nota,
-          autor
-        };
+          autor,
+          areas_coordenacao: areaInfo
+        } as NotaOficial;
       }));
       
       setNotas(processedNotas);
