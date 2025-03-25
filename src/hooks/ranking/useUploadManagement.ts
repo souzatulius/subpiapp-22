@@ -32,6 +32,8 @@ export const useUploadManagement = (user: User | null) => {
           fileName: data[0].nome_arquivo,
           uploadDate: new Date(data[0].data_upload).toLocaleString()
         });
+      } else {
+        setLastUpload(null);
       }
     } catch (error) {
       console.error('Erro ao buscar último upload:', error);
@@ -55,9 +57,21 @@ export const useUploadManagement = (user: User | null) => {
       return;
     }
 
+    // Validate file type
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    if (fileExt !== 'xls' && fileExt !== 'xlsx') {
+      toast({
+        title: "Tipo de arquivo inválido",
+        description: "Por favor, carregue apenas arquivos XLS ou XLSX.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
 
+      // First, store the file metadata
       const { data, error } = await supabase
         .from('ranking_uploads')
         .insert({
@@ -74,11 +88,6 @@ export const useUploadManagement = (user: User | null) => {
           fileName: data[0].nome_arquivo,
           uploadDate: new Date(data[0].data_upload).toLocaleString()
         });
-
-        toast({
-          title: "Upload concluído",
-          description: "A planilha foi carregada com sucesso.",
-        });
       }
     } catch (error: any) {
       console.error('Erro ao fazer upload:', error);
@@ -87,6 +96,7 @@ export const useUploadManagement = (user: User | null) => {
         description: error.message || "Não foi possível processar o arquivo.",
         variant: "destructive",
       });
+      throw error; // Re-throw to allow proper error handling in the component
     } finally {
       setIsLoading(false);
     }

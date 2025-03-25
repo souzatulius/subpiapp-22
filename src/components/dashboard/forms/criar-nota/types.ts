@@ -5,6 +5,7 @@ export interface Demand {
   id: string;
   titulo: string;
   status: string;
+  problema_id?: string;
   area_coordenacao: {
     id: string;
     descricao: string;

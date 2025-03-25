@@ -25,12 +25,23 @@ export const useDemandasData = () => {
             status,
             detalhes_solicitacao,
             perguntas,
-            area_coordenacao:area_coordenacao_id(id, descricao)
+            problema_id,
+            area_coordenacao_id
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
         
         if (demandasError) throw demandasError;
+        
+        // Fetch areas to get area descriptions
+        const { data: areas, error: areasError } = await supabase
+          .from('areas_coordenacao')
+          .select('id, descricao');
+          
+        if (areasError) throw areasError;
+          
+        // Create a map of area IDs to descriptions
+        const areaMap = new Map(areas?.map(area => [area.id, area.descricao]) || []);
         
         // Fetch all notas oficiais to check which demandas already have notas
         const { data: notasData, error: notasError } = await supabase
@@ -49,10 +60,14 @@ export const useDemandasData = () => {
         console.log('Demandas with notas:', demandasComNotas.size);
         console.log('Demandas without notas:', demandasSemNotas.length);
         
-        // Make sure the perguntas field is properly typed
+        // Make sure the perguntas field is properly typed and add area information
         const typedData = demandasSemNotas?.map(item => ({
           ...item,
-          perguntas: item.perguntas as Record<string, string> | null
+          perguntas: item.perguntas as Record<string, string> | null,
+          area_coordenacao: item.area_coordenacao_id ? {
+            id: item.area_coordenacao_id,
+            descricao: areaMap.get(item.area_coordenacao_id) || 'Área não especificada'
+          } : null
         })) || [];
         
         setDemandas(typedData);
