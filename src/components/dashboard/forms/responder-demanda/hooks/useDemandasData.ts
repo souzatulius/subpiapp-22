@@ -36,56 +36,73 @@ export const useDemandasData = () => {
     const fetchDemandas = async () => {
       try {
         setIsLoadingDemandas(true);
-        const {
-          data,
-          error
-        } = await supabase.from('demandas').select(`
+        
+        // Buscar todas as demandas pendentes
+        const { data: demandasData, error: demandasError } = await supabase
+          .from('demandas')
+          .select(`
             *,
-            areas_coordenacao (id, descricao),
-            origens_demandas (descricao),
-            tipos_midia (descricao),
-            servicos (descricao)
+            servicos(id, descricao),
+            origens_demandas(descricao),
+            tipos_midia(descricao)
           `)
           .eq('status', 'pendente')
-          .order('prioridade', {
-            ascending: false
-          })
-          .order('prazo_resposta', {
-            ascending: true
-          });
+          .order('prioridade', { ascending: false })
+          .order('prazo_resposta', { ascending: true });
           
-        if (error) throw error;
+        if (demandasError) throw demandasError;
         
+        // Verificar notas existentes
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
           .select('demanda_id');
           
         if (notasError) throw notasError;
         
+        // Filtrar demandas que já têm notas
         const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
+        const filteredDemandas = demandasData?.filter(demanda => !demandasComNotas.has(demanda.id)) || [];
         
-        const filteredDemandas = data?.filter(demanda => !demandasComNotas.has(demanda.id)) || [];
-        
-        // Type assertion to make TypeScript happy
-        const typedDemandas = filteredDemandas.map(demanda => {
-          // Ensure perguntas is in the correct format
-          let parsedPerguntas = demanda.perguntas;
-          if (typeof parsedPerguntas === 'string') {
-            try {
-              parsedPerguntas = JSON.parse(parsedPerguntas);
-            } catch (e) {
-              parsedPerguntas = null;
+        // Processar as demandas para adicionar informações de área
+        const processedDemandas = await Promise.all(
+          filteredDemandas.map(async (demanda) => {
+            // Garantir que perguntas esteja no formato correto
+            let parsedPerguntas = demanda.perguntas;
+            if (typeof parsedPerguntas === 'string') {
+              try {
+                parsedPerguntas = JSON.parse(parsedPerguntas);
+              } catch (e) {
+                parsedPerguntas = null;
+              }
             }
-          }
-          
-          return {
-            ...demanda,
-            perguntas: parsedPerguntas
-          } as Demanda;
-        });
+            
+            // Buscar área de coordenação
+            let areaInfo = null;
+            if (demanda.area_coordenacao_id) {
+              const { data: areaData } = await supabase
+                .from('areas_coordenacao')
+                .select('id, descricao')
+                .eq('id', demanda.area_coordenacao_id)
+                .single();
+                
+              if (areaData) {
+                areaInfo = {
+                  id: areaData.id,
+                  descricao: areaData.descricao
+                };
+              }
+            }
+            
+            return {
+              ...demanda,
+              perguntas: parsedPerguntas,
+              areas_coordenacao: areaInfo
+            } as Demanda;
+          })
+        );
         
-        setDemandas(typedDemandas);
-        setFilteredDemandas(typedDemandas);
+        setDemandas(processedDemandas);
+        setFilteredDemandas(processedDemandas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
         toast({

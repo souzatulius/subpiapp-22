@@ -28,42 +28,45 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const fetchNotas = async () => {
     try {
       setIsLoading(true);
-      // Specify the exact columns we want and use explicit foreign key hints
-      const { data, error } = await supabase
+      // Buscar notas com join em autores
+      const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
         .select(`
-          id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id,
-          autor:usuarios!autor_id(id, nome_completo),
-          area_coordenacao:area_coordenacao_id(id, descricao),
-          demanda:demanda_id(*)
+          id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id, problema_id,
+          autor:autor_id(id, nome_completo)
         `)
-        .eq('status', 'pendente')  // Only fetch pending notes
+        .eq('status', 'pendente')  // Apenas notas pendentes
         .order('criado_em', { ascending: false });
       
-      if (error) throw error;
+      if (notasError) throw notasError;
       
-      // Transform the data to ensure it matches the NotaOficial interface
-      const typedNotas: NotaOficial[] = data?.map(nota => ({
-        id: nota.id,
-        titulo: nota.titulo,
-        texto: nota.texto,
-        status: nota.status,
-        criado_em: nota.criado_em,
-        autor_id: nota.autor_id,
-        aprovador_id: nota.aprovador_id,
-        area_coordenacao_id: nota.area_coordenacao_id,
-        demanda_id: nota.demanda_id,
-        autor: nota.autor ? {
-          id: nota.autor.id,
-          nome_completo: nota.autor.nome_completo
-        } : { nome_completo: 'Desconhecido' },
-        areas_coordenacao: nota.area_coordenacao ? 
-          { descricao: nota.area_coordenacao.descricao, id: nota.area_coordenacao.id } : 
-          { descricao: 'Desconhecida', id: '' },
-        demanda: nota.demanda
-      })) || [];
+      // Processar para adicionar informações de área
+      const notasProcessadas = await Promise.all(notasData.map(async (nota) => {
+        // Buscar área de coordenação
+        let areaInfo = { descricao: 'Desconhecida', id: '' };
+        if (nota.area_coordenacao_id) {
+          const { data: areaData, error: areaError } = await supabase
+            .from('areas_coordenacao')
+            .select('id, descricao')
+            .eq('id', nota.area_coordenacao_id)
+            .single();
+            
+          if (!areaError && areaData) {
+            areaInfo = { 
+              descricao: areaData.descricao, 
+              id: areaData.id 
+            };
+          }
+        }
+        
+        return {
+          ...nota,
+          areas_coordenacao: areaInfo,
+          autor: nota.autor || { nome_completo: 'Desconhecido' }
+        };
+      }));
       
-      setNotas(typedNotas);
+      setNotas(notasProcessadas);
     } catch (error) {
       console.error('Erro ao carregar notas oficiais:', error);
       toast({

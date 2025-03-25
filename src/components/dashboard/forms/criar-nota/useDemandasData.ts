@@ -16,7 +16,7 @@ export const useDemandasData = () => {
       try {
         setIsLoading(true);
         
-        // First, fetch all demandas that are either pendente or em_andamento
+        // Primeiro buscamos as demandas que estão pendentes ou em andamento
         const { data: allDemandas, error: demandasError } = await supabase
           .from('demandas')
           .select(`
@@ -25,35 +25,57 @@ export const useDemandasData = () => {
             status,
             detalhes_solicitacao,
             perguntas,
-            area_coordenacao:area_coordenacao_id(id, descricao)
+            area_coordenacao_id
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
         
         if (demandasError) throw demandasError;
         
-        // Fetch all notas oficiais to check which demandas already have notas
+        // Buscar todas as notas oficiais para verificar quais demandas já possuem notas
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
           .select('demanda_id');
         
         if (notasError) throw notasError;
         
-        // Create a set of demanda IDs that already have notas
+        // Criar um conjunto de IDs de demandas que já possuem notas
         const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
         
-        // Filter to include only demandas that don't have notas associated
+        // Filtrar para incluir apenas demandas que não possuem notas associadas
         const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
         
         console.log('All demandas:', allDemandas.length);
         console.log('Demandas with notas:', demandasComNotas.size);
         console.log('Demandas without notas:', demandasSemNotas.length);
         
-        // Make sure the perguntas field is properly typed
-        const typedData = demandasSemNotas?.map(item => ({
+        // Buscar informações de área para cada demanda
+        const demandasComArea = await Promise.all(
+          demandasSemNotas.map(async (demanda) => {
+            if (demanda.area_coordenacao_id) {
+              const { data: areaData } = await supabase
+                .from('areas_coordenacao')
+                .select('id, descricao')
+                .eq('id', demanda.area_coordenacao_id)
+                .single();
+              
+              return {
+                ...demanda,
+                area_coordenacao: areaData || null
+              };
+            }
+            return {
+              ...demanda,
+              area_coordenacao: null
+            };
+          })
+        );
+        
+        // Garantir que perguntas seja tratado corretamente
+        const typedData = demandasComArea.map(item => ({
           ...item,
           perguntas: item.perguntas as Record<string, string> | null
-        })) || [];
+        }));
         
         setDemandas(typedData);
         setFilteredDemandas(typedData);
@@ -72,7 +94,7 @@ export const useDemandasData = () => {
     fetchDemandas();
   }, []);
 
-  // Filter demandas based on search term
+  // Filtrar demandas baseado no termo de busca
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredDemandas(demandas);
@@ -82,7 +104,7 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.area_coordenacao?.descricao.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);

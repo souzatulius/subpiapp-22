@@ -20,40 +20,76 @@ export const useDemandFormSubmit = (
         throw new Error("Usuário não identificado. Por favor, faça login novamente.");
       }
 
-      // Filter out empty questions
+      // Filtrar perguntas vazias
       const filteredPerguntas = formData.perguntas.filter(p => p.trim() !== '');
       
-      // Prepare demand data - ensuring prioridade value is compatible with constraint
-      // Converting 'média' to 'media' to match the constraint
+      // Preparar normalização da prioridade
       let normalizedPrioridade = formData.prioridade.toLowerCase();
       if (normalizedPrioridade === 'média') {
         normalizedPrioridade = 'media';
       }
       
-      // Ensure it's one of the allowed values
+      // Garantir valor permitido
       if (!['alta', 'media', 'baixa'].includes(normalizedPrioridade)) {
-        normalizedPrioridade = 'media'; // Default to media if invalid
+        normalizedPrioridade = 'media'; // Default para média se inválido
       }
       
-      // Format the date properly for Supabase
+      // Formatar data corretamente
       const prazoResposta = formData.prazo_resposta ? new Date(formData.prazo_resposta).toISOString() : null;
       
-      // Prepare data for submission
+      // Verificar se existe um problema padrão
+      const { data: problemaData, error: problemaError } = await supabase
+        .from('problemas')
+        .select('id')
+        .limit(1);
+        
+      if (problemaError) throw problemaError;
+      
+      let problemaId;
+      
+      if (!problemaData || problemaData.length === 0) {
+        // Criar um problema padrão se não existir
+        const { data: newProblema, error: newProblemaError } = await supabase
+          .from('problemas')
+          .insert({ descricao: 'Problema Padrão' })
+          .select();
+          
+        if (newProblemaError) throw newProblemaError;
+        
+        problemaId = newProblema[0].id;
+      } else {
+        problemaId = problemaData[0].id;
+      }
+      
+      // Preparar dados para inserção
       const demandaData = {
-        ...formData,
         prazo_resposta: prazoResposta,
         prioridade: normalizedPrioridade,
         perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
         autor_id: userId,
-        status: 'pendente' // Setting the initial status as 'pendente' which will display as 'Nova'
+        status: 'pendente',
+        titulo: formData.titulo,
+        area_coordenacao_id: formData.area_coordenacao_id,
+        servico_id: formData.servico_id,
+        origem_id: formData.origem_id,
+        tipo_midia_id: formData.tipo_midia_id,
+        bairro_id: formData.bairro_id,
+        nome_solicitante: formData.nome_solicitante,
+        email_solicitante: formData.email_solicitante,
+        telefone_solicitante: formData.telefone_solicitante,
+        veiculo_imprensa: formData.veiculo_imprensa,
+        endereco: formData.endereco,
+        detalhes_solicitacao: formData.detalhes_solicitacao,
+        problema_id: problemaId,
+        arquivo_url: formData.arquivo_url
       };
 
       console.log('Submitting demand data:', demandaData);
 
-      // Insert into demandas table
+      // Inserir na tabela demandas
       const { data, error } = await supabase
         .from('demandas')
-        .insert([demandaData])
+        .insert(demandaData)
         .select();
 
       if (error) {
@@ -66,7 +102,7 @@ export const useDemandFormSubmit = (
         description: "A solicitação foi registrada no sistema."
       });
       
-      // Redirect to dashboard
+      // Redirecionar para dashboard
       navigate('/dashboard/comunicacao/consultar-demandas');
     } catch (error: any) {
       console.error('Erro ao cadastrar demanda:', error);
