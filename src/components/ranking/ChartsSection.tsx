@@ -8,6 +8,8 @@ import ResolutionTimeChart from './charts/ResolutionTimeChart';
 import NeighborhoodsChart from './charts/NeighborhoodsChart';
 import FrequentServicesChart from './charts/FrequentServicesChart';
 import StatusDistributionChart from './charts/StatusDistributionChart';
+import TopCompaniesChart from './charts/TopCompaniesChart';
+import CriticalStatusChart from './charts/CriticalStatusChart';
 
 // Import chart registration
 import './charts/ChartRegistration';
@@ -29,23 +31,15 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Gráfico 1: Distribuição de Ocorrências */}
+      {/* Gráfico 1: Distribuição por Status */}
       {chartVisibility.occurrences && (
-        <OccurrencesChart 
-          data={chartData?.occurrences} 
+        <StatusDistributionChart 
+          data={chartData?.statusDistribution} 
           isLoading={isLoading} 
         />
       )}
       
-      {/* Gráfico 2: Tipos de Serviços */}
-      {chartVisibility.serviceTypes && (
-        <ServiceTypesChart 
-          data={chartData?.serviceTypes} 
-          isLoading={isLoading} 
-        />
-      )}
-      
-      {/* Gráfico 3: Tempo de Resolução */}
+      {/* Gráfico 2: Tempo de Resolução */}
       {chartVisibility.resolutionTime && (
         <ResolutionTimeChart 
           data={chartData?.resolutionTime} 
@@ -53,26 +47,34 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         />
       )}
       
-      {/* Gráfico 4: Distribuição por Bairros */}
+      {/* Gráfico 3: Empresas com mais ordens concluídas */}
+      {chartVisibility.topCompanies && (
+        <TopCompaniesChart 
+          data={chartData?.topCompanies} 
+          isLoading={isLoading} 
+        />
+      )}
+      
+      {/* Gráfico 4: Distribuição por Distrito */}
       {chartVisibility.neighborhoods && (
         <NeighborhoodsChart 
-          data={chartData?.neighborhoods} 
+          data={chartData?.districtDistribution} 
           isLoading={isLoading} 
         />
       )}
       
-      {/* Gráfico 5: Serviços Frequentes */}
-      {chartVisibility.frequentServices && (
-        <FrequentServicesChart 
-          data={chartData?.frequentServices} 
+      {/* Gráfico 5: Serviços por Departamento Técnico */}
+      {chartVisibility.serviceTypes && (
+        <ServiceTypesChart 
+          data={chartData?.servicesByDepartment} 
           isLoading={isLoading} 
         />
       )}
       
-      {/* Gráfico 6: Status */}
-      {chartVisibility.statusDistribution && (
-        <StatusDistributionChart 
-          data={chartData?.statusDistribution} 
+      {/* Gráfico 6: Status Críticos */}
+      {chartVisibility.criticalStatus && (
+        <CriticalStatusChart 
+          data={chartData?.criticalStatus} 
           isLoading={isLoading} 
         />
       )}

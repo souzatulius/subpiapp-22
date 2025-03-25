@@ -14,18 +14,20 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
   onChartVisibilityToggle
 }) => {
   const chartOptions = [
-    { id: 'occurrences', label: 'Ocorrências' },
+    { id: 'occurrences', label: 'Status' },
     { id: 'resolutionTime', label: 'Tempo de Resolução' },
     { id: 'serviceTypes', label: 'Tipos de Serviços' },
-    { id: 'neighborhoods', label: 'Bairros' },
+    { id: 'neighborhoods', label: 'Distritos' },
     { id: 'frequentServices', label: 'Serviços Frequentes' },
-    { id: 'statusDistribution', label: 'Status' }
+    { id: 'statusDistribution', label: 'Distribuição de Status' },
+    { id: 'topCompanies', label: 'Empresas' },
+    { id: 'criticalStatus', label: 'Status Críticos' }
   ];
   
   return (
     <div>
       <Label className="mb-2 block">Gerenciamento de Exibição</Label>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {chartOptions.map(option => (
           <div key={option.id} className="flex items-center space-x-2">
             <Checkbox 

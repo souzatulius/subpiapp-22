@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Trash2, RefreshCw, Clock } from 'lucide-react';
+import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle } from 'lucide-react';
 import { UploadInfo } from './types';
 
 interface UploadSectionProps {
@@ -40,16 +40,15 @@ const UploadSection: React.FC<UploadSectionProps> = ({
 
   const handleRefreshClick = () => {
     // Esta função seria usada para atualizar os gráficos baseados no último upload
-    // Por enquanto, é apenas um placeholder
     console.log('Atualizando gráficos...');
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Upload de Planilha</CardTitle>
+    <Card className="border-orange-200">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-orange-700">Upload de Planilha SGZ</CardTitle>
         <CardDescription>
-          Carregue uma planilha XLS/XLSX com dados das ordens de serviço
+          Carregue uma planilha XLS/XLSX com dados das ordens de serviço do SGZ
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -66,16 +65,16 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             <Button 
               onClick={handleUploadClick} 
               disabled={!selectedFile || isLoading}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700"
             >
               <UploadCloud className="mr-2 h-4 w-4" />
-              {isLoading ? 'Carregando...' : 'Carregar Planilha'}
+              {isLoading ? 'Carregando...' : 'Carregar Planilha SGZ'}
             </Button>
           </div>
           
           {lastUpload && (
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-4 p-3 border rounded-md bg-gray-50">
+              <div className="flex items-center gap-4 p-3 border rounded-md bg-orange-50 border-orange-200">
                 <div className="flex-1">
                   <p className="font-medium text-sm">{lastUpload.fileName}</p>
                   <div className="flex items-center text-sm text-muted-foreground">
@@ -105,6 +104,17 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               </Button>
             </div>
           )}
+
+          <div className="flex items-start gap-2 p-3 border border-orange-200 rounded-md bg-orange-50">
+            <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-orange-800">Importante:</p>
+              <p className="text-orange-700">
+                A planilha SGZ deve conter as colunas: ordem_servico, sgz_departamento_tecnico (STM/STLP), 
+                sgz_status, sgz_distrito, sgz_bairro, sgz_criado_em, sgz_modificado_em, sgz_empresa e sgz_tipo_servico.
+              </p>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -8,6 +8,9 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useUploadManagement } from '@/hooks/ranking/useUploadManagement';
 import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 import { useChartData } from '@/hooks/ranking/useChartData';
+import { Badge } from '@/components/ui/badge';
+import { CalendarClock } from 'lucide-react';
+
 const RankingContent = () => {
   const {
     user
@@ -27,18 +30,29 @@ const RankingContent = () => {
   } = useFilterManagement();
   const {
     chartData,
-    isLoading: isChartLoading
+    isLoading: isChartLoading,
+    lastUpdate
   } = useChartData(filters);
 
   // Combined loading state
   const isLoading = isUploadLoading || isChartLoading;
+  
   useEffect(() => {
     if (user) {
       fetchLastUpload();
     }
   }, [user]);
-  return <div className="space-y-6">
-      
+  
+  return (
+    <div className="space-y-6">
+      {lastUpdate && (
+        <div className="flex items-center">
+          <Badge variant="outline" className="flex items-center gap-1 px-3 py-1 text-orange-700 bg-orange-50 border-orange-200">
+            <CalendarClock className="w-4 h-4" />
+            <span>Última atualização: {lastUpdate}</span>
+          </Badge>
+        </div>
+      )}
       
       <UploadSection onUpload={handleUpload} lastUpload={lastUpload} onDelete={handleDeleteUpload} isLoading={isLoading} />
       
@@ -47,6 +61,8 @@ const RankingContent = () => {
       <ChartsSection chartData={chartData} isLoading={isLoading} chartVisibility={chartVisibility} />
       
       <ActionsSection />
-    </div>;
+    </div>
+  );
 };
+
 export default RankingContent;

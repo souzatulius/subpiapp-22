@@ -1,8 +1,8 @@
 
 import { DateRange } from 'react-day-picker';
 
-export type OrderStatus = 'Planejar' | 'Novo' | 'Aprovado' | 'Concluído' | 'Todos';
-export type ServiceType = 'Tapa Buraco' | 'Poda' | 'Limpeza' | 'Todos';
+export type OrderStatus = 'PREPLAN' | 'PRECANC' | 'Concluído' | 'Aprovado' | 'Em Andamento' | 'Todos';
+export type ServiceType = 'Tapa-buraco' | 'Poda de árvore' | 'Recapeamento' | 'Limpeza de boca de lobo' | 'Manutenção de calçada' | 'Todos';
 export type District = 'Itaim Bibi' | 'Pinheiros' | 'Alto de Pinheiros' | 'Jardim Paulista' | 'Todos';
 
 export interface ChartVisibility {
@@ -12,6 +12,8 @@ export interface ChartVisibility {
   neighborhoods: boolean;
   frequentServices: boolean;
   statusDistribution: boolean;
+  topCompanies: boolean;
+  criticalStatus: boolean;
 }
 
 export interface FilterOptions {

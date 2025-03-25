@@ -15,17 +15,18 @@ const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({ serviceTypes, onS
     <div className="space-y-2">
       <Label>Tipo de Serviço</Label>
       <Select>
-        <SelectTrigger>
+        <SelectTrigger className="border-orange-200">
           <SelectValue placeholder="Filtrar por serviço" />
         </SelectTrigger>
         <SelectContent>
           <div className="space-y-1 p-1">
-            {['Todos', 'Tapa Buraco', 'Poda', 'Limpeza'].map((type) => (
+            {['Todos', 'Tapa-buraco', 'Poda de árvore', 'Recapeamento', 'Limpeza de boca de lobo', 'Manutenção de calçada'].map((type) => (
               <div key={type} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`type-${type}`} 
                   checked={serviceTypes.includes(type as any)}
                   onCheckedChange={() => onServiceTypeChange(type)}
+                  className="border-orange-400 data-[state=checked]:bg-orange-600"
                 />
                 <label 
                   htmlFor={`type-${type}`}

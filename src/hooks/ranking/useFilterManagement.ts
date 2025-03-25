@@ -18,7 +18,9 @@ export const useFilterManagement = () => {
     serviceTypes: true,
     neighborhoods: true,
     frequentServices: true,
-    statusDistribution: true
+    statusDistribution: true,
+    topCompanies: true,
+    criticalStatus: true
   });
 
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {

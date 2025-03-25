@@ -15,17 +15,18 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ statuses, onStatusChange })
     <div className="space-y-2">
       <Label>Status</Label>
       <Select>
-        <SelectTrigger>
+        <SelectTrigger className="border-orange-200">
           <SelectValue placeholder="Filtrar por status" />
         </SelectTrigger>
         <SelectContent>
           <div className="space-y-1 p-1">
-            {['Todos', 'Planejar', 'Novo', 'Aprovado', 'Concluído'].map((status) => (
+            {['Todos', 'Concluído', 'PREPLAN', 'PRECANC', 'Aprovado', 'Em Andamento'].map((status) => (
               <div key={status} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`status-${status}`} 
                   checked={statuses.includes(status as any)}
                   onCheckedChange={() => onStatusChange(status)}
+                  className="border-orange-400 data-[state=checked]:bg-orange-600"
                 />
                 <label 
                   htmlFor={`status-${status}`}
