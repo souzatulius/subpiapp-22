@@ -2,7 +2,6 @@
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
-  servico_id: string;
   origem_id: string;
   tipo_midia_id: string;
   prioridade: string;
@@ -22,13 +21,11 @@ export interface DemandFormData {
 export interface FormState {
   formData: DemandFormData;
   areasCoord: any[];
-  servicos: any[];
   origens: any[];
   tiposMidia: any[];
   distritos: any[];
   bairros: any[];
   problemas: any[];
-  filteredServicos: any[];
   filteredBairros: any[];
   isLoading: boolean;
   serviceSearch: string;

@@ -10,7 +10,6 @@ interface ReviewStepProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   errors: ValidationError[];
   problemas: any[];
-  servicos: any[];
   origens: any[];
   tiposMidia: any[];
   filteredBairros: any[];
@@ -21,7 +20,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   handleChange,
   errors,
   problemas,
-  servicos,
   origens,
   tiposMidia,
   filteredBairros
@@ -72,8 +70,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           </div>
         </div>
         
-        {/* Service information is now omitted since it will be selected later */}
-
         <div>
           <Label className="block mb-2">Origem</Label>
           <div className="p-2 border rounded-md bg-gray-50">

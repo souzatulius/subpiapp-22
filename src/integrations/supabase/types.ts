@@ -262,7 +262,6 @@ export type Database = {
           prioridade: string
           problema_id: string
           protocolo: string | null
-          servico_id: string | null
           status: string
           supervisao_tecnica_id: string | null
           telefone_solicitante: string | null
@@ -287,7 +286,6 @@ export type Database = {
           prioridade: string
           problema_id: string
           protocolo?: string | null
-          servico_id?: string | null
           status: string
           supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
@@ -312,7 +310,6 @@ export type Database = {
           prioridade?: string
           problema_id?: string
           protocolo?: string | null
-          servico_id?: string | null
           status?: string
           supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
@@ -347,13 +344,6 @@ export type Database = {
             columns: ["origem_id"]
             isOneToOne: false
             referencedRelation: "origens_demandas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "demandas_servico_id_fkey"
-            columns: ["servico_id"]
-            isOneToOne: false
-            referencedRelation: "servicos"
             referencedColumns: ["id"]
           },
           {
@@ -1055,38 +1045,6 @@ export type Database = {
         }
         Relationships: []
       }
-      servicos: {
-        Row: {
-          criado_em: string
-          descricao: string
-          id: string
-          problema_id: string
-          supervisao_id: string | null
-        }
-        Insert: {
-          criado_em?: string
-          descricao: string
-          id?: string
-          problema_id: string
-          supervisao_id?: string | null
-        }
-        Update: {
-          criado_em?: string
-          descricao?: string
-          id?: string
-          problema_id?: string
-          supervisao_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "servicos_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
-            isOneToOne: false
-            referencedRelation: "problemas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       sgz_departamentos_tecnicos: {
         Row: {
           id: string
@@ -1638,8 +1596,6 @@ export type Database = {
           problema_descricao: string | null
           problema_id: string | null
           protocolo: string | null
-          servico_descricao: string | null
-          servico_id: string | null
           status: string | null
           telefone_solicitante: string | null
           tipo_midia_descricao: string | null
@@ -1674,13 +1630,6 @@ export type Database = {
             columns: ["origem_id"]
             isOneToOne: false
             referencedRelation: "origens_demandas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "demandas_servico_id_fkey"
-            columns: ["servico_id"]
-            isOneToOne: false
-            referencedRelation: "servicos"
             referencedColumns: ["id"]
           },
           {

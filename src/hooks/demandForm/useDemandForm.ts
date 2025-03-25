@@ -6,7 +6,6 @@ import { useDemandFormSubmit } from './useDemandFormSubmit';
 export const useDemandForm = (userId: string | undefined, onClose: () => void) => {
   const {
     areasCoord,
-    servicos,
     origens,
     tiposMidia,
     distritos,
@@ -19,14 +18,11 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
   const {
     formData,
     serviceSearch,
-    filteredServicos,
     filteredBairros,
     selectedDistrito,
     activeStep,
-    filteredServicesBySearch,
     handleChange,
     handleSelectChange,
-    handleServiceSelect,
     handlePerguntaChange,
     handleAnexosChange,
     nextStep,
@@ -34,7 +30,7 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     setSelectedDistrito,
     resetForm,
     setActiveStep
-  } = useDemandFormState(servicos, bairros, problemas); // Pass problemas here
+  } = useDemandFormState(bairros, problemas);
 
   const { handleSubmit } = useDemandFormSubmit(
     userId,
@@ -46,7 +42,6 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
   return {
     formData,
     areasCoord,
-    servicos,
     origens,
     tiposMidia,
     distritos,
@@ -54,13 +49,11 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     problemas,
     isLoading,
     serviceSearch,
-    filteredServicesBySearch,
     filteredBairros,
     selectedDistrito,
     activeStep,
     handleChange,
     handleSelectChange,
-    handleServiceSelect,
     handlePerguntaChange,
     handleAnexosChange,
     handleSubmit,

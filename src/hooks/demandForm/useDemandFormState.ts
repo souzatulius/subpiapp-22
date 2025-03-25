@@ -3,14 +3,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
 export const useDemandFormState = (
-  servicos: any[],
   bairros: any[],
   problemas: any[]
 ) => {
   const initialFormState: DemandFormData = {
     titulo: '',
     problema_id: '',
-    servico_id: '',
     origem_id: '',
     tipo_midia_id: '',
     prioridade: 'media',
@@ -29,7 +27,6 @@ export const useDemandFormState = (
 
   const [formData, setFormData] = useState<DemandFormData>(initialFormState);
   const [serviceSearch, setServiceSearch] = useState('');
-  const [filteredServicos, setFilteredServicos] = useState<any[]>([]);
   const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
@@ -84,17 +81,6 @@ export const useDemandFormState = (
   };
 
   useEffect(() => {
-    if (formData.problema_id) {
-      const filtered = servicos.filter(
-        service => service.problema_id === formData.problema_id
-      );
-      setFilteredServicos(filtered);
-    } else {
-      setFilteredServicos([]);
-    }
-  }, [formData.problema_id, servicos]);
-
-  useEffect(() => {
     if (selectedDistrito) {
       const filtered = bairros.filter(
         bairro => bairro.distrito_id === selectedDistrito
@@ -104,13 +90,6 @@ export const useDemandFormState = (
       setFilteredBairros([]);
     }
   }, [selectedDistrito, bairros]);
-
-  const filteredServicesBySearch = useMemo(() => {
-    if (!serviceSearch) return filteredServicos;
-    return filteredServicos.filter(service => 
-      service.descricao.toLowerCase().includes(serviceSearch.toLowerCase())
-    );
-  }, [filteredServicos, serviceSearch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -129,14 +108,6 @@ export const useDemandFormState = (
       ...prev,
       [name]: value
     }));
-  };
-
-  const handleServiceSelect = (serviceId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      servico_id: serviceId
-    }));
-    setServiceSearch('');
   };
 
   const handlePerguntaChange = (index: number, value: string) => {
@@ -177,14 +148,11 @@ export const useDemandFormState = (
   return {
     formData,
     serviceSearch,
-    filteredServicos,
     filteredBairros,
     selectedDistrito,
     activeStep,
-    filteredServicesBySearch,
     handleChange,
     handleSelectChange,
-    handleServiceSelect,
     handlePerguntaChange,
     handleAnexosChange,
     nextStep,

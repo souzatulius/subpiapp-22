@@ -5,7 +5,6 @@ import { toast } from '@/components/ui/use-toast';
 
 export const useDemandFormData = () => {
   const [areasCoord, setAreasCoord] = useState<any[]>([]);
-  const [servicos, setServicos] = useState<any[]>([]);
   const [origens, setOrigens] = useState<any[]>([]);
   const [tiposMidia, setTiposMidia] = useState<any[]>([]);
   const [distritos, setDistritos] = useState<any[]>([]);
@@ -21,12 +20,6 @@ export const useDemandFormData = () => {
           .select('*');
         if (areasError) throw areasError;
         setAreasCoord(areasData || []);
-
-        const { data: servicosData, error: servicosError } = await supabase
-          .from('servicos')
-          .select('*');
-        if (servicosError) throw servicosError;
-        setServicos(servicosData || []);
 
         const { data: origensData, error: origensError } = await supabase
           .from('origens_demandas')
@@ -71,7 +64,6 @@ export const useDemandFormData = () => {
 
   return {
     areasCoord,
-    servicos,
     origens,
     tiposMidia,
     distritos,

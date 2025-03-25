@@ -1,3 +1,4 @@
+
 import React from 'react';
 import IdentificationStep from '../steps/IdentificationStep';
 import OriginClassificationStep from '../steps/OriginClassificationStep';
@@ -14,14 +15,11 @@ const FormContent: React.FC<FormContentProps> = ({
   formData,
   handleChange,
   handleSelectChange,
-  handleServiceSelect,
   handlePerguntaChange,
   handleAnexosChange,
   areasCoord,
   problemas,
-  filteredServicesBySearch,
   serviceSearch,
-  servicos,
   origens,
   tiposMidia,
   selectedDistrito,
@@ -41,11 +39,7 @@ const FormContent: React.FC<FormContentProps> = ({
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
-          handleServiceSelect={handleServiceSelect}
           problemas={problemas}
-          filteredServicesBySearch={filteredServicesBySearch}
-          serviceSearch={serviceSearch}
-          servicos={servicos}
           errors={getStepErrors(0)}
         />
       );
@@ -107,7 +101,6 @@ const FormContent: React.FC<FormContentProps> = ({
           handleChange={handleChange}
           errors={getStepErrors(6)}
           problemas={problemas}
-          servicos={servicos}
           origens={origens}
           tiposMidia={tiposMidia}
           filteredBairros={filteredBairros}

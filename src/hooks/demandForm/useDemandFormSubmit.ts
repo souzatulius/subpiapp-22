@@ -62,7 +62,6 @@ export const useDemandFormSubmit = (
         titulo: formData.titulo,
         supervisao_tecnica_id: supervisao_tecnica_id,
         problema_id: formData.problema_id,
-        servico_id: formData.servico_id,
         origem_id: formData.origem_id,
         tipo_midia_id: formData.tipo_midia_id,
         bairro_id: formData.bairro_id,
@@ -73,7 +72,6 @@ export const useDemandFormSubmit = (
         endereco: formData.endereco,
         detalhes_solicitacao: formData.detalhes_solicitacao,
         arquivo_url: formData.arquivo_url
-        // Remove the tem_protocolo_156 and numero_protocolo_156 fields
       };
 
       console.log('Submitting demand data:', demandaData);
