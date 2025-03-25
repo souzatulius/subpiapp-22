@@ -58,8 +58,8 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
         
         if (prefsData) {
           setEmailNotificationsEnabled(prefsData.email_notificacoes || false);
-          setDemandaNotifications(prefsData.notificar_demandas !== false); // Default to true
-          setComunicadoNotifications(prefsData.notificar_comunicados !== false); // Default to true
+          setDemandaNotifications(prefsData.notificar_demandas !== false); 
+          setComunicadoNotifications(prefsData.notificar_comunicados !== false); 
         }
       } catch (error) {
         console.error('Erro ao verificar preferências de notificações:', error);

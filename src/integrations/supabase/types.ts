@@ -1318,6 +1318,33 @@ export type Database = {
           },
         ]
       }
+      usuario_preferencias: {
+        Row: {
+          created_at: string | null
+          email_notificacoes: boolean | null
+          id: string
+          notificar_comunicados: boolean | null
+          notificar_demandas: boolean | null
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_notificacoes?: boolean | null
+          id?: string
+          notificar_comunicados?: boolean | null
+          notificar_demandas?: boolean | null
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_notificacoes?: boolean | null
+          id?: string
+          notificar_comunicados?: boolean | null
+          notificar_demandas?: boolean | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       usuario_roles: {
         Row: {
           coordenacao_id: string | null
