@@ -1,11 +1,14 @@
 
-import React from 'react';
-import RankingContent from '@/components/ranking/RankingContent';
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import SGZContent from '@/components/ranking/SGZContent';
 
 const RankingSubs = () => {
+  const { user } = useAuth();
+
   return (
     <div className="max-w-7xl mx-auto">
-      <RankingContent />
+      <SGZContent user={user} />
     </div>
   );
 };
