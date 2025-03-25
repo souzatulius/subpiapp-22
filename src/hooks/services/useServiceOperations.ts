@@ -64,6 +64,8 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
         problema_id: problemaId
       };
       
+      console.log('Criando serviço com dados:', serviceData);
+      
       const { error } = await supabase
         .from('servicos')
         .insert(serviceData);

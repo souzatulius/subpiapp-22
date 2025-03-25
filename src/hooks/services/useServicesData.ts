@@ -16,12 +16,15 @@ export function useServicesData() {
 
   const fetchAreas = async () => {
     try {
+      console.log('Buscando áreas (supervisões técnicas)...');
       const { data, error } = await supabase
         .from('supervisoes_tecnicas')
         .select('*')
         .order('descricao', { ascending: true });
       
       if (error) throw error;
+      
+      console.log('Áreas carregadas:', data);
       setAreas(data || []);
     } catch (error: any) {
       console.error('Erro ao carregar áreas:', error);
@@ -32,6 +35,7 @@ export function useServicesData() {
   const fetchServices = async () => {
     setLoading(true);
     try {
+      console.log('Buscando serviços...');
       const { data, error } = await supabase
         .from('servicos')
         .select(`
@@ -49,6 +53,7 @@ export function useServicesData() {
         supervisao_tecnica_id: item.supervisao_id
       }));
       
+      console.log('Serviços carregados:', transformedData);
       setServices(transformedData);
     } catch (error: any) {
       console.error('Erro ao carregar serviços:', error);

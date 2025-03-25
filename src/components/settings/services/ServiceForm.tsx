@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Area } from '@/hooks/services/types';
 
 interface ServiceFormProps {
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<any>;
   onCancel: () => void;
   defaultValues?: {
     descricao: string;
@@ -34,8 +34,17 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
 
   const selectedAreaId = watch('supervisao_tecnica_id');
 
+  const handleFormSubmit = async (data: any) => {
+    console.log('Enviando dados do formulário:', data);
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      console.error('Erro ao enviar formulário:', error);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="descricao">Descrição</Label>
         <Input
