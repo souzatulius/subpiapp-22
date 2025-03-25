@@ -4,7 +4,7 @@ import DataTable from './data-table/DataTable';
 import ServiceForm from './services/ServiceForm';
 import ServiceEditDialog from './services/ServiceEditDialog';
 import { useServices } from '@/hooks/useServices';
-import { Service } from '@/types/service';
+import { Service } from '@/hooks/services/types';
 
 const Services = () => {
   const {

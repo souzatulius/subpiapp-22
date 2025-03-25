@@ -7,6 +7,7 @@ export interface Service {
   descricao: string;
   supervisao_tecnica_id: string;
   supervisao_id?: string; // Add this for backward compatibility
+  problema_id: string; // Add this to match the hooks version
   supervisao_tecnica?: SupervisaoTecnica;
   criado_em?: string;
 }
