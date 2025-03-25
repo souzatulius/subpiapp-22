@@ -34,10 +34,10 @@ export const useProblemsData = () => {
         descricao: problem.descricao,
         area_coordenacao_id: problem.area_coordenacao_id,
         areas_coordenacao: problem.areas_coordenacao ? {
-          id: problem.areas_coordenacao.id,
-          descricao: problem.areas_coordenacao.descricao,
-          coordenacao: problem.areas_coordenacao.coordenacao,
-          coordenacao_id: problem.areas_coordenacao.coordenacao_id
+          id: problem.areas_coordenacao.id || '',
+          descricao: problem.areas_coordenacao.descricao || '',
+          coordenacao: problem.areas_coordenacao.coordenacao || '',
+          coordenacao_id: problem.areas_coordenacao.coordenacao_id || ''
         } : undefined,
         criado_em: problem.criado_em,
         atualizado_em: problem.atualizado_em

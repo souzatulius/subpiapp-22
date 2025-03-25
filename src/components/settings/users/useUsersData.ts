@@ -57,12 +57,12 @@ export const useUsersData = () => {
             .from('areas_coordenacao')
             .select('id, descricao, coordenacao, coordenacao_id')
             .eq('id', user.area_coordenacao_id)
-            .single();
+            .maybeSingle();
             
           if (!areaError && areaData) {
             areaInfo = {
-              id: areaData.id,
-              descricao: areaData.descricao,
+              id: areaData.id || '',
+              descricao: areaData.descricao || '',
               coordenacao: areaData.coordenacao || '',
               coordenacao_id: areaData.coordenacao_id || ''
             };
@@ -80,7 +80,7 @@ export const useUsersData = () => {
           .eq('usuario_id', user.id);
         
         let permissoes = [];
-        if (!permissionsError) {
+        if (!permissionsError && permissionsData) {
           permissoes = permissionsData.map((p: any) => p.permissoes);
         }
         
