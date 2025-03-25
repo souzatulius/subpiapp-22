@@ -137,3 +137,6 @@ export const ProfileMenu: React.FC = () => {
     </>
   );
 };
+
+// Add default export that points to the same component
+export default ProfileMenu;

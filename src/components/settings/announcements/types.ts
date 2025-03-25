@@ -41,3 +41,15 @@ export interface Announcement {
     email: string;
   };
 }
+
+// Add Notification type to ensure consistent typing
+export interface Notification {
+  id: string;
+  mensagem: string;
+  usuario_id: string;
+  data_envio: string;
+  lida: boolean;
+  tipo?: string;
+  referencia_id?: string;
+  excluida?: boolean;
+}
