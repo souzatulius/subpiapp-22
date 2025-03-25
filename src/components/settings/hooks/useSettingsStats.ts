@@ -12,7 +12,21 @@ export const useSettingsStats = () => {
     districts: 0,
     neighborhoods: 0,
     announcements: 0,
-    notifications: 0
+    notifications: 0,
+    // Additional properties for Portuguese UI
+    usuarios: 0,
+    areasCoordenacao: 0,
+    coordenacoes: 0,
+    cargos: 0,
+    problemas: 0,
+    temas: 0,
+    tiposMidia: 0,
+    origensDemanda: 0,
+    distritos: 0,
+    bairros: 0,
+    comunicados: 0,
+    configuracoesNotificacoes: 0,
+    permissoes: 0
   });
   const [loading, setLoading] = useState(true);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -38,6 +52,14 @@ export const useSettingsStats = () => {
         count: notificationsCount
       }, {
         count: unreadNotificationsCount
+      }, {
+        count: coordenacoesCount
+      }, {
+        count: temasCount
+      }, {
+        count: tiposMidiaCount
+      }, {
+        count: origensDemandaCount
       }] = await Promise.all([
         supabase.from('usuarios').select('*', { count: 'exact', head: true }),
         supabase.from('areas_coordenacao').select('*', { count: 'exact', head: true }),
@@ -47,10 +69,15 @@ export const useSettingsStats = () => {
         supabase.from('bairros').select('*', { count: 'exact', head: true }),
         supabase.from('comunicados').select('*', { count: 'exact', head: true }),
         supabase.from('notificacoes').select('*', { count: 'exact', head: true }),
-        supabase.from('notificacoes').select('*', { count: 'exact', head: true }).eq('lida', false)
+        supabase.from('notificacoes').select('*', { count: 'exact', head: true }).eq('lida', false),
+        supabase.from('coordenacoes').select('*', { count: 'exact', head: true }),
+        supabase.from('problemas').select('*', { count: 'exact', head: true }),
+        supabase.from('tipos_midia').select('*', { count: 'exact', head: true }),
+        supabase.from('origens_demanda').select('*', { count: 'exact', head: true })
       ]);
       
       setStats({
+        // English properties
         users: usersCount || 0,
         areas: areasCount || 0,
         positions: positionsCount || 0,
@@ -58,7 +85,22 @@ export const useSettingsStats = () => {
         districts: districtsCount || 0,
         neighborhoods: neighborhoodsCount || 0,
         announcements: announcementsCount || 0,
-        notifications: notificationsCount || 0
+        notifications: notificationsCount || 0,
+        
+        // Portuguese UI properties
+        usuarios: usersCount || 0,
+        areasCoordenacao: areasCount || 0,
+        coordenacoes: coordenacoesCount || 0,
+        cargos: positionsCount || 0,
+        problemas: temasCount || 0,
+        temas: temasCount || 0,
+        tiposMidia: tiposMidiaCount || 0,
+        origensDemanda: origensDemandaCount || 0,
+        distritos: districtsCount || 0,
+        bairros: neighborhoodsCount || 0,
+        comunicados: announcementsCount || 0,
+        configuracoesNotificacoes: notificationsCount || 0,
+        permissoes: 0  // This might need to come from another table
       });
       
       setUnreadNotifications(unreadNotificationsCount || 0);

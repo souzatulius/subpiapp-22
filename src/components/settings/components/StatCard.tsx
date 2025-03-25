@@ -1,9 +1,18 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { StatCardProps } from '../types/settingsTypes';
+
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  description: string;
+  section: string;
+  highlight?: boolean;
+  unreadCount?: number;
+  onClick?: () => void;
+}
 
 const StatCard: React.FC<StatCardProps> = ({
   title,
@@ -12,18 +21,13 @@ const StatCard: React.FC<StatCardProps> = ({
   description,
   section,
   highlight = false,
-  unreadCount = 0
+  unreadCount = 0,
+  onClick
 }) => {
-  const navigate = useNavigate();
-  
-  const handleSectionClick = () => {
-    navigate(`/settings?tab=${section}`);
-  };
-  
   return (
     <Card 
       className={`${highlight ? 'border-blue-400' : ''} cursor-pointer hover:shadow-md transition-shadow`}
-      onClick={handleSectionClick}
+      onClick={onClick}
     >
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>

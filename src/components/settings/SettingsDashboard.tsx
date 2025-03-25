@@ -9,7 +9,7 @@ import UserServiceStats from './components/UserServiceStats';
 
 const SettingsDashboard = () => {
   const navigate = useNavigate();
-  const { stats, isLoading } = useSettingsStats();
+  const { stats, loading, unreadNotifications } = useSettingsStats();
 
   const handleCategoryClick = (category: string) => {
     navigate(`/settings?tab=${category}`);
@@ -21,14 +21,14 @@ const SettingsDashboard = () => {
       title: 'Usuários',
       icon: <Users className="h-6 w-6" />,
       description: 'Gerencie os usuários da plataforma',
-      count: stats.usuarios
+      count: stats.users
     },
     {
       id: 'areas',
       title: 'Áreas de Coordenação',
       icon: <Briefcase className="h-6 w-6" />,
       description: 'Gerencie as áreas de coordenação',
-      count: stats.areasCoordenacao
+      count: stats.areas
     },
     {
       id: 'coordenacao',
@@ -42,63 +42,63 @@ const SettingsDashboard = () => {
       title: 'Cargos',
       icon: <BookText className="h-6 w-6" />,
       description: 'Gerencie os cargos disponíveis',
-      count: stats.cargos
+      count: stats.positions
     },
     {
       id: 'temas',
       title: 'Temas',
       icon: <Layers className="h-6 w-6" />,
       description: 'Gerencie os temas disponíveis',
-      count: stats.problemas
+      count: stats.temas || 0
     },
     {
       id: 'servicos',
       title: 'Serviços',
       icon: <FileSignature className="h-6 w-6" />,
       description: 'Gerencie os serviços disponíveis',
-      count: stats.servicos
+      count: stats.services
     },
     {
       id: 'tipos_midia',
       title: 'Tipos de Mídia',
       icon: <Newspaper className="h-6 w-6" />,
       description: 'Gerencie os tipos de mídia',
-      count: stats.tiposMidia
+      count: stats.tiposMidia || 0
     },
     {
       id: 'origens_demanda',
       title: 'Origens das Demandas',
       icon: <Home className="h-6 w-6" />,
       description: 'Gerencie as origens das demandas',
-      count: stats.origensDemanda
+      count: stats.origensDemanda || 0
     },
     {
       id: 'distritos_bairros',
       title: 'Distritos e Bairros',
       icon: <Map className="h-6 w-6" />,
       description: 'Gerencie distritos e bairros',
-      count: stats.distritos + stats.bairros
+      count: (stats.districts || 0) + (stats.neighborhoods || 0)
     },
     {
       id: 'comunicados',
       title: 'Comunicados',
       icon: <MessageCircle className="h-6 w-6" />,
       description: 'Gerencie os comunicados',
-      count: stats.comunicados
+      count: stats.announcements
     },
     {
       id: 'notificacoes',
       title: 'Configurações de Notificações',
       icon: <Bell className="h-6 w-6" />,
       description: 'Configure as notificações do sistema',
-      count: stats.configuracoesNotificacoes
+      count: stats.notifications
     },
     {
       id: 'permissoes',
       title: 'Permissões',
       icon: <Shield className="h-6 w-6" />,
       description: 'Gerencie as permissões dos usuários',
-      count: stats.permissoes
+      count: stats.permissoes || 0
     }
   ];
 
@@ -111,15 +111,16 @@ const SettingsDashboard = () => {
             title={category.title}
             icon={category.icon}
             description={category.description}
-            count={isLoading ? null : category.count}
+            value={loading ? 0 : category.count}
+            section={category.id}
             onClick={() => handleCategoryClick(category.id)}
           />
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <LocationCommunicationStats stats={stats} isLoading={isLoading} />
-        <UserServiceStats stats={stats} isLoading={isLoading} />
+        <LocationCommunicationStats stats={stats} loading={loading} unreadNotifications={unreadNotifications} />
+        <UserServiceStats stats={stats} loading={loading} />
       </div>
     </div>
   );

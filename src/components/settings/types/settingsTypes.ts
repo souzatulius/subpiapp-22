@@ -8,6 +8,19 @@ export interface SettingsStats {
   neighborhoods: number;
   announcements: number;
   notifications: number;
+  usuarios: number;
+  areasCoordenacao: number;
+  coordenacoes: number;
+  cargos: number;
+  problemas: number;
+  tiposMidia: number;
+  origensDemanda: number;
+  distritos: number;
+  bairros: number;
+  comunicados: number;
+  configuracoesNotificacoes: number;
+  permissoes: number;
+  temas: number;
 }
 
 export interface StatCardProps {
@@ -19,3 +32,4 @@ export interface StatCardProps {
   highlight?: boolean;
   unreadCount?: number;
 }
+
