@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -356,5 +357,109 @@ const NotificationConfigurations: React.FC = () => {
         </CardContent>
       </Card>
 
-      <
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing ? "Editar Configuração" : "Nova Configuração de Notificação"}
+            </DialogTitle>
+            <DialogDescription>
+              {isEditing 
+                ? "Atualize os detalhes da configuração de notificação."
+                : "Defina como e quando as notificações serão enviadas."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="titulo" className="text-right">
+                Título
+              </Label>
+              <Input
+                id="titulo"
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                className="col-span-3"
+                placeholder="Ex: Notificação de Nova Demanda"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tipo" className="text-right">
+                Tipo
+              </Label>
+              <Select
+                value={formData.tipo}
+                onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="demanda">Demanda</SelectItem>
+                  <SelectItem value="nota">Nota Oficial</SelectItem>
+                  <SelectItem value="sistema">Sistema</SelectItem>
+                  <SelectItem value="comunicado">Comunicado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="descricao" className="text-right">
+                Descrição
+              </Label>
+              <Textarea
+                id="descricao"
+                value={formData.descricao}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                className="col-span-3"
+                placeholder="Descrição opcional"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="frequencia" className="text-right">
+                Frequência
+              </Label>
+              <Select
+                value={formData.frequencia}
+                onValueChange={(value) => setFormData({ ...formData, frequencia: value })}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecione a frequência" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="imediata">Imediata</SelectItem>
+                  <SelectItem value="agrupada">Agrupada (a cada hora)</SelectItem>
+                  <SelectItem value="diaria">Diária (resumo)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
+                Ativo
+              </Label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Switch
+                  id="status"
+                  checked={formData.ativo}
+                  onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
+                />
+                <Label htmlFor="status" className="cursor-pointer">
+                  {formData.ativo ? "Sim" : "Não"}
+                </Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditing ? "Atualizar" : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
 
+export default NotificationConfigurations;
