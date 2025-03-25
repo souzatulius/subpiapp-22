@@ -12,16 +12,37 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
     if (!currentUser?.id) return;
     
     try {
+      // Clean up data before submission
+      const cleanData: any = {
+        nome_completo: data.nome_completo,
+        whatsapp: data.whatsapp || null,
+        aniversario: data.aniversario ? data.aniversario.toISOString() : null,
+      };
+      
+      // Only include fields that are valid (not placeholder values)
+      if (data.cargo_id && data.cargo_id !== 'select-cargo') {
+        cleanData.cargo_id = data.cargo_id;
+      } else {
+        cleanData.cargo_id = null;
+      }
+      
+      if (data.coordenacao_id && data.coordenacao_id !== 'select-coordenacao') {
+        cleanData.coordenacao_id = data.coordenacao_id;
+      } else {
+        cleanData.coordenacao_id = null;
+      }
+      
+      if (data.area_coordenacao_id && data.area_coordenacao_id !== 'select-area') {
+        cleanData.area_coordenacao_id = data.area_coordenacao_id;
+      } else {
+        cleanData.area_coordenacao_id = null;
+      }
+      
+      console.log('Updating user with data:', cleanData);
+      
       const { error } = await supabase
         .from('usuarios')
-        .update({
-          nome_completo: data.nome_completo,
-          cargo_id: data.cargo_id || null,
-          coordenacao_id: data.coordenacao_id || null,
-          area_coordenacao_id: data.area_coordenacao_id || null,
-          whatsapp: data.whatsapp || null,
-          aniversario: data.aniversario ? data.aniversario.toISOString() : null,
-        })
+        .update(cleanData)
         .eq('id', currentUser.id);
       
       if (error) throw error;

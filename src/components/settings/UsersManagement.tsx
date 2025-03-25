@@ -8,6 +8,7 @@ import { useUserDelete } from './users/hooks/useUserDelete';
 import { usePasswordReset } from './users/hooks/usePasswordReset';
 import { useUserApproval } from './users/hooks/useUserApproval';
 import { useUserAccessRemoval } from './users/hooks/useUserAccessRemoval';
+import { useUserInvite } from './users/hooks/useUserInvite';
 import { supabase } from '@/integrations/supabase/client';
 
 const UsersManagement = () => {
@@ -39,6 +40,7 @@ const UsersManagement = () => {
           return;
         }
         
+        console.log('Fetched coordenações:', data);
         setCoordenacoes(data || []);
       } catch (error) {
         console.error('Error in fetchCoordenacoes:', error);
@@ -67,6 +69,12 @@ const UsersManagement = () => {
     deleteUser
   } = useUserDelete(fetchData);
 
+  const {
+    isInviteDialogOpen,
+    setIsInviteDialogOpen,
+    handleInviteUser
+  } = useUserInvite(fetchData);
+
   const { handleSendPasswordReset: resetPassword } = usePasswordReset();
   const { approveUser, approving } = useUserApproval(fetchData);
   const { removeAccess, removing } = useUserAccessRemoval(fetchData);
@@ -91,9 +99,9 @@ const UsersManagement = () => {
     areas,
     cargos,
     coordenacoes,
-    isInviteDialogOpen: false, // This would be managed in a separate hook
-    setIsInviteDialogOpen: () => {}, // Placeholder for now
-    handleInviteUser: async () => {}, // Placeholder for now
+    isInviteDialogOpen,
+    setIsInviteDialogOpen,
+    handleInviteUser,
     isEditDialogOpen,
     setIsEditDialogOpen,
     selectedUser,

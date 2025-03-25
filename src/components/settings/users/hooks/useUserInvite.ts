@@ -1,112 +1,79 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { completeEmailWithDomain } from '@/lib/authUtils';
+
+interface InviteUserData {
+  email: string;
+  nome_completo: string;
+  cargo_id?: string;
+  coordenacao_id?: string;
+  area_coordenacao_id?: string;
+}
 
 export const useUserInvite = (fetchData: () => Promise<void>) => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
-  const handleInviteUser = async (data: { 
-    email: string; 
-    nome_completo: string; 
-    cargo_id?: string; 
-    area_coordenacao_id?: string;
-  }) => {
+  const handleInviteUser = async (data: InviteUserData) => {
     try {
+      // Prepare email with domain if needed
       const email = completeEmailWithDomain(data.email);
       
-      const { data: existingUser, error: checkError } = await supabase
-        .from('usuarios')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle();
-        
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
+      // Clean up the data for submission
+      const cleanData: any = {
+        nome_completo: data.nome_completo,
+        email: email,
+      };
+      
+      // Only include fields that are valid (not placeholder values)
+      if (data.cargo_id && data.cargo_id !== 'select-cargo') {
+        cleanData.cargo_id = data.cargo_id;
       }
       
-      if (existingUser) {
-        const { error: updateError } = await supabase
-          .from('usuarios')
-          .update({
-            nome_completo: data.nome_completo,
-            cargo_id: data.cargo_id || null,
-            area_coordenacao_id: data.area_coordenacao_id || null,
-          })
-          .eq('id', existingUser.id);
-          
-        if (updateError) throw updateError;
-        
-        toast({
-          title: 'Usuário atualizado',
-          description: `As informações do usuário ${email} foram atualizadas`,
-        });
-        
-        setIsInviteDialogOpen(false);
-        fetchData();
-        return;
+      if (data.coordenacao_id && data.coordenacao_id !== 'select-coordenacao') {
+        cleanData.coordenacao_id = data.coordenacao_id;
       }
       
+      if (data.area_coordenacao_id && data.area_coordenacao_id !== 'select-area') {
+        cleanData.area_coordenacao_id = data.area_coordenacao_id;
+      }
+      
+      console.log('Inviting user with data:', cleanData);
+      
+      // First, create the Supabase auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password: Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12),
+        email: email,
+        password: Math.random().toString(36).slice(-10) + Math.random().toString(36).toUpperCase().slice(-2) + '!',
         options: {
           data: {
             name: data.nome_completo,
-          },
-          emailRedirectTo: `${window.location.origin}/login`,
+            role_id: cleanData.cargo_id || null,
+            coordenacao_id: cleanData.coordenacao_id || null,
+            area_id: cleanData.area_coordenacao_id || null,
+          }
         }
       });
       
       if (authError) throw authError;
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const { data: newUserData, error: userError } = await supabase
-        .from('usuarios')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle();
-        
-      if (userError) throw userError;
-      
-      if (newUserData) {
-        const { error: updateError } = await supabase
-          .from('usuarios')
-          .update({
-            nome_completo: data.nome_completo,
-            cargo_id: data.cargo_id || null,
-            area_coordenacao_id: data.area_coordenacao_id || null,
-          })
-          .eq('id', newUserData.id);
-          
-        if (updateError) throw updateError;
-      }
+      // The user will be created in usuarios table automatically via trigger
       
       toast({
-        title: 'Convite enviado',
+        title: 'Usuário convidado',
         description: `Um convite foi enviado para ${email}`,
       });
       
+      // Refresh users data
+      await fetchData();
+      
+      // Close dialog
       setIsInviteDialogOpen(false);
-      fetchData();
     } catch (error: any) {
       console.error('Erro ao convidar usuário:', error);
-      
-      let mensagemErro = 'Ocorreu um erro ao enviar o convite.';
-      
-      if (error.message) {
-        if (error.message.includes('already registered')) {
-          mensagemErro = 'Este email já está registrado no sistema.';
-        } else if (error.message.includes('invalid email')) {
-          mensagemErro = 'O formato do email é inválido.';
-        }
-      }
-      
       toast({
-        title: 'Erro ao convidar usuário',
-        description: mensagemErro,
+        title: 'Erro',
+        description: error.message || 'Não foi possível enviar o convite. Por favor, tente novamente.',
         variant: 'destructive',
       });
     }

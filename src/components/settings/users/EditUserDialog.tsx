@@ -48,6 +48,12 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   const role = watch('cargo_id') || '';
   const coordenacao = watch('coordenacao_id') || '';
   const area = watch('area_coordenacao_id') || '';
+  
+  // Filter areas based on the selected coordination
+  const filteredAreas = React.useMemo(() => {
+    if (!coordenacao) return [];
+    return areas.filter(a => a.coordenacao_id === coordenacao);
+  }, [areas, coordenacao]);
 
   // Reset form when opening or changing user
   React.useEffect(() => {
@@ -125,33 +131,73 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
             />
           </div>
 
-          <PositionFields
-            role={role}
-            area={area}
-            coordenacao={coordenacao}
-            roles={cargos.map(cargo => ({ id: cargo.id, value: cargo.descricao }))}
-            areas={areas.map(area => ({ id: area.id, value: area.descricao }))}
-            coordenacoes={coordenacoes.map(coord => ({ id: coord.coordenacao_id, value: coord.coordenacao }))}
-            loadingOptions={false}
-            errors={{
-              role: !!errors.cargo_id,
-              area: !!errors.area_coordenacao_id,
-              coordenacao: !!errors.coordenacao_id
-            }}
-            handleChange={(name, value) => {
-              if (name === 'role') {
-                setValue('cargo_id', value);
-              } else if (name === 'area') {
-                setValue('area_coordenacao_id', value);
-              } else if (name === 'coordenacao') {
-                setValue('coordenacao_id', value);
-                if (value) {
-                  // Reset area when changing coordenacao
-                  setValue('area_coordenacao_id', '');
-                }
-              }
-            }}
-          />
+          <div className="grid gap-2">
+            <Label htmlFor="cargo_id">Cargo</Label>
+            <select
+              id="cargo_id"
+              {...register('cargo_id')}
+              className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+            >
+              <option value="select-cargo">Selecione um cargo</option>
+              {cargos.map(cargo => (
+                <option key={cargo.id} value={cargo.id}>
+                  {cargo.descricao}
+                </option>
+              ))}
+            </select>
+            {errors.cargo_id && (
+              <p className="text-sm text-red-500">{errors.cargo_id.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="coordenacao_id">Coordenação</Label>
+            <select
+              id="coordenacao_id"
+              {...register('coordenacao_id')}
+              className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+              onChange={(e) => {
+                setValue('coordenacao_id', e.target.value);
+                setValue('area_coordenacao_id', '');
+              }}
+            >
+              <option value="select-coordenacao">Selecione uma coordenação</option>
+              {coordenacoes.map(coord => (
+                <option key={coord.coordenacao_id} value={coord.coordenacao_id}>
+                  {coord.coordenacao}
+                </option>
+              ))}
+            </select>
+            {errors.coordenacao_id && (
+              <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="area_coordenacao_id">Supervisão Técnica</Label>
+            <select
+              id="area_coordenacao_id"
+              {...register('area_coordenacao_id')}
+              className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+              disabled={!coordenacao || filteredAreas.length === 0}
+            >
+              <option value="select-area">
+                {!coordenacao 
+                  ? 'Selecione uma coordenação primeiro' 
+                  : filteredAreas.length === 0 
+                    ? 'Nenhuma supervisão técnica disponível' 
+                    : 'Selecione uma supervisão técnica'}
+              </option>
+              {filteredAreas.map(area => (
+                <option key={area.id} value={area.id}>
+                  {area.descricao}
+                </option>
+              ))}
+            </select>
+            {errors.area_coordenacao_id && (
+              <p className="text-sm text-red-500">{errors.area_coordenacao_id.message}</p>
+            )}
+          </div>
 
           <DialogFooter>
             <Button 

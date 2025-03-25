@@ -3,17 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Area, Cargo } from './types';
 import EmailSuffix from '@/components/EmailSuffix';
 import { toast } from '@/components/ui/use-toast';
-import { completeEmailWithDomain } from '@/lib/authUtils';
-import { supabase } from '@/integrations/supabase/client';
 
 const inviteUserSchema = z.object({
   email: z.string().min(1, 'Email é obrigatório'),
@@ -42,7 +39,8 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
   cargos,
   coordenacoes
 }) => {
-  const [filteredAreas, setFilteredAreas] = useState<Area[]>(areas);
+  const [filteredAreas, setFilteredAreas] = useState<Area[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(inviteUserSchema),
@@ -60,7 +58,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
   
   // Filter areas based on selected coordenação
   useEffect(() => {
-    if (coordenacaoId) {
+    if (coordenacaoId && coordenacaoId !== 'select-coordenacao') {
       const filtered = areas.filter(area => area.coordenacao_id === coordenacaoId);
       setFilteredAreas(filtered);
       
@@ -70,14 +68,30 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
         form.setValue('area_coordenacao_id', undefined);
       }
     } else {
-      setFilteredAreas(areas);
+      setFilteredAreas([]);
     }
   }, [coordenacaoId, areas, form]);
   
   const handleSubmit = async (data: FormValues) => {
     try {
+      setIsSubmitting(true);
+
+      // Validate the selected values
+      if (data.cargo_id === 'select-cargo') {
+        data.cargo_id = undefined;
+      }
+      
+      if (data.coordenacao_id === 'select-coordenacao') {
+        data.coordenacao_id = undefined;
+      }
+      
+      if (data.area_coordenacao_id === 'select-area') {
+        data.area_coordenacao_id = undefined;
+      }
+      
       await onSubmit(data);
       form.reset();
+      onOpenChange(false);
     } catch (error) {
       console.error('Erro ao convidar usuário:', error);
       toast({
@@ -85,6 +99,8 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
         description: "Ocorreu um erro ao enviar o convite. Tente novamente.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -139,20 +155,20 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cargo</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um cargo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
+                  <FormControl>
+                    <select
+                      className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+                      value={field.value}
+                      onChange={field.onChange}
+                    >
+                      <option value="select-cargo">Selecione um cargo</option>
                       {cargos.map(cargo => (
-                        <SelectItem key={cargo.id} value={cargo.id}>
+                        <option key={cargo.id} value={cargo.id}>
                           {cargo.descricao}
-                        </SelectItem>
+                        </option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} 
@@ -164,27 +180,24 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Coordenação</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      // Clear area selection when coordenação changes
-                      form.setValue('area_coordenacao_id', undefined);
-                    }} 
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma coordenação" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
+                  <FormControl>
+                    <select
+                      className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+                      value={field.value}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        // Clear area selection when coordenação changes
+                        form.setValue('area_coordenacao_id', undefined);
+                      }}
+                    >
+                      <option value="select-coordenacao">Selecione uma coordenação</option>
                       {coordenacoes.map(coord => (
-                        <SelectItem key={coord.coordenacao_id} value={coord.coordenacao_id}>
+                        <option key={coord.coordenacao_id} value={coord.coordenacao_id}>
                           {coord.coordenacao}
-                        </SelectItem>
+                        </option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} 
@@ -196,42 +209,48 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Supervisão Técnica</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    value={field.value}
-                    disabled={!form.getValues('coordenacao_id') || filteredAreas.length === 0}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={
-                          form.getValues('coordenacao_id') 
-                            ? filteredAreas.length === 0 
-                              ? "Nenhuma supervisão técnica para esta coordenação" 
-                              : "Selecione uma supervisão técnica"
-                            : "Selecione uma coordenação primeiro"
-                        } />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
+                  <FormControl>
+                    <select
+                      className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={!form.getValues('coordenacao_id') || filteredAreas.length === 0 || form.getValues('coordenacao_id') === 'select-coordenacao'}
+                    >
+                      <option value="select-area">
+                        {!form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'select-coordenacao'
+                          ? "Selecione uma coordenação primeiro"
+                          : filteredAreas.length === 0
+                          ? "Nenhuma supervisão técnica para esta coordenação"
+                          : "Selecione uma supervisão técnica"}
+                      </option>
                       {filteredAreas.map(area => (
-                        <SelectItem key={area.id} value={area.id}>
+                        <option key={area.id} value={area.id}>
                           {area.descricao}
-                        </SelectItem>
+                        </option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} 
             />
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Convidar
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Convidando...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Convidar
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </form>
