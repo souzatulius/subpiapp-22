@@ -1,18 +1,20 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import DataEntryForm from '../DataEntryForm';
-import { serviceSchema, Area } from '@/hooks/services/types';
+import { serviceSchema } from '@/types/service';
+import { SupervisaoTecnica } from '@/types/common';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ServiceFormProps {
-  onSubmit: (data: { descricao: string; area_coordenacao_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
   onCancel: () => void;
   defaultValues?: {
     descricao: string;
-    area_coordenacao_id: string;
+    supervisao_tecnica_id: string;
   };
-  areas: Area[];
+  areas: SupervisaoTecnica[];
   isSubmitting: boolean;
   submitText?: string;
 }
@@ -22,7 +24,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   onCancel,
   defaultValues = {
     descricao: '',
-    area_coordenacao_id: '',
+    supervisao_tecnica_id: '',
   },
   areas,
   isSubmitting,
@@ -49,10 +51,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="area_coordenacao_id">Supervisão Técnica</Label>
+            <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
             <Select 
-              onValueChange={(value) => setValue("area_coordenacao_id", value)}
-              defaultValue={defaultValues.area_coordenacao_id}
+              onValueChange={(value) => setValue("supervisao_tecnica_id", value)}
+              defaultValue={defaultValues.supervisao_tecnica_id}
             >
               <SelectTrigger className="rounded-lg">
                 <SelectValue placeholder="Selecione uma supervisão técnica" />
@@ -65,8 +67,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 ))}
               </SelectContent>
             </Select>
-            {formState.errors.area_coordenacao_id && (
-              <p className="text-sm text-red-500">{formState.errors.area_coordenacao_id.message}</p>
+            {formState.errors.supervisao_tecnica_id && (
+              <p className="text-sm text-red-500">{formState.errors.supervisao_tecnica_id.message}</p>
             )}
           </div>
         </div>

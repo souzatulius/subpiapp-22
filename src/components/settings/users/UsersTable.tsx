@@ -11,9 +11,19 @@ import {
 import { Button } from '@/components/ui/button';
 import { CircleUserRound, Loader2 } from 'lucide-react';
 import UserActionsMenu from './UserActionsMenu';
-import { formatDate } from '@/lib/utils';
 import { User } from '@/types/common';
-import { UsersTableProps } from '@/types/users';
+import { formatDate } from '@/types/common';
+
+interface UsersTableProps {
+  users: User[];
+  loading: boolean;
+  filter: string;
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
+  onResetPassword?: (user: User) => void;
+  onApprove?: (user: User, permissionLevel: string) => void;
+  onRemoveAccess?: (user: User) => void;
+}
 
 const UsersTable: React.FC<UsersTableProps> = ({
   users,
@@ -116,6 +126,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                     onEdit={() => onEdit(user)}
                     onDelete={() => onDelete(user)}
                     onResetPassword={() => onResetPassword && onResetPassword(user)}
+                    onApprove={onApprove}
                     onRemoveAccess={() => onRemoveAccess && onRemoveAccess(user)}
                   />
                 )}

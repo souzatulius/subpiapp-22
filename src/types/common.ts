@@ -43,6 +43,7 @@ export interface UserProfile {
   aniversario?: string;
   cargo?: string;
   supervisao_tecnica?: string;
+  coordenacao?: string;
   cargos?: {
     descricao: string;
   };
@@ -80,3 +81,20 @@ export interface UserFormData {
   whatsapp?: string;
   aniversario?: Date;
 }
+
+// Helper function for date formatting
+export const formatDate = (dateStr: string): string => {
+  if (!dateStr) return 'Data não informada';
+  try {
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  } catch (error) {
+    return 'Data inválida';
+  }
+};

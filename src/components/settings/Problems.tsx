@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
-import { useProblemsData, useProblemOperations, Problem, Area } from '@/hooks/useProblems';
+import { useProblemsData, useProblemOperations } from '@/hooks/useProblems';
+import { Problem } from '@/types/problem';
+import { SupervisaoTecnica } from '@/types/common';
 import DataTable from './data-table/DataTable';
 import ProblemForm from './problems/ProblemForm';
 import ProblemEditDialog from './problems/ProblemEditDialog';
@@ -55,7 +57,6 @@ const Problems = () => {
     }
   };
 
-  // Fix: Properly extract the ID when deleting a problem
   const handleDelete = (problem: Problem) => {
     return deleteProblem(problem.id);
   };
@@ -66,9 +67,9 @@ const Problems = () => {
       header: 'Descrição',
     },
     {
-      key: 'area_coordenacao',
-      header: 'Área de Coordenação',
-      render: (row: Problem) => row.areas_coordenacao?.descricao || '-',
+      key: 'supervisao_tecnica',
+      header: 'Supervisão Técnica',
+      render: (row: Problem) => row.supervisao_tecnica?.descricao || '-',
     },
     {
       key: 'criado_em',
@@ -82,7 +83,7 @@ const Problems = () => {
       <ProblemForm
         onSubmit={handleAdd}
         onCancel={onClose}
-        areas={areas as any}
+        areas={areas as SupervisaoTecnica[]}
         isSubmitting={isSubmitting}
       />
     );
@@ -106,7 +107,7 @@ const Problems = () => {
         isOpen={isEditFormOpen}
         onClose={closeEditForm}
         problem={editingProblem}
-        areas={areas as any}
+        areas={areas as SupervisaoTecnica[]}
         onSubmit={handleEdit}
         isSubmitting={isSubmitting}
       />

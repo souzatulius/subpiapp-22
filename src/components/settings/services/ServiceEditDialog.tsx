@@ -2,14 +2,15 @@
 import React from 'react';
 import EditModal from '../EditModal';
 import ServiceForm from './ServiceForm';
-import { Service, Area } from '@/hooks/services/types';
+import { Service } from '@/types/service';
+import { SupervisaoTecnica } from '@/types/common';
 
 interface ServiceEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   service: Service | null;
-  areas: Area[];
-  onSubmit: (data: { descricao: string; area_coordenacao_id: string }) => Promise<void>;
+  areas: SupervisaoTecnica[];
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -34,7 +35,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
         onCancel={onClose}
         defaultValues={{
           descricao: service.descricao,
-          area_coordenacao_id: service.area_coordenacao_id,
+          supervisao_tecnica_id: service.supervisao_id || '',
         }}
         areas={areas}
         isSubmitting={isSubmitting}

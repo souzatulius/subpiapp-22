@@ -3,12 +3,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, X } from 'lucide-react';
-import { useDemandasData } from './criar-nota/useDemandasData';
-import { useNotaForm } from './criar-nota/useNotaForm';
+import { useDemandasData } from '@/hooks/dashboard/forms/criar-nota/useDemandasData';
+import { useNotaForm } from '@/hooks/dashboard/forms/criar-nota/useNotaForm';
 import DemandaSelection from './criar-nota/DemandaSelection';
 import DemandaInfo from './criar-nota/DemandaInfo';
 import NotaForm from './criar-nota/NotaForm';
-import { CriarNotaFormProps } from './types';
+import { CriarNotaFormProps } from '@/types/demand';
 
 const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
   onClose

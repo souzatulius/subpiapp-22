@@ -96,13 +96,15 @@ export const useNotasQuery = () => {
 
         if (error) throw error;
 
-        // Cast the data to the expected type with proper formatting for nullable fields
-        return (data || []).map((nota: RawNotaOficial) => ({
+        // Cast data to the expected type with proper formatting for nullable fields
+        const formattedNotas = (data || []).map((nota: any) => ({
           ...nota,
           autor: nota.autor || { id: '', nome_completo: 'Não informado' },
           aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
           supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' }
         })) as NotaOficial[];
+
+        return formattedNotas;
       } catch (error: any) {
         console.error('Erro ao carregar notas:', error);
         toast({
@@ -110,7 +112,7 @@ export const useNotasQuery = () => {
           description: 'Não foi possível carregar as notas',
           variant: 'destructive',
         });
-        return [];
+        return [] as NotaOficial[];
       }
     },
     staleTime: 30000, // 30 segundos antes de considerar dados obsoletos

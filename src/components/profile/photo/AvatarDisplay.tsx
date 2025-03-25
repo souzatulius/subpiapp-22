@@ -1,41 +1,45 @@
 
 import React from 'react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { UserProfile } from '../types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { User } from 'lucide-react';
 
-interface AvatarDisplayProps {
-  userProfile: UserProfile | null;
-  previewUrl: string | null;
-  size?: 'sm' | 'md' | 'lg';
+export interface AvatarDisplayProps {
+  nome?: string;
+  imageSrc?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
 }
 
-export const getUserInitials = (name: string) => {
-  if (!name) return 'U';
-  const parts = name.split(' ');
-  if (parts.length >= 2) {
-    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-  }
-  return parts[0][0].toUpperCase();
-};
-
-const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ userProfile, previewUrl, size = 'lg' }) => {
-  const sizeClasses = {
-    sm: 'h-8 w-8',
-    md: 'h-12 w-12',
-    lg: 'h-32 w-32 border-4 border-gray-200'
+const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ 
+  nome = '',
+  imageSrc,
+  size = 'md',
+  className = ''
+}) => {
+  const getInitials = (name: string): string => {
+    if (!name) return '';
+    const words = name.split(' ');
+    if (words.length === 1) {
+      return words[0].charAt(0).toUpperCase();
+    }
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
   };
 
+  const sizeClasses = {
+    sm: 'h-8 w-8 text-xs',
+    md: 'h-10 w-10 text-sm',
+    lg: 'h-16 w-16 text-lg',
+    xl: 'h-24 w-24 text-xl'
+  };
+  
+  const initials = getInitials(nome);
+
   return (
-    <Avatar className={sizeClasses[size]}>
-      {previewUrl ? (
-        <AvatarImage src={previewUrl} alt="Preview" />
-      ) : userProfile?.foto_perfil_url ? (
-        <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
-      ) : (
-        <AvatarFallback className={size === 'lg' ? "text-3xl bg-subpi-blue text-white" : "bg-subpi-blue text-white"}>
-          {userProfile?.nome_completo ? getUserInitials(userProfile.nome_completo) : 'U'}
-        </AvatarFallback>
-      )}
+    <Avatar className={`${sizeClasses[size]} ${className}`}>
+      <AvatarImage src={imageSrc} alt={nome} />
+      <AvatarFallback className="bg-primary/10 text-primary">
+        {initials || <User className="h-5 w-5" />}
+      </AvatarFallback>
     </Avatar>
   );
 };

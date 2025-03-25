@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import DataTable from './data-table/DataTable';
 import ServiceForm from './services/ServiceForm';
 import ServiceEditDialog from './services/ServiceEditDialog';
-import { useServices, Service } from '@/hooks/useServices';
+import { useServices } from '@/hooks/useServices';
+import { Service } from '@/types/service';
 
 const Services = () => {
   const {
@@ -38,7 +39,7 @@ const Services = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     if (!editingService) return Promise.reject(new Error('Nenhum problema selecionado'));
     
     await updateService(editingService.id, data);
@@ -46,13 +47,12 @@ const Services = () => {
     return Promise.resolve();
   };
 
-  const handleAdd = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     await addService(data);
     closeAddForm();
     return Promise.resolve();
   };
 
-  // Fix: Properly extract the ID when deleting a service
   const handleDelete = (service: Service) => {
     return deleteService(service.id);
   };
@@ -63,9 +63,9 @@ const Services = () => {
       header: 'Descrição',
     },
     {
-      key: 'areas_coordenacao',
+      key: 'supervisao_tecnica',
       header: 'Supervisão Técnica',
-      render: (row: any) => row.areas_coordenacao?.descricao || '-',
+      render: (row: any) => row.supervisao_tecnica?.descricao || '-',
     },
     {
       key: 'criado_em',

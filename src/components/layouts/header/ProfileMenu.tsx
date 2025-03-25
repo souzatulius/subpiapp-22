@@ -46,7 +46,7 @@ const ProfileMenu: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none">
           <AvatarDisplay 
-            name={displayName}
+            nome={displayName}
             imageSrc={photoUrl}
             size="md"
           />

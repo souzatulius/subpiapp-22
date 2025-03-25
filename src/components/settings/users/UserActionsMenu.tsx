@@ -9,15 +9,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Pencil, Trash2, KeyRound, UserCheck, UserX } from 'lucide-react';
-import { User } from './types';
+import { User } from '@/types/common';
 
 interface UserActionsMenuProps {
   user: User;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onResetPassword: (user: User) => void;
-  onApprove: (user: User, permissionLevel?: string) => void;
-  onRemoveAccess: (user: User) => void;
+  onApprove?: (user: User, permissionLevel?: string) => void;
+  onRemoveAccess?: (user: User) => void;
   isApproving?: boolean;
   isRemoving?: boolean;
 }
@@ -55,12 +55,14 @@ const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
         
         <DropdownMenuSeparator />
         
-        {!hasPermissions ? (
+        {!hasPermissions && onApprove && (
           <DropdownMenuItem onClick={() => onApprove(user)}>
             <UserCheck className="mr-2 h-4 w-4" />
             <span>Aprovar acesso</span>
           </DropdownMenuItem>
-        ) : (
+        )}
+        
+        {hasPermissions && onRemoveAccess && (
           <DropdownMenuItem onClick={() => onRemoveAccess(user)}>
             <UserX className="mr-2 h-4 w-4" />
             <span>Remover acesso</span>

@@ -3,7 +3,7 @@ import React from 'react';
 import { Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Demand } from './types';
+import { Demand } from '@/types/demand';
 
 interface DemandaSelectionProps {
   filteredDemandas: Demand[];
@@ -55,9 +55,9 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                     <span className="px-2 py-0.5 bg-gray-100 rounded-full">
                       {demanda.status === 'pendente' ? 'Pendente' : 'Em andamento'}
                     </span>
-                    {demanda.area_coordenacao && (
+                    {demanda.supervisao_tecnica && (
                       <span className="px-2 py-0.5 bg-gray-100 rounded-full">
-                        {demanda.area_coordenacao.descricao}
+                        {demanda.supervisao_tecnica.descricao}
                       </span>
                     )}
                   </div>

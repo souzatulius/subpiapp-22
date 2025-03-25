@@ -1,7 +1,9 @@
 
 import React, { useState } from 'react';
-import { useProblemsData, useProblemOperations, Problem } from '@/hooks/useProblems';
-import { useCoordinationAreas, Area } from '@/hooks/coordination-areas/useCoordinationAreas';
+import { useProblemsData, useProblemOperations } from '@/hooks/useProblems';
+import { Problem } from '@/types/problem';
+import { useCoordinationAreas } from '@/hooks/coordination-areas/useCoordinationAreas';
+import { SupervisaoTecnica } from '@/types/common';
 import DataTable from './data-table/DataTable';
 import TemaForm from './temas/TemaForm';
 import TemaEditDialog from './temas/TemaEditDialog';
@@ -57,7 +59,6 @@ const Temas = () => {
     }
   };
 
-  // Fix: Properly extract the ID when deleting a tema
   const handleDelete = (tema: Problem) => {
     return deleteProblem(tema.id);
   };
@@ -68,15 +69,15 @@ const Temas = () => {
       header: 'Descrição',
     },
     {
-      key: 'area_coordenacao',
+      key: 'supervisao_tecnica',
       header: 'Supervisão Técnica',
-      render: (row: Problem) => row.areas_coordenacao?.descricao || '-',
+      render: (row: Problem) => row.supervisao_tecnica?.descricao || '-',
     },
     {
       key: 'coordenacao',
       header: 'Coordenação',
       render: (row: Problem) => {
-        const area = row.areas_coordenacao;
+        const area = row.supervisao_tecnica;
         if (area && area.coordenacao_id) {
           const coord = areas.find(a => a.id === area.coordenacao_id);
           return coord ? coord.descricao : '-';
