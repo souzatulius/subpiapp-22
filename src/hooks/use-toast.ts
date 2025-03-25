@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -126,24 +127,26 @@ export const reducer = (state: State, action: Action): State => {
   }
 }
 
-const dispatch = (action: Action) => {
-  reactDispatch?.(action)
-}
+// Create a React context to store the dispatch function
+const ToastDispatchContext = React.createContext<React.Dispatch<Action> | undefined>(undefined);
 
-const reactDispatch = React.createContext<React.Dispatch<Action> | undefined>(
-  undefined
-).dispatch
+// Create a mutable variable to store the current dispatch function
+let dispatchFunction: ((action: Action) => void) | undefined;
+
+const dispatch = (action: Action) => {
+  dispatchFunction?.(action);
+}
 
 export const useToast = () => {
   const [state, setState] = React.useState<State>({ toasts: [] })
 
   React.useEffect(() => {
-    reactDispatch = (action: Action) => {
+    dispatchFunction = (action: Action) => {
       setState((prevState) => reducer(prevState, action))
     }
 
     return () => {
-      reactDispatch = undefined
+      dispatchFunction = undefined
     }
   }, [])
 
