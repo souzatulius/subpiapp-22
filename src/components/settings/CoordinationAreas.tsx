@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 const CoordinationAreas = () => {
   const {
     areas,
+    coordinations,
     loading,
     isSubmitting,
     addArea,
@@ -38,7 +39,7 @@ const CoordinationAreas = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string, sigla?: string, coordenacao?: string }) => {
+  const handleEdit = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     if (!editingArea) return Promise.reject(new Error('Nenhuma supervisão técnica selecionada'));
     
     try {
@@ -51,7 +52,7 @@ const CoordinationAreas = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string, sigla?: string, coordenacao?: string }) => {
+  const handleAdd = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       console.log('CoordinationAreas handling add:', data);
       await addArea(data);
@@ -81,7 +82,10 @@ const CoordinationAreas = () => {
     {
       key: 'coordenacao',
       header: 'Coordenação',
-      render: (row: any) => row.coordenacao || '-',
+      render: (row: any) => {
+        const coordination = coordinations.find(c => c.id === row.coordenacao_id);
+        return coordination ? coordination.descricao : (row.coordenacao || '-');
+      },
     },
     {
       key: 'criado_em',
@@ -97,6 +101,7 @@ const CoordinationAreas = () => {
         onSubmit={handleAdd}
         onCancel={onClose}
         isSubmitting={isSubmitting}
+        coordinations={coordinations}
       />
     );
   };
@@ -126,6 +131,7 @@ const CoordinationAreas = () => {
         area={editingArea}
         onSubmit={handleEdit}
         isSubmitting={isSubmitting}
+        coordinations={coordinations}
       />
     </div>
   );

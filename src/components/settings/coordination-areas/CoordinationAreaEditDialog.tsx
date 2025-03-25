@@ -3,13 +3,15 @@ import React from 'react';
 import EditModal from '../EditModal';
 import CoordinationAreaForm from './CoordinationAreaForm';
 import { Area } from '@/hooks/useCoordinationAreas';
+import { Coordination } from '@/hooks/settings/useCoordination';
 
 interface CoordinationAreaEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   area: Area | null;
-  onSubmit: (data: { descricao: string, sigla?: string, coordenacao?: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => Promise<void>;
   isSubmitting: boolean;
+  coordinations?: Coordination[];
 }
 
 const CoordinationAreaEditDialog: React.FC<CoordinationAreaEditDialogProps> = ({
@@ -17,7 +19,8 @@ const CoordinationAreaEditDialog: React.FC<CoordinationAreaEditDialogProps> = ({
   onClose,
   area,
   onSubmit,
-  isSubmitting
+  isSubmitting,
+  coordinations = []
 }) => {
   if (!isOpen || !area) return null;
 
@@ -33,10 +36,11 @@ const CoordinationAreaEditDialog: React.FC<CoordinationAreaEditDialogProps> = ({
         defaultValues={{
           descricao: area.descricao,
           sigla: area.sigla || '',
-          coordenacao: area.coordenacao || '',
+          coordenacao_id: area.coordenacao_id || '',
         }}
         isSubmitting={isSubmitting}
         submitText="Salvar Alterações"
+        coordinations={coordinations}
       />
     </EditModal>
   );

@@ -4,17 +4,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import DataEntryForm from '../DataEntryForm';
 import { areaSchema } from '@/hooks/useCoordinationAreas';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Coordination } from '@/hooks/settings/useCoordination';
 
 interface CoordinationAreaFormProps {
-  onSubmit: (data: { descricao: string, sigla?: string, coordenacao?: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => Promise<void>;
   onCancel: () => void;
   defaultValues?: {
     descricao: string;
     sigla?: string;
-    coordenacao?: string;
+    coordenacao_id?: string;
   };
   isSubmitting: boolean;
   submitText?: string;
+  coordinations?: Coordination[];
 }
 
 const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
@@ -23,10 +32,11 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
   defaultValues = {
     descricao: '',
     sigla: '',
-    coordenacao: ''
+    coordenacao_id: ''
   },
   isSubmitting,
-  submitText = 'Salvar'
+  submitText = 'Salvar',
+  coordinations = []
 }) => {
   return (
     <DataEntryForm
@@ -34,7 +44,7 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
       onSubmit={onSubmit}
       onCancel={onCancel}
       defaultValues={defaultValues}
-      renderFields={({ register, formState }) => (
+      renderFields={({ register, formState, control }) => (
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="descricao">Descrição</Label>
@@ -63,15 +73,30 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="coordenacao">Coordenação</Label>
-            <Input
-              id="coordenacao"
-              {...register("coordenacao")}
-              className="rounded-lg"
-              placeholder="Nome do coordenador ou equipe"
-            />
-            {formState.errors.coordenacao && (
-              <p className="text-sm text-red-500">{formState.errors.coordenacao.message}</p>
+            <Label htmlFor="coordenacao_id">Coordenação</Label>
+            <Select
+              defaultValue={defaultValues.coordenacao_id || ''}
+              onValueChange={(value) => {
+                const event = {
+                  target: { value, name: 'coordenacao_id' }
+                };
+                register('coordenacao_id').onChange(event);
+              }}
+            >
+              <SelectTrigger className="rounded-lg">
+                <SelectValue placeholder="Selecione uma coordenação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Nenhuma</SelectItem>
+                {coordinations.map((coordination) => (
+                  <SelectItem key={coordination.id} value={coordination.id}>
+                    {coordination.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {formState.errors.coordenacao_id && (
+              <p className="text-sm text-red-500">{formState.errors.coordenacao_id.message}</p>
             )}
           </div>
         </div>

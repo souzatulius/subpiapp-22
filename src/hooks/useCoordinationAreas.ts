@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { z } from 'zod';
+import { Coordination } from '@/hooks/settings/useCoordination';
 
 // Define tipos para evitar recursividade infinita
 export type CoordinationArea = {
@@ -10,6 +11,7 @@ export type CoordinationArea = {
   descricao: string;
   sigla?: string;
   coordenacao?: string;
+  coordenacao_id?: string;
   criado_em?: string;
 };
 
@@ -20,11 +22,12 @@ export type Area = CoordinationArea;
 export const areaSchema = z.object({
   descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" }),
   sigla: z.string().optional(),
-  coordenacao: z.string().optional()
+  coordenacao_id: z.string().optional()
 });
 
 export const useCoordinationAreas = () => {
   const [areas, setAreas] = useState<CoordinationArea[]>([]);
+  const [coordinations, setCoordinations] = useState<Coordination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -53,11 +56,32 @@ export const useCoordinationAreas = () => {
     }
   }, []);
 
+  const fetchCoordinations = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('areas_coordenacao')
+        .select('*')
+        .order('descricao');
+
+      if (error) throw error;
+      
+      setCoordinations(data || []);
+    } catch (error: any) {
+      console.error('Erro ao buscar coordenações:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as coordenações.",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
   useEffect(() => {
     fetchAreas();
-  }, [fetchAreas]);
+    fetchCoordinations();
+  }, [fetchAreas, fetchCoordinations]);
 
-  const addArea = async (data: { descricao: string, sigla?: string, coordenacao?: string }) => {
+  const addArea = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       setIsAdding(true);
       const { data: newArea, error } = await supabase
@@ -87,7 +111,7 @@ export const useCoordinationAreas = () => {
     }
   };
 
-  const updateArea = async (id: string, data: { descricao: string, sigla?: string, coordenacao?: string }) => {
+  const updateArea = async (id: string, data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       setIsEditing(true);
       const { error } = await supabase
@@ -160,6 +184,7 @@ export const useCoordinationAreas = () => {
 
   return {
     areas,
+    coordinations,
     isLoading,
     isAdding,
     isEditing,
@@ -167,6 +192,7 @@ export const useCoordinationAreas = () => {
     isSubmitting: isAdding || isEditing, // Alias para compatibilidade
     loading: isLoading, // Alias para compatibilidade
     fetchAreas,
+    fetchCoordinations,
     addArea,
     updateArea,
     deleteArea,
