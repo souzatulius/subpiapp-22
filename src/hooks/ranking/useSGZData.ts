@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { SGZOrdemServico, SGZPlanilhaUpload, SGZFilterOptions, SGZChartData } from '@/types/sgz';
+import { SGZOrdemServico, SGZPlanilhaUpload, SGZFilterOptions, SGZChartData, SGZAreaTecnica } from '@/types/sgz';
 import { processExcelFile } from './utils/sgzDataProcessing';
 import { toast } from 'sonner';
 
@@ -71,7 +71,26 @@ export const useSGZData = (user: User | null) => {
       if (error) throw error;
 
       if (data) {
-        setOrdens(data as SGZOrdemServico[]);
+        // Ensure the area_tecnica is valid
+        const validatedOrdens = data.map(ordem => {
+          // Make sure sgz_area_tecnica is either STM or STLP
+          let areaTecnica: SGZAreaTecnica = 'STM'; // Default
+          
+          if (ordem.sgz_area_tecnica === 'STLP') {
+            areaTecnica = 'STLP';
+          } else if (ordem.sgz_area_tecnica === 'STM') {
+            areaTecnica = 'STM';
+          } else {
+            console.warn(`Invalid area_tecnica found: ${ordem.sgz_area_tecnica}, defaulting to STM`);
+          }
+          
+          return {
+            ...ordem,
+            sgz_area_tecnica: areaTecnica
+          } as SGZOrdemServico;
+        });
+        
+        setOrdens(validatedOrdens);
       }
     } catch (error: any) {
       console.error('Error fetching service orders:', error);
@@ -94,21 +113,37 @@ export const useSGZData = (user: User | null) => {
         return;
       }
 
+      // Validate and transform data
+      const validatedOrdens = ordensData.map(ordem => {
+        let areaTecnica: SGZAreaTecnica = 'STM'; // Default
+        
+        if (ordem.sgz_area_tecnica === 'STLP') {
+          areaTecnica = 'STLP';
+        } else if (ordem.sgz_area_tecnica === 'STM') {
+          areaTecnica = 'STM';
+        }
+        
+        return {
+          ...ordem,
+          sgz_area_tecnica: areaTecnica
+        } as SGZOrdemServico;
+      });
+
       // Status distribution
       const statusCounts: Record<string, number> = {};
-      ordensData.forEach((ordem: SGZOrdemServico) => {
+      validatedOrdens.forEach((ordem: SGZOrdemServico) => {
         statusCounts[ordem.sgz_status] = (statusCounts[ordem.sgz_status] || 0) + 1;
       });
 
       // Area distribution
       const areaCounts = {
-        STM: ordensData.filter((ordem: SGZOrdemServico) => ordem.sgz_area_tecnica === 'STM').length,
-        STLP: ordensData.filter((ordem: SGZOrdemServico) => ordem.sgz_area_tecnica === 'STLP').length
+        STM: validatedOrdens.filter((ordem: SGZOrdemServico) => ordem.sgz_area_tecnica === 'STM').length,
+        STLP: validatedOrdens.filter((ordem: SGZOrdemServico) => ordem.sgz_area_tecnica === 'STLP').length
       };
 
       // Most frequent services
       const serviceCounts: Record<string, number> = {};
-      ordensData.forEach((ordem: SGZOrdemServico) => {
+      validatedOrdens.forEach((ordem: SGZOrdemServico) => {
         serviceCounts[ordem.sgz_classificacao_servico] = (serviceCounts[ordem.sgz_classificacao_servico] || 0) + 1;
       });
 
@@ -120,7 +155,7 @@ export const useSGZData = (user: User | null) => {
 
       // Average time by status
       const statusTimes: Record<string, number[]> = {};
-      ordensData.forEach((ordem: SGZOrdemServico) => {
+      validatedOrdens.forEach((ordem: SGZOrdemServico) => {
         if (!statusTimes[ordem.sgz_status]) statusTimes[ordem.sgz_status] = [];
         if (ordem.sgz_dias_ate_status_atual) {
           statusTimes[ordem.sgz_status].push(ordem.sgz_dias_ate_status_atual);
@@ -134,7 +169,7 @@ export const useSGZData = (user: User | null) => {
 
       // Distribution by district
       const districtCounts: Record<string, number> = {};
-      ordensData.forEach((ordem: SGZOrdemServico) => {
+      validatedOrdens.forEach((ordem: SGZOrdemServico) => {
         if (ordem.sgz_distrito) {
           districtCounts[ordem.sgz_distrito] = (districtCounts[ordem.sgz_distrito] || 0) + 1;
         }
@@ -217,15 +252,19 @@ export const useSGZData = (user: User | null) => {
       
       // Save user config with chart data
       if (user) {
-        await supabase
-          .from('sgz_configuracoes_usuario')
-          .upsert({
-            usuario_id: user.id,
-            filtros_ativos: filters,
-            cards_visiveis: ['statusDistribution', 'areaDistribution', 'servicosFrequentes', 
+        try {
+          await supabase
+            .from('sgz_configuracoes_usuario')
+            .upsert({
+              usuario_id: user.id,
+              filtros_ativos: JSON.stringify(filters),
+              cards_visiveis: ['statusDistribution', 'areaDistribution', 'servicosFrequentes', 
                             'tempoMedioPorStatus', 'distribuicaoPorDistrito', 'evolucaoStatus'],
-            data_atualizacao: new Date().toISOString()
-          });
+              data_atualizacao: new Date().toISOString()
+            });
+        } catch (error) {
+          console.error('Error saving user configuration:', error);
+        }
       }
     } catch (error: any) {
       console.error('Error generating chart data:', error);
@@ -361,19 +400,17 @@ export const useSGZData = (user: User | null) => {
     
     // Save user preferences
     if (user) {
-      supabase
-        .from('sgz_configuracoes_usuario')
-        .upsert({
-          usuario_id: user.id,
-          filtros_ativos: newFilters,
-          data_atualizacao: new Date().toISOString()
-        })
-        .then(() => {
-          console.log('User preferences saved');
-        })
-        .catch(error => {
-          console.error('Error saving user preferences:', error);
-        });
+      try {
+        supabase
+          .from('sgz_configuracoes_usuario')
+          .upsert({
+            usuario_id: user.id,
+            filtros_ativos: JSON.stringify(newFilters),
+            data_atualizacao: new Date().toISOString()
+          });
+      } catch (error) {
+        console.error('Error saving user preferences:', error);
+      }
     }
   };
 
@@ -388,7 +425,12 @@ export const useSGZData = (user: User | null) => {
         .then(({ data, error }) => {
           if (!error && data) {
             if (data.filtros_ativos) {
-              setFilters(data.filtros_ativos as SGZFilterOptions);
+              try {
+                const parsed = JSON.parse(data.filtros_ativos as string);
+                setFilters(parsed as SGZFilterOptions);
+              } catch (e) {
+                console.error('Error parsing saved filters:', e);
+              }
             }
           }
         });

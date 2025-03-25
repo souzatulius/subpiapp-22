@@ -1,7 +1,14 @@
+
+export type SGZAreaTecnica = "STM" | "STLP";
+
+export const isValidSGZAreaTecnica = (value: string): value is SGZAreaTecnica => {
+  return value === "STM" || value === "STLP";
+};
+
 export interface SGZOrdemServico {
   ordem_servico: string;
   sgz_classificacao_servico: string;
-  sgz_area_tecnica: 'STM' | 'STLP';
+  sgz_area_tecnica: SGZAreaTecnica;
   sgz_fornecedor?: string;
   sgz_status: string;
   sgz_data_status: string;
@@ -58,7 +65,7 @@ export interface SGZChartData {
 
 export interface SGZFilterOptions {
   status: string[];
-  areaTecnica: 'Todos' | 'STM' | 'STLP';
+  areaTecnica: 'Todos' | SGZAreaTecnica;
   distrito: string[];
   dataDe?: Date;
   dataAte?: Date;
