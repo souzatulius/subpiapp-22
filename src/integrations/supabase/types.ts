@@ -9,24 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      areas_coordenacao: {
-        Row: {
-          criado_em: string
-          descricao: string
-          id: string
-        }
-        Insert: {
-          criado_em?: string
-          descricao: string
-          id?: string
-        }
-        Update: {
-          criado_em?: string
-          descricao?: string
-          id?: string
-        }
-        Relationships: []
-      }
       bairros: {
         Row: {
           criado_em: string
@@ -77,36 +59,36 @@ export type Database = {
       comunicacoes_oficiais: {
         Row: {
           aprovador_id: string | null
-          area_coordenacao_id: string
           atualizado_em: string
           autor_id: string
           criado_em: string
           demanda_id: string | null
           id: string
+          problema_id: string
           status: string
           texto: string
           titulo: string
         }
         Insert: {
           aprovador_id?: string | null
-          area_coordenacao_id: string
           atualizado_em?: string
           autor_id: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
+          problema_id: string
           status?: string
           texto: string
           titulo: string
         }
         Update: {
           aprovador_id?: string | null
-          area_coordenacao_id?: string
           atualizado_em?: string
           autor_id?: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
+          problema_id?: string
           status?: string
           texto?: string
           titulo?: string
@@ -114,9 +96,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "comunicacoes_oficiais_area_coordenacao_id_fkey"
-            columns: ["area_coordenacao_id"]
+            columns: ["problema_id"]
             isOneToOne: false
-            referencedRelation: "areas_coordenacao"
+            referencedRelation: "problemas"
             referencedColumns: ["id"]
           },
           {
@@ -205,7 +187,6 @@ export type Database = {
       }
       demandas: {
         Row: {
-          area_coordenacao_id: string
           arquivo_url: string | null
           atualizado_em: string
           autor_id: string
@@ -220,6 +201,7 @@ export type Database = {
           perguntas: Json | null
           prazo_resposta: string
           prioridade: string
+          problema_id: string
           protocolo: string | null
           servico_id: string | null
           status: string
@@ -229,7 +211,6 @@ export type Database = {
           veiculo_imprensa: string | null
         }
         Insert: {
-          area_coordenacao_id: string
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id: string
@@ -244,6 +225,7 @@ export type Database = {
           perguntas?: Json | null
           prazo_resposta: string
           prioridade: string
+          problema_id: string
           protocolo?: string | null
           servico_id?: string | null
           status: string
@@ -253,7 +235,6 @@ export type Database = {
           veiculo_imprensa?: string | null
         }
         Update: {
-          area_coordenacao_id?: string
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id?: string
@@ -268,6 +249,7 @@ export type Database = {
           perguntas?: Json | null
           prazo_resposta?: string
           prioridade?: string
+          problema_id?: string
           protocolo?: string | null
           servico_id?: string | null
           status?: string
@@ -279,9 +261,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "demandas_area_coordenacao_id_fkey"
-            columns: ["area_coordenacao_id"]
+            columns: ["problema_id"]
             isOneToOne: false
-            referencedRelation: "areas_coordenacao"
+            referencedRelation: "problemas"
             referencedColumns: ["id"]
           },
           {
@@ -342,36 +324,36 @@ export type Database = {
       notas_oficiais: {
         Row: {
           aprovador_id: string | null
-          area_coordenacao_id: string
           atualizado_em: string
           autor_id: string
           criado_em: string
           demanda_id: string | null
           id: string
+          problema_id: string
           status: string
           texto: string
           titulo: string
         }
         Insert: {
           aprovador_id?: string | null
-          area_coordenacao_id: string
           atualizado_em?: string
           autor_id: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
+          problema_id: string
           status?: string
           texto: string
           titulo: string
         }
         Update: {
           aprovador_id?: string | null
-          area_coordenacao_id?: string
           atualizado_em?: string
           autor_id?: string
           criado_em?: string
           demanda_id?: string | null
           id?: string
+          problema_id?: string
           status?: string
           texto?: string
           titulo?: string
@@ -386,9 +368,9 @@ export type Database = {
           },
           {
             foreignKeyName: "notas_oficiais_area_coordenacao_id_fkey"
-            columns: ["area_coordenacao_id"]
+            columns: ["problema_id"]
             isOneToOne: false
-            referencedRelation: "areas_coordenacao"
+            referencedRelation: "problemas"
             referencedColumns: ["id"]
           },
           {
@@ -513,39 +495,74 @@ export type Database = {
       }
       ordens_servico: {
         Row: {
+          area_tecnica: string | null
           bairro: string | null
-          classificacao: string | null
+          cep: string | null
+          classificacao_servico: string
+          contrato: string | null
           criado_em: string | null
-          dias: number | null
+          data_status: string | null
+          dias_ate_status_atual: number | null
           distrito: string | null
-          id: number
+          fornecedor: string | null
+          id: string
+          logradouro: string | null
+          numero: string | null
           ordem_servico: string
-          status: string | null
-          ultima_atualizacao: string | null
+          planilha_referencia: string | null
+          prioridade: string | null
+          status: string
+          subprefeitura: string | null
         }
         Insert: {
+          area_tecnica?: string | null
           bairro?: string | null
-          classificacao?: string | null
+          cep?: string | null
+          classificacao_servico: string
+          contrato?: string | null
           criado_em?: string | null
-          dias?: number | null
+          data_status?: string | null
+          dias_ate_status_atual?: number | null
           distrito?: string | null
-          id?: number
+          fornecedor?: string | null
+          id?: string
+          logradouro?: string | null
+          numero?: string | null
           ordem_servico: string
-          status?: string | null
-          ultima_atualizacao?: string | null
+          planilha_referencia?: string | null
+          prioridade?: string | null
+          status: string
+          subprefeitura?: string | null
         }
         Update: {
+          area_tecnica?: string | null
           bairro?: string | null
-          classificacao?: string | null
+          cep?: string | null
+          classificacao_servico?: string
+          contrato?: string | null
           criado_em?: string | null
-          dias?: number | null
+          data_status?: string | null
+          dias_ate_status_atual?: number | null
           distrito?: string | null
-          id?: number
+          fornecedor?: string | null
+          id?: string
+          logradouro?: string | null
+          numero?: string | null
           ordem_servico?: string
-          status?: string | null
-          ultima_atualizacao?: string | null
+          planilha_referencia?: string | null
+          prioridade?: string | null
+          status?: string
+          subprefeitura?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ordens_servico_planilha_referencia_fkey"
+            columns: ["planilha_referencia"]
+            isOneToOne: false
+            referencedRelation: "planilhas_upload"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       origens_demandas: {
         Row: {
@@ -663,6 +680,54 @@ export type Database = {
         }
         Relationships: []
       }
+      planilhas_upload: {
+        Row: {
+          arquivo_nome: string
+          data_upload: string | null
+          id: string
+          qtd_ordens_processadas: number | null
+          qtd_ordens_validas: number | null
+          status_upload: string | null
+          usuario_upload: string | null
+        }
+        Insert: {
+          arquivo_nome: string
+          data_upload?: string | null
+          id?: string
+          qtd_ordens_processadas?: number | null
+          qtd_ordens_validas?: number | null
+          status_upload?: string | null
+          usuario_upload?: string | null
+        }
+        Update: {
+          arquivo_nome?: string
+          data_upload?: string | null
+          id?: string
+          qtd_ordens_processadas?: number | null
+          qtd_ordens_validas?: number | null
+          status_upload?: string | null
+          usuario_upload?: string | null
+        }
+        Relationships: []
+      }
+      problemas: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+        }
+        Relationships: []
+      }
       ranking_ordens_servico: {
         Row: {
           bairro: string | null
@@ -744,6 +809,7 @@ export type Database = {
           criado_em: string
           demanda_id: string
           id: string
+          respostas: Json | null
           texto: string
           usuario_id: string
         }
@@ -753,6 +819,7 @@ export type Database = {
           criado_em?: string
           demanda_id: string
           id?: string
+          respostas?: Json | null
           texto: string
           usuario_id: string
         }
@@ -762,6 +829,7 @@ export type Database = {
           criado_em?: string
           demanda_id?: string
           id?: string
+          respostas?: Json | null
           texto?: string
           usuario_id?: string
         }
@@ -791,29 +859,208 @@ export type Database = {
       }
       servicos: {
         Row: {
-          area_coordenacao_id: string
           criado_em: string
           descricao: string
           id: string
+          problema_id: string
         }
         Insert: {
-          area_coordenacao_id: string
           criado_em?: string
           descricao: string
           id?: string
+          problema_id: string
         }
         Update: {
-          area_coordenacao_id?: string
           criado_em?: string
           descricao?: string
           id?: string
+          problema_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "servicos_area_coordenacao_id_fkey"
-            columns: ["area_coordenacao_id"]
+            columns: ["problema_id"]
             isOneToOne: false
-            referencedRelation: "areas_coordenacao"
+            referencedRelation: "problemas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sgz_configuracoes_usuario: {
+        Row: {
+          cards_visiveis: Json | null
+          data_atualizacao: string | null
+          filtros_ativos: Json | null
+          id: string
+          ordem_dos_cards: Json | null
+          usuario_id: string | null
+        }
+        Insert: {
+          cards_visiveis?: Json | null
+          data_atualizacao?: string | null
+          filtros_ativos?: Json | null
+          id?: string
+          ordem_dos_cards?: Json | null
+          usuario_id?: string | null
+        }
+        Update: {
+          cards_visiveis?: Json | null
+          data_atualizacao?: string | null
+          filtros_ativos?: Json | null
+          id?: string
+          ordem_dos_cards?: Json | null
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
+      sgz_ordens_servico: {
+        Row: {
+          data_upload: string | null
+          id: string
+          ordem_servico: string
+          planilha_referencia: string
+          sgz_area_tecnica: string
+          sgz_bairro: string | null
+          sgz_cep: string | null
+          sgz_classificacao_servico: string
+          sgz_criado_em: string | null
+          sgz_data_status: string | null
+          sgz_dias_ate_status_atual: number | null
+          sgz_distrito: string | null
+          sgz_fornecedor: string | null
+          sgz_logradouro: string | null
+          sgz_numero: string | null
+          sgz_prioridade: string | null
+          sgz_status: string
+        }
+        Insert: {
+          data_upload?: string | null
+          id?: string
+          ordem_servico: string
+          planilha_referencia: string
+          sgz_area_tecnica: string
+          sgz_bairro?: string | null
+          sgz_cep?: string | null
+          sgz_classificacao_servico: string
+          sgz_criado_em?: string | null
+          sgz_data_status?: string | null
+          sgz_dias_ate_status_atual?: number | null
+          sgz_distrito?: string | null
+          sgz_fornecedor?: string | null
+          sgz_logradouro?: string | null
+          sgz_numero?: string | null
+          sgz_prioridade?: string | null
+          sgz_status: string
+        }
+        Update: {
+          data_upload?: string | null
+          id?: string
+          ordem_servico?: string
+          planilha_referencia?: string
+          sgz_area_tecnica?: string
+          sgz_bairro?: string | null
+          sgz_cep?: string | null
+          sgz_classificacao_servico?: string
+          sgz_criado_em?: string | null
+          sgz_data_status?: string | null
+          sgz_dias_ate_status_atual?: number | null
+          sgz_distrito?: string | null
+          sgz_fornecedor?: string | null
+          sgz_logradouro?: string | null
+          sgz_numero?: string | null
+          sgz_prioridade?: string | null
+          sgz_status?: string
+        }
+        Relationships: []
+      }
+      sgz_planilhas_upload: {
+        Row: {
+          arquivo_nome: string
+          data_upload: string | null
+          id: string
+          qtd_ordens_processadas: number | null
+          qtd_ordens_validas: number | null
+          status_upload: string | null
+          usuario_upload: string | null
+        }
+        Insert: {
+          arquivo_nome: string
+          data_upload?: string | null
+          id?: string
+          qtd_ordens_processadas?: number | null
+          qtd_ordens_validas?: number | null
+          status_upload?: string | null
+          usuario_upload?: string | null
+        }
+        Update: {
+          arquivo_nome?: string
+          data_upload?: string | null
+          id?: string
+          qtd_ordens_processadas?: number | null
+          qtd_ordens_validas?: number | null
+          status_upload?: string | null
+          usuario_upload?: string | null
+        }
+        Relationships: []
+      }
+      sgz_status_historico: {
+        Row: {
+          data_mudanca: string | null
+          id: string
+          ordem_servico: string
+          planilha_origem: string
+          status_antigo: string | null
+          status_novo: string
+        }
+        Insert: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico: string
+          planilha_origem: string
+          status_antigo?: string | null
+          status_novo: string
+        }
+        Update: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico?: string
+          planilha_origem?: string
+          status_antigo?: string | null
+          status_novo?: string
+        }
+        Relationships: []
+      }
+      status_historico: {
+        Row: {
+          data_mudanca: string | null
+          id: string
+          ordem_servico: string
+          planilha_origem: string | null
+          status_antigo: string | null
+          status_novo: string
+        }
+        Insert: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico: string
+          planilha_origem?: string | null
+          status_antigo?: string | null
+          status_novo: string
+        }
+        Update: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico?: string
+          planilha_origem?: string | null
+          status_antigo?: string | null
+          status_novo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_historico_planilha_origem_fkey"
+            columns: ["planilha_origem"]
+            isOneToOne: false
+            referencedRelation: "planilhas_upload"
             referencedColumns: ["id"]
           },
         ]
@@ -985,7 +1232,6 @@ export type Database = {
       usuarios: {
         Row: {
           aniversario: string | null
-          area_coordenacao_id: string | null
           cargo_id: string | null
           configuracoes_notificacao: Json | null
           criado_em: string
@@ -993,11 +1239,11 @@ export type Database = {
           foto_perfil_url: string | null
           id: string
           nome_completo: string
+          problema_id: string | null
           whatsapp: string | null
         }
         Insert: {
           aniversario?: string | null
-          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           criado_em?: string
@@ -1005,11 +1251,11 @@ export type Database = {
           foto_perfil_url?: string | null
           id: string
           nome_completo: string
+          problema_id?: string | null
           whatsapp?: string | null
         }
         Update: {
           aniversario?: string | null
-          area_coordenacao_id?: string | null
           cargo_id?: string | null
           configuracoes_notificacao?: Json | null
           criado_em?: string
@@ -1017,14 +1263,15 @@ export type Database = {
           foto_perfil_url?: string | null
           id?: string
           nome_completo?: string
+          problema_id?: string | null
           whatsapp?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "usuarios_area_coordenacao_id_fkey"
-            columns: ["area_coordenacao_id"]
+            columns: ["problema_id"]
             isOneToOne: false
-            referencedRelation: "areas_coordenacao"
+            referencedRelation: "problemas"
             referencedColumns: ["id"]
           },
           {
@@ -1040,83 +1287,41 @@ export type Database = {
     Views: {
       demandas_visiveis: {
         Row: {
-          area_coordenacao_id: string | null
           arquivo_url: string | null
           atualizado_em: string | null
           autor_id: string | null
+          autor_nome: string | null
           bairro_id: string | null
+          bairro_nome: string | null
           detalhes_solicitacao: string | null
           email_solicitante: string | null
           endereco: string | null
           horario_publicacao: string | null
           id: string | null
           nome_solicitante: string | null
+          origem_descricao: string | null
           origem_id: string | null
           perguntas: Json | null
           prazo_resposta: string | null
           prioridade: string | null
+          problema_descricao: string | null
+          problema_id: string | null
           protocolo: string | null
+          servico_descricao: string | null
           servico_id: string | null
           status: string | null
           telefone_solicitante: string | null
+          tipo_midia_descricao: string | null
           tipo_midia_id: string | null
           titulo: string | null
           veiculo_imprensa: string | null
         }
-        Insert: {
-          area_coordenacao_id?: string | null
-          arquivo_url?: string | null
-          atualizado_em?: string | null
-          autor_id?: string | null
-          bairro_id?: string | null
-          detalhes_solicitacao?: string | null
-          email_solicitante?: string | null
-          endereco?: string | null
-          horario_publicacao?: string | null
-          id?: string | null
-          nome_solicitante?: string | null
-          origem_id?: string | null
-          perguntas?: Json | null
-          prazo_resposta?: string | null
-          prioridade?: string | null
-          protocolo?: string | null
-          servico_id?: string | null
-          status?: string | null
-          telefone_solicitante?: string | null
-          tipo_midia_id?: string | null
-          titulo?: string | null
-          veiculo_imprensa?: string | null
-        }
-        Update: {
-          area_coordenacao_id?: string | null
-          arquivo_url?: string | null
-          atualizado_em?: string | null
-          autor_id?: string | null
-          bairro_id?: string | null
-          detalhes_solicitacao?: string | null
-          email_solicitante?: string | null
-          endereco?: string | null
-          horario_publicacao?: string | null
-          id?: string | null
-          nome_solicitante?: string | null
-          origem_id?: string | null
-          perguntas?: Json | null
-          prazo_resposta?: string | null
-          prioridade?: string | null
-          protocolo?: string | null
-          servico_id?: string | null
-          status?: string | null
-          telefone_solicitante?: string | null
-          tipo_midia_id?: string | null
-          titulo?: string | null
-          veiculo_imprensa?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "demandas_area_coordenacao_id_fkey"
-            columns: ["area_coordenacao_id"]
+            columns: ["problema_id"]
             isOneToOne: false
-            referencedRelation: "areas_coordenacao"
+            referencedRelation: "problemas"
             referencedColumns: ["id"]
           },
           {
