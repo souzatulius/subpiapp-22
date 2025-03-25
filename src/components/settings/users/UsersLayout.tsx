@@ -9,13 +9,10 @@ import {
   DropdownMenuRadioGroup, 
   DropdownMenuRadioItem 
 } from '@/components/ui/dropdown-menu';
-import { UserPlus, Filter, Loader2 } from 'lucide-react';
-import InviteUserDialog from './InviteUserDialog';
-import EditUserDialog from './EditUserDialog';
-import DeleteUserDialog from './DeleteUserDialog';
-import UserActionsMenu from './UserActionsMenu';
-import { UsersLayoutProps } from './types';
+import { UserPlus, Filter } from 'lucide-react';
+import UsersDialogs from './UsersDialogs';
 import UsersTable from './UsersTable';
+import { UsersLayoutProps } from '@/types/users';
 
 const UsersLayout: React.FC<UsersLayoutProps> = ({
   users,
@@ -75,12 +72,6 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
     
     setFilteredUsers(filtered);
   }, [users, filter, statusFilter]);
-
-  // Convert coordenacoes for InviteUserDialog
-  const formattedCoordenacoes = coordenacoes.map(coord => ({
-    coordenacao_id: coord.id,
-    coordenacao: coord.descricao
-  }));
 
   return (
     <div className="space-y-4">
@@ -154,36 +145,28 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         onEdit={(user) => userActions.handleEdit(user)}
         onDelete={(user) => userActions.handleDelete(user)}
         onResetPassword={(user) => userActions.handleResetPassword(user)}
-        onApprove={(user, permissionLevel) => userActions.handleApprove(user, permissionLevel)}
+        onApprove={(user, roleName) => userActions.handleApprove(user, roleName)}
         onRemoveAccess={userActions.handleRemoveAccess}
+        onManageRoles={userActions.handleManageRoles}
       />
 
-      {/* Dialogs */}
-      <InviteUserDialog 
-        open={isInviteDialogOpen} 
-        onOpenChange={setIsInviteDialogOpen}
-        onSubmit={handleInviteUser}
-        areas={supervisoesTecnicas}
-        cargos={cargos}
-        coordenacoes={formattedCoordenacoes}
-      />
-      
-      <EditUserDialog 
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        user={selectedUser}
-        onSubmit={handleEditUser}
+      {/* Dialogs for user management */}
+      <UsersDialogs
         supervisoesTecnicas={supervisoesTecnicas}
         cargos={cargos}
         coordenacoes={coordenacoes}
-        isSubmitting={isEditSubmitting}
-      />
-      
-      <DeleteUserDialog 
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        user={userToDelete}
-        onDelete={handleDeleteUser}
+        isInviteDialogOpen={isInviteDialogOpen}
+        setIsInviteDialogOpen={setIsInviteDialogOpen}
+        isEditDialogOpen={isEditDialogOpen}
+        setIsEditDialogOpen={setIsEditDialogOpen}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        selectedUser={selectedUser}
+        userToDelete={userToDelete}
+        handleInviteUser={handleInviteUser}
+        handleEditUser={handleEditUser}
+        handleDeleteUser={handleDeleteUser}
+        isEditSubmitting={isEditSubmitting}
       />
     </div>
   );

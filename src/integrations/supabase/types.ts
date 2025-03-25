@@ -1037,6 +1037,24 @@ export type Database = {
           },
         ]
       }
+      roles: {
+        Row: {
+          descricao: string
+          id: number
+          role_nome: string
+        }
+        Insert: {
+          descricao: string
+          id?: number
+          role_nome: string
+        }
+        Update: {
+          descricao?: string
+          id?: number
+          role_nome?: string
+        }
+        Relationships: []
+      }
       servicos: {
         Row: {
           criado_em: string
@@ -1300,6 +1318,55 @@ export type Database = {
           },
         ]
       }
+      usuario_roles: {
+        Row: {
+          coordenacao_id: string | null
+          created_at: string
+          id: string
+          role_id: number
+          supervisao_tecnica_id: string | null
+          usuario_id: string
+        }
+        Insert: {
+          coordenacao_id?: string | null
+          created_at?: string
+          id?: string
+          role_id: number
+          supervisao_tecnica_id?: string | null
+          usuario_id: string
+        }
+        Update: {
+          coordenacao_id?: string | null
+          created_at?: string
+          id?: string
+          role_id?: number
+          supervisao_tecnica_id?: string | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_roles_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "coordenacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_roles_supervisao_tecnica_id_fkey"
+            columns: ["supervisao_tecnica_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoes_tecnicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usuarios: {
         Row: {
           aniversario: string | null
@@ -1515,6 +1582,19 @@ export type Database = {
           coordenacao: string
         }[]
       }
+      get_user_roles: {
+        Args: {
+          _user_id?: string
+        }
+        Returns: {
+          role_nome: string
+          descricao: string
+          coordenacao_id: string
+          coordenacao_nome: string
+          supervisao_tecnica_id: string
+          supervisao_tecnica_nome: string
+        }[]
+      }
       insert_area_coordenacao: {
         Args: {
           p_descricao: string
@@ -1615,6 +1695,15 @@ export type Database = {
         Args: {
           p_id: string
           p_descricao: string
+        }
+        Returns: boolean
+      }
+      user_has_role: {
+        Args: {
+          _user_id: string
+          _role_nome: string
+          _coordenacao_id?: string
+          _supervisao_tecnica_id?: string
         }
         Returns: boolean
       }

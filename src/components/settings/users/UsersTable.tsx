@@ -1,29 +1,11 @@
-
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { CircleUserRound, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 import UserActionsMenu from './UserActionsMenu';
-import { User } from '@/types/common';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UsersTableProps } from '@/types/users';
 import { formatDate } from '@/types/common';
-
-interface UsersTableProps {
-  users: User[];
-  loading: boolean;
-  filter: string;
-  onEdit: (user: User) => void;
-  onDelete: (user: User) => void;
-  onResetPassword?: (user: User) => void;
-  onApprove?: (user: User, permissionLevel: string) => void;
-  onRemoveAccess?: (user: User) => void;
-}
 
 const UsersTable: React.FC<UsersTableProps> = ({
   users,
@@ -33,108 +15,117 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onDelete,
   onResetPassword,
   onApprove,
-  onRemoveAccess
+  onRemoveAccess,
+  onManageRoles
 }) => {
+  // Status badge color mapping
+  const getStatusBadge = (hasPermissions: boolean) => {
+    if (hasPermissions) {
+      return <Badge className="bg-green-500">Ativo</Badge>;
+    }
+    return <Badge variant="outline" className="text-amber-500 border-amber-500">Pendente</Badge>;
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = (name: string) => {
+    if (!name) return '??';
+    
+    const parts = name.split(' ');
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  // Get summary of user roles
+  const getUserRolesSummary = (permissoes: any[] | undefined) => {
+    if (!permissoes || permissoes.length === 0) {
+      return 'Sem permissões';
+    }
+    
+    // If there are many roles, summarize
+    if (permissoes.length > 2) {
+      return `${permissoes[0]?.descricao}, ${permissoes[1]?.descricao} + ${permissoes.length - 2}`;
+    }
+    
+    // Otherwise list them
+    return permissoes.map(p => p?.descricao).join(', ');
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-10">
-        <Loader2 className="h-8 w-8 animate-spin text-subpi-blue" />
+      <div className="p-8 flex justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (users.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center">
-        <CircleUserRound className="h-16 w-16 text-gray-300 mb-4" />
-        <h3 className="text-lg font-medium">Nenhum usuário encontrado</h3>
-        <p className="text-sm text-gray-500">
-          {filter ? 'Tente usar outros termos de busca.' : 'Você ainda não tem usuários cadastrados.'}
-        </p>
-      </div>
+      <Card className="p-6 text-center text-muted-foreground">
+        {filter ? 'Nenhum usuário corresponde à busca.' : 'Nenhum usuário cadastrado.'}
+      </Card>
     );
   }
 
-  const hasNoPendingUserPermissions = (user: User) => {
-    return !user.permissoes || user.permissoes.length === 0;
-  };
-
   return (
-    <div className="overflow-x-auto rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50">
-            <TableHead className="font-semibold">Nome</TableHead>
-            <TableHead className="font-semibold">Email</TableHead>
-            <TableHead className="font-semibold">Cargo</TableHead>
-            <TableHead className="font-semibold">Coordenação</TableHead>
-            <TableHead className="font-semibold">Supervisão Técnica</TableHead>
-            <TableHead className="font-semibold">Status</TableHead>
-            <TableHead className="text-right font-semibold">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="bg-muted/50">
+            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Usuário</th>
+            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Cargo</th>
+            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Área</th>
+            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Permissões</th>
+            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Status</th>
+            <th className="p-3 text-left font-medium text-sm text-muted-foreground">Cadastro</th>
+            <th className="p-3 text-center font-medium text-sm text-muted-foreground">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
           {users.map((user) => (
-            <TableRow key={user.id} className="hover:bg-gray-50">
-              <TableCell className="font-medium">
-                {user.nome_completo}
-              </TableCell>
-              <TableCell>
-                {user.email}
-              </TableCell>
-              <TableCell>
-                {user.cargos?.descricao || 'Não definido'}
-              </TableCell>
-              <TableCell>
-                {user.coordenacao?.descricao || 'Não definido'}
-              </TableCell>
-              <TableCell>
-                {user.supervisao_tecnica?.descricao || 'Não definido'}
-              </TableCell>
-              <TableCell>
-                {hasNoPendingUserPermissions(user) ? (
-                  <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-                    Pendente
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                    Ativo
-                  </span>
-                )}
-              </TableCell>
-              <TableCell className="text-right">
-                {hasNoPendingUserPermissions(user) ? (
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onApprove && onApprove(user, 'admin')}
-                    >
-                      Aprovar
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => onDelete(user)}
-                    >
-                      Excluir
-                    </Button>
+            <tr key={user.id} className="border-b hover:bg-muted/30">
+              <td className="p-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.foto_perfil_url || ''} alt={user.nome_completo} />
+                    <AvatarFallback>{getUserInitials(user.nome_completo)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">{user.nome_completo}</div>
+                    <div className="text-sm text-muted-foreground">{user.email}</div>
                   </div>
-                ) : (
+                </div>
+              </td>
+              <td className="p-3 text-sm">{user.cargos?.descricao || '-'}</td>
+              <td className="p-3 text-sm">
+                {user.supervisao_tecnica?.descricao || user.coordenacao?.descricao || '-'}
+              </td>
+              <td className="p-3 text-sm">
+                {getUserRolesSummary(user.permissoes)}
+              </td>
+              <td className="p-3">
+                {getStatusBadge(user.permissoes && user.permissoes.length > 0)}
+              </td>
+              <td className="p-3 text-sm">
+                {formatDate(user.criado_em)}
+              </td>
+              <td className="p-3">
+                <div className="flex justify-center">
                   <UserActionsMenu
                     user={user}
-                    onEdit={() => onEdit(user)}
-                    onDelete={() => onDelete(user)}
-                    onResetPassword={() => onResetPassword && onResetPassword(user)}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onResetPassword={onResetPassword}
                     onApprove={onApprove}
-                    onRemoveAccess={() => onRemoveAccess && onRemoveAccess(user)}
+                    onRemoveAccess={onRemoveAccess}
+                    onManageRoles={onManageRoles}
                   />
-                )}
-              </TableCell>
-            </TableRow>
+                </div>
+              </td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </div>
   );
 };

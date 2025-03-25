@@ -2,26 +2,27 @@
 import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '../types';
 
 export const useUserAccessRemoval = (fetchData: () => Promise<void>) => {
   const [removing, setRemoving] = useState(false);
 
-  const removeAccess = async (userId: string, userName: string) => {
-    if (!userId) return;
+  const removeAccess = async (user: User) => {
+    if (!user.id) return;
     
     setRemoving(true);
     try {
-      // Remove all permissions for this user
+      // Delete all roles for this user
       const { error } = await supabase
-        .from('usuario_permissoes')
+        .from('usuario_roles')
         .delete()
-        .eq('usuario_id', userId);
+        .eq('usuario_id', user.id);
       
       if (error) throw error;
       
       toast({
         title: 'Acesso removido',
-        description: `Todas as permissões de ${userName} foram removidas.`,
+        description: `O acesso de ${user.nome_completo} foi removido com sucesso.`,
       });
       
       // Refresh users data

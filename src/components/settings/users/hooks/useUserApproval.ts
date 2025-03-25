@@ -6,42 +6,39 @@ import { supabase } from '@/integrations/supabase/client';
 export const useUserApproval = (fetchData: () => Promise<void>) => {
   const [approving, setApproving] = useState(false);
 
-  const approveUser = async (userId: string, userName: string, userEmail: string, permissionLevel?: string) => {
+  const approveUser = async (userId: string, userName: string, userEmail: string, roleName: string = 'leitor', contextData?: { coordenacao_id?: string, supervisao_tecnica_id?: string }) => {
     if (!userId) return;
     
     setApproving(true);
     try {
-      // 1. Get the permission ID based on the level
-      const permissionLevel_ = permissionLevel || 'Restrito';
-      
-      const { data: permissionData, error: permissionError } = await supabase
-        .from('permissoes')
+      // 1. Get the role ID based on the role name
+      const { data: roleData, error: roleError } = await supabase
+        .from('roles')
         .select('id')
-        .eq('descricao', permissionLevel_)
+        .eq('role_nome', roleName)
         .single();
       
-      if (permissionError) throw permissionError;
+      if (roleError) throw roleError;
       
-      if (!permissionData) {
-        throw new Error(`Permissão "${permissionLevel_}" não encontrada.`);
+      if (!roleData) {
+        throw new Error(`Role "${roleName}" not found.`);
       }
       
-      // 2. Associate the user with the permission
+      // 2. Associate the user with the role
       const { error: assignError } = await supabase
-        .from('usuario_permissoes')
+        .from('usuario_roles')
         .insert({
           usuario_id: userId,
-          permissao_id: permissionData.id
+          role_id: roleData.id,
+          coordenacao_id: contextData?.coordenacao_id || null,
+          supervisao_tecnica_id: contextData?.supervisao_tecnica_id || null
         });
       
       if (assignError) throw assignError;
       
-      // 3. Send approval notification if needed
-      // This could call a serverless function to send an email
-      
       toast({
         title: 'Acesso aprovado',
-        description: `O usuário ${userName} agora tem acesso como "${permissionLevel_}".`,
+        description: `O usuário ${userName} agora tem acesso como "${roleName}".`,
       });
       
       // Refresh users data

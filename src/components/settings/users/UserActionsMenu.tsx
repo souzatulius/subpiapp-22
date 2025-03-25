@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Pencil, Trash2, KeyRound, UserCheck, UserX } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, KeyRound, UserCheck, UserX, Shield } from 'lucide-react';
 import { User } from '@/types/common';
 
 interface UserActionsMenuProps {
@@ -16,8 +16,9 @@ interface UserActionsMenuProps {
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onResetPassword: (user: User) => void;
-  onApprove?: (user: User, permissionLevel?: string) => void;
+  onApprove?: (user: User, roleName?: string) => void;
   onRemoveAccess?: (user: User) => void;
+  onManageRoles?: (user: User) => void;
   isApproving?: boolean;
   isRemoving?: boolean;
 }
@@ -29,6 +30,7 @@ const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
   onResetPassword,
   onApprove,
   onRemoveAccess,
+  onManageRoles,
   isApproving,
   isRemoving
 }) => {
@@ -52,6 +54,13 @@ const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
           <KeyRound className="mr-2 h-4 w-4" />
           <span>Redefinir senha</span>
         </DropdownMenuItem>
+        
+        {hasPermissions && onManageRoles && (
+          <DropdownMenuItem onClick={() => onManageRoles(user)}>
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Gerenciar permissões</span>
+          </DropdownMenuItem>
+        )}
         
         <DropdownMenuSeparator />
         

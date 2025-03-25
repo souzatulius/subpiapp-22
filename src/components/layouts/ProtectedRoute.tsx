@@ -17,7 +17,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         navigate('/login');
       } else if (isApproved === false) {
         // Redirect non-approved users when they try to access protected routes
-        navigate('/login');
+        navigate('/pending-approval');
       }
     }
   }, [user, loading, isApproved, navigate]);

@@ -1,14 +1,14 @@
 
-import { User } from './types';
+import { User } from '@/types/common';
 
 interface UserActionsProps {
   setIsEditDialogOpen: (open: boolean) => void;
   setSelectedUser: (user: User | null) => void;
   setIsDeleteDialogOpen: (open: boolean) => void;
   setUserToDelete: (user: User | null) => void;
-  resetPassword: (userId: string, userEmail: string) => Promise<void>;
-  approveUser: (userId: string, userName: string, userEmail: string, permissionLevel?: string) => Promise<void>;
-  removeAccess?: (userId: string, userName: string) => Promise<void>;
+  resetPassword: (user: User) => void;
+  approveUser: (userId: string, userName: string, userEmail: string, roleName?: string) => void;
+  removeAccess: (user: User) => void;
 }
 
 export const useUserActions = ({
@@ -30,22 +30,16 @@ export const useUserActions = ({
     setIsDeleteDialogOpen(true);
   };
 
-  const handleResetPassword = async (user: User) => {
-    if (user.id && user.email) {
-      await resetPassword(user.id, user.email);
-    }
+  const handleResetPassword = (user: User) => {
+    resetPassword(user);
   };
 
-  const handleApprove = async (user: User, permissionLevel?: string) => {
-    if (user.id && user.nome_completo && user.email) {
-      await approveUser(user.id, user.nome_completo, user.email, permissionLevel);
-    }
+  const handleApprove = (user: User, roleName: string = 'leitor') => {
+    approveUser(user.id, user.nome_completo, user.email, roleName);
   };
 
-  const handleRemoveAccess = async (user: User) => {
-    if (user.id && user.nome_completo && removeAccess) {
-      await removeAccess(user.id, user.nome_completo);
-    }
+  const handleRemoveAccess = (user: User) => {
+    removeAccess(user);
   };
 
   return {

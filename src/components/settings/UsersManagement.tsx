@@ -9,6 +9,8 @@ import { usePasswordReset } from './users/hooks/usePasswordReset';
 import { useUserApproval } from './users/hooks/useUserApproval';
 import { useUserAccessRemoval } from './users/hooks/useUserAccessRemoval';
 import { useUserInvite } from './users/hooks/useUserInvite';
+import UserApprovalDialog from './users/UserApprovalDialog';
+import UserRolesDialog from './users/UserRolesDialog';
 import { supabase } from '@/integrations/supabase/client';
 
 const UsersManagement = () => {
@@ -28,6 +30,10 @@ const UsersManagement = () => {
   } = useUsersManagement();
 
   const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
+  const [userToApprove, setUserToApprove] = useState(null);
+  const [isRolesDialogOpen, setIsRolesDialogOpen] = useState(false);
+  const [userToManageRoles, setUserToManageRoles] = useState(null);
 
   // Fetch coordenacoes
   useEffect(() => {
@@ -84,6 +90,18 @@ const UsersManagement = () => {
   const { approveUser, approving } = useUserApproval(fetchData);
   const { removeAccess, removing } = useUserAccessRemoval(fetchData);
 
+  // Handle approval dialog
+  const openApprovalDialog = (user) => {
+    setUserToApprove(user);
+    setIsApprovalDialogOpen(true);
+  };
+  
+  // Handle roles dialog
+  const openRolesDialog = (user) => {
+    setUserToManageRoles(user);
+    setIsRolesDialogOpen(true);
+  };
+
   // Initialize userActions
   const userActions = useUserActions({
     setIsEditDialogOpen,
@@ -91,7 +109,13 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen,
     setUserToDelete,
     resetPassword,
-    approveUser,
+    approveUser: (user, roleName) => {
+      if (roleName) {
+        approveUser(user.id, user.nome_completo, user.email, roleName);
+      } else {
+        openApprovalDialog(user);
+      }
+    },
     removeAccess
   });
 
@@ -115,7 +139,10 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen,
     userToDelete,
     handleDeleteUser,
-    userActions,
+    userActions: {
+      ...userActions,
+      handleManageRoles: openRolesDialog
+    },
     approving,
     removing,
     isEditSubmitting
@@ -124,6 +151,22 @@ const UsersManagement = () => {
   return (
     <div>
       <UsersLayout {...usersManagementProps} />
+      
+      {/* User Approval Dialog */}
+      <UserApprovalDialog
+        open={isApprovalDialogOpen}
+        onOpenChange={setIsApprovalDialogOpen}
+        user={userToApprove}
+        onApprove={approveUser}
+        approving={approving}
+      />
+      
+      {/* User Roles Dialog */}
+      <UserRolesDialog
+        open={isRolesDialogOpen}
+        onOpenChange={setIsRolesDialogOpen}
+        user={userToManageRoles}
+      />
     </div>
   );
 };

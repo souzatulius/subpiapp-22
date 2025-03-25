@@ -11,8 +11,9 @@ export const useAdminCheck = (user: User | null) => {
       const checkAdminStatus = async () => {
         try {
           // Check if user has admin privileges
-          const { data, error } = await supabase.rpc('is_admin', {
-            user_id: user.id
+          const { data, error } = await supabase.rpc('user_has_role', {
+            _user_id: user.id,
+            _role_nome: 'admin'
           });
           
           if (error) throw error;
