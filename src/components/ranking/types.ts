@@ -38,7 +38,7 @@ export interface SGZOrdemServico {
   id: string;
   ordem_servico: string;
   sgz_status: string;
-  sgz_departamento_tecnico: "STM" | "STLP";
+  sgz_departamento_tecnico: string; // Mudado de "STM" | "STLP" para string para resolver o erro de tipagem
   sgz_bairro: string;
   sgz_distrito: string;
   sgz_tipo_servico: string;

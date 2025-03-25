@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,7 +6,7 @@ import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet } f
 import { UploadInfo } from './types';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 
 interface UploadSectionProps {
@@ -29,7 +28,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const supabaseClient = useSupabaseClient();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -53,7 +51,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   };
 
   const handleDownloadTemplate = () => {
-    // Create a simple template Excel file
     const template = [
       {
         'Ordem de Serviço': 'OS-1001',
@@ -77,12 +74,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       }
     ];
     
-    // Create a workbook and add the worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(template);
     XLSX.utils.book_append_sheet(wb, ws, 'SGZ Template');
     
-    // Generate the Excel file and trigger download
     XLSX.writeFile(wb, 'modelo_sgz.xlsx');
     
     toast.success('Modelo de planilha SGZ baixado com sucesso!');

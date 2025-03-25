@@ -522,10 +522,28 @@ export const useChartData = (filters: FilterOptions) => {
     try {
       // Fetch data from Supabase
       const data = await fetchSGZData();
-      setOrdensData(data);
+      
+      // Cast the data to the correct type
+      const typedData: SGZOrdemServico[] = data.map(item => ({
+        ...item,
+        id: item.id,
+        ordem_servico: item.ordem_servico,
+        sgz_status: item.sgz_status,
+        sgz_departamento_tecnico: item.sgz_departamento_tecnico,
+        sgz_bairro: item.sgz_bairro || '',
+        sgz_distrito: item.sgz_distrito,
+        sgz_tipo_servico: item.sgz_tipo_servico,
+        sgz_empresa: item.sgz_empresa || '',
+        sgz_criado_em: item.sgz_criado_em,
+        sgz_modificado_em: item.sgz_modificado_em || '',
+        sgz_dias_ate_status_atual: item.sgz_dias_ate_status_atual,
+        planilha_referencia: item.planilha_referencia
+      }));
+      
+      setOrdensData(typedData);
       
       // Generate chart data with the fetched data
-      const generatedChartData = generateChartData(data, filters);
+      const generatedChartData = generateChartData(typedData, filters);
       setChartData(generatedChartData);
       
       // Set last update time

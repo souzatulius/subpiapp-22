@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { UploadInfo, SGZUpload } from '@/components/ranking/types';
@@ -106,7 +105,7 @@ export const useUploadManagement = (user: User | null) => {
     });
   };
   
-  const mapExcelRowToSGZOrdem = (row: any) => {
+  const mapExcelRowToSGZOrdem = (row: any, uploadId: string) => {
     // Determinar o departamento técnico com base no tipo de serviço
     const servicoTipo = row['Classificação de Serviço'] || '';
     
@@ -140,7 +139,8 @@ export const useUploadManagement = (user: User | null) => {
       sgz_modificado_em: row['Data do Status'] ? new Date(row['Data do Status']).toISOString() : null,
       sgz_bairro: row['Bairro'] || '',
       sgz_distrito: row['Distrito'] || '',
-      sgz_departamento_tecnico: departamentoTecnico
+      sgz_departamento_tecnico: departamentoTecnico,
+      planilha_referencia: uploadId
     };
   };
 
@@ -183,8 +183,7 @@ export const useUploadManagement = (user: User | null) => {
       const ordensParaInserir = [];
       
       for (const row of excelData) {
-        const ordem = mapExcelRowToSGZOrdem(row);
-        ordem.planilha_referencia = uploadId;
+        const ordem = mapExcelRowToSGZOrdem(row, uploadId);
         ordens.push(ordem);
         
         // Verificar se esta ordem já existe
@@ -239,7 +238,7 @@ export const useUploadManagement = (user: User | null) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, fetchLastUpload]);
+  }, [user, fetchLastUpload, processExcelFile]);
 
   const handleDeleteUpload = useCallback(async (uploadId: string) => {
     if (!user) return;
