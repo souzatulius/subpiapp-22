@@ -16,6 +16,7 @@ export interface DemandFormData {
   perguntas: string[];
   detalhes_solicitacao: string;
   arquivo_url: string;
+  anexos: string[]; // Added property for multiple attachments
 }
 
 export interface FormState {
