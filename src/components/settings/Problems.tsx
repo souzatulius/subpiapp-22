@@ -31,7 +31,7 @@ const Problems = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     if (!editingProblem) return Promise.reject(new Error('Nenhum problema selecionado'));
     
     try {
@@ -44,7 +44,7 @@ const Problems = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       await addProblem(data);
       closeAddForm();

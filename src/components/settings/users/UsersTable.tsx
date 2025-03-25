@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Table,
@@ -105,7 +104,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.cargos?.descricao || '-'}</TableCell>
                   <TableCell>{user.areas_coordenacao?.coordenacao || '-'}</TableCell>
-                  <TableCell>{user.areas_coordenacao?.descricao || '-'}</TableCell>
+                  <TableCell>{user.supervisao_tecnica?.descricao || '-'}</TableCell>
+                  <TableCell>{user.coordenacao?.descricao || '-'}</TableCell>
                   <TableCell>{user.criado_em ? formatDateTime(user.criado_em) : '-'}</TableCell>
                   <TableCell>
                     {renderApprovalSection(user)}
@@ -179,7 +179,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.cargos?.descricao || '-'}</TableCell>
                   <TableCell>{user.areas_coordenacao?.coordenacao || '-'}</TableCell>
-                  <TableCell>{user.areas_coordenacao?.descricao || '-'}</TableCell>
+                  <TableCell>{user.supervisao_tecnica?.descricao || '-'}</TableCell>
+                  <TableCell>{user.coordenacao?.descricao || '-'}</TableCell>
                   <TableCell>
                     {user.permissoes ? user.permissoes.map(p => 
                       <Badge key={p.id} className="bg-blue-100 text-blue-800 mr-1 mb-1">

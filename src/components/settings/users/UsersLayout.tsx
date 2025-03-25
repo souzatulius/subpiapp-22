@@ -76,6 +76,12 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
     setFilteredUsers(filtered);
   }, [users, filter, statusFilter]);
 
+  // Convert coordenacoes for InviteUserDialog
+  const formattedCoordenacoes = coordenacoes.map(coord => ({
+    coordenacao_id: coord.id,
+    coordenacao: coord.descricao
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
@@ -159,7 +165,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         onSubmit={handleInviteUser}
         areas={supervisoesTecnicas}
         cargos={cargos}
-        coordenacoes={coordenacoes}
+        coordenacoes={formattedCoordenacoes}
       />
       
       <EditUserDialog 
@@ -167,7 +173,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         onOpenChange={setIsEditDialogOpen}
         user={selectedUser}
         onSubmit={handleEditUser}
-        areas={supervisoesTecnicas}
+        supervisoesTecnicas={supervisoesTecnicas}
         cargos={cargos}
         coordenacoes={coordenacoes}
         isSubmitting={isEditSubmitting}

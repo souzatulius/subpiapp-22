@@ -17,7 +17,7 @@ export const useProblemsData = () => {
         .from('problemas')
         .select(`
           *,
-          areas_coordenacao:area_coordenacao_id (
+          areas_coordenacao:supervisao_tecnica_id (
             id, 
             descricao,
             coordenacao,
@@ -32,7 +32,7 @@ export const useProblemsData = () => {
       const typedProblems: Problem[] = problemsData ? problemsData.map(problem => ({
         id: problem.id,
         descricao: problem.descricao,
-        area_coordenacao_id: problem.area_coordenacao_id,
+        supervisao_tecnica_id: problem.supervisao_tecnica_id,
         areas_coordenacao: problem.areas_coordenacao ? {
           id: problem.areas_coordenacao.id || '',
           descricao: problem.areas_coordenacao.descricao || '',

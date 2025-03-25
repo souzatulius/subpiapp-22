@@ -8,7 +8,7 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const addProblem = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const addProblem = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       setIsAdding(true);
       const { error } = await supabase
@@ -38,7 +38,7 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
     }
   };
 
-  const updateProblem = async (id: string, data: { descricao: string; area_coordenacao_id: string }) => {
+  const updateProblem = async (id: string, data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       setIsEditing(true);
       const { error } = await supabase

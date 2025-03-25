@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -52,7 +51,7 @@ export default function ProfileMenu() {
             <AvatarDisplay
               userName={userProfile.nome_completo}
               photoUrl={userProfile.foto_perfil_url}
-              size={40}
+              size="md"
             />
           </Button>
         </DropdownMenuTrigger>

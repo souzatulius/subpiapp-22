@@ -48,6 +48,8 @@ export type Cargo = {
   descricao: string;
 };
 
+export type Area = SupervisaoTecnica;
+
 export interface UserFormData {
   nome_completo: string;
   email?: string;

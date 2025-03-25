@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Area, Cargo } from './types';
+import { SupervisaoTecnica, Cargo } from './types';
 import EmailSuffix from '@/components/EmailSuffix';
 import { toast } from '@/components/ui/use-toast';
 import { 
@@ -24,7 +23,7 @@ const inviteUserSchema = z.object({
   nome_completo: z.string().min(3, 'Nome completo é obrigatório'),
   cargo_id: z.string().optional(),
   coordenacao_id: z.string().optional(),
-  area_coordenacao_id: z.string().optional()
+  supervisao_tecnica_id: z.string().optional()
 });
 
 type FormValues = z.infer<typeof inviteUserSchema>;
@@ -33,7 +32,7 @@ interface InviteUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: FormValues) => Promise<void>;
-  areas: Area[];
+  areas: SupervisaoTecnica[];
   cargos: Cargo[];
   coordenacoes: { coordenacao_id: string; coordenacao: string }[];
 }
@@ -46,7 +45,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
   cargos,
   coordenacoes
 }) => {
-  const [filteredAreas, setFilteredAreas] = useState<Area[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<SupervisaoTecnica[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<FormValues>({
@@ -56,23 +55,20 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
       nome_completo: '',
       cargo_id: undefined,
       coordenacao_id: undefined,
-      area_coordenacao_id: undefined
+      supervisao_tecnica_id: undefined
     }
   });
   
-  // Watch for coordenacao_id changes
   const coordenacaoId = form.watch('coordenacao_id');
   
-  // Filter areas based on selected coordenação
   useEffect(() => {
     if (coordenacaoId && coordenacaoId !== 'select-coordenacao') {
       const filtered = areas.filter(area => area.coordenacao_id === coordenacaoId);
       setFilteredAreas(filtered);
       
-      // Clear area selection if not in filtered list
-      const currentAreaId = form.getValues('area_coordenacao_id');
+      const currentAreaId = form.getValues('supervisao_tecnica_id');
       if (currentAreaId && !filtered.some(area => area.id === currentAreaId)) {
-        form.setValue('area_coordenacao_id', undefined);
+        form.setValue('supervisao_tecnica_id', undefined);
       }
     } else {
       setFilteredAreas([]);
@@ -83,7 +79,6 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
     try {
       setIsSubmitting(true);
 
-      // Validate the selected values
       if (data.cargo_id === 'select-cargo') {
         data.cargo_id = undefined;
       }
@@ -92,8 +87,8 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
         data.coordenacao_id = undefined;
       }
       
-      if (data.area_coordenacao_id === 'select-area') {
-        data.area_coordenacao_id = undefined;
+      if (data.supervisao_tecnica_id === 'select-area') {
+        data.supervisao_tecnica_id = undefined;
       }
       
       await onSubmit(data);
@@ -201,8 +196,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                         value={field.value}
                         onValueChange={(value) => {
                           field.onChange(value);
-                          // Clear area selection when coordenação changes
-                          form.setValue('area_coordenacao_id', undefined);
+                          form.setValue('supervisao_tecnica_id', undefined);
                         }}
                       >
                         <SelectTrigger className="h-12 rounded-xl border-gray-300">
@@ -225,7 +219,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
               
               <FormField 
                 control={form.control} 
-                name="area_coordenacao_id" 
+                name="supervisao_tecnica_id" 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-subpi-gray-text">Supervisão Técnica</FormLabel>

@@ -33,7 +33,7 @@ const Temas = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     if (!editingTema) return Promise.reject(new Error('Nenhum tema selecionado'));
     
     try {
@@ -46,7 +46,7 @@ const Temas = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       await addProblem(data);
       closeAddForm();

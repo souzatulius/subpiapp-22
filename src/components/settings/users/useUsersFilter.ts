@@ -12,7 +12,7 @@ export const useUsersFilter = (users: User[]) => {
         user.nome_completo?.toLowerCase().includes(searchTerms) ||
         user.email?.toLowerCase().includes(searchTerms) ||
         user.cargos?.descricao?.toLowerCase().includes(searchTerms) ||
-        user.areas_coordenacao?.descricao?.toLowerCase().includes(searchTerms)
+        user.supervisao_tecnica?.descricao?.toLowerCase().includes(searchTerms)
       );
     });
   }, [users, filter]);
