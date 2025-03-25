@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { useProblemsData, useProblemOperations, Problem, Area } from '@/hooks/useProblems';
+import { useProblemsData, useProblemOperations, Problem } from '@/hooks/useProblems';
+import { useCoordinationAreas, Area } from '@/hooks/coordination-areas/useCoordinationAreas';
 import DataTable from './data-table/DataTable';
 import TemaForm from './temas/TemaForm';
 import TemaEditDialog from './temas/TemaEditDialog';
 
 const Temas = () => {
-  const { problems, areas, isLoading, fetchProblems } = useProblemsData();
+  const { problems, isLoading, fetchProblems } = useProblemsData();
+  const { areas } = useCoordinationAreas();
   const { isSubmitting, isDeleting, addProblem, updateProblem, deleteProblem } = useProblemOperations(fetchProblems);
   
   const [editingTema, setEditingTema] = useState<Problem | null>(null);
@@ -67,8 +69,20 @@ const Temas = () => {
     },
     {
       key: 'area_coordenacao',
-      header: 'Área de Coordenação',
+      header: 'Supervisão Técnica',
       render: (row: Problem) => row.areas_coordenacao?.descricao || '-',
+    },
+    {
+      key: 'coordenacao',
+      header: 'Coordenação',
+      render: (row: Problem) => {
+        const area = row.areas_coordenacao;
+        if (area && area.coordenacao_id) {
+          const coord = areas.find(a => a.id === area.coordenacao_id);
+          return coord ? coord.descricao : '-';
+        }
+        return '-';
+      }
     },
     {
       key: 'criado_em',
@@ -82,7 +96,7 @@ const Temas = () => {
       <TemaForm
         onSubmit={handleAdd}
         onCancel={onClose}
-        areas={areas as any}
+        areas={areas}
         isSubmitting={isSubmitting}
       />
     );
@@ -106,7 +120,7 @@ const Temas = () => {
         isOpen={isEditFormOpen}
         onClose={closeEditForm}
         tema={editingTema}
-        areas={areas as any}
+        areas={areas}
         onSubmit={handleEdit}
         isSubmitting={isSubmitting}
       />

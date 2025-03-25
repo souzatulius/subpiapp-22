@@ -2,7 +2,8 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import TemaForm from './TemaForm';
-import { Problem, Area } from '@/hooks/useProblems';
+import { Problem } from '@/hooks/problems/types';
+import { Area } from '@/hooks/coordination-areas/useCoordinationAreas';
 
 interface TemaEditDialogProps {
   isOpen: boolean;

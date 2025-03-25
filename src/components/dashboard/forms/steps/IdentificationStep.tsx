@@ -118,6 +118,9 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
             >
               {tema.areas_coordenacao && getAreaIcon(tema.areas_coordenacao.descricao)}
               <span className="text-sm font-semibold">{tema.descricao}</span>
+              {tema.areas_coordenacao && (
+                <span className="text-xs opacity-75">{tema.areas_coordenacao.descricao}</span>
+              )}
             </Button>
           ))}
         </div>

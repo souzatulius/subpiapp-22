@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Area } from '@/hooks/problems/types';
+import { Area } from '@/hooks/coordination-areas/useCoordinationAreas';
 
 // Schema for tema validation - using the same as problem
 export const temaSchema = z.object({
@@ -77,14 +77,14 @@ const TemaForm: React.FC<TemaFormProps> = ({
           name="area_coordenacao_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Área de Coordenação</FormLabel>
+              <FormLabel>Supervisão Técnica</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger className="rounded-lg">
-                    <SelectValue placeholder="Selecione uma área" />
+                    <SelectValue placeholder="Selecione uma supervisão técnica" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

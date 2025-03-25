@@ -1,71 +1,48 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Problem, Area } from './types';
 
-export function useProblemsData() {
+export const useProblemsData = () => {
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProblems();
-    fetchAreas();
-  }, []);
-
-  const fetchAreas = async () => {
+  const fetchProblems = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('areas_coordenacao')
-        .select('*')
-        .order('descricao', { ascending: true });
+      setIsLoading(true);
       
-      if (error) throw error;
-      setAreas(data || []);
-    } catch (error: any) {
-      console.error('Erro ao carregar áreas:', error);
-      setAreas([]);
-    }
-  };
-
-  const fetchProblems = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
+      // Fetch problems with coordination area information
+      const { data: problemsData, error: problemsError } = await supabase
         .from('problemas')
         .select(`
           *,
-          areas_coordenacao(id, descricao)
+          areas_coordenacao:area_coordenacao_id (
+            id, 
+            descricao,
+            coordenacao_id
+          )
         `)
-        .order('descricao', { ascending: true });
+        .order('descricao');
+
+      if (problemsError) throw problemsError;
       
-      if (error) throw error;
-      
-      const transformedData: Problem[] = (data || []).map((item: any) => ({
-        ...item,
-        areas_coordenacao: item.areas_coordenacao
-      }));
-      
-      setProblems(transformedData);
+      setProblems(problemsData || []);
     } catch (error: any) {
-      console.error('Erro ao carregar problemas:', error);
+      console.error('Erro ao buscar problemas:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os problemas',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível carregar os problemas.",
+        variant: "destructive",
       });
-      setProblems([]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   return {
     problems,
-    setProblems,
-    areas,
-    loading,
+    isLoading,
     fetchProblems
   };
-}
+};
