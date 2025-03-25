@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { BarChart as RechartsBarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPieChart, Pie, LineChart as RechartsLineChart, Line } from 'recharts';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { useAdvancedFilters } from './hooks/useAdvancedFilters';
 import { useReportsData } from './hooks/useReportsData';
 
@@ -96,7 +95,7 @@ const RelatoriosContent = () => {
                 <h4 className="font-medium">Filtros Avançados</h4>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Período</label>
-                  <DateRangePicker 
+                  <DatePickerWithRange 
                     value={filters.dateRange}
                     onChange={(range) => handleFilterChange('dateRange', range)}
                     className="w-full"

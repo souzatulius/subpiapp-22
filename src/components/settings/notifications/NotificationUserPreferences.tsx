@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -19,6 +18,7 @@ interface NotificationPreferences {
   app: boolean;
   email: boolean;
   resumo_diario: boolean;
+  frequencia?: string;
 }
 
 interface FrequencyState {
@@ -49,23 +49,25 @@ const NotificationUserPreferences = () => {
     try {
       const { data, error } = await supabase
         .from('usuarios')
-        .select('configuracoes_notificacao, configuracoes_notificacao->frequencia')
+        .select('configuracoes_notificacao')
         .eq('id', user?.id)
         .single();
 
       if (error) throw error;
 
       if (data && data.configuracoes_notificacao) {
-        // Ensure configuracoes_notificacao is treated correctly as an object
-        const configData = data.configuracoes_notificacao as unknown as NotificationPreferences;
+        // Cast to the correct type and handle safely
+        const configData = data.configuracoes_notificacao as Record<string, any>;
+        
         setPreferences({
-          app: configData.app !== undefined ? configData.app : true,
-          email: configData.email !== undefined ? configData.email : true,
-          resumo_diario: configData.resumo_diario !== undefined ? configData.resumo_diario : true,
+          app: configData.app !== undefined ? Boolean(configData.app) : true,
+          email: configData.email !== undefined ? Boolean(configData.email) : true,
+          resumo_diario: configData.resumo_diario !== undefined ? Boolean(configData.resumo_diario) : true,
+          frequencia: typeof configData.frequencia === 'string' ? configData.frequencia : 'diario',
         });
 
         // Set frequency from the data
-        const frequencyValue = data.configuracoes_notificacao?.frequencia as string || 'diario';
+        const frequencyValue = typeof configData.frequencia === 'string' ? configData.frequencia : 'diario';
         setFrequency({
           value: frequencyValue,
           label: getFrequencyLabel(frequencyValue),

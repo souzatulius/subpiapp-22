@@ -15,11 +15,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+export interface DateRange {
+  from: Date;
+  to: Date;
+}
+
 interface DatePickerWithRangeProps {
-  dateRange: {
-    from: Date;
-    to: Date;
-  };
+  dateRange: DateRange;
   onRangeChange: (range: { from?: Date; to?: Date }) => void;
   align?: "start" | "center" | "end";
   className?: string;
@@ -81,3 +83,6 @@ export function DatePickerWithRange({
     </div>
   );
 }
+
+// Export DateRangePicker as an alias of DatePickerWithRange for backward compatibility
+export const DateRangePicker = DatePickerWithRange;

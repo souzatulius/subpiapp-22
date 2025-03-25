@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { DateRange } from '@/components/ui/date-range-picker';
 
@@ -25,7 +24,6 @@ export const useAdvancedFilters = () => {
     origin: 'todos'
   });
 
-  // Traduzir nomes para exibição
   const getDisplayName = (key: string, value: any): string => {
     if (key === 'dateRange' && value) {
       const fromDate = value.from ? new Date(value.from).toLocaleDateString('pt-BR') : '';
@@ -33,7 +31,6 @@ export const useAdvancedFilters = () => {
       return `${fromDate} até ${toDate}`;
     }
 
-    // Para outros filtros, podemos mapear valores
     const displayMap: Record<string, Record<string, string>> = {
       district: {
         'todos': 'Todos',
@@ -61,13 +58,10 @@ export const useAdvancedFilters = () => {
     return displayMap[key]?.[value] || value;
   };
 
-  // Converter filtros para uma lista de filtros ativos para exibição
   const selectedFilters = useMemo(() => {
     const result: FilterDisplayInfo[] = [];
 
-    // Mapear cada filtro para o formato de exibição
     Object.entries(filters).forEach(([key, value]) => {
-      // Ignorar filtros com valores padrão
       if (key === 'dateRange' && value) {
         result.push({
           key,
@@ -87,12 +81,10 @@ export const useAdvancedFilters = () => {
     return result;
   }, [filters]);
 
-  // Atualizar um filtro específico
   const handleFilterChange = (key: FilterKey, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // Limpar um filtro específico
   const clearFilter = (key: string) => {
     setFilters(prev => ({ 
       ...prev, 
@@ -100,7 +92,6 @@ export const useAdvancedFilters = () => {
     }));
   };
 
-  // Limpar todos os filtros
   const clearAllFilters = () => {
     setFilters({
       dateRange: undefined,

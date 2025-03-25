@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -48,10 +47,11 @@ const NotificationStats = () => {
       // Fetch notification stats by type
       const typeStatsResponse = await supabase
         .from('notificacoes')
-        .select('tipo, count(*)')
+        .select('tipo, count')
         .gte('data_envio', dateRange.from.toISOString())
         .lte('data_envio', dateRange.to.toISOString())
-        .group('tipo');
+        .select('tipo, count(*)')
+        .groupBy('tipo');
 
       if (typeStatsResponse.error) throw typeStatsResponse.error;
       setTypeStats(typeStatsResponse.data as NotificationStat[]);
@@ -62,7 +62,7 @@ const NotificationStats = () => {
         .select('usuario_id, usuarios!inner(nome_completo), count(*)')
         .gte('data_envio', dateRange.from.toISOString())
         .lte('data_envio', dateRange.to.toISOString())
-        .group('usuario_id, usuarios.nome_completo');
+        .groupBy('usuario_id, usuarios.nome_completo');
 
       if (userStatsResponse.error) throw userStatsResponse.error;
       
@@ -79,7 +79,7 @@ const NotificationStats = () => {
         .select('lida, count(*)')
         .gte('data_envio', dateRange.from.toISOString())
         .lte('data_envio', dateRange.to.toISOString())
-        .group('lida');
+        .groupBy('lida');
 
       if (readStatsResponse.error) throw readStatsResponse.error;
       
@@ -334,3 +334,4 @@ const NotificationStats = () => {
 };
 
 export default NotificationStats;
+
