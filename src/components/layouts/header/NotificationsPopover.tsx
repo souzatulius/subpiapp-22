@@ -148,7 +148,7 @@ export const NotificationsPopover: React.FC = () => {
             className="text-sm h-auto p-0" 
             onClick={() => {
               setIsOpen(false);
-              navigate('/settings');
+              navigate('/settings?tab=notificacoes');
             }}
           >
             Ver todas as notificações

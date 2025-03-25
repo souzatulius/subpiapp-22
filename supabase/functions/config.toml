@@ -6,5 +6,8 @@ project_id = "mapjrbfzurpjmianfnev"
 [functions.get_users_with_permission]
 verify_jwt = true
 
+[functions.send-notification-email]
+verify_jwt = true
+
 [functions.send-approval-email]
 verify_jwt = true

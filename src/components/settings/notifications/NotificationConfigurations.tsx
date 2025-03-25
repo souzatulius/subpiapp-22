@@ -1,239 +1,464 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Check, X, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { supabase } from "@/integrations/supabase/client";
+import { Edit, Plus, Trash2, Loader2, Toggle, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 
 interface NotificationConfig {
   id: string;
-  tipo: string;
   titulo: string;
-  descricao: string;
-  ativo: boolean;
+  tipo: string;
+  descricao: string | null;
   frequencia: string;
+  ativo: boolean;
 }
 
-const NotificationConfigurations = () => {
-  const [configurations, setConfigurations] = useState<NotificationConfig[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+interface ConfigFormData {
+  id?: string;
+  titulo: string;
+  tipo: string;
+  descricao: string;
+  frequencia: string;
+  ativo: boolean;
+}
+
+const NotificationConfigurations: React.FC = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const [configs, setConfigs] = useState<NotificationConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<ConfigFormData>({
+    titulo: '',
+    tipo: 'demanda',
+    descricao: '',
+    frequencia: 'imediata',
+    ativo: true,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch notification configurations
   useEffect(() => {
-    const fetchConfigurations = async () => {
-      if (!user) return;
-      
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('configuracoes_notificacoes')
-          .select('*')
-          .order('titulo');
-          
-        if (error) throw error;
-        setConfigurations(data || []);
-      } catch (error: any) {
-        console.error('Erro ao carregar configurações de notificações:', error);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar as configurações de notificações.',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchConfigurations();
-  }, [user, toast]);
+  }, []);
 
-  // Toggle notification status
-  const handleToggleActive = async (id: string, currentValue: boolean) => {
-    const updatedConfigurations = configurations.map(config => 
-      config.id === id ? { ...config, ativo: !currentValue } : config
-    );
-    
-    setConfigurations(updatedConfigurations);
-    
+  const fetchConfigurations = async () => {
     try {
-      setSaving(true);
-      const { error } = await supabase
+      setIsLoading(true);
+      const { data, error } = await supabase
         .from('configuracoes_notificacoes')
-        .update({ ativo: !currentValue })
-        .eq('id', id);
-        
+        .select('*')
+        .order('tipo', { ascending: true });
+      
       if (error) throw error;
       
+      setConfigs(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar configurações:', error);
       toast({
-        title: 'Configuração atualizada',
-        description: !currentValue 
-          ? 'Notificação ativada com sucesso.' 
-          : 'Notificação desativada com sucesso.',
-      });
-    } catch (error: any) {
-      console.error('Erro ao atualizar configuração:', error);
-      // Revert the change in UI
-      setConfigurations(configurations);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar a configuração.',
-        variant: 'destructive',
+        title: "Erro ao carregar configurações",
+        description: "Não foi possível carregar as configurações de notificação.",
+        variant: "destructive",
       });
     } finally {
-      setSaving(false);
+      setIsLoading(false);
     }
   };
 
-  // Update notification frequency
-  const handleFrequencyChange = async (id: string, frequency: string) => {
-    const updatedConfigurations = configurations.map(config => 
-      config.id === id ? { ...config, frequencia: frequency } : config
-    );
-    
-    setConfigurations(updatedConfigurations);
-    
-    try {
-      setSaving(true);
-      const { error } = await supabase
-        .from('configuracoes_notificacoes')
-        .update({ frequencia: frequency })
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      toast({
-        title: 'Frequência atualizada',
-        description: 'A frequência da notificação foi atualizada com sucesso.',
-      });
-    } catch (error: any) {
-      console.error('Erro ao atualizar frequência:', error);
-      // Revert the change in UI
-      setConfigurations(configurations);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar a frequência da notificação.',
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Add a new configuration
-  const handleAddConfiguration = async () => {
-    toast({
-      title: 'Funcionalidade em desenvolvimento',
-      description: 'A adição de novas configurações será implementada em breve.',
+  const handleEdit = (config: NotificationConfig) => {
+    setFormData({
+      id: config.id,
+      titulo: config.titulo,
+      tipo: config.tipo,
+      descricao: config.descricao || '',
+      frequencia: config.frequencia || 'imediata',
+      ativo: config.ativo,
     });
+    setIsEditing(true);
+    setIsDialogOpen(true);
   };
 
-  if (loading) {
+  const handleToggleActive = async (id: string, currentActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('configuracoes_notificacoes')
+        .update({ ativo: !currentActive })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setConfigs(configs.map(config => 
+        config.id === id ? { ...config, ativo: !currentActive } : config
+      ));
+      
+      toast({
+        title: `Notificação ${!currentActive ? 'ativada' : 'desativada'}`,
+        description: `A notificação foi ${!currentActive ? 'ativada' : 'desativada'} com sucesso.`,
+        variant: "success",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Não foi possível atualizar o status da notificação.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('configuracoes_notificacoes')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setConfigs(configs.filter(config => config.id !== id));
+      
+      toast({
+        title: "Configuração excluída",
+        description: "A configuração de notificação foi excluída com sucesso.",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error('Erro ao excluir configuração:', error);
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir a configuração de notificação.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      if (!formData.titulo || !formData.tipo) {
+        toast({
+          title: "Campos obrigatórios",
+          description: "Preencha todos os campos obrigatórios.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (isEditing && formData.id) {
+        // Update existing config
+        const { error } = await supabase
+          .from('configuracoes_notificacoes')
+          .update({
+            titulo: formData.titulo,
+            tipo: formData.tipo,
+            descricao: formData.descricao || null,
+            frequencia: formData.frequencia,
+            ativo: formData.ativo,
+            atualizado_em: new Date().toISOString(),
+          })
+          .eq('id', formData.id);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Configuração atualizada",
+          description: "A configuração de notificação foi atualizada com sucesso.",
+          variant: "success",
+        });
+      } else {
+        // Create new config
+        const { error } = await supabase
+          .from('configuracoes_notificacoes')
+          .insert({
+            titulo: formData.titulo,
+            tipo: formData.tipo,
+            descricao: formData.descricao || null,
+            frequencia: formData.frequencia,
+            ativo: formData.ativo,
+          });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Configuração criada",
+          description: "A configuração de notificação foi criada com sucesso.",
+          variant: "success",
+        });
+      }
+      
+      // Refresh configurations
+      fetchConfigurations();
+      
+      // Reset form and close dialog
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Erro ao salvar configuração:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar a configuração de notificação.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      titulo: '',
+      tipo: 'demanda',
+      descricao: '',
+      frequencia: 'imediata',
+      ativo: true,
+    });
+    setIsEditing(false);
+  };
+
+  const handleDialogClose = () => {
+    resetForm();
+    setIsDialogOpen(false);
+  };
+
+  const renderNotificationType = (type: string) => {
+    switch (type) {
+      case 'demanda':
+        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">Demanda</Badge>;
+      case 'nota':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">Nota Oficial</Badge>;
+      case 'sistema':
+        return <Badge variant="outline" className="bg-purple-100 text-purple-800 hover:bg-purple-100 border-purple-200">Sistema</Badge>;
+      case 'comunicado':
+        return <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">Comunicado</Badge>;
+      default:
+        return <Badge variant="outline">{type}</Badge>;
+    }
+  };
+
+  const renderFrequency = (frequency: string) => {
+    switch (frequency) {
+      case 'imediata':
+        return 'Imediata';
+      case 'agrupada':
+        return 'Agrupada (a cada hora)';
+      case 'diaria':
+        return 'Diária (resumo)';
+      default:
+        return frequency;
+    }
+  };
+
+  if (isLoading) {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-4 w-60 bg-gray-200 rounded animate-pulse"></div>
-                </div>
-                <div className="h-6 w-12 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-6">
-          {configurations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <AlertCircle className="h-10 w-10 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900">Nenhuma configuração encontrada</h3>
-              <p className="text-gray-500 mt-1 mb-4">
-                Não existem configurações de notificações definidas no sistema.
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div>
+            <CardTitle className="text-lg">Configurações de Notificações</CardTitle>
+            <CardDescription>
+              Gerencie os tipos de notificações que o sistema pode enviar
+            </CardDescription>
+          </div>
+          <Button 
+            onClick={() => {
+              resetForm();
+              setIsDialogOpen(true);
+            }}
+            className="flex items-center gap-1"
+          >
+            <Plus className="h-4 w-4" />
+            Nova Configuração
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {configs.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Info className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+              <p className="text-lg font-medium mb-1">Nenhuma configuração encontrada</p>
+              <p className="text-sm">
+                Clique em "Nova Configuração" para criar sua primeira configuração de notificação.
               </p>
-              <Button onClick={handleAddConfiguration}>
-                Adicionar Configuração
-              </Button>
             </div>
           ) : (
-            <>
-              {configurations.map((config) => (
-                <div key={config.id} className="flex flex-col space-y-3 border-b pb-4 last:border-b-0">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-sm">{config.titulo}</div>
-                      <div className="text-sm text-gray-500">{config.descricao}</div>
-                    </div>
-                    <div className="flex items-center">
-                      <Switch 
-                        checked={config.ativo} 
-                        disabled={saving}
-                        onCheckedChange={() => handleToggleActive(config.id, config.ativo)}
-                      />
-                      <span className="ml-2 w-12 text-xs">
-                        {config.ativo ? 
-                          <span className="text-green-600 flex items-center"><Check className="h-3 w-3 mr-1" /> Ativo</span> : 
-                          <span className="text-gray-500 flex items-center"><X className="h-3 w-3 mr-1" /> Inativo</span>
-                        }
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {config.ativo && (
-                    <div className="flex items-center space-x-4 text-sm">
-                      <Label className="text-xs text-gray-500">Frequência:</Label>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant={config.frequencia === 'imediata' ? 'default' : 'outline'} 
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => handleFrequencyChange(config.id, 'imediata')}
-                          disabled={saving}
-                        >
-                          Imediata
-                        </Button>
-                        <Button 
-                          variant={config.frequencia === 'diaria' ? 'default' : 'outline'} 
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => handleFrequencyChange(config.id, 'diaria')}
-                          disabled={saving}
-                        >
-                          Diária
-                        </Button>
-                        <Button 
-                          variant={config.frequencia === 'semanal' ? 'default' : 'outline'} 
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => handleFrequencyChange(config.id, 'semanal')}
-                          disabled={saving}
-                        >
-                          Semanal
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Título</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Frequência</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {configs.map((config) => (
+                    <TableRow key={config.id}>
+                      <TableCell className="font-medium">
+                        {config.titulo}
+                      </TableCell>
+                      <TableCell>
+                        {renderNotificationType(config.tipo)}
+                      </TableCell>
+                      <TableCell>
+                        {renderFrequency(config.frequencia)}
+                      </TableCell>
+                      <TableCell>
+                        <Switch 
+                          checked={config.ativo} 
+                          onCheckedChange={() => handleToggleActive(config.id, config.ativo)}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleEdit(config)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleDelete(config.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Configuration Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing ? 'Editar Configuração' : 'Nova Configuração de Notificação'}
+            </DialogTitle>
+            <DialogDescription>
+              Configure os diferentes tipos de notificações do sistema.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="titulo">Título da Notificação</Label>
+              <Input
+                id="titulo"
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                placeholder="Ex: Notificação de Nova Demanda"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="tipo">Tipo de Notificação</Label>
+                <Select
+                  value={formData.tipo}
+                  onValueChange={(value) => 
+                    setFormData({ ...formData, tipo: value })
+                  }
+                >
+                  <SelectTrigger id="tipo">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="demanda">Demanda</SelectItem>
+                    <SelectItem value="nota">Nota Oficial</SelectItem>
+                    <SelectItem value="sistema">Sistema</SelectItem>
+                    <SelectItem value="comunicado">Comunicado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="frequencia">Frequência</Label>
+                <Select
+                  value={formData.frequencia}
+                  onValueChange={(value) => 
+                    setFormData({ ...formData, frequencia: value })
+                  }
+                >
+                  <SelectTrigger id="frequencia">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="imediata">Imediata</SelectItem>
+                    <SelectItem value="agrupada">Agrupada (horária)</SelectItem>
+                    <SelectItem value="diaria">Diária (resumo)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="descricao">Descrição</Label>
+              <Textarea
+                id="descricao"
+                value={formData.descricao}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                placeholder="Descrição detalhada desta notificação..."
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="ativo"
+                checked={formData.ativo}
+                onCheckedChange={(checked) => 
+                  setFormData({ ...formData, ativo: checked })
+                }
+              />
+              <Label htmlFor="ativo">Ativo</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" onClick={handleDialogClose}>
+                Cancelar
+              </Button>
+            </DialogClose>
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditing ? 'Atualizar' : 'Criar'} Configuração
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

@@ -1,204 +1,296 @@
-
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Bell, UserCheck, UserX, BarChart3 } from "lucide-react";
 import { 
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Download, Loader2, RefreshCw } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+  Chart as ChartJS, 
+  CategoryScale, 
+  LinearScale, 
+  BarElement, 
+  Title, 
+  Tooltip, 
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { addDays, format, subDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+ChartJS.register(
+  CategoryScale, 
+  LinearScale, 
+  BarElement, 
+  Title, 
+  Tooltip, 
+  Legend,
+  ArcElement
+);
 
 interface NotificationStat {
   tipo: string;
-  titulo: string;
-  total_enviadas: number;
-  total_lidas: number;
-  porcentagem_leitura: number;
+  count: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+interface UserStat {
+  usuario_nome: string;
+  count: number;
+}
+
+interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string[];
+    borderColor: string[];
+    borderWidth: number;
+  }[];
+}
 
 const NotificationStats: React.FC = () => {
   const { toast } = useToast();
-  const [stats, setStats] = useState<NotificationStat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [totals, setTotals] = useState({
-    total_notificacoes: 0,
-    total_lidas: 0,
-    taxa_leitura: 0
+  const [typeStats, setTypeStats] = useState<NotificationStat[]>([]);
+  const [userStats, setUserStats] = useState<UserStat[]>([]);
+  const [readStats, setReadStats] = useState<{read: number, unread: number}>({read: 0, unread: 0});
+  const [dateRange, setDateRange] = useState<{from: Date, to: Date}>({
+    from: subDays(new Date(), 30),
+    to: new Date()
   });
+  const [selectedTab, setSelectedTab] = useState('tipos');
+  const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [dateRange, selectedPeriod]);
 
   const fetchStats = async () => {
     try {
       setIsLoading(true);
       
-      // Obter estatísticas por tipo de notificação
-      const { data: notificacoesData, error: notificacoesError } = await supabase
-        .from('notificacoes')
-        .select('tipo, lida')
-        .not('tipo', 'is', null);
+      // Format dates for query
+      const from = dateRange.from.toISOString();
+      const to = dateRange.to.toISOString();
       
-      if (notificacoesError) throw notificacoesError;
-      
-      if (!notificacoesData || notificacoesData.length === 0) {
-        setStats([]);
-        setTotals({
-          total_notificacoes: 0,
-          total_lidas: 0,
-          taxa_leitura: 0
+      // Fetch type stats
+      const { data: typeData, error: typeError } = await supabase
+        .rpc('get_notification_type_stats', { 
+          from_date: from,
+          to_date: to
         });
-        return;
+      
+      if (typeError) throw typeError;
+      setTypeStats(typeData || []);
+      
+      // Fetch user stats
+      const { data: userData, error: userError } = await supabase
+        .rpc('get_notification_user_stats', { 
+          from_date: from,
+          to_date: to
+        });
+      
+      if (userError) throw userError;
+      setUserStats(userData || []);
+      
+      // Fetch read/unread stats
+      const { data: readData, error: readError } = await supabase
+        .rpc('get_notification_read_stats', { 
+          from_date: from,
+          to_date: to
+        });
+      
+      if (readError) throw readError;
+      if (readData && readData.length > 0) {
+        const read = readData.find((item: any) => item.lida === true)?.count || 0;
+        const unread = readData.find((item: any) => item.lida === false)?.count || 0;
+        setReadStats({ read, unread });
       }
       
-      // Obter configurações para mapear tipos para títulos
-      const { data: configData, error: configError } = await supabase
-        .from('configuracoes_notificacoes')
-        .select('tipo, titulo');
-      
-      if (configError) throw configError;
-      
-      // Mapear tipo para título
-      const tipoParaTitulo: Record<string, string> = {};
-      if (configData) {
-        configData.forEach(config => {
-          tipoParaTitulo[config.tipo] = config.titulo;
-        });
-      }
-      
-      // Processar dados
-      const tiposSet = new Set<string>();
-      notificacoesData.forEach(n => {
-        if (n.tipo) tiposSet.add(n.tipo);
-      });
-      
-      const tiposArray = Array.from(tiposSet);
-      
-      // Calcular estatísticas por tipo
-      const statsArray: NotificationStat[] = tiposArray.map(tipo => {
-        const notificacoesDesseTipo = notificacoesData.filter(n => n.tipo === tipo);
-        const totalEnviadas = notificacoesDesseTipo.length;
-        const totalLidas = notificacoesDesseTipo.filter(n => n.lida).length;
-        const porcentagemLeitura = totalEnviadas > 0 ? (totalLidas / totalEnviadas) * 100 : 0;
-        
-        return {
-          tipo,
-          titulo: tipoParaTitulo[tipo] || tipo,
-          total_enviadas: totalEnviadas,
-          total_lidas: totalLidas,
-          porcentagem_leitura: porcentagemLeitura
-        };
-      });
-      
-      // Ordenar por maior número de notificações
-      statsArray.sort((a, b) => b.total_enviadas - a.total_enviadas);
-      
-      // Calcular totais
-      const totalNotificacoes = notificacoesData.length;
-      const totalLidas = notificacoesData.filter(n => n.lida).length;
-      const taxaLeitura = totalNotificacoes > 0 ? (totalLidas / totalNotificacoes) * 100 : 0;
-      
-      setStats(statsArray);
-      setTotals({
-        total_notificacoes: totalNotificacoes,
-        total_lidas: totalLidas,
-        taxa_leitura: taxaLeitura
-      });
     } catch (error) {
-      console.error('Erro ao carregar estatísticas de notificações:', error);
+      console.error('Erro ao buscar estatísticas:', error);
       toast({
-        title: "Erro",
+        title: "Erro ao carregar estatísticas",
         description: "Não foi possível carregar as estatísticas de notificações.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(1)}%`;
+  const handlePeriodChange = (value: string) => {
+    setSelectedPeriod(value);
+    const today = new Date();
+    
+    switch (value) {
+      case '7d':
+        setDateRange({
+          from: subDays(today, 7),
+          to: today
+        });
+        break;
+      case '30d':
+        setDateRange({
+          from: subDays(today, 30),
+          to: today
+        });
+        break;
+      case '90d':
+        setDateRange({
+          from: subDays(today, 90),
+          to: today
+        });
+        break;
+      case 'custom':
+        // When selecting custom, keep the current date range
+        break;
+    }
   };
 
-  const exportToCsv = () => {
-    try {
-      if (stats.length === 0) {
-        toast({
-          title: "Exportação cancelada",
-          description: "Não há dados para exportar.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Criar cabeçalho CSV
-      const headers = ['Tipo', 'Título', 'Total Enviadas', 'Total Lidas', 'Taxa de Leitura (%)'];
-      
-      // Criar linhas CSV
-      const rows = stats.map(stat => [
-        stat.tipo,
-        stat.titulo,
-        stat.total_enviadas,
-        stat.total_lidas,
-        stat.porcentagem_leitura.toFixed(1)
-      ]);
-      
-      // Adicionar linha de totais
-      rows.push([
-        'TOTAIS',
-        '',
-        totals.total_notificacoes,
-        totals.total_lidas,
-        totals.taxa_leitura.toFixed(1)
-      ]);
-      
-      // Converter para string CSV
-      const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.join(','))
-      ].join('\n');
-      
-      // Criar blob e link para download
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `estatisticas_notificacoes_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast({
-        title: "Exportação concluída",
-        description: "As estatísticas foram exportadas com sucesso."
-      });
-    } catch (error) {
-      console.error('Erro ao exportar estatísticas:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível exportar as estatísticas.",
-        variant: "destructive"
-      });
+  const renderTypesChart = () => {
+    if (typeStats.length === 0) return <div className="text-center py-10 text-gray-500">Sem dados para exibir</div>;
+    
+    const data: ChartData = {
+      labels: typeStats.map(item => getNotificationType(item.tipo)),
+      datasets: [
+        {
+          label: 'Quantidade',
+          data: typeStats.map(item => item.count),
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+          ],
+          borderColor: [
+            'rgba(75, 192, 192, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(153, 102, 255, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+    
+    return <Bar 
+      data={data} 
+      options={{
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          },
+          title: {
+            display: true,
+            text: 'Notificações por Tipo',
+          },
+        },
+      }} 
+    />;
+  };
+
+  const renderUsersChart = () => {
+    if (userStats.length === 0) return <div className="text-center py-10 text-gray-500">Sem dados para exibir</div>;
+    
+    // Limit to top 10 users for better visualization
+    const topUsers = userStats.slice(0, 10);
+    
+    const data: ChartData = {
+      labels: topUsers.map(item => item.usuario_nome),
+      datasets: [
+        {
+          label: 'Notificações Recebidas',
+          data: topUsers.map(item => item.count),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+    
+    return <Bar 
+      data={data} 
+      options={{
+        responsive: true,
+        indexAxis: 'y',
+        plugins: {
+          legend: {
+            position: 'bottom',
+          },
+          title: {
+            display: true,
+            text: 'Top 10 Usuários - Notificações Recebidas',
+          },
+        },
+      }} 
+    />;
+  };
+
+  const renderReadUnreadChart = () => {
+    if (readStats.read === 0 && readStats.unread === 0) {
+      return <div className="text-center py-10 text-gray-500">Sem dados para exibir</div>;
+    }
+    
+    const data = {
+      labels: ['Lidas', 'Não Lidas'],
+      datasets: [
+        {
+          data: [readStats.read, readStats.unread],
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+          ],
+          borderColor: [
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+    
+    return <div className="max-w-[300px] mx-auto">
+      <Pie 
+        data={data} 
+        options={{
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            title: {
+              display: true,
+              text: 'Status das Notificações',
+            },
+          },
+        }} 
+      />
+    </div>;
+  };
+
+  const getNotificationType = (type: string) => {
+    switch (type) {
+      case 'demanda_criada':
+        return 'Nova Demanda';
+      case 'demanda_respondida':
+        return 'Demanda Respondida';
+      case 'nota_pendente_aprov':
+        return 'Nota Pendente';
+      case 'nota_aprovada':
+        return 'Nota Aprovada';
+      case 'comunicado':
+        return 'Comunicado';
+      default:
+        return type;
     }
   };
 
@@ -210,196 +302,94 @@ const NotificationStats: React.FC = () => {
     );
   }
 
-  const statsPieData = stats.map(stat => ({
-    name: stat.titulo,
-    value: stat.total_enviadas
-  }));
-
-  const statsBarData = stats.map(stat => ({
-    name: stat.titulo,
-    enviadas: stat.total_enviadas,
-    lidas: stat.total_lidas
-  }));
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Estatísticas de Notificações</h3>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchStats}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Atualizar
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={exportToCsv}
-            disabled={stats.length === 0}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Exportar CSV
-          </Button>
-        </div>
-      </div>
-      
-      {stats.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Sem dados disponíveis</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Nenhuma notificação foi enviada ainda ou os dados ainda não estão disponíveis.
-            </p>
-            <Button onClick={fetchStats} variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Verificar Novamente
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Cards de resumo */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">Total de Notificações</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totals.total_notificacoes}</div>
-              </CardContent>
-            </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Estatísticas de Notificações</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="w-full md:w-1/3">
+              <div className="space-y-2">
+                <Label htmlFor="period">Período</Label>
+                <Select
+                  value={selectedPeriod}
+                  onValueChange={handlePeriodChange}
+                >
+                  <SelectTrigger id="period">
+                    <SelectValue placeholder="Selecione o período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">Últimos 7 dias</SelectItem>
+                    <SelectItem value="30d">Últimos 30 dias</SelectItem>
+                    <SelectItem value="90d">Últimos 90 dias</SelectItem>
+                    <SelectItem value="custom">Período Personalizado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">Notificações Lidas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totals.total_lidas}</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">Taxa de Leitura</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatPercentage(totals.taxa_leitura)}</div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Gráficos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Distribuição por Tipo</CardTitle>
-              </CardHeader>
-              <CardContent className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statsPieData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {statsPieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value) => [`${value} notificações`, 'Quantidade']} 
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Notificações Enviadas vs. Lidas</CardTitle>
-              </CardHeader>
-              <CardContent className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={statsBarData}
-                    margin={{
-                      top: 20,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
+            {selectedPeriod === 'custom' && (
+              <div className="w-full md:w-2/3">
+                <div className="space-y-2">
+                  <Label>Intervalo de datas</Label>
+                  <DatePickerWithRange
+                    value={dateRange}
+                    onChange={(range) => {
+                      if (range?.from && range?.to) {
+                        setDateRange({ from: range.from, to: range.to });
+                      }
                     }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="enviadas" name="Enviadas" fill="#8884d8" />
-                    <Bar dataKey="lidas" name="Lidas" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
-          {/* Tabela de estatísticas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Detalhamento por Tipo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Total Enviadas</TableHead>
-                    <TableHead>Total Lidas</TableHead>
-                    <TableHead>Taxa de Leitura</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stats.map((stat) => (
-                    <TableRow key={stat.tipo}>
-                      <TableCell className="font-medium">
-                        <div>
-                          {stat.titulo}
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {stat.tipo}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{stat.total_enviadas}</TableCell>
-                      <TableCell>{stat.total_lidas}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={
-                            stat.porcentagem_leitura >= 80 ? 'default' : 
-                            stat.porcentagem_leitura >= 50 ? 'secondary' : 
-                            'outline'
-                          }
-                        >
-                          {formatPercentage(stat.porcentagem_leitura)}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </>
-      )}
+          <div className="space-y-6">
+            <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+              <TabsList className="grid grid-cols-3 mb-6">
+                <TabsTrigger value="tipos" className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  Tipos
+                </TabsTrigger>
+                <TabsTrigger value="usuarios" className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4" />
+                  Usuários
+                </TabsTrigger>
+                <TabsTrigger value="status" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Status
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="tipos" className="h-[400px] flex items-center justify-center">
+                {renderTypesChart()}
+              </TabsContent>
+              
+              <TabsContent value="usuarios" className="h-[400px] flex items-center justify-center">
+                {renderUsersChart()}
+              </TabsContent>
+              
+              <TabsContent value="status" className="h-[400px] flex items-center justify-center">
+                {renderReadUnreadChart()}
+              </TabsContent>
+            </Tabs>
+            
+            <div className="text-center text-sm text-gray-500">
+              {selectedPeriod === 'custom' 
+                ? `Período: ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} a ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`
+                : selectedPeriod === '7d'
+                  ? 'Últimos 7 dias'
+                  : selectedPeriod === '30d'
+                    ? 'Últimos 30 dias'
+                    : 'Últimos 90 dias'
+              }
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

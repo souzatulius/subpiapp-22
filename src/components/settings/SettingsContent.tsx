@@ -9,7 +9,7 @@ import DemandOrigins from './DemandOrigins';
 import DistrictsAndNeighborhoods from './DistrictsAndNeighborhoods';
 import Announcements from './Announcements';
 import AccessControl from './AccessControl';
-import NotificationsSettings from './notifications/NotificationsSettings';
+import NotificationsPage from './notifications/NotificationsPage';
 import Temas from './Temas';
 import CoordinationArea from './coordination/CoordinationArea';
 import CoordinationsList from './coordination/CoordinationsList';
@@ -36,7 +36,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
       {activeSection === 'tipos_midia' && <MediaTypes />}
       {activeSection === 'servicos' && <Services />}
       {activeSection === 'distritos_bairros' && <DistrictsAndNeighborhoods />}
-      {activeSection === 'notificacoes' && <NotificationsSettings />}
+      {activeSection === 'notificacoes' && <NotificationsPage />}
       {activeSection === 'comunicados' && <Announcements />}
       
       {activeSection === 'temas' && <Temas />}
