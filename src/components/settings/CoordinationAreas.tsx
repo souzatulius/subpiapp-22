@@ -43,8 +43,10 @@ const CoordinationAreas = () => {
     if (!editingArea) return Promise.reject(new Error('Nenhuma supervisão técnica selecionada'));
     
     try {
-      await updateArea(editingArea.id, data);
-      closeEditForm();
+      const success = await updateArea(editingArea.id, data);
+      if (success) {
+        closeEditForm();
+      }
       return Promise.resolve();
     } catch (error) {
       console.error('Error in handleEdit:', error);
@@ -55,8 +57,10 @@ const CoordinationAreas = () => {
   const handleAdd = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       console.log('CoordinationAreas handling add:', data);
-      await addArea(data);
-      closeAddForm();
+      const success = await addArea(data);
+      if (success) {
+        closeAddForm();
+      }
       return Promise.resolve();
     } catch (error) {
       console.error('Error in handleAdd:', error);
@@ -67,6 +71,19 @@ const CoordinationAreas = () => {
       });
       return Promise.reject(error);
     }
+  };
+
+  const handleDelete = async (area: Area) => {
+    if (!area || !area.id) {
+      console.error('Attempted to delete area without ID:', area);
+      toast({
+        title: "Erro",
+        description: "ID da supervisão técnica não encontrado.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return deleteArea(area.id);
   };
 
   const columns = [
@@ -90,7 +107,7 @@ const CoordinationAreas = () => {
     {
       key: 'criado_em',
       header: 'Data de Criação',
-      render: (row: any) => new Date(row.criado_em).toLocaleDateString('pt-BR'),
+      render: (row: any) => row.criado_em ? new Date(row.criado_em).toLocaleDateString('pt-BR') : '-',
     },
   ];
 
@@ -104,11 +121,6 @@ const CoordinationAreas = () => {
         coordinations={coordinations}
       />
     );
-  };
-
-  // Fix: Properly extract the ID when deleting an area
-  const handleDelete = (area: Area) => {
-    return deleteArea(area.id);
   };
 
   return (

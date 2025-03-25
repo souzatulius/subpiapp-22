@@ -45,15 +45,23 @@ export const useCoordinationAreasCrud = (
   const updateArea = async (id: string, data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       setIsEditing(true);
+      
+      // Prepare update data - remove coordenacao_id if it's empty string
+      const updateData = { ...data };
+      if (updateData.coordenacao_id === '') {
+        delete updateData.coordenacao_id;
+      }
+      
       const { error } = await supabase
         .from('areas_coordenacao')
-        .update(data)
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
       
+      // Update local state
       setAreas(areas.map(area => 
-        area.id === id ? { ...area, ...data } : area
+        area.id === id ? { ...area, ...updateData } : area
       ));
       
       toast({
@@ -77,6 +85,41 @@ export const useCoordinationAreasCrud = (
   const deleteArea = async (id: string) => {
     try {
       setIsDeleting(true);
+      
+      // First check if area is used by any services
+      const { data: servicesData, error: servicesError } = await supabase
+        .from('servicos')
+        .select('id')
+        .eq('area_coordenacao_id', id);
+        
+      if (servicesError) throw servicesError;
+      
+      if (servicesData && servicesData.length > 0) {
+        toast({
+          title: "Erro",
+          description: "Esta supervisão técnica está sendo utilizada por serviços e não pode ser excluída.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      // Then check if area is used by any problems
+      const { data: problemsData, error: problemsError } = await supabase
+        .from('problemas')
+        .select('id')
+        .eq('area_coordenacao_id', id);
+        
+      if (problemsError) throw problemsError;
+      
+      if (problemsData && problemsData.length > 0) {
+        toast({
+          title: "Erro",
+          description: "Esta supervisão técnica está sendo utilizada por problemas/temas e não pode ser excluída.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
       const { error } = await supabase
         .from('areas_coordenacao')
         .delete()
@@ -93,7 +136,7 @@ export const useCoordinationAreasCrud = (
     } catch (error: any) {
       console.error('Erro ao remover supervisão técnica:', error);
       
-      // Verificar se o erro é de restrição de chave estrangeira
+      // Check for foreign key constraint error
       if (error.code === '23503') {
         toast({
           title: "Erro",

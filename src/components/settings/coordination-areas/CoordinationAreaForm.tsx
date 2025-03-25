@@ -44,7 +44,7 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
       onSubmit={onSubmit}
       onCancel={onCancel}
       defaultValues={defaultValues}
-      renderFields={({ register, formState, control }) => (
+      renderFields={({ register, formState, setValue, watch }) => (
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="descricao">Descrição</Label>
@@ -77,13 +77,8 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
             <Select
               defaultValue={defaultValues.coordenacao_id || 'none'}
               onValueChange={(value) => {
-                const event = {
-                  target: { 
-                    value: value === 'none' ? '' : value, 
-                    name: 'coordenacao_id' 
-                  }
-                };
-                register('coordenacao_id').onChange(event);
+                // Convert 'none' to empty string for the form submission
+                setValue("coordenacao_id", value === 'none' ? '' : value);
               }}
             >
               <SelectTrigger className="rounded-lg">

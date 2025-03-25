@@ -5,7 +5,9 @@ import { useCoordinationAreasCrud } from './useCoordinationAreasCrud';
 import { Area, areaSchema } from './types';
 import { Coordination } from '@/hooks/settings/useCoordination';
 
-export { Area, areaSchema };
+// Export types using the 'export type' syntax to fix the TS1205 error
+export type { Area };
+export { areaSchema };
 
 export const useCoordinationAreas = () => {
   const {
