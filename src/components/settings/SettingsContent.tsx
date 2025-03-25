@@ -11,9 +11,7 @@ import Announcements from './Announcements';
 import AccessControl from './AccessControl';
 import NotificationsPage from './notifications/NotificationsPage';
 import Temas from './Temas';
-import CoordinationArea from './coordination/CoordinationArea';
 import CoordinationsList from './coordination/CoordinationsList';
-// Import Problem, Teams components if available
 
 interface SettingsContentProps {
   activeSection: string;
@@ -22,24 +20,24 @@ interface SettingsContentProps {
 const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
+      {/* Gestão de Usuários e Permissões */}
       {activeSection === 'usuarios' && <UsersManagement />}
-      {activeSection === 'permissoes' && <AccessControl />}
-      
       {activeSection === 'cargos' && <Positions />}
-      {activeSection === 'coordenacao' && <CoordinationArea />}
-      {activeSection === 'areas' && <CoordinationAreas />}
-      {activeSection === 'coordenacoes_lista' && <CoordinationsList />}
-      {activeSection === 'equipes' && <div className="text-center p-10 text-gray-500">Gerenciamento de Equipes em desenvolvimento</div>}
       
-      {activeSection === 'origens_demanda' && <DemandOrigins />}
-      {activeSection === 'problemas' && <div className="text-center p-10 text-gray-500">Gerenciamento de Problemas em desenvolvimento</div>}
-      {activeSection === 'tipos_midia' && <MediaTypes />}
+      {/* Gestão Organizacional */}
+      {activeSection === 'coordenacoes_lista' && <CoordinationsList />}
+      {activeSection === 'areas' && <CoordinationAreas />}
       {activeSection === 'servicos' && <Services />}
+      
+      {/* Gestão Operacional - Demandas */}
+      {activeSection === 'origens_demanda' && <DemandOrigins />}
+      {activeSection === 'problemas' && <Temas />}
+      {activeSection === 'tipos_midia' && <MediaTypes />}
       {activeSection === 'distritos_bairros' && <DistrictsAndNeighborhoods />}
+      
+      {/* Gestão Operacional - Comunicação */}
       {activeSection === 'notificacoes' && <NotificationsPage />}
       {activeSection === 'comunicados' && <Announcements />}
-      
-      {activeSection === 'temas' && <Temas />}
     </div>
   );
 };

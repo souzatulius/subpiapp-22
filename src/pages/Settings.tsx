@@ -6,7 +6,6 @@ import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import SettingsContent from '@/components/settings/SettingsContent';
 import SettingsDashboard from '@/components/settings/SettingsDashboard';
 import SettingsSidebar from '@/components/settings/SettingsSidebar';
-import BackButton from '@/components/layouts/BackButton';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 
@@ -45,30 +44,26 @@ const Settings = () => {
   // Functions to get section details
   const getSectionCategory = (section: string) => {
     if (section === 'dashboard') return 'Dashboard';
-    if (['usuarios', 'permissoes'].includes(section)) return 'Gestão de Usuários e Permissões';
-    if (['cargos', 'coordenacao', 'areas', 'coordenacoes_lista', 'equipes'].includes(section)) return 'Gestão Organizacional';
-    if (['origens_demanda', 'problemas', 'tipos_midia', 'servicos', 'distritos_bairros', 'notificacoes', 'comunicados'].includes(section)) return 'Gestão Operacional';
+    if (['usuarios', 'permissoes', 'cargos'].includes(section)) return 'Gestão de Usuários e Permissões';
+    if (['coordenacoes_lista', 'areas', 'servicos'].includes(section)) return 'Gestão Organizacional';
+    if (['origens_demanda', 'problemas', 'tipos_midia', 'distritos_bairros', 'notificacoes', 'comunicados'].includes(section)) return 'Gestão Operacional';
     return '';
   };
 
   const getSectionTitle = (section: string) => {
     switch (section) {
       case 'dashboard': return 'Dashboard';
-      case 'usuarios': return 'Gerenciamento de Usuários';
-      case 'permissoes': return 'Permissões';
+      case 'usuarios': return 'Usuários e Permissões';
       case 'cargos': return 'Cargos';
-      case 'coordenacao': return 'Coordenações';
+      case 'coordenacoes_lista': return 'Coordenações';
       case 'areas': return 'Supervisões Técnicas';
-      case 'coordenacoes_lista': return 'Lista de Coordenações';
-      case 'equipes': return 'Equipe e Responsabilidades';
-      case 'origens_demanda': return 'Origem das Demandas';
-      case 'problemas': return 'Problemas';
-      case 'tipos_midia': return 'Tipos de Mídia';
       case 'servicos': return 'Serviços';
+      case 'origens_demanda': return 'Origem das Demandas';
+      case 'problemas': return 'Problemas/Temas';
+      case 'tipos_midia': return 'Tipos de Mídia';
       case 'distritos_bairros': return 'Distritos e Bairros';
-      case 'notificacoes': return 'Configurações de Notificações';
+      case 'notificacoes': return 'Notificações';
       case 'comunicados': return 'Avisos e Comunicados';
-      case 'temas': return 'Temas';
       default: return '';
     }
   };

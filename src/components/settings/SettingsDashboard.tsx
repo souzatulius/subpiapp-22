@@ -3,10 +3,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
-  Settings, Users, ListChecks, Briefcase, LayoutDashboard, 
-  MessageSquare, Bell, ShieldCheck, Building, UserCheck, 
-  Globe, AlertTriangle, Image, FileText, MapPin, Send, Map,
-  Layers // Add the missing Layers icon import
+  Users, Briefcase, Building, Layers, 
+  Globe, AlertTriangle, Image, FileText, MapPin,
+  Settings, MessageSquare, Bell, Send, Shield
 } from 'lucide-react';
 
 interface SettingsCardProps {
@@ -44,17 +43,15 @@ const CategoryTitle = ({ title, icon, color }: { title: string; icon: React.Reac
 );
 
 const SettingsDashboard = () => {
-  
   return (
     <div className="space-y-6">
       {/* Welcome Card */}
       <Card className="bg-blue-600 text-white shadow-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center">
-            <LayoutDashboard className="h-4 w-4 mr-2" />
+            <Settings className="h-4 w-4 mr-2" />
             Configurações do Sistema
           </CardTitle>
-          <Settings className="h-4 w-4 text-white opacity-75" />
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">Bem-vindo(a)!</p>
@@ -71,18 +68,18 @@ const SettingsDashboard = () => {
         />
         
         <SettingsCard
-          title="Gerenciamento de Usuários"
-          description="Adicione, edite e gerencie usuários do sistema."
+          title="Usuários e Permissões"
+          description="Gerencie usuários e suas permissões de acesso no sistema."
           icon={<Users className="h-5 w-5" />}
           link="/settings?tab=usuarios"
           color="bg-amber-600"
         />
         
         <SettingsCard
-          title="Permissões e Acessos"
-          description="Configure as permissões e acessos dos usuários."
-          icon={<ShieldCheck className="h-5 w-5" />}
-          link="/settings?tab=permissoes"
+          title="Cargos"
+          description="Gerencie os cargos dos usuários."
+          icon={<Briefcase className="h-5 w-5" />}
+          link="/settings?tab=cargos"
           color="bg-amber-600"
         />
         
@@ -94,18 +91,10 @@ const SettingsDashboard = () => {
         />
         
         <SettingsCard
-          title="Cargos"
-          description="Gerencie os cargos dos usuários."
-          icon={<Briefcase className="h-5 w-5" />}
-          link="/settings?tab=cargos"
-          color="bg-blue-600"
-        />
-        
-        <SettingsCard
           title="Coordenações"
           description="Gerencie as coordenações."
           icon={<Building className="h-5 w-5" />}
-          link="/settings?tab=coordenacao"
+          link="/settings?tab=coordenacoes_lista"
           color="bg-blue-600"
         />
         
@@ -118,10 +107,10 @@ const SettingsDashboard = () => {
         />
         
         <SettingsCard
-          title="Equipe e Responsabilidades"
-          description="Gerencie as equipes e suas responsabilidades."
-          icon={<UserCheck className="h-5 w-5" />}
-          link="/settings?tab=equipes"
+          title="Serviços"
+          description="Gerencie os serviços oferecidos."
+          icon={<FileText className="h-5 w-5" />}
+          link="/settings?tab=servicos"
           color="bg-blue-600"
         />
         
@@ -141,8 +130,8 @@ const SettingsDashboard = () => {
         />
         
         <SettingsCard
-          title="Problemas"
-          description="Gerencie os tipos de problemas."
+          title="Problemas/Temas"
+          description="Gerencie temas e problemas para demandas."
           icon={<AlertTriangle className="h-5 w-5" />}
           link="/settings?tab=problemas"
           color="bg-green-600"
@@ -153,14 +142,6 @@ const SettingsDashboard = () => {
           description="Gerencie os tipos de mídia utilizados."
           icon={<Image className="h-5 w-5" />}
           link="/settings?tab=tipos_midia"
-          color="bg-green-600"
-        />
-        
-        <SettingsCard
-          title="Serviços"
-          description="Gerencie os serviços oferecidos."
-          icon={<FileText className="h-5 w-5" />}
-          link="/settings?tab=servicos"
           color="bg-green-600"
         />
         
@@ -186,21 +167,6 @@ const SettingsDashboard = () => {
           icon={<MessageSquare className="h-5 w-5" />}
           link="/settings?tab=comunicados"
           color="bg-green-600"
-        />
-        
-        {/* OTHER SETTINGS */}
-        <CategoryTitle 
-          title="Outros Ajustes" 
-          icon={<Settings className="h-6 w-6" />} 
-          color="bg-gray-600" 
-        />
-        
-        <SettingsCard
-          title="Temas"
-          description="Gerencie os temas do sistema."
-          icon={<Image className="h-5 w-5" />}
-          link="/settings?tab=temas"
-          color="bg-gray-600"
         />
       </div>
     </div>
