@@ -124,13 +124,17 @@ const UsersManagement = () => {
     removeAccess(user);
   };
 
+  const handleResetPassword = (user: User) => {
+    resetPassword.handleSendPasswordReset(user);
+  };
+
   // Initialize userActions
   const userActions = useUserActions({
     setIsEditDialogOpen,
     setSelectedUser: handleEdit,
     setIsDeleteDialogOpen,
     setUserToDelete: handleDelete,
-    resetPassword,
+    resetPassword: handleResetPassword,
     approveUser: handleApprove,
     removeAccess: handleRemoveAccess
   });

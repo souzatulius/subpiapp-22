@@ -29,12 +29,16 @@ export interface User {
   foto_perfil_url?: string;
   permissoes?: any[];
   cargos?: {
+    id: string;
     descricao: string;
   };
   supervisao_tecnica?: {
+    id: string;
     descricao: string;
+    coordenacao_id?: string;
   };
   coordenacao?: {
+    id: string;
     descricao: string;
   };
   criado_em?: string;

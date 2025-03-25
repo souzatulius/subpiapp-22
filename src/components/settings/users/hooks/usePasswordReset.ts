@@ -2,16 +2,19 @@
 import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '../types';
 
 export const usePasswordReset = () => {
   const [resetting, setResetting] = useState(false);
 
-  const handleSendPasswordReset = async (userId: string, email: string) => {
+  const handleSendPasswordReset = async (user: User) => {
+    if (!user || !user.email) return;
+    
     setResetting(true);
     
     try {
       // Send password reset email
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       
@@ -19,7 +22,7 @@ export const usePasswordReset = () => {
       
       toast({
         title: 'Email de redefinição enviado',
-        description: `Um email de redefinição de senha foi enviado para ${email}`,
+        description: `Um email de redefinição de senha foi enviado para ${user.email}`,
       });
     } catch (error: any) {
       console.error('Erro ao enviar email de redefinição:', error);
