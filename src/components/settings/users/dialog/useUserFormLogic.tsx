@@ -6,7 +6,10 @@ export const useUserFormLogic = (areas: Area[]) => {
   // Handle coordination and area filtering
   const filterAreasByCoordination = (coordenacao: string) => {
     if (!coordenacao || coordenacao === 'select-coordenacao') return [];
-    return areas.filter(a => a.coordenacao_id === coordenacao);
+    
+    const filtered = areas.filter(a => a.coordenacao_id === coordenacao);
+    console.log(`Filtered ${filtered.length} supervisions for coordination ${coordenacao}`);
+    return filtered;
   };
   
   return {

@@ -80,22 +80,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         if (areasData) setAreas(areasData);
         
         console.log('Coordenações loaded:', coordenacoesData?.length);
-        console.log('Supervisions loaded:', areasData?.length);
+        console.log('All supervisions loaded:', areasData?.length);
         
         // Get user's current coordenacao_id if available
         if (userProfile && userProfile.coordenacao_id) {
           setValue('coordenacao_id', userProfile.coordenacao_id);
           
           // Filter areas based on this coordenação
-          const { data: filteredAreasData, error: filteredAreasError } = await supabase
-            .from('areas_coordenacao')
-            .select('*')
-            .eq('is_supervision', true)
-            .eq('coordenacao_id', userProfile.coordenacao_id);
-            
-          if (filteredAreasError) throw filteredAreasError;
+          const filtered = areasData?.filter(area => 
+            area.coordenacao_id === userProfile.coordenacao_id
+          ) || [];
           
-          setFilteredAreas(filteredAreasData || []);
+          console.log(`Filtered ${filtered.length} supervisions for coordination ${userProfile.coordenacao_id}`);
+          setFilteredAreas(filtered);
         } else {
           setFilteredAreas([]);
         }
@@ -114,44 +111,26 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     if (isOpen) {
       fetchOptions();
     }
-  }, [isOpen, userProfile]);
+  }, [isOpen, userProfile, setValue]);
 
   // Filter areas when coordenação changes
   useEffect(() => {
-    const filterAreas = async () => {
-      if (watchedCoordenacao) {
-        try {
-          setLoadingOptions(true);
-          
-          // Fetch supervisions for the selected coordination
-          const { data: filteredAreasData, error: filteredAreasError } = await supabase
-            .from('areas_coordenacao')
-            .select('*')
-            .eq('is_supervision', true)
-            .eq('coordenacao_id', watchedCoordenacao);
-          
-          if (filteredAreasError) throw filteredAreasError;
-          
-          console.log(`Found ${filteredAreasData?.length} supervisions for coordination ${watchedCoordenacao}`);
-          setFilteredAreas(filteredAreasData || []);
-          
-          // If the current area_coordenacao_id isn't in the filtered list, clear it
-          const currentAreaId = watch('area_coordenacao_id');
-          if (currentAreaId && !filteredAreasData?.some(area => area.id === currentAreaId)) {
-            setValue('area_coordenacao_id', '');
-          }
-        } catch (error) {
-          console.error('Error filtering areas:', error);
-        } finally {
-          setLoadingOptions(false);
-        }
-      } else {
-        setFilteredAreas([]);
+    if (watchedCoordenacao && watchedCoordenacao !== 'select-coordenacao') {
+      console.log(`Filtering areas for coordination ID: ${watchedCoordenacao}`);
+      // Filter the cached areas directly to avoid extra API calls
+      const filtered = areas.filter(area => area.coordenacao_id === watchedCoordenacao);
+      console.log(`Found ${filtered.length} supervisions for coordination ${watchedCoordenacao}`);
+      setFilteredAreas(filtered);
+      
+      // If the current area_coordenacao_id isn't in the filtered list, clear it
+      const currentAreaId = watch('area_coordenacao_id');
+      if (currentAreaId && !filtered.some(area => area.id === currentAreaId)) {
+        setValue('area_coordenacao_id', '');
       }
-    };
-    
-    filterAreas();
-  }, [watchedCoordenacao, setValue, watch]);
+    } else {
+      setFilteredAreas([]);
+    }
+  }, [watchedCoordenacao, areas, setValue, watch]);
 
   // Reset form when profile data changes
   useEffect(() => {
@@ -297,11 +276,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
             <Select
               value={watch('area_coordenacao_id')}
               onValueChange={(value) => setValue('area_coordenacao_id', value)}
-              disabled={loadingOptions || !watchedCoordenacao || filteredAreas.length === 0}
+              disabled={loadingOptions || !watchedCoordenacao || watchedCoordenacao === 'select-coordenacao' || filteredAreas.length === 0}
             >
               <SelectTrigger className="h-12 rounded-xl">
                 <SelectValue placeholder={
-                  !watchedCoordenacao 
+                  !watchedCoordenacao || watchedCoordenacao === 'select-coordenacao'
                     ? "Selecione uma coordenação primeiro" 
                     : filteredAreas.length === 0 
                       ? "Nenhuma supervisão técnica para esta coordenação" 
@@ -309,7 +288,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
                 } />
               </SelectTrigger>
               <SelectContent>
-                {!watchedCoordenacao ? (
+                {!watchedCoordenacao || watchedCoordenacao === 'select-coordenacao' ? (
                   <SelectItem value="no-coordenacao">
                     Selecione uma coordenação primeiro
                   </SelectItem>

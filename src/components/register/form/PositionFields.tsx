@@ -34,7 +34,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
   // Filter areas based on selected coordenação
   useEffect(() => {
     const filterAreas = async () => {
-      if (coordenacao) {
+      if (coordenacao && coordenacao !== 'select-coordenacao') {
         try {
           setFetchingAreas(true);
           
@@ -54,6 +54,8 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             }));
             console.log(`Found ${formattedAreas.length} supervisions for coordination ${coordenacao}`);
             setFilteredAreas(formattedAreas);
+          } else {
+            setFilteredAreas([]);
           }
         } catch (error) {
           console.error('Error filtering areas:', error);
@@ -171,7 +173,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           <Select 
             value={area} 
             onValueChange={(value) => handleChange('area', value)}
-            disabled={loadingOptions || !coordenacao || filteredAreas.length === 0}
+            disabled={loadingOptions || !coordenacao || coordenacao === 'select-coordenacao' || filteredAreas.length === 0}
           >
             <SelectTrigger 
               className={`${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
@@ -179,7 +181,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
-              {!coordenacao ? (
+              {!coordenacao || coordenacao === 'select-coordenacao' ? (
                 <SelectItem value="no-coordenacao" disabled>
                   Selecione uma coordenação primeiro
                 </SelectItem>
