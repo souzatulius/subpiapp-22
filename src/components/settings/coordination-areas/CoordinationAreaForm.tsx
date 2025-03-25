@@ -3,7 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import DataEntryForm from '../DataEntryForm';
-import { areaSchema } from '@/hooks/coordination-areas/useCoordinationAreas';
+import { areaSchema } from '@/hooks/coordination-areas/types';
 import { 
   Select,
   SelectContent,
@@ -60,7 +60,7 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="sigla">Sigla</Label>
+            <Label htmlFor="sigla">Sigla (opcional)</Label>
             <Input
               id="sigla"
               {...register("sigla")}

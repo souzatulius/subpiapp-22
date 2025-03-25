@@ -8,15 +8,15 @@ import { z } from 'zod';
 // Schema for coordination validation
 export const coordinationSchema = z.object({
   descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
-  sigla: z.string().min(1, 'A sigla é obrigatória'),
+  sigla: z.string().optional(),
 });
 
 interface CoordinationFormProps {
-  onSubmit: (data: { descricao: string, sigla: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string, sigla?: string }) => Promise<void>;
   onCancel: () => void;
   defaultValues?: {
     descricao: string;
-    sigla: string;
+    sigla?: string;
   };
   isSubmitting: boolean;
   submitText?: string;
@@ -54,7 +54,7 @@ const CoordinationForm: React.FC<CoordinationFormProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="sigla">Sigla</Label>
+            <Label htmlFor="sigla">Sigla (opcional)</Label>
             <Input
               id="sigla"
               {...register("sigla")}
