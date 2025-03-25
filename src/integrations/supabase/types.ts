@@ -886,6 +886,30 @@ export type Database = {
           },
         ]
       }
+      sgz_areas_tecnicas: {
+        Row: {
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          nome_area: string
+          responsavel: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          nome_area: string
+          responsavel?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          nome_area?: string
+          responsavel?: string | null
+        }
+        Relationships: []
+      }
       sgz_configuracoes_usuario: {
         Row: {
           cards_visiveis: Json | null
@@ -1447,6 +1471,12 @@ export type Database = {
           upload_id: string
         }
         Returns: undefined
+      }
+      sgz_map_service_to_area: {
+        Args: {
+          service_type: string
+        }
+        Returns: string
       }
       update_area_coordenacao: {
         Args: {

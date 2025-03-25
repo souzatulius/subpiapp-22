@@ -1,4 +1,3 @@
-
 export interface SGZOrdemServico {
   ordem_servico: string;
   sgz_classificacao_servico: string;
