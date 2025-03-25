@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { AlertCircle } from 'lucide-react';
 
 interface ReviewStepProps {
   formData: any;
@@ -50,7 +51,17 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           className={hasError('titulo') ? 'border-orange-500 focus:ring-orange-500' : ''}
           placeholder="Título da demanda"
         />
-        {hasError('titulo') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>}
+        {hasError('titulo') && (
+          <div className="flex items-center mt-2 text-orange-500 text-sm">
+            <AlertCircle className="h-4 w-4 mr-1" />
+            <p>{getErrorMessage('titulo')}</p>
+          </div>
+        )}
+        {!hasError('titulo') && (
+          <p className="text-gray-500 text-sm mt-1">
+            O título da demanda é obrigatório para finalizar o cadastro.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

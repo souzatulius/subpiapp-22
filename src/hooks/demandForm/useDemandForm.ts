@@ -34,7 +34,7 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     setSelectedDistrito,
     resetForm,
     setActiveStep
-  } = useDemandFormState(servicos, bairros);
+  } = useDemandFormState(servicos, bairros, problemas); // Pass problemas here
 
   const { handleSubmit } = useDemandFormSubmit(
     userId,

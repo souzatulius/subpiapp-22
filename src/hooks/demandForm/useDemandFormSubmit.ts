@@ -72,9 +72,8 @@ export const useDemandFormSubmit = (
         veiculo_imprensa: formData.veiculo_imprensa,
         endereco: formData.endereco,
         detalhes_solicitacao: formData.detalhes_solicitacao,
-        arquivo_url: formData.arquivo_url,
-        tem_protocolo_156: formData.tem_protocolo_156,
-        numero_protocolo_156: formData.tem_protocolo_156 ? formData.numero_protocolo_156 : null
+        arquivo_url: formData.arquivo_url
+        // Remove the tem_protocolo_156 and numero_protocolo_156 fields
       };
 
       console.log('Submitting demand data:', demandaData);

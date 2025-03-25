@@ -1,9 +1,11 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
 export const useDemandFormState = (
   servicos: any[],
-  bairros: any[]
+  bairros: any[],
+  problemas: any[]
 ) => {
   const initialFormState: DemandFormData = {
     titulo: '',
@@ -23,8 +25,6 @@ export const useDemandFormState = (
     detalhes_solicitacao: '',
     arquivo_url: '',
     anexos: [],
-    tem_protocolo_156: false,
-    numero_protocolo_156: '',
   };
 
   const [formData, setFormData] = useState<DemandFormData>(initialFormState);
@@ -34,25 +34,54 @@ export const useDemandFormState = (
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
 
+  // Generate title suggestion when reaching the review step
   useEffect(() => {
     if (activeStep === 6) {
-      const selectedService = servicos.find(s => s.id === formData.servico_id);
+      generateTitleSuggestion();
+    }
+  }, [activeStep, formData.problema_id, formData.bairro_id]);
+
+  // Update title when problema or bairro changes while on review step
+  useEffect(() => {
+    if (activeStep === 6) {
+      generateTitleSuggestion();
+    }
+  }, [formData.problema_id, formData.bairro_id]);
+
+  const generateTitleSuggestion = () => {
+    // Only generate if we don't already have a title
+    if (!formData.titulo || formData.titulo.trim() === '') {
+      const selectedProblema = problemas.find(p => p.id === formData.problema_id);
       const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
       
-      if (selectedService && selectedBairro) {
-        const suggestedTitle = `${selectedService.descricao} - ${selectedBairro.nome}`;
+      let suggestedTitle = '';
+      
+      if (selectedProblema) {
+        suggestedTitle = selectedProblema.descricao;
+        
+        if (selectedBairro) {
+          suggestedTitle += ` - ${selectedBairro.nome}`;
+        }
+        
+        if (formData.detalhes_solicitacao && formData.detalhes_solicitacao.length > 0) {
+          // Add a short snippet from details if available (first 30 chars)
+          const detailsSnippet = formData.detalhes_solicitacao.substring(0, 30).trim();
+          if (detailsSnippet.length > 0) {
+            suggestedTitle += ` (${detailsSnippet}${formData.detalhes_solicitacao.length > 30 ? '...' : ''})`;
+          }
+        }
+      } else if (selectedBairro) {
+        suggestedTitle = `Demanda ${selectedBairro.nome}`;
+      }
+      
+      if (suggestedTitle) {
         setFormData(prev => ({
           ...prev,
           titulo: suggestedTitle
         }));
-      } else if (selectedService) {
-        setFormData(prev => ({
-          ...prev,
-          titulo: selectedService.descricao
-        }));
       }
     }
-  }, [activeStep, formData.servico_id, formData.bairro_id, servicos, bairros]);
+  };
 
   useEffect(() => {
     if (formData.problema_id) {
