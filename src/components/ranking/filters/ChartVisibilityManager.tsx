@@ -14,7 +14,7 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
   onChartVisibilityToggle
 }) => {
   // Category 1: Indicadores Gerais
-  const generalCharts = [
+  const generalCharts: { id: keyof ChartVisibility; label: string }[] = [
     { id: 'statusDistribution', label: 'Distribuição por Status' },
     { id: 'topCompanies', label: 'Empresas com Ordens Concluídas' },
     { id: 'districtDistribution', label: 'Ordens por Subprefeitura' },
@@ -23,7 +23,7 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
   ];
   
   // Category 2: Indicadores Temporais
-  const timeCharts = [
+  const timeCharts: { id: keyof ChartVisibility; label: string }[] = [
     { id: 'resolutionTime', label: 'Tempo de Resolução' },
     { id: 'timeComparison', label: 'Comparativo de Tempo Médio' },
     { id: 'dailyDemands', label: 'Volume Diário' },
@@ -32,14 +32,14 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
   ];
   
   // Category 3: Análise por Território
-  const territoryCharts = [
+  const territoryCharts: { id: keyof ChartVisibility; label: string }[] = [
     { id: 'neighborhoodComparison', label: 'Comparativo por Bairros' },
     { id: 'districtEfficiencyRadar', label: 'Radar de Eficiência' },
     { id: 'externalDistricts', label: 'Distritos Externos' },
   ];
   
   // Category 4: Eficiência de Atendimento
-  const efficiencyCharts = [
+  const efficiencyCharts: { id: keyof ChartVisibility; label: string }[] = [
     { id: 'efficiencyImpact', label: 'Impacto na Eficiência' },
     { id: 'criticalStatus', label: 'Status Críticos' },
     { id: 'serviceDiversity', label: 'Diversidade de Serviços' },
