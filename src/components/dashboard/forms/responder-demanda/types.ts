@@ -26,3 +26,9 @@ export interface Area {
   id: string;
   descricao: string;
 }
+
+export type ViewMode = 'list' | 'cards';
+
+export interface ResponderDemandaFormProps {
+  onClose: () => void;
+}

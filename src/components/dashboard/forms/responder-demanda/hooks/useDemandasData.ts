@@ -64,7 +64,7 @@ export const useDemandasData = () => {
         
         // Processar as demandas para adicionar informações de área
         const processedDemandas = await Promise.all(
-          filteredDemandas.map(async (demanda) => {
+          filteredDemandas.map(async (demanda: any) => {
             // Garantir que perguntas esteja no formato correto
             let parsedPerguntas = demanda.perguntas;
             if (typeof parsedPerguntas === 'string') {

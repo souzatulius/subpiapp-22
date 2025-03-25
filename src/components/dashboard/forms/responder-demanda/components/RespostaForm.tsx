@@ -26,7 +26,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   isLoading,
   onSubmit
 }) => {
-  const [selectedServico, setSelectedServico] = useState<string>(selectedDemanda.servico_id || '');
+  const [selectedServico, setSelectedServico] = useState<string>('');
   const { services, areas } = useServicesData();
   const [filteredServices, setFilteredServices] = useState<any[]>([]);
   

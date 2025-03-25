@@ -22,6 +22,7 @@ export type Service = {
   id: string;
   descricao: string;
   supervisao_tecnica_id?: string;
+  problema_id?: string;
 };
 
 export type Area = {

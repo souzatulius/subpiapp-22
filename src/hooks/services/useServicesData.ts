@@ -1,18 +1,10 @@
 
-import { useAreas } from './data/useAreas';
-import { useServices } from './data/useServices';
-
-export function useServicesData() {
-  const { areas, loading: areasLoading } = useAreas();
-  const { services, setServices, loading: servicesLoading, fetchServices } = useServices();
-  
-  const loading = areasLoading || servicesLoading;
-
+export const useServicesData = () => {
+  // This is a placeholder stub implementation for the removed services functionality
+  // We return empty arrays and a loading state of false
   return {
-    services,
-    setServices,
-    areas,
-    loading,
-    fetchServices
+    services: [],
+    areas: [],
+    loading: false
   };
-}
+};

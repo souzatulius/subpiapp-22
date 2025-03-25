@@ -53,9 +53,9 @@ export function useDemandas(filterStatus: string) {
         if (error) throw error;
         
         // Agora vamos buscar as informações relacionadas em consultas separadas
-        const enhancedData = await Promise.all((data || []).map(async (demanda) => {
+        const enhancedData = await Promise.all((data || []).map(async (demanda: any) => {
           // Create an enhanced demand object with all required properties
-          let enhancedDemand: any = { 
+          let enhancedDemand: Partial<Demand> = { 
             ...demanda,
             supervisao_tecnica: null,
             origem: null,
