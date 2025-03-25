@@ -13,6 +13,7 @@ import Notifications from './Notifications';
 import NotificationsSettings from './notifications/NotificationsSettings';
 import Temas from './Temas';
 import CoordinationArea from './coordination/CoordinationArea';
+import CoordinationsList from './coordination/CoordinationsList';
 
 interface SettingsContentProps {
   activeSection: string;
@@ -33,6 +34,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
       {activeSection === 'notificacoes' && <NotificationsSettings />}
       {activeSection === 'permissoes' && <AccessControl />}
       {activeSection === 'temas' && <Temas />}
+      {activeSection === 'coordenacoes_lista' && <CoordinationsList />}
     </div>
   );
 };
