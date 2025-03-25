@@ -20,7 +20,8 @@ export const useProblemsData = () => {
           areas_coordenacao:area_coordenacao_id (
             id, 
             descricao,
-            coordenacao
+            coordenacao,
+            coordenacao_id
           )
         `)
         .order('descricao');
@@ -35,8 +36,8 @@ export const useProblemsData = () => {
         areas_coordenacao: problem.areas_coordenacao ? {
           id: problem.areas_coordenacao.id,
           descricao: problem.areas_coordenacao.descricao,
-          coordenacao_id: problem.coordenacao_id,
-          coordenacao: problem.areas_coordenacao.coordenacao
+          coordenacao: problem.areas_coordenacao.coordenacao,
+          coordenacao_id: problem.areas_coordenacao.coordenacao_id
         } : undefined,
         criado_em: problem.criado_em,
         atualizado_em: problem.atualizado_em

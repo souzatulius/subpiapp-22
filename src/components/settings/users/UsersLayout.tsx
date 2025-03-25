@@ -167,7 +167,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
                       onEdit={() => userActions.handleEdit(user)}
                       onDelete={() => userActions.handleDelete(user)}
                       onResetPassword={() => userActions.handleResetPassword(user)}
-                      onApprove={(permissionLevel) => userActions.handleApprove(user, permissionLevel)}
+                      onApprove={(user) => userActions.handleApprove(user)}
                       onRemoveAccess={() => userActions.handleRemoveAccess(user)}
                       isApproving={approving}
                       isRemoving={removing}
@@ -203,7 +203,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         user={userToDelete}
-        onConfirm={handleDeleteUser}
+        onDelete={handleDeleteUser}
       />
     </div>
   );

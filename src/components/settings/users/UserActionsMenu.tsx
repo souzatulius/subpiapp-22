@@ -16,8 +16,10 @@ interface UserActionsMenuProps {
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onResetPassword: (user: User) => void;
-  onApprove: (user: User) => void;
+  onApprove: (user: User, permissionLevel?: string) => void;
   onRemoveAccess: (user: User) => void;
+  isApproving?: boolean;
+  isRemoving?: boolean;
 }
 
 const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
@@ -26,7 +28,9 @@ const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
   onDelete,
   onResetPassword,
   onApprove,
-  onRemoveAccess
+  onRemoveAccess,
+  isApproving,
+  isRemoving
 }) => {
   const hasPermissions = user.permissoes && user.permissoes.length > 0;
   

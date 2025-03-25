@@ -36,7 +36,7 @@ export const useRegisterOptions = () => {
         
         console.log('Areas data received:', areasData);
         
-        // Fetch coordenações (from areas_coordenacao table where the coordenacao_id is not null and is unique)
+        // Fetch coordenações using the RPC function
         console.log('Fetching coordenações from Supabase...');
         const { data: coordenacoesData, error: coordenacoesError } = await supabase.rpc('get_unique_coordenacoes');
         
@@ -45,19 +45,19 @@ export const useRegisterOptions = () => {
           // Fallback if the RPC function isn't available - simpler version without labels
           const { data: fallbackData, error: fallbackError } = await supabase
             .from('areas_coordenacao')
-            .select('coordenacao_id, coordenacao')
-            .not('coordenacao_id', 'is', null)
+            .select('id, coordenacao')
+            .not('coordenacao', 'is', null)
             .order('coordenacao', { ascending: true });
             
           if (fallbackError) throw fallbackError;
           
-          // Remove duplicates by coordenacao_id
+          // Remove duplicates by coordenacao
           const uniqueCoordenacoes = fallbackData ? 
-            Array.from(new Set(fallbackData.map(c => c.coordenacao_id)))
-              .map(id => {
-                const coord = fallbackData.find(c => c.coordenacao_id === id);
+            Array.from(new Set(fallbackData.map(c => c.coordenacao)))
+              .map(coordName => {
+                const coord = fallbackData.find(c => c.coordenacao === coordName);
                 return {
-                  id: coord?.coordenacao_id || '',
+                  id: coord?.id || '',
                   value: coord?.coordenacao || ''
                 };
               })

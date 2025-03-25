@@ -8,6 +8,7 @@ export type Problem = {
   areas_coordenacao?: {
     id: string;
     descricao: string;
+    coordenacao?: string;
     coordenacao_id?: string;
   };
   criado_em?: string;
