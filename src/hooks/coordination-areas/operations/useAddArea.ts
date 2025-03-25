@@ -13,6 +13,7 @@ export const useAddArea = (
   const addArea = async (data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       setIsAdding(true);
+      console.log('Adding area with data:', data, 'is_supervision=true');
       
       if (data.coordenacao_id) {
         // If a coordenacao_id is provided, use the special RPC function to insert with coordination
@@ -35,6 +36,7 @@ export const useAddArea = (
           
         if (fetchError) throw fetchError;
         
+        console.log('Added new area with coordination:', newArea);
         setAreas([...areas, newArea]);
       } else {
         // If no coordenacao_id, insert directly and explicitly mark as supervision
@@ -50,6 +52,7 @@ export const useAddArea = (
 
         if (error) throw error;
         
+        console.log('Added new area without coordination:', newArea);
         setAreas([...areas, newArea]);
       }
       

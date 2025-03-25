@@ -13,6 +13,7 @@ export const useUpdateArea = (
   const updateArea = async (id: string, data: { descricao: string, sigla?: string, coordenacao_id?: string }) => {
     try {
       setIsEditing(true);
+      console.log('Updating area with data:', data, 'is_supervision=true');
       
       // Prepare update data - remove coordenacao_id if it's empty string
       const updateData = { ...data };
@@ -61,6 +62,8 @@ export const useUpdateArea = (
       }
       
       if (updateResult.error) throw updateResult.error;
+      
+      console.log('Updated area:', updateResult.data[0]);
       
       // Update local state
       setAreas(areas.map(area => 

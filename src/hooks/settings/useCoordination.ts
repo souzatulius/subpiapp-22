@@ -24,11 +24,12 @@ export const useCoordination = () => {
         .from('areas_coordenacao')
         .select('*')
         .is('coordenacao_id', null) // Select only top-level coordinations
-        .is('is_supervision', false) // Only get items marked as coordinations, explicitly false
+        .eq('is_supervision', false) // Explicitly filter for coordinations only
         .order('descricao');
 
       if (error) throw error;
       
+      console.log('Fetched coordinations:', data);
       setCoordinations(data || []);
     } catch (error: any) {
       console.error('Erro ao buscar coordenações:', error);
@@ -49,6 +50,8 @@ export const useCoordination = () => {
   const addCoordination = async (data: { descricao: string, sigla: string }) => {
     try {
       setIsAdding(true);
+      
+      // Make sure to explicitly set is_supervision to false
       const { data: newCoordination, error } = await supabase
         .from('areas_coordenacao')
         .insert({
@@ -60,6 +63,7 @@ export const useCoordination = () => {
 
       if (error) throw error;
       
+      console.log('Added new coordination:', newCoordination);
       setCoordinations([...coordinations, newCoordination]);
       toast({
         title: "Coordenação adicionada",

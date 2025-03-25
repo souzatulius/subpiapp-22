@@ -13,6 +13,7 @@ export const useCoordinationAreasData = () => {
   const fetchAreas = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching areas with is_supervision=true');
       const { data, error } = await supabase
         .from('areas_coordenacao')
         .select('id, descricao, sigla, coordenacao, coordenacao_id')
@@ -21,6 +22,7 @@ export const useCoordinationAreasData = () => {
 
       if (error) throw error;
       
+      console.log('Fetched supervision areas:', data);
       setAreas(data || []);
     } catch (error: any) {
       console.error('Erro ao buscar áreas de coordenação:', error);
@@ -37,6 +39,7 @@ export const useCoordinationAreasData = () => {
   const fetchCoordinations = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching coordinations with is_supervision=false');
       const { data, error } = await supabase
         .from('areas_coordenacao')
         .select('id, descricao, sigla, criado_em')
@@ -45,6 +48,7 @@ export const useCoordinationAreasData = () => {
 
       if (error) throw error;
       
+      console.log('Fetched coordinations for dropdown:', data);
       setCoordinations(data || []);
     } catch (error: any) {
       console.error('Erro ao buscar coordenações:', error);
