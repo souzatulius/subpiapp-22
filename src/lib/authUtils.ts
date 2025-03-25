@@ -1,4 +1,7 @@
 
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
 // Format an email to include the domain if it's not already present
 export const completeEmailWithDomain = (email: string): string => {
   const emailDomain = '@smsub.prefeitura.sp.gov.br';
@@ -12,9 +15,6 @@ export const completeEmailWithDomain = (email: string): string => {
 
 // Show an error message from auth operations
 export const showAuthError = (error: any) => {
-  // Use the toast component to show the error
-  const { toast } = require('@/components/ui/use-toast');
-  
   let errorMessage = 'Erro ao processar a solicitação';
   
   if (error?.message) {
@@ -41,8 +41,6 @@ export const showAuthError = (error: any) => {
 
 // Check if a user is approved to access the system
 export const isUserApproved = async (userId: string): Promise<boolean> => {
-  const { supabase } = require('@/integrations/supabase/client');
-  
   try {
     // Query the 'usuarios' table to check if the user is approved
     const { data, error } = await supabase
@@ -69,8 +67,6 @@ export const createAdminNotification = async (
   userName: string,
   email: string
 ): Promise<void> => {
-  const { supabase } = require('@/integrations/supabase/client');
-  
   try {
     // Create a notification in the notifications table
     await supabase.from('notificacoes').insert({
@@ -89,8 +85,6 @@ export const createAdminNotification = async (
 
 // Update user profile data
 export const updateUserProfile = async (userId: string, userData: any): Promise<{ error: any | null }> => {
-  const { supabase } = require('@/integrations/supabase/client');
-  
   try {
     // Update user profile in the usuarios table
     const { error } = await supabase
