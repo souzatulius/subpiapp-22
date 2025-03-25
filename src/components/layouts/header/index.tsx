@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,12 +5,10 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import ProfileMenu from './ProfileMenu';
 import NotificationsPopover from './NotificationsPopover';
 import { useNotifications } from './useNotifications';
-
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
 }
-
 const Header: React.FC<HeaderProps> = ({
   showControls = false,
   toggleSidebar
@@ -34,7 +31,6 @@ const Header: React.FC<HeaderProps> = ({
       fetchNotifications();
     }
   }, [user, fetchNotifications]);
-
   return <header className="bg-white border-b border-gray-200 z-30 sticky top-0">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -59,5 +55,4 @@ const Header: React.FC<HeaderProps> = ({
       </div>
     </header>;
 };
-
 export default Header;

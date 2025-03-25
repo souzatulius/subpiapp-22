@@ -8,17 +8,15 @@ interface ChartCardProps {
   value: string | number; 
   isLoading: boolean; 
   children: React.ReactNode;
-  className?: string;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
   title, 
   value, 
   isLoading, 
-  children,
-  className
+  children 
 }) => (
-  <Card className={`h-full ${className || ""}`}>
+  <Card className="h-full">
     <CardHeader className="pb-2">
       <CardTitle className="text-lg">{title}</CardTitle>
       <div className="text-2xl font-bold">

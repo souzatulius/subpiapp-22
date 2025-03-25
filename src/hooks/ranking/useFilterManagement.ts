@@ -11,22 +11,14 @@ export const useFilterManagement = () => {
     districts: ['Todos']
   });
 
-  // State for chart visibility with all required properties
+  // State for chart visibility
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
     occurrences: true,
     resolutionTime: true,
     serviceTypes: true,
     neighborhoods: true,
     frequentServices: true,
-    statusDistribution: true,
-    statusTimeline: true,
-    statusTransition: true,
-    efficiencyRadar: true,
-    criticalStatus: true,
-    externalDistricts: true,
-    servicesDiversity: true,
-    timeToClose: true,
-    dailyOrders: true
+    statusDistribution: true
   });
 
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {

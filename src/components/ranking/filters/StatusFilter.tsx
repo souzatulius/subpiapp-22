@@ -3,11 +3,11 @@ import React from 'react';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { FilterOptions, OrderStatus } from '@/components/ranking/types';
+import { FilterOptions } from '@/components/ranking/types';
 
 interface StatusFilterProps {
   statuses: FilterOptions['statuses'];
-  onStatusChange: (status: OrderStatus) => void;
+  onStatusChange: (status: string) => void;
 }
 
 const StatusFilter: React.FC<StatusFilterProps> = ({ statuses, onStatusChange }) => {
@@ -20,12 +20,12 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ statuses, onStatusChange })
         </SelectTrigger>
         <SelectContent>
           <div className="space-y-1 p-1">
-            {['Todos', 'Planejar', 'Novo', 'Aprovado', 'Concluído', 'NOVO', 'CONC', 'PREPLAN', 'PRECANC', 'AB', 'PE'].map((status) => (
+            {['Todos', 'Planejar', 'Novo', 'Aprovado', 'Concluído'].map((status) => (
               <div key={status} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`status-${status}`} 
-                  checked={statuses.includes(status as OrderStatus)}
-                  onCheckedChange={() => onStatusChange(status as OrderStatus)}
+                  checked={statuses.includes(status as any)}
+                  onCheckedChange={() => onStatusChange(status)}
                 />
                 <label 
                   htmlFor={`status-${status}`}
