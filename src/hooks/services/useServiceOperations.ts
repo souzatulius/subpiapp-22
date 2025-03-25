@@ -220,27 +220,6 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
     try {
       setIsDeleting(true);
       
-      // Verificar se existem demandas usando este serviço
-      const { data: demandasData, error: demandasError } = await supabase
-        .from('demandas')
-        .select('id')
-        .eq('servico_id', id);
-      
-      if (demandasError) {
-        console.error('Erro ao verificar demandas:', demandasError);
-        throw demandasError;
-      }
-      
-      if (demandasData && demandasData.length > 0) {
-        toast({
-          title: "Erro",
-          description: "Este serviço está associado a demandas e não pode ser excluído.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      // Se não houver demandas vinculadas, prosseguir com a exclusão
       const { error } = await supabase
         .from('servicos')
         .delete()
@@ -262,11 +241,20 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
     } catch (error: any) {
       console.error('Erro ao excluir serviço:', error);
       
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir o serviço: " + (error.message || "erro desconhecido"),
-        variant: "destructive",
-      });
+      // Se o erro for de chave estrangeira, mostrar uma mensagem específica
+      if (error.code === '23503') { // Código de erro para violação de chave estrangeira
+        toast({
+          title: "Erro",
+          description: "Este serviço está associado a demandas e não pode ser excluído.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir o serviço: " + (error.message || "erro desconhecido"),
+          variant: "destructive",
+        });
+      }
       
       return false;
     } finally {

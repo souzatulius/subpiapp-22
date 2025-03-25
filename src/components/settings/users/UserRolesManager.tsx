@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue 
 } from '@/components/ui/select';
+import { useUserRoles } from './hooks/useUserRoles';
 
 interface Role {
   id: number;
@@ -63,20 +64,17 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
   const [coordenacoes, setCoordenacoes] = useState<Coordenacao[]>([]);
   const [supervisoes, setSupervisoes] = useState<SupervisaoTecnica[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
+  const { updating, addRole, removeRole } = useUserRoles(() => fetchUserRoles());
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [selectedCoord, setSelectedCoord] = useState<string>('');
   const [selectedSuper, setSelectedSuper] = useState<string>('');
   const [filteredSupervisoes, setFilteredSupervisoes] = useState<SupervisaoTecnica[]>([]);
-  
-  console.log('UserRolesManager rendered, userId:', userId);
   
   // Fetch all available roles, coordenações, and supervisões
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log('Fetching roles data...');
         
         // Fetch roles
         const { data: rolesData, error: rolesError } = await supabase
@@ -85,7 +83,6 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
           .order('id');
           
         if (rolesError) throw rolesError;
-        console.log('Roles data:', rolesData);
         setRoles(rolesData || []);
         
         // Fetch coordenações
@@ -95,7 +92,6 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
           .order('descricao');
           
         if (coordError) throw coordError;
-        console.log('Coordenações data:', coordData);
         setCoordenacoes(coordData || []);
         
         // Fetch supervisões
@@ -105,7 +101,6 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
           .order('descricao');
           
         if (superError) throw superError;
-        console.log('Supervisões data:', superData);
         setSupervisoes(superData || []);
         
         await fetchUserRoles();
@@ -138,7 +133,6 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
     if (!userId) return;
     
     try {
-      console.log('Fetching user roles for userId:', userId);
       const { data, error } = await supabase
         .from('usuario_roles')
         .select(`
@@ -153,7 +147,6 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
         .eq('usuario_id', userId);
         
       if (error) throw error;
-      console.log('User roles data:', data);
       setUserRoles(data || []);
       
       if (onRolesChange) {
@@ -172,35 +165,10 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
   const handleToggleRole = async (role: Role, checked: boolean) => {
     if (!userId) return;
     
-    setUpdating(true);
     try {
       if (checked) {
         // Add role
-        const { error } = await supabase
-          .from('usuario_roles')
-          .insert({
-            usuario_id: userId,
-            role_id: role.id,
-          });
-        
-        if (error) throw error;
-        
-        // Update local state (for immediate UI update)
-        const newRole: UserRole = {
-          id: Date.now().toString(), // temporary ID until we refresh
-          role_id: role.id,
-          role: {
-            role_nome: role.role_nome,
-            descricao: role.descricao
-          }
-        };
-        
-        setUserRoles([...userRoles, newRole]);
-        
-        toast({
-          title: 'Permissão adicionada',
-          description: `A permissão "${role.descricao}" foi adicionada com sucesso.`,
-        });
+        await addRole(userId, role.id);
       } else {
         // Find the role entry to remove (without context)
         const roleEntry = userRoles.find(ur => 
@@ -210,118 +178,57 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
         );
         
         if (roleEntry) {
-          const { error } = await supabase
-            .from('usuario_roles')
-            .delete()
-            .eq('id', roleEntry.id);
-          
-          if (error) throw error;
-          
-          // Update local state
-          setUserRoles(userRoles.filter(ur => ur.id !== roleEntry.id));
-          
-          toast({
-            title: 'Permissão removida',
-            description: `A permissão "${role.descricao}" foi removida com sucesso.`,
-          });
+          await removeRole(userId, role.id);
         }
       }
-    } catch (error: any) {
-      console.error('Erro ao gerenciar permissão:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao gerenciar a permissão.',
-        variant: 'destructive',
-      });
-    } finally {
-      setUpdating(false);
+      
+      // Refresh user roles after changes
+      await fetchUserRoles();
+    } catch (error) {
+      console.error('Error managing role:', error);
     }
   };
 
   const handleAddContextualRole = async () => {
     if (!selectedRole || !userId) return;
     
-    setUpdating(true);
     try {
       const roleId = parseInt(selectedRole);
-      const selectedRole_obj = roles.find(r => r.id === roleId);
       
       const contextData = {
-        usuario_id: userId,
-        role_id: roleId,
-        coordenacao_id: selectedCoord || null,
-        supervisao_tecnica_id: selectedSuper || null
+        coordenacao_id: selectedCoord || undefined,
+        supervisao_tecnica_id: selectedSuper || undefined
       };
       
-      const { data, error } = await supabase
-        .from('usuario_roles')
-        .insert(contextData)
-        .select(`
-          id,
-          role_id,
-          coordenacao_id,
-          supervisao_tecnica_id,
-          roles:role_id(id, role_nome, descricao),
-          coordenacao:coordenacao_id(id, descricao),
-          supervisao_tecnica:supervisao_tecnica_id(id, descricao)
-        `);
-      
-      if (error) throw error;
-      
-      // Update local state with the returned data
-      if (data && data.length > 0) {
-        setUserRoles([...userRoles, data[0]]);
-      }
-      
-      toast({
-        title: 'Permissão contextual adicionada',
-        description: `A permissão contextual "${selectedRole_obj?.descricao}" foi adicionada com sucesso.`,
-      });
+      await addRole(userId, roleId, contextData);
       
       // Reset selections
       setSelectedRole('');
       setSelectedCoord('');
       setSelectedSuper('');
-    } catch (error: any) {
-      console.error('Erro ao adicionar permissão contextual:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao adicionar a permissão contextual.',
-        variant: 'destructive',
-      });
-    } finally {
-      setUpdating(false);
+      
+      // Refresh user roles
+      await fetchUserRoles();
+    } catch (error) {
+      console.error('Error adding contextual role:', error);
     }
   };
 
   const handleRemoveContextualRole = async (roleEntry: UserRole) => {
     if (!roleEntry.id || !userId) return;
     
-    setUpdating(true);
     try {
-      const { error } = await supabase
-        .from('usuario_roles')
-        .delete()
-        .eq('id', roleEntry.id);
+      const contextData = {
+        coordenacao_id: roleEntry.coordenacao_id,
+        supervisao_tecnica_id: roleEntry.supervisao_tecnica_id
+      };
       
-      if (error) throw error;
+      await removeRole(userId, roleEntry.role_id, contextData);
       
-      // Update local state
-      setUserRoles(userRoles.filter(ur => ur.id !== roleEntry.id));
-      
-      toast({
-        title: 'Permissão contextual removida',
-        description: 'A permissão contextual foi removida com sucesso.',
-      });
-    } catch (error: any) {
-      console.error('Erro ao remover permissão contextual:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao remover a permissão contextual.',
-        variant: 'destructive',
-      });
-    } finally {
-      setUpdating(false);
+      // Refresh user roles
+      await fetchUserRoles();
+    } catch (error) {
+      console.error('Error removing contextual role:', error);
     }
   };
 
