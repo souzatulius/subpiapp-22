@@ -1,101 +1,127 @@
 
 import React from 'react';
-import { Bell, Users, Briefcase, FileStack, Image, Inbox, MapPin, AlertTriangle, Layers } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Users, BookText, Briefcase, FileSignature, Newspaper, Map, MessageCircle, Bell, Shield, Home, Layers, Building } from 'lucide-react';
+import { useSettingsStats } from './hooks/useSettingsStats';
+import StatCard from './components/StatCard';
+import LocationCommunicationStats from './components/LocationCommunicationStats';
+import UserServiceStats from './components/UserServiceStats';
 
 const SettingsDashboard = () => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <SettingsCard
-        icon={<Users className="h-8 w-8" />}
-        title="Usuários"
-        description="Gerencie os usuários do sistema, atribua permissões e papéis"
-        to="/settings?tab=usuarios"
-      />
-      
-      <SettingsCard
-        icon={<Layers className="h-8 w-8" />}
-        title="Áreas de Coordenação"
-        description="Gerencie as áreas de coordenação do sistema"
-        to="/settings?tab=areas"
-      />
-      
-      <SettingsCard
-        icon={<Bell className="h-8 w-8" />}
-        title="Notificações"
-        description="Configure as notificações do sistema e preferências dos usuários"
-        to="/settings?tab=notificacoes"
-      />
-      
-      <SettingsCard
-        icon={<Briefcase className="h-8 w-8" />}
-        title="Cargos"
-        description="Adicione, edite e gerencie os cargos disponíveis"
-        to="/settings?tab=cargos"
-      />
-      
-      <SettingsCard
-        icon={<AlertTriangle className="h-8 w-8" />}
-        title="Problemas"
-        description="Gerencie os problemas associados às áreas de coordenação"
-        to="/settings?tab=problemas"
-      />
-      
-      <SettingsCard
-        icon={<FileStack className="h-8 w-8" />}
-        title="Serviços"
-        description="Gerencie os serviços oferecidos pelas áreas de coordenação"
-        to="/settings?tab=servicos"
-      />
-      
-      <SettingsCard
-        icon={<Image className="h-8 w-8" />}
-        title="Tipos de Mídia"
-        description="Configure os tipos de mídia para as demandas"
-        to="/settings?tab=tipos_midia"
-      />
-      
-      <SettingsCard
-        icon={<Inbox className="h-8 w-8" />}
-        title="Origem das Demandas"
-        description="Gerencie as possíveis origens das demandas"
-        to="/settings?tab=origens_demanda"
-      />
-      
-      <SettingsCard
-        icon={<MapPin className="h-8 w-8" />}
-        title="Distritos e Bairros"
-        description="Organize os distritos e bairros da cidade"
-        to="/settings?tab=distritos_bairros"
-      />
-      
-      {/* Outros cards de ajustes... */}
-    </div>
-  );
-};
+  const navigate = useNavigate();
+  const { stats, isLoading } = useSettingsStats();
 
-interface SettingsCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  to: string;
-}
+  const handleCategoryClick = (category: string) => {
+    navigate(`/settings?tab=${category}`);
+  };
 
-const SettingsCard: React.FC<SettingsCardProps> = ({ icon, title, description, to }) => {
+  const categories = [
+    {
+      id: 'usuarios',
+      title: 'Usuários',
+      icon: <Users className="h-6 w-6" />,
+      description: 'Gerencie os usuários da plataforma',
+      count: stats.usuarios
+    },
+    {
+      id: 'areas',
+      title: 'Áreas de Coordenação',
+      icon: <Briefcase className="h-6 w-6" />,
+      description: 'Gerencie as áreas de coordenação',
+      count: stats.areasCoordenacao
+    },
+    {
+      id: 'coordenacao',
+      title: 'Coordenações',
+      icon: <Building className="h-6 w-6" />,
+      description: 'Gerencie as coordenações',
+      count: stats.coordenacoes || 0
+    },
+    {
+      id: 'cargos',
+      title: 'Cargos',
+      icon: <BookText className="h-6 w-6" />,
+      description: 'Gerencie os cargos disponíveis',
+      count: stats.cargos
+    },
+    {
+      id: 'temas',
+      title: 'Temas',
+      icon: <Layers className="h-6 w-6" />,
+      description: 'Gerencie os temas disponíveis',
+      count: stats.problemas
+    },
+    {
+      id: 'servicos',
+      title: 'Serviços',
+      icon: <FileSignature className="h-6 w-6" />,
+      description: 'Gerencie os serviços disponíveis',
+      count: stats.servicos
+    },
+    {
+      id: 'tipos_midia',
+      title: 'Tipos de Mídia',
+      icon: <Newspaper className="h-6 w-6" />,
+      description: 'Gerencie os tipos de mídia',
+      count: stats.tiposMidia
+    },
+    {
+      id: 'origens_demanda',
+      title: 'Origens das Demandas',
+      icon: <Home className="h-6 w-6" />,
+      description: 'Gerencie as origens das demandas',
+      count: stats.origensDemanda
+    },
+    {
+      id: 'distritos_bairros',
+      title: 'Distritos e Bairros',
+      icon: <Map className="h-6 w-6" />,
+      description: 'Gerencie distritos e bairros',
+      count: stats.distritos + stats.bairros
+    },
+    {
+      id: 'comunicados',
+      title: 'Comunicados',
+      icon: <MessageCircle className="h-6 w-6" />,
+      description: 'Gerencie os comunicados',
+      count: stats.comunicados
+    },
+    {
+      id: 'notificacoes',
+      title: 'Configurações de Notificações',
+      icon: <Bell className="h-6 w-6" />,
+      description: 'Configure as notificações do sistema',
+      count: stats.configuracoesNotificacoes
+    },
+    {
+      id: 'permissoes',
+      title: 'Permissões',
+      icon: <Shield className="h-6 w-6" />,
+      description: 'Gerencie as permissões dos usuários',
+      count: stats.permissoes
+    }
+  ];
+
   return (
-    <Link to={to} className="block">
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-        <div className="flex items-start gap-4">
-          <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-            {icon}
-          </div>
-          <div>
-            <h3 className="font-medium text-lg text-gray-900">{title}</h3>
-            <p className="text-gray-500 mt-1">{description}</p>
-          </div>
-        </div>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {categories.map(category => (
+          <StatCard
+            key={category.id}
+            title={category.title}
+            icon={category.icon}
+            description={category.description}
+            count={isLoading ? null : category.count}
+            onClick={() => handleCategoryClick(category.id)}
+          />
+        ))}
       </div>
-    </Link>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <LocationCommunicationStats stats={stats} isLoading={isLoading} />
+        <UserServiceStats stats={stats} isLoading={isLoading} />
+      </div>
+    </div>
   );
 };
 

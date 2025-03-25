@@ -75,7 +75,7 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   };
 
   const selectedService = servicos.find(s => s.id === formData.servico_id);
-  const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+  const selectedTema = problemas.find(p => p.id === formData.problema_id);
 
   return (
     <div className="space-y-4">
@@ -101,23 +101,23 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
       
       <div>
         <Label className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
-          Problema {hasError('problema_id') && <span className="text-orange-500">*</span>}
+          Tema {hasError('problema_id') && <span className="text-orange-500">*</span>}
         </Label>
         <div className="flex flex-wrap gap-3">
-          {problemas.map(problema => (
+          {problemas.map(tema => (
             <Button 
-              key={problema.id} 
+              key={tema.id} 
               type="button" 
-              variant={formData.problema_id === problema.id ? "default" : "outline"} 
+              variant={formData.problema_id === tema.id ? "default" : "outline"} 
               className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-                formData.problema_id === problema.id ? "ring-2 ring-[#003570]" : ""
+                formData.problema_id === tema.id ? "ring-2 ring-[#003570]" : ""
               } ${
                 hasError('problema_id') ? 'border-orange-500' : ''
               }`} 
-              onClick={() => handleSelectChange('problema_id', problema.id)}
+              onClick={() => handleSelectChange('problema_id', tema.id)}
             >
-              {problema.areas_coordenacao && getAreaIcon(problema.areas_coordenacao.descricao)}
-              <span className="text-sm font-semibold">{problema.descricao}</span>
+              {tema.areas_coordenacao && getAreaIcon(tema.areas_coordenacao.descricao)}
+              <span className="text-sm font-semibold">{tema.descricao}</span>
             </Button>
           ))}
         </div>

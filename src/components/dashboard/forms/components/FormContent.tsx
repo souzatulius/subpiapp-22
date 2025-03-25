@@ -11,7 +11,7 @@ import { ValidationError } from '@/lib/formValidationUtils';
 export const FORM_STEPS = [
   {
     title: "Identificação",
-    description: "Selecione o problema e o serviço relacionado à demanda",
+    description: "Selecione o tema e o serviço relacionado à demanda",
     fields: ["titulo", "problema_id", "servico_id"]
   },
   {
@@ -170,7 +170,7 @@ const FormContent: React.FC<FormContentProps> = ({
               </div>
               
               <div>
-                <p className="text-sm font-semibold">Problema:</p>
+                <p className="text-sm font-semibold">Tema:</p>
                 <p className="text-sm text-gray-700">
                   {problemas.find(p => p.id === formData.problema_id)?.descricao || '-'}
                 </p>

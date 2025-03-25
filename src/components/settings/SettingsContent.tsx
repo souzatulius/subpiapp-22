@@ -11,7 +11,8 @@ import Announcements from './Announcements';
 import AccessControl from './AccessControl';
 import Notifications from './Notifications';
 import NotificationsSettings from './notifications/NotificationsSettings';
-import Problems from './Problems';
+import Temas from './Temas';
+import CoordinationArea from './coordination/CoordinationArea';
 
 interface SettingsContentProps {
   activeSection: string;
@@ -22,6 +23,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
     <div>
       {activeSection === 'usuarios' && <UsersManagement />}
       {activeSection === 'areas' && <CoordinationAreas />}
+      {activeSection === 'coordenacao' && <CoordinationArea />}
       {activeSection === 'cargos' && <Positions />}
       {activeSection === 'servicos' && <Services />}
       {activeSection === 'tipos_midia' && <MediaTypes />}
@@ -30,7 +32,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
       {activeSection === 'comunicados' && <Announcements />}
       {activeSection === 'notificacoes' && <NotificationsSettings />}
       {activeSection === 'permissoes' && <AccessControl />}
-      {activeSection === 'problemas' && <Problems />}
+      {activeSection === 'temas' && <Temas />}
     </div>
   );
 };

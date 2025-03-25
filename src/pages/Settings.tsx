@@ -59,6 +59,7 @@ const Settings = () => {
               <div>
                 <h1 className="text-2xl font-bold text-gray-800 mt-4 mb-6 pl-16">
                   {activeSection === 'areas' && 'Áreas de Coordenação'}
+                  {activeSection === 'coordenacao' && 'Coordenações'}
                   {activeSection === 'cargos' && 'Cargos'}
                   {activeSection === 'servicos' && 'Serviços'}
                   {activeSection === 'tipos_midia' && 'Tipos de Mídia'}
@@ -68,7 +69,7 @@ const Settings = () => {
                   {activeSection === 'permissoes' && 'Permissões'}
                   {activeSection === 'notificacoes' && 'Configurações de Notificações'}
                   {activeSection === 'usuarios' && 'Gerenciamento de Usuários'}
-                  {activeSection === 'problemas' && 'Problemas'}
+                  {activeSection === 'temas' && 'Temas'}
                 </h1>
                 <SettingsContent activeSection={activeSection} />
               </div>
