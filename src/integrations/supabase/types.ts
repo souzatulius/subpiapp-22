@@ -1087,6 +1087,136 @@ export type Database = {
           },
         ]
       }
+      sgz_departamentos_tecnicos: {
+        Row: {
+          id: string
+          nome: string | null
+        }
+        Insert: {
+          id: string
+          nome?: string | null
+        }
+        Update: {
+          id?: string
+          nome?: string | null
+        }
+        Relationships: []
+      }
+      sgz_ordens_servico: {
+        Row: {
+          id: string
+          ordem_servico: string
+          planilha_referencia: string | null
+          sgz_bairro: string | null
+          sgz_criado_em: string
+          sgz_data_status: string | null
+          sgz_departamento_tecnico: string
+          sgz_dias_ate_status_atual: number | null
+          sgz_distrito: string
+          sgz_empresa: string | null
+          sgz_modificado_em: string | null
+          sgz_status: string
+          sgz_tipo_servico: string
+        }
+        Insert: {
+          id?: string
+          ordem_servico: string
+          planilha_referencia?: string | null
+          sgz_bairro?: string | null
+          sgz_criado_em: string
+          sgz_data_status?: string | null
+          sgz_departamento_tecnico: string
+          sgz_dias_ate_status_atual?: number | null
+          sgz_distrito: string
+          sgz_empresa?: string | null
+          sgz_modificado_em?: string | null
+          sgz_status: string
+          sgz_tipo_servico: string
+        }
+        Update: {
+          id?: string
+          ordem_servico?: string
+          planilha_referencia?: string | null
+          sgz_bairro?: string | null
+          sgz_criado_em?: string
+          sgz_data_status?: string | null
+          sgz_departamento_tecnico?: string
+          sgz_dias_ate_status_atual?: number | null
+          sgz_distrito?: string
+          sgz_empresa?: string | null
+          sgz_modificado_em?: string | null
+          sgz_status?: string
+          sgz_tipo_servico?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sgz_ordens_servico_planilha_referencia_fkey"
+            columns: ["planilha_referencia"]
+            isOneToOne: false
+            referencedRelation: "sgz_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sgz_status_historico: {
+        Row: {
+          data_mudanca: string | null
+          id: string
+          ordem_servico: string
+          planilha_origem: string | null
+          status_antigo: string | null
+          status_novo: string
+        }
+        Insert: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico: string
+          planilha_origem?: string | null
+          status_antigo?: string | null
+          status_novo: string
+        }
+        Update: {
+          data_mudanca?: string | null
+          id?: string
+          ordem_servico?: string
+          planilha_origem?: string | null
+          status_antigo?: string | null
+          status_novo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sgz_status_historico_planilha_origem_fkey"
+            columns: ["planilha_origem"]
+            isOneToOne: false
+            referencedRelation: "sgz_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sgz_uploads: {
+        Row: {
+          data_upload: string | null
+          id: string
+          nome_arquivo: string
+          processado: boolean | null
+          usuario_id: string
+        }
+        Insert: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo: string
+          processado?: boolean | null
+          usuario_id: string
+        }
+        Update: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo?: string
+          processado?: boolean | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       status_historico: {
         Row: {
           data_mudanca: string | null
