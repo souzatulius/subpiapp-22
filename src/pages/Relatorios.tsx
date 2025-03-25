@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import RelatoriosContent from '@/components/relatorios/RelatoriosContent';
+import { RelatoriosContent } from '@/components/relatorios';
 
 const Relatorios = () => {
   // Start with sidebar collapsed

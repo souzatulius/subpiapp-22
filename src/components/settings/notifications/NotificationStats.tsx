@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from '@/integrations/supabase/client';
@@ -57,13 +58,9 @@ const NotificationStats: React.FC<NotificationStatsProps> = () => {
 
       if (coordenacoesError) throw coordenacoesError;
 
-      // Use this format:
+      // Use this format for count queries:
       const { data: notificacoesCoordenacaoData, error: coordError } = await supabase
-        .from('notificacoes')
-        .select('coordenacao_id, count(*)', { count: 'exact' })
-        .not('coordenacao_id', 'is', null)
-        .is('lida', false)
-        .groupBy('coordenacao_id');
+        .rpc('get_notificacoes_por_coordenacao');
 
       if (coordError) throw coordError;
 
@@ -79,11 +76,9 @@ const NotificationStats: React.FC<NotificationStatsProps> = () => {
 
       setCoordenacoesData(formattedCoordenacoesData);
 
+      // Use RPC function for status grouping instead of direct query with group
       const { data: demandasStatusData, error: statusError } = await supabase
-        .from('demandas')
-        .select('status, count(*)', { count: 'exact' })
-        .in('status', ['pendente', 'em-andamento', 'concluido'])
-        .groupBy('status');
+        .rpc('get_demandas_por_status');
 
       if (statusError) throw statusError;
 
@@ -94,17 +89,14 @@ const NotificationStats: React.FC<NotificationStatsProps> = () => {
 
       setDemandaStatusData(formattedDemandaStatusData);
 
+      // Use RPC function for origens grouping
       const { data: demandasOrigensData, error: origensError } = await supabase
-        .from('demandas')
-        .select('origem_id, count(*)', { count: 'exact' })
-        .not('origem_id', 'is', null)
-        .is('respondida_em', null)
-        .groupBy('origem_id');
+        .rpc('get_demandas_por_origem');
 
       if (origensError) throw origensError;
 
       const { data: origens, error: origensListError } = await supabase
-        .from('origens_demanda')
+        .from('origens_demandas')
         .select('id, descricao');
 
       if (origensListError) throw origensListError;

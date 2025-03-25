@@ -40,6 +40,12 @@ const UserDialogs: React.FC<UserDialogsProps> = ({
   handleDeleteUser,
   isEditSubmitting,
 }) => {
+  // Format coordenacoes for InviteUserDialog
+  const formattedCoordenacoes = coordenacoes.map(coord => ({
+    coordenacao_id: coord.id,
+    coordenacao: coord.descricao
+  }));
+
   return (
     <>
       <InviteUserDialog
@@ -48,7 +54,7 @@ const UserDialogs: React.FC<UserDialogsProps> = ({
         onSubmit={handleInviteUser}
         supervisoesTecnicas={supervisoesTecnicas}
         cargos={cargos}
-        coordenacoes={coordenacoes}
+        coordenacoes={formattedCoordenacoes}
       />
       
       <EditUserDialog

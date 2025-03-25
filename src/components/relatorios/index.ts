@@ -1,2 +1,2 @@
 
-export { default as RelatoriosContent } from './RelatoriosContent';
+export { RelatoriosContent } from './RelatoriosContent';

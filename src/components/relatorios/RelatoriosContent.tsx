@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { useAdvancedFilters } from './hooks/useAdvancedFilters';
@@ -12,13 +13,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "lucide-react"
+import { CalendarIcon } from "lucide-react"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Calendar as CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { pt } from "date-fns/locale"
 import { cn } from "@/lib/utils"
