@@ -39,7 +39,7 @@ const CoordinationAreas = () => {
   };
 
   const handleEdit = async (data: { descricao: string, sigla?: string, coordenacao?: string }) => {
-    if (!editingArea) return Promise.reject(new Error('Nenhuma área selecionada'));
+    if (!editingArea) return Promise.reject(new Error('Nenhuma supervisão técnica selecionada'));
     
     try {
       await updateArea(editingArea.id, data);
@@ -60,9 +60,9 @@ const CoordinationAreas = () => {
     } catch (error) {
       console.error('Error in handleAdd:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível adicionar a área. Tente novamente.',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível adicionar a supervisão técnica. Tente novamente.",
+        variant: "destructive",
       });
       return Promise.reject(error);
     }
@@ -104,13 +104,13 @@ const CoordinationAreas = () => {
   return (
     <div>
       <DataTable
-        title="Áreas de Coordenação"
+        title="Supervisões Técnicas"
         data={areas || []}
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={deleteArea}
-        filterPlaceholder="Filtrar áreas..."
+        filterPlaceholder="Filtrar supervisões técnicas..."
         renderForm={renderForm}
         isLoading={loading}
       />

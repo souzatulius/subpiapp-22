@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users, ArrowUpRight, Briefcase, FileText } from 'lucide-react';
+import { Users, ArrowUpRight, Briefcase, AlertTriangle } from 'lucide-react';
 import StatCard from './StatCard';
 import { SettingsStats } from '../types/settingsTypes';
 
@@ -20,10 +20,10 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         section="usuarios"
       />
       <StatCard 
-        title="Áreas de Coordenação" 
-        value={loading ? 0 : stats.areasCoordenacao} 
+        title="Supervisões Técnicas" 
+        value={loading ? 0 : stats.supervisoesTecnicas} 
         icon={<ArrowUpRight className="h-4 w-4 text-muted-foreground" />} 
-        description="Áreas de coordenação registradas"
+        description="Supervisões técnicas registradas"
         section="areas"
       />
       <StatCard 
@@ -34,11 +34,11 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         section="cargos"
       />
       <StatCard 
-        title="Serviços" 
-        value={loading ? 0 : stats.services} 
-        icon={<FileText className="h-4 w-4 text-muted-foreground" />} 
-        description="Serviços registrados"
-        section="servicos"
+        title="Problemas" 
+        value={loading ? 0 : stats.problemas} 
+        icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />} 
+        description="Problemas registrados"
+        section="problemas"
       />
     </div>
   );

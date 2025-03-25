@@ -50,13 +50,13 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="area_coordenacao_id">Área de Coordenação</Label>
+            <Label htmlFor="area_coordenacao_id">Supervisão Técnica</Label>
             <Select 
               onValueChange={(value) => setValue("area_coordenacao_id", value)}
               defaultValue={defaultValues.area_coordenacao_id}
             >
               <SelectTrigger className="rounded-lg">
-                <SelectValue placeholder="Selecione uma área" />
+                <SelectValue placeholder="Selecione uma supervisão técnica" />
               </SelectTrigger>
               <SelectContent>
                 {areas.map((area) => (

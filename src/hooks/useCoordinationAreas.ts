@@ -42,10 +42,10 @@ export const useCoordinationAreas = () => {
       
       setAreas(data || []);
     } catch (error: any) {
-      console.error('Erro ao buscar áreas de coordenação:', error);
+      console.error('Erro ao buscar supervisões técnicas:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar as áreas de coordenação.",
+        description: "Não foi possível carregar as supervisões técnicas.",
         variant: "destructive",
       });
     } finally {
@@ -70,15 +70,15 @@ export const useCoordinationAreas = () => {
       
       setAreas([...areas, newArea]);
       toast({
-        title: "Área adicionada",
-        description: "Área de coordenação adicionada com sucesso.",
+        title: "Supervisão técnica adicionada",
+        description: "Supervisão técnica adicionada com sucesso.",
       });
       return true;
     } catch (error: any) {
-      console.error('Erro ao adicionar área de coordenação:', error);
+      console.error('Erro ao adicionar supervisão técnica:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível adicionar a área de coordenação.",
+        description: "Não foi possível adicionar a supervisão técnica.",
         variant: "destructive",
       });
       return false;
@@ -102,15 +102,15 @@ export const useCoordinationAreas = () => {
       ));
       
       toast({
-        title: "Área atualizada",
-        description: "Área de coordenação atualizada com sucesso.",
+        title: "Supervisão técnica atualizada",
+        description: "Supervisão técnica atualizada com sucesso.",
       });
       return true;
     } catch (error: any) {
-      console.error('Erro ao atualizar área de coordenação:', error);
+      console.error('Erro ao atualizar supervisão técnica:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar a área de coordenação.",
+        description: "Não foi possível atualizar a supervisão técnica.",
         variant: "destructive",
       });
       return false;
@@ -131,24 +131,24 @@ export const useCoordinationAreas = () => {
       
       setAreas(areas.filter(area => area.id !== id));
       toast({
-        title: "Área removida",
-        description: "Área de coordenação removida com sucesso.",
+        title: "Supervisão técnica removida",
+        description: "Supervisão técnica removida com sucesso.",
       });
       return true;
     } catch (error: any) {
-      console.error('Erro ao remover área de coordenação:', error);
+      console.error('Erro ao remover supervisão técnica:', error);
       
       // Verificar se o erro é de restrição de chave estrangeira
       if (error.code === '23503') {
         toast({
           title: "Erro",
-          description: "Esta área está em uso e não pode ser removida.",
+          description: "Esta supervisão técnica está em uso e não pode ser removida.",
           variant: "destructive",
         });
       } else {
         toast({
           title: "Erro",
-          description: "Não foi possível remover a área de coordenação.",
+          description: "Não foi possível remover a supervisão técnica.",
           variant: "destructive",
         });
       }

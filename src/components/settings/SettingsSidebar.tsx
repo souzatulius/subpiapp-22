@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { 
-  Users, Layers, Briefcase, FileText, 
+  Users, Layers, Briefcase, AlertTriangle, 
   Image, Globe, MapPin, MessageSquare, Shield, 
-  LayoutDashboard, Bell, AlertTriangle
+  LayoutDashboard, Bell, FileText
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
@@ -20,7 +20,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'usuarios', label: 'Usuários', icon: Users },
-    { id: 'areas', label: 'Áreas de Coordenação', icon: Layers },
+    { id: 'areas', label: 'Supervisões Técnicas', icon: Layers },
     { id: 'cargos', label: 'Cargos', icon: Briefcase },
     { id: 'problemas', label: 'Problemas', icon: AlertTriangle },
     { id: 'servicos', label: 'Serviços', icon: FileText },

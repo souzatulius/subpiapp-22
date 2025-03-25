@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, BookText, Briefcase, FileSignature, Newspaper, Map, MessageCircle, Bell, Shield, Home, Layers, Building } from 'lucide-react';
+import { Users, BookText, Briefcase, AlertTriangle, Newspaper, Map, MessageCircle, Bell, Shield, Home, Layers, Building } from 'lucide-react';
 import { useSettingsStats } from './hooks/useSettingsStats';
 import StatCard from './components/StatCard';
 import LocationCommunicationStats from './components/LocationCommunicationStats';
@@ -25,10 +25,10 @@ const SettingsDashboard = () => {
     },
     {
       id: 'areas',
-      title: 'Áreas de Coordenação',
+      title: 'Supervisões Técnicas',
       icon: <Briefcase className="h-6 w-6" />,
-      description: 'Gerencie as áreas de coordenação',
-      count: stats.areasCoordenacao
+      description: 'Gerencie as supervisões técnicas',
+      count: stats.supervisoesTecnicas
     },
     {
       id: 'coordenacao',
@@ -52,11 +52,11 @@ const SettingsDashboard = () => {
       count: stats.temas || 0
     },
     {
-      id: 'servicos',
-      title: 'Serviços',
-      icon: <FileSignature className="h-6 w-6" />,
-      description: 'Gerencie os serviços disponíveis',
-      count: stats.services
+      id: 'problemas',
+      title: 'Problemas',
+      icon: <AlertTriangle className="h-6 w-6" />,
+      description: 'Gerencie os problemas disponíveis',
+      count: stats.problemas
     },
     {
       id: 'tipos_midia',

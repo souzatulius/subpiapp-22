@@ -15,7 +15,7 @@ export const useSettingsStats = () => {
     notifications: 0,
     // Additional properties for Portuguese UI
     usuarios: 0,
-    areasCoordenacao: 0,
+    supervisoesTecnicas: 0, // Renamed from areasCoordenacao
     coordenacoes: 0,
     cargos: 0,
     problemas: 0,
@@ -95,10 +95,10 @@ export const useSettingsStats = () => {
         
         // Portuguese UI properties
         usuarios: usersCount || 0,
-        areasCoordenacao: areasCount || 0,
+        supervisoesTecnicas: areasCount || 0, // Renamed from areasCoordenacao
         coordenacoes: coordenacoesCount || 0,
         cargos: positionsCount || 0,
-        problemas: temasCount || 0,
+        problemas: servicesCount || 0, // Now using servicesCount for problemas
         temas: temasCount || 0,
         tiposMidia: tiposMidiaCount || 0,
         origensDemanda: origensDemandaCount || 0,

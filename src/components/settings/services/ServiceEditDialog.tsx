@@ -27,7 +27,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
     <EditModal 
       isOpen={isOpen} 
       onClose={onClose}
-      title="Editar Serviço"
+      title="Editar Problema"
     >
       <ServiceForm
         onSubmit={onSubmit}

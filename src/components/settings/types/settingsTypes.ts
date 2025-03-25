@@ -9,7 +9,7 @@ export interface SettingsStats {
   announcements: number;
   notifications: number;
   usuarios: number;
-  areasCoordenacao: number;
+  supervisoesTecnicas: number; // Renamed from areasCoordenacao
   coordenacoes: number;
   cargos: number;
   problemas: number;

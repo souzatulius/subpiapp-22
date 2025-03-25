@@ -58,9 +58,10 @@ const Settings = () => {
             ) : (
               <div>
                 <h1 className="text-2xl font-bold text-gray-800 mt-4 mb-6 pl-16">
-                  {activeSection === 'areas' && 'Áreas de Coordenação'}
+                  {activeSection === 'areas' && 'Supervisões Técnicas'}
                   {activeSection === 'coordenacao' && 'Coordenações'}
                   {activeSection === 'cargos' && 'Cargos'}
+                  {activeSection === 'problemas' && 'Problemas'}
                   {activeSection === 'servicos' && 'Serviços'}
                   {activeSection === 'tipos_midia' && 'Tipos de Mídia'}
                   {activeSection === 'origens_demanda' && 'Origem das Demandas'}
