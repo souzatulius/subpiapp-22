@@ -67,6 +67,22 @@ export const useUsersData = () => {
               coordenacao_id: areaData.coordenacao_id || ''
             };
           }
+        } else if (user.coordenacao_id) {
+          // If no area but has coordenacao, fetch coordenacao details
+          const { data: coordData, error: coordError } = await supabase
+            .from('areas_coordenacao')
+            .select('id, descricao')
+            .eq('id', user.coordenacao_id)
+            .maybeSingle();
+            
+          if (!coordError && coordData) {
+            areaInfo = {
+              id: '',
+              descricao: '',
+              coordenacao: coordData.descricao || '',
+              coordenacao_id: user.coordenacao_id
+            };
+          }
         }
         
         // Buscar permissões

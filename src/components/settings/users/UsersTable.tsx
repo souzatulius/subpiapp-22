@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Table,
@@ -86,7 +87,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Cargo</TableHead>
-                <TableHead>Área</TableHead>
+                <TableHead>Coordenação</TableHead>
+                <TableHead>Supervisão Técnica</TableHead>
                 <TableHead>Cadastro</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -102,6 +104,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   <TableCell>{user.nome_completo}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.cargos?.descricao || '-'}</TableCell>
+                  <TableCell>{user.areas_coordenacao?.coordenacao || '-'}</TableCell>
                   <TableCell>{user.areas_coordenacao?.descricao || '-'}</TableCell>
                   <TableCell>{user.criado_em ? formatDateTime(user.criado_em) : '-'}</TableCell>
                   <TableCell>
@@ -127,14 +130,15 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Cargo</TableHead>
-                <TableHead>Área</TableHead>
+                <TableHead>Coordenação</TableHead>
+                <TableHead>Supervisão Técnica</TableHead>
                 <TableHead>Permissões</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   {filter ? 'Nenhum usuário encontrado com este filtro.' : 'Nenhum usuário cadastrado.'}
                 </TableCell>
               </TableRow>
@@ -157,7 +161,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Cargo</TableHead>
-                <TableHead>Área</TableHead>
+                <TableHead>Coordenação</TableHead>
+                <TableHead>Supervisão Técnica</TableHead>
                 <TableHead>Permissões</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -173,6 +178,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   <TableCell>{user.nome_completo}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.cargos?.descricao || '-'}</TableCell>
+                  <TableCell>{user.areas_coordenacao?.coordenacao || '-'}</TableCell>
                   <TableCell>{user.areas_coordenacao?.descricao || '-'}</TableCell>
                   <TableCell>
                     {user.permissoes ? user.permissoes.map(p => 
@@ -240,14 +246,15 @@ const UsersTable: React.FC<UsersTableProps> = ({
               <TableHead>Nome</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Cargo</TableHead>
-              <TableHead>Área</TableHead>
+              <TableHead>Coordenação</TableHead>
+              <TableHead>Supervisão Técnica</TableHead>
               <TableHead>Cadastro</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 <div className="flex justify-center items-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                 </div>
@@ -268,4 +275,3 @@ const UsersTable: React.FC<UsersTableProps> = ({
 };
 
 export default UsersTable;
-

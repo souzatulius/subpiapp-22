@@ -9,20 +9,13 @@ import {
   DropdownMenuRadioGroup, 
   DropdownMenuRadioItem 
 } from '@/components/ui/dropdown-menu';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
 import { UserPlus, Filter, Loader2 } from 'lucide-react';
 import InviteUserDialog from './InviteUserDialog';
 import EditUserDialog from './EditUserDialog';
 import DeleteUserDialog from './DeleteUserDialog';
 import UserActionsMenu from './UserActionsMenu';
-import { UsersLayoutProps, User } from './types';
+import { UsersLayoutProps } from './types';
+import UsersTable from './UsersTable';
 
 const UsersLayout: React.FC<UsersLayoutProps> = ({
   users,
@@ -114,71 +107,16 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Cargo</TableHead>
-              <TableHead>Coordenação</TableHead>
-              <TableHead>Supervisão Técnica</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center p-8">
-                  <div className="flex justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center p-8">
-                  Nenhum usuário encontrado.
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.nome_completo}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.cargos?.descricao || '-'}</TableCell>
-                  <TableCell>{user.areas_coordenacao?.coordenacao || '-'}</TableCell>
-                  <TableCell>{user.areas_coordenacao?.descricao || '-'}</TableCell>
-                  <TableCell>
-                    {user.permissoes && user.permissoes.length > 0 ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Ativo
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        Pendente
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <UserActionsMenu 
-                      user={user} 
-                      onEdit={() => userActions.handleEdit(user)}
-                      onDelete={() => userActions.handleDelete(user)}
-                      onResetPassword={() => userActions.handleResetPassword(user)}
-                      onApprove={(user) => userActions.handleApprove(user)}
-                      onRemoveAccess={() => userActions.handleRemoveAccess(user)}
-                      isApproving={approving}
-                      isRemoving={removing}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <UsersTable 
+        users={users} 
+        loading={loading} 
+        filter={filter}
+        onEdit={(user) => userActions.handleEdit(user)}
+        onDelete={(user) => userActions.handleDelete(user)}
+        onResetPassword={(user) => userActions.handleResetPassword(user)}
+        onApprove={(user, permissionLevel) => userActions.handleApprove(user, permissionLevel)}
+        onRemoveAccess={userActions.handleRemoveAccess}
+      />
 
       {/* Dialogs */}
       <InviteUserDialog 
@@ -197,6 +135,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         onSubmit={handleEditUser}
         areas={areas}
         cargos={cargos}
+        coordenacoes={coordenacoes}
       />
       
       <DeleteUserDialog 
