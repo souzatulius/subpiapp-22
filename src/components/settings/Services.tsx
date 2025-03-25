@@ -67,11 +67,6 @@ const Services = () => {
       header: 'Supervisão Técnica',
       render: (row: any) => row.supervisao_tecnica?.descricao || '-',
     },
-    {
-      key: 'criado_em',
-      header: 'Data de Criação',
-      render: (row: any) => new Date(row.criado_em).toLocaleDateString('pt-BR'),
-    },
   ];
 
   const renderForm = (onClose: () => void) => (

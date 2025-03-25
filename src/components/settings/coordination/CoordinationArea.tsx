@@ -67,6 +67,10 @@ const CoordinationArea = () => {
     }
   };
 
+  const handleDelete = (coordination: any) => {
+    return deleteCoordination(coordination.id);
+  };
+
   const columns = [
     {
       key: 'descricao',
@@ -92,11 +96,6 @@ const CoordinationArea = () => {
         isSubmitting={isSubmitting}
       />
     );
-  };
-
-  // Fix: Properly extract the ID when deleting coordination
-  const handleDelete = (coordination: any) => {
-    return deleteCoordination(coordination.id);
   };
 
   return (
