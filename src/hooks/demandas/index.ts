@@ -1,0 +1,2 @@
+
+export { useDemandas } from './useDemandas';

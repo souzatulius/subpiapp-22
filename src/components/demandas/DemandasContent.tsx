@@ -1,0 +1,49 @@
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import DemandFilter from './DemandFilter';
+import DemandCards from './DemandCards';
+import DemandList from './DemandList';
+import DemandDetail from './DemandDetail';
+import { useDemandas } from '@/hooks/demandas/useDemandas';
+
+const DemandasContent: React.FC = () => {
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+  const [filterStatus, setFilterStatus] = useState<string>('pendente');
+  
+  const {
+    demandas,
+    isLoading,
+    selectedDemand,
+    isDetailOpen,
+    handleSelectDemand,
+    handleCloseDetail
+  } = useDemandas(filterStatus);
+
+  return (
+    <Card className="bg-white shadow-sm">
+      <CardHeader className="pb-2 border-b">
+        <CardTitle className="text-2xl font-bold text-[#003570]">
+          Gerenciamento de Demandas
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <DemandFilter 
+          viewMode={viewMode} 
+          setViewMode={setViewMode} 
+          filterStatus={filterStatus} 
+          setFilterStatus={setFilterStatus} 
+        />
+        
+        {viewMode === 'cards' ? 
+          <DemandCards demandas={demandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} /> : 
+          <DemandList demandas={demandas} isLoading={isLoading} onSelectDemand={handleSelectDemand} />
+        }
+
+        <DemandDetail demand={selectedDemand} isOpen={isDetailOpen} onClose={handleCloseDetail} />
+      </CardContent>
+    </Card>
+  );
+};
+
+export default DemandasContent;
