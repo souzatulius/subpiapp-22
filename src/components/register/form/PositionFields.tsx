@@ -95,12 +95,12 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             </SelectTrigger>
             <SelectContent>
               {roles.length === 0 ? (
-                <SelectItem value="no-options" disabled>
+                <SelectItem value="no-options-available" disabled>
                   Nenhum cargo disponível
                 </SelectItem>
               ) : (
                 <>
-                  <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
+                  <SelectItem value="select-cargo" disabled>Selecione um cargo</SelectItem>
                   {roles.map(role => (
                     <SelectItem key={role.id} value={role.id}>
                       {role.value}
@@ -140,12 +140,12 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             </SelectTrigger>
             <SelectContent>
               {coordenacoes.length === 0 ? (
-                <SelectItem value="no-options" disabled>
+                <SelectItem value="no-coordenacoes-available" disabled>
                   Nenhuma coordenação disponível
                 </SelectItem>
               ) : (
                 <>
-                  <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
+                  <SelectItem value="select-coordenacao" disabled>Selecione uma coordenação</SelectItem>
                   {coordenacoes.map(coord => (
                     <SelectItem key={coord.id} value={coord.id}>
                       {coord.value}
@@ -181,16 +181,16 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             </SelectTrigger>
             <SelectContent>
               {!coordenacao || coordenacao === 'select-coordenacao' ? (
-                <SelectItem value="no-coordenacao" disabled>
+                <SelectItem value="no-coordenacao-selected" disabled>
                   Selecione uma coordenação primeiro
                 </SelectItem>
               ) : filteredAreas.length === 0 ? (
-                <SelectItem value="no-supervisions" disabled>
+                <SelectItem value="no-supervisions-available" disabled>
                   Nenhuma supervisão técnica disponível para esta coordenação
                 </SelectItem>
               ) : (
                 <>
-                  <SelectItem value="select-area">Selecione uma supervisão técnica</SelectItem>
+                  <SelectItem value="select-area" disabled>Selecione uma supervisão técnica</SelectItem>
                   {filteredAreas.map(area => (
                     <SelectItem key={area.id} value={area.id}>
                       {area.value}

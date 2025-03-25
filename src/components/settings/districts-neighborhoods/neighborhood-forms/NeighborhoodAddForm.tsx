@@ -4,6 +4,13 @@ import DataEntryForm from '../../DataEntryForm';
 import { neighborhoodSchema } from '../NeighborhoodForm';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger,
+  SelectValue 
+} from '@/components/ui/select';
 
 interface NeighborhoodAddFormProps {
   onSubmit: (data: { nome: string; distrito_id: string }) => Promise<void>;
@@ -49,18 +56,22 @@ const NeighborhoodAddForm: React.FC<NeighborhoodAddFormProps> = ({
             <Label htmlFor="distrito_id">
               Distrito
             </Label>
-            <select
-              id="distrito_id"
-              {...form.register('distrito_id')}
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            <Select
+              onValueChange={(value) => form.setValue('distrito_id', value)}
+              defaultValue={form.getValues('distrito_id')}
             >
-              <option value="" className="bg-gray-100">Selecione um distrito</option>
-              {districts.map((district) => (
-                <option key={district.id} value={district.id} className="bg-gray-100">
-                  {district.nome}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="rounded-lg">
+                <SelectValue placeholder="Selecione um distrito" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="select-district" disabled>Selecione um distrito</SelectItem>
+                {districts.map((district) => (
+                  <SelectItem key={district.id} value={district.id}>
+                    {district.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {form.formState.errors.distrito_id && (
               <p className="text-sm font-medium text-destructive">
                 {form.formState.errors.distrito_id.message}
