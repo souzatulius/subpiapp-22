@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -22,8 +21,7 @@ export const useCoordinationAreasCrud = (
           .rpc('insert_supervision_with_coordination', {
             p_descricao: data.descricao,
             p_sigla: data.sigla || null,
-            p_coordenacao_id: data.coordenacao_id,
-            p_is_supervision: true // Add flag to mark as supervision
+            p_coordenacao_id: data.coordenacao_id
           });
           
         if (rpcError) throw rpcError;

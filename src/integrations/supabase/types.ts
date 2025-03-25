@@ -16,6 +16,7 @@ export type Database = {
           criado_em: string | null
           descricao: string
           id: string
+          is_supervision: boolean | null
           sigla: string | null
         }
         Insert: {
@@ -24,6 +25,7 @@ export type Database = {
           criado_em?: string | null
           descricao: string
           id?: string
+          is_supervision?: boolean | null
           sigla?: string | null
         }
         Update: {
@@ -32,6 +34,7 @@ export type Database = {
           criado_em?: string | null
           descricao?: string
           id?: string
+          is_supervision?: boolean | null
           sigla?: string | null
         }
         Relationships: [
@@ -1371,14 +1374,24 @@ export type Database = {
         }
         Returns: string
       }
-      insert_supervision_with_coordination: {
-        Args: {
-          p_descricao: string
-          p_sigla: string
-          p_coordenacao_id: string
-        }
-        Returns: string
-      }
+      insert_supervision_with_coordination:
+        | {
+            Args: {
+              p_descricao: string
+              p_sigla: string
+              p_coordenacao_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_descricao: string
+              p_sigla: string
+              p_coordenacao_id: string
+              p_is_supervision?: boolean
+            }
+            Returns: string
+          }
       insert_tipo_midia: {
         Args: {
           p_descricao: string
