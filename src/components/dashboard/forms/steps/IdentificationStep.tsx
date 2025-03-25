@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, 
   Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, X, ChevronDown, Search 
@@ -13,9 +14,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 interface IdentificationStepProps {
   formData: {
-    titulo: string;
     problema_id: string;
     servico_id: string;
+    detalhes_solicitacao: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
@@ -25,7 +26,6 @@ interface IdentificationStepProps {
   serviceSearch: string;
   servicos: any[];
   errors?: ValidationError[];
-  showTitleField?: boolean;
 }
 
 const IdentificationStep: React.FC<IdentificationStepProps> = ({
@@ -37,8 +37,7 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   filteredServicesBySearch,
   serviceSearch,
   servicos,
-  errors = [],
-  showTitleField = true
+  errors = []
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -79,26 +78,6 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
 
   return (
     <div className="space-y-4">
-      {showTitleField && (
-        <div>
-          <Label htmlFor="titulo" className={`block ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
-            Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
-          </Label>
-          {/* Título da Demanda - estilo similar ao SmartSearchCard */}
-          <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
-            <Input 
-              id="titulo" 
-              name="titulo" 
-              value={formData.titulo} 
-              onChange={handleChange} 
-              className={`border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasError('titulo') ? 'placeholder-orange-300' : ''}`} 
-              placeholder="Digite o título da demanda..."
-            />
-          </div>
-          {hasError('titulo') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>}
-        </div>
-      )}
-      
       <div>
         <Label className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
           Tema {hasError('problema_id') && <span className="text-orange-500">*</span>}
@@ -212,6 +191,24 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
           {hasError('servico_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>}
         </div>
       )}
+
+      <div className="mt-6">
+        <Label htmlFor="detalhes_solicitacao" className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
+          Detalhes da Solicitação {hasError('detalhes_solicitacao') && <span className="text-orange-500">*</span>}
+        </Label>
+        <Textarea
+          id="detalhes_solicitacao"
+          name="detalhes_solicitacao"
+          value={formData.detalhes_solicitacao}
+          onChange={handleChange}
+          rows={5}
+          className={hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}
+          placeholder="Descreva os detalhes da solicitação..."
+        />
+        {hasError('detalhes_solicitacao') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
+        )}
+      </div>
     </div>
   );
 };

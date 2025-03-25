@@ -13,8 +13,8 @@ import { Input } from '@/components/ui/input';
 export const FORM_STEPS = [
   {
     title: "Identificação",
-    description: "Selecione o tema e o serviço relacionado à demanda",
-    fields: ["problema_id", "servico_id"]
+    description: "Selecione o tema, o serviço e informe os detalhes da demanda",
+    fields: ["problema_id", "servico_id", "detalhes_solicitacao"]
   },
   {
     title: "Classificação e Origem",
@@ -32,9 +32,9 @@ export const FORM_STEPS = [
     fields: ["endereco", "bairro_id"]
   },
   {
-    title: "Perguntas e Detalhes",
-    description: "Adicione perguntas e detalhes da solicitação",
-    fields: ["perguntas", "detalhes_solicitacao", "anexos"]
+    title: "Perguntas e Anexos",
+    description: "Adicione perguntas para a área técnica e anexos",
+    fields: ["perguntas", "anexos"]
   },
   {
     title: "Prioridade e Prazo",

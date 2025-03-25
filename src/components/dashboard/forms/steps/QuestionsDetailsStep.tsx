@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Plus, Trash2, Upload, File, FileText } from 'lucide-react';
@@ -10,7 +9,6 @@ import { Plus, Trash2, Upload, File, FileText } from 'lucide-react';
 interface QuestionsDetailsStepProps {
   formData: {
     perguntas: string[];
-    detalhes_solicitacao: string;
     anexos: string[];
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -144,23 +142,6 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
         
         {hasError('perguntas') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('perguntas')}</p>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="detalhes_solicitacao" className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
-          Detalhes da Solicitação
-        </Label>
-        <Textarea
-          id="detalhes_solicitacao"
-          name="detalhes_solicitacao"
-          value={formData.detalhes_solicitacao}
-          onChange={handleChange}
-          rows={5}
-          className={hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}
-        />
-        {hasError('detalhes_solicitacao') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
         )}
       </div>
 
