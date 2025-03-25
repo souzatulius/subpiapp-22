@@ -6,14 +6,22 @@ export type ServiceType = 'Tapa-buraco' | 'Poda de árvore' | 'Recapeamento' | '
 export type District = 'Itaim Bibi' | 'Pinheiros' | 'Alto de Pinheiros' | 'Jardim Paulista' | 'Todos';
 
 export interface ChartVisibility {
-  occurrences: boolean;
-  resolutionTime: boolean;
-  serviceTypes: boolean;
-  neighborhoods: boolean;
-  frequentServices: boolean;
   statusDistribution: boolean;
+  resolutionTime: boolean;
   topCompanies: boolean;
+  districtDistribution: boolean;
+  servicesByDepartment: boolean;
+  servicesByDistrict: boolean;
+  timeComparison: boolean;
+  efficiencyImpact: boolean;
+  dailyDemands: boolean;
+  neighborhoodComparison: boolean;
+  districtEfficiencyRadar: boolean;
+  statusTransition: boolean;
   criticalStatus: boolean;
+  externalDistricts: boolean;
+  serviceDiversity: boolean;
+  closureTime: boolean;
 }
 
 export interface FilterOptions {

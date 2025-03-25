@@ -9,7 +9,9 @@ import {
   Legend,
   ArcElement,
   PointElement,
-  LineElement
+  LineElement,
+  RadialLinearScale,
+  Filler
 } from 'chart.js';
 
 // Register ChartJS components
@@ -22,8 +24,9 @@ ChartJS.register(
   Legend,
   ArcElement,
   PointElement,
-  LineElement
+  LineElement,
+  RadialLinearScale,
+  Filler
 );
 
 // This is just a registration file, not a component
-

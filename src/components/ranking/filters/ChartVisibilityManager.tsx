@@ -14,14 +14,22 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
   onChartVisibilityToggle
 }) => {
   const chartOptions = [
-    { id: 'occurrences', label: 'Status' },
+    { id: 'statusDistribution', label: 'Distribuição por Status' },
     { id: 'resolutionTime', label: 'Tempo de Resolução' },
-    { id: 'serviceTypes', label: 'Tipos de Serviços' },
-    { id: 'neighborhoods', label: 'Distritos' },
-    { id: 'frequentServices', label: 'Serviços Frequentes' },
-    { id: 'statusDistribution', label: 'Distribuição de Status' },
-    { id: 'topCompanies', label: 'Empresas' },
-    { id: 'criticalStatus', label: 'Status Críticos' }
+    { id: 'topCompanies', label: 'Empresas com Ordens Concluídas' },
+    { id: 'districtDistribution', label: 'Ordens por Subprefeitura' },
+    { id: 'servicesByDepartment', label: 'Serviços por Departamento' },
+    { id: 'servicesByDistrict', label: 'Serviços por Distrito' },
+    { id: 'timeComparison', label: 'Comparativo de Tempo Médio' },
+    { id: 'efficiencyImpact', label: 'Impacto na Eficiência' },
+    { id: 'dailyDemands', label: 'Volume Diário' },
+    { id: 'neighborhoodComparison', label: 'Comparativo por Bairros' },
+    { id: 'districtEfficiencyRadar', label: 'Radar de Eficiência' },
+    { id: 'statusTransition', label: 'Transição de Status' },
+    { id: 'criticalStatus', label: 'Status Críticos' },
+    { id: 'externalDistricts', label: 'Distritos Externos' },
+    { id: 'serviceDiversity', label: 'Diversidade de Serviços' },
+    { id: 'closureTime', label: 'Tempo até Fechamento' }
   ];
   
   return (

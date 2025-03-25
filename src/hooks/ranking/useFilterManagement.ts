@@ -13,14 +13,22 @@ export const useFilterManagement = () => {
 
   // State for chart visibility
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
-    occurrences: true,
-    resolutionTime: true,
-    serviceTypes: true,
-    neighborhoods: true,
-    frequentServices: true,
     statusDistribution: true,
+    resolutionTime: true,
     topCompanies: true,
-    criticalStatus: true
+    districtDistribution: true,
+    servicesByDepartment: true,
+    servicesByDistrict: true,
+    timeComparison: true,
+    efficiencyImpact: true,
+    dailyDemands: true,
+    neighborhoodComparison: true,
+    districtEfficiencyRadar: true,
+    statusTransition: true,
+    criticalStatus: true,
+    externalDistricts: true,
+    serviceDiversity: true,
+    closureTime: true
   });
 
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
