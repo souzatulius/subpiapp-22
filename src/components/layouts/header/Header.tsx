@@ -63,8 +63,12 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
             <Menu className="h-5 w-5" />
           </Button>
         )}
-        <div className="h-8 w-auto flex items-center">
-          <span className="text-subpi-blue font-bold text-xl">SUB-PI</span>
+        <div className="h-10 flex items-center">
+          <img 
+            src="/lovable-uploads/f0e9c688-4d13-4dee-aa68-f4ac4292ad11.png" 
+            alt="SUB-PI Logo" 
+            className="h-full object-contain"
+          />
         </div>
         
         {generateBreadcrumbs()}
