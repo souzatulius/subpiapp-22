@@ -20,3 +20,8 @@ export interface Area {
   coordenacao_id?: string;
   coordenacao?: string;
 }
+
+export const problemSchema = {
+  descricao: '',
+  supervisao_tecnica_id: ''
+};
