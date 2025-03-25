@@ -50,19 +50,19 @@ export interface Demand {
   area_coordenacao: {
     descricao: string;
   } | null;
-  servico?: {
+  servico: {
     descricao: string;
   } | null;
-  origem?: {
+  origem: {
     descricao: string;
   } | null;
-  tipo_midia?: {
+  tipo_midia: {
     descricao: string;
   } | null;
-  bairro?: {
+  bairro: {
     nome: string;
   } | null;
-  autor?: {
+  autor: {
     nome_completo: string;
   } | null;
   endereco: string | null;
