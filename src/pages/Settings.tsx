@@ -5,14 +5,15 @@ import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import SettingsContent from '@/components/settings/SettingsContent';
 import SettingsDashboard from '@/components/settings/SettingsDashboard';
-import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [settingsSidebarOpen, setSettingsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -29,10 +30,6 @@ const Settings = () => {
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const toggleSettingsSidebar = () => {
-    setSettingsSidebarOpen(!settingsSidebarOpen);
   };
 
   const handleBackClick = () => {
@@ -75,6 +72,11 @@ const Settings = () => {
     if (category === 'Gestão Operacional') return 'text-green-600';
     return 'text-gray-800';
   };
+
+  // Function to handle search
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -84,51 +86,26 @@ const Settings = () => {
         <DashboardSidebar isOpen={sidebarOpen} />
         
         <main className="flex-1 overflow-hidden">
-          <div className="flex h-full">
-            {/* Settings Sidebar for desktop */}
-            <div className="hidden md:block w-64 h-full overflow-y-auto border-r border-gray-200 bg-white p-4">
-              <SettingsSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-            </div>
-            
-            {/* Mobile sidebar button and backdrop */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="fixed top-20 left-2 z-30"
-                onClick={toggleSettingsSidebar}
-              >
-                <Menu className="h-6 w-6" />
-              </Button>
-              
-              {/* Mobile sidebar */}
-              {settingsSidebarOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 bg-black/30 z-40"
-                    onClick={toggleSettingsSidebar}
-                  />
-                  <div className="fixed top-0 left-0 h-full w-64 z-50 bg-white p-4 overflow-y-auto">
-                    <div className="pb-4 border-b mb-4">
-                      <h2 className="text-lg font-semibold">Configurações</h2>
-                    </div>
-                    <SettingsSidebar 
-                      activeSection={activeSection} 
-                      setActiveSection={setActiveSection} 
-                      isMobile={true}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-            
+          <div className="w-full h-full">
             {/* Main content area */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="max-w-6xl mx-auto">
+            <div className="overflow-y-auto p-6">
+              <div className="max-w-7xl mx-auto">
                 {activeSection === 'dashboard' ? (
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-800 mb-6">Configurações</h1>
-                    <SettingsDashboard />
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                      <h1 className="text-2xl font-bold text-gray-800">Configurações</h1>
+                      <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+                        <Input
+                          type="text"
+                          placeholder="Buscar configurações..."
+                          className="pl-10 pr-4 py-2 border-gray-300 rounded-lg w-full"
+                          value={searchQuery}
+                          onChange={handleSearchChange}
+                        />
+                      </div>
+                    </div>
+                    <SettingsDashboard searchQuery={searchQuery} />
                   </div>
                 ) : (
                   <div>
