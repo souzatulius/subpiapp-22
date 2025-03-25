@@ -63,6 +63,7 @@ export const useDemandasData = () => {
               return {
                 ...demanda,
                 supervisao_tecnica: supervisaoData || null,
+                area_coordenacao: supervisaoData ? { descricao: supervisaoData.descricao } : null,
                 prioridade: "",
                 horario_publicacao: "",
                 prazo_resposta: "",
@@ -72,10 +73,10 @@ export const useDemandasData = () => {
                 telefone_solicitante: null,
                 veiculo_imprensa: null,
                 origem: null,
-                servico: null,
                 tipo_midia: null,
                 bairro: null,
-                autor: null
+                autor: null,
+                servico: null, // Add null servico property
               } as Demand;
             }
             
@@ -83,6 +84,7 @@ export const useDemandasData = () => {
             return {
               ...demanda,
               supervisao_tecnica: null,
+              area_coordenacao: null,
               prioridade: "",
               horario_publicacao: "",
               prazo_resposta: "",
@@ -92,10 +94,10 @@ export const useDemandasData = () => {
               telefone_solicitante: null,
               veiculo_imprensa: null,
               origem: null,
-              servico: null,
               tipo_midia: null,
               bairro: null,
-              autor: null
+              autor: null,
+              servico: null, // Add null servico property
             } as Demand;
           })
         );

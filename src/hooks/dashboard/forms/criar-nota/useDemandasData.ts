@@ -75,7 +75,8 @@ export const useDemandasData = () => {
                 origem: null,
                 tipo_midia: null,
                 bairro: null,
-                autor: null
+                autor: null,
+                servico: null, // Add null servico property
               };
               
               return enhancedDemand as Demand;
@@ -97,7 +98,8 @@ export const useDemandasData = () => {
               origem: null,
               tipo_midia: null,
               bairro: null,
-              autor: null
+              autor: null,
+              servico: null, // Add null servico property
             };
             
             return defaultDemand as Demand;

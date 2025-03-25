@@ -69,6 +69,9 @@ export interface Demand {
   veiculo_imprensa: string | null;
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null | any;
+  servico: {
+    descricao: string;
+  } | null;
 }
 
 export interface DemandResponse {
