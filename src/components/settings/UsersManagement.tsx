@@ -57,7 +57,8 @@ const UsersManagement = () => {
     currentUser: selectedUser,
     setCurrentUser: setSelectedUser,
     handleEditUser,
-    openEditDialog
+    openEditDialog,
+    isSubmitting: isEditSubmitting
   } = useUserEdit(fetchData);
 
   const {
@@ -112,7 +113,8 @@ const UsersManagement = () => {
     handleDeleteUser,
     userActions,
     approving,
-    removing
+    removing,
+    isEditSubmitting
   };
   
   return (

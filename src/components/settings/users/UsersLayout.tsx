@@ -39,6 +39,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   userActions,
   approving,
   removing,
+  isEditSubmitting
 }) => {
   const [statusFilter, setStatusFilter] = useState<string>('todos');
 
@@ -136,6 +137,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         areas={areas}
         cargos={cargos}
         coordenacoes={coordenacoes}
+        isSubmitting={isEditSubmitting}
       />
       
       <DeleteUserDialog 

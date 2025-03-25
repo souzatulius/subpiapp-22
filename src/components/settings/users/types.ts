@@ -72,4 +72,5 @@ export interface UsersLayoutProps {
   userActions: any;
   approving: boolean;
   removing: boolean;
+  isEditSubmitting?: boolean;
 }

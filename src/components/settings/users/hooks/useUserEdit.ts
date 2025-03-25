@@ -7,9 +7,12 @@ import { User, UserFormData } from '../types';
 export const useUserEdit = (fetchData: () => Promise<void>) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleEditUser = async (data: UserFormData) => {
     if (!currentUser?.id) return;
+    
+    setIsSubmitting(true);
     
     try {
       // Clean up data before submission
@@ -19,24 +22,19 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         aniversario: data.aniversario ? data.aniversario.toISOString() : null,
       };
       
-      // Only include fields that are valid (not placeholder values)
-      if (data.cargo_id && data.cargo_id !== 'select-cargo') {
-        cleanData.cargo_id = data.cargo_id;
-      } else {
-        cleanData.cargo_id = null;
-      }
-      
-      if (data.coordenacao_id && data.coordenacao_id !== 'select-coordenacao') {
-        cleanData.coordenacao_id = data.coordenacao_id;
-      } else {
-        cleanData.coordenacao_id = null;
-      }
-      
-      if (data.area_coordenacao_id && data.area_coordenacao_id !== 'select-area') {
-        cleanData.area_coordenacao_id = data.area_coordenacao_id;
-      } else {
-        cleanData.area_coordenacao_id = null;
-      }
+      // Process coordination fields
+      // Set to null if not selected or "select-" default value
+      cleanData.cargo_id = data.cargo_id && !data.cargo_id.startsWith('select-') 
+        ? data.cargo_id 
+        : null;
+        
+      cleanData.coordenacao_id = data.coordenacao_id && !data.coordenacao_id.startsWith('select-') 
+        ? data.coordenacao_id 
+        : null;
+        
+      cleanData.area_coordenacao_id = data.area_coordenacao_id && !data.area_coordenacao_id.startsWith('select-')
+        ? data.area_coordenacao_id 
+        : null;
       
       console.log('Updating user with data:', cleanData);
       
@@ -64,6 +62,8 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         description: error.message || 'Não foi possível atualizar o usuário. Por favor, tente novamente.',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,5 +79,6 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
     setCurrentUser,
     handleEditUser,
     openEditDialog,
+    isSubmitting
   };
 };

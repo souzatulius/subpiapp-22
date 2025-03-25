@@ -15,7 +15,6 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { Loader2 } from 'lucide-react';
 import { User, UserFormData, Area, Cargo } from './types';
-import PositionFields from '@/components/register/form/PositionFields';
 
 interface EditUserDialogProps {
   open: boolean;
@@ -25,6 +24,7 @@ interface EditUserDialogProps {
   areas: Area[];
   cargos: Cargo[];
   coordenacoes?: {coordenacao_id: string, coordenacao: string}[];
+  isSubmitting?: boolean;
 }
 
 const EditUserDialog: React.FC<EditUserDialogProps> = ({
@@ -34,24 +34,23 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   onSubmit,
   areas,
   cargos,
-  coordenacoes = []
+  coordenacoes = [],
+  isSubmitting = false
 }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setValue,
     watch,
     reset
   } = useForm<UserFormData>();
 
-  const role = watch('cargo_id') || '';
   const coordenacao = watch('coordenacao_id') || '';
-  const area = watch('area_coordenacao_id') || '';
   
   // Filter areas based on the selected coordination
   const filteredAreas = React.useMemo(() => {
-    if (!coordenacao) return [];
+    if (!coordenacao || coordenacao === 'select-coordenacao') return [];
     return areas.filter(a => a.coordenacao_id === coordenacao);
   }, [areas, coordenacao]);
 
@@ -82,7 +81,6 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
   const onFormSubmit = async (data: UserFormData) => {
     await onSubmit(data);
-    onOpenChange(false);
   };
 
   return (
@@ -158,6 +156,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
               className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
               onChange={(e) => {
                 setValue('coordenacao_id', e.target.value);
+                // Reset area_coordenacao_id when coordination changes
                 setValue('area_coordenacao_id', '');
               }}
             >
@@ -174,15 +173,15 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="area_coordenacao_id">Supervisão Técnica</Label>
+            <Label htmlFor="area_coordenacao_id">Supervisão Técnica (Opcional)</Label>
             <select
               id="area_coordenacao_id"
               {...register('area_coordenacao_id')}
               className="flex h-12 w-full items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-subpi-gray-text shadow-sm ring-offset-background placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-subpi-blue focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300"
-              disabled={!coordenacao || filteredAreas.length === 0}
+              disabled={!coordenacao || coordenacao === 'select-coordenacao' || filteredAreas.length === 0}
             >
               <option value="select-area">
-                {!coordenacao 
+                {!coordenacao || coordenacao === 'select-coordenacao'
                   ? 'Selecione uma coordenação primeiro' 
                   : filteredAreas.length === 0 
                     ? 'Nenhuma supervisão técnica disponível' 
