@@ -41,6 +41,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     handleSelectChange,
     handleServiceSelect,
     handlePerguntaChange,
+    handleAnexosChange,
     handleSubmit: submitForm,
     nextStep,
     prevStep,
@@ -50,12 +51,12 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   } = useDemandForm(user?.id, onClose);
 
   const handleStepClick = (stepIndex: number) => {
-    // Allow direct navigation to any step
+    // Permitir navegação direta para qualquer etapa
     setActiveStep(stepIndex);
   };
 
   const handleNextStep = () => {
-    // Validate current step
+    // Validar etapa atual
     const errors = validateDemandForm(formData, activeStep);
     setValidationErrors(errors);
     
@@ -72,7 +73,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Validate final step before submission
+    // Validar etapa final antes da submissão
     const errors = validateDemandForm(formData, activeStep);
     setValidationErrors(errors);
     
@@ -132,6 +133,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             handleSelectChange={handleSelectChange}
             handleServiceSelect={handleServiceSelect}
             handlePerguntaChange={handlePerguntaChange}
+            handleAnexosChange={handleAnexosChange}
             areasCoord={areasCoord}
             problemas={problemas}
             filteredServicesBySearch={filteredServicesBySearch}

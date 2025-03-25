@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 
@@ -22,7 +21,8 @@ export const useDemandFormState = (
     bairro_id: '',
     perguntas: ['', '', '', '', ''],
     detalhes_solicitacao: '',
-    arquivo_url: ''
+    arquivo_url: '',
+    anexos: []
   };
 
   const [formData, setFormData] = useState<DemandFormData>(initialFormState);
@@ -34,8 +34,8 @@ export const useDemandFormState = (
 
   // Generate title suggestion based on service and bairro
   useEffect(() => {
-    // Only auto-generate title if we're on step 5 and moving to step 6
-    if (activeStep === 5) {
+    // Gerar sugestão de título quando o usuário avança para a última etapa (resumo)
+    if (activeStep === 6) {
       const selectedService = servicos.find(s => s.id === formData.servico_id);
       const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
       
@@ -119,6 +119,13 @@ export const useDemandFormState = (
     }));
   };
 
+  const handleAnexosChange = (files: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      anexos: files
+    }));
+  };
+
   const nextStep = () => {
     // Check against FORM_STEPS.length - 1 (6) instead of hardcoded value
     if (activeStep < 6) {
@@ -151,6 +158,7 @@ export const useDemandFormState = (
     handleSelectChange,
     handleServiceSelect,
     handlePerguntaChange,
+    handleAnexosChange,
     nextStep,
     prevStep,
     setSelectedDistrito,

@@ -33,17 +33,20 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
     return error ? error.message : '';
   };
   
-  // Check if "Imprensa" is selected
+  // Verifica se a origem está entre as que devem mostrar tipo de mídia
   const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
-  const isImprensaSelected = selectedOrigin?.descricao === "Imprensa";
-  const showVeiculoImprensa = isImprensaSelected && formData.tipo_midia_id;
+  const showMediaFields = selectedOrigin?.descricao === "Imprensa" || 
+                         selectedOrigin?.descricao === "SMSUB" ||
+                         selectedOrigin?.descricao === "SECOM";
+                         
+  const showVeiculoImprensa = showMediaFields && formData.tipo_midia_id;
   
-  // Reset tipo_midia_id when origin is not "Imprensa"
+  // Resetar tipo_midia_id quando a origem não exige este campo
   useEffect(() => {
-    if (!isImprensaSelected && formData.tipo_midia_id) {
+    if (!showMediaFields && formData.tipo_midia_id) {
       handleSelectChange('tipo_midia_id', '');
     }
-  }, [isImprensaSelected, formData.tipo_midia_id]);
+  }, [showMediaFields, formData.tipo_midia_id]);
 
   // Get media type icon based on description
   const getMediaTypeIcon = (descricao: string) => {
@@ -94,7 +97,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
         )}
       </div>
       
-      {isImprensaSelected && (
+      {showMediaFields && (
         <div className="animate-fadeIn">
           <Label 
             htmlFor="tipo_midia_id" 

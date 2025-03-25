@@ -1,4 +1,3 @@
-
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
@@ -16,6 +15,7 @@ export interface DemandFormData {
   perguntas: string[];
   detalhes_solicitacao: string;
   arquivo_url: string;
+  anexos: string[]; // Novo campo para armazenar múltiplos anexos
 }
 
 export interface FormState {
