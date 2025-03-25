@@ -9,11 +9,11 @@ import DemandOrigins from './DemandOrigins';
 import DistrictsAndNeighborhoods from './DistrictsAndNeighborhoods';
 import Announcements from './Announcements';
 import AccessControl from './AccessControl';
-import Notifications from './Notifications';
 import NotificationsSettings from './notifications/NotificationsSettings';
 import Temas from './Temas';
 import CoordinationArea from './coordination/CoordinationArea';
 import CoordinationsList from './coordination/CoordinationsList';
+// Import Problem, Teams components if available
 
 interface SettingsContentProps {
   activeSection: string;
@@ -21,20 +21,25 @@ interface SettingsContentProps {
 
 const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
   return (
-    <div>
+    <div className="bg-white rounded-lg shadow p-6">
       {activeSection === 'usuarios' && <UsersManagement />}
-      {activeSection === 'areas' && <CoordinationAreas />}
-      {activeSection === 'coordenacao' && <CoordinationArea />}
-      {activeSection === 'cargos' && <Positions />}
-      {activeSection === 'servicos' && <Services />}
-      {activeSection === 'tipos_midia' && <MediaTypes />}
-      {activeSection === 'origens_demanda' && <DemandOrigins />}
-      {activeSection === 'distritos_bairros' && <DistrictsAndNeighborhoods />}
-      {activeSection === 'comunicados' && <Announcements />}
-      {activeSection === 'notificacoes' && <NotificationsSettings />}
       {activeSection === 'permissoes' && <AccessControl />}
-      {activeSection === 'temas' && <Temas />}
+      
+      {activeSection === 'cargos' && <Positions />}
+      {activeSection === 'coordenacao' && <CoordinationArea />}
+      {activeSection === 'areas' && <CoordinationAreas />}
       {activeSection === 'coordenacoes_lista' && <CoordinationsList />}
+      {activeSection === 'equipes' && <div className="text-center p-10 text-gray-500">Gerenciamento de Equipes em desenvolvimento</div>}
+      
+      {activeSection === 'origens_demanda' && <DemandOrigins />}
+      {activeSection === 'problemas' && <div className="text-center p-10 text-gray-500">Gerenciamento de Problemas em desenvolvimento</div>}
+      {activeSection === 'tipos_midia' && <MediaTypes />}
+      {activeSection === 'servicos' && <Services />}
+      {activeSection === 'distritos_bairros' && <DistrictsAndNeighborhoods />}
+      {activeSection === 'notificacoes' && <NotificationsSettings />}
+      {activeSection === 'comunicados' && <Announcements />}
+      
+      {activeSection === 'temas' && <Temas />}
     </div>
   );
 };

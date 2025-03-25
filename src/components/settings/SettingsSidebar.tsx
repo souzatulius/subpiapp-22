@@ -3,7 +3,8 @@ import React from 'react';
 import { 
   Users, Layers, Briefcase, AlertTriangle, 
   Image, Globe, MapPin, MessageSquare, Shield, 
-  LayoutDashboard, Bell, FileText
+  LayoutDashboard, Bell, FileText, Building,
+  UserCheck, Settings, FolderTree, Map, Send
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
@@ -17,19 +18,60 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   setActiveSection,
   isMobile = false
 }) => {
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'usuarios', label: 'Usuários', icon: Users },
-    { id: 'areas', label: 'Supervisões Técnicas', icon: Layers },
-    { id: 'cargos', label: 'Cargos', icon: Briefcase },
-    { id: 'problemas', label: 'Problemas', icon: AlertTriangle },
-    { id: 'servicos', label: 'Serviços', icon: FileText },
-    { id: 'tipos_midia', label: 'Tipos de Mídia', icon: Image },
-    { id: 'origens_demanda', label: 'Origem das Demandas', icon: Globe },
-    { id: 'distritos_bairros', label: 'Distritos e Bairros', icon: MapPin },
-    { id: 'comunicados', label: 'Comunicados', icon: MessageSquare },
-    { id: 'notificacoes', label: 'Notificações', icon: Bell },
-    { id: 'permissoes', label: 'Permissões', icon: Shield }
+  // Define the main categories
+  const categories = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+    },
+    {
+      id: 'usuarios',
+      label: 'Gestão de Usuários e Permissões',
+      icon: Users,
+      subcategories: [
+        { id: 'usuarios', label: 'Usuários', icon: Users },
+        { id: 'permissoes', label: 'Permissões', icon: Shield }
+      ]
+    },
+    {
+      id: 'organizacional',
+      label: 'Gestão Organizacional',
+      icon: Building,
+      subcategories: [
+        { id: 'cargos', label: 'Cargos', icon: Briefcase },
+        { id: 'coordenacoes_lista', label: 'Coordenações', icon: Building },
+        { id: 'areas', label: 'Supervisões Técnicas', icon: Layers },
+        { id: 'equipes', label: 'Equipe e Responsabilidades', icon: UserCheck },
+      ]
+    },
+    {
+      id: 'operacional',
+      label: 'Gestão Operacional',
+      icon: Settings,
+      subcategories: [
+        { id: 'demandas', label: 'Demandas', icon: FolderTree, 
+          subItems: [
+            { id: 'origens_demanda', label: 'Origens das Demandas', icon: Globe },
+            { id: 'problemas', label: 'Problemas', icon: AlertTriangle },
+            { id: 'tipos_midia', label: 'Tipos de Mídia', icon: Image },
+            { id: 'servicos', label: 'Serviços', icon: FileText },
+          ]
+        },
+        { id: 'localizacao', label: 'Localização', icon: Map,
+          subItems: [
+            { id: 'distritos_bairros', label: 'Distritos e Bairros', icon: MapPin },
+          ]
+        },
+        { id: 'notificacoes', label: 'Notificações', icon: Bell },
+        { id: 'comunicados', label: 'Avisos e Comunicados', icon: Send },
+      ]
+    },
+    {
+      id: 'temas',
+      label: 'Temas',
+      icon: Image,
+    }
   ];
 
   const handleItemClick = (sectionId: string) => {
@@ -40,22 +82,86 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     }
   };
 
+  // Determine if a category or subcategory is active
+  const isCategoryActive = (category: any) => {
+    if (activeSection === category.id) return true;
+    if (category.subcategories) {
+      return category.subcategories.some((sub: any) => 
+        activeSection === sub.id || 
+        (sub.subItems && sub.subItems.some((item: any) => activeSection === item.id))
+      );
+    }
+    return false;
+  };
+
+  const isSubcategoryActive = (subcategory: any) => {
+    if (activeSection === subcategory.id) return true;
+    if (subcategory.subItems) {
+      return subcategory.subItems.some((item: any) => activeSection === item.id);
+    }
+    return false;
+  };
+
   return (
-    <ul className="space-y-1">
-      {menuItems.map(item => (
-        <li key={item.id}>
+    <div className="space-y-4">
+      {categories.map(category => (
+        <div key={category.id} className="space-y-1">
+          {/* Main category */}
           <button 
             className={`w-full text-left px-4 py-2 rounded-md flex items-center gap-3 ${
-              activeSection === item.id ? 'bg-[#003570] text-white' : 'hover:bg-gray-100'
+              isCategoryActive(category) 
+                ? 'bg-[#003570] text-white font-medium' 
+                : 'hover:bg-gray-100 font-medium'
             }`}
-            onClick={() => handleItemClick(item.id)}
+            onClick={() => handleItemClick(category.id)}
           >
-            <item.icon size={18} />
-            <span className="text-sm font-medium">{item.label}</span>
+            <category.icon size={18} />
+            <span className="text-sm">{category.label}</span>
           </button>
-        </li>
+          
+          {/* Subcategories */}
+          {category.subcategories && isCategoryActive(category) && (
+            <div className="ml-6 border-l border-gray-200 pl-2 space-y-1">
+              {category.subcategories.map(subcategory => (
+                <div key={subcategory.id}>
+                  <button
+                    className={`w-full text-left px-4 py-2 rounded-md flex items-center gap-3 ${
+                      isSubcategoryActive(subcategory) 
+                        ? 'bg-[#0035704d] text-[#003570] font-medium' 
+                        : 'hover:bg-gray-100'
+                    }`}
+                    onClick={() => handleItemClick(subcategory.id)}
+                  >
+                    <subcategory.icon size={16} />
+                    <span className="text-sm">{subcategory.label}</span>
+                  </button>
+                  
+                  {/* Sub-items of subcategories */}
+                  {subcategory.subItems && isSubcategoryActive(subcategory) && (
+                    <div className="ml-6 border-l border-gray-200 pl-2 space-y-1">
+                      {subcategory.subItems.map(item => (
+                        <button
+                          key={item.id}
+                          className={`w-full text-left px-4 py-2 rounded-md flex items-center gap-3 ${
+                            activeSection === item.id 
+                              ? 'bg-[#0035701a] text-[#003570] font-medium' 
+                              : 'hover:bg-gray-100'
+                          }`}
+                          onClick={() => handleItemClick(item.id)}
+                        >
+                          <item.icon size={14} />
+                          <span className="text-sm">{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       ))}
-    </ul>
+    </div>
   );
 };
 

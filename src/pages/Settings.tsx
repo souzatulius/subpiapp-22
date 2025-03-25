@@ -5,10 +5,14 @@ import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import SettingsContent from '@/components/settings/SettingsContent';
 import SettingsDashboard from '@/components/settings/SettingsDashboard';
+import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import BackButton from '@/components/layouts/BackButton';
+import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsSidebarOpen, setSettingsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,10 +32,53 @@ const Settings = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const toggleSettingsSidebar = () => {
+    setSettingsSidebarOpen(!settingsSidebarOpen);
+  };
+
   const handleBackClick = () => {
     // Navigate back to the main settings dashboard
     navigate('/settings');
     setActiveSection('dashboard');
+  };
+
+  // Functions to get section details
+  const getSectionCategory = (section: string) => {
+    if (section === 'dashboard') return 'Dashboard';
+    if (['usuarios', 'permissoes'].includes(section)) return 'Gestão de Usuários e Permissões';
+    if (['cargos', 'coordenacao', 'areas', 'coordenacoes_lista', 'equipes'].includes(section)) return 'Gestão Organizacional';
+    if (['origens_demanda', 'problemas', 'tipos_midia', 'servicos', 'distritos_bairros', 'notificacoes', 'comunicados'].includes(section)) return 'Gestão Operacional';
+    return '';
+  };
+
+  const getSectionTitle = (section: string) => {
+    switch (section) {
+      case 'dashboard': return 'Dashboard';
+      case 'usuarios': return 'Gerenciamento de Usuários';
+      case 'permissoes': return 'Permissões';
+      case 'cargos': return 'Cargos';
+      case 'coordenacao': return 'Coordenações';
+      case 'areas': return 'Supervisões Técnicas';
+      case 'coordenacoes_lista': return 'Lista de Coordenações';
+      case 'equipes': return 'Equipe e Responsabilidades';
+      case 'origens_demanda': return 'Origem das Demandas';
+      case 'problemas': return 'Problemas';
+      case 'tipos_midia': return 'Tipos de Mídia';
+      case 'servicos': return 'Serviços';
+      case 'distritos_bairros': return 'Distritos e Bairros';
+      case 'notificacoes': return 'Configurações de Notificações';
+      case 'comunicados': return 'Avisos e Comunicados';
+      case 'temas': return 'Temas';
+      default: return '';
+    }
+  };
+
+  const getSectionColor = (section: string) => {
+    const category = getSectionCategory(section);
+    if (category === 'Gestão de Usuários e Permissões') return 'text-amber-600';
+    if (category === 'Gestão Organizacional') return 'text-blue-600';
+    if (category === 'Gestão Operacional') return 'text-green-600';
+    return 'text-gray-800';
   };
   
   return (
@@ -41,40 +88,74 @@ const Settings = () => {
       <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar isOpen={sidebarOpen} />
         
-        <main className="flex-1 overflow-auto p-6 relative">
-          {activeSection !== 'dashboard' && (
-            <BackButton 
-              onClick={handleBackClick}
-              className="absolute top-6 left-6 z-10"
-            />
-          )}
-          
-          <div className="max-w-7xl mx-auto">
-            {activeSection === 'dashboard' ? (
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">Ajustes</h1>
-                <SettingsDashboard />
+        <main className="flex-1 overflow-hidden">
+          <div className="flex h-full">
+            {/* Settings Sidebar for desktop */}
+            <div className="hidden md:block w-64 h-full overflow-y-auto border-r border-gray-200 bg-white p-4">
+              <SettingsSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+            </div>
+            
+            {/* Mobile sidebar button and backdrop */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="fixed top-16 left-2 z-30"
+                onClick={toggleSettingsSidebar}
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+              
+              {/* Mobile sidebar */}
+              {settingsSidebarOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 bg-black/30 z-40"
+                    onClick={toggleSettingsSidebar}
+                  />
+                  <div className="fixed top-0 left-0 h-full w-64 z-50 bg-white p-4 overflow-y-auto">
+                    <div className="pb-4 border-b mb-4">
+                      <h2 className="text-lg font-semibold">Configurações</h2>
+                    </div>
+                    <SettingsSidebar 
+                      activeSection={activeSection} 
+                      setActiveSection={setActiveSection} 
+                      isMobile={true}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* Main content area */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="max-w-6xl mx-auto">
+                {activeSection === 'dashboard' ? (
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-6">Configurações</h1>
+                    <SettingsDashboard />
+                  </div>
+                ) : (
+                  <div>
+                    {/* Breadcrumbs */}
+                    <div className="flex items-center mb-2 text-sm">
+                      <span className="cursor-pointer hover:underline" onClick={handleBackClick}>Configurações</span>
+                      <span className="mx-2">/</span>
+                      <span className={`font-medium ${getSectionColor(activeSection)}`}>
+                        {getSectionCategory(activeSection)}
+                      </span>
+                      <span className="mx-2">/</span>
+                      <span className="font-medium">{getSectionTitle(activeSection)}</span>
+                    </div>
+                    
+                    <h1 className={`text-2xl font-bold mb-6 ${getSectionColor(activeSection)}`}>
+                      {getSectionTitle(activeSection)}
+                    </h1>
+                    <SettingsContent activeSection={activeSection} />
+                  </div>
+                )}
               </div>
-            ) : (
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800 mt-4 mb-6 pl-16">
-                  {activeSection === 'areas' && 'Supervisões Técnicas'}
-                  {activeSection === 'coordenacao' && 'Coordenações'}
-                  {activeSection === 'cargos' && 'Cargos'}
-                  {activeSection === 'problemas' && 'Problemas'}
-                  {activeSection === 'servicos' && 'Serviços'}
-                  {activeSection === 'tipos_midia' && 'Tipos de Mídia'}
-                  {activeSection === 'origens_demanda' && 'Origem das Demandas'}
-                  {activeSection === 'distritos_bairros' && 'Distritos e Bairros'}
-                  {activeSection === 'comunicados' && 'Comunicados'}
-                  {activeSection === 'permissoes' && 'Permissões'}
-                  {activeSection === 'notificacoes' && 'Configurações de Notificações'}
-                  {activeSection === 'usuarios' && 'Gerenciamento de Usuários'}
-                  {activeSection === 'temas' && 'Temas'}
-                </h1>
-                <SettingsContent activeSection={activeSection} />
-              </div>
-            )}
+            </div>
           </div>
         </main>
       </div>

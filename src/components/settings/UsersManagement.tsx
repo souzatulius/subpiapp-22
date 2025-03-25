@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUsersManagement } from './users/useUsersManagement';
 import UsersLayout from './users/UsersLayout';
@@ -36,11 +35,9 @@ const UsersManagement = () => {
   const [isRolesDialogOpen, setIsRolesDialogOpen] = useState(false);
   const [userToManageRoles, setUserToManageRoles] = useState<User | null>(null);
 
-  // Fetch coordenacoes
   useEffect(() => {
     const fetchCoordenacoes = async () => {
       try {
-        // Fetch coordenações from the new table
         const { data, error } = await supabase
           .from('coordenacoes')
           .select('id, descricao')
@@ -61,7 +58,6 @@ const UsersManagement = () => {
     fetchCoordenacoes();
   }, []);
 
-  // Initialize user management hooks
   const {
     isEditDialogOpen,
     setIsEditDialogOpen,
@@ -87,23 +83,20 @@ const UsersManagement = () => {
     handleInviteUser
   } = useUserInvite(fetchData);
 
-  const { handleSendPasswordReset: resetPassword } = usePasswordReset();
+  const resetPassword = usePasswordReset();
   const { approveUser, approving } = useUserApproval(fetchData);
   const { removeAccess, removing } = useUserAccessRemoval(fetchData);
 
-  // Handle approval dialog
   const openApprovalDialog = (user: User) => {
     setUserToApprove(user);
     setIsApprovalDialogOpen(true);
   };
   
-  // Handle roles dialog
   const openRolesDialog = (user: User) => {
     setUserToManageRoles(user);
     setIsRolesDialogOpen(true);
   };
 
-  // Wrapper functions to handle type compatibility
   const handleEdit = (user: User) => {
     setSelectedUser(user);
   };
@@ -128,7 +121,6 @@ const UsersManagement = () => {
     resetPassword.handleSendPasswordReset(user);
   };
 
-  // Initialize userActions
   const userActions = useUserActions({
     setIsEditDialogOpen,
     setSelectedUser: handleEdit,
@@ -139,7 +131,6 @@ const UsersManagement = () => {
     removeAccess: handleRemoveAccess
   });
 
-  // Pass all necessary props to UsersLayout
   const usersManagementProps = {
     users: filteredUsers || users,
     loading: isLoading || loading,
@@ -172,7 +163,6 @@ const UsersManagement = () => {
     <div>
       <UsersLayout {...usersManagementProps} />
       
-      {/* User Approval Dialog */}
       <UserApprovalDialog
         open={isApprovalDialogOpen}
         onOpenChange={setIsApprovalDialogOpen}
@@ -181,7 +171,6 @@ const UsersManagement = () => {
         approving={approving}
       />
       
-      {/* User Roles Dialog */}
       <UserRolesDialog
         open={isRolesDialogOpen}
         onOpenChange={setIsRolesDialogOpen}
