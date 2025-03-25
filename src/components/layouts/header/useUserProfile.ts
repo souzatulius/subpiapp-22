@@ -3,26 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-
-export interface UserProfile {
-  nome_completo: string;
-  cargo?: string;
-  supervisao_tecnica?: string;
-  coordenacao?: string;
-  foto_perfil_url?: string;
-  whatsapp?: string;
-  aniversario?: string;
-  cargo_id?: string;
-  supervisao_tecnica_id?: string;
-  coordenacao_id?: string;
-  cargos?: {
-    descricao: string;
-  };
-  supervisao_tecnica_info?: {
-    descricao: string;
-    coordenacao_id?: string;
-  };
-}
+import { UserProfile } from '@/types/common';
 
 export const useUserProfile = () => {
   const { user } = useAuth();
@@ -46,7 +27,8 @@ export const useUserProfile = () => {
           coordenacao_id,
           foto_perfil_url,
           whatsapp,
-          aniversario
+          aniversario,
+          email
         `)
         .eq('id', user.id)
         .single();
@@ -102,13 +84,16 @@ export const useUserProfile = () => {
       }
       
       setUserProfile({
+        id: user.id,
         nome_completo: userData.nome_completo,
         cargo: cargoInfo.descricao,
         supervisao_tecnica: supervisaoTecnicaInfo.descricao,
         coordenacao: coordenacaoInfo.descricao,
         foto_perfil_url: userData.foto_perfil_url,
+        avatar_url: userData.foto_perfil_url, // Adicionando avatar_url como alias
         whatsapp: userData.whatsapp,
         aniversario: userData.aniversario,
+        email: userData.email,
         cargo_id: userData.cargo_id,
         supervisao_tecnica_id: userData.supervisao_tecnica_id,
         coordenacao_id: userData.coordenacao_id,

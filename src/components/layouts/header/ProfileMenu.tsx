@@ -39,7 +39,7 @@ const ProfileMenu: React.FC = () => {
   }
 
   const displayName = userProfile?.nome_completo || 'Usuário';
-  const photoUrl = userProfile?.avatar_url || '';
+  const photoUrl = userProfile?.foto_perfil_url || '';
 
   return (
     <DropdownMenu>

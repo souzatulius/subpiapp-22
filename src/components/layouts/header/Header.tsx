@@ -2,7 +2,7 @@
 import React from 'react';
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProfileMenu } from '.';
+import ProfileMenu from './ProfileMenu';
 
 interface HeaderProps {
   showControls?: boolean;

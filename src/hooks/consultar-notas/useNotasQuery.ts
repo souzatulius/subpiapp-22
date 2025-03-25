@@ -5,7 +5,33 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { startOfDay, endOfDay, isAfter, isBefore, isEqual } from 'date-fns';
 import { useCurrentUser } from '@/components/settings/access-control/hooks/useCurrentUser';
-import { NotaOficial } from './types';
+import { NotaOficial } from '@/types/nota';
+
+interface RawNotaOficial {
+  id: string;
+  titulo: string;
+  texto: string;
+  status: string;
+  criado_em: string;
+  atualizado_em: string;
+  autor_id: string;
+  aprovador_id?: string;
+  supervisao_tecnica_id: string;
+  demanda_id?: string;
+  problema_id: string;
+  autor?: {
+    id: string;
+    nome_completo: string;
+  } | null;
+  aprovador?: {
+    id: string;
+    nome_completo: string;
+  } | null;
+  supervisao_tecnica?: {
+    id: string;
+    descricao: string;
+  } | null;
+}
 
 export const useNotasQuery = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,33 +73,35 @@ export const useNotasQuery = () => {
             atualizado_em,
             autor_id,
             aprovador_id,
-            area_coordenacao_id,
+            supervisao_tecnica_id,
             demanda_id,
+            problema_id,
             autor:autor_id(id, nome_completo),
             aprovador:aprovador_id(id, nome_completo),
-            area_coordenacao:area_coordenacao_id(id, descricao)
+            supervisao_tecnica:supervisao_tecnica_id(id, descricao)
           `)
-          .neq('status', 'excluida') // Ignorar notas excluídas
-          .order('criado_em', { ascending: false });
+          .neq('status', 'excluida'); // Ignorar notas excluídas
 
         if (statusFilter !== 'all') {
           query = query.eq('status', statusFilter);
         }
 
         if (areaFilter !== 'all') {
-          query = query.eq('area_coordenacao_id', areaFilter);
+          query = query.eq('supervisao_tecnica_id', areaFilter);
         }
+
+        query = query.order('criado_em', { ascending: false });
 
         const { data, error } = await query;
 
         if (error) throw error;
 
         // Cast the data to the expected type with proper formatting for nullable fields
-        return (data || []).map(nota => ({
+        return (data || []).map((nota: RawNotaOficial) => ({
           ...nota,
           autor: nota.autor || { id: '', nome_completo: 'Não informado' },
           aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
-          area_coordenacao: nota.area_coordenacao || { id: '', descricao: 'Não informada' }
+          supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' }
         })) as NotaOficial[];
       } catch (error: any) {
         console.error('Erro ao carregar notas:', error);
@@ -96,7 +124,7 @@ export const useNotasQuery = () => {
         nota.titulo?.toLowerCase().includes(searchLower) ||
         nota.texto?.toLowerCase().includes(searchLower) ||
         nota.autor?.nome_completo?.toLowerCase().includes(searchLower) ||
-        nota.area_coordenacao?.descricao?.toLowerCase().includes(searchLower) ||
+        nota.supervisao_tecnica?.descricao?.toLowerCase().includes(searchLower) ||
         nota.status?.toLowerCase().includes(searchLower)
       )) {
         return false;
