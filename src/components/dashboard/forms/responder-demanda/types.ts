@@ -1,3 +1,4 @@
+
 export interface Demanda {
   id: string;
   titulo: string;
@@ -22,6 +23,8 @@ export interface Demanda {
   prazo_resposta: string;
   detalhes_solicitacao?: string;
   perguntas?: Record<string, string> | string[] | null;
+  tem_protocolo_156?: boolean;
+  numero_protocolo_156?: string;
 }
 
 export interface Area {

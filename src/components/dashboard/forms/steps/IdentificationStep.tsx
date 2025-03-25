@@ -1,37 +1,53 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import TemaSelector from './identification/TemaSelector';
-import DetalhesInput from './identification/DetalhesInput';
+import ServiceSearch from './identification/ServiceSearch';
 import Protocolo156 from './identification/Protocolo156';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 export interface IdentificationStepProps {
-  formData: {
-    problema_id: string;
-    detalhes_solicitacao: string;
-    tem_protocolo_156: boolean;
-    numero_protocolo_156?: string;
-  };
+  formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
+  handleServiceSelect: (serviceId: string) => void;
   problemas: any[];
+  filteredServicesBySearch: any[];
+  serviceSearch: string;
+  servicos: any[];
   errors?: ValidationError[];
-  // These props are passed but not used in this component anymore
-  handleServiceSelect?: (serviceId: string) => void;
-  filteredServicesBySearch?: any[];
-  serviceSearch?: string;
-  servicos?: any[];
 }
 
 const IdentificationStep: React.FC<IdentificationStepProps> = ({
   formData,
   handleChange,
   handleSelectChange,
+  handleServiceSelect,
   problemas,
+  filteredServicesBySearch,
+  serviceSearch,
+  servicos,
   errors = []
 }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
+  const selectedService = formData.servico_id 
+    ? servicos.find(s => s.id === formData.servico_id) 
+    : null;
+  
+  const handleServiceRemove = () => {
+    handleSelectChange('servico_id', '');
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <Protocolo156
+        temProtocolo156={formData.tem_protocolo_156}
+        numeroProtocolo156={formData.numero_protocolo_156}
+        handleChange={handleChange}
+        handleSelectChange={handleSelectChange}
+        errors={errors}
+      />
+      
       <TemaSelector
         problemas={problemas}
         selectedTemaId={formData.problema_id}
@@ -39,19 +55,19 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
         errors={errors}
       />
       
-      <Protocolo156
-        temProtocolo156={formData.tem_protocolo_156}
-        numeroProtocolo156={formData.numero_protocolo_156 || ''}
-        handleChange={handleChange}
-        handleSelectChange={handleSelectChange}
-        errors={errors}
-      />
-      
-      <DetalhesInput
-        value={formData.detalhes_solicitacao}
-        handleChange={handleChange}
-        errors={errors}
-      />
+      {formData.problema_id && (
+        <ServiceSearch
+          serviceSearch={serviceSearch}
+          handleChange={handleChange}
+          filteredServicesBySearch={filteredServicesBySearch}
+          handleServiceSelect={handleServiceSelect}
+          selectedService={selectedService}
+          handleServiceRemove={handleServiceRemove}
+          errors={errors}
+          isPopoverOpen={isPopoverOpen}
+          setIsPopoverOpen={setIsPopoverOpen}
+        />
+      )}
     </div>
   );
 };

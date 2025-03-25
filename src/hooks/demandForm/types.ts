@@ -1,8 +1,7 @@
-
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
-  servico_id?: string; // Make optional
+  servico_id: string;
   origem_id: string;
   tipo_midia_id: string;
   prioridade: string;
@@ -16,9 +15,9 @@ export interface DemandFormData {
   perguntas: string[];
   detalhes_solicitacao: string;
   arquivo_url: string;
-  anexos: string[]; // Added property for multiple attachments
-  tem_protocolo_156: boolean; // Novo campo para indicar se existe protocolo 156
-  numero_protocolo_156?: string; // Novo campo para armazenar o número do protocolo 156 (opcional)
+  anexos: string[];
+  tem_protocolo_156: boolean;
+  numero_protocolo_156: string;
 }
 
 export interface FormState {
