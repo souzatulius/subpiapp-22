@@ -3,7 +3,7 @@ import React from 'react';
 import { 
   Users, Layers, Briefcase, FileText, 
   Image, Globe, MapPin, MessageSquare, Shield, 
-  LayoutDashboard, Bell
+  LayoutDashboard, Bell, AlertTriangle
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
@@ -22,6 +22,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     { id: 'usuarios', label: 'Usuários', icon: Users },
     { id: 'areas', label: 'Áreas de Coordenação', icon: Layers },
     { id: 'cargos', label: 'Cargos', icon: Briefcase },
+    { id: 'problemas', label: 'Problemas', icon: AlertTriangle },
     { id: 'servicos', label: 'Serviços', icon: FileText },
     { id: 'tipos_midia', label: 'Tipos de Mídia', icon: Image },
     { id: 'origens_demanda', label: 'Origem das Demandas', icon: Globe },

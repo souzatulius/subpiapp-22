@@ -736,21 +736,35 @@ export type Database = {
       }
       problemas: {
         Row: {
+          area_coordenacao_id: string
+          atualizado_em: string | null
           criado_em: string
           descricao: string
           id: string
         }
         Insert: {
+          area_coordenacao_id: string
+          atualizado_em?: string | null
           criado_em?: string
           descricao: string
           id?: string
         }
         Update: {
+          area_coordenacao_id?: string
+          atualizado_em?: string | null
           criado_em?: string
           descricao?: string
           id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "problemas_area_coordenacao_id_fkey"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ranking_ordens_servico: {
         Row: {
@@ -883,18 +897,21 @@ export type Database = {
       }
       servicos: {
         Row: {
+          area_coordenacao_id: string | null
           criado_em: string
           descricao: string
           id: string
           problema_id: string
         }
         Insert: {
+          area_coordenacao_id?: string | null
           criado_em?: string
           descricao: string
           id?: string
           problema_id: string
         }
         Update: {
+          area_coordenacao_id?: string | null
           criado_em?: string
           descricao?: string
           id?: string
@@ -906,6 +923,13 @@ export type Database = {
             columns: ["problema_id"]
             isOneToOne: false
             referencedRelation: "problemas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicos_area_coordenacao_id_fkey1"
+            columns: ["area_coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
             referencedColumns: ["id"]
           },
         ]

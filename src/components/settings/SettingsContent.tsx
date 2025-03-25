@@ -11,6 +11,7 @@ import Announcements from './Announcements';
 import AccessControl from './AccessControl';
 import Notifications from './Notifications';
 import NotificationsSettings from './notifications/NotificationsSettings';
+import Problems from './Problems';
 
 interface SettingsContentProps {
   activeSection: string;
@@ -29,6 +30,7 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
       {activeSection === 'comunicados' && <Announcements />}
       {activeSection === 'notificacoes' && <NotificationsSettings />}
       {activeSection === 'permissoes' && <AccessControl />}
+      {activeSection === 'problemas' && <Problems />}
     </div>
   );
 };

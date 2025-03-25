@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Bell, Users, Briefcase, FileStack, Image, Inbox, MapPin } from 'lucide-react';
+import { Bell, Users, Briefcase, FileStack, Image, Inbox, MapPin, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const SettingsDashboard = () => {
@@ -24,6 +25,13 @@ const SettingsDashboard = () => {
         title="Cargos"
         description="Adicione, edite e gerencie os cargos disponíveis"
         to="/settings?tab=cargos"
+      />
+      
+      <SettingsCard
+        icon={<AlertTriangle className="h-8 w-8" />}
+        title="Problemas"
+        description="Gerencie os problemas associados às áreas de coordenação"
+        to="/settings?tab=problemas"
       />
       
       <SettingsCard
