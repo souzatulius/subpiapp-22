@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,7 +56,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           type="email"
           className="rounded-xl border-gray-300 bg-gray-100"
           {...register('email', { required: 'Email é obrigatório' })}
-          disabled // Email não pode ser alterado
+          disabled
         />
       </div>
 
@@ -91,7 +90,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione um cargo" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
+            <SelectItem value="no-selection">Selecione um cargo</SelectItem>
             {cargos.map(cargo => (
               <SelectItem key={cargo.id} value={cargo.id}>
                 {cargo.descricao}
@@ -110,7 +109,6 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           value={watch('coordenacao_id')}
           onValueChange={(value) => {
             setValue('coordenacao_id', value);
-            // Reset supervisao_tecnica_id when coordination changes
             setValue('supervisao_tecnica_id', '');
           }}
         >
@@ -118,7 +116,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione uma coordenação" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
+            <SelectItem value="no-coord">Selecione uma coordenação</SelectItem>
             {coordenacoes.map(coord => (
               <SelectItem key={coord.id} value={coord.id}>
                 {coord.descricao}
@@ -136,11 +134,11 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
         <Select
           value={watch('supervisao_tecnica_id')}
           onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
-          disabled={!coordenacao || coordenacao === 'select-coordenacao'}
+          disabled={!coordenacao || coordenacao === 'no-coord'}
         >
           <SelectTrigger id="supervisao_tecnica_id" className="rounded-xl border-gray-300 h-12">
             <SelectValue placeholder={
-              !coordenacao || coordenacao === 'select-coordenacao'
+              !coordenacao || coordenacao === 'no-coord'
                 ? 'Selecione uma coordenação primeiro' 
                 : filteredSupervisoes.length === 0 
                   ? 'Nenhuma supervisão técnica disponível' 
@@ -148,17 +146,17 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             } />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            {!coordenacao || coordenacao === 'select-coordenacao' ? (
-              <SelectItem value="select-supervisao">
+            {!coordenacao || coordenacao === 'no-coord' ? (
+              <SelectItem value="no-supervisao">
                 Selecione uma coordenação primeiro
               </SelectItem>
             ) : filteredSupervisoes.length === 0 ? (
-              <SelectItem value="select-supervisao">
+              <SelectItem value="no-supervisoes">
                 Nenhuma supervisão técnica disponível
               </SelectItem>
             ) : (
               <>
-                <SelectItem value="select-supervisao">Selecione uma supervisão técnica</SelectItem>
+                <SelectItem value="no-selection-supervisao">Selecione uma supervisão técnica</SelectItem>
                 {filteredSupervisoes.map(supervisao => (
                   <SelectItem key={supervisao.id} value={supervisao.id}>
                     {supervisao.descricao}

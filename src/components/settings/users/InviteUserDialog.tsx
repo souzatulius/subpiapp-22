@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -62,7 +63,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
   const coordenacaoId = form.watch('coordenacao_id');
   
   useEffect(() => {
-    if (coordenacaoId && coordenacaoId !== 'select-coordenacao') {
+    if (coordenacaoId && coordenacaoId !== 'no-select-coord') {
       const filtered = areas.filter(area => area.coordenacao_id === coordenacaoId);
       setFilteredAreas(filtered);
       
@@ -79,15 +80,15 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
     try {
       setIsSubmitting(true);
 
-      if (data.cargo_id === 'select-cargo') {
+      if (data.cargo_id === 'no-select-cargo') {
         data.cargo_id = undefined;
       }
       
-      if (data.coordenacao_id === 'select-coordenacao') {
+      if (data.coordenacao_id === 'no-select-coord') {
         data.coordenacao_id = undefined;
       }
       
-      if (data.supervisao_tecnica_id === 'select-area') {
+      if (data.supervisao_tecnica_id === 'no-select-area') {
         data.supervisao_tecnica_id = undefined;
       }
       
@@ -171,7 +172,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                           <SelectValue placeholder="Selecione um cargo" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                          <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
+                          <SelectItem value="no-select-cargo">Selecione um cargo</SelectItem>
                           {cargos.map(cargo => (
                             <SelectItem key={cargo.id} value={cargo.id}>
                               {cargo.descricao}
@@ -203,7 +204,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                           <SelectValue placeholder="Selecione uma coordenação" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                          <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
+                          <SelectItem value="no-select-coord">Selecione uma coordenação</SelectItem>
                           {coordenacoes.map(coord => (
                             <SelectItem key={coord.coordenacao_id} value={coord.coordenacao_id}>
                               {coord.coordenacao}
@@ -227,11 +228,11 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={!form.getValues('coordenacao_id') || filteredAreas.length === 0 || form.getValues('coordenacao_id') === 'select-coordenacao'}
+                        disabled={!form.getValues('coordenacao_id') || filteredAreas.length === 0 || form.getValues('coordenacao_id') === 'no-select-coord'}
                       >
                         <SelectTrigger className="h-12 rounded-xl border-gray-300">
                           <SelectValue placeholder={
-                            !form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'select-coordenacao'
+                            !form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'no-select-coord'
                               ? "Selecione uma coordenação primeiro"
                               : filteredAreas.length === 0
                               ? "Nenhuma supervisão técnica para esta coordenação"
@@ -239,18 +240,24 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                           } />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                          <SelectItem value="select-area">
-                            {!form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'select-coordenacao'
-                              ? "Selecione uma coordenação primeiro"
-                              : filteredAreas.length === 0
-                              ? "Nenhuma supervisão técnica para esta coordenação"
-                              : "Selecione uma supervisão técnica"}
-                          </SelectItem>
-                          {filteredAreas.map(area => (
-                            <SelectItem key={area.id} value={area.id}>
-                              {area.descricao}
+                          {!form.getValues('coordenacao_id') || form.getValues('coordenacao_id') === 'no-select-coord' ? (
+                            <SelectItem value="no-coord-selected">
+                              Selecione uma coordenação primeiro
                             </SelectItem>
-                          ))}
+                          ) : filteredAreas.length === 0 ? (
+                            <SelectItem value="no-areas-available">
+                              Nenhuma supervisão técnica para esta coordenação
+                            </SelectItem>
+                          ) : (
+                            <>
+                              <SelectItem value="no-select-area">Selecione uma supervisão técnica</SelectItem>
+                              {filteredAreas.map(area => (
+                                <SelectItem key={area.id} value={area.id}>
+                                  {area.descricao}
+                                </SelectItem>
+                              ))}
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </FormControl>
