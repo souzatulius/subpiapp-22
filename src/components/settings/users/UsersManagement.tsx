@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUsersManagement } from './useUsersManagement';
 import UsersLayout from './UsersLayout';
-import { useUserActions } from './useUserActions';
 import { useUserEdit } from './hooks/useUserEdit';
 import { useUserDelete } from './hooks/useUserDelete';
 import { usePasswordReset } from './hooks/usePasswordReset';
@@ -56,32 +55,34 @@ const UsersManagement = () => {
     userToDelete,
     setUserToDelete,
     handleDeleteUser,
-    openDeleteDialog,
-    isSubmitting: isDeleteSubmitting
+    deleteUser
   } = useUserDelete(fetchData);
 
   // Password reset functionality
   const {
-    handleResetPassword
+    resetting,
+    handleSendPasswordReset
   } = usePasswordReset();
+
+  // User approval state
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
+  const [userToApprove, setUserToApprove] = useState<User | null>(null);
+  const [roleName, setRoleName] = useState('leitor');
 
   // User approval functionality
   const {
-    isApprovalDialogOpen,
-    setIsApprovalDialogOpen,
-    userToApprove,
-    setUserToApprove,
-    handleApproveUser,
-    openApprovalDialog,
-    roleName,
-    setRoleName,
-    approving
+    approving,
+    approveUser
   } = useUserApproval(fetchData);
+
+  const handleApproveUser = (userId: string, userName: string, userEmail: string, role: string) => {
+    approveUser(userId, userName, userEmail, role);
+  };
 
   // User access removal functionality
   const {
-    handleRemoveAccess,
-    removing
+    removing,
+    removeAccess
   } = useUserAccessRemoval(fetchData);
 
   // User roles management
@@ -93,14 +94,50 @@ const UsersManagement = () => {
     closeRolesDialog
   } = useUserRolesManagement();
 
+  // Open approval dialog
+  const openApprovalDialog = (user: User) => {
+    setUserToApprove(user);
+    setIsApprovalDialogOpen(true);
+  };
+
+  // Handle user actions
+  const handleEdit = (user: User) => {
+    openEditDialog(user);
+  };
+
+  const handleDelete = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleResetPassword = (user: User) => {
+    handleSendPasswordReset(user);
+  };
+
+  const handleApprove = (user: User, roleName?: string) => {
+    if (roleName) {
+      approveUser(user.id, user.nome_completo, user.email, roleName);
+    } else {
+      openApprovalDialog(user);
+    }
+  };
+
+  const handleRemoveAccess = (user: User) => {
+    removeAccess(user);
+  };
+
+  const handleManageRoles = (user: User) => {
+    openRolesDialog(user);
+  };
+
   // Combined user actions
   const userActions = {
-    onEdit: openEditDialog,
-    onDelete: openDeleteDialog,
-    onResetPassword: handleResetPassword,
-    onApprove: openApprovalDialog,
-    onRemoveAccess: handleRemoveAccess,
-    onManageRoles: openRolesDialog
+    handleEdit,
+    handleDelete,
+    handleResetPassword,
+    handleApprove,
+    handleRemoveAccess,
+    handleManageRoles
   };
 
   // Load user data on component mount
@@ -111,13 +148,13 @@ const UsersManagement = () => {
   return (
     <>
       <UsersLayout
-        users={users}
-        loading={loading || isLoading}
+        users={filteredUsers || users}
+        loading={isLoading || loading}
         filter={searchQuery}
         setFilter={setSearchQuery}
         supervisoesTecnicas={supervisoesTecnicas}
         cargos={cargos}
-        coordenacoes={[]} // Coordenações serão buscadas em outro endpoint se necessário
+        coordenacoes={[]} 
         isInviteDialogOpen={isInviteDialogOpen}
         setIsInviteDialogOpen={setIsInviteDialogOpen}
         handleInviteUser={handleInviteUser}
@@ -140,10 +177,8 @@ const UsersManagement = () => {
         open={isApprovalDialogOpen}
         onOpenChange={setIsApprovalDialogOpen}
         user={userToApprove}
-        roleName={roleName}
-        setRoleName={setRoleName}
         onApprove={handleApproveUser}
-        isSubmitting={approving}
+        approving={approving}
       />
 
       {/* Roles Management Dialog */}

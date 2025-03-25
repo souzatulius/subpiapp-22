@@ -7,10 +7,12 @@ import { User } from '../types';
 export const useUserDelete = (fetchData: () => Promise<void>) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleDeleteUser = async () => {
     if (!userToDelete?.id) return;
     
+    setIsSubmitting(true);
     try {
       const { error } = await supabase
         .from('usuarios')
@@ -36,7 +38,14 @@ export const useUserDelete = (fetchData: () => Promise<void>) => {
         description: error.message || 'Não foi possível excluir o usuário. Por favor, tente novamente.',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const openDeleteDialog = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
   };
 
   const deleteUser = (user: User) => {
@@ -51,5 +60,7 @@ export const useUserDelete = (fetchData: () => Promise<void>) => {
     setUserToDelete,
     handleDeleteUser,
     deleteUser,
+    openDeleteDialog,
+    isSubmitting
   };
 };

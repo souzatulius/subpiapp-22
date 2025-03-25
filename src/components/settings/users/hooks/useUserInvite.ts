@@ -14,9 +14,12 @@ interface InviteUserData {
 
 export const useUserInvite = (fetchData: () => Promise<void>) => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInviteUser = async (data: InviteUserData) => {
     try {
+      setIsSubmitting(true);
+      
       // Prepare email with domain if needed
       const email = completeEmailWithDomain(data.email);
       
@@ -76,12 +79,15 @@ export const useUserInvite = (fetchData: () => Promise<void>) => {
         description: error.message || 'Não foi possível enviar o convite. Por favor, tente novamente.',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return {
     isInviteDialogOpen,
     setIsInviteDialogOpen,
-    handleInviteUser
+    handleInviteUser,
+    isSubmitting
   };
 };
