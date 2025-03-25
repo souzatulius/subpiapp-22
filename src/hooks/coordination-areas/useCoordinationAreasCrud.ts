@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -21,7 +22,8 @@ export const useCoordinationAreasCrud = (
           .rpc('insert_supervision_with_coordination', {
             p_descricao: data.descricao,
             p_sigla: data.sigla || null,
-            p_coordenacao_id: data.coordenacao_id
+            p_coordenacao_id: data.coordenacao_id,
+            p_is_supervision: true // Explicitly set as supervision
           });
           
         if (rpcError) throw rpcError;
@@ -37,13 +39,13 @@ export const useCoordinationAreasCrud = (
         
         setAreas([...areas, newArea]);
       } else {
-        // If no coordenacao_id, insert directly
+        // If no coordenacao_id, insert directly and explicitly mark as supervision
         const { data: newArea, error } = await supabase
           .from('areas_coordenacao')
           .insert({
             descricao: data.descricao,
             sigla: data.sigla || null,
-            is_supervision: true // Mark as supervision, not coordination
+            is_supervision: true // Explicitly mark as supervision
           })
           .select()
           .single();

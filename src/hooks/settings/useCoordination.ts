@@ -24,7 +24,7 @@ export const useCoordination = () => {
         .from('areas_coordenacao')
         .select('*')
         .is('coordenacao_id', null) // Select only top-level coordinations
-        .is('is_supervision', false) // Only get items marked as coordinations
+        .is('is_supervision', false) // Only get items marked as coordinations, explicitly false
         .order('descricao');
 
       if (error) throw error;
@@ -53,7 +53,7 @@ export const useCoordination = () => {
         .from('areas_coordenacao')
         .insert({
           ...data,
-          is_supervision: false // Mark as coordination, not supervision
+          is_supervision: false // Explicitly mark as coordination, not supervision
         })
         .select()
         .single();

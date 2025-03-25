@@ -16,7 +16,7 @@ export const useCoordinationAreasData = () => {
       const { data, error } = await supabase
         .from('areas_coordenacao')
         .select('id, descricao, sigla, coordenacao, coordenacao_id')
-        .eq('is_supervision', true) // Only get items marked as supervisions
+        .eq('is_supervision', true) // Explicitly filter only items marked as supervisions
         .order('descricao');
 
       if (error) throw error;
