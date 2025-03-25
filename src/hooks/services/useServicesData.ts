@@ -17,7 +17,7 @@ export function useServicesData() {
   const fetchAreas = async () => {
     try {
       const { data, error } = await supabase
-        .from('areas_coordenacao')
+        .from('supervisoes_tecnicas')
         .select('*')
         .order('descricao', { ascending: true });
       
@@ -36,7 +36,7 @@ export function useServicesData() {
         .from('servicos')
         .select(`
           *,
-          areas_coordenacao(id, descricao)
+          supervisao_tecnica:supervisao_id(id, descricao)
         `)
         .order('descricao', { ascending: true });
       
@@ -45,7 +45,8 @@ export function useServicesData() {
       // Transform the data to match our Service type
       const transformedData: Service[] = (data || []).map((item: any) => ({
         ...item,
-        areas_coordenacao: item.areas_coordenacao
+        supervisao_tecnica: item.supervisao_tecnica,
+        supervisao_tecnica_id: item.supervisao_id
       }));
       
       setServices(transformedData);

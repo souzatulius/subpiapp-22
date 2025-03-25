@@ -94,6 +94,7 @@ const UsersManagement = () => {
   };
   
   const openRolesDialog = (user: User) => {
+    console.log('Opening roles dialog for user:', user);
     setUserToManageRoles(user);
     setIsRolesDialogOpen(true);
   };

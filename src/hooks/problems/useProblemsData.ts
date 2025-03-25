@@ -6,44 +6,36 @@ import { Problem, Area } from './types';
 
 export const useProblemsData = () => {
   const [problems, setProblems] = useState<Problem[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProblems = useCallback(async () => {
     try {
       setIsLoading(true);
       
-      // Fetch problems with coordination area information
+      // Fetch problems with supervision information
       const { data: problemsData, error: problemsError } = await supabase
         .from('problemas')
         .select(`
           *,
-          areas_coordenacao:supervisao_tecnica_id (
-            id, 
-            descricao,
-            coordenacao,
-            coordenacao_id
-          )
+          supervisao_tecnica:supervisao_tecnica_id(id, descricao, coordenacao_id)
         `)
         .order('descricao');
 
       if (problemsError) throw problemsError;
       
-      // Ensure properly typed data before setting state
-      const typedProblems: Problem[] = problemsData ? problemsData.map(problem => ({
-        id: problem.id,
-        descricao: problem.descricao,
-        supervisao_tecnica_id: problem.supervisao_tecnica_id,
-        areas_coordenacao: problem.areas_coordenacao ? {
-          id: problem.areas_coordenacao.id || '',
-          descricao: problem.areas_coordenacao.descricao || '',
-          coordenacao: problem.areas_coordenacao.coordenacao || '',
-          coordenacao_id: problem.areas_coordenacao.coordenacao_id || ''
-        } : undefined,
-        criado_em: problem.criado_em,
-        atualizado_em: problem.atualizado_em
-      })) : [];
+      // Fetch areas for the form selector
+      const { data: areasData, error: areasError } = await supabase
+        .from('supervisoes_tecnicas')
+        .select('*')
+        .order('descricao');
+        
+      if (areasError) throw areasError;
       
-      setProblems(typedProblems);
+      console.log('Fetched problems:', problemsData);
+      
+      setProblems(problemsData || []);
+      setAreas(areasData || []);
     } catch (error: any) {
       console.error('Erro ao buscar problemas:', error);
       toast({
@@ -58,6 +50,7 @@ export const useProblemsData = () => {
 
   return {
     problems,
+    areas,
     isLoading,
     fetchProblems
   };

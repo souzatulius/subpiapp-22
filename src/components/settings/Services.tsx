@@ -40,7 +40,7 @@ const Services = () => {
   };
 
   const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
-    if (!editingService) return Promise.reject(new Error('Nenhum problema selecionado'));
+    if (!editingService) return Promise.reject(new Error('Nenhum serviço selecionado'));
     
     await updateService(editingService.id, data);
     closeEditForm();
@@ -81,13 +81,13 @@ const Services = () => {
   return (
     <div>
       <DataTable
-        title="Problemas"
+        title="Serviços"
         data={services}
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
         onDelete={handleDelete}
-        filterPlaceholder="Filtrar problemas..."
+        filterPlaceholder="Filtrar serviços..."
         renderForm={renderForm}
         isLoading={loading}
       />

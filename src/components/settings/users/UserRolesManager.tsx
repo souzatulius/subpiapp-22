@@ -69,11 +69,14 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
   const [selectedSuper, setSelectedSuper] = useState<string>('');
   const [filteredSupervisoes, setFilteredSupervisoes] = useState<SupervisaoTecnica[]>([]);
   
+  console.log('UserRolesManager rendered, userId:', userId);
+  
   // Fetch all available roles, coordenações, and supervisões
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log('Fetching roles data...');
         
         // Fetch roles
         const { data: rolesData, error: rolesError } = await supabase
@@ -82,6 +85,7 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
           .order('id');
           
         if (rolesError) throw rolesError;
+        console.log('Roles data:', rolesData);
         setRoles(rolesData || []);
         
         // Fetch coordenações
@@ -91,6 +95,7 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
           .order('descricao');
           
         if (coordError) throw coordError;
+        console.log('Coordenações data:', coordData);
         setCoordenacoes(coordData || []);
         
         // Fetch supervisões
@@ -100,6 +105,7 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
           .order('descricao');
           
         if (superError) throw superError;
+        console.log('Supervisões data:', superData);
         setSupervisoes(superData || []);
         
         await fetchUserRoles();
@@ -110,7 +116,9 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
       }
     };
     
-    fetchData();
+    if (userId) {
+      fetchData();
+    }
   }, [userId]);
   
   // Update filtered supervisões when coordenação changes
@@ -127,7 +135,10 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
   }, [selectedCoord, supervisoes]);
 
   async function fetchUserRoles() {
+    if (!userId) return;
+    
     try {
+      console.log('Fetching user roles for userId:', userId);
       const { data, error } = await supabase
         .from('usuario_roles')
         .select(`
@@ -142,6 +153,7 @@ const UserRolesManager: React.FC<UserRolesManagerProps> = ({ userId, onRolesChan
         .eq('usuario_id', userId);
         
       if (error) throw error;
+      console.log('User roles data:', data);
       setUserRoles(data || []);
       
       if (onRolesChange) {
