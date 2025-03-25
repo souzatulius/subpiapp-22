@@ -18,7 +18,7 @@ export interface UserProfile {
   cargos?: {
     descricao: string;
   };
-  supervisao_tecnica?: {
+  supervisao_tecnica_info?: {
     descricao: string;
     coordenacao_id?: string;
   };
@@ -113,7 +113,7 @@ export const useUserProfile = () => {
         supervisao_tecnica_id: userData.supervisao_tecnica_id,
         coordenacao_id: userData.coordenacao_id,
         cargos: cargoInfo,
-        supervisao_tecnica: supervisaoTecnicaInfo
+        supervisao_tecnica_info: supervisaoTecnicaInfo
       });
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);

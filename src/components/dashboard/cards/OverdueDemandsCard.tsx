@@ -30,16 +30,16 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
       setIsLoading(true);
       
       try {
-        // First, get user's area_coordenacao_id
+        // First, get user's supervisao_tecnica_id
         const { data: userData, error: userError } = await supabase
           .from('usuarios')
-          .select('area_coordenacao_id')
+          .select('supervisao_tecnica_id')
           .eq('id', user.id)
           .single();
           
         if (userError) throw userError;
         
-        const userAreaId = userData?.area_coordenacao_id;
+        const userAreaId = userData?.supervisao_tecnica_id;
         
         // Get current date for comparing with deadlines
         const now = new Date().toISOString();
@@ -49,7 +49,7 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
           .from('demandas')
           .select('id, titulo')
           .lt('prazo_resposta', now) // Less than = past deadline
-          .eq('area_coordenacao_id', userAreaId)
+          .eq('supervisao_tecnica_id', userAreaId)
           .eq('status', 'pendente')
           .order('prazo_resposta', { ascending: true })
           .limit(5);

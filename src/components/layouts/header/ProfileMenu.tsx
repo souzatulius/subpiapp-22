@@ -1,146 +1,139 @@
 
 import React, { useState } from 'react';
-import { User, UserCog, Settings, Camera, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useNavigate } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
+import AvatarDisplay from '@/components/profile/photo/AvatarDisplay';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { useUserProfile } from './useUserProfile';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
-import ChangePhotoModal from '@/components/profile/photo/ChangePhotoModal';
-import AvatarDisplay from '@/components/profile/photo/AvatarDisplay';
+import { UserRound, Settings, LogOut, CalendarDays, Mail, Phone, Briefcase, Building } from 'lucide-react';
 
-export const ProfileMenu: React.FC = () => {
-  const navigate = useNavigate();
+export default function ProfileMenu() {
   const { user, signOut } = useAuth();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { userProfile } = useUserProfile();
-  
-  // Modal states
-  const [showEditProfile, setShowEditProfile] = useState(false);
-  const [showAccountSettings, setShowAccountSettings] = useState(false);
-  const [showChangePhoto, setShowChangePhoto] = useState(false);
+  const navigate = useNavigate();
+  const { userProfile, isLoading } = useUserProfile();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
 
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     try {
       await signOut();
-      setIsProfileOpen(false);
-      toast({
-        description: "Você foi desconectado com sucesso"
-      });
+      navigate('/auth/login');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível fazer logout. Tente novamente.",
-        variant: "destructive"
-      });
+      console.error('Error signing out:', error);
     }
   };
 
-  const handleOpenEditProfile = () => {
-    setIsProfileOpen(false);
-    setShowEditProfile(true);
+  const openProfileModal = () => {
+    setIsProfileModalOpen(true);
   };
 
-  const handleOpenAccountSettings = () => {
-    setIsProfileOpen(false);
-    setShowAccountSettings(true);
-  };
-
-  const handleOpenChangePhoto = () => {
-    setIsProfileOpen(false);
-    setShowChangePhoto(true);
+  const openAccountModal = () => {
+    setIsAccountModalOpen(true);
   };
 
   return (
     <>
-      <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="bg-gray-100 hover:bg-gray-200 rounded-full">
-            {userProfile ? (
-              <AvatarDisplay userProfile={userProfile} previewUrl={null} size="sm" />
-            ) : (
-              <User className="h-5 w-5 text-[#003570]" />
-            )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <AvatarDisplay
+              userName={userProfile.nome_completo}
+              photoUrl={userProfile.foto_perfil_url}
+              size={40}
+            />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64 p-0 overflow-hidden">
-          <div className="bg-gray-100 p-4 px-0 rounded-none">
-            <div className="flex items-center space-x-3 bg-transparent my-0 px-4">
-              <AvatarDisplay userProfile={userProfile} previewUrl={null} size="md" />
-              <div className="flex flex-col">
-                <h3 className="text-gray-900 text-base font-bold">{userProfile?.nome_completo || 'Usuário'}</h3>
-                <p className="text-gray-500 text-sm font-medium">
-                  {userProfile?.cargos?.descricao || 'Cargo não definido'}
-                </p>
-                {userProfile?.areas_coordenacao?.descricao && (
-                  <p className="text-xs text-slate-900">
-                    {userProfile?.areas_coordenacao?.descricao || ''}
-                  </p>
-                )}
-                {userProfile?.areas_coordenacao?.coordenacao && (
-                  <p className="text-xs text-slate-700">
-                    {userProfile?.areas_coordenacao?.coordenacao || ''}
-                  </p>
-                )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-80" align="end" sideOffset={5}>
+          <DropdownMenuLabel>
+            <div className="flex flex-col space-y-1">
+              <p className="text-base font-medium leading-none">{userProfile.nome_completo}</p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <div className="px-2 py-1.5 text-sm">
+              {userProfile.cargo && (
+                <div className="flex items-center mb-2">
+                  <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>{userProfile.cargo}</span>
+                </div>
+              )}
+              {userProfile.supervisao_tecnica && (
+                <div className="flex items-center mb-2">
+                  <Building className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>{userProfile.supervisao_tecnica}</span>
+                </div>
+              )}
+              {userProfile.coordenacao && (
+                <div className="flex items-center mb-2">
+                  <Building className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>{userProfile.coordenacao}</span>
+                </div>
+              )}
+              {userProfile.whatsapp && (
+                <div className="flex items-center mb-2">
+                  <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>{userProfile.whatsapp}</span>
+                </div>
+              )}
+              {userProfile.aniversario && (
+                <div className="flex items-center mb-2">
+                  <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>
+                    {format(new Date(userProfile.aniversario), "dd 'de' MMMM", {
+                      locale: ptBR,
+                    })}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center">
+                <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>{user?.email}</span>
               </div>
             </div>
-          </div>
-          <div className="p-1 bg-zinc-50">
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
-              onClick={handleOpenEditProfile}
-            >
-              <UserCog className="mr-2 h-4 w-4" />
-              Editar Perfil
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
-              onClick={handleOpenAccountSettings}
-            >
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={openProfileModal}>
+              <UserRound className="mr-2 h-4 w-4" />
+              <span>Editar Perfil</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={openAccountModal}>
               <Settings className="mr-2 h-4 w-4" />
-              Ajustes da Conta
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
-              onClick={handleOpenChangePhoto}
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Trocar Foto
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-left py-2 hover:bg-[#f57c35] hover:text-white transition-colors"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
+              <span>Configurações da Conta</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSignOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sair</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {/* Modals */}
-      <EditProfileModal 
-        isOpen={showEditProfile} 
-        onClose={() => setShowEditProfile(false)} 
+      <EditProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
-      
-      <AccountSettingsModal 
-        isOpen={showAccountSettings} 
-        onClose={() => setShowAccountSettings(false)} 
-      />
-      
-      <ChangePhotoModal 
-        isOpen={showChangePhoto} 
-        onClose={() => setShowChangePhoto(false)} 
+
+      <AccountSettingsModal
+        isOpen={isAccountModalOpen}
+        onClose={() => setIsAccountModalOpen(false)}
       />
     </>
   );
-};
+}

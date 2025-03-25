@@ -18,7 +18,7 @@ export const useDemandasData = () => {
     const fetchAreas = async () => {
       try {
         const { data, error } = await supabase
-          .from('areas_coordenacao')
+          .from('supervisoes_tecnicas')
           .select('id, descricao')
           .order('descricao');
           
@@ -76,13 +76,13 @@ export const useDemandasData = () => {
               }
             }
             
-            // Buscar área de coordenação
+            // Buscar supervisão técnica
             let areaInfo = null;
-            if (demanda.area_coordenacao_id) {
+            if (demanda.supervisao_tecnica_id) {
               const { data: areaData } = await supabase
-                .from('areas_coordenacao')
+                .from('supervisoes_tecnicas')
                 .select('id, descricao')
-                .eq('id', demanda.area_coordenacao_id)
+                .eq('id', demanda.supervisao_tecnica_id)
                 .single();
                 
               if (areaData) {

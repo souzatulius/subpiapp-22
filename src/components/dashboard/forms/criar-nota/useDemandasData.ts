@@ -25,7 +25,7 @@ export const useDemandasData = () => {
             status,
             detalhes_solicitacao,
             perguntas,
-            area_coordenacao_id
+            supervisao_tecnica_id
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -52,11 +52,11 @@ export const useDemandasData = () => {
         // Buscar informações de área para cada demanda
         const demandasComArea = await Promise.all(
           demandasSemNotas.map(async (demanda) => {
-            if (demanda.area_coordenacao_id) {
+            if (demanda.supervisao_tecnica_id) {
               const { data: areaData } = await supabase
-                .from('areas_coordenacao')
+                .from('supervisoes_tecnicas')
                 .select('id, descricao')
-                .eq('id', demanda.area_coordenacao_id)
+                .eq('id', demanda.supervisao_tecnica_id)
                 .single();
               
               return {

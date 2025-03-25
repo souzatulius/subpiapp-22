@@ -13,12 +13,12 @@ export const useProblemsData = () => {
     try {
       setIsLoading(true);
       
-      // Fetch problems with coordination area information
+      // Fetch problems with supervision information
       const { data: problemsData, error: problemsError } = await supabase
         .from('problemas')
         .select(`
           *,
-          areas_coordenacao:area_coordenacao_id (id, descricao, coordenacao, coordenacao_id)
+          areas_coordenacao:supervisao_tecnica_id (id, descricao, coordenacao, coordenacao_id)
         `)
         .order('descricao');
 
@@ -26,7 +26,7 @@ export const useProblemsData = () => {
       
       // Fetch coordination areas for the form select
       const { data: areasData, error: areasError } = await supabase
-        .from('areas_coordenacao')
+        .from('supervisoes_tecnicas')
         .select('*')
         .order('descricao');
         
@@ -63,7 +63,7 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const addProblem = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const addProblem = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       setIsAdding(true);
       const { error } = await supabase
@@ -93,7 +93,7 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
     }
   };
 
-  const updateProblem = async (id: string, data: { descricao: string; area_coordenacao_id: string }) => {
+  const updateProblem = async (id: string, data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       setIsEditing(true);
       const { error } = await supabase

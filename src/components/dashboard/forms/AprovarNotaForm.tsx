@@ -51,11 +51,11 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         
         // Get area info
         let areaInfo = { id: '', descricao: 'Área não especificada' };
-        if (nota.area_coordenacao_id) {
+        if (nota.supervisao_tecnica_id) {
           const { data: areaData, error: areaError } = await supabase
-            .from('areas_coordenacao')
+            .from('supervisoes_tecnicas')
             .select('id, descricao')
-            .eq('id', nota.area_coordenacao_id)
+            .eq('id', nota.supervisao_tecnica_id)
             .single();
             
           if (!areaError && areaData) {

@@ -65,7 +65,7 @@ export interface UsersLayoutProps {
   setFilter: (filter: string) => void;
   supervisoesTecnicas: SupervisaoTecnica[];
   cargos: Cargo[];
-  coordenacoes?: Coordenacao[];
+  coordenacoes: Coordenacao[];
   isInviteDialogOpen: boolean;
   setIsInviteDialogOpen: (open: boolean) => void;
   handleInviteUser: (data: any) => Promise<void>;
