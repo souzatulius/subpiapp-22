@@ -8,6 +8,7 @@ import { User, Area, Cargo } from './types';
 interface UsersDialogsProps {
   areas: Area[];
   cargos: Cargo[];
+  coordenacoes: { coordenacao_id: string; coordenacao: string }[];
   isInviteDialogOpen: boolean;
   setIsInviteDialogOpen: (value: boolean) => void;
   isEditDialogOpen: boolean;
@@ -24,6 +25,7 @@ interface UsersDialogsProps {
 const UsersDialogs: React.FC<UsersDialogsProps> = ({
   areas,
   cargos,
+  coordenacoes,
   isInviteDialogOpen,
   setIsInviteDialogOpen,
   isEditDialogOpen,
@@ -44,6 +46,7 @@ const UsersDialogs: React.FC<UsersDialogsProps> = ({
         onSubmit={handleInviteUser}
         areas={areas}
         cargos={cargos}
+        coordenacoes={coordenacoes}
       />
       
       <EditUserDialog 

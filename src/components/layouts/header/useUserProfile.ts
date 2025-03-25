@@ -44,6 +44,7 @@ export const useUserProfile = () => {
           nome_completo,
           cargo_id,
           area_coordenacao_id,
+          coordenacao_id,
           foto_perfil_url,
           whatsapp,
           aniversario
@@ -76,14 +77,14 @@ export const useUserProfile = () => {
       if (userData.area_coordenacao_id) {
         const { data: areaData, error: areaError } = await supabase
           .from('areas_coordenacao')
-          .select('descricao, coordenacao_id, coordenacao')
+          .select('descricao, coordenacao')
           .eq('id', userData.area_coordenacao_id)
           .single();
           
         if (!areaError && areaData) {
           areaInfo = { 
             descricao: areaData.descricao,
-            coordenacao_id: areaData.coordenacao_id || '',
+            coordenacao_id: userData.coordenacao_id || '',
             coordenacao: areaData.coordenacao || ''
           };
         }
@@ -99,7 +100,7 @@ export const useUserProfile = () => {
         aniversario: userData.aniversario,
         cargo_id: userData.cargo_id,
         area_coordenacao_id: userData.area_coordenacao_id,
-        coordenacao_id: areaInfo.coordenacao_id,
+        coordenacao_id: userData.coordenacao_id,
         cargos: cargoInfo,
         areas_coordenacao: areaInfo
       });

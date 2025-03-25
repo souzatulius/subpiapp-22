@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -63,18 +62,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         if (areasData) setAreas(areasData);
         
         // Get user's current coordenacao_id if available
-        if (userProfile && userProfile.area_coordenacao_id) {
-          const area = areasData?.find(a => a.id === userProfile.area_coordenacao_id);
-          if (area && area.coordenacao_id) {
-            setSelectedCoordenacao(area.coordenacao_id);
-            setValue('coordenacao_id', area.coordenacao_id);
-            
-            // Filter areas based on this coordenação
-            const filteredAreas = areasData?.filter(a => a.coordenacao_id === area.coordenacao_id) || [];
-            setFilteredAreas(filteredAreas);
-          } else {
-            setFilteredAreas(areasData || []);
-          }
+        if (userProfile && userProfile.coordenacao_id) {
+          setSelectedCoordenacao(userProfile.coordenacao_id);
+          setValue('coordenacao_id', userProfile.coordenacao_id);
+          
+          // Filter areas based on this coordenação
+          const filteredAreas = areasData?.filter(a => a.coordenacao === userProfile.coordenacao) || [];
+          setFilteredAreas(filteredAreas);
         } else {
           setFilteredAreas(areasData || []);
         }
@@ -98,7 +92,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   // Filter areas when coordenação changes
   useEffect(() => {
     if (watchedCoordenacao && areas.length > 0) {
-      const filtered = areas.filter(area => area.coordenacao_id === watchedCoordenacao);
+      // Find the coordenacao name from the id
+      const coordName = coordenacoes.find(c => c.coordenacao_id === watchedCoordenacao)?.coordenacao;
+      const filtered = areas.filter(area => area.coordenacao === coordName);
       setFilteredAreas(filtered);
       
       // If the current area_coordenacao_id isn't in the filtered list, clear it
@@ -109,32 +105,23 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     } else {
       setFilteredAreas(areas);
     }
-  }, [watchedCoordenacao, areas, setValue, watch]);
+  }, [watchedCoordenacao, areas, setValue, watch, coordenacoes]);
 
   // Reset form when profile data changes
   useEffect(() => {
     if (userProfile) {
-      // Find coordenacao_id from area_coordenacao_id
-      let coordenacaoId = '';
-      if (userProfile.area_coordenacao_id) {
-        const area = areas.find(a => a.id === userProfile.area_coordenacao_id);
-        if (area) {
-          coordenacaoId = area.coordenacao_id || '';
-        }
-      }
-      
       reset({
         nome_completo: userProfile.nome_completo || '',
         whatsapp: userProfile.whatsapp || '',
         aniversario: userProfile.aniversario ? userProfile.aniversario.split('T')[0] : '',
         cargo_id: userProfile.cargo_id || '',
-        coordenacao_id: coordenacaoId,
+        coordenacao_id: userProfile.coordenacao_id || '',
         area_coordenacao_id: userProfile.area_coordenacao_id || '',
       });
       
-      setSelectedCoordenacao(coordenacaoId);
+      setSelectedCoordenacao(userProfile.coordenacao_id || '');
     }
-  }, [userProfile, reset, areas]);
+  }, [userProfile, reset]);
 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) return;

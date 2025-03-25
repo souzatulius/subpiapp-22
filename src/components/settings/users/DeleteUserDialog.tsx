@@ -1,12 +1,6 @@
+
 import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle,
-  DialogFooter
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { User } from './types';
 
@@ -21,36 +15,25 @@ const DeleteUserDialog: React.FC<DeleteUserDialogProps> = ({
   open,
   onOpenChange,
   user,
-  onDelete,
+  onDelete
 }) => {
+  if (!user) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Excluir Usuário</DialogTitle>
+          <DialogTitle>Confirmar Exclusão</DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir o usuário <span className="font-semibold">{user.nome_completo}</span>?
+            Esta ação não pode ser desfeita.
           </DialogDescription>
         </DialogHeader>
-        
-        {user && (
-          <div className="p-4 bg-gray-50 rounded-md">
-            <p><strong>Nome:</strong> {user.nome_completo}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-          </div>
-        )}
-        
         <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button 
-            variant="destructive" 
-            onClick={onDelete}
-          >
+          <Button variant="destructive" onClick={onDelete}>
             Excluir
           </Button>
         </DialogFooter>

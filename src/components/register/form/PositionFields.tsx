@@ -36,10 +36,14 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
       // If a coordenação is selected, filter areas that belong to it
       const filterAreas = async () => {
         try {
+          // Find the coordenacao name from the id to use in filtering
+          const selectedCoord = coordenacoes.find(c => c.id === coordenacao);
+          if (!selectedCoord) return;
+          
           const { data, error } = await supabase
             .from('areas_coordenacao')
             .select('id, descricao')
-            .eq('coordenacao_id', coordenacao);
+            .eq('coordenacao', selectedCoord.value);
             
           if (error) throw error;
           
@@ -61,7 +65,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
       // If no coordenação is selected, show all areas
       setFilteredAreas(areas);
     }
-  }, [coordenacao, areas]);
+  }, [coordenacao, areas, coordenacoes]);
 
   return (
     <div className="space-y-4">

@@ -50,12 +50,12 @@ export const useUsersData = () => {
           }
         }
         
-        // Buscar área
-        let areaInfo = { id: '', descricao: '', coordenacao_id: '', coordenacao: '' };
+        // Buscar área e coordenação
+        let areaInfo = { id: '', descricao: '', coordenacao: '' };
         if (user.area_coordenacao_id) {
           const { data: areaData, error: areaError } = await supabase
             .from('areas_coordenacao')
-            .select('id, descricao, coordenacao_id, coordenacao')
+            .select('id, descricao, coordenacao')
             .eq('id', user.area_coordenacao_id)
             .single();
             
@@ -63,7 +63,6 @@ export const useUsersData = () => {
             areaInfo = {
               id: areaData.id,
               descricao: areaData.descricao,
-              coordenacao_id: areaData.coordenacao_id || '',
               coordenacao: areaData.coordenacao || ''
             };
           }
@@ -88,7 +87,7 @@ export const useUsersData = () => {
           ...user, 
           cargos: cargoInfo,
           areas_coordenacao: areaInfo,
-          coordenacao_id: areaInfo.coordenacao_id,
+          coordenacao: areaInfo.coordenacao,
           permissoes
         } as User;
       }));
@@ -119,7 +118,7 @@ export const useUsersData = () => {
         user.email.toLowerCase().includes(query) ||
         user.cargos?.descricao.toLowerCase().includes(query) ||
         user.areas_coordenacao?.descricao?.toLowerCase().includes(query) ||
-        user.areas_coordenacao?.coordenacao?.toLowerCase().includes(query)
+        user.coordenacao?.toLowerCase().includes(query)
       );
     }
     
