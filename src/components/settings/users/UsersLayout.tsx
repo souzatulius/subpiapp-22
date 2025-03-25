@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
@@ -42,6 +42,39 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   isEditSubmitting
 }) => {
   const [statusFilter, setStatusFilter] = useState<string>('todos');
+  const [filteredUsers, setFilteredUsers] = useState<typeof users>(users);
+
+  // Apply filtering based on search text and status
+  useEffect(() => {
+    let filtered = users;
+    
+    // Filter by text
+    if (filter) {
+      const searchTerm = filter.toLowerCase();
+      filtered = filtered.filter(user => 
+        user.nome_completo?.toLowerCase().includes(searchTerm) ||
+        user.email?.toLowerCase().includes(searchTerm) ||
+        user.cargos?.descricao?.toLowerCase().includes(searchTerm) ||
+        user.supervisao_tecnica?.descricao?.toLowerCase().includes(searchTerm) ||
+        user.coordenacao?.descricao?.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Filter by status
+    if (statusFilter !== 'todos') {
+      if (statusFilter === 'ativos') {
+        filtered = filtered.filter(user => 
+          user.permissoes && user.permissoes.length > 0
+        );
+      } else if (statusFilter === 'inativos') {
+        filtered = filtered.filter(user => 
+          !user.permissoes || user.permissoes.length === 0
+        );
+      }
+    }
+    
+    setFilteredUsers(filtered);
+  }, [users, filter, statusFilter]);
 
   return (
     <div className="space-y-4">
@@ -109,7 +142,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
       </div>
 
       <UsersTable 
-        users={users} 
+        users={filteredUsers} 
         loading={loading} 
         filter={filter}
         onEdit={(user) => userActions.handleEdit(user)}
