@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from './types';
+import { Demand } from '@/hooks/dashboard/forms/criar-nota/types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -61,12 +61,12 @@ export const useDemandasData = () => {
               
               return {
                 ...demanda,
-                area_coordenacao: areaData || null
+                supervisao_tecnica: areaData || null
               };
             }
             return {
               ...demanda,
-              area_coordenacao: null
+              supervisao_tecnica: null
             };
           })
         );
@@ -104,7 +104,7 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.supervisao_tecnica?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);

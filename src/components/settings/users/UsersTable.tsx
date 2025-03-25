@@ -13,6 +13,8 @@ import { formatDateTime } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { User } from './types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { EyeIcon, PencilIcon, Trash2Icon } from 'lucide-react';
 
 interface UsersTableProps {
   users: User[];
@@ -23,6 +25,9 @@ interface UsersTableProps {
   onResetPassword: (user: User) => void;
   onApprove: (user: User, permissionLevel?: string) => void;
   onRemoveAccess?: (user: User) => void;
+  onViewUser: (user: User) => void;
+  onEditUser: (user: User) => void;
+  onDeleteUser: (user: User) => void;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({
@@ -33,7 +38,10 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onDelete,
   onResetPassword,
   onApprove,
-  onRemoveAccess
+  onRemoveAccess,
+  onViewUser,
+  onEditUser,
+  onDeleteUser
 }) => {
   const pendingUsers = users.filter(user => !user.permissoes || user.permissoes.length === 0);
   const activeUsers = users.filter(user => user.permissoes && user.permissoes.length > 0);
@@ -69,6 +77,65 @@ const UsersTable: React.FC<UsersTableProps> = ({
           Aprovar
         </Button>
       </div>
+    );
+  };
+
+  const renderUserRow = (user: User) => {
+    return (
+      <TableRow key={user.id}>
+        <TableCell className="font-medium">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.foto_perfil_url || undefined} />
+              <AvatarFallback>
+                {user.nome_completo
+                  .split(' ')
+                  .map(n => n[0])
+                  .join('')
+                  .substring(0, 2)
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium">{user.nome_completo}</p>
+              <p className="text-xs text-gray-500">{user.email}</p>
+            </div>
+          </div>
+        </TableCell>
+        <TableCell>
+          {user.supervisao_tecnica?.descricao || '-'}
+        </TableCell>
+        <TableCell>
+          {user.coordenacao?.descricao || '-'}
+        </TableCell>
+        <TableCell>
+          {user.cargos?.descricao || '-'}
+        </TableCell>
+        <TableCell>
+          {user.permissoes && user.permissoes.length > 0 ? (
+            <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
+              Ativo
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+              Inativo
+            </Badge>
+          )}
+        </TableCell>
+        <TableCell>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="icon" onClick={() => onViewUser(user)}>
+              <EyeIcon className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => onEditUser(user)}>
+              <PencilIcon className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => onDeleteUser(user)}>
+              <Trash2Icon className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
     );
   };
 

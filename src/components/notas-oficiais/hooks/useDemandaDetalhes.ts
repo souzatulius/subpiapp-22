@@ -52,7 +52,7 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
             status,
             detalhes_solicitacao,
             perguntas,
-            area_coordenacao_id
+            supervisao_tecnica_id
           `)
           .eq('id', demandaId)
           .single();
@@ -61,11 +61,11 @@ export const useDemandaDetalhes = (demandaId: string | undefined) => {
         
         // Fetch area_coordenacao separately to avoid relation errors
         let areaCoordenacao = null;
-        if (data.area_coordenacao_id) {
+        if (data.supervisao_tecnica_id) {
           const { data: areaData, error: areaError } = await supabase
-            .from('areas_coordenacao')
+            .from('supervisoes_tecnicas')
             .select('id, descricao')
-            .eq('id', data.area_coordenacao_id)
+            .eq('id', data.supervisao_tecnica_id)
             .maybeSingle();
             
           if (!areaError && areaData) {

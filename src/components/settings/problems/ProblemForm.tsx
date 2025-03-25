@@ -1,94 +1,75 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Area, problemSchema } from '@/hooks/useProblems';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Area } from '@/hooks/problems/types';
 
 interface ProblemFormProps {
-  onSubmit: (data: { descricao: string; area_coordenacao_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
   onCancel: () => void;
-  defaultValues?: { descricao: string; area_coordenacao_id: string };
   areas: Area[];
   isSubmitting: boolean;
-  submitText?: string;
 }
 
-const ProblemForm: React.FC<ProblemFormProps> = ({
-  onSubmit,
-  onCancel,
-  defaultValues = { descricao: '', area_coordenacao_id: '' },
-  areas,
-  isSubmitting,
-  submitText = 'Salvar'
-}) => {
-  const form = useForm({
-    resolver: zodResolver(problemSchema),
-    defaultValues
+const ProblemForm = ({ onSubmit, onCancel, areas, isSubmitting }: ProblemFormProps) => {
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
+    defaultValues: {
+      descricao: '',
+      supervisao_tecnica_id: ''
+    }
   });
 
+  const selectedArea = watch('supervisao_tecnica_id');
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="descricao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Nome do problema"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="descricao">Descrição</Label>
+        <Input
+          id="descricao"
+          placeholder="Digite a descrição do problema"
+          {...register('descricao', { required: 'Descrição é obrigatória' })}
+          className={errors.descricao ? 'border-red-500' : ''}
         />
-        
-        <FormField
-          control={form.control}
-          name="area_coordenacao_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Área de Coordenação</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma área" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {areas.map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isSubmitting} variant="action">
-            {isSubmitting ? 'Processando...' : submitText}
-          </Button>
-        </div>
-      </form>
-    </Form>
+        {errors.descricao && (
+          <p className="text-sm text-red-500">{errors.descricao.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
+        <Select
+          onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
+          value={selectedArea}
+        >
+          <SelectTrigger id="supervisao_tecnica_id" className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Selecione uma área" />
+          </SelectTrigger>
+          <SelectContent>
+            {areas.map((area) => (
+              <SelectItem key={area.id} value={area.id}>
+                {area.descricao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.supervisao_tecnica_id && (
+          <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
+        )}
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Salvando...' : 'Salvar'}
+        </Button>
+      </div>
+    </form>
   );
 };
 

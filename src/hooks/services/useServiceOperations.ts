@@ -8,20 +8,20 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const addService = async (data: { descricao: string; area_coordenacao_id: string }) => {
+  const addService = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       setIsAdding(true);
       
-      // Make sure we have a problema_id
-      if (!data.area_coordenacao_id) {
-        throw new Error("Área de coordenação não selecionada");
+      // Make sure we have a supervisao_tecnica_id
+      if (!data.supervisao_tecnica_id) {
+        throw new Error("Supervisão técnica não selecionada");
       }
       
       // Get the first problem for this area
       const { data: problemData, error: problemError } = await supabase
         .from('problemas')
         .select('id')
-        .eq('area_coordenacao_id', data.area_coordenacao_id)
+        .eq('supervisao_tecnica_id', data.supervisao_tecnica_id)
         .limit(1);
       
       if (problemError) throw problemError;
@@ -30,7 +30,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
         // No problem found, create one
         const newProblemData = {
           descricao: `Problema padrão para ${data.descricao}`,
-          area_coordenacao_id: data.area_coordenacao_id
+          supervisao_tecnica_id: data.supervisao_tecnica_id
         };
         
         const { data: newProblem, error: newProblemError } = await supabase
@@ -43,7 +43,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
         // Create service with the new problem
         const serviceData = {
           descricao: data.descricao,
-          area_coordenacao_id: data.area_coordenacao_id,
+          supervisao_id: data.supervisao_tecnica_id,
           problema_id: newProblem[0].id
         };
         
@@ -56,7 +56,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
         // Create service with the existing problem
         const serviceData = {
           descricao: data.descricao,
-          area_coordenacao_id: data.area_coordenacao_id,
+          supervisao_id: data.supervisao_tecnica_id,
           problema_id: problemData[0].id
         };
         
@@ -88,11 +88,11 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
     }
   };
 
-  const updateService = async (id: string, data: { descricao: string; area_coordenacao_id: string }) => {
+  const updateService = async (id: string, data: { descricao: string; supervisao_tecnica_id: string }) => {
     try {
       setIsEditing(true);
       
-      // Get the current service to check if area_coordenacao_id changed
+      // Get the current service to check if supervisao_id changed
       const { data: currentService, error: currentServiceError } = await supabase
         .from('servicos')
         .select('*')
@@ -101,13 +101,13 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
       
       if (currentServiceError) throw currentServiceError;
       
-      // If area_coordenacao_id changed, we need to update problema_id
-      if (currentService.area_coordenacao_id !== data.area_coordenacao_id) {
+      // If supervisao_id changed, we need to update problema_id
+      if (currentService.supervisao_id !== data.supervisao_tecnica_id) {
         // Get a problem for the new area
         const { data: problemData, error: problemError } = await supabase
           .from('problemas')
           .select('id')
-          .eq('area_coordenacao_id', data.area_coordenacao_id)
+          .eq('supervisao_tecnica_id', data.supervisao_tecnica_id)
           .limit(1);
         
         if (problemError) throw problemError;
@@ -116,7 +116,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
           // No problem found, create one
           const newProblemData = {
             descricao: `Problema padrão para ${data.descricao}`,
-            area_coordenacao_id: data.area_coordenacao_id
+            supervisao_tecnica_id: data.supervisao_tecnica_id
           };
           
           const { data: newProblem, error: newProblemError } = await supabase
@@ -129,7 +129,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
           // Update service with new problem_id
           const serviceData = {
             descricao: data.descricao,
-            area_coordenacao_id: data.area_coordenacao_id,
+            supervisao_id: data.supervisao_tecnica_id,
             problema_id: newProblem[0].id
           };
           
@@ -143,7 +143,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
           // Update service with existing problem_id
           const serviceData = {
             descricao: data.descricao,
-            area_coordenacao_id: data.area_coordenacao_id,
+            supervisao_id: data.supervisao_tecnica_id,
             problema_id: problemData[0].id
           };
           

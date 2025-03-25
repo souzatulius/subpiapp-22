@@ -1,36 +1,24 @@
 
-import { format } from 'date-fns';
 import { User } from './types';
 
-export const handleExportCsv = (filteredUsers: User[]) => {
-  const headers = ['Nome', 'Email', 'Cargo', 'Área de Coordenação', 'WhatsApp', 'Aniversário'];
-  const csvData = filteredUsers.map(user => [
-    user.nome_completo,
-    user.email,
-    user.cargos?.descricao || '',
-    user.areas_coordenacao?.descricao || '',
-    user.whatsapp || '',
-    user.aniversario ? format(new Date(user.aniversario), 'dd/MM/yyyy') : ''
-  ]);
-  
-  const csvContent = [
-    headers.join(','),
-    ...csvData.map(row => row.map(cell => {
-      if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"'))) {
-        return `"${cell.replace(/"/g, '""')}"`;
-      }
-      return cell;
-    }).join(','))
-  ].join('\n');
-  
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'usuarios.csv';
-  link.click();
-  URL.revokeObjectURL(link.href);
-};
+export function prepareUsersDataForExport(users: User[]) {
+    return users.map(user => ({
+        'Nome': user.nome_completo || '',
+        'Email': user.email || '',
+        'Cargo': user.cargos?.descricao || '',
+        'Supervisão Técnica': user.supervisao_tecnica?.descricao || '',
+        'Coordenação': user.coordenacao?.descricao || '',
+        'WhatsApp': user.whatsapp || '',
+        'Aniversário': user.aniversario ? formatDate(user.aniversario) : '',
+        'Status': user.permissoes && user.permissoes.length > 0 ? 'Ativo' : 'Inativo',
+    }));
+}
 
-export const handlePrint = () => {
-  window.print();
-};
+export function formatDate(dateString: string) {
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR');
+    } catch (error) {
+        return dateString;
+    }
+}

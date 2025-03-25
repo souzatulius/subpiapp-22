@@ -1,124 +1,75 @@
 
 import React from 'react';
-import { z } from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { DialogFooter } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Area } from '@/hooks/coordination-areas/useCoordinationAreas';
-
-// Schema for tema validation - using the same as problem
-export const temaSchema = z.object({
-  descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
-  area_coordenacao_id: z.string().min(1, 'Selecione uma área de coordenação'),
-});
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Area } from '@/hooks/coordination-areas/types';
 
 interface TemaFormProps {
-  onSubmit: (data: z.infer<typeof temaSchema>) => Promise<void>;
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
   onCancel: () => void;
   areas: Area[];
   isSubmitting: boolean;
-  defaultValues?: z.infer<typeof temaSchema>;
-  submitText?: string;
 }
 
-const TemaForm: React.FC<TemaFormProps> = ({
-  onSubmit,
-  onCancel,
-  areas,
-  isSubmitting,
-  defaultValues = { descricao: '', area_coordenacao_id: '' },
-  submitText = 'Salvar'
-}) => {
-  const form = useForm<z.infer<typeof temaSchema>>({
-    resolver: zodResolver(temaSchema),
-    defaultValues,
+const TemaForm = ({ onSubmit, onCancel, areas, isSubmitting }: TemaFormProps) => {
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
+    defaultValues: {
+      descricao: '',
+      supervisao_tecnica_id: ''
+    }
   });
 
+  const selectedArea = watch('supervisao_tecnica_id');
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="descricao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Input
-                  className="rounded-lg"
-                  {...field}
-                  placeholder="Nome do tema"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="descricao">Descrição</Label>
+        <Input
+          id="descricao"
+          placeholder="Digite a descrição do tema"
+          {...register('descricao', { required: 'Descrição é obrigatória' })}
+          className={errors.descricao ? 'border-red-500' : ''}
         />
+        {errors.descricao && (
+          <p className="text-sm text-red-500">{errors.descricao.message}</p>
+        )}
+      </div>
 
-        <FormField
-          control={form.control}
-          name="area_coordenacao_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Supervisão Técnica</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger className="rounded-lg">
-                    <SelectValue placeholder="Selecione uma supervisão técnica" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {areas.map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <div className="space-y-2">
+        <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
+        <Select
+          onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
+          value={selectedArea}
+        >
+          <SelectTrigger id="supervisao_tecnica_id" className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Selecione uma área" />
+          </SelectTrigger>
+          <SelectContent>
+            {areas.map((area) => (
+              <SelectItem key={area.id} value={area.id}>
+                {area.descricao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.supervisao_tecnica_id && (
+          <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
+        )}
+      </div>
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="rounded-lg"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-lg"
-          >
-            {isSubmitting ? 'Salvando...' : submitText}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Salvando...' : 'Salvar'}
+        </Button>
+      </div>
+    </form>
   );
 };
 
