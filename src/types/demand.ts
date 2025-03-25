@@ -47,7 +47,7 @@ export interface Demand {
     id?: string;
     descricao: string;
   } | null;
-  area_coordenacao?: {
+  area_coordenacao: {
     descricao: string;
   } | null;
   servico?: {
