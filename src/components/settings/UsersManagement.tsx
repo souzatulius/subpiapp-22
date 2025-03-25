@@ -120,6 +120,10 @@ const UsersManagement = () => {
     }
   };
 
+  const handleRemoveAccess = (user: User) => {
+    removeAccess(user);
+  };
+
   // Initialize userActions
   const userActions = useUserActions({
     setIsEditDialogOpen,
@@ -128,7 +132,7 @@ const UsersManagement = () => {
     setUserToDelete: handleDelete,
     resetPassword,
     approveUser: handleApprove,
-    removeAccess
+    removeAccess: handleRemoveAccess
   });
 
   // Pass all necessary props to UsersLayout
