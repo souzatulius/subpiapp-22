@@ -8,7 +8,7 @@ export const useDemandFormState = (
 ) => {
   const initialFormState: DemandFormData = {
     titulo: '',
-    area_coordenacao_id: '',
+    problema_id: '',
     servico_id: '',
     origem_id: '',
     tipo_midia_id: '',
@@ -55,15 +55,15 @@ export const useDemandFormState = (
   }, [activeStep, formData.servico_id, formData.bairro_id, servicos, bairros]);
 
   useEffect(() => {
-    if (formData.area_coordenacao_id) {
+    if (formData.problema_id) {
       const filtered = servicos.filter(
-        service => service.area_coordenacao_id === formData.area_coordenacao_id
+        service => service.problema_id === formData.problema_id
       );
       setFilteredServicos(filtered);
     } else {
       setFilteredServicos([]);
     }
-  }, [formData.area_coordenacao_id, servicos]);
+  }, [formData.problema_id, servicos]);
 
   useEffect(() => {
     if (selectedDistrito) {

@@ -11,6 +11,7 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     tiposMidia,
     distritos,
     bairros,
+    problemas,
     isLoading,
     setIsLoading
   } = useDemandFormData();
@@ -48,6 +49,8 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     origens,
     tiposMidia,
     distritos,
+    bairros,
+    problemas,
     isLoading,
     serviceSearch,
     filteredServicesBySearch,

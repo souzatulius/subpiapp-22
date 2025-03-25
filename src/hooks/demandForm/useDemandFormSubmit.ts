@@ -37,43 +37,19 @@ export const useDemandFormSubmit = (
       // Formatar data corretamente
       const prazoResposta = formData.prazo_resposta ? new Date(formData.prazo_resposta).toISOString() : null;
       
-      // Verificar se existe um problema padrão
-      const { data: problemaData, error: problemaError } = await supabase
-        .from('problemas')
-        .select('id')
-        .limit(1);
-        
-      if (problemaError) throw problemaError;
+      // Obter a área de coordenação do problema selecionado
+      let area_coordenacao_id = null;
       
-      let problemaId;
-      
-      if (!problemaData || problemaData.length === 0) {
-        // Precisamos obter uma área de coordenação padrão para criar o problema
-        const { data: areaData, error: areaError } = await supabase
-          .from('areas_coordenacao')
-          .select('id')
-          .limit(1);
-          
-        if (areaError) throw areaError;
-        
-        if (!areaData || areaData.length === 0) {
-          throw new Error("Não há áreas de coordenação cadastradas no sistema.");
-        }
-        
-        // Criar um problema padrão se não existir, agora incluindo a área de coordenação
-        const { data: newProblema, error: newProblemaError } = await supabase
+      if (formData.problema_id) {
+        const { data: problemaData, error: problemaError } = await supabase
           .from('problemas')
-          .insert({ 
-            descricao: 'Problema Padrão',
-            area_coordenacao_id: areaData[0].id 
-          })
-          .select();
+          .select('area_coordenacao_id')
+          .eq('id', formData.problema_id)
+          .single();
           
-        if (newProblemaError) throw newProblemaError;
+        if (problemaError) throw problemaError;
         
-        problemaId = newProblema[0].id;
-      } else {
-        problemaId = problemaData[0].id;
+        area_coordenacao_id = problemaData.area_coordenacao_id;
       }
       
       // Preparar dados para inserção
@@ -84,7 +60,8 @@ export const useDemandFormSubmit = (
         autor_id: userId,
         status: 'pendente',
         titulo: formData.titulo,
-        area_coordenacao_id: formData.area_coordenacao_id,
+        area_coordenacao_id: area_coordenacao_id,
+        problema_id: formData.problema_id,
         servico_id: formData.servico_id,
         origem_id: formData.origem_id,
         tipo_midia_id: formData.tipo_midia_id,
@@ -95,7 +72,6 @@ export const useDemandFormSubmit = (
         veiculo_imprensa: formData.veiculo_imprensa,
         endereco: formData.endereco,
         detalhes_solicitacao: formData.detalhes_solicitacao,
-        problema_id: problemaId,
         arquivo_url: formData.arquivo_url
       };
 

@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, X, ChevronDown, Search } from 'lucide-react';
+import { 
+  LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, 
+  Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb, X, ChevronDown, Search 
+} from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -11,13 +14,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 interface IdentificationStepProps {
   formData: {
     titulo: string;
-    area_coordenacao_id: string;
+    problema_id: string;
     servico_id: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   handleServiceSelect: (serviceId: string) => void;
-  areasCoord: any[];
+  problemas: any[];
   filteredServicesBySearch: any[];
   serviceSearch: string;
   servicos: any[];
@@ -30,7 +33,7 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   handleChange,
   handleSelectChange,
   handleServiceSelect,
-  areasCoord,
+  problemas,
   filteredServicesBySearch,
   serviceSearch,
   servicos,
@@ -72,8 +75,10 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
   };
 
   const selectedService = servicos.find(s => s.id === formData.servico_id);
+  const selectedProblem = problemas.find(p => p.id === formData.problema_id);
 
-  return <div className="space-y-4">
+  return (
+    <div className="space-y-4">
       {showTitleField && (
         <div>
           <Label htmlFor="titulo" className={`block ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
@@ -95,31 +100,31 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
       )}
       
       <div>
-        <Label className={`block mb-2 ${hasError('area_coordenacao_id') ? 'text-orange-500 font-semibold' : ''}`}>
-          Área de Coordenação {hasError('area_coordenacao_id') && <span className="text-orange-500">*</span>}
+        <Label className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
+          Problema {hasError('problema_id') && <span className="text-orange-500">*</span>}
         </Label>
         <div className="flex flex-wrap gap-3">
-          {areasCoord.map(area => (
+          {problemas.map(problema => (
             <Button 
-              key={area.id} 
+              key={problema.id} 
               type="button" 
-              variant={formData.area_coordenacao_id === area.id ? "default" : "outline"} 
+              variant={formData.problema_id === problema.id ? "default" : "outline"} 
               className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-                formData.area_coordenacao_id === area.id ? "ring-2 ring-[#003570]" : ""
+                formData.problema_id === problema.id ? "ring-2 ring-[#003570]" : ""
               } ${
-                hasError('area_coordenacao_id') ? 'border-orange-500' : ''
+                hasError('problema_id') ? 'border-orange-500' : ''
               }`} 
-              onClick={() => handleSelectChange('area_coordenacao_id', area.id)}
+              onClick={() => handleSelectChange('problema_id', problema.id)}
             >
-              {getAreaIcon(area.descricao)}
-              <span className="text-sm font-semibold">{area.descricao}</span>
+              {problema.areas_coordenacao && getAreaIcon(problema.areas_coordenacao.descricao)}
+              <span className="text-sm font-semibold">{problema.descricao}</span>
             </Button>
           ))}
         </div>
-        {hasError('area_coordenacao_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('area_coordenacao_id')}</p>}
+        {hasError('problema_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('problema_id')}</p>}
       </div>
       
-      {formData.area_coordenacao_id && (
+      {formData.problema_id && (
         <div className="animate-fadeIn">
           <Label htmlFor="servico_id" className={`block mb-2 ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}>
             Serviço {hasError('servico_id') && <span className="text-orange-500">*</span>}
@@ -204,7 +209,8 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
           {hasError('servico_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>}
         </div>
       )}
-    </div>;
+    </div>
+  );
 };
 
 export default IdentificationStep;

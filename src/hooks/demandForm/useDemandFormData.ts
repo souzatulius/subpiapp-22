@@ -10,6 +10,7 @@ export const useDemandFormData = () => {
   const [tiposMidia, setTiposMidia] = useState<any[]>([]);
   const [distritos, setDistritos] = useState<any[]>([]);
   const [bairros, setBairros] = useState<any[]>([]);
+  const [problemas, setProblemas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -50,6 +51,12 @@ export const useDemandFormData = () => {
           .select('*');
         if (bairrosError) throw bairrosError;
         setBairros(bairrosData || []);
+        
+        const { data: problemasData, error: problemasError } = await supabase
+          .from('problemas')
+          .select('*, areas_coordenacao(id, descricao)');
+        if (problemasError) throw problemasError;
+        setProblemas(problemasData || []);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
         toast({
@@ -69,6 +76,7 @@ export const useDemandFormData = () => {
     tiposMidia,
     distritos,
     bairros,
+    problemas,
     isLoading,
     setIsLoading
   };

@@ -2,64 +2,70 @@
 import React from 'react';
 import IdentificationStep from '../steps/IdentificationStep';
 import OriginClassificationStep from '../steps/OriginClassificationStep';
-import PriorityDeadlineStep from '../steps/PriorityDeadlineStep';
 import RequesterInfoStep from '../steps/RequesterInfoStep';
 import LocationStep from '../steps/LocationStep';
 import QuestionsDetailsStep from '../steps/QuestionsDetailsStep';
-import { FormStep } from './FormSteps';
-import { DemandFormData } from '@/hooks/demandForm';
+import PriorityDeadlineStep from '../steps/PriorityDeadlineStep';
 import { ValidationError } from '@/lib/formValidationUtils';
+
+export const FORM_STEPS = [
+  {
+    title: "Identificação",
+    description: "Selecione o problema e o serviço relacionado à demanda",
+    fields: ["titulo", "problema_id", "servico_id"]
+  },
+  {
+    title: "Classificação e Origem",
+    description: "Informe a origem e tipo de mídia da demanda",
+    fields: ["origem_id", "tipo_midia_id"]
+  },
+  {
+    title: "Dados do Solicitante",
+    description: "Preencha os dados de contato do solicitante",
+    fields: ["nome_solicitante", "telefone_solicitante", "email_solicitante", "veiculo_imprensa"]
+  },
+  {
+    title: "Localização",
+    description: "Informe a localização da demanda",
+    fields: ["endereco", "bairro_id"]
+  },
+  {
+    title: "Perguntas e Detalhes",
+    description: "Adicione perguntas e detalhes da solicitação",
+    fields: ["perguntas", "detalhes_solicitacao"]
+  },
+  {
+    title: "Prioridade e Prazo",
+    description: "Defina a prioridade e prazo para resposta",
+    fields: ["prioridade", "prazo_resposta"]
+  },
+  {
+    title: "Revisão",
+    description: "Revise os dados informados antes de cadastrar",
+    fields: []
+  }
+];
 
 interface FormContentProps {
   activeStep: number;
-  formData: DemandFormData;
+  formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   handleServiceSelect: (serviceId: string) => void;
   handlePerguntaChange: (index: number, value: string) => void;
   areasCoord: any[];
+  problemas: any[];
   filteredServicesBySearch: any[];
   serviceSearch: string;
   servicos: any[];
   origens: any[];
   tiposMidia: any[];
   selectedDistrito: string;
-  setSelectedDistrito: (value: string) => void;
+  setSelectedDistrito: (distrito: string) => void;
   distritos: any[];
   filteredBairros: any[];
-  errors?: ValidationError[];
+  errors: ValidationError[];
 }
-
-export const FORM_STEPS: FormStep[] = [
-  {
-    title: "Detalhes da Solicitação",
-    description: "Explique a solicitação ou cole a solicitação recebida"
-  },
-  {
-    title: "Identificação da Demanda",
-    description: "Informe os detalhes básicos da solicitação"
-  }, 
-  {
-    title: "Origem e Classificação",
-    description: "Selecione a origem e tipo de mídia"
-  }, 
-  {
-    title: "Prioridade e Prazo",
-    description: "Defina a prioridade e prazo para resposta"
-  }, 
-  {
-    title: "Dados do Solicitante",
-    description: "Informe os dados de contato (opcional)"
-  }, 
-  {
-    title: "Localização",
-    description: "Informe o endereço e bairro relacionado"
-  },
-  {
-    title: "Título e Perguntas",
-    description: "Revisar título sugerido e adicionar perguntas"
-  }
-];
 
 const FormContent: React.FC<FormContentProps> = ({
   activeStep,
@@ -69,6 +75,7 @@ const FormContent: React.FC<FormContentProps> = ({
   handleServiceSelect,
   handlePerguntaChange,
   areasCoord,
+  problemas,
   filteredServicesBySearch,
   serviceSearch,
   servicos,
@@ -78,176 +85,162 @@ const FormContent: React.FC<FormContentProps> = ({
   setSelectedDistrito,
   distritos,
   filteredBairros,
-  errors = []
+  errors
 }) => {
   switch (activeStep) {
     case 0:
       return (
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="detalhes_solicitacao" className={`block text-sm font-medium mb-2 ${errors.some(err => err.field === 'detalhes_solicitacao') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
-              Explique a solicitação ou cole a solicitação recebida
-            </label>
-            <textarea
-              id="detalhes_solicitacao"
-              name="detalhes_solicitacao"
-              value={formData.detalhes_solicitacao}
-              onChange={handleChange}
-              rows={10}
-              className={`mt-1 w-full rounded-xl px-4 py-3 border ${
-                errors.some(err => err.field === 'detalhes_solicitacao') 
-                  ? 'border-orange-500' 
-                  : 'border-gray-300'
-              } bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent`}
-            />
-            {errors.some(err => err.field === 'detalhes_solicitacao') && (
-              <p className="text-orange-500 text-sm mt-1">
-                {errors.find(err => err.field === 'detalhes_solicitacao')?.message}
-              </p>
-            )}
-          </div>
-        </div>
-      );
-    case 1:
-      return (
-        <IdentificationStep 
+        <IdentificationStep
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
           handleServiceSelect={handleServiceSelect}
-          areasCoord={areasCoord}
+          problemas={problemas}
           filteredServicesBySearch={filteredServicesBySearch}
           serviceSearch={serviceSearch}
           servicos={servicos}
-          errors={errors}
-          showTitleField={false}
+          errors={errors.filter(err => FORM_STEPS[0].fields.includes(err.field))}
+        />
+      );
+    case 1:
+      return (
+        <OriginClassificationStep
+          formData={formData}
+          handleSelectChange={handleSelectChange}
+          origens={origens}
+          tiposMidia={tiposMidia}
+          errors={errors.filter(err => FORM_STEPS[1].fields.includes(err.field))}
         />
       );
     case 2:
       return (
-        <OriginClassificationStep 
+        <RequesterInfoStep
           formData={formData}
-          handleSelectChange={handleSelectChange}
           handleChange={handleChange}
-          origens={origens}
-          tiposMidia={tiposMidia}
-          errors={errors}
+          errors={errors.filter(err => FORM_STEPS[2].fields.includes(err.field))}
         />
       );
     case 3:
       return (
-        <PriorityDeadlineStep 
+        <LocationStep
           formData={formData}
+          handleChange={handleChange}
           handleSelectChange={handleSelectChange}
-          errors={errors}
+          distritos={distritos}
+          selectedDistrito={selectedDistrito}
+          setSelectedDistrito={setSelectedDistrito}
+          filteredBairros={filteredBairros}
+          errors={errors.filter(err => FORM_STEPS[3].fields.includes(err.field))}
         />
       );
     case 4:
       return (
-        <RequesterInfoStep 
+        <QuestionsDetailsStep
           formData={formData}
           handleChange={handleChange}
-          errors={errors}
+          handlePerguntaChange={handlePerguntaChange}
+          errors={errors.filter(err => FORM_STEPS[4].fields.includes(err.field))}
         />
       );
     case 5:
       return (
-        <LocationStep 
+        <PriorityDeadlineStep
           formData={formData}
-          selectedDistrito={selectedDistrito}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
-          setSelectedDistrito={setSelectedDistrito}
-          distritos={distritos}
-          filteredBairros={filteredBairros}
-          errors={errors}
+          errors={errors.filter(err => FORM_STEPS[5].fields.includes(err.field))}
         />
       );
     case 6:
       return (
-        <div className="space-y-6">
-          <div>
-            <label htmlFor="titulo" className={`block text-sm font-medium mb-2 ${errors.some(err => err.field === 'titulo') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
-              Título da Demanda {errors.some(err => err.field === 'titulo') && <span className="text-orange-500">*</span>}
-            </label>
-            <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md">
-              <input 
-                id="titulo" 
-                name="titulo" 
-                value={formData.titulo} 
-                onChange={handleChange} 
-                className="border-0 shadow-none focus:outline-none focus:ring-0 w-full py-3 bg-transparent" 
-                placeholder="Digite o título da demanda..."
-              />
-            </div>
-            {errors.some(err => err.field === 'titulo') && (
-              <p className="text-orange-500 text-sm mt-1">
-                {errors.find(err => err.field === 'titulo')?.message}
-              </p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              Título sugerido com base no serviço e bairro selecionados.
-            </p>
-          </div>
-          
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className={`block text-sm font-medium ${errors.some(err => err.field === 'perguntas') ? 'text-orange-500 font-semibold' : 'text-gray-700'}`}>
-                Perguntas para a Área Técnica
-              </label>
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3">Resumo da Demanda</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-semibold">Título:</p>
+                <p className="text-sm text-gray-700">{formData.titulo}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Prioridade:</p>
+                <p className="text-sm text-gray-700">{formData.prioridade}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Problema:</p>
+                <p className="text-sm text-gray-700">
+                  {problemas.find(p => p.id === formData.problema_id)?.descricao || '-'}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Serviço:</p>
+                <p className="text-sm text-gray-700">
+                  {servicos.find(s => s.id === formData.servico_id)?.descricao || '-'}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Origem:</p>
+                <p className="text-sm text-gray-700">
+                  {origens.find(o => o.id === formData.origem_id)?.descricao || '-'}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Tipo de Mídia:</p>
+                <p className="text-sm text-gray-700">
+                  {tiposMidia.find(t => t.id === formData.tipo_midia_id)?.descricao || '-'}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Solicitante:</p>
+                <p className="text-sm text-gray-700">{formData.nome_solicitante || '-'}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Prazo de Resposta:</p>
+                <p className="text-sm text-gray-700">
+                  {formData.prazo_resposta ? new Date(formData.prazo_resposta).toLocaleDateString('pt-BR') : '-'}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Bairro:</p>
+                <p className="text-sm text-gray-700">
+                  {filteredBairros.find(b => b.id === formData.bairro_id)?.nome || '-'}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-semibold">Endereço:</p>
+                <p className="text-sm text-gray-700">{formData.endereco || '-'}</p>
+              </div>
             </div>
             
-            <div className="space-y-3">
-              {formData.perguntas.map((pergunta, index) => {
-                if (index < 5 && (index === 0 || formData.perguntas[index-1].trim() !== '' || pergunta.trim() !== '')) {
-                  return (
-                    <div key={index} className="flex gap-2">
-                      <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center px-4 transition-all hover:shadow-md">
-                        <input
-                          value={pergunta}
-                          onChange={(e) => handlePerguntaChange(index, e.target.value)}
-                          className="border-0 shadow-none focus:outline-none focus:ring-0 w-full py-3 bg-transparent"
-                          placeholder={`Pergunta ${index + 1}`}
-                        />
-                      </div>
-                      {index > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updatedPerguntas = [...formData.perguntas];
-                            // Remove this question and shift others up
-                            for (let i = index; i < 4; i++) {
-                              updatedPerguntas[i] = updatedPerguntas[i + 1];
-                            }
-                            updatedPerguntas[4] = '';
-                            handleSelectChange('perguntas', JSON.stringify(updatedPerguntas));
-                          }}
-                          className="text-red-500 hover:text-red-700 p-2"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
+            <div className="mt-4">
+              <p className="text-sm font-semibold">Detalhes da Solicitação:</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{formData.detalhes_solicitacao || '-'}</p>
             </div>
             
-            {errors.some(err => err.field === 'perguntas') && (
-              <p className="text-orange-500 text-sm mt-1">
-                {errors.find(err => err.field === 'perguntas')?.message}
-              </p>
+            {formData.perguntas.some(p => p.trim() !== '') && (
+              <div className="mt-4">
+                <p className="text-sm font-semibold">Perguntas:</p>
+                <ul className="list-disc pl-5 text-sm text-gray-700">
+                  {formData.perguntas.filter(p => p.trim() !== '').map((pergunta, index) => (
+                    <li key={index}>{pergunta}</li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>
       );
     default:
-      return null;
+      return <div>Passo não encontrado</div>;
   }
 };
 
