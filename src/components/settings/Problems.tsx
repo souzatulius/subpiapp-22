@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useProblemsData, useProblemOperations, Problem, Area } from '@/hooks/problems';
+import { useProblemsData, useProblemOperations, Problem, Area } from '@/hooks/useProblems';
 import DataTable from './data-table/DataTable';
 import ProblemForm from './problems/ProblemForm';
 import ProblemEditDialog from './problems/ProblemEditDialog';

@@ -66,6 +66,7 @@ const Settings = () => {
                   {activeSection === 'permissoes' && 'Permissões'}
                   {activeSection === 'notificacoes' && 'Configurações de Notificações'}
                   {activeSection === 'usuarios' && 'Gerenciamento de Usuários'}
+                  {activeSection === 'problemas' && 'Problemas'}
                 </h1>
                 <SettingsContent activeSection={activeSection} />
               </div>

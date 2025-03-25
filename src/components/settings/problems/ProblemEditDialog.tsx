@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ProblemForm from './ProblemForm';
-import { Area, Problem } from '@/hooks/problems';
+import { Area, Problem } from '@/hooks/useProblems';
 
 interface ProblemEditDialogProps {
   isOpen: boolean;

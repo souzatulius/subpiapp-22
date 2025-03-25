@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Area, problemSchema } from '@/hooks/problems';
+import { Area, problemSchema } from '@/hooks/useProblems';
 
 interface ProblemFormProps {
   onSubmit: (data: { descricao: string; area_coordenacao_id: string }) => Promise<void>;
