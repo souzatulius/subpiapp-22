@@ -48,10 +48,25 @@ export const useDemandFormSubmit = (
       let problemaId;
       
       if (!problemaData || problemaData.length === 0) {
-        // Criar um problema padrão se não existir
+        // Precisamos obter uma área de coordenação padrão para criar o problema
+        const { data: areaData, error: areaError } = await supabase
+          .from('areas_coordenacao')
+          .select('id')
+          .limit(1);
+          
+        if (areaError) throw areaError;
+        
+        if (!areaData || areaData.length === 0) {
+          throw new Error("Não há áreas de coordenação cadastradas no sistema.");
+        }
+        
+        // Criar um problema padrão se não existir, agora incluindo a área de coordenação
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
-          .insert({ descricao: 'Problema Padrão' })
+          .insert({ 
+            descricao: 'Problema Padrão',
+            area_coordenacao_id: areaData[0].id 
+          })
           .select();
           
         if (newProblemaError) throw newProblemaError;

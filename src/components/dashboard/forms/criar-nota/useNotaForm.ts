@@ -100,49 +100,41 @@ export const useNotaForm = (onClose: () => void) => {
       
       if (problemaError) throw problemaError;
       
+      let problemaId;
+      
       if (!problemaData || problemaData.length === 0) {
         // Se não houver problema cadastrado, criar um padrão
+        // Note: Now we need to include area_coordenacao_id when creating a problem
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
-          .insert({ descricao: 'Problema Padrão' })
+          .insert({ 
+            descricao: 'Problema Padrão',
+            area_coordenacao_id: selectedDemanda.area_coordenacao.id 
+          })
           .select();
           
         if (newProblemaError) throw newProblemaError;
         
-        const problemaId = newProblema[0].id;
-        
-        // Create the note
-        const { data, error } = await supabase
-          .from('notas_oficiais')
-          .insert({
-            titulo,
-            texto,
-            area_coordenacao_id: selectedDemanda.area_coordenacao.id,
-            autor_id: user?.id,
-            status: 'pendente',
-            demanda_id: selectedDemandaId,
-            problema_id: problemaId
-          })
-          .select();
-        
-        if (error) throw error;
+        problemaId = newProblema[0].id;
       } else {
-        // Create the note with existing problema
-        const { data, error } = await supabase
-          .from('notas_oficiais')
-          .insert({
-            titulo,
-            texto,
-            area_coordenacao_id: selectedDemanda.area_coordenacao.id,
-            autor_id: user?.id,
-            status: 'pendente',
-            demanda_id: selectedDemandaId,
-            problema_id: problemaData[0].id
-          })
-          .select();
-        
-        if (error) throw error;
+        problemaId = problemaData[0].id;
       }
+      
+      // Create the note with existing problema
+      const { data, error } = await supabase
+        .from('notas_oficiais')
+        .insert({
+          titulo,
+          texto,
+          area_coordenacao_id: selectedDemanda.area_coordenacao.id,
+          autor_id: user?.id,
+          status: 'pendente',
+          demanda_id: selectedDemandaId,
+          problema_id: problemaId
+        })
+        .select();
+      
+      if (error) throw error;
       
       // Update the demand status to reflect that a note has been created
       const { error: updateError } = await supabase

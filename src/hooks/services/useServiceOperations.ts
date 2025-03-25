@@ -20,12 +20,16 @@ export function useServiceOperations(refreshCallback: () => Promise<void>) {
       
       if (problemaError) throw problemaError;
       
-      // If no problems exist yet, create a default one
       let problema_id;
+      // If no problems exist yet, create a default one
       if (!problemaData || problemaData.length === 0) {
+        // We need to include area_coordenacao_id when creating a problem
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
-          .insert({ descricao: 'Problema Padrão' })
+          .insert({ 
+            descricao: 'Problema Padrão',
+            area_coordenacao_id: data.area_coordenacao_id
+          })
           .select();
         
         if (newProblemaError) throw newProblemaError;
