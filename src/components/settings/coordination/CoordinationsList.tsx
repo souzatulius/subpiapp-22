@@ -34,6 +34,9 @@ const CoordinationsList = () => {
         
         if (supervError) throw supervError;
         
+        console.log('Coordinations fetched:', coordData);
+        console.log('Supervisions fetched:', supervData);
+        
         setCoordinations(coordData || []);
         setSupervisions(supervData || []);
       } catch (error) {

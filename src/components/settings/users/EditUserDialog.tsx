@@ -140,7 +140,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
               value={watch('cargo_id')}
               onValueChange={(value) => setValue('cargo_id', value)}
             >
-              <SelectTrigger className="h-12 rounded-xl">
+              <SelectTrigger id="cargo_id" className="h-10 rounded-md">
                 <SelectValue placeholder="Selecione um cargo" />
               </SelectTrigger>
               <SelectContent>
@@ -167,7 +167,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                 setValue('area_coordenacao_id', '');
               }}
             >
-              <SelectTrigger className="h-12 rounded-xl">
+              <SelectTrigger id="coordenacao_id" className="h-10 rounded-md">
                 <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
@@ -189,9 +189,9 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
             <Select
               value={watch('area_coordenacao_id')}
               onValueChange={(value) => setValue('area_coordenacao_id', value)}
-              disabled={!coordenacao || coordenacao === 'select-coordenacao' || filteredAreas.length === 0}
+              disabled={!coordenacao || coordenacao === 'select-coordenacao'}
             >
-              <SelectTrigger className="h-12 rounded-xl">
+              <SelectTrigger id="area_coordenacao_id" className="h-10 rounded-md">
                 <SelectValue placeholder={
                   !coordenacao || coordenacao === 'select-coordenacao'
                     ? 'Selecione uma coordenação primeiro' 
