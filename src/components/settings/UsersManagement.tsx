@@ -33,15 +33,26 @@ const UsersManagement = () => {
   useEffect(() => {
     const fetchCoordenacoes = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_unique_coordenacoes');
-        
+        // Buscar todas as coordenações diretamente da tabela, em vez de usar a função RPC
+        const { data, error } = await supabase
+          .from('areas_coordenacao')
+          .select('id, descricao')
+          .eq('is_supervision', false)
+          .order('descricao');
+          
         if (error) {
           console.error('Error fetching coordenações:', error);
           return;
         }
         
-        console.log('Fetched coordenações:', data);
-        setCoordenacoes(data || []);
+        // Transformar dados para o formato esperado pelo componente
+        const formattedData = data.map(item => ({
+          coordenacao_id: item.id,
+          coordenacao: item.descricao
+        }));
+        
+        console.log('Fetched coordenações:', formattedData);
+        setCoordenacoes(formattedData || []);
       } catch (error) {
         console.error('Error in fetchCoordenacoes:', error);
       }

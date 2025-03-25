@@ -14,7 +14,7 @@ export const useRegisterOptions = () => {
     const fetchOptions = async () => {
       setLoadingOptions(true);
       try {
-        // Fetch positions from cargos table - add console logs to debug
+        // Fetch positions from cargos table
         console.log('Fetching cargos from Supabase...');
         const { data: cargosData, error: cargosError } = await supabase
           .from('cargos')
@@ -28,11 +28,12 @@ export const useRegisterOptions = () => {
         
         console.log('Cargos data received:', cargosData);
         
-        // Fetch coordination areas from areas_coordenacao table
-        console.log('Fetching areas from Supabase...');
+        // Fetch supervisions from areas_coordenacao table
+        console.log('Fetching supervisions from Supabase...');
         const { data: areasData, error: areasError } = await supabase
           .from('areas_coordenacao')
           .select('id, descricao')
+          .eq('is_supervision', true)
           .order('descricao', { ascending: true });
         
         if (areasError) {
@@ -40,12 +41,15 @@ export const useRegisterOptions = () => {
           throw areasError;
         }
         
-        console.log('Areas data received:', areasData);
+        console.log('Supervisions data received:', areasData);
         
-        // Fetch coordenações using the RPC function
+        // Fetch coordenações directly from the table
         console.log('Fetching coordenações from Supabase...');
         const { data: coordenacoesData, error: coordenacoesError } = await supabase
-          .rpc('get_unique_coordenacoes');
+          .from('areas_coordenacao')
+          .select('id, descricao')
+          .eq('is_supervision', false)
+          .order('descricao', { ascending: true });
         
         if (coordenacoesError) {
           console.error('Error fetching coordenações:', coordenacoesError);
@@ -59,7 +63,7 @@ export const useRegisterOptions = () => {
         }
         
         if (!areasData || areasData.length === 0) {
-          console.warn('No areas found in the database');
+          console.warn('No supervisions found in the database');
         }
         
         if (!coordenacoesData || coordenacoesData.length === 0) {
@@ -70,8 +74,8 @@ export const useRegisterOptions = () => {
         setRoles(cargosData?.map(item => ({ id: item.id, value: item.descricao })) || []);
         setAreas(areasData?.map(item => ({ id: item.id, value: item.descricao })) || []);
         setCoordenacoes(coordenacoesData?.map(item => ({ 
-          id: item.coordenacao_id, 
-          value: item.coordenacao 
+          id: item.id, 
+          value: item.descricao 
         })) || []);
       } catch (error) {
         console.error('Error fetching options:', error);
