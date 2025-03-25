@@ -3,11 +3,12 @@ export interface User {
   id: string;
   nome_completo: string;
   email: string;
-  aniversario?: string;
   whatsapp?: string;
+  aniversario?: string;
   foto_perfil_url?: string;
   cargo_id?: string;
   area_coordenacao_id?: string;
+  criado_em: string;
   cargos?: {
     id: string;
     descricao: string;
@@ -16,13 +17,13 @@ export interface User {
     id: string;
     descricao: string;
   };
-  criado_em?: string;
-  permissoes?: any[];
+  permissoes: Permission[];
 }
 
-export interface Area {
+export interface Permission {
   id: string;
   descricao: string;
+  nivel_acesso: number;
 }
 
 export interface Cargo {
@@ -30,11 +31,7 @@ export interface Cargo {
   descricao: string;
 }
 
-export interface UserFormData {
-  email: string;
-  nome_completo: string;
-  cargo_id?: string;
-  area_coordenacao_id?: string;
-  whatsapp?: string;
-  aniversario?: Date;
+export interface Area {
+  id: string;
+  descricao: string;
 }

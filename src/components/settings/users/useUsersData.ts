@@ -34,7 +34,7 @@ export const useUsersData = () => {
       if (usersError) throw usersError;
       
       // Processar para adicionar dados relacionados
-      const processedUsers = await Promise.all(usersData.map(async (user) => {
+      const processedUsers = await Promise.all((usersData || []).map(async (user) => {
         // Buscar cargo
         let cargoInfo = { id: '', descricao: '' };
         if (user.cargo_id) {
@@ -75,7 +75,7 @@ export const useUsersData = () => {
         
         let permissoes = [];
         if (!permissionsError) {
-          permissoes = permissionsData.map(p => p.permissoes);
+          permissoes = permissionsData.map((p: any) => p.permissoes);
         }
         
         return { 
@@ -83,11 +83,11 @@ export const useUsersData = () => {
           cargos: cargoInfo,
           areas_coordenacao: areaInfo,
           permissoes
-        };
+        } as User;
       }));
       
-      setUsers(processedUsers as User[]);
-      setFilteredUsers(processedUsers as User[]);
+      setUsers(processedUsers);
+      setFilteredUsers(processedUsers);
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
       toast({

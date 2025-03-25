@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -26,68 +25,41 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const [isRejecting, setIsRejecting] = useState(false);
 
   const fetchNotas = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      // Buscar notas com dados dos autores, usando a sintaxe correta para evitar erro de relação
       const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
-        .select(`
-          id, titulo, texto, status, criado_em, autor_id, aprovador_id, area_coordenacao_id, demanda_id, problema_id
-        `)
-        .eq('status', 'pendente')  // Apenas notas pendentes
+        .select('*, demanda_id, problema_id, areas_coordenacao(id, descricao)')
+        .eq('status', 'pendente')
         .order('criado_em', { ascending: false });
       
       if (notasError) throw notasError;
       
-      // Processar para adicionar informações de autor e área
-      const notasProcessadas = await Promise.all(notasData.map(async (nota) => {
-        // Buscar autor separadamente
-        let autorInfo = { id: '', nome_completo: 'Desconhecido' };
-        if (nota.autor_id) {
-          const { data: autorData, error: autorError } = await supabase
-            .from('usuarios')
-            .select('id, nome_completo')
-            .eq('id', nota.autor_id)
-            .single();
-            
-          if (!autorError && autorData) {
-            autorInfo = { 
-              id: autorData.id, 
-              nome_completo: autorData.nome_completo 
-            };
-          }
-        }
+      const processedNotas = await Promise.all((notasData || []).map(async (nota) => {
+        let autor = { id: nota.autor_id, nome_completo: 'Usuário não encontrado' };
         
-        // Buscar área de coordenação
-        let areaInfo = { descricao: 'Desconhecida', id: '' };
-        if (nota.area_coordenacao_id) {
-          const { data: areaData, error: areaError } = await supabase
-            .from('areas_coordenacao')
-            .select('id, descricao')
-            .eq('id', nota.area_coordenacao_id)
-            .single();
-            
-          if (!areaError && areaData) {
-            areaInfo = { 
-              descricao: areaData.descricao, 
-              id: areaData.id 
-            };
-          }
+        const { data: authorData, error: authorError } = await supabase
+          .from('usuarios')
+          .select('id, nome_completo')
+          .eq('id', nota.autor_id)
+          .single();
+        
+        if (!authorError && authorData) {
+          autor = authorData;
         }
         
         return {
           ...nota,
-          areas_coordenacao: areaInfo,
-          autor: autorInfo
+          autor
         };
       }));
       
-      setNotas(notasProcessadas);
+      setNotas(processedNotas);
     } catch (error) {
       console.error('Erro ao carregar notas oficiais:', error);
       toast({
-        title: "Erro ao carregar notas",
-        description: "Não foi possível carregar as notas pendentes de aprovação.",
+        title: "Erro",
+        description: "Não foi possível carregar as notas oficiais.",
         variant: "destructive"
       });
     } finally {
@@ -110,7 +82,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     try {
       setIsApproving(true);
       
-      // Update nota status to approved
       const { error: notaError } = await supabase
         .from('notas_oficiais')
         .update({ 
@@ -122,7 +93,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       if (notaError) throw notaError;
       
-      // Update demanda status if there is an associated demanda
       if (selectedNota.demanda_id) {
         const { error: demandaError } = await supabase
           .from('demandas')
@@ -137,7 +107,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         description: "A nota oficial foi aprovada e está pronta para divulgação."
       });
       
-      // Reset the selected nota and refresh the list
       setSelectedNota(null);
       fetchNotas();
     } catch (error: any) {
@@ -158,7 +127,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     try {
       setIsRejecting(true);
       
-      // Update nota status to rejected
       const { error: notaError } = await supabase
         .from('notas_oficiais')
         .update({ 
@@ -170,7 +138,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       if (notaError) throw notaError;
       
-      // Update demanda status if there is an associated demanda
       if (selectedNota.demanda_id) {
         const { error: demandaError } = await supabase
           .from('demandas')
@@ -185,7 +152,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         description: "A nota oficial foi rejeitada e retornada para revisão."
       });
       
-      // Reset the selected nota and refresh the list
       setSelectedNota(null);
       fetchNotas();
     } catch (error: any) {

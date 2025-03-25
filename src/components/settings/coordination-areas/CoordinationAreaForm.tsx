@@ -36,6 +36,7 @@ const CoordinationAreaForm: React.FC<CoordinationAreaFormProps> = ({
               id="descricao"
               {...register("descricao")}
               className="rounded-lg"
+              placeholder="Nome da área de coordenação"
             />
             {formState.errors.descricao && (
               <p className="text-sm text-red-500">{formState.errors.descricao.message}</p>
