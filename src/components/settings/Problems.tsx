@@ -1,20 +1,13 @@
 
 import React, { useState } from 'react';
+import { useProblemsData, useProblemOperations, Problem, Area } from '@/hooks/problems';
 import DataTable from './data-table/DataTable';
 import ProblemForm from './problems/ProblemForm';
 import ProblemEditDialog from './problems/ProblemEditDialog';
-import { useProblems, Problem } from '@/hooks/useProblems';
 
 const Problems = () => {
-  const {
-    problems,
-    areas,
-    loading,
-    isSubmitting,
-    addProblem,
-    updateProblem,
-    deleteProblem
-  } = useProblems();
+  const { problems, areas, isLoading, fetchProblems } = useProblemsData();
+  const { isSubmitting, isDeleting, addProblem, updateProblem, deleteProblem } = useProblemOperations(fetchProblems);
   
   const [editingProblem, setEditingProblem] = useState<Problem | null>(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
@@ -41,15 +34,25 @@ const Problems = () => {
   const handleEdit = async (data: { descricao: string; area_coordenacao_id: string }) => {
     if (!editingProblem) return Promise.reject(new Error('Nenhum problema selecionado'));
     
-    await updateProblem(editingProblem.id, data);
-    closeEditForm();
-    return Promise.resolve();
+    try {
+      await updateProblem(editingProblem.id, data);
+      closeEditForm();
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error in handleEdit:', error);
+      return Promise.reject(error);
+    }
   };
 
   const handleAdd = async (data: { descricao: string; area_coordenacao_id: string }) => {
-    await addProblem(data);
-    closeAddForm();
-    return Promise.resolve();
+    try {
+      await addProblem(data);
+      closeAddForm();
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error in handleAdd:', error);
+      return Promise.reject(error);
+    }
   };
 
   const columns = [
@@ -58,25 +61,27 @@ const Problems = () => {
       header: 'Descrição',
     },
     {
-      key: 'areas_coordenacao',
+      key: 'area_coordenacao',
       header: 'Área de Coordenação',
-      render: (row: any) => row.areas_coordenacao?.descricao || '-',
+      render: (row: Problem) => row.area_coordenacao?.descricao || '-',
     },
     {
       key: 'criado_em',
       header: 'Data de Criação',
-      render: (row: any) => new Date(row.criado_em).toLocaleDateString('pt-BR'),
+      render: (row: Problem) => new Date(row.criado_em || '').toLocaleDateString('pt-BR'),
     },
   ];
 
-  const renderForm = (onClose: () => void) => (
-    <ProblemForm
-      onSubmit={handleAdd}
-      onCancel={onClose}
-      areas={areas}
-      isSubmitting={isSubmitting}
-    />
-  );
+  const renderForm = (onClose: () => void) => {
+    return (
+      <ProblemForm
+        onSubmit={handleAdd}
+        onCancel={onClose}
+        areas={areas}
+        isSubmitting={isSubmitting}
+      />
+    );
+  };
 
   return (
     <div>
@@ -89,7 +94,7 @@ const Problems = () => {
         onDelete={deleteProblem}
         filterPlaceholder="Filtrar problemas..."
         renderForm={renderForm}
-        isLoading={loading}
+        isLoading={isLoading}
       />
       
       <ProblemEditDialog

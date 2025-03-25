@@ -1,8 +1,8 @@
 
 import React from 'react';
-import EditModal from '../EditModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ProblemForm from './ProblemForm';
-import { Problem, Area } from '@/hooks/problems/types';
+import { Area, Problem } from '@/hooks/problems';
 
 interface ProblemEditDialogProps {
   isOpen: boolean;
@@ -24,22 +24,24 @@ const ProblemEditDialog: React.FC<ProblemEditDialogProps> = ({
   if (!isOpen || !problem) return null;
 
   return (
-    <EditModal 
-      isOpen={isOpen} 
-      onClose={onClose}
-      title="Editar Problema"
-    >
-      <ProblemForm
-        onSubmit={onSubmit}
-        onCancel={onClose}
-        defaultValues={{
-          descricao: problem.descricao,
-          area_coordenacao_id: problem.area_coordenacao_id,
-        }}
-        areas={areas}
-        isSubmitting={isSubmitting}
-      />
-    </EditModal>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar Problema</DialogTitle>
+        </DialogHeader>
+        <ProblemForm
+          onSubmit={onSubmit}
+          onCancel={onClose}
+          defaultValues={{
+            descricao: problem.descricao,
+            area_coordenacao_id: problem.area_coordenacao_id
+          }}
+          areas={areas}
+          isSubmitting={isSubmitting}
+          submitText="Salvar Alterações"
+        />
+      </DialogContent>
+    </Dialog>
   );
 };
 
