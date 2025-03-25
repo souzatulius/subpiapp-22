@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -8,22 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import EditModal from '@/components/settings/EditModal';
-import { Loader2 } from 'lucide-react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { Loader2, Info } from 'lucide-react';
 
 interface ProfileFormData {
   nome_completo: string;
   whatsapp: string;
   aniversario: string;
-  cargo_id: string;
-  coordenacao_id: string;
-  supervisao_tecnica_id: string;
 }
 
 interface EditProfileModalProps {
@@ -35,91 +26,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   const { updateProfile, user } = useAuth();
   const { userProfile, fetchUserProfile, isLoading: profileLoading } = useUserProfile();
   const [submitting, setSubmitting] = useState(false);
-  const [supervisoes, setSupervisoes] = useState<any[]>([]);
-  const [cargos, setCargos] = useState<any[]>([]);
-  const [coordenacoes, setCoordenacoes] = useState<any[]>([]);
-  const [filteredSupervisoes, setFilteredSupervisoes] = useState<any[]>([]);
-  const [loadingOptions, setLoadingOptions] = useState(false);
 
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ProfileFormData>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>();
   
-  const watchedCoordenacao = watch('coordenacao_id');
-
-  useEffect(() => {
-    const fetchOptions = async () => {
-      setLoadingOptions(true);
-      try {
-        const { data: cargosData, error: cargosError } = await supabase
-          .from('cargos')
-          .select('*')
-          .order('descricao');
-        
-        const { data: coordenacoesData, error: coordenacoesError } = await supabase
-          .from('coordenacoes')
-          .select('id, descricao')
-          .order('descricao');
-        
-        const { data: supervisoesData, error: supervisoesError } = await supabase
-          .from('supervisoes_tecnicas')
-          .select('*')
-          .order('descricao');
-        
-        if (cargosError) throw cargosError;
-        if (coordenacoesError) throw coordenacoesError;
-        if (supervisoesError) throw supervisoesError;
-        
-        if (cargosData) setCargos(cargosData);
-        if (coordenacoesData) setCoordenacoes(coordenacoesData);
-        if (supervisoesData) setSupervisoes(supervisoesData);
-        
-        console.log('Coordenações loaded:', coordenacoesData?.length);
-        console.log('All supervisions loaded:', supervisoesData?.length);
-        
-        if (userProfile && userProfile.coordenacao_id) {
-          setValue('coordenacao_id', userProfile.coordenacao_id);
-          
-          const filtered = supervisoesData?.filter(supervisao => 
-            supervisao.coordenacao_id === userProfile.coordenacao_id
-          ) || [];
-          
-          console.log(`Filtered ${filtered.length} supervisions for coordination ${userProfile.coordenacao_id}`);
-          setFilteredSupervisoes(filtered);
-        } else {
-          setFilteredSupervisoes([]);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar opções:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar as opções de áreas e cargos.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoadingOptions(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchOptions();
-    }
-  }, [isOpen, userProfile, setValue]);
-
-  useEffect(() => {
-    if (watchedCoordenacao && watchedCoordenacao !== 'select-coordenacao') {
-      console.log(`Filtering supervisions for coordination ID: ${watchedCoordenacao}`);
-      const filtered = supervisoes.filter(supervisao => supervisao.coordenacao_id === watchedCoordenacao);
-      console.log(`Found ${filtered.length} supervisions for coordination ${watchedCoordenacao}`);
-      setFilteredSupervisoes(filtered);
-      
-      const currentSupervisaoId = watch('supervisao_tecnica_id');
-      if (currentSupervisaoId && !filtered.some(supervisao => supervisao.id === currentSupervisaoId)) {
-        setValue('supervisao_tecnica_id', '');
-      }
-    } else {
-      setFilteredSupervisoes([]);
-    }
-  }, [watchedCoordenacao, supervisoes, setValue, watch]);
-
   useEffect(() => {
     if (userProfile) {
       reset({
@@ -130,9 +39,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
              ? userProfile.aniversario.split('T')[0] 
              : new Date(userProfile.aniversario).toISOString().split('T')[0]) 
           : '',
-        cargo_id: userProfile.cargo_id || '',
-        coordenacao_id: userProfile.coordenacao_id || '',
-        supervisao_tecnica_id: userProfile.supervisao_tecnica_id || '',
       });
     }
   }, [userProfile, reset]);
@@ -142,12 +48,21 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     
     setSubmitting(true);
     try {
-      await updateProfile(data);
+      // When submitting the update, include the existing values for fields that shouldn't be updated
+      const updateData = {
+        ...data,
+        cargo_id: userProfile?.cargo_id,
+        coordenacao_id: userProfile?.coordenacao_id,
+        supervisao_tecnica_id: userProfile?.supervisao_tecnica_id,
+      };
+      
+      await updateProfile(updateData);
       await fetchUserProfile();
       onClose();
       toast({
         title: "Perfil atualizado",
         description: "Suas informações foram atualizadas com sucesso.",
+        variant: "success",
       });
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
@@ -161,7 +76,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  const isLoading = profileLoading || loadingOptions || submitting;
+  const isLoading = profileLoading || submitting;
 
   const footerContent = (
     <>
@@ -187,6 +102,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         </div>
       ) : (
         <form id="profileForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4">
+            <div className="flex items-start">
+              <Info className="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
+              <p className="text-sm text-blue-700">
+                Você pode editar suas informações pessoais neste formulário. Para alterações em cargo, coordenação e supervisão técnica, entre em contato com a administração.
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="nome_completo">Nome Completo</Label>
             <Input
@@ -217,87 +141,45 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cargo_id">Cargo</Label>
-            <Select
-              value={watch('cargo_id')}
-              onValueChange={(value) => setValue('cargo_id', value)}
-              disabled={loadingOptions}
-            >
-              <SelectTrigger className="h-12 rounded-xl">
-                <SelectValue placeholder="Selecione um cargo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
-                {cargos.map(cargo => (
-                  <SelectItem key={cargo.id} value={cargo.id}>
-                    {cargo.descricao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={userProfile?.email || ''}
+              disabled
+              className="bg-gray-100"
+            />
+            <p className="text-xs text-gray-500">O email não pode ser alterado.</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="coordenacao_id">Coordenação</Label>
-            <Select
-              value={watch('coordenacao_id')}
-              onValueChange={(value) => {
-                setValue('coordenacao_id', value);
-                setValue('supervisao_tecnica_id', '');
-              }}
-              disabled={loadingOptions}
-            >
-              <SelectTrigger className="h-12 rounded-xl">
-                <SelectValue placeholder="Selecione uma coordenação" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="select-coordenacao">Selecione uma coordenação</SelectItem>
-                {coordenacoes.map(coord => (
-                  <SelectItem key={coord.id} value={coord.id}>
-                    {coord.descricao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="cargo">Cargo</Label>
+            <Input
+              id="cargo"
+              value={userProfile?.cargo || ''}
+              disabled
+              className="bg-gray-100"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
-            <Select
-              value={watch('supervisao_tecnica_id')}
-              onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
-              disabled={loadingOptions || !watchedCoordenacao || watchedCoordenacao === 'select-coordenacao' || filteredSupervisoes.length === 0}
-            >
-              <SelectTrigger className="h-12 rounded-xl">
-                <SelectValue placeholder={
-                  !watchedCoordenacao || watchedCoordenacao === 'select-coordenacao'
-                    ? "Selecione uma coordenação primeiro" 
-                    : filteredSupervisoes.length === 0 
-                      ? "Nenhuma supervisão técnica para esta coordenação" 
-                      : "Selecione uma supervisão técnica"
-                } />
-              </SelectTrigger>
-              <SelectContent>
-                {!watchedCoordenacao || watchedCoordenacao === 'select-coordenacao' ? (
-                  <SelectItem value="no-coordenacao">
-                    Selecione uma coordenação primeiro
-                  </SelectItem>
-                ) : filteredSupervisoes.length === 0 ? (
-                  <SelectItem value="no-supervisions">
-                    Nenhuma supervisão técnica para esta coordenação
-                  </SelectItem>
-                ) : (
-                  <>
-                    <SelectItem value="select-supervision">Selecione uma supervisão técnica</SelectItem>
-                    {filteredSupervisoes.map(supervisao => (
-                      <SelectItem key={supervisao.id} value={supervisao.id}>
-                        {supervisao.descricao}
-                      </SelectItem>
-                    ))}
-                  </>
-                )}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="coordenacao">Coordenação</Label>
+            <Input
+              id="coordenacao"
+              value={userProfile?.coordenacao || ''}
+              disabled
+              className="bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="supervisao">Supervisão Técnica</Label>
+            <Input
+              id="supervisao"
+              value={userProfile?.supervisao_tecnica || ''}
+              disabled
+              className="bg-gray-100"
+            />
           </div>
         </form>
       )}
