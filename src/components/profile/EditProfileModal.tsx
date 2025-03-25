@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -9,6 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import EditModal from '@/components/settings/EditModal';
 import { Loader2 } from 'lucide-react';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 interface ProfileFormData {
   nome_completo: string;
@@ -33,7 +41,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   const [coordenacoes, setCoordenacoes] = useState<any[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<any[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
-  const [selectedCoordenacao, setSelectedCoordenacao] = useState<string>('');
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ProfileFormData>();
   
@@ -45,13 +52,24 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
       setLoadingOptions(true);
       try {
         // Fetch cargos
-        const { data: cargosData, error: cargosError } = await supabase.from('cargos').select('*').order('descricao');
+        const { data: cargosData, error: cargosError } = await supabase
+          .from('cargos')
+          .select('*')
+          .order('descricao');
         
-        // Fetch coordenações
-        const { data: coordenacoesData, error: coordenacoesError } = await supabase.rpc('get_unique_coordenacoes');
+        // Fetch coordenações (is_supervision = false)
+        const { data: coordenacoesData, error: coordenacoesError } = await supabase
+          .from('areas_coordenacao')
+          .select('id, descricao')
+          .eq('is_supervision', false)
+          .order('descricao');
         
-        // Fetch areas
-        const { data: areasData, error: areasError } = await supabase.from('areas_coordenacao').select('*').order('descricao');
+        // Fetch all supervisions
+        const { data: areasData, error: areasError } = await supabase
+          .from('areas_coordenacao')
+          .select('*')
+          .eq('is_supervision', true)
+          .order('descricao');
         
         if (cargosError) throw cargosError;
         if (coordenacoesError) throw coordenacoesError;
@@ -61,16 +79,25 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         if (coordenacoesData) setCoordenacoes(coordenacoesData);
         if (areasData) setAreas(areasData);
         
+        console.log('Coordenações loaded:', coordenacoesData?.length);
+        console.log('Supervisions loaded:', areasData?.length);
+        
         // Get user's current coordenacao_id if available
         if (userProfile && userProfile.coordenacao_id) {
-          setSelectedCoordenacao(userProfile.coordenacao_id);
           setValue('coordenacao_id', userProfile.coordenacao_id);
           
           // Filter areas based on this coordenação
-          const filteredAreas = areasData?.filter(a => a.coordenacao === userProfile.coordenacao) || [];
-          setFilteredAreas(filteredAreas);
+          const { data: filteredAreasData, error: filteredAreasError } = await supabase
+            .from('areas_coordenacao')
+            .select('*')
+            .eq('is_supervision', true)
+            .eq('coordenacao_id', userProfile.coordenacao_id);
+            
+          if (filteredAreasError) throw filteredAreasError;
+          
+          setFilteredAreas(filteredAreasData || []);
         } else {
-          setFilteredAreas(areasData || []);
+          setFilteredAreas([]);
         }
       } catch (error) {
         console.error('Erro ao buscar opções:', error);
@@ -91,21 +118,40 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
 
   // Filter areas when coordenação changes
   useEffect(() => {
-    if (watchedCoordenacao && areas.length > 0) {
-      // Find the coordenacao name from the id
-      const coordName = coordenacoes.find(c => c.coordenacao_id === watchedCoordenacao)?.coordenacao;
-      const filtered = areas.filter(area => area.coordenacao === coordName);
-      setFilteredAreas(filtered);
-      
-      // If the current area_coordenacao_id isn't in the filtered list, clear it
-      const currentAreaId = watch('area_coordenacao_id');
-      if (currentAreaId && !filtered.some(area => area.id === currentAreaId)) {
-        setValue('area_coordenacao_id', '');
+    const filterAreas = async () => {
+      if (watchedCoordenacao) {
+        try {
+          setLoadingOptions(true);
+          
+          // Fetch supervisions for the selected coordination
+          const { data: filteredAreasData, error: filteredAreasError } = await supabase
+            .from('areas_coordenacao')
+            .select('*')
+            .eq('is_supervision', true)
+            .eq('coordenacao_id', watchedCoordenacao);
+          
+          if (filteredAreasError) throw filteredAreasError;
+          
+          console.log(`Found ${filteredAreasData?.length} supervisions for coordination ${watchedCoordenacao}`);
+          setFilteredAreas(filteredAreasData || []);
+          
+          // If the current area_coordenacao_id isn't in the filtered list, clear it
+          const currentAreaId = watch('area_coordenacao_id');
+          if (currentAreaId && !filteredAreasData?.some(area => area.id === currentAreaId)) {
+            setValue('area_coordenacao_id', '');
+          }
+        } catch (error) {
+          console.error('Error filtering areas:', error);
+        } finally {
+          setLoadingOptions(false);
+        }
+      } else {
+        setFilteredAreas([]);
       }
-    } else {
-      setFilteredAreas(areas);
-    }
-  }, [watchedCoordenacao, areas, setValue, watch, coordenacoes]);
+    };
+    
+    filterAreas();
+  }, [watchedCoordenacao, setValue, watch]);
 
   // Reset form when profile data changes
   useEffect(() => {
@@ -118,8 +164,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         coordenacao_id: userProfile.coordenacao_id || '',
         area_coordenacao_id: userProfile.area_coordenacao_id || '',
       });
-      
-      setSelectedCoordenacao(userProfile.coordenacao_id || '');
     }
   }, [userProfile, reset]);
 
@@ -204,64 +248,81 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
 
           <div className="space-y-2">
             <Label htmlFor="cargo_id">Cargo</Label>
-            <select
-              id="cargo_id"
-              {...register('cargo_id')}
-              className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 shadow-sm transition-all duration-300"
+            <Select
+              value={watch('cargo_id')}
+              onValueChange={(value) => setValue('cargo_id', value)}
               disabled={loadingOptions}
             >
-              <option value="">Selecione um cargo</option>
-              {cargos.map(cargo => (
-                <option key={cargo.id} value={cargo.id}>
-                  {cargo.descricao}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-12 rounded-xl">
+                <SelectValue placeholder="Selecione um cargo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Selecione um cargo</SelectItem>
+                {cargos.map(cargo => (
+                  <SelectItem key={cargo.id} value={cargo.id}>
+                    {cargo.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="coordenacao_id">Coordenação</Label>
-            <select
-              id="coordenacao_id"
-              {...register('coordenacao_id')}
-              className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 shadow-sm transition-all duration-300"
-              disabled={loadingOptions}
-              onChange={(e) => {
-                setValue('coordenacao_id', e.target.value);
+            <Select
+              value={watch('coordenacao_id')}
+              onValueChange={(value) => {
+                setValue('coordenacao_id', value);
                 // Clear area_coordenacao_id when coordenação changes
                 setValue('area_coordenacao_id', '');
               }}
+              disabled={loadingOptions}
             >
-              <option value="">Selecione uma coordenação</option>
-              {coordenacoes.map(coord => (
-                <option key={coord.coordenacao_id} value={coord.coordenacao_id}>
-                  {coord.coordenacao}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-12 rounded-xl">
+                <SelectValue placeholder="Selecione uma coordenação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Selecione uma coordenação</SelectItem>
+                {coordenacoes.map(coord => (
+                  <SelectItem key={coord.id} value={coord.id}>
+                    {coord.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="area_coordenacao_id">Supervisão Técnica</Label>
-            <select
-              id="area_coordenacao_id"
-              {...register('area_coordenacao_id')}
-              className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-700 shadow-sm transition-all duration-300"
-              disabled={loadingOptions || filteredAreas.length === 0}
+            <Select
+              value={watch('area_coordenacao_id')}
+              onValueChange={(value) => setValue('area_coordenacao_id', value)}
+              disabled={loadingOptions || !watchedCoordenacao || filteredAreas.length === 0}
             >
-              <option value="">
-                {watchedCoordenacao 
-                  ? filteredAreas.length === 0 
-                    ? "Nenhuma supervisão técnica para esta coordenação" 
-                    : "Selecione uma supervisão técnica"
-                  : "Selecione uma coordenação primeiro"}
-              </option>
-              {filteredAreas.map(area => (
-                <option key={area.id} value={area.id}>
-                  {area.descricao}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-12 rounded-xl">
+                <SelectValue placeholder={
+                  !watchedCoordenacao 
+                    ? "Selecione uma coordenação primeiro" 
+                    : filteredAreas.length === 0 
+                      ? "Nenhuma supervisão técnica para esta coordenação" 
+                      : "Selecione uma supervisão técnica"
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">
+                  {!watchedCoordenacao 
+                    ? "Selecione uma coordenação primeiro" 
+                    : filteredAreas.length === 0 
+                      ? "Nenhuma supervisão técnica para esta coordenação" 
+                      : "Selecione uma supervisão técnica"}
+                </SelectItem>
+                {filteredAreas.map(area => (
+                  <SelectItem key={area.id} value={area.id}>
+                    {area.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </form>
       )}

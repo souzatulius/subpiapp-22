@@ -28,18 +28,17 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
   errors,
   handleChange
 }) => {
-  const [filteredAreas, setFilteredAreas] = useState<SelectOption[]>(areas);
+  const [filteredAreas, setFilteredAreas] = useState<SelectOption[]>([]);
+  const [fetchingAreas, setFetchingAreas] = useState(false);
 
   // Filter areas based on selected coordenação
   useEffect(() => {
-    if (coordenacao && areas.length > 0) {
-      // If a coordenação is selected, filter areas that belong to it
-      const filterAreas = async () => {
+    const filterAreas = async () => {
+      if (coordenacao) {
         try {
-          // Find the coordenacao name from the id to use in filtering
-          const selectedCoord = coordenacoes.find(c => c.id === coordenacao);
-          if (!selectedCoord) return;
+          setFetchingAreas(true);
           
+          // Fetch technical supervisions for this coordination
           const { data, error } = await supabase
             .from('areas_coordenacao')
             .select('id, descricao')
@@ -53,20 +52,23 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
               id: area.id,
               value: area.descricao
             }));
+            console.log(`Found ${formattedAreas.length} supervisions for coordination ${coordenacao}`);
             setFilteredAreas(formattedAreas);
           }
         } catch (error) {
           console.error('Error filtering areas:', error);
-          setFilteredAreas(areas);
+          setFilteredAreas([]);
+        } finally {
+          setFetchingAreas(false);
         }
-      };
-      
-      filterAreas();
-    } else {
-      // If no coordenação is selected, show all areas
-      setFilteredAreas(areas);
-    }
-  }, [coordenacao, areas, coordenacoes]);
+      } else {
+        // If no coordenação is selected, show no areas
+        setFilteredAreas([]);
+      }
+    };
+    
+    filterAreas();
+  }, [coordenacao]);
 
   return (
     <div className="space-y-4">
@@ -96,11 +98,14 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                   Nenhum cargo disponível
                 </SelectItem>
               ) : (
-                roles.map(role => (
-                  <SelectItem key={role.id} value={role.id}>
-                    {role.value}
-                  </SelectItem>
-                ))
+                <>
+                  <SelectItem value="">Selecione um cargo</SelectItem>
+                  {roles.map(role => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.value}
+                    </SelectItem>
+                  ))}
+                </>
               )}
             </SelectContent>
           </Select>
@@ -120,7 +125,11 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
         ) : (
           <Select 
             value={coordenacao} 
-            onValueChange={(value) => handleChange('coordenacao', value)}
+            onValueChange={(value) => {
+              handleChange('coordenacao', value);
+              // Clear area when coordenação changes
+              handleChange('area', '');
+            }}
             disabled={loadingOptions}
           >
             <SelectTrigger 
@@ -134,11 +143,14 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                   Nenhuma coordenação disponível
                 </SelectItem>
               ) : (
-                coordenacoes.map(coordenacao => (
-                  <SelectItem key={coordenacao.id} value={coordenacao.id}>
-                    {coordenacao.value}
-                  </SelectItem>
-                ))
+                <>
+                  <SelectItem value="">Selecione uma coordenação</SelectItem>
+                  {coordenacoes.map(coord => (
+                    <SelectItem key={coord.id} value={coord.id}>
+                      {coord.value}
+                    </SelectItem>
+                  ))}
+                </>
               )}
             </SelectContent>
           </Select>
@@ -150,7 +162,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
         <label htmlFor="area" className="block text-sm font-medium text-[#111827] mb-1">
           Supervisão Técnica
         </label>
-        {loadingOptions ? (
+        {loadingOptions || fetchingAreas ? (
           <div className="w-full px-4 py-2 border border-gray-300 rounded-xl flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-gray-500">Carregando...</span>
@@ -159,7 +171,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           <Select 
             value={area} 
             onValueChange={(value) => handleChange('area', value)}
-            disabled={loadingOptions || filteredAreas.length === 0}
+            disabled={loadingOptions || !coordenacao || filteredAreas.length === 0}
           >
             <SelectTrigger 
               className={`${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
@@ -167,16 +179,23 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
-              {filteredAreas.length === 0 ? (
+              {!coordenacao ? (
                 <SelectItem value="no-options" disabled>
-                  {coordenacao ? "Nenhuma supervisão técnica disponível para esta coordenação" : "Selecione uma coordenação primeiro"}
+                  Selecione uma coordenação primeiro
+                </SelectItem>
+              ) : filteredAreas.length === 0 ? (
+                <SelectItem value="no-options" disabled>
+                  Nenhuma supervisão técnica disponível para esta coordenação
                 </SelectItem>
               ) : (
-                filteredAreas.map(area => (
-                  <SelectItem key={area.id} value={area.id}>
-                    {area.value}
-                  </SelectItem>
-                ))
+                <>
+                  <SelectItem value="">Selecione uma supervisão técnica</SelectItem>
+                  {filteredAreas.map(area => (
+                    <SelectItem key={area.id} value={area.id}>
+                      {area.value}
+                    </SelectItem>
+                  ))}
+                </>
               )}
             </SelectContent>
           </Select>

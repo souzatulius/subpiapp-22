@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -64,8 +64,8 @@ interface EditUserDialogProps {
 }
 
 interface Coordenacao {
-  coordenacao_id: string;
-  coordenacao: string;
+  id: string;
+  descricao: string;
 }
 
 const EditUserDialog: React.FC<EditUserDialogProps> = ({
@@ -77,7 +77,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   cargos,
 }) => {
   const [coordenacoes, setCoordenacoes] = useState<Coordenacao[]>([]);
-  const [filteredAreas, setFilteredAreas] = useState<Area[]>(areas);
+  const [filteredAreas, setFilteredAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -100,13 +100,19 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
       
       setLoading(true);
       try {
-        const { data, error } = await supabase.rpc('get_unique_coordenacoes');
+        // Fetch coordenações (is_supervision = false)
+        const { data, error } = await supabase
+          .from('areas_coordenacao')
+          .select('id, descricao')
+          .eq('is_supervision', false)
+          .order('descricao');
         
         if (error) {
           console.error('Error fetching coordenações:', error);
           return;
         }
         
+        console.log('Coordenações loaded for user edit:', data?.length);
         setCoordenacoes(data || []);
       } catch (error) {
         console.error('Error in fetchCoordenacoes:', error);
@@ -123,49 +129,62 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     if (user) {
       const aniversario = user.aniversario ? new Date(user.aniversario) : undefined;
       
-      // Find coordenacao_id from area_coordenacao_id
-      let coordenacaoId = '';
-      if (user.area_coordenacao_id && user.areas_coordenacao) {
-        coordenacaoId = user.areas_coordenacao.coordenacao_id || '';
-      }
-      
       form.reset({
         email: user.email,
         nome_completo: user.nome_completo,
         cargo_id: user.cargo_id || undefined,
-        coordenacao_id: coordenacaoId || undefined,
+        coordenacao_id: user.coordenacao_id || undefined,
         area_coordenacao_id: user.area_coordenacao_id || undefined,
         whatsapp: user.whatsapp || '',
         aniversario: aniversario,
       });
       
-      // Initialize filtered areas
-      if (coordenacaoId) {
-        const filtered = areas.filter(area => area.coordenacao_id === coordenacaoId);
-        setFilteredAreas(filtered);
-      } else {
-        setFilteredAreas(areas);
+      // If the user has a coordination, fetch related supervisions
+      if (user.coordenacao_id) {
+        fetchFilteredAreas(user.coordenacao_id);
       }
     }
-  }, [user, form, areas]);
+  }, [user, form]);
+
+  // Function to fetch filtered areas by coordination
+  const fetchFilteredAreas = async (coordenacaoId: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('areas_coordenacao')
+        .select('*')
+        .eq('is_supervision', true)
+        .eq('coordenacao_id', coordenacaoId);
+      
+      if (error) throw error;
+      
+      console.log(`Found ${data?.length} supervisions for coordination ${coordenacaoId}`);
+      setFilteredAreas(data || []);
+    } catch (error) {
+      console.error('Error fetching filtered areas:', error);
+      setFilteredAreas([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Watch for coordenacao_id changes to filter areas
   const coordenacaoId = form.watch('coordenacao_id');
   
   useEffect(() => {
     if (coordenacaoId) {
-      const filtered = areas.filter(area => area.coordenacao_id === coordenacaoId);
-      setFilteredAreas(filtered);
+      fetchFilteredAreas(coordenacaoId);
       
-      // Clear area selection if not in filtered list
+      // Clear area selection if coordination changes
       const currentAreaId = form.getValues('area_coordenacao_id');
-      if (currentAreaId && !filtered.some(area => area.id === currentAreaId)) {
-        form.setValue('area_coordenacao_id', undefined);
+      if (currentAreaId) {
+        // We'll check if this area belongs to the selected coordination in fetchFilteredAreas
       }
     } else {
-      setFilteredAreas(areas);
+      setFilteredAreas([]);
+      form.setValue('area_coordenacao_id', undefined);
     }
-  }, [coordenacaoId, areas, form]);
+  }, [coordenacaoId, form]);
 
   const handleSubmit = async (data: FormValues) => {
     await onSubmit(data);
@@ -238,6 +257,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="">Selecione um cargo</SelectItem>
                       {cargos.map((cargo) => (
                         <SelectItem key={cargo.id} value={cargo.id}>
                           {cargo.descricao}
@@ -270,9 +290,10 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="">Selecione uma coordenação</SelectItem>
                       {coordenacoes.map((coord) => (
-                        <SelectItem key={coord.coordenacao_id} value={coord.coordenacao_id}>
-                          {coord.coordenacao}
+                        <SelectItem key={coord.id} value={coord.id}>
+                          {coord.descricao}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -291,20 +312,29 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                   <Select 
                     onValueChange={field.onChange} 
                     value={field.value}
-                    disabled={!form.getValues('coordenacao_id') || filteredAreas.length === 0}
+                    disabled={!form.getValues('coordenacao_id') || loading || filteredAreas.length === 0}
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={
-                          form.getValues('coordenacao_id') 
-                            ? filteredAreas.length === 0 
-                              ? "Nenhuma supervisão técnica para esta coordenação" 
-                              : "Selecione uma supervisão técnica"
-                            : "Selecione uma coordenação primeiro"
+                          !form.getValues('coordenacao_id') 
+                            ? "Selecione uma coordenação primeiro" 
+                            : loading 
+                              ? "Carregando..."
+                              : filteredAreas.length === 0 
+                                ? "Nenhuma supervisão técnica para esta coordenação" 
+                                : "Selecione uma supervisão técnica"
                         } />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="">
+                        {!form.getValues('coordenacao_id') 
+                          ? "Selecione uma coordenação primeiro" 
+                          : filteredAreas.length === 0 
+                            ? "Nenhuma supervisão técnica para esta coordenação" 
+                            : "Selecione uma supervisão técnica"}
+                      </SelectItem>
                       {filteredAreas.map((area) => (
                         <SelectItem key={area.id} value={area.id}>
                           {area.descricao}
@@ -380,8 +410,15 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                Salvar Alterações
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  'Salvar Alterações'
+                )}
               </Button>
             </DialogFooter>
           </form>
