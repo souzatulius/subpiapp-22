@@ -1,13 +1,13 @@
 
-import { User } from '@/types/common';
+import { User } from './types';
 
 interface UserActionsProps {
   setIsEditDialogOpen: (open: boolean) => void;
-  setSelectedUser: (user: User | null) => void;
+  setSelectedUser: (user: User) => void;
   setIsDeleteDialogOpen: (open: boolean) => void;
-  setUserToDelete: (user: User | null) => void;
+  setUserToDelete: (user: User) => void;
   resetPassword: (user: User) => void;
-  approveUser: (userId: string, userName: string, userEmail: string, roleName?: string) => void;
+  approveUser: (user: User, roleName?: string) => void;
   removeAccess: (user: User) => void;
 }
 
@@ -35,7 +35,7 @@ export const useUserActions = ({
   };
 
   const handleApprove = (user: User, roleName: string = 'leitor') => {
-    approveUser(user.id, user.nome_completo, user.email, roleName);
+    approveUser(user, roleName);
   };
 
   const handleRemoveAccess = (user: User) => {

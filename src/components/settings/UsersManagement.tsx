@@ -12,6 +12,7 @@ import { useUserInvite } from './users/hooks/useUserInvite';
 import UserApprovalDialog from './users/UserApprovalDialog';
 import UserRolesDialog from './users/UserRolesDialog';
 import { supabase } from '@/integrations/supabase/client';
+import { User } from './users/types';
 
 const UsersManagement = () => {
   const {
@@ -31,9 +32,9 @@ const UsersManagement = () => {
 
   const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
-  const [userToApprove, setUserToApprove] = useState(null);
+  const [userToApprove, setUserToApprove] = useState<User | null>(null);
   const [isRolesDialogOpen, setIsRolesDialogOpen] = useState(false);
-  const [userToManageRoles, setUserToManageRoles] = useState(null);
+  const [userToManageRoles, setUserToManageRoles] = useState<User | null>(null);
 
   // Fetch coordenacoes
   useEffect(() => {
@@ -91,31 +92,42 @@ const UsersManagement = () => {
   const { removeAccess, removing } = useUserAccessRemoval(fetchData);
 
   // Handle approval dialog
-  const openApprovalDialog = (user) => {
+  const openApprovalDialog = (user: User) => {
     setUserToApprove(user);
     setIsApprovalDialogOpen(true);
   };
   
   // Handle roles dialog
-  const openRolesDialog = (user) => {
+  const openRolesDialog = (user: User) => {
     setUserToManageRoles(user);
     setIsRolesDialogOpen(true);
+  };
+
+  // Wrapper functions to handle type compatibility
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+  };
+
+  const handleDelete = (user: User) => {
+    setUserToDelete(user);
+  };
+
+  const handleApprove = (user: User, roleName?: string) => {
+    if (roleName) {
+      approveUser(user.id, user.nome_completo, user.email, roleName);
+    } else {
+      openApprovalDialog(user);
+    }
   };
 
   // Initialize userActions
   const userActions = useUserActions({
     setIsEditDialogOpen,
-    setSelectedUser,
+    setSelectedUser: handleEdit,
     setIsDeleteDialogOpen,
-    setUserToDelete,
+    setUserToDelete: handleDelete,
     resetPassword,
-    approveUser: (user, roleName) => {
-      if (roleName) {
-        approveUser(user.id, user.nome_completo, user.email, roleName);
-      } else {
-        openApprovalDialog(user);
-      }
-    },
+    approveUser: handleApprove,
     removeAccess
   });
 

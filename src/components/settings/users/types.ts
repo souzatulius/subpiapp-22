@@ -4,7 +4,7 @@ export type User = {
   nome_completo: string;
   email: string;
   whatsapp?: string;
-  aniversario?: string;
+  aniversario?: string | Date;
   foto_perfil_url?: string;
   cargo_id?: string;
   supervisao_tecnica_id?: string;
