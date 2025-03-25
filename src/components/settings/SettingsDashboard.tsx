@@ -24,7 +24,7 @@ interface SettingsDashboardProps {
 const SettingsDashboard: React.FC<SettingsDashboardProps> = ({ searchQuery = '' }) => {
   // Fetch counts from hooks
   const { positions, loading: positionsLoading } = usePositions();
-  const { problems, loading: problemsLoading } = useProblemsData();
+  const { problems, isLoading: problemsLoading } = useProblemsData();
   const { services, loading: servicesLoading } = useServices();
   const { areas, coordinations, loading: areasLoading } = useCoordinationAreas();
   const { origins, loading: originsLoading } = useDemandOrigins();

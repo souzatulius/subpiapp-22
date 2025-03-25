@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { SettingsStats } from '../types/settingsTypes';
+import { SettingsStats } from '../../components/settings/types/settingsTypes';
 
 export const useSettingsStats = () => {
   const [stats, setStats] = useState<SettingsStats>({
