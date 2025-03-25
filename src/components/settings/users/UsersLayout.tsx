@@ -22,7 +22,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   loading,
   filter,
   setFilter,
-  areas,
+  supervisoesTecnicas,
   cargos,
   coordenacoes = [],
   isInviteDialogOpen,
@@ -124,7 +124,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         open={isInviteDialogOpen} 
         onOpenChange={setIsInviteDialogOpen}
         onSubmit={handleInviteUser}
-        areas={areas}
+        areas={supervisoesTecnicas}
         cargos={cargos}
         coordenacoes={coordenacoes}
       />
@@ -134,7 +134,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         onOpenChange={setIsEditDialogOpen}
         user={selectedUser}
         onSubmit={handleEditUser}
-        areas={areas}
+        areas={supervisoesTecnicas}
         cargos={cargos}
         coordenacoes={coordenacoes}
         isSubmitting={isEditSubmitting}

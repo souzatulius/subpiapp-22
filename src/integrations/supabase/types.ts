@@ -390,6 +390,48 @@ export type Database = {
         }
         Relationships: []
       }
+      historico_demandas: {
+        Row: {
+          demanda_id: string
+          detalhes: Json | null
+          evento: string
+          id: string
+          timestamp: string
+          usuario_id: string
+        }
+        Insert: {
+          demanda_id: string
+          detalhes?: Json | null
+          evento: string
+          id?: string
+          timestamp?: string
+          usuario_id: string
+        }
+        Update: {
+          demanda_id?: string
+          detalhes?: Json | null
+          evento?: string
+          id?: string
+          timestamp?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historico_demandas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historico_demandas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas_visiveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notas_oficiais: {
         Row: {
           aprovador_id: string | null
@@ -788,6 +830,51 @@ export type Database = {
           usuario_upload?: string | null
         }
         Relationships: []
+      }
+      prazos_demandas: {
+        Row: {
+          alterado_por: string
+          demanda_id: string
+          id: string
+          motivo_alteracao: string | null
+          prazo_atualizado: string
+          prazo_inicial: string
+          timestamp_alteracao: string
+        }
+        Insert: {
+          alterado_por: string
+          demanda_id: string
+          id?: string
+          motivo_alteracao?: string | null
+          prazo_atualizado: string
+          prazo_inicial: string
+          timestamp_alteracao?: string
+        }
+        Update: {
+          alterado_por?: string
+          demanda_id?: string
+          id?: string
+          motivo_alteracao?: string | null
+          prazo_atualizado?: string
+          prazo_inicial?: string
+          timestamp_alteracao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prazos_demandas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prazos_demandas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas_visiveis"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       problemas: {
         Row: {
