@@ -55,6 +55,11 @@ const Temas = () => {
     }
   };
 
+  // Fix: Properly extract the ID when deleting a tema
+  const handleDelete = (tema: Problem) => {
+    return deleteProblem(tema.id);
+  };
+
   const columns = [
     {
       key: 'descricao',
@@ -91,7 +96,7 @@ const Temas = () => {
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
-        onDelete={deleteProblem}
+        onDelete={handleDelete}
         filterPlaceholder="Filtrar temas..."
         renderForm={renderForm}
         isLoading={isLoading}

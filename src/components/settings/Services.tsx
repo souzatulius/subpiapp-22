@@ -52,6 +52,11 @@ const Services = () => {
     return Promise.resolve();
   };
 
+  // Fix: Properly extract the ID when deleting a service
+  const handleDelete = (service: Service) => {
+    return deleteService(service.id);
+  };
+
   const columns = [
     {
       key: 'descricao',
@@ -86,7 +91,7 @@ const Services = () => {
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
-        onDelete={deleteService}
+        onDelete={handleDelete}
         filterPlaceholder="Filtrar problemas..."
         renderForm={renderForm}
         isLoading={loading}

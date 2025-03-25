@@ -101,6 +101,11 @@ const CoordinationAreas = () => {
     );
   };
 
+  // Fix: Properly extract the ID when deleting an area
+  const handleDelete = (area: Area) => {
+    return deleteArea(area.id);
+  };
+
   return (
     <div>
       <DataTable
@@ -109,7 +114,7 @@ const CoordinationAreas = () => {
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
-        onDelete={deleteArea}
+        onDelete={handleDelete}
         filterPlaceholder="Filtrar supervisões técnicas..."
         renderForm={renderForm}
         isLoading={loading}

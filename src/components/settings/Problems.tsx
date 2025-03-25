@@ -55,6 +55,11 @@ const Problems = () => {
     }
   };
 
+  // Fix: Properly extract the ID when deleting a problem
+  const handleDelete = (problem: Problem) => {
+    return deleteProblem(problem.id);
+  };
+
   const columns = [
     {
       key: 'descricao',
@@ -91,7 +96,7 @@ const Problems = () => {
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
-        onDelete={deleteProblem}
+        onDelete={handleDelete}
         filterPlaceholder="Filtrar problemas..."
         renderForm={renderForm}
         isLoading={isLoading}

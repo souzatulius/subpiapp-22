@@ -94,6 +94,11 @@ const CoordinationArea = () => {
     );
   };
 
+  // Fix: Properly extract the ID when deleting coordination
+  const handleDelete = (coordination: any) => {
+    return deleteCoordination(coordination.id);
+  };
+
   return (
     <div>
       <DataTable
@@ -102,7 +107,7 @@ const CoordinationArea = () => {
         columns={columns}
         onAdd={openAddForm}
         onEdit={openEditForm}
-        onDelete={deleteCoordination}
+        onDelete={handleDelete}
         filterPlaceholder="Filtrar coordenações..."
         renderForm={renderForm}
         isLoading={loading}
