@@ -13,6 +13,9 @@ const EmptySearchState: React.FC<EmptySearchStateProps> = ({ searchQuery }) => {
         <p className="mt-1 text-sm text-gray-500">
           Não encontramos configurações correspondentes a "{searchQuery}".
         </p>
+        <p className="mt-2 text-sm text-gray-500">
+          Tente usar termos mais gerais ou verifique se há erros de digitação.
+        </p>
       </div>
     </div>
   );

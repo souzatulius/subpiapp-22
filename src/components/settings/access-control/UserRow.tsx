@@ -31,14 +31,6 @@ const UserRow: React.FC<UserRowProps> = ({
 }) => {
   const isCurrentUser = user.id === currentUserId;
   
-  // Adicionar log para depuração
-  console.log('UserRow:', {
-    userId: user.id,
-    isCurrentUser,
-    userPermissions,
-    permissionsLength: permissions.length
-  });
-
   return (
     <tr key={user.id}>
       <td className="px-4 py-3 text-sm">
@@ -57,7 +49,7 @@ const UserRow: React.FC<UserRowProps> = ({
       <td className="px-4 py-3">
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
-            {userPermissions.length > 0 ? (
+            {userPermissions && userPermissions.length > 0 ? (
               permissions
                 .filter(p => userPermissions.includes(p.id))
                 .map(permission => (
@@ -85,7 +77,7 @@ const UserRow: React.FC<UserRowProps> = ({
           
           <PermissionSelect
             permissions={permissions}
-            userPermissions={userPermissions}
+            userPermissions={userPermissions || []}
             userId={user.id}
             onAddPermission={handleAddPermission}
             disabled={saving}

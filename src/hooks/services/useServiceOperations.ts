@@ -9,25 +9,34 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const addService = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+    if (!data.descricao || !data.supervisao_tecnica_id) {
+      toast({
+        title: "Erro",
+        description: "A descrição e a supervisão técnica são obrigatórias.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
     try {
       setIsAdding(true);
       
-      // Make sure we have a supervisao_tecnica_id
-      if (!data.supervisao_tecnica_id) {
-        throw new Error("Supervisão técnica não selecionada");
-      }
-      
-      // Get the first problem for this area
+      // Verificar se já existe um problema para esta supervisão técnica
       const { data: problemData, error: problemError } = await supabase
         .from('problemas')
         .select('id')
         .eq('supervisao_tecnica_id', data.supervisao_tecnica_id)
         .limit(1);
       
-      if (problemError) throw problemError;
+      if (problemError) {
+        console.error('Erro ao buscar problema:', problemError);
+        throw problemError;
+      }
+      
+      let problemaId;
       
       if (!problemData || problemData.length === 0) {
-        // No problem found, create one
+        // Não encontrou problema, criar um novo
         const newProblemData = {
           descricao: `Problema padrão para ${data.descricao}`,
           supervisao_tecnica_id: data.supervisao_tecnica_id
@@ -38,33 +47,30 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
           .insert(newProblemData)
           .select();
         
-        if (newProblemError) throw newProblemError;
+        if (newProblemError) {
+          console.error('Erro ao criar problema:', newProblemError);
+          throw newProblemError;
+        }
         
-        // Create service with the new problem
-        const serviceData = {
-          descricao: data.descricao,
-          supervisao_id: data.supervisao_tecnica_id,
-          problema_id: newProblem[0].id
-        };
-        
-        const { error } = await supabase
-          .from('servicos')
-          .insert(serviceData);
-          
-        if (error) throw error;
+        problemaId = newProblem[0].id;
       } else {
-        // Create service with the existing problem
-        const serviceData = {
-          descricao: data.descricao,
-          supervisao_id: data.supervisao_tecnica_id,
-          problema_id: problemData[0].id
-        };
+        problemaId = problemData[0].id;
+      }
+      
+      // Criar serviço com o problema encontrado ou criado
+      const serviceData = {
+        descricao: data.descricao,
+        supervisao_id: data.supervisao_tecnica_id,
+        problema_id: problemaId
+      };
+      
+      const { error } = await supabase
+        .from('servicos')
+        .insert(serviceData);
         
-        const { error } = await supabase
-          .from('servicos')
-          .insert(serviceData);
-          
-        if (error) throw error;
+      if (error) {
+        console.error('Erro ao adicionar serviço:', error);
+        throw error;
       }
       
       await refreshCallback();
@@ -79,7 +85,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
       console.error('Erro ao adicionar serviço:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível adicionar o serviço.",
+        description: "Não foi possível adicionar o serviço: " + (error.message || "erro desconhecido"),
         variant: "destructive",
       });
       return false;
@@ -89,31 +95,48 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
   };
 
   const updateService = async (id: string, data: { descricao: string; supervisao_tecnica_id: string }) => {
+    if (!id || !data.descricao || !data.supervisao_tecnica_id) {
+      toast({
+        title: "Erro",
+        description: "Dados inválidos para atualização do serviço.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
     try {
       setIsEditing(true);
       
-      // Get the current service to check if supervisao_id changed
+      // Obter o serviço atual para verificar se a supervisão técnica mudou
       const { data: currentService, error: currentServiceError } = await supabase
         .from('servicos')
         .select('*')
         .eq('id', id)
         .single();
       
-      if (currentServiceError) throw currentServiceError;
+      if (currentServiceError) {
+        console.error('Erro ao buscar serviço atual:', currentServiceError);
+        throw currentServiceError;
+      }
       
-      // If supervisao_id changed, we need to update problema_id
+      // Se a supervisão técnica mudou, precisamos atualizar o problema_id
       if (currentService.supervisao_id !== data.supervisao_tecnica_id) {
-        // Get a problem for the new area
+        // Buscar um problema para a nova área
         const { data: problemData, error: problemError } = await supabase
           .from('problemas')
           .select('id')
           .eq('supervisao_tecnica_id', data.supervisao_tecnica_id)
           .limit(1);
         
-        if (problemError) throw problemError;
+        if (problemError) {
+          console.error('Erro ao buscar problema:', problemError);
+          throw problemError;
+        }
+        
+        let problemaId;
         
         if (!problemData || problemData.length === 0) {
-          // No problem found, create one
+          // Não encontrou problema, criar um novo
           const newProblemData = {
             descricao: `Problema padrão para ${data.descricao}`,
             supervisao_tecnica_id: data.supervisao_tecnica_id
@@ -124,44 +147,43 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
             .insert(newProblemData)
             .select();
           
-          if (newProblemError) throw newProblemError;
+          if (newProblemError) {
+            console.error('Erro ao criar problema:', newProblemError);
+            throw newProblemError;
+          }
           
-          // Update service with new problem_id
-          const serviceData = {
-            descricao: data.descricao,
-            supervisao_id: data.supervisao_tecnica_id,
-            problema_id: newProblem[0].id
-          };
-          
-          const { error } = await supabase
-            .from('servicos')
-            .update(serviceData)
-            .eq('id', id);
-            
-          if (error) throw error;
+          problemaId = newProblem[0].id;
         } else {
-          // Update service with existing problem_id
-          const serviceData = {
-            descricao: data.descricao,
-            supervisao_id: data.supervisao_tecnica_id,
-            problema_id: problemData[0].id
-          };
+          problemaId = problemData[0].id;
+        }
+        
+        // Atualizar serviço com o novo problema_id
+        const serviceData = {
+          descricao: data.descricao,
+          supervisao_id: data.supervisao_tecnica_id,
+          problema_id: problemaId
+        };
+        
+        const { error } = await supabase
+          .from('servicos')
+          .update(serviceData)
+          .eq('id', id);
           
-          const { error } = await supabase
-            .from('servicos')
-            .update(serviceData)
-            .eq('id', id);
-            
-          if (error) throw error;
+        if (error) {
+          console.error('Erro ao atualizar serviço:', error);
+          throw error;
         }
       } else {
-        // Just update the description
+        // Apenas atualizar a descrição
         const { error } = await supabase
           .from('servicos')
           .update({ descricao: data.descricao })
           .eq('id', id);
           
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao atualizar descrição do serviço:', error);
+          throw error;
+        }
       }
       
       await refreshCallback();
@@ -176,7 +198,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
       console.error('Erro ao atualizar serviço:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o serviço.",
+        description: "Não foi possível atualizar o serviço: " + (error.message || "erro desconhecido"),
         variant: "destructive",
       });
       return false;
@@ -186,16 +208,28 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
   };
 
   const deleteService = async (id: string) => {
+    if (!id) {
+      toast({
+        title: "Erro",
+        description: "ID do serviço inválido.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
     try {
       setIsDeleting(true);
       
-      // Check if there are any demandas using this service
+      // Verificar se existem demandas usando este serviço
       const { data: demandasData, error: demandasError } = await supabase
         .from('demandas')
         .select('id')
         .eq('servico_id', id);
       
-      if (demandasError) throw demandasError;
+      if (demandasError) {
+        console.error('Erro ao verificar demandas:', demandasError);
+        throw demandasError;
+      }
       
       if (demandasData && demandasData.length > 0) {
         toast({
@@ -206,13 +240,16 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
         return false;
       }
       
-      // If no dependent records, proceed with deletion
+      // Se não houver demandas vinculadas, prosseguir com a exclusão
       const { error } = await supabase
         .from('servicos')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao excluir serviço:', error);
+        throw error;
+      }
       
       await refreshCallback();
       
@@ -227,7 +264,7 @@ export const useServiceOperations = (refreshCallback: () => Promise<void>) => {
       
       toast({
         title: "Erro",
-        description: "Não foi possível excluir o serviço.",
+        description: "Não foi possível excluir o serviço: " + (error.message || "erro desconhecido"),
         variant: "destructive",
       });
       
