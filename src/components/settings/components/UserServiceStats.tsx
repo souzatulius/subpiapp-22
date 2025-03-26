@@ -49,7 +49,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
       />
       <StatCard 
         title="Serviços" 
-        value={loading ? 0 : stats.services} 
+        value={loading ? 0 : stats.servicos} 
         icon={<FileText className="h-4 w-4 text-muted-foreground" />} 
         description="Serviços cadastrados"
         section="servicos"

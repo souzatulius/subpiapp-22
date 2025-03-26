@@ -60,7 +60,7 @@ export const useSettingsStats = () => {
       
       if (servicesError) throw servicesError;
 
-      // Fetch other counts
+      // Fetch other counts using explicit table names instead of string variables
       const tablesQueries = [
         { table: 'cargos', key: 'cargos' },
         { table: 'problemas', key: 'problemas' },
@@ -76,8 +76,9 @@ export const useSettingsStats = () => {
 
       const tablesData = await Promise.all(
         tablesQueries.map(async ({ table, key }) => {
+          // Using TypeScript casting to handle the table name typing issue
           const { data, error } = await supabase
-            .from(table)
+            .from(table as any)
             .select('id');
           
           if (error) throw error;

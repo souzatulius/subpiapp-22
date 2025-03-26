@@ -8,7 +8,6 @@ export const useSettingsStats = () => {
     users: 0,
     areas: 0,
     positions: 0,
-    services: 0,
     districts: 0,
     neighborhoods: 0,
     announcements: 0,
@@ -25,7 +24,9 @@ export const useSettingsStats = () => {
     comunicados: 0,
     configuracoesNotificacoes: 0,
     permissoes: 0,
-    temas: 0
+    temas: 0,
+    notificacoes: 0,
+    servicos: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +61,14 @@ export const useSettingsStats = () => {
 
       console.log('Fetched supervisions:', supervisions?.length);
       console.log('Fetched coordinations:', coordinations?.length);
-
+      
+      // Fetch services count
+      const { data: services, error: servicesError } = await supabase
+        .from('servicos')
+        .select('id');
+      
+      if (servicesError) throw servicesError;
+      
       // Fetch counts for other entities
       const { data: positions, error: positionsError } = await supabase
         .from('cargos')
@@ -146,7 +154,6 @@ export const useSettingsStats = () => {
         users: users?.length || 0,
         areas: supervisions?.length || 0,
         positions: positions?.length || 0,
-        services: 0, // Will be updated in a more complex query if needed
         districts: districts?.length || 0,
         neighborhoods: neighborhoods?.length || 0,
         announcements: announcements?.length || 0,
@@ -163,7 +170,9 @@ export const useSettingsStats = () => {
         comunicados: announcements?.length || 0,
         configuracoesNotificacoes: notificationSettings?.length || 0,
         permissoes: permissions?.length || 0,
-        temas: themes?.length || 0
+        temas: themes?.length || 0,
+        notificacoes: notifications?.length || 0,
+        servicos: services?.length || 0
       });
       
       setUnreadNotifications(unreadNotifs?.length || 0);
