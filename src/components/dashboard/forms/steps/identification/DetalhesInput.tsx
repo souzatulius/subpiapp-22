@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ValidationError } from '@/lib/formValidationUtils';
 
@@ -23,9 +22,9 @@ const DetalhesInput: React.FC<DetalhesInputProps> = ({
 
   return (
     <div className="mt-6">
-      <Label htmlFor="detalhes_solicitacao" className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
+      <label htmlFor="detalhes_solicitacao" className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
         Detalhes da Solicitação {hasError('detalhes_solicitacao') && <span className="text-orange-500">*</span>}
-      </Label>
+      </label>
       <Textarea
         id="detalhes_solicitacao"
         name="detalhes_solicitacao"

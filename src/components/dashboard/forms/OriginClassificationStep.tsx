@@ -1,6 +1,5 @@
 
 import React, { useEffect } from 'react';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag } from 'lucide-react';
@@ -69,12 +68,12 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <Label 
+        <label 
           htmlFor="origem_id" 
           className={`block mb-2 ${hasError('origem_id') ? 'text-orange-500 font-semibold' : ''}`}
         >
           Origem da Demanda {hasError('origem_id') && <span className="text-orange-500">*</span>}
-        </Label>
+        </label>
         <div className="flex flex-wrap gap-3">
           {origens.map(origem => (
             <Button 
@@ -99,12 +98,12 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
       
       {showMediaFields && (
         <div className="animate-fadeIn">
-          <Label 
+          <label 
             htmlFor="tipo_midia_id" 
             className={`block mb-2 ${hasError('tipo_midia_id') ? 'text-orange-500 font-semibold' : ''}`}
           >
             Tipo de Mídia {hasError('tipo_midia_id') && <span className="text-orange-500">*</span>}
-          </Label>
+          </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {tiposMidia.map(tipo => (
               <Button 
@@ -131,12 +130,12 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
       
       {showVeiculoImprensa && (
         <div className="animate-fadeIn">
-          <Label 
+          <label 
             htmlFor="veiculo_imprensa" 
             className={`block mb-2 ${hasError('veiculo_imprensa') ? 'text-orange-500 font-semibold' : ''}`}
           >
             Veículo de Imprensa
-          </Label>
+          </label>
           <Input 
             id="veiculo_imprensa" 
             name="veiculo_imprensa" 

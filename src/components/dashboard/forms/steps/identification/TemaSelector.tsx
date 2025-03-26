@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { renderIcon } from '@/components/settings/problems/renderIcon';
 
@@ -26,9 +25,9 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
 
   return (
     <div>
-      <Label className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
+      <label className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
         Tema {hasError('problema_id') && <span className="text-orange-500">*</span>}
-      </Label>
+      </label>
       <div className="flex flex-wrap gap-3">
         {problemas.map(tema => (
           <Button 
