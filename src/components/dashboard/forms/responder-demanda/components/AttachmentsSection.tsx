@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { FileIcon, ExternalLink, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import AttachmentItem from './AttachmentItem';
 
 interface AttachmentsSectionProps {
@@ -20,7 +22,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   }
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="mt-4 space-y-3 animate-fade-in">
       <h3 className="text-base font-medium text-subpi-blue">Anexos</h3>
       <div className="space-y-2">
         {arquivo_url && (

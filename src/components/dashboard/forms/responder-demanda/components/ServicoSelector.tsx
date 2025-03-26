@@ -4,8 +4,9 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, ChevronDown, X } from 'lucide-react';
+import { Search, ChevronDown, X, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 interface ServicoSelectorProps {
   selectedServicoId: string;
@@ -50,10 +51,10 @@ const ServicoSelector: React.FC<ServicoSelectorProps> = ({
     : servicos;
 
   return (
-    <div>
+    <div className="animate-fade-in">
       {selectedService ? (
         <div className="flex items-center">
-          <Badge className="px-3 py-2 bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center">
+          <Badge className="px-3 py-2 bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center transition-colors duration-300">
             {selectedService.descricao}
             <Button 
               variant="ghost" 
@@ -94,29 +95,32 @@ const ServicoSelector: React.FC<ServicoSelectorProps> = ({
               align="center"
               sideOffset={5}
             >
-              <div className="max-h-60 overflow-y-auto">
-                {filteredServicesBySearch.length > 0 ? (
-                  filteredServicesBySearch.map(service => (
-                    <Button 
-                      key={service.id} 
-                      variant="ghost" 
-                      className="w-full justify-start px-4 py-3 text-left hover:bg-blue-50 rounded-none"
-                      onClick={() => handleServiceSelect(service.id)}
-                    >
-                      {service.descricao}
-                    </Button>
-                  ))
-                ) : (
-                  <p className="p-4 text-sm text-gray-500">Nenhum serviço encontrado</p>
-                )}
-              </div>
+              <Card className="border-0 shadow-none">
+                <div className="max-h-60 overflow-y-auto">
+                  {filteredServicesBySearch.length > 0 ? (
+                    filteredServicesBySearch.map(service => (
+                      <Button 
+                        key={service.id} 
+                        variant="ghost" 
+                        className="w-full justify-start px-4 py-3 text-left hover:bg-blue-50 rounded-none transition-colors duration-300"
+                        onClick={() => handleServiceSelect(service.id)}
+                      >
+                        {service.id === selectedServicoId && <Check className="mr-2 h-4 w-4 text-green-500" />}
+                        {service.descricao}
+                      </Button>
+                    ))
+                  ) : (
+                    <p className="p-4 text-sm text-gray-500">Nenhum serviço encontrado</p>
+                  )}
+                </div>
+              </Card>
             </PopoverContent>
           </Popover>
         </div>
       )}
       
       {servicosLoading && (
-        <p className="text-sm text-gray-500 mt-2">Carregando serviços...</p>
+        <p className="text-sm text-gray-500 mt-2 animate-pulse">Carregando serviços...</p>
       )}
     </div>
   );

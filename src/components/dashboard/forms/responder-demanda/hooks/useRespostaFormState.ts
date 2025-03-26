@@ -18,11 +18,13 @@ export const useRespostaFormState = ({
   const [selectedServicoId, setSelectedServicoId] = useState<string>('');
   const [dontKnowService, setDontKnowService] = useState<boolean>(false);
 
+  // Initialize form state when demanda changes
   useEffect(() => {
     if (selectedDemanda?.problema_id) {
       setSelectedProblemId(selectedDemanda.problema_id);
     }
     
+    // Initialize perguntas and respostas
     if (selectedDemanda?.perguntas) {
       const initialRespostas: Record<string, string> = {};
       
@@ -36,20 +38,26 @@ export const useRespostaFormState = ({
         });
       }
       
+      console.log('Initializing perguntas:', selectedDemanda.perguntas);
+      console.log('Initial respostas:', initialRespostas);
+      
       setResposta(initialRespostas);
     }
 
-    // Inicializar o serviço selecionado
+    // Initialize servico
     if (selectedDemanda?.servico_id) {
       setSelectedServicoId(selectedDemanda.servico_id);
       setDontKnowService(false);
     } else {
-      setDontKnowService(true);
+      setDontKnowService(selectedDemanda?.servico_id === null);
       setSelectedServicoId('');
     }
+    
+    console.log('Initializing servico_id:', selectedDemanda?.servico_id);
   }, [selectedDemanda, setResposta, resposta]);
 
   const handleRespostaChange = (key: string, value: string) => {
+    console.log('Changing resposta for key:', key, 'to value:', value);
     setResposta(prev => ({
       ...prev,
       [key]: value
@@ -71,6 +79,8 @@ export const useRespostaFormState = ({
         servico_id: dontKnowService ? null : selectedServicoId 
       };
       
+      console.log('Updating service with payload:', updatePayload);
+      
       const { error: servicoError } = await supabase
         .from('demandas')
         .update(updatePayload)
@@ -85,6 +95,14 @@ export const useRespostaFormState = ({
         });
         throw servicoError;
       }
+      
+      toast({
+        title: "Serviço atualizado",
+        description: dontKnowService ? 
+          "Marcado como 'Não sei informar o serviço'" : 
+          "Serviço atualizado com sucesso",
+        variant: "success"
+      });
     }
   };
 

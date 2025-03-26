@@ -3,6 +3,7 @@ import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface QuestionsAnswersSectionProps {
   perguntas: string[] | Record<string, string> | null;
@@ -44,18 +45,21 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   const { answered, total } = getTotalAnswered();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 transition-all duration-300">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-blue-700">Perguntas e Respostas</h3>
-        <div className="text-sm text-gray-600">
+        <Badge 
+          variant={answered === total ? "success" : "outline"} 
+          className={`${answered === total ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'} transition-colors duration-300`}
+        >
           <span className="font-medium">{answered}</span> de <span className="font-medium">{total}</span> respondidas
-        </div>
+        </Badge>
       </div>
       
       <div className="space-y-5">
         {Array.isArray(perguntas) ? (
           perguntas.map((pergunta: string, index: number) => (
-            <Card key={index} className="overflow-hidden border-blue-100">
+            <Card key={index} className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300 animate-fade-in">
               <CardContent className="p-0">
                 <div className="bg-blue-50 p-4 border-b border-blue-100">
                   <Label className="font-medium text-blue-800">Pergunta {index+1}:</Label>
@@ -78,7 +82,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
           ))
         ) : (
           Object.entries(perguntas).map(([key, pergunta]) => (
-            <Card key={key} className="overflow-hidden border-blue-100">
+            <Card key={key} className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300 animate-fade-in">
               <CardContent className="p-0">
                 <div className="bg-blue-50 p-4 border-b border-blue-100">
                   <Label className="font-medium text-blue-800">Pergunta:</Label>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import CommentsSection from './CommentsSection';
+import { Card } from '@/components/ui/card';
 
 interface CommentsTabProps {
   comentarios: string;
@@ -14,10 +15,12 @@ const CommentsTab: React.FC<CommentsTabProps> = ({
 }) => {
   return (
     <TabsContent value="comments" className="pt-2 m-0 animate-fade-in">
-      <CommentsSection 
-        comentarios={comentarios}
-        onChange={onChange}
-      />
+      <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+        <CommentsSection 
+          comentarios={comentarios}
+          onChange={onChange}
+        />
+      </Card>
     </TabsContent>
   );
 };
