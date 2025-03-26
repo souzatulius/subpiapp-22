@@ -78,30 +78,30 @@ export const useNotasQuery = () => {
 
       // Process the data to match our TypeScript interfaces
       const processedData = (data || []).map(nota => {
-        // Process historic edits
+        // Process historic edits with null safety
         const processedHistorico = (nota.historico_edicoes || []).map(edit => {
-          // Safely handle editor data
+          // Safely handle editor data with null check
           const editor = edit.editor && typeof edit.editor === 'object' && !('error' in edit.editor)
             ? edit.editor
             : null;
 
           return {
             ...edit,
-            editor: editor // Safe null handling
+            editor: editor
           };
         }) as NotaEdicao[];
 
-        // Safely handle author data
+        // Safely handle author data with null check
         const autor = nota.autor && typeof nota.autor === 'object' && !('error' in nota.autor)
           ? nota.autor
           : { id: '', nome_completo: 'Não informado' };
 
-        // Safely handle approver data
+        // Safely handle approver data with null check
         const aprovador = nota.aprovador && typeof nota.aprovador === 'object' && !('error' in nota.aprovador)
           ? nota.aprovador
           : null;
 
-        // Safely handle technical supervision data
+        // Safely handle technical supervision data with null check
         const supervisao_tecnica = nota.supervisao_tecnica && typeof nota.supervisao_tecnica === 'object' && !('error' in nota.supervisao_tecnica)
           ? nota.supervisao_tecnica
           : { id: '', descricao: 'Não informada' };

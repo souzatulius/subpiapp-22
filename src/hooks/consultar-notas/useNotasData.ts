@@ -6,7 +6,25 @@ import { toast } from '@/components/ui/use-toast';
 import { useNotasQuery } from './useNotasQuery';
 
 export const useNotasData = (): UseNotasDataReturn => {
-  const notasQuery = useNotasQuery();
+  const {
+    notas,
+    filteredNotas,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    areaFilter,
+    setAreaFilter,
+    dataInicioFilter,
+    setDataInicioFilter,
+    dataFimFilter,
+    setDataFimFilter,
+    formatDate,
+    refetch,
+    isAdmin
+  } = useNotasQuery();
+  
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const deleteNota = async (notaId: string): Promise<void> => {
@@ -43,7 +61,7 @@ export const useNotasData = (): UseNotasDataReturn => {
         description: "A nota oficial foi excluída com sucesso."
       });
       
-      notasQuery.refetch();
+      await refetch();
     } catch (error: any) {
       console.error('Erro ao excluir nota:', error);
       toast({
@@ -57,8 +75,23 @@ export const useNotasData = (): UseNotasDataReturn => {
   };
 
   return {
-    ...notasQuery,
+    notas,
+    filteredNotas,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    areaFilter,
+    setAreaFilter,
+    dataInicioFilter,
+    setDataInicioFilter,
+    dataFimFilter,
+    setDataFimFilter,
+    formatDate,
+    refetch,
     deleteNota,
-    deleteLoading
+    deleteLoading,
+    isAdmin
   };
 };
