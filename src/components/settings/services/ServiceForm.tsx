@@ -45,8 +45,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
 
         if (error) throw error;
         
-        console.log('Areas fetched:', data);
-        setAreas(data || []);
+        // Filter out areas with empty IDs
+        const validAreas = (data || []).filter(area => area.id && area.id.trim() !== '');
+        console.log('Areas fetched:', validAreas);
+        setAreas(validAreas);
       } catch (error) {
         console.error('Error fetching areas:', error);
       } finally {

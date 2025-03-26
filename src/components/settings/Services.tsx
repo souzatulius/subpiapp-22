@@ -31,13 +31,18 @@ const Services = () => {
 
   const fetchAreas = async () => {
     try {
+      console.log('Fetching areas for services component...');
       const { data, error } = await supabase
         .from('supervisoes_tecnicas')
         .select('id, descricao, sigla, coordenacao_id')
         .order('descricao');
 
       if (error) throw error;
-      setAreas(data || []);
+      
+      // Filter out areas with empty IDs
+      const validAreas = (data || []).filter(area => area.id && area.id.trim() !== '');
+      console.log('Areas fetched for services:', validAreas);
+      setAreas(validAreas);
     } catch (error) {
       console.error('Error fetching areas:', error);
       toast({

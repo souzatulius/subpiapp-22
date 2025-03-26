@@ -79,7 +79,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
                 <SelectValue placeholder="Selecione uma supervisão técnica" />
               </SelectTrigger>
               <SelectContent>
-                {areas.map((area) => (
+                {areas.filter(area => area.id && area.id.trim() !== '').map((area) => (
                   <SelectItem key={area.id} value={area.id}>
                     {area.descricao}
                   </SelectItem>

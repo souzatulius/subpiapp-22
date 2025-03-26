@@ -18,8 +18,10 @@ export function useAreas() {
       
       if (error) throw error;
       
-      console.log('Áreas carregadas:', data);
-      setAreas(data || []);
+      // Filter out areas with empty IDs
+      const validAreas = (data || []).filter(area => area.id && area.id.trim() !== '');
+      console.log('Áreas carregadas:', validAreas);
+      setAreas(validAreas);
     } catch (error: any) {
       console.error('Erro ao carregar áreas:', error);
       toast({
