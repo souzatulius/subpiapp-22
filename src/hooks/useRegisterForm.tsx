@@ -5,7 +5,18 @@ import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { validatePasswordsMatch, formatPhone, formatDate } from '@/lib/formValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
-import { FormData } from '../types';
+import { toast } from '@/components/ui/use-toast';
+
+export interface FormData {
+  name: string;
+  email: string;
+  birthday: string;
+  whatsapp: string;
+  role: string;
+  area: string;
+  coordenacao: string;
+  confirmPassword: string;
+}
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();
@@ -81,6 +92,7 @@ export const useRegisterForm = () => {
     if (!formData.whatsapp) newErrors.whatsapp = true;
     if (!formData.role) newErrors.role = true;
     if (!formData.coordenacao) newErrors.coordenacao = true;
+    // Area is optional if the coordenação doesn't have supervisões técnicas
     if (!password) newErrors.password = true;
     if (!formData.confirmPassword) newErrors.confirmPassword = true;
 

@@ -11,10 +11,10 @@ import {
   MapPin, 
   Trash2, 
   Droplets, 
-  Construction, 
-  Tree, 
+  Building2, 
+  Trees, 
   Lightbulb, 
-  Road, 
+  HardHat, 
   Shield 
 } from 'lucide-react';
 
@@ -52,11 +52,11 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
   // Get problem icon based on description
   const getProblemIcon = (problema: any) => {
     const iconMap: Record<string, React.ReactNode> = {
-      "Buraco": <Road className="h-8 w-8" />,
+      "Buraco": <HardHat className="h-8 w-8" />,
       "Iluminação": <Lightbulb className="h-8 w-8" />,
-      "Árvore": <Tree className="h-8 w-8" />,
+      "Árvore": <Trees className="h-8 w-8" />,
       "Esgoto": <Droplets className="h-8 w-8" />,
-      "Calçada": <Construction className="h-8 w-8" />,
+      "Calçada": <Building2 className="h-8 w-8" />,
       "Lixo": <Trash2 className="h-8 w-8" />,
       "Sinalização": <MapPin className="h-8 w-8" />,
       "Segurança": <Shield className="h-8 w-8" />,

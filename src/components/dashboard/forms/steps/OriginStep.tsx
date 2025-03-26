@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag } from 'lucide-react';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface OriginStepProps {
@@ -33,7 +33,8 @@ const OriginStep: React.FC<OriginStepProps> = ({
     return error ? error.message : '';
   };
   
-  // Always show the media type selection, regardless of origin
+  // Show the media type selection always, regardless of origin
+  // Show the veículo de imprensa field only when a media type is selected
   const showVeiculoImprensa = formData.tipo_midia_id;
   
   // Get media type icon based on description

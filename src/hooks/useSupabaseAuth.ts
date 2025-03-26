@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
@@ -18,7 +19,7 @@ interface AuthActions {
   resetPasswordForEmail: (email: string) => Promise<any>;
 }
 
-export const useSupabaseAuth = (): AuthState & AuthActions => {
+export const useAuth = (): AuthState & AuthActions => {
   const [authState, setAuthState] = useState<AuthState>({
     session: null,
     user: null,
