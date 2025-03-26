@@ -24,8 +24,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setLoading(true);
       try {
         // Verifica sessão atual
-        const { data } = await authService.getSession();
-        const currentSession = data.session;
+        const result = await authService.getSession();
+        // Updated to handle the correct structure of the return value
+        const currentSession = result?.data?.session || null;
         setSession(currentSession);
         setUser(currentSession?.user || null);
 

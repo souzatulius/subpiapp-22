@@ -18,21 +18,54 @@ import { LoadingState } from './LoadingState';
 
 interface DemandasTableProps {
   demandas: Demand[];
-  isLoading: boolean;
-  onViewDemand: (demand: Demand) => void;
-  onRespondDemand: (demand: Demand) => void;
+  onViewDemand?: (demand: Demand) => void;
+  onRespondDemand?: (demand: Demand) => void;
   onDeleteClick?: (demand: Demand) => void;
+  onEdit?: (id: string) => void; // Added missing prop
+  onDelete?: (demand: Demand) => void; // Added missing prop
+  totalCount?: number; // Added missing prop
+  page?: number; // Added missing prop
+  pageSize?: number; // Added missing prop
+  setPage?: React.Dispatch<React.SetStateAction<number>>; // Added missing prop
+  setPageSize?: React.Dispatch<React.SetStateAction<number>>; // Added missing prop
+  isAdmin?: boolean; // Added missing prop
   showDeleteOption?: boolean;
+  isLoading?: boolean; // Added isLoading prop with default
 }
 
 const DemandasTable: React.FC<DemandasTableProps> = ({
   demandas,
-  isLoading,
   onViewDemand,
   onRespondDemand,
   onDeleteClick,
-  showDeleteOption = false
+  onEdit,
+  onDelete,
+  totalCount,
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
+  isAdmin,
+  showDeleteOption = false,
+  isLoading = false
 }) => {
+  // Use local handler functions that call the appropriate callback based on context
+  const handleViewOrEdit = (demand: Demand) => {
+    if (onViewDemand) {
+      onViewDemand(demand);
+    } else if (onEdit) {
+      onEdit(demand.id);
+    }
+  };
+
+  const handleDelete = (demand: Demand) => {
+    if (onDeleteClick) {
+      onDeleteClick(demand);
+    } else if (onDelete) {
+      onDelete(demand);
+    }
+  };
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -120,17 +153,17 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => onViewDemand(demand)}
+                      onClick={() => handleViewOrEdit(demand)}
                       title="Visualizar"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
                     
-                    {showDeleteOption && onDeleteClick && (
+                    {(showDeleteOption || isAdmin) && (
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => onDeleteClick(demand)}
+                        onClick={() => handleDelete(demand)}
                         className="text-red-600 hover:text-red-700"
                         title="Excluir"
                       >

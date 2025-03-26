@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -8,61 +8,51 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog';
-import { Loader2 } from 'lucide-react';
-import AttentionBox from '@/components/ui/attention-box';
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 
-interface DeleteDemandDialogProps {
+export interface DeleteDemandDialogProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => Promise<void>;
-  isLoading: boolean;
-  demandId?: string;
+  demandId: string;
+  onConfirm: () => Promise<void> | void;
+  onCancel: () => void; // Added missing prop
+  isDeleting?: boolean;
 }
 
 const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
   isOpen,
-  onOpenChange,
+  demandId,
   onConfirm,
-  isLoading,
-  demandId
+  onCancel,
+  isDeleting = false
 }) => {
-  const handleDelete = async () => {
-    if (!demandId) {
-      console.error('ID da demanda não encontrado');
-      return;
-    }
-    
-    try {
-      await onConfirm();
-    } catch (error) {
-      console.error('Erro ao ocultar demanda:', error);
-    }
-  };
-
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-gray-50">
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Ocultar Demanda</AlertDialogTitle>
+          <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
           <AlertDialogDescription>
-            <p className="mb-4">Tem certeza que deseja ocultar esta demanda? Ela não aparecerá mais nas listagens.</p>
-            <AttentionBox title="Observação:" variant="info" className="mb-2">
-              <p>Notas oficiais e respostas relacionadas serão mantidas no sistema. 
-              Este processo é reversível apenas por administradores do sistema.</p>
-            </AttentionBox>
+            Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
-            {isLoading ? (
+          <AlertDialogCancel onClick={onCancel} disabled={isDeleting}>
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirm} 
+            disabled={isDeleting}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            {isDeleting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                Ocultando...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Excluindo...
               </>
-            ) : 'Ocultar Demanda'}
+            ) : (
+              "Excluir"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

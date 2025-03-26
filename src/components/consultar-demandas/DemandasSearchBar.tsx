@@ -7,12 +7,23 @@ import { Search, Filter } from 'lucide-react';
 interface DemandasSearchBarProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  onSearch?: (term: string) => void; // Added this prop to match usage
 }
 
 const DemandasSearchBar: React.FC<DemandasSearchBarProps> = ({ 
   searchTerm, 
-  setSearchTerm 
+  setSearchTerm,
+  onSearch
 }) => {
+  // Handle search function to support both direct state update and callback
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    if (onSearch) {
+      onSearch(value);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
       <div className="relative flex-1">
@@ -22,7 +33,7 @@ const DemandasSearchBar: React.FC<DemandasSearchBarProps> = ({
           placeholder="Buscar demandas..." 
           className="pl-9" 
           value={searchTerm} 
-          onChange={e => setSearchTerm(e.target.value)} 
+          onChange={handleSearchChange} 
         />
       </div>
       <Button variant="outline" className="md:w-auto flex items-center gap-2">

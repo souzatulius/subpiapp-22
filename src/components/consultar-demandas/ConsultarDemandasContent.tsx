@@ -75,7 +75,11 @@ const ConsultarDemandasContent = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-semibold mb-4">Consultar Demandas</h1>
-      <DemandasSearchBar onSearch={handleSearch} />
+      <DemandasSearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSearch={handleSearch}
+      />
       <DemandasTable
         demandas={demandas || []}
         onEdit={handleEdit}
