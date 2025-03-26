@@ -40,14 +40,25 @@ export const useRespostaForm = (
         
       if (updateError) throw updateError;
 
-      // Then create the response
+      // Generate a text summary of responses
+      const respostasText = Object.entries(resposta)
+        .map(([key, value]) => {
+          const perguntaText = Array.isArray(selectedDemanda.perguntas) 
+            ? selectedDemanda.perguntas[parseInt(key)]
+            : selectedDemanda.perguntas?.[key] || '';
+          return `Pergunta: ${perguntaText}\nResposta: ${value}`;
+        })
+        .join('\n\n');
+
+      // Then create the response with both text and JSON format
       const { error: respostaError } = await supabase
         .from('respostas_demandas')
-        .insert([{
+        .insert({
           demanda_id: selectedDemanda.id,
           usuario_id: user?.id,
-          respostas: resposta
-        }]);
+          respostas: resposta,
+          texto: respostasText // Add required texto field
+        });
         
       if (respostaError) throw respostaError;
 

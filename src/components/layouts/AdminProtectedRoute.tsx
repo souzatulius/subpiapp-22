@@ -10,7 +10,7 @@ interface AdminProtectedRouteProps {
 
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
   const { user, loading: authLoading, isApproved } = useAuth();
-  const { isAdmin, loading: permissionLoading, canAccessProtectedRoute } = usePermissions();
+  const { isAdmin, isLoading: permissionLoading, canAccessProtectedRoute } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
 

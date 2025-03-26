@@ -9,6 +9,8 @@ export interface UsePermissionsReturn {
   userSupervisaoTecnica: string | null;
   isLoading: boolean;
   error: Error | null;
+  loading: boolean; // Add the loading property
+  canAccessProtectedRoute: (route: string) => boolean; // Add the function
 }
 
 export const usePermissions = (): UsePermissionsReturn => {
@@ -72,6 +74,39 @@ export const usePermissions = (): UsePermissionsReturn => {
 
     fetchUserPermissions();
   }, [user]);
+  
+  // Add canAccessProtectedRoute function
+  const canAccessProtectedRoute = (route: string): boolean => {
+    // Admin can access all routes
+    if (isAdmin) return true;
+    
+    // Protected routes that only admins can access
+    const adminOnlyRoutes = [
+      '/settings',
+      '/dashboard/comunicacao/cadastrar-demanda',
+      '/dashboard/comunicacao/consultar-demandas',
+      '/dashboard/comunicacao/criar-nota-oficial',
+      '/dashboard/comunicacao/consultar-notas',
+      '/cadastrar-demanda',
+      '/consultar-demandas',
+      '/criar-nota-oficial',
+      '/consultar-notas'
+    ];
+    
+    // Check if the route starts with any of the admin-only routes
+    return !adminOnlyRoutes.some(adminRoute => 
+      route === adminRoute || 
+      route.startsWith(`${adminRoute}/`)
+    );
+  };
 
-  return { isAdmin, userCoordination, userSupervisaoTecnica, isLoading, error };
+  return { 
+    isAdmin, 
+    userCoordination, 
+    userSupervisaoTecnica, 
+    isLoading, 
+    error,
+    loading: isLoading, // Set loading as alias to isLoading for compatibility
+    canAccessProtectedRoute // Add the function
+  };
 };

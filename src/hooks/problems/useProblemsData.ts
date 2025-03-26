@@ -1,49 +1,84 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Problem } from './types';
-import { toast } from '@/components/ui/use-toast';
+import { Problem, Area } from './types';
 
+// Custom hook for accessing problems data
 export const useProblemsData = () => {
-  return useQuery({
+  const {
+    data: problems = [],
+    isLoading,
+    error,
+    refetch: fetchProblems
+  } = useQuery({
     queryKey: ['problems'],
-    queryFn: async (): Promise<Problem[]> => {
-      try {
-        const { data, error } = await supabase
-          .from('problemas')
-          .select(`
-            *,
-            supervisao_tecnica:supervisao_tecnica_id (
+    queryFn: async () => {
+      // Fetch problems with supervisao_tecnica information
+      const { data, error } = await supabase
+        .from('problemas')
+        .select(`
+          id,
+          descricao,
+          supervisao_tecnica_id,
+          criado_em,
+          atualizado_em,
+          icone,
+          supervisao_tecnica:supervisao_tecnica_id (
+            id,
+            descricao,
+            coordenacao_id,
+            coordenacao:coordenacao_id (
               id,
-              descricao,
-              sigla,
-              coordenacao_id,
-              coordenacoes:coordenacao_id (
-                descricao
-              )
+              descricao
             )
-          `)
-          .order('descricao');
-        
-        if (error) throw error;
-        
-        // Process the data to add coordination to supervisao_tecnica
-        return (data || []).map(problem => ({
-          ...problem,
-          supervisao_tecnica: problem.supervisao_tecnica ? {
-            ...problem.supervisao_tecnica,
-            coordenacao: problem.supervisao_tecnica.coordenacoes?.descricao
-          } : undefined
-        }));
-      } catch (error: any) {
-        console.error('Error fetching problems:', error);
-        toast({
-          title: 'Erro ao carregar problemas/temas',
-          description: error.message,
-          variant: 'destructive'
-        });
-        return [];
+          )
+        `)
+        .order('descricao');
+
+      if (error) throw error;
+      return data as Problem[];
+    },
+    meta: {
+      onError: (err: any) => {
+        console.error('Error fetching problems:', err);
       }
     }
   });
+
+  const {
+    data: areas = [],
+    isLoading: areasLoading,
+    error: areasError
+  } = useQuery({
+    queryKey: ['areas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('supervisoes_tecnicas')
+        .select(`
+          id,
+          descricao,
+          sigla,
+          coordenacao_id,
+          coordenacao:coordenacao_id (
+            id, 
+            descricao
+          )
+        `)
+        .order('descricao');
+
+      if (error) throw error;
+      return data as Area[];
+    }
+  });
+
+  return {
+    problems,
+    areas,
+    isLoading: isLoading || areasLoading,
+    error: error || areasError,
+    fetchProblems
+  };
 };
+
+// Export an alias for backward compatibility
+export const useProblems = useProblemsData;
