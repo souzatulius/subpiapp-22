@@ -34,7 +34,10 @@ export const useUsersData = () => {
         .not('status', 'eq', 'excluido')
         .order('nome_completo');
       
-      if (usersError) throw usersError;
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        throw usersError;
+      }
       
       // Process to add related data
       const processedUsers = await Promise.all((usersData || []).map(async (user) => {
@@ -111,9 +114,10 @@ export const useUsersData = () => {
             
           if (updateError) {
             console.error('Error updating user status:', updateError);
+          } else {
+            // Update was successful
+            user.status = 'ativo';
           }
-          
-          user.status = 'ativo';
         }
         
         return { 

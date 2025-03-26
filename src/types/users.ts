@@ -1,5 +1,5 @@
 
-import { User, SupervisaoTecnica, Cargo, Coordenacao, UserFormData } from '@/types/common';
+import { UserFormData } from '@/components/settings/users/types';
 
 export interface UsersLayoutProps {
   users: User[];
@@ -112,14 +112,4 @@ export type Cargo = {
 
 export type Area = SupervisaoTecnica;
 
-export interface UserFormData {
-  nome_completo: string;
-  email?: string;
-  cargo_id?: string;
-  coordenacao_id?: string;
-  supervisao_tecnica_id?: string;
-  whatsapp?: string;
-  aniversario?: Date;
-  foto_perfil_url?: string;
-  status?: UserStatus;
-}
+// Using the UserFormData from the dedicated types file

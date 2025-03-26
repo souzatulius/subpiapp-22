@@ -10,6 +10,7 @@ export type User = {
   supervisao_tecnica_id?: string;
   coordenacao_id?: string;
   criado_em?: string;
+  status?: UserStatus;
   cargos?: {
     id: string;
     descricao: string;
@@ -29,6 +30,8 @@ export type User = {
     nivel_acesso: number;
   }>;
 };
+
+export type UserStatus = 'aguardando_email' | 'pendente' | 'ativo' | 'excluido';
 
 export type SupervisaoTecnica = {
   id: string;
@@ -59,6 +62,7 @@ export interface UserFormData {
   whatsapp?: string;
   aniversario?: Date;
   foto_perfil_url?: string;
+  status?: UserStatus;
 }
 
 export interface UsersLayoutProps {
@@ -91,4 +95,6 @@ export interface UsersLayoutProps {
   removing: boolean;
   isEditSubmitting?: boolean;
   onRefresh?: () => void;
+  statusFilter?: string;
+  setStatusFilter?: (status: string) => void;
 }
