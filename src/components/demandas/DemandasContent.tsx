@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import DemandFilter from './DemandFilter';
 import DemandCards from './DemandCards';
@@ -27,6 +27,10 @@ const DemandasContent: React.FC = () => {
     handleSelectDemand,
     handleCloseDetail
   } = useDemandas(filterStatus);
+
+  useEffect(() => {
+    console.log("Demandas atualizadas:", fetchedDemandas);
+  }, [fetchedDemandas]);
 
   // Convert fetched demandas to include servico property
   const demandas = fetchedDemandas.map(demand => {

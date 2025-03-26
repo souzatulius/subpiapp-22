@@ -11,13 +11,6 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
   
   // Step 0: Identification
   if (activeStep === 0) {
-    if (!formData.titulo || formData.titulo.trim() === '') {
-      errors.push({
-        field: 'titulo',
-        message: 'O título da demanda é obrigatório'
-      });
-    }
-    
     if (!formData.problema_id) {
       errors.push({
         field: 'problema_id',
@@ -50,14 +43,7 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       });
     }
 
-    // Se a origem for SECOM ou Imprensa, tipo_midia_id é obrigatório
-    const origensRequireMediaType = ["SECOM", "Imprensa", "SMSUB"];
-    if (formData.origem && origensRequireMediaType.includes(formData.origem.descricao) && !formData.tipo_midia_id) {
-      errors.push({
-        field: 'tipo_midia_id',
-        message: 'Selecione o tipo de mídia'
-      });
-    }
+    // Tipo de mídia não é mais obrigatório
   }
   
   // Step 2: Requester Info

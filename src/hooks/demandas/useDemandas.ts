@@ -17,6 +17,8 @@ export function useDemandas(filterStatus: string) {
     queryKey: ['demandas', filterStatus],
     queryFn: async () => {
       try {
+        console.log('Fetching demandas with status:', filterStatus);
+        
         // Construir a consulta base
         let query = supabase.from('demandas')
           .select(`
@@ -37,7 +39,8 @@ export function useDemandas(filterStatus: string) {
             telefone_solicitante,
             veiculo_imprensa,
             detalhes_solicitacao,
-            perguntas
+            perguntas,
+            problema_id
           `);
           
         // Aplicar filtro de status se não for 'todos'
@@ -50,7 +53,12 @@ export function useDemandas(filterStatus: string) {
           ascending: false
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching demandas:', error);
+          throw error;
+        }
+        
+        console.log('Demandas data from DB:', data);
         
         // Agora vamos buscar as informações relacionadas em consultas separadas
         const enhancedData = await Promise.all((data || []).map(async (demanda: any) => {
@@ -58,24 +66,24 @@ export function useDemandas(filterStatus: string) {
           let enhancedDemand: Partial<Demand> = { 
             ...demanda,
             supervisao_tecnica: null,
-            origem: null,
-            tipo_midia: null,
+            area_coordenacao: null,
+            origens_demandas: null,
+            tipos_midia: null,
             bairro: null,
-            autor: null,
-            area_coordenacao: null
+            autor: null
           };
           
-          // Buscar supervisão técnica
+          // Buscar areas de coordenacao (que substituem a supervisao_tecnica)
           if (demanda.supervisao_tecnica_id) {
             const { data: stData } = await supabase
-              .from('supervisoes_tecnicas')
-              .select('descricao')
+              .from('areas_coordenacao')
+              .select('id, descricao')
               .eq('id', demanda.supervisao_tecnica_id)
-              .single();
+              .maybeSingle();
               
-            enhancedDemand.supervisao_tecnica = stData;
-            // Also set area_coordenacao to match the supervisao_tecnica
-            enhancedDemand.area_coordenacao = stData;
+            if (stData) {
+              enhancedDemand.areas_coordenacao = stData;
+            }
           }
           
           // Buscar origem
@@ -84,9 +92,9 @@ export function useDemandas(filterStatus: string) {
               .from('origens_demandas')
               .select('descricao')
               .eq('id', demanda.origem_id)
-              .single();
+              .maybeSingle();
               
-            enhancedDemand.origem = origemData;
+            enhancedDemand.origens_demandas = origemData;
           }
           
           // Buscar tipo de mídia
@@ -95,9 +103,9 @@ export function useDemandas(filterStatus: string) {
               .from('tipos_midia')
               .select('descricao')
               .eq('id', demanda.tipo_midia_id)
-              .single();
+              .maybeSingle();
               
-            enhancedDemand.tipo_midia = midiaData;
+            enhancedDemand.tipos_midia = midiaData;
           }
           
           // Buscar bairro
@@ -106,7 +114,7 @@ export function useDemandas(filterStatus: string) {
               .from('bairros')
               .select('nome')
               .eq('id', demanda.bairro_id)
-              .single();
+              .maybeSingle();
               
             enhancedDemand.bairro = bairroData;
           }
@@ -117,11 +125,12 @@ export function useDemandas(filterStatus: string) {
               .from('usuarios')
               .select('nome_completo')
               .eq('id', demanda.autor_id)
-              .single();
+              .maybeSingle();
               
             enhancedDemand.autor = autorData;
           }
           
+          console.log('Enhanced demand:', enhancedDemand);
           return enhancedDemand as Demand;
         }));
         
@@ -133,6 +142,7 @@ export function useDemandas(filterStatus: string) {
     },
     meta: {
       onError: (err: any) => {
+        console.error('Error in onError:', err);
         toast({
           title: "Erro ao carregar demandas",
           description: err.message || "Ocorreu um erro ao carregar as demandas.",
@@ -151,6 +161,8 @@ export function useDemandas(filterStatus: string) {
         item.perguntas as Record<string, string>) : 
       null
   })) : [];
+
+  console.log('Processed demandas:', demandas);
 
   const handleSelectDemand = (demand: Demand) => {
     setSelectedDemand(demand);
