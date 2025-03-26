@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -9,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -79,59 +79,61 @@ const Settings = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header showControls={true} toggleSidebar={toggleSidebar} />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} />
+    <AdminProtectedRoute>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header showControls={true} toggleSidebar={toggleSidebar} />
         
-        <main className="flex-1 overflow-hidden">
-          <div className="w-full h-full">
-            {/* Main content area */}
-            <div className="overflow-y-auto p-6">
-              <div className="max-w-7xl mx-auto">
-                {activeSection === 'dashboard' ? (
-                  <div>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                      <h1 className="text-2xl font-bold text-gray-800">Configurações</h1>
-                      <div className="relative w-full md:w-64">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
-                        <Input
-                          type="text"
-                          placeholder="Buscar configurações..."
-                          className="pl-10 pr-4 py-2 border-gray-300 rounded-lg w-full"
-                          value={searchQuery}
-                          onChange={handleSearchChange}
-                        />
+        <div className="flex flex-1 overflow-hidden">
+          <DashboardSidebar isOpen={sidebarOpen} />
+          
+          <main className="flex-1 overflow-hidden">
+            <div className="w-full h-full">
+              {/* Main content area */}
+              <div className="overflow-y-auto p-6">
+                <div className="max-w-7xl mx-auto">
+                  {activeSection === 'dashboard' ? (
+                    <div>
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h1 className="text-2xl font-bold text-gray-800">Configurações</h1>
+                        <div className="relative w-full md:w-64">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+                          <Input
+                            type="text"
+                            placeholder="Buscar configurações..."
+                            className="pl-10 pr-4 py-2 border-gray-300 rounded-lg w-full"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                          />
+                        </div>
                       </div>
+                      <SettingsDashboard searchQuery={searchQuery} />
                     </div>
-                    <SettingsDashboard searchQuery={searchQuery} />
-                  </div>
-                ) : (
-                  <div>
-                    {/* Local breadcrumbs for settings sections */}
-                    <div className="flex items-center mb-2 text-sm">
-                      <span className="cursor-pointer hover:underline" onClick={handleBackClick}>Configurações</span>
-                      <span className="mx-2">/</span>
-                      <span className={`font-medium ${getSectionColor(activeSection)}`}>
-                        {getSectionCategory(activeSection)}
-                      </span>
-                      <span className="mx-2">/</span>
-                      <span className="font-medium">{getSectionTitle(activeSection)}</span>
+                  ) : (
+                    <div>
+                      {/* Local breadcrumbs for settings sections */}
+                      <div className="flex items-center mb-2 text-sm">
+                        <span className="cursor-pointer hover:underline" onClick={handleBackClick}>Configurações</span>
+                        <span className="mx-2">/</span>
+                        <span className={`font-medium`}>
+                          {getSectionCategory(activeSection)}
+                        </span>
+                        <span className="mx-2">/</span>
+                        <span className="font-medium">{getSectionTitle(activeSection)}</span>
+                      </div>
+                      
+                      <h1 className={`text-2xl font-bold mb-6`}>
+                        {getSectionTitle(activeSection)}
+                      </h1>
+                      <SettingsContent activeSection={activeSection} />
                     </div>
-                    
-                    <h1 className={`text-2xl font-bold mb-6 ${getSectionColor(activeSection)}`}>
-                      {getSectionTitle(activeSection)}
-                    </h1>
-                    <SettingsContent activeSection={activeSection} />
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
+    </AdminProtectedRoute>
   );
 };
 

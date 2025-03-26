@@ -1,57 +1,49 @@
 
-import { useState, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Problem } from './types';
 import { toast } from '@/components/ui/use-toast';
-import { Problem, Area } from './types';
 
 export const useProblemsData = () => {
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchProblems = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      
-      // Fetch problems with supervision information
-      const { data: problemsData, error: problemsError } = await supabase
-        .from('problemas')
-        .select(`
-          *,
-          supervisao_tecnica:supervisao_tecnica_id(id, descricao, coordenacao_id)
-        `)
-        .order('descricao');
-
-      if (problemsError) throw problemsError;
-      
-      // Fetch areas for the form selector
-      const { data: areasData, error: areasError } = await supabase
-        .from('supervisoes_tecnicas')
-        .select('*')
-        .order('descricao');
+  return useQuery({
+    queryKey: ['problems'],
+    queryFn: async (): Promise<Problem[]> => {
+      try {
+        const { data, error } = await supabase
+          .from('problemas')
+          .select(`
+            *,
+            supervisao_tecnica:supervisao_tecnica_id (
+              id,
+              descricao,
+              sigla,
+              coordenacao_id,
+              coordenacoes:coordenacao_id (
+                descricao
+              )
+            )
+          `)
+          .order('descricao');
         
-      if (areasError) throw areasError;
-      
-      console.log('Fetched problems:', problemsData);
-      
-      setProblems(problemsData || []);
-      setAreas(areasData || []);
-    } catch (error: any) {
-      console.error('Erro ao buscar problemas:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os problemas.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+        if (error) throw error;
+        
+        // Process the data to add coordination to supervisao_tecnica
+        return (data || []).map(problem => ({
+          ...problem,
+          supervisao_tecnica: problem.supervisao_tecnica ? {
+            ...problem.supervisao_tecnica,
+            coordenacao: problem.supervisao_tecnica.coordenacoes?.descricao
+          } : undefined
+        }));
+      } catch (error: any) {
+        console.error('Error fetching problems:', error);
+        toast({
+          title: 'Erro ao carregar problemas/temas',
+          description: error.message,
+          variant: 'destructive'
+        });
+        return [];
+      }
     }
-  }, []);
-
-  return {
-    problems,
-    areas,
-    isLoading,
-    fetchProblems
-  };
+  });
 };

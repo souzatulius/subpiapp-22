@@ -6,6 +6,9 @@ import DemandasTable from './DemandasTable';
 import DeleteDemandDialog from './DeleteDemandDialog';
 import DemandDetail from '@/components/demandas/DemandDetail';
 import { useDemandasData, type Demand } from '@/hooks/consultar-demandas';
+import { usePermissions } from '@/hooks/usePermissions';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shield } from 'lucide-react';
 
 const ConsultarDemandasContent: React.FC = () => {
   const {
@@ -22,6 +25,8 @@ const ConsultarDemandasContent: React.FC = () => {
     isLoading,
     handleDeleteConfirm
   } = useDemandasData();
+
+  const { isAdmin } = usePermissions();
 
   const handleViewDemand = (demand: Demand) => {
     setSelectedDemand(demand);
@@ -42,6 +47,15 @@ const ConsultarDemandasContent: React.FC = () => {
     <div className="max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Consultar Demandas</h1>
       
+      {!isAdmin && (
+        <Alert className="mb-6 bg-yellow-50 border-yellow-200">
+          <Shield className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            Você está visualizando esta página como administrador. Usuários comuns não têm acesso a esta funcionalidade.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-xl">Lista de Demandas</CardTitle>
@@ -58,6 +72,7 @@ const ConsultarDemandasContent: React.FC = () => {
             onViewDemand={handleViewDemand}
             onRespondDemand={handleRespondDemand}
             onDeleteClick={handleDeleteClick}
+            showDeleteOption={isAdmin}
           />
         </CardContent>
       </Card>

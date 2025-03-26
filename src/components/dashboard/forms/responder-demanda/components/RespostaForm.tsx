@@ -1,18 +1,47 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Upload } from 'lucide-react';
-import { formatarData } from '../utils/formatters';
-import { Demanda } from '../types';
+import { ChevronLeft, Send, AlertTriangle, ThumbsUp } from 'lucide-react';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription,
+  CardFooter 
+} from '@/components/ui/card';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useProblems } from '@/hooks/useProblems';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface RespostaFormProps {
-  selectedDemanda: Demanda;
-  resposta: string;
-  setResposta: (resposta: string) => void;
+  selectedDemanda: any;
+  resposta: Record<string, string>;
+  setResposta: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   onBack: () => void;
   isLoading: boolean;
-  onSubmit: () => void;
+  onSubmit: () => Promise<void>;
 }
 
 const RespostaForm: React.FC<RespostaFormProps> = ({
@@ -23,123 +52,325 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   isLoading,
   onSubmit
 }) => {
-  // Helper function to render perguntas safely
-  const renderPerguntas = () => {
-    const { perguntas } = selectedDemanda;
-    
-    // If perguntas is null or undefined, return nothing
-    if (!perguntas) return null;
-    
-    // If perguntas is an array of strings
-    if (Array.isArray(perguntas)) {
-      return (
-        <ul className="list-disc pl-5 space-y-1">
-          {perguntas.map((pergunta, index) => (
-            <li key={index} className="text-sm">{String(pergunta)}</li>
-          ))}
-        </ul>
-      );
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [selectedProblemId, setSelectedProblemId] = useState<string>('');
+  const [originalCoordination, setOriginalCoordination] = useState<string | null>(null);
+  const [newCoordination, setNewCoordination] = useState<string | null>(null);
+  const [changingProblem, setChangingProblem] = useState(false);
+  
+  const { data: problems = [], isLoading: problemsLoading } = useProblems();
+
+  useEffect(() => {
+    // Set the initial problem ID when the demanda is loaded
+    if (selectedDemanda?.problema_id) {
+      setSelectedProblemId(selectedDemanda.problema_id);
+      
+      // Fetch the original coordination information
+      const fetchOriginalCoordination = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('problemas')
+            .select(`
+              supervisao_tecnica_id,
+              supervisoes_tecnicas:supervisao_tecnica_id (
+                coordenacao_id,
+                coordenacoes:coordenacao_id (
+                  descricao
+                )
+              )
+            `)
+            .eq('id', selectedDemanda.problema_id)
+            .single();
+            
+          if (error) throw error;
+          
+          if (data?.supervisoes_tecnicas?.coordenacoes) {
+            setOriginalCoordination(data.supervisoes_tecnicas.coordenacoes.descricao);
+          }
+        } catch (error) {
+          console.error('Error fetching original coordination:', error);
+        }
+      };
+      
+      fetchOriginalCoordination();
     }
     
-    // If perguntas is an object (Record<string, string>)
-    if (typeof perguntas === 'object') {
-      return (
-        <ul className="list-disc pl-5 space-y-1">
-          {Object.entries(perguntas).map(([key, value], index) => (
-            <li key={index} className="text-sm">{String(value)}</li>
-          ))}
-        </ul>
-      );
+    // Initialize resposta with empty strings for each pergunta
+    if (selectedDemanda?.perguntas) {
+      const initialRespostas: Record<string, string> = {};
+      
+      if (Array.isArray(selectedDemanda.perguntas)) {
+        selectedDemanda.perguntas.forEach((pergunta: string, index: number) => {
+          initialRespostas[index.toString()] = resposta[index.toString()] || '';
+        });
+      } else if (typeof selectedDemanda.perguntas === 'object') {
+        Object.keys(selectedDemanda.perguntas).forEach((key) => {
+          initialRespostas[key] = resposta[key] || '';
+        });
+      }
+      
+      setResposta(initialRespostas);
+    }
+  }, [selectedDemanda, setResposta]);
+  
+  const handleProblemChange = async (problemId: string) => {
+    if (problemId === selectedDemanda.problema_id) {
+      return; // No change
     }
     
-    // If perguntas is a string or any other primitive, convert to string
-    return <p className="text-sm">{String(perguntas)}</p>;
+    // Find the new problem's coordination
+    const newProblem = problems.find(p => p.id === problemId);
+    if (!newProblem || !newProblem.supervisao_tecnica) {
+      return;
+    }
+
+    try {
+      // Get the coordination info for the new problem
+      const { data, error } = await supabase
+        .from('supervisoes_tecnicas')
+        .select(`
+          coordenacao_id,
+          coordenacoes:coordenacao_id (
+            descricao
+          )
+        `)
+        .eq('id', newProblem.supervisao_tecnica.id)
+        .single();
+        
+      if (error) throw error;
+      
+      // If coordination is changing, show alert
+      if (data?.coordenacoes?.descricao && 
+          data.coordenacoes.descricao !== originalCoordination) {
+        setSelectedProblemId(problemId); // Update selected problem
+        setNewCoordination(data.coordenacoes.descricao);
+        setShowAlertDialog(true);
+      } else {
+        // Same coordination, just update
+        await updateProblem(problemId);
+      }
+    } catch (error) {
+      console.error('Error checking coordination change:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível verificar a alteração de coordenação",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const updateProblem = async (problemId: string) => {
+    try {
+      setChangingProblem(true);
+      
+      const { error } = await supabase
+        .from('demandas')
+        .update({ problema_id: problemId })
+        .eq('id', selectedDemanda.id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Sucesso",
+        description: "Tema da demanda atualizado com sucesso",
+      });
+      
+      // Update the selected demanda with the new problem
+      selectedDemanda.problema_id = problemId;
+      
+    } catch (error) {
+      console.error('Error updating problem:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o tema da demanda",
+        variant: "destructive"
+      });
+    } finally {
+      setChangingProblem(false);
+      setShowAlertDialog(false);
+    }
+  };
+  
+  const handleRespostaChange = (key: string, value: string) => {
+    setResposta(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+  
+  const allQuestionsAnswered = () => {
+    if (!selectedDemanda?.perguntas) return false;
+    
+    const questions = Array.isArray(selectedDemanda.perguntas) 
+      ? selectedDemanda.perguntas 
+      : Object.values(selectedDemanda.perguntas);
+      
+    const answers = Object.values(resposta);
+    
+    if (questions.length !== answers.length) return false;
+    
+    return answers.every(answer => !!answer.trim());
   };
 
+  if (!selectedDemanda) return null;
+
   return (
-    <div className="animate-fade-in">
-      <div className="mb-6">
-        <Button variant="ghost" onClick={onBack} className="p-1.5">
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
+    <div className="space-y-6">
+      <div className="flex items-center">
+        <Button 
+          variant="outline" 
+          onClick={onBack} 
+          className="mr-4"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Voltar
         </Button>
-        <h3 className="text-xl font-medium mt-4">{selectedDemanda.titulo}</h3>
-        
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <h2 className="text-lg font-semibold">Responder Demanda</h2>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>{selectedDemanda.titulo}</CardTitle>
+              <CardDescription>
+                Criada em: {format(new Date(selectedDemanda.horario_publicacao), 'dd/MM/yyyy', { locale: ptBR })}
+              </CardDescription>
+            </div>
+            <Badge 
+              variant="outline" 
+              className={
+                selectedDemanda.prioridade === 'alta' 
+                  ? 'bg-red-100 text-red-800 border-red-200' 
+                  : selectedDemanda.prioridade === 'media'
+                  ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                  : 'bg-green-100 text-green-800 border-green-200'
+              }
+            >
+              Prioridade: {selectedDemanda.prioridade === 'alta' ? 'Alta' : selectedDemanda.prioridade === 'media' ? 'Média' : 'Baixa'}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
           <div>
-            <p className="text-sm font-medium text-gray-500">Área de Coordenação</p>
-            <p>{selectedDemanda.areas_coordenacao?.descricao || 'Não informada'}</p>
+            <h3 className="text-sm font-medium mb-2">Tema</h3>
+            <Select
+              value={selectedProblemId}
+              onValueChange={handleProblemChange}
+              disabled={changingProblem}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um tema" />
+              </SelectTrigger>
+              <SelectContent>
+                {problemsLoading ? (
+                  <SelectItem value="loading" disabled>Carregando temas...</SelectItem>
+                ) : problems.length > 0 ? (
+                  problems.map((problem) => (
+                    <SelectItem key={problem.id} value={problem.id}>
+                      {problem.descricao} 
+                      {problem.supervisao_tecnica?.coordenacao && ` (${problem.supervisao_tecnica.coordenacao})`}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>Nenhum tema encontrado</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
-          
+
           <div>
-            <p className="text-sm font-medium text-gray-500">Origem</p>
-            <p>{selectedDemanda.origens_demandas?.descricao || 'Não informada'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500">Tipo de Mídia</p>
-            <p>{selectedDemanda.tipos_midia?.descricao || 'Não informado'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500">Prazo</p>
-            <p>{selectedDemanda.prazo_resposta ? formatarData(selectedDemanda.prazo_resposta) : 'Não informado'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500">Prioridade</p>
-            <p className="capitalize">{selectedDemanda.prioridade}</p>
-          </div>
-        </div>
-        
-        {selectedDemanda.perguntas && (
-          <div className="mt-6">
-            <p className="text-sm font-medium text-gray-500 mb-2">Perguntas</p>
-            {renderPerguntas()}
-          </div>
-        )}
-        
-        {selectedDemanda.detalhes_solicitacao && (
-          <div className="mt-6">
-            <p className="text-sm font-medium text-gray-500 mb-2">Detalhes da Solicitação</p>
-            <p className="text-sm whitespace-pre-line">{selectedDemanda.detalhes_solicitacao}</p>
-          </div>
-        )}
-        
-        <div className="mt-8">
-          <p className="text-sm font-medium text-gray-500 mb-2">Resposta</p>
-          <Textarea 
-            value={resposta} 
-            onChange={e => setResposta(e.target.value)} 
-            placeholder="Digite sua resposta aqui..." 
-            rows={6} 
-            className="w-full" 
-          />
-        </div>
-        
-        <div className="mt-4">
-          <div className="flex items-center justify-center border-2 border-dashed border-gray-300 p-4 rounded-md">
-            <div className="space-y-1 text-center">
-              <Upload className="mx-auto h-8 w-8 text-gray-400" />
-              <div className="text-sm text-gray-500">
-                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 hover:text-blue-500">
-                  <span>Anexar arquivo</span>
-                  <input id="file-upload" name="file-upload" type="file" className="sr-only" />
-                </label>
-              </div>
+            <h3 className="text-sm font-medium mb-2">Detalhes da Solicitação</h3>
+            <div className="bg-gray-50 p-4 rounded-md border">
+              {selectedDemanda.detalhes_solicitacao || "Sem detalhes fornecidos"}
             </div>
           </div>
-        </div>
-        
-        <div className="mt-8 flex justify-end">
+          
+          {selectedDemanda.perguntas && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Perguntas e Respostas</h3>
+              
+              {Array.isArray(selectedDemanda.perguntas) ? (
+                selectedDemanda.perguntas.map((pergunta: string, index: number) => (
+                  <div key={index} className="space-y-2">
+                    <div className="bg-blue-50 p-3 rounded-md text-blue-800">
+                      <strong>Pergunta {index+1}:</strong> {pergunta}
+                    </div>
+                    <Textarea 
+                      placeholder="Digite sua resposta"
+                      className="min-h-[100px]"
+                      value={resposta[index.toString()] || ''}
+                      onChange={(e) => handleRespostaChange(index.toString(), e.target.value)}
+                    />
+                  </div>
+                ))
+              ) : (
+                Object.entries(selectedDemanda.perguntas).map(([key, pergunta]) => (
+                  <div key={key} className="space-y-2">
+                    <div className="bg-blue-50 p-3 rounded-md text-blue-800">
+                      <strong>Pergunta:</strong> {pergunta as string}
+                    </div>
+                    <Textarea 
+                      placeholder="Digite sua resposta"
+                      className="min-h-[100px]"
+                      value={resposta[key] || ''}
+                      onChange={(e) => handleRespostaChange(key, e.target.value)}
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="justify-end">
           <Button 
-            onClick={onSubmit} 
-            disabled={isLoading || !resposta.trim()} 
-            className="bg-[#003570] hover:bg-[#002855]"
+            onClick={onSubmit}
+            disabled={isLoading || !allQuestionsAnswered()}
+            className="space-x-2"
           >
-            {isLoading ? "Enviando..." : "Enviar Resposta"}
+            {isLoading ? (
+              <>
+                <div className="animate-spin w-4 h-4 border-2 border-white border-opacity-50 border-t-transparent rounded-full" />
+                <span>Enviando...</span>
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                <span>Enviar Resposta</span>
+              </>
+            )}
           </Button>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
+      
+      {/* Alert Dialog for coordination change */}
+      <AlertDialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center">
+              <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
+              Alteração de Coordenação
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está alterando o tema desta demanda para uma coordenação diferente.
+              <br /><br />
+              <strong>Coordenação original:</strong> {originalCoordination || 'Não definida'}
+              <br />
+              <strong>Nova coordenação:</strong> {newCoordination || 'Não definida'}
+              <br /><br />
+              Esta alteração fará com que a demanda deixe de ser visível para a coordenação original.
+              Tem certeza que deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => updateProblem(selectedProblemId)}>
+              <ThumbsUp className="h-4 w-4 mr-2" />
+              Confirmar Alteração
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

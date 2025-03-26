@@ -5,45 +5,59 @@ import { toast } from '@/components/ui/use-toast';
 import { Demand } from './types';
 import { useCurrentUser } from '@/components/settings/access-control/hooks/useCurrentUser';
 import { useState, useEffect } from 'react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export const useDemandasQuery = () => {
   const { currentUserId } = useCurrentUser();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, userCoordination } = usePermissions();
   
-  // Verificar se o usuário é administrador
-  useEffect(() => {
-    const checkIfAdmin = async () => {
-      if (!currentUserId) return;
-      
-      const { data, error } = await supabase
-        .rpc('is_admin', { user_id: currentUserId });
-        
-      if (!error && data) {
-        setIsAdmin(data);
-      }
-    };
-    
-    checkIfAdmin();
-  }, [currentUserId]);
-
   return useQuery({
-    queryKey: ['demandas', isAdmin],
+    queryKey: ['demandas', isAdmin, userCoordination],
     queryFn: async () => {
-      console.log('Fetching all demandas, isAdmin:', isAdmin);
+      console.log('Fetching demandas, isAdmin:', isAdmin, 'userCoordination:', userCoordination);
       
-      // Buscar demandas com base no status admin
-      let demandaQuery;
+      // Base query - select all visible demandas
+      let query = supabase.from('demandas_visiveis');
       
-      if (isAdmin) {
-        // Administradores podem ver todas as demandas, incluindo ocultas
-        demandaQuery = supabase.from('demandas');
-      } else {
-        // Usuários normais só veem demandas não-ocultas
-        demandaQuery = supabase.from('demandas_visiveis');
+      // If not admin, filter by user's coordination
+      if (!isAdmin && userCoordination) {
+        // Join with problemas and supervisoes_tecnicas to filter by coordination
+        const { data: filteredDemandas, error: filterError } = await supabase
+          .from('demandas')
+          .select(`
+            *,
+            problemas!inner (
+              id,
+              descricao,
+              supervisao_tecnica_id
+            ),
+            supervisoes_tecnicas:problemas!inner(supervisao_tecnica_id).supervisoes_tecnicas!inner (
+              id, 
+              descricao,
+              coordenacao_id
+            )
+          `)
+          .eq('supervisoes_tecnicas.coordenacao_id', userCoordination);
+          
+        if (filterError) {
+          console.error('Error fetching filtered demandas:', filterError);
+          throw filterError;
+        }
+        
+        // Extract the demanda IDs that match the user's coordination
+        const filteredIds = filteredDemandas.map(d => d.id);
+        
+        if (filteredIds.length > 0) {
+          // Fetch the full demanda details for the filtered IDs
+          query = query.in('id', filteredIds);
+        } else {
+          // No demandas found for this coordination
+          return [];
+        }
       }
       
-      // Executar a consulta com as seleções de campos relevantes
-      const { data: allDemandas, error: demandasError } = await demandaQuery
+      // Now add the detailed fields selection
+      const { data: allDemandas, error: demandasError } = await query
         .select(`
           *,
           area_coordenacao:area_coordenacao_id(descricao),

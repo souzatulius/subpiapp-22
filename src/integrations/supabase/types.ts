@@ -244,6 +244,51 @@ export type Database = {
         }
         Relationships: []
       }
+      demanda_historico: {
+        Row: {
+          campo_alterado: string
+          data_alteracao: string | null
+          demanda_id: string
+          id: string
+          usuario_id: string
+          valor_anterior: Json | null
+          valor_novo: Json | null
+        }
+        Insert: {
+          campo_alterado: string
+          data_alteracao?: string | null
+          demanda_id: string
+          id?: string
+          usuario_id: string
+          valor_anterior?: Json | null
+          valor_novo?: Json | null
+        }
+        Update: {
+          campo_alterado?: string
+          data_alteracao?: string | null
+          demanda_id?: string
+          id?: string
+          usuario_id?: string
+          valor_anterior?: Json | null
+          valor_novo?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demanda_historico_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_historico_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas_visiveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demandas: {
         Row: {
           arquivo_url: string | null
@@ -1781,6 +1826,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_by_coordenacao: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
       processar_upload_os_156: {
         Args: {
           upload_id: string
@@ -1826,6 +1877,13 @@ export type Database = {
         Args: {
           p_id: string
           p_descricao: string
+        }
+        Returns: boolean
+      }
+      user_belongs_to_demanda_coordenacao: {
+        Args: {
+          user_id: string
+          demanda_id: string
         }
         Returns: boolean
       }

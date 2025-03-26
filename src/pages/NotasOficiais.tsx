@@ -10,6 +10,7 @@ import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaF
 import ResponderDemandaForm from '@/components/dashboard/forms/ResponderDemandaForm';
 import CriarNotaForm from '@/components/dashboard/forms/CriarNotaForm';
 import AprovarNotaForm from '@/components/dashboard/forms/AprovarNotaForm';
+import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
 
 const NotasOficiais = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -150,17 +151,19 @@ const NotasOficiais = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header showControls={true} toggleSidebar={toggleSidebar} />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} />
+    <AdminProtectedRoute>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header showControls={true} toggleSidebar={toggleSidebar} />
         
-        <Layout>
-          {renderForm()}
-        </Layout>
+        <div className="flex flex-1 overflow-hidden">
+          <DashboardSidebar isOpen={sidebarOpen} />
+          
+          <Layout>
+            {renderForm()}
+          </Layout>
+        </div>
       </div>
-    </div>
+    </AdminProtectedRoute>
   );
 };
 
