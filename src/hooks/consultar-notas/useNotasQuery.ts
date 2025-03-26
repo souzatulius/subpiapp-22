@@ -82,11 +82,11 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
         .from('notas_oficiais')
         .select(`
           *,
-          autor:autor_id (nome_completo),
-          aprovador:aprovador_id (nome_completo),
-          supervisao_tecnica:supervisao_tecnica_id (descricao),
-          demanda:demanda_id (titulo),
-          problema:problema_id (descricao)
+          autor:autor_id (id, nome_completo),
+          aprovador:aprovador_id (id, nome_completo),
+          supervisao_tecnica:supervisao_tecnica_id (id, descricao),
+          demanda:demanda_id (id, titulo),
+          problema:problema_id (id, descricao)
         `)
         .order('criado_em', { ascending: false });
 
@@ -105,16 +105,21 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
       }
 
       // Add area_coordenacao property to match NotaOficial type
-      const formattedData = (data || []).map(nota => ({
-        ...nota,
-        autor: nota.autor || null,
-        aprovador: nota.aprovador || null,
-        supervisao_tecnica: nota.supervisao_tecnica || null,
-        area_coordenacao: {
-          id: nota.supervisao_tecnica_id || '',
-          descricao: nota.supervisao_tecnica?.descricao || 'Não informada'
-        }
-      })) as NotaOficial[];
+      const formattedData = (data || []).map(nota => {
+        // Transform the data to match NotaOficial type
+        return {
+          ...nota,
+          autor: nota.autor || null,
+          aprovador: nota.aprovador || null,
+          supervisao_tecnica: nota.supervisao_tecnica || null,
+          demanda: nota.demanda || null,
+          problema: nota.problema || null,
+          area_coordenacao: {
+            id: nota.supervisao_tecnica_id || '',
+            descricao: nota.supervisao_tecnica?.descricao || 'Não informada'
+          }
+        } as unknown as NotaOficial;
+      });
 
       return formattedData;
     }

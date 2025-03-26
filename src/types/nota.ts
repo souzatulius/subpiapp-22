@@ -1,17 +1,16 @@
 
 export interface NotaEdicao {
   id: string;
-  nota_id: string;
-  texto_anterior: string;
-  texto_novo: string;
+  nota_id?: string;
+  editor_id?: string;
+  texto_anterior?: string;
+  texto_novo?: string;
   titulo_anterior?: string;
   titulo_novo?: string;
-  editor_id: string;
+  criado_em: string;
   editor?: {
-    id: string;
     nome_completo: string;
   } | null;
-  criado_em: string;
 }
 
 export interface NotaOficial {
@@ -26,48 +25,29 @@ export interface NotaOficial {
     id: string;
     nome_completo: string;
   } | null;
-  aprovador_id?: string;
+  aprovador_id?: string | null;
   aprovador?: {
     id: string;
     nome_completo: string;
   } | null;
-  supervisao_tecnica_id: string | null;
+  problema_id: string;
+  problema?: {
+    id: string;
+    descricao: string;
+  } | null;
+  supervisao_tecnica_id?: string | null;
   supervisao_tecnica?: {
     id: string;
     descricao: string;
   } | null;
+  demanda_id?: string | null;
+  demanda?: {
+    id: string;
+    titulo: string;
+  } | null;
+  historico_edicoes?: NotaEdicao[];
   area_coordenacao: {
     id: string;
     descricao: string;
   };
-  demanda_id?: string;
-  demanda?: {
-    titulo: string;
-  } | null;
-  problema_id: string;
-  problema?: {
-    descricao: string;
-  } | null;
-  historico_edicoes?: NotaEdicao[];
-}
-
-export interface UseNotasDataReturn {
-  notas: NotaOficial[] | null;
-  filteredNotas: NotaOficial[];
-  isLoading: boolean;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  statusFilter: string;
-  setStatusFilter: (status: string) => void;
-  areaFilter: string;
-  setAreaFilter: (area: string) => void;
-  dataInicioFilter: Date | undefined;
-  setDataInicioFilter: (date: Date | undefined) => void;
-  dataFimFilter: Date | undefined;
-  setDataFimFilter: (date: Date | undefined) => void;
-  formatDate: (dateStr: string) => string;
-  refetch: () => Promise<any>;
-  deleteNota: (notaId: string) => Promise<void>;
-  deleteLoading: boolean;
-  isAdmin: boolean;
 }
