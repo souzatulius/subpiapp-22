@@ -1,4 +1,3 @@
-
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
@@ -76,6 +75,7 @@ export interface Demand {
   } | null;
   arquivo_url: string | null;
   anexos: string[] | null;
+  servico_id?: string;
 }
 
 export interface DemandResponse {

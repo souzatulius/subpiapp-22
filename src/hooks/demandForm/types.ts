@@ -1,4 +1,3 @@
-
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
@@ -18,6 +17,6 @@ export interface DemandFormData {
   anexos: string[]; 
   tem_protocolo_156?: boolean;
   numero_protocolo_156?: string;
-  servico_id?: string; // New field for service
-  nao_sabe_servico?: boolean; // New field for "Não sei informar"
+  servico_id?: string; // Add optional servico_id
+  nao_sabe_servico?: boolean; // Keep this for "I don't know the service" option
 }

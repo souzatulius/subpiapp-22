@@ -1,5 +1,3 @@
-
-import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { DemandFormData } from './types';
 import { toast } from '@/components/ui/use-toast';
@@ -23,15 +21,6 @@ export const useDemandFormSubmit = (
     setIsLoading(true);
 
     try {
-      // Format the perguntas field to be stored as JSON
-      const perguntas: Record<string, string> = {};
-      formData.perguntas.forEach((pergunta, index) => {
-        if (pergunta.trim()) {
-          perguntas[`pergunta_${index + 1}`] = pergunta;
-        }
-      });
-
-      // Prepare data for insertion
       const demandaData = {
         titulo: formData.titulo,
         problema_id: formData.problema_id,
@@ -56,7 +45,6 @@ export const useDemandFormSubmit = (
         servico_id: formData.nao_sabe_servico ? null : formData.servico_id || null
       };
 
-      // Insert into demandas table
       const { data: insertedDemanda, error: insertError } = await supabase
         .from('demandas')
         .insert(demandaData)
@@ -65,14 +53,12 @@ export const useDemandFormSubmit = (
 
       if (insertError) throw insertError;
 
-      // Success notification
       toast({
         title: "Demanda cadastrada com sucesso!",
         description: "A demanda foi cadastrada e será encaminhada para a área responsável.",
         variant: "default"
       });
 
-      // Redirect/close
       onClose();
     } catch (error: any) {
       console.error("Error submitting demand:", error);

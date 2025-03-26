@@ -308,6 +308,7 @@ export type Database = {
           prioridade: string
           problema_id: string
           protocolo: string | null
+          servico_id: string | null
           status: string
           supervisao_tecnica_id: string | null
           telefone_solicitante: string | null
@@ -333,6 +334,7 @@ export type Database = {
           prioridade: string
           problema_id: string
           protocolo?: string | null
+          servico_id?: string | null
           status: string
           supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
@@ -358,6 +360,7 @@ export type Database = {
           prioridade?: string
           problema_id?: string
           protocolo?: string | null
+          servico_id?: string | null
           status?: string
           supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
