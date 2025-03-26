@@ -88,7 +88,6 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         onResetPassword={userActions.handleResetPassword}
         onApprove={userActions.handleApprove}
         onRemoveAccess={userActions.handleRemoveAccess}
-        onManageRoles={userActions.handleManageRoles}
       />
 
       <UserDialogs

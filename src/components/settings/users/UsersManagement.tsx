@@ -8,10 +8,10 @@ import { usePasswordReset } from './hooks/usePasswordReset';
 import { useUserApproval } from './hooks/useUserApproval';
 import { useUserAccessRemoval } from './hooks/useUserAccessRemoval';
 import { useUserInvite } from './hooks/useUserInvite';
-import { useUserRolesManagement } from './hooks/useUserRolesManagement';
 import UserApprovalDialog from './UserApprovalDialog';
-import UserRolesDialog from './UserRolesDialog';
+import { supabase } from '@/integrations/supabase/client';
 import { User } from './types';
+import { useUserActions } from './useUserActions';
 
 const UsersManagement = () => {
   const {
@@ -29,26 +29,43 @@ const UsersManagement = () => {
     fetchData
   } = useUsersManagement();
 
-  // User edit dialog management
+  const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
+  const [userToApprove, setUserToApprove] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchCoordenacoes = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('coordenacoes')
+          .select('id, descricao')
+          .order('descricao');
+          
+        if (error) {
+          console.error('Error fetching coordenações:', error);
+          return;
+        }
+        
+        console.log('Fetched coordenações:', data);
+        setCoordenacoes(data || []);
+      } catch (error) {
+        console.error('Error in fetchCoordenacoes:', error);
+      }
+    };
+    
+    fetchCoordenacoes();
+  }, []);
+
   const {
     isEditDialogOpen,
     setIsEditDialogOpen,
-    currentUser,
-    setCurrentUser,
+    currentUser: selectedUser,
+    setCurrentUser: setSelectedUser,
     handleEditUser,
     openEditDialog,
     isSubmitting: isEditSubmitting
   } = useUserEdit(fetchData);
 
-  // User invite dialog management
-  const {
-    isInviteDialogOpen,
-    setIsInviteDialogOpen,
-    handleInviteUser,
-    isSubmitting: isInviteSubmitting
-  } = useUserInvite(fetchData);
-
-  // User delete dialog management
   const {
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
@@ -58,49 +75,21 @@ const UsersManagement = () => {
     deleteUser
   } = useUserDelete(fetchData);
 
-  // Password reset functionality
   const {
-    resetting,
-    handleSendPasswordReset
-  } = usePasswordReset();
+    isInviteDialogOpen,
+    setIsInviteDialogOpen,
+    handleInviteUser
+  } = useUserInvite(fetchData);
 
-  // User approval state
-  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
-  const [userToApprove, setUserToApprove] = useState<User | null>(null);
-  const [roleName, setRoleName] = useState('leitor');
+  const resetPassword = usePasswordReset();
+  const { approveUser, approving } = useUserApproval(fetchData);
+  const { removeAccess, removing } = useUserAccessRemoval(fetchData);
 
-  // User approval functionality
-  const {
-    approving,
-    approveUser
-  } = useUserApproval(fetchData);
-
-  const handleApproveUser = (userId: string, userName: string, userEmail: string, role: string) => {
-    approveUser(userId, userName, userEmail, role);
-  };
-
-  // User access removal functionality
-  const {
-    removing,
-    removeAccess
-  } = useUserAccessRemoval(fetchData);
-
-  // User roles management
-  const {
-    isRolesDialogOpen,
-    userForRoles,
-    loading: rolesLoading,
-    openRolesDialog,
-    closeRolesDialog
-  } = useUserRolesManagement();
-
-  // Open approval dialog
   const openApprovalDialog = (user: User) => {
     setUserToApprove(user);
     setIsApprovalDialogOpen(true);
   };
 
-  // Handle user actions
   const handleEdit = (user: User) => {
     openEditDialog(user);
   };
@@ -108,10 +97,6 @@ const UsersManagement = () => {
   const handleDelete = (user: User) => {
     setUserToDelete(user);
     setIsDeleteDialogOpen(true);
-  };
-
-  const handleResetPassword = (user: User) => {
-    handleSendPasswordReset(user);
   };
 
   const handleApprove = (user: User, roleName?: string) => {
@@ -126,68 +111,62 @@ const UsersManagement = () => {
     removeAccess(user);
   };
 
-  const handleManageRoles = (user: User) => {
-    openRolesDialog(user);
+  const handleResetPassword = (user: User) => {
+    resetPassword.handleSendPasswordReset(user);
   };
-
-  // Combined user actions
-  const userActions = {
-    handleEdit,
-    handleDelete,
-    handleResetPassword,
-    handleApprove,
-    handleRemoveAccess,
-    handleManageRoles
-  };
-
-  // Load user data on component mount
-  useEffect(() => {
+  
+  const handleRefreshData = () => {
     fetchData();
-  }, []);
+  };
 
+  const userActions = useUserActions({
+    setIsEditDialogOpen,
+    setSelectedUser: handleEdit,
+    setIsDeleteDialogOpen,
+    setUserToDelete: handleDelete,
+    resetPassword: handleResetPassword,
+    approveUser: handleApprove,
+    removeAccess: handleRemoveAccess
+  });
+
+  const usersManagementProps = {
+    users: filteredUsers || users,
+    loading: isLoading || loading,
+    filter: searchQuery,
+    setFilter: setSearchQuery,
+    supervisoesTecnicas,
+    cargos,
+    coordenacoes,
+    isInviteDialogOpen,
+    setIsInviteDialogOpen,
+    handleInviteUser,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    selectedUser,
+    handleEditUser,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    userToDelete,
+    handleDeleteUser,
+    userActions,
+    approving,
+    removing,
+    isEditSubmitting,
+    onRefresh: handleRefreshData
+  };
+  
   return (
-    <>
-      <UsersLayout
-        users={filteredUsers || users}
-        loading={isLoading || loading}
-        filter={searchQuery}
-        setFilter={setSearchQuery}
-        supervisoesTecnicas={supervisoesTecnicas}
-        cargos={cargos}
-        coordenacoes={[]} 
-        isInviteDialogOpen={isInviteDialogOpen}
-        setIsInviteDialogOpen={setIsInviteDialogOpen}
-        handleInviteUser={handleInviteUser}
-        isEditDialogOpen={isEditDialogOpen}
-        setIsEditDialogOpen={setIsEditDialogOpen}
-        selectedUser={currentUser}
-        handleEditUser={handleEditUser}
-        isDeleteDialogOpen={isDeleteDialogOpen}
-        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-        userToDelete={userToDelete}
-        handleDeleteUser={handleDeleteUser}
-        userActions={userActions}
-        approving={approving}
-        removing={removing}
-        isEditSubmitting={isEditSubmitting}
-      />
-
-      {/* Approval Dialog */}
+    <div>
+      <UsersLayout {...usersManagementProps} />
+      
       <UserApprovalDialog
         open={isApprovalDialogOpen}
         onOpenChange={setIsApprovalDialogOpen}
         user={userToApprove}
-        onApprove={handleApproveUser}
+        onApprove={approveUser}
         approving={approving}
       />
-
-      {/* Roles Management Dialog */}
-      <UserRolesDialog
-        open={isRolesDialogOpen}
-        onOpenChange={closeRolesDialog}
-        user={userForRoles}
-      />
-    </>
+    </div>
   );
 };
 
