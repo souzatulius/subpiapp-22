@@ -94,8 +94,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   const handleSubmitWithExtra = async () => {
     try {
       // Atualizar o serviço selecionado (se houver)
-      if (selectedServicoId) {
-        // Fix: update to properly handle servico_id when updating demandas
+      if (selectedServicoId && selectedServicoId !== selectedDemanda.servico_id) {
         const updatePayload: any = { servico_id: selectedServicoId };
         
         const { error: servicoError } = await supabase
@@ -127,7 +126,9 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     if (questions.length === 0) return true;
     
     // Verifica se tem o mesmo número de respostas e perguntas
-    if (Object.keys(resposta).length !== Object.keys(selectedDemanda.perguntas).length) return false;
+    if (Object.keys(resposta).length !== (Array.isArray(selectedDemanda.perguntas) 
+      ? selectedDemanda.perguntas.length 
+      : Object.keys(selectedDemanda.perguntas).length)) return false;
     
     // Verifica se todas as respostas estão preenchidas
     return !Object.values(resposta).some(answer => !answer || answer.trim() === '');
@@ -158,58 +159,68 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Seção de informações principais */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Tema</h3>
-              <TemaSelector 
-                selectedProblemId={selectedProblemId}
-                problems={problems}
-                problemsLoading={problemsLoading}
-                demandaId={selectedDemanda.id}
-                currentProblem={currentProblem}
-                onProblemChange={setSelectedProblemId}
+          {/* Layout com duas colunas para desktop */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Coluna 1: Informações da demanda e detalhes */}
+            <div className="lg:col-span-1 space-y-6">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Tema</h3>
+                <TemaSelector 
+                  selectedProblemId={selectedProblemId}
+                  problems={problems}
+                  problemsLoading={problemsLoading}
+                  demandaId={selectedDemanda.id}
+                  currentProblem={currentProblem}
+                  onProblemChange={setSelectedProblemId}
+                />
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium mb-2">Serviço</h3>
+                <ServicoSelector 
+                  selectedServicoId={selectedServicoId}
+                  servicos={servicos}
+                  servicosLoading={servicosLoading}
+                  onServicoChange={setSelectedServicoId}
+                />
+              </div>
+
+              <Separator className="my-4" />
+              
+              <DemandaInfoSection demanda={selectedDemanda} />
+            </div>
+            
+            {/* Coluna 2: Detalhes e perguntas/respostas (spans 2 cols) */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="bg-gray-50 border border-gray-200">
+                <CardContent className="p-4">
+                  <DemandaDetailsSection detalhes={selectedDemanda.detalhes_solicitacao} />
+                </CardContent>
+              </Card>
+              
+              {selectedDemanda.perguntas && Object.keys(selectedDemanda.perguntas).length > 0 && (
+                <QuestionsAnswersSection 
+                  perguntas={selectedDemanda.perguntas}
+                  resposta={resposta}
+                  onRespostaChange={handleRespostaChange}
+                />
+              )}
+              
+              <CommentsSection 
+                comentarios={setComentarios ? comentarios : localComentarios}
+                onChange={(value) => {
+                  if (setComentarios) {
+                    setComentarios(value);
+                  } else {
+                    setLocalComentarios(value);
+                  }
+                }}
               />
             </div>
-
-            <ServicoSelector 
-              selectedServicoId={selectedServicoId}
-              servicos={servicos}
-              servicosLoading={servicosLoading}
-              onServicoChange={setSelectedServicoId}
-            />
           </div>
-          
-          <Separator />
-          
-          {/* Informações adicionais da demanda */}
-          <DemandaInfoSection demanda={selectedDemanda} />
-
-          <Separator />
-          
-          <DemandaDetailsSection detalhes={selectedDemanda.detalhes_solicitacao} />
-          
-          {selectedDemanda.perguntas && (
-            <QuestionsAnswersSection 
-              perguntas={selectedDemanda.perguntas}
-              resposta={resposta}
-              onRespostaChange={handleRespostaChange}
-            />
-          )}
-          
-          <CommentsSection 
-            comentarios={setComentarios ? comentarios : localComentarios}
-            onChange={(value) => {
-              if (setComentarios) {
-                setComentarios(value);
-              } else {
-                setLocalComentarios(value);
-              }
-            }}
-          />
         </CardContent>
 
-        <CardFooter className="justify-end">
+        <CardFooter className="border-t p-4 justify-end">
           <Button 
             onClick={handleSubmitWithExtra}
             disabled={isLoading || !allQuestionsAnswered()}

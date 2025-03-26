@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import ServiceSearch from '@/components/dashboard/forms/steps/identification/ServiceSearch';
 
 interface ServicoSelectorProps {
   selectedServicoId: string;
@@ -16,30 +16,52 @@ const ServicoSelector: React.FC<ServicoSelectorProps> = ({
   servicosLoading,
   onServicoChange
 }) => {
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
+  // Find the selected service
+  const selectedService = selectedServicoId 
+    ? servicos.find(s => s.id === selectedServicoId) 
+    : null;
+  
+  const handleServiceSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setServiceSearch(e.target.value);
+  };
+  
+  const handleServiceSelect = (serviceId: string) => {
+    onServicoChange(serviceId);
+    setServiceSearch('');
+    setIsPopoverOpen(false);
+  };
+  
+  const handleServiceRemove = () => {
+    onServicoChange('');
+  };
+  
+  // Filter services based on search term
+  const filteredServicesBySearch = serviceSearch
+    ? servicos.filter(service => 
+        service.descricao.toLowerCase().includes(serviceSearch.toLowerCase())
+      )
+    : servicos;
+
   return (
     <div>
-      <Label htmlFor="servico" className="text-sm font-medium mb-2">Serviço</Label>
-      <Select
-        value={selectedServicoId}
-        onValueChange={onServicoChange}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Selecione um serviço" />
-        </SelectTrigger>
-        <SelectContent>
-          {servicosLoading ? (
-            <SelectItem value="loading" disabled>Carregando serviços...</SelectItem>
-          ) : servicos.length > 0 ? (
-            servicos.map((servico) => (
-              <SelectItem key={servico.id} value={servico.id}>
-                {servico.descricao}
-              </SelectItem>
-            ))
-          ) : (
-            <SelectItem value="none" disabled>Nenhum serviço encontrado</SelectItem>
-          )}
-        </SelectContent>
-      </Select>
+      <ServiceSearch 
+        serviceSearch={serviceSearch}
+        handleChange={handleServiceSearch}
+        filteredServicesBySearch={filteredServicesBySearch}
+        handleServiceSelect={handleServiceSelect}
+        selectedService={selectedService}
+        handleServiceRemove={handleServiceRemove}
+        isPopoverOpen={isPopoverOpen}
+        setIsPopoverOpen={setIsPopoverOpen}
+        className="w-full"
+      />
+      
+      {servicosLoading && (
+        <p className="text-sm text-gray-500 mt-2">Carregando serviços...</p>
+      )}
     </div>
   );
 };

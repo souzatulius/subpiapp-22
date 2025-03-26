@@ -18,6 +18,7 @@ interface ServiceSearchProps {
   errors?: ValidationError[];
   isPopoverOpen: boolean;
   setIsPopoverOpen: (isOpen: boolean) => void;
+  className?: string;
 }
 
 const ServiceSearch: React.FC<ServiceSearchProps> = ({
@@ -29,7 +30,8 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
   handleServiceRemove,
   errors = [],
   isPopoverOpen,
-  setIsPopoverOpen
+  setIsPopoverOpen,
+  className = '',
 }) => {
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
@@ -38,7 +40,7 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
   };
 
   return (
-    <div className="animate-fadeIn">
+    <div className={`animate-fadeIn ${className}`}>
       <Label htmlFor="servico_id" className={`block mb-2 ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}>
         Serviço {hasError('servico_id') && <span className="text-orange-500">*</span>}
       </Label>
