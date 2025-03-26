@@ -35,6 +35,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         .select(`
           *,
           autor:autor_id(id, nome_completo),
+          aprovador:aprovador_id(id, nome_completo),
           supervisao_tecnica:supervisao_tecnica_id(id, descricao),
           historico_edicoes:notas_historico_edicoes(
             id,
@@ -56,9 +57,10 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       const formattedNotas = (notasData || []).map(nota => ({
         ...nota,
         autor: nota.autor || { id: '', nome_completo: 'Não informado' },
+        aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
         supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
         historico_edicoes: nota.historico_edicoes || []
-      }));
+      })) as NotaOficial[];
       
       setNotas(formattedNotas);
     } catch (error) {

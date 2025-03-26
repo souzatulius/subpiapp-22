@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { User, Calendar, FileText } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { NotaOficial } from '../types';
+import { NotaOficial } from '@/types/nota';
 
 interface NotaCardProps {
   nota: NotaOficial;
@@ -46,7 +46,7 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
               
               <div className="flex items-center text-sm text-gray-600">
                 <FileText className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-                <span>{nota.areas_coordenacao?.descricao || 'Área não informada'}</span>
+                <span>{nota.supervisao_tecnica?.descricao || 'Área não informada'}</span>
               </div>
             </div>
           </div>
