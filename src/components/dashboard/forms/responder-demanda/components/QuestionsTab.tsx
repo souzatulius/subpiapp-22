@@ -15,9 +15,43 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
   resposta,
   onRespostaChange
 }) => {
+  // Função para verificar se existem perguntas
+  const hasQuestions = () => {
+    if (!selectedDemanda.perguntas) return false;
+    
+    if (Array.isArray(selectedDemanda.perguntas)) {
+      return selectedDemanda.perguntas.length > 0;
+    }
+    
+    if (typeof selectedDemanda.perguntas === 'object') {
+      return Object.keys(selectedDemanda.perguntas).length > 0;
+    }
+    
+    if (typeof selectedDemanda.perguntas === 'string') {
+      try {
+        const parsed = JSON.parse(selectedDemanda.perguntas);
+        if (Array.isArray(parsed)) {
+          return parsed.length > 0;
+        }
+        if (typeof parsed === 'object') {
+          return Object.keys(parsed).length > 0;
+        }
+      } catch {
+        // Se não conseguir parsear, considera a string como uma pergunta
+        return selectedDemanda.perguntas.trim() !== '';
+      }
+    }
+    
+    return false;
+  };
+
+  console.log('Tipo das perguntas:', typeof selectedDemanda.perguntas);
+  console.log('Conteúdo das perguntas:', selectedDemanda.perguntas);
+  console.log('Has questions:', hasQuestions());
+
   return (
     <TabsContent value="questions" className="pt-2 m-0 animate-fade-in">
-      {selectedDemanda.perguntas && Object.keys(selectedDemanda.perguntas).length > 0 ? (
+      {hasQuestions() ? (
         <QuestionsAnswersSection 
           perguntas={selectedDemanda.perguntas}
           resposta={resposta}
