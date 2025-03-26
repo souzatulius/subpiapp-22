@@ -21,14 +21,19 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   
   // Normaliza as perguntas para um formato consistente para processamento
   const normalizeQuestions = () => {
+    // Se for null ou undefined, retorna array vazio
+    if (!perguntas) return [];
+    
     // Se já for um array, retorna diretamente
     if (Array.isArray(perguntas)) {
-      return perguntas;
+      return perguntas.filter(p => p && p.trim() !== '');
     }
     
-    // Se for um objeto, converte para array
+    // Se for um objeto, converte para array de valores
     if (typeof perguntas === 'object') {
-      return Object.values(perguntas);
+      return Object.entries(perguntas)
+        .filter(([_, value]) => value && String(value).trim() !== '')
+        .map(([key, value]) => value);
     }
     
     // Se for string, tenta parsear como JSON
@@ -36,10 +41,10 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
       try {
         const parsed = JSON.parse(perguntas);
         if (Array.isArray(parsed)) {
-          return parsed;
+          return parsed.filter(p => p && String(p).trim() !== '');
         }
         if (typeof parsed === 'object') {
-          return Object.values(parsed);
+          return Object.values(parsed).filter(p => p && String(p).trim() !== '');
         }
       } catch (e) {
         console.error('Erro ao parsear perguntas:', e);
@@ -53,49 +58,15 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   
   // Count answered questions
   const getTotalAnswered = () => {
+    const normalizedQuestions = normalizeQuestions();
     let answered = 0;
-    let total = 0;
+    let total = normalizedQuestions.length;
     
-    if (Array.isArray(perguntas)) {
-      total = perguntas.length;
-      perguntas.forEach((_, index) => {
-        if (resposta[index.toString()] && resposta[index.toString()].trim() !== '') {
-          answered++;
-        }
-      });
-    } else if (typeof perguntas === 'object' && perguntas !== null) {
-      total = Object.keys(perguntas).length;
-      Object.keys(perguntas).forEach(key => {
-        if (resposta[key] && resposta[key].trim() !== '') {
-          answered++;
-        }
-      });
-    } else if (typeof perguntas === 'string') {
-      try {
-        const parsed = JSON.parse(perguntas);
-        if (Array.isArray(parsed)) {
-          total = parsed.length;
-          parsed.forEach((_, index) => {
-            if (resposta[index.toString()] && resposta[index.toString()].trim() !== '') {
-              answered++;
-            }
-          });
-        } else if (typeof parsed === 'object' && parsed !== null) {
-          total = Object.keys(parsed).length;
-          Object.keys(parsed).forEach(key => {
-            if (resposta[key] && resposta[key].trim() !== '') {
-              answered++;
-            }
-          });
-        }
-      } catch (e) {
-        console.error('Erro ao contar perguntas respondidas:', e);
-        total = 1; // Assume uma única pergunta
-        if (resposta['0'] && resposta['0'].trim() !== '') {
-          answered = 1;
-        }
+    normalizedQuestions.forEach((_, index) => {
+      if (resposta[index.toString()] && resposta[index.toString()].trim() !== '') {
+        answered++;
       }
-    }
+    });
     
     return { answered, total };
   };

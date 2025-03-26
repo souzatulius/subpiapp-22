@@ -15,34 +15,40 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
   resposta,
   onRespostaChange
 }) => {
-  // Função para verificar se existem perguntas
+  // Função melhorada para verificar se existem perguntas
   const hasQuestions = () => {
     if (!selectedDemanda.perguntas) return false;
     
-    if (Array.isArray(selectedDemanda.perguntas)) {
-      return selectedDemanda.perguntas.length > 0;
+    // Se for uma array vazia
+    if (Array.isArray(selectedDemanda.perguntas) && selectedDemanda.perguntas.length === 0) return false;
+    
+    // Se for um objeto vazio
+    if (typeof selectedDemanda.perguntas === 'object' && !Array.isArray(selectedDemanda.perguntas)) {
+      if (Object.keys(selectedDemanda.perguntas).length === 0) return false;
+      
+      // Verifica se há pelo menos uma pergunta não vazia
+      return Object.values(selectedDemanda.perguntas).some(pergunta => 
+        pergunta && String(pergunta).trim() !== ''
+      );
     }
     
-    if (typeof selectedDemanda.perguntas === 'object') {
-      return Object.keys(selectedDemanda.perguntas).length > 0;
-    }
-    
+    // Se for uma string JSON, tenta parsear
     if (typeof selectedDemanda.perguntas === 'string') {
       try {
         const parsed = JSON.parse(selectedDemanda.perguntas);
-        if (Array.isArray(parsed)) {
-          return parsed.length > 0;
-        }
-        if (typeof parsed === 'object') {
-          return Object.keys(parsed).length > 0;
-        }
+        
+        if (Array.isArray(parsed) && parsed.length === 0) return false;
+        
+        if (typeof parsed === 'object' && Object.keys(parsed).length === 0) return false;
+        
+        return true;
       } catch {
-        // Se não conseguir parsear, considera a string como uma pergunta
+        // Se não conseguir parsear, verifica se a string não está vazia
         return selectedDemanda.perguntas.trim() !== '';
       }
     }
     
-    return false;
+    return true;
   };
 
   console.log('Tipo das perguntas:', typeof selectedDemanda.perguntas);
