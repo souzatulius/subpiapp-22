@@ -129,7 +129,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nenhum</SelectItem>
+            <SelectItem value="none">Nenhum</SelectItem>
             {cargos.map((cargo) => (
               <SelectItem key={cargo.id} value={cargo.id}>
                 {cargo.descricao}
@@ -158,7 +158,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nenhuma</SelectItem>
+            <SelectItem value="none">Nenhuma</SelectItem>
             {coordenacoes.map((coordenacao) => (
               <SelectItem key={coordenacao.id} value={coordenacao.id}>
                 {coordenacao.descricao}
@@ -186,7 +186,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nenhuma</SelectItem>
+            <SelectItem value="none">Nenhuma</SelectItem>
             {filteredSupervisoes.map((supervisao) => (
               <SelectItem key={supervisao.id} value={supervisao.id}>
                 {supervisao.descricao}

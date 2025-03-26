@@ -89,7 +89,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
                   <FormLabel>Supervisão Técnica</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value || "select-area"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -97,11 +97,17 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {validAreas.map((area) => (
-                        <SelectItem key={area.id} value={area.id}>
-                          {area.descricao}
+                      {validAreas.length === 0 ? (
+                        <SelectItem value="no-areas">
+                          Nenhuma área disponível
                         </SelectItem>
-                      ))}
+                      ) : (
+                        validAreas.map((area) => (
+                          <SelectItem key={area.id} value={area.id}>
+                            {area.descricao}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
