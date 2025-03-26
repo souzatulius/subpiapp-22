@@ -46,6 +46,8 @@ export interface Demand {
     id: string;
     descricao: string;
   };
+  arquivo_url: string | null; // Added missing property
+  anexos: string[] | null; // Added missing property
   resposta?: {
     id: string;
     demanda_id: string;

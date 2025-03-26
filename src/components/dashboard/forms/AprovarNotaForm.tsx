@@ -63,7 +63,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           
           return {
             ...edit,
-            editor // Using optional chaining and nullish coalescing
+            editor // Safe null handling
           };
         }) as NotaEdicao[];
         
