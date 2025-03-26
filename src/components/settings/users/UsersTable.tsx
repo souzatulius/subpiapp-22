@@ -17,8 +17,7 @@ import {
   Trash, 
   KeyRound, 
   UserCheck, 
-  UserX,
-  ShieldCheck
+  UserX
 } from 'lucide-react';
 import { User } from './types';
 import LoadingSkeleton from '@/components/ui/loading-skeleton';
@@ -146,16 +145,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    {onManageRoles && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onManageRoles(user)}
-                        title="Gerenciar permissões"
-                      >
-                        <ShieldCheck className="h-4 w-4" />
-                      </Button>
-                    )}
                     <Button 
                       variant="outline" 
                       size="sm"

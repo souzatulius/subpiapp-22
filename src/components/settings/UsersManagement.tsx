@@ -10,7 +10,6 @@ import { useUserApproval } from './users/hooks/useUserApproval';
 import { useUserAccessRemoval } from './users/hooks/useUserAccessRemoval';
 import { useUserInvite } from './users/hooks/useUserInvite';
 import UserApprovalDialog from './users/UserApprovalDialog';
-import UserRolesDialog from './users/UserRolesDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from './users/types';
 
@@ -33,8 +32,6 @@ const UsersManagement = () => {
   const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
   const [userToApprove, setUserToApprove] = useState<User | null>(null);
-  const [isRolesDialogOpen, setIsRolesDialogOpen] = useState(false);
-  const [userToManageRoles, setUserToManageRoles] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchCoordenacoes = async () => {
@@ -92,12 +89,6 @@ const UsersManagement = () => {
     setUserToApprove(user);
     setIsApprovalDialogOpen(true);
   };
-  
-  const openRolesDialog = (user: User) => {
-    console.log('Opening roles dialog for user:', user);
-    setUserToManageRoles(user);
-    setIsRolesDialogOpen(true);
-  };
 
   const handleEdit = (user: User) => {
     openEditDialog(user);
@@ -135,8 +126,7 @@ const UsersManagement = () => {
     setUserToDelete: handleDelete,
     resetPassword: handleResetPassword,
     approveUser: handleApprove,
-    removeAccess: handleRemoveAccess,
-    manageRoles: openRolesDialog
+    removeAccess: handleRemoveAccess
   });
 
   const usersManagementProps = {
@@ -158,10 +148,7 @@ const UsersManagement = () => {
     setIsDeleteDialogOpen,
     userToDelete,
     handleDeleteUser,
-    userActions: {
-      ...userActions,
-      handleManageRoles: openRolesDialog
-    },
+    userActions,
     approving,
     removing,
     isEditSubmitting,
@@ -178,12 +165,6 @@ const UsersManagement = () => {
         user={userToApprove}
         onApprove={approveUser}
         approving={approving}
-      />
-      
-      <UserRolesDialog
-        open={isRolesDialogOpen}
-        onOpenChange={setIsRolesDialogOpen}
-        user={userToManageRoles}
       />
     </div>
   );

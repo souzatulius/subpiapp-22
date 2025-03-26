@@ -9,7 +9,6 @@ interface UserActionsProps {
   resetPassword: (user: User) => void;
   approveUser: (user: User, roleName?: string) => void;
   removeAccess: (user: User) => void;
-  manageRoles?: (user: User) => void;
 }
 
 export const useUserActions = ({
@@ -19,8 +18,7 @@ export const useUserActions = ({
   setUserToDelete,
   resetPassword,
   approveUser,
-  removeAccess,
-  manageRoles
+  removeAccess
 }: UserActionsProps) => {
   const handleEdit = (user: User) => {
     setSelectedUser(user);
@@ -43,19 +41,12 @@ export const useUserActions = ({
   const handleRemoveAccess = (user: User) => {
     removeAccess(user);
   };
-  
-  const handleManageRoles = (user: User) => {
-    if (manageRoles) {
-      manageRoles(user);
-    }
-  };
 
   return {
     handleEdit,
     handleDelete,
     handleResetPassword,
     handleApprove,
-    handleRemoveAccess,
-    handleManageRoles
+    handleRemoveAccess
   };
 };
