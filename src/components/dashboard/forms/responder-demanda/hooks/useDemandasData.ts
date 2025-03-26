@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda, Area, ViewMode } from '../types';
+import { toast } from '@/components/ui/use-toast';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
@@ -43,10 +44,15 @@ export const useDemandasData = () => {
             origens_demandas:origem_id (id, descricao),
             tipos_midia:tipo_midia_id (id, descricao)
           `)
-          .eq('status', 'pendente');
+          .order('horario_publicacao', { ascending: false });
         
         if (error) {
           console.error('Error fetching demandas:', error);
+          toast({
+            title: "Erro ao carregar demandas",
+            description: error.message,
+            variant: "destructive"
+          });
           return;
         }
         
@@ -105,6 +111,11 @@ export const useDemandasData = () => {
         setFilteredDemandas(transformedData);
       } catch (error) {
         console.error('Error in fetchDemandas:', error);
+        toast({
+          title: "Erro ao carregar demandas",
+          description: "Ocorreu um erro ao carregar as demandas.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoadingDemandas(false);
       }
@@ -123,12 +134,22 @@ export const useDemandasData = () => {
         
         if (error) {
           console.error('Error fetching areas:', error);
+          toast({
+            title: "Erro ao carregar áreas",
+            description: error.message,
+            variant: "destructive"
+          });
           return;
         }
         
         setAreas(data || []);
       } catch (error) {
         console.error('Error in fetchAreas:', error);
+        toast({
+          title: "Erro ao carregar áreas",
+          description: "Ocorreu um erro ao carregar as áreas.",
+          variant: "destructive"
+        });
       }
     };
     
