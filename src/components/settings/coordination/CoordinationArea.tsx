@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DataTable from '../data-table/DataTable';
 import CoordinationForm from './CoordinationForm';
@@ -80,12 +79,7 @@ const CoordinationArea = () => {
       key: 'sigla',
       header: 'Sigla',
       render: (row: any) => row.sigla || '-',
-    },
-    {
-      key: 'criado_em',
-      header: 'Data de Criação',
-      render: (row: any) => new Date(row.criado_em).toLocaleDateString('pt-BR'),
-    },
+    }
   ];
 
   const renderForm = (onClose: () => void) => {

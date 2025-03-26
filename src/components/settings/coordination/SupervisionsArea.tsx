@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DataTable from '../data-table/DataTable';
 import SupervisionEditDialog from './SupervisionEditDialog';
@@ -98,12 +97,7 @@ const SupervisionsArea = () => {
         const coordination = coordinations.find(c => c.id === row.coordenacao_id);
         return coordination ? coordination.descricao : (row.coordenacao || '-');
       },
-    },
-    {
-      key: 'criado_em',
-      header: 'Data de Criação',
-      render: (row: any) => row.criado_em ? new Date(row.criado_em).toLocaleDateString('pt-BR') : '-',
-    },
+    }
   ];
 
   const renderForm = (onClose: () => void) => {
