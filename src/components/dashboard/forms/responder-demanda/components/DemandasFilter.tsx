@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -47,7 +48,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
             <SelectValue placeholder="Filtrar por Área" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as Áreas</SelectItem>
+            <SelectItem value="all">Todas as Áreas</SelectItem>
             {areas.map(area => (
               <SelectItem key={area.id} value={area.id}>{area.descricao}</SelectItem>
             ))}
@@ -61,7 +62,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
             <SelectValue placeholder="Prioridade" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as Prioridades</SelectItem>
+            <SelectItem value="all">Todas as Prioridades</SelectItem>
             <SelectItem value="alta">Alta</SelectItem>
             <SelectItem value="media">Média</SelectItem>
             <SelectItem value="baixa">Baixa</SelectItem>
