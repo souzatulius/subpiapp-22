@@ -87,7 +87,7 @@ export const useNotasQuery = () => {
 
           return {
             ...edit,
-            editor: editor
+            editor // Safe null handling
           };
         }) as NotaEdicao[];
 
