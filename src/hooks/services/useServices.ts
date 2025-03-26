@@ -3,16 +3,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-
-export interface Service {
-  id?: string;
-  descricao: string;
-  supervisao_tecnica_id: string;
-  supervisao_tecnica?: {
-    descricao: string;
-  };
-  criado_em?: string;
-}
+import { Service } from './types';
 
 export const useServices = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -84,6 +75,37 @@ export const useServices = () => {
     }
   };
 
+  const updateService = async (serviceId: string, updates: Partial<Service>) => {
+    if (!user) return;
+
+    try {
+      console.log('Updating service:', serviceId, updates);
+      const { data, error } = await supabase
+        .from('servicos')
+        .update(updates)
+        .eq('id', serviceId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('Service updated:', data);
+      setServices(prev => prev.map(service => 
+        service.id === serviceId ? data : service
+      ));
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating service:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o serviço.',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
   const deleteService = async (serviceId: string) => {
     if (!user) return;
 
@@ -116,6 +138,7 @@ export const useServices = () => {
     loading,
     fetchServices,
     addService,
+    updateService,
     deleteService
   };
 };

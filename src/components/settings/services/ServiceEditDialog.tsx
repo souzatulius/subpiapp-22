@@ -34,7 +34,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
   const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm({
     defaultValues: {
       descricao: service?.descricao || '',
-      supervisao_tecnica_id: service?.supervisao_id || service?.supervisao_tecnica_id || ''
+      supervisao_tecnica_id: service?.supervisao_tecnica_id || ''
     }
   });
 
@@ -42,7 +42,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
     if (service) {
       reset({
         descricao: service.descricao,
-        supervisao_tecnica_id: service.supervisao_id || service.supervisao_tecnica_id || '',
+        supervisao_tecnica_id: service.supervisao_tecnica_id || '',
       });
     }
   }, [service, reset]);
