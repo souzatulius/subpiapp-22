@@ -1,16 +1,32 @@
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { NotaOficial, NotaEdicao } from '@/types/nota';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
-export const useNotasQuery = (
-  statusFilter: string,
-  areaFilter: string,
-  searchQuery: string,
-  dataInicioFilter?: Date,
-  dataFimFilter?: Date
-) => {
-  return useQuery({
+export const useNotasQuery = () => {
+  const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todos');
+  const [areaFilter, setAreaFilter] = useState('todas');
+  const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
+  const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
+  
+  const isAdmin = true; // Simplified for now, should be based on user roles
+  
+  const formatDate = (dateStr: string) => {
+    try {
+      return format(new Date(dateStr), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Data inválida';
+    }
+  };
+
+  const { data: notas = [], isLoading, refetch } = useQuery({
     queryKey: ['notas', statusFilter, areaFilter, searchQuery, dataInicioFilter, dataFimFilter],
     queryFn: async () => {
       let query = supabase
@@ -83,7 +99,7 @@ export const useNotasQuery = (
         // Safely handle approver data
         const aprovador = nota.aprovador && typeof nota.aprovador === 'object' && !('error' in nota.aprovador)
           ? nota.aprovador
-          : { id: '', nome_completo: 'Não informado' };
+          : null;
 
         // Safely handle technical supervision data
         const supervisao_tecnica = nota.supervisao_tecnica && typeof nota.supervisao_tecnica === 'object' && !('error' in nota.supervisao_tecnica)
@@ -100,17 +116,46 @@ export const useNotasQuery = (
         };
       }) as NotaOficial[];
 
-      if (searchQuery) {
-        // Filter by search query
+      // Filter by search query
+      if (searchQuery.trim()) {
         return processedData.filter(nota => 
           nota.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || 
           nota.texto.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          nota.autor?.nome_completo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          nota.supervisao_tecnica?.descricao.toLowerCase().includes(searchQuery.toLowerCase())
+          (nota.autor?.nome_completo?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+          (nota.supervisao_tecnica?.descricao?.toLowerCase() || '').includes(searchQuery.toLowerCase())
         );
       }
 
       return processedData;
     }
   });
+
+  // Apply local filtering for search query if it changes and we already have data
+  const filteredNotas = searchQuery.trim() && notas.length > 0
+    ? notas.filter(nota => 
+        nota.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        nota.texto.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (nota.autor?.nome_completo?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (nota.supervisao_tecnica?.descricao?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+      )
+    : notas;
+
+  return {
+    notas,
+    filteredNotas,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    areaFilter,
+    setAreaFilter,
+    dataInicioFilter,
+    setDataInicioFilter,
+    dataFimFilter,
+    setDataFimFilter,
+    formatDate,
+    refetch,
+    isAdmin
+  };
 };

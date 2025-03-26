@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -55,14 +54,11 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       if (notasError) throw notasError;
       
-      // Format the data to ensure type safety
       const formattedNotas = (notasData || []).map(nota => {
-        // Process historic edits to ensure the type is correct
         const processedHistorico = (nota.historico_edicoes || []).map(edit => {
-          // Handle potential error in editor relationship
           const editor = edit.editor && typeof edit.editor === 'object' && !('error' in edit.editor) 
             ? edit.editor 
-            : { id: '', nome_completo: 'Não informado' };
+            : null;
           
           return {
             ...edit,
@@ -70,14 +66,13 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           };
         }) as NotaEdicao[];
         
-        // Handle potential error in relationships
         const autor = nota.autor && typeof nota.autor === 'object' && !('error' in nota.autor)
           ? nota.autor
           : { id: '', nome_completo: 'Não informado' };
           
         const aprovador = nota.aprovador && typeof nota.aprovador === 'object' && !('error' in nota.aprovador)
           ? nota.aprovador
-          : { id: '', nome_completo: 'Não informado' };
+          : null;
           
         const supervisao_tecnica = nota.supervisao_tecnica && typeof nota.supervisao_tecnica === 'object' && !('error' in nota.supervisao_tecnica)
           ? nota.supervisao_tecnica
