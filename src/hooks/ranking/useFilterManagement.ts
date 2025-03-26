@@ -1,6 +1,7 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FilterOptions, ChartVisibility } from '@/components/ranking/types';
+import { toast } from 'sonner';
 
 export const useFilterManagement = () => {
   // Default filter state
@@ -37,8 +38,15 @@ export const useFilterManagement = () => {
   // State for chart visibility
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>(defaultChartVisibility);
 
+  // Track if filters have been modified from default
+  const [isModified, setIsModified] = useState(false);
+
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters(prev => {
+      const updated = { ...prev, ...newFilters };
+      setIsModified(true);
+      return updated;
+    });
   };
 
   const handleChartVisibilityChange = (newVisibility: Partial<ChartVisibility>) => {
@@ -47,14 +55,24 @@ export const useFilterManagement = () => {
 
   // Reset filters to defaults
   const resetFilters = useCallback(() => {
+    console.log("Resetting filters to defaults");
     setFilters(defaultFilters);
+    setIsModified(false);
+    toast.success("Filtros redefinidos para os valores padrão");
   }, []);
+
+  // Debug log effect
+  useEffect(() => {
+    console.log("Current filters:", filters);
+    console.log("Filters modified:", isModified);
+  }, [filters, isModified]);
 
   return {
     filters,
     chartVisibility,
     handleFiltersChange,
     handleChartVisibilityChange,
-    resetFilters
+    resetFilters,
+    isModified
   };
 };

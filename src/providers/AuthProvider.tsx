@@ -24,13 +24,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setLoading(true);
       try {
         // Verifica sessão atual
-        const { session } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user || null);
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        setUser(data.session?.user || null);
 
         // Verifica se o usuário está aprovado
-        if (session?.user) {
-          const approved = await isUserApproved(session.user.id);
+        if (data.session?.user) {
+          const approved = await isUserApproved(data.session.user.id);
           setIsApproved(approved);
           
           // Se estiver aprovado e estiver na página de login, redireciona para o dashboard

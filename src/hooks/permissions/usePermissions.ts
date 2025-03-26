@@ -42,6 +42,7 @@ export const usePermissions = (): UsePermissionsReturn => {
         if (hasAdminRole) {
           console.log("User granted admin status via admin role");
           adminStatus = true;
+          // We don't return early to ensure we fetch coordination data for other features
         }
 
         // 2. Fetch user coordination and supervisao data

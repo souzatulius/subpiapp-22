@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { usePermissions } from '@/hooks/permissions';
@@ -15,9 +15,10 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
   const { isAdmin, isLoading: permissionLoading, canAccessProtectedRoute } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
+  const [accessChecked, setAccessChecked] = useState(false);
 
   useEffect(() => {
-    if (authLoading || permissionLoading) return; // garante que só executa com tudo pronto
+    if (authLoading || permissionLoading) return; // Don't proceed until both auth and permissions are loaded
     
     console.log("Checking access to admin route:", location.pathname);
     console.log("User auth state:", { 
@@ -63,6 +64,8 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
       });
       
       navigate('/dashboard');
+    } else {
+      setAccessChecked(true);
     }
   }, [
     user,
@@ -84,7 +87,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
   }
 
   if (!user || !isApproved || (!isAdmin && !canAccessProtectedRoute(location.pathname))) {
-    return null; // ou mostre um fallback amigável
+    return null; // Não renderiza nada enquanto aguarda o redirecionamento
   }
 
   return <>{children}</>;
