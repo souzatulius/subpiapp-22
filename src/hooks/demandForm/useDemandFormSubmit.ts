@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { DemandFormData } from './types';
 import { toast } from '@/components/ui/use-toast';
@@ -21,6 +22,14 @@ export const useDemandFormSubmit = (
     setIsLoading(true);
 
     try {
+      // Format the perguntas field to be stored as JSON
+      const perguntas: Record<string, string> = {};
+      formData.perguntas.forEach((pergunta, index) => {
+        if (pergunta.trim()) {
+          perguntas[`pergunta_${index + 1}`] = pergunta;
+        }
+      });
+
       const demandaData = {
         titulo: formData.titulo,
         problema_id: formData.problema_id,
