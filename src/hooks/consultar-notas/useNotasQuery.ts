@@ -107,6 +107,9 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
       // Add area_coordenacao property to match NotaOficial type
       const formattedData = (data || []).map(nota => ({
         ...nota,
+        autor: nota.autor || null,
+        aprovador: nota.aprovador || null,
+        supervisao_tecnica: nota.supervisao_tecnica || null,
         area_coordenacao: {
           id: nota.supervisao_tecnica_id || '',
           descricao: nota.supervisao_tecnica?.descricao || 'Não informada'
@@ -140,7 +143,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
         title: 'Sucesso!',
         description: 'Nota excluída com sucesso.',
       });
-      queryClient.invalidateQueries({ queryKey: ['notas', status, searchTerm] });
+      queryClient.invalidateQueries({ queryKey: ['notas'] });
       setIsDeleteModalOpen(false);
     },
     onError: (error: any) => {
@@ -156,7 +159,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
     mutationFn: async (id: string) => {
       const { data, error } = await supabase
         .from('notas_oficiais')
-        .update({ status: 'aprovada', aprovador_id: user?.id })
+        .update({ status: 'aprovado', aprovador_id: user?.id })
         .eq('id', id)
         .select();
   
@@ -171,7 +174,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
         title: 'Sucesso!',
         description: 'Nota aprovada com sucesso.',
       });
-      queryClient.invalidateQueries({ queryKey: ['notas', status] });
+      queryClient.invalidateQueries({ queryKey: ['notas'] });
       setIsApproveModalOpen(false);
     },
     onError: (error: any) => {
@@ -202,7 +205,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
         title: 'Sucesso!',
         description: 'Nota rejeitada com sucesso.',
       });
-      queryClient.invalidateQueries({ queryKey: ['notas', status] });
+      queryClient.invalidateQueries({ queryKey: ['notas'] });
       setIsApproveModalOpen(false);
     },
     onError: (error: any) => {

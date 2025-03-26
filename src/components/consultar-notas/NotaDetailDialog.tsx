@@ -6,31 +6,7 @@ import { Card } from '@/components/ui/card';
 import { X, User, Calendar, Clock, FileText, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-interface NotaEdicao {
-  id: string;
-  editor?: {
-    nome_completo: string;
-  };
-  criado_em: string;
-}
-
-interface NotaOficial {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  criado_em: string;
-  atualizado_em: string;
-  autor: {
-    nome_completo: string;
-  };
-  aprovador?: {
-    nome_completo: string;
-  };
-  demanda_id?: string;
-  historico_edicoes?: NotaEdicao[];
-}
+import { NotaOficial } from '@/types/nota';
 
 interface NotaDetailDialogProps {
   nota: NotaOficial;
