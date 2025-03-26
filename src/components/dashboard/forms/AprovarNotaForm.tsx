@@ -1,113 +1,285 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Card } from '@/components/ui/card';
+import { toast } from '@/components/ui/use-toast';
+import NotasList from './components/NotasList';
+import NotaDetail from './components/NotaDetail';
 import { NotaOficial } from '@/types/nota';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface AprovarNotaFormProps {
-  nota?: NotaOficial;
-  onApprove?: () => void;
-  onReject?: () => void;
-  loading?: boolean;
-  formatDate?: (dateStr: string) => string;
-  onClose: () => void;
-}
+interface AprovarNotaFormProps {}
 
-const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({
-  nota,
-  onApprove,
-  onReject,
-  loading,
-  formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('pt-BR'),
-  onClose
-}) => {
-  if (!nota) {
-    return <div>Nota não encontrada</div>;
-  }
+const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
+  const { user } = useAuth();
+  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedText, setEditedText] = useState('');
 
-  const formatNotaHistory = () => {
-    if (!nota.historico_edicoes || nota.historico_edicoes.length === 0) {
-      return <p className="text-gray-500 mt-2">Sem histórico de edições</p>;
+  const { data: notas, isLoading, refetch } = useQuery({
+    queryKey: ['notas-pendentes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notas_oficiais')
+        .select(`
+          *,
+          autor:autor_id (id, nome_completo),
+          aprovador:aprovador_id (id, nome_completo),
+          problema:problema_id (id, descricao),
+          supervisao_tecnica:supervisao_tecnica_id (id, descricao),
+          demanda:demanda_id (id, titulo)
+        `)
+        .eq('status', 'pendente')
+        .order('criado_em', { ascending: false });
+        
+      if (error) throw error;
+      return data as NotaOficial[];
     }
+  });
 
-    return (
-      <div className="space-y-3 mt-3">
-        {nota.historico_edicoes.map((edit) => (
-          <div key={edit.id} className="bg-gray-50 p-3 rounded-md text-sm">
-            <p className="text-gray-700">
-              <span className="font-semibold">
-                {edit.editor?.nome_completo || 'Editor desconhecido'}
-              </span>
-              <span className="text-gray-500 mx-1">editou em</span>
-              <span className="text-gray-600">
-                {formatDate(edit.criado_em)}
-              </span>
-            </p>
-            
-            {edit.titulo_anterior !== edit.titulo_novo && (
-              <div className="mt-2">
-                <p className="text-gray-600 font-medium">Título alterado:</p>
-                <p className="text-red-600 line-through">{edit.titulo_anterior}</p>
-                <p className="text-green-600">{edit.titulo_novo}</p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    );
+  const handleSelectNota = (nota: NotaOficial) => {
+    setSelectedNota(nota);
+    setEditedTitle(nota.titulo);
+    setEditedText(nota.texto);
+    setEditMode(false);
   };
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold">{nota.titulo}</h2>
-        <div className="flex items-center text-sm text-gray-500 mt-1">
-          <span>Por {nota.autor?.nome_completo || 'Autor desconhecido'}</span>
-          <span className="mx-2">•</span>
-          <span>{formatDate(nota.criado_em)}</span>
-        </div>
-        {nota.aprovador && (
-          <div className="text-sm text-gray-500 mt-1">
-            Aprovado por {nota.aprovador?.nome_completo || 'Aprovador desconhecido'} em {formatDate(nota.atualizado_em)}
-          </div>
-        )}
-      </div>
+  const handleBackToList = () => {
+    setSelectedNota(null);
+    setEditMode(false);
+  };
+
+  const handleEditMode = () => {
+    if (!selectedNota) return;
+    setEditedTitle(selectedNota.titulo);
+    setEditedText(selectedNota.texto);
+    setEditMode(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedNota || !user) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Save original text for history
+      const { error: historyError } = await supabase
+        .from('notas_historico_edicoes')
+        .insert({
+          nota_id: selectedNota.id,
+          editor_id: user.id,
+          texto_anterior: selectedNota.texto,
+          texto_novo: editedText,
+          titulo_anterior: selectedNota.titulo,
+          titulo_novo: editedTitle
+        });
       
-      <Separator />
+      if (historyError) throw historyError;
       
-      <div>
-        <div className="font-medium mb-2">Conteúdo da Nota</div>
-        <div className="bg-gray-50 p-4 rounded-md whitespace-pre-line">
-          {nota.texto}
-        </div>
-      </div>
+      // Update the note
+      const { error: updateError } = await supabase
+        .from('notas_oficiais')
+        .update({
+          titulo: editedTitle,
+          texto: editedText,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', selectedNota.id);
       
-      {nota.historico_edicoes && nota.historico_edicoes.length > 0 && (
+      if (updateError) throw updateError;
+      
+      toast({
+        title: "Nota atualizada",
+        description: "As alterações foram salvas com sucesso.",
+      });
+      
+      // Refresh data
+      refetch();
+      setEditMode(false);
+      
+      // Update selected nota with new values
+      if (selectedNota) {
+        setSelectedNota({
+          ...selectedNota,
+          titulo: editedTitle,
+          texto: editedText,
+          atualizado_em: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao salvar edições:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as alterações.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAprovarNota = async () => {
+    if (!selectedNota || !user) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .update({
+          status: 'aprovado',
+          aprovador_id: user.id,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', selectedNota.id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Nota aprovada",
+        description: "A nota oficial foi aprovada com sucesso.",
+      });
+      
+      refetch();
+      setSelectedNota(null);
+    } catch (error) {
+      console.error('Erro ao aprovar nota:', error);
+      toast({
+        title: "Erro ao aprovar",
+        description: "Não foi possível aprovar a nota oficial.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRejeitarNota = async () => {
+    if (!selectedNota || !user) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .update({
+          status: 'rejeitado',
+          aprovador_id: user.id,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', selectedNota.id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Nota rejeitada",
+        description: "A nota oficial foi rejeitada.",
+      });
+      
+      refetch();
+      setSelectedNota(null);
+    } catch (error) {
+      console.error('Erro ao rejeitar nota:', error);
+      toast({
+        title: "Erro ao rejeitar",
+        description: "Não foi possível rejeitar a nota oficial.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (editMode && selectedNota) {
+    return (
+      <Card className="p-6">
         <div>
-          <div className="font-medium mb-1">Histórico de Edições</div>
-          {formatNotaHistory()}
+          <button 
+            onClick={() => setEditMode(false)} 
+            className="mb-4 text-blue-600 hover:text-blue-800"
+          >
+            ← Voltar para visualização
+          </button>
+          
+          <h3 className="text-lg font-medium mb-4">Editar Nota Oficial</h3>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Título
+              </label>
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Conteúdo
+              </label>
+              <textarea
+                value={editedText}
+                onChange={(e) => setEditedText(e.target.value)}
+                rows={10}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            <div className="flex justify-end pt-4">
+              <button
+                onClick={handleSaveEdit}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              >
+                {isSubmitting ? "Salvando..." : "Salvar alterações"}
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+      </Card>
+    );
+  }
+
+  if (selectedNota) {
+    return (
+      <NotaDetail 
+        nota={selectedNota}
+        onBack={handleBackToList}
+        onAprovar={handleAprovarNota}
+        onRejeitar={handleRejeitarNota}
+        onEditar={handleEditMode}
+        isSubmitting={isSubmitting}
+      />
+    );
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold">Aprovar Notas Oficiais</h2>
+        <p className="text-sm text-gray-600">
+          Revise e aprove notas oficiais criadas pela equipe.
+        </p>
+      </div>
       
-      {nota.status === 'pendente' && (
-        <div className="flex justify-end space-x-3 mt-4">
-          <Button 
-            variant="outline" 
-            onClick={onReject}
-            disabled={loading}
-          >
-            Rejeitar
-          </Button>
-          <Button 
-            onClick={onApprove}
-            disabled={loading}
-          >
-            Aprovar
-          </Button>
-        </div>
-      )}
-    </div>
+      <Tabs defaultValue="pendentes">
+        <TabsList className="mb-4">
+          <TabsTrigger value="pendentes">Pendentes de Aprovação</TabsTrigger>
+        </TabsList>
+        <TabsContent value="pendentes">
+          <NotasList 
+            notas={notas || []}
+            loading={isLoading}
+            onSelectNota={handleSelectNota}
+            emptyMessage="Nenhuma nota pendente de aprovação no momento."
+          />
+        </TabsContent>
+      </Tabs>
+    </Card>
   );
 };
 

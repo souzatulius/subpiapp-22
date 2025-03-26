@@ -1,11 +1,14 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Demand, ResponseQA } from '@/types/demand';
+import { useNavigate } from 'react-router-dom';
 
 export const useNotaForm = (onClose: () => void) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedDemandaId, setSelectedDemandaId] = useState('');
   const [selectedDemanda, setSelectedDemanda] = useState<Demand | null>(null);
   const [demandaResponse, setDemandaResponse] = useState<string | null>(null);
@@ -59,17 +62,6 @@ export const useNotaForm = (onClose: () => void) => {
     setDemandaResponse(null);
   };
 
-  const formatDemandInfo = (demand: Demand): string => {
-    const parts = [
-      `Título: ${demand.titulo}`,
-      `Status: ${demand.status}`,
-      `Supervisão Técnica: ${demand.supervisao_tecnica?.descricao || 'Não definida'}`,
-      `Descrição: ${demand.detalhes_solicitacao || 'Não informada'}`
-    ];
-
-    return parts.join('\n');
-  };
-
   const handleSubmit = async () => {
     // Validação
     if (!titulo.trim()) {
@@ -93,7 +85,7 @@ export const useNotaForm = (onClose: () => void) => {
     if (!selectedDemanda || !selectedDemanda.supervisao_tecnica) {
       toast({
         title: "Demanda inválida",
-        description: "A demanda selecionada não possui área de coordenação.",
+        description: "A demanda selecionada não possui supervisão técnica.",
         variant: "destructive"
       });
       return;
@@ -161,7 +153,8 @@ export const useNotaForm = (onClose: () => void) => {
         description: "A nota foi enviada para aprovação.",
       });
       
-      onClose();
+      // Redirect to dashboard
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Erro ao criar nota oficial:', error);
       toast({

@@ -30,6 +30,14 @@ export function useRegisterOptions() {
           .order('descricao');
         
         if (coordenacoesError) throw coordenacoesError;
+
+        // Fetch areas from supervisoes_tecnicas
+        const { data: areasData, error: areasError } = await supabase
+          .from('supervisoes_tecnicas')
+          .select('id, descricao, coordenacao_id')
+          .order('descricao');
+        
+        if (areasError) throw areasError;
         
         // Format data as SelectOption
         const formattedRoles = rolesData.map(role => ({
@@ -41,14 +49,20 @@ export function useRegisterOptions() {
           id: coord.id,
           value: coord.descricao
         }));
+
+        const formattedAreas = areasData.map(area => ({
+          id: area.id,
+          value: area.descricao,
+          coordenacao_id: area.coordenacao_id
+        }));
         
         console.log('Fetched roles:', formattedRoles);
         console.log('Fetched coordenacoes:', formattedCoordenacoes);
+        console.log('Fetched areas:', formattedAreas);
         
         setRoles(formattedRoles);
         setCoordenacoes(formattedCoordenacoes);
-        // Areas will be fetched dynamically based on the selected coordenacao
-        setAreas([]);
+        setAreas(formattedAreas);
       } catch (error) {
         console.error('Error fetching options:', error);
         toast({

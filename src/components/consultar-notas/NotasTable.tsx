@@ -9,12 +9,13 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { EyeIcon, FileDownIcon, TrashIcon } from 'lucide-react';
+import { EyeIcon, FileDownIcon, TrashIcon, EditIcon, CheckIcon, XIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
 import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
 import { NotaOficial } from '@/types/nota';
+import { useNavigate } from 'react-router-dom';
 
 interface NotasTableProps {
   notas: NotaOficial[];
@@ -22,6 +23,9 @@ interface NotasTableProps {
   formatDate: (dateString: string) => string;
   onDeleteNota: (notaId: string) => Promise<void>;
   deleteLoading: boolean;
+  onApproveNota?: (notaId: string) => Promise<void>;
+  onRejectNota?: (notaId: string) => Promise<void>;
+  isAdmin?: boolean;
 }
 
 const NotasTable: React.FC<NotasTableProps> = ({ 
@@ -29,12 +33,16 @@ const NotasTable: React.FC<NotasTableProps> = ({
   loading, 
   formatDate,
   onDeleteNota,
-  deleteLoading
+  deleteLoading,
+  onApproveNota,
+  onRejectNota,
+  isAdmin = false
 }) => {
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { exportNotaToPDF, exporting } = useExportNotaPDF(formatDate);
+  const navigate = useNavigate();
 
   const handleViewNota = (nota: NotaOficial) => {
     setSelectedNota(nota);
@@ -55,6 +63,11 @@ const NotasTable: React.FC<NotasTableProps> = ({
 
   const handleExportPDF = (nota: NotaOficial) => {
     exportNotaToPDF(nota);
+  };
+
+  const handleEditNota = (notaId: string) => {
+    // Navigate to edit nota page (could be implemented differently)
+    navigate(`/dashboard/comunicacao/editar-nota/${notaId}`);
   };
 
   const getStatusBadgeClass = (status: string) => {
@@ -150,6 +163,45 @@ const NotasTable: React.FC<NotasTableProps> = ({
                     >
                       <EyeIcon className="h-4 w-4" />
                     </Button>
+                    
+                    {isAdmin && nota.status === 'pendente' && (
+                      <>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0 text-blue-600" 
+                          onClick={() => handleEditNota(nota.id)}
+                          title="Editar"
+                        >
+                          <EditIcon className="h-4 w-4" />
+                        </Button>
+                        
+                        {onApproveNota && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0 text-green-600" 
+                            onClick={() => onApproveNota(nota.id)}
+                            title="Aprovar"
+                          >
+                            <CheckIcon className="h-4 w-4" />
+                          </Button>
+                        )}
+                        
+                        {onRejectNota && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0 text-red-600" 
+                            onClick={() => onRejectNota(nota.id)}
+                            title="Rejeitar"
+                          >
+                            <XIcon className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </>
+                    )}
+                    
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -160,6 +212,7 @@ const NotasTable: React.FC<NotasTableProps> = ({
                     >
                       <FileDownIcon className="h-4 w-4" />
                     </Button>
+                    
                     <Button 
                       variant="ghost" 
                       size="sm" 

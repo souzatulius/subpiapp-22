@@ -37,7 +37,7 @@ const NotasOficiais = () => {
       case 'criar-nota':
         return <CriarNotaForm onClose={handleCloseForm} />;
       case 'aprovar-nota':
-        return <AprovarNotaForm onClose={handleCloseForm} />;
+        return <AprovarNotaForm />;
       default:
         return renderMainContent();
     }

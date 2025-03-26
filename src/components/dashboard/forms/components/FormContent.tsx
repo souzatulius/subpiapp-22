@@ -1,6 +1,5 @@
 
 import React from 'react';
-import OriginStep from '../steps/OriginStep';
 import RequestInfoStep from '../steps/RequestInfoStep';
 import ProblemStep from '../steps/ProblemStep';
 import LocationStep from '../steps/LocationStep';
