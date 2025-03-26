@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toast } from '@/components/ui/use-toast';
 
 // Import sub-components
 import DemandaHeader from './DemandaHeader';
@@ -55,6 +56,55 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   
   const { problems, isLoading: problemsLoading } = useProblemsData();
   const { servicos, isLoading: servicosLoading } = useServicosData();
+
+  // Persist active tab in session storage
+  useEffect(() => {
+    const savedTab = sessionStorage.getItem('activeRespostaTab');
+    if (savedTab) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem('activeRespostaTab', activeTab);
+  }, [activeTab]);
+
+  // Persist form data in session storage
+  useEffect(() => {
+    if (selectedDemanda?.id) {
+      const formKey = `resposta_form_${selectedDemanda.id}`;
+      const savedData = sessionStorage.getItem(formKey);
+      
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          if (parsedData.resposta && Object.keys(parsedData.resposta).length > 0) {
+            setResposta(parsedData.resposta);
+          }
+          if (parsedData.comentarios) {
+            if (setComentarios) {
+              setComentarios(parsedData.comentarios);
+            }
+            setLocalComentarios(parsedData.comentarios);
+          }
+        } catch (e) {
+          console.error('Erro ao recuperar dados do formulário:', e);
+        }
+      }
+    }
+  }, [selectedDemanda?.id]);
+
+  // Save form data to session storage
+  useEffect(() => {
+    if (selectedDemanda?.id) {
+      const formKey = `resposta_form_${selectedDemanda.id}`;
+      const dataToSave = {
+        resposta,
+        comentarios: setComentarios ? comentarios : localComentarios
+      };
+      sessionStorage.setItem(formKey, JSON.stringify(dataToSave));
+    }
+  }, [resposta, comentarios, localComentarios, selectedDemanda?.id]);
 
   useEffect(() => {
     if (setComentarios) {
@@ -121,8 +171,28 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       // Chamar o onSubmit original que salva as respostas
       await onSubmit();
       
+      // Limpar dados do sessionStorage após envio bem-sucedido
+      if (selectedDemanda?.id) {
+        const formKey = `resposta_form_${selectedDemanda.id}`;
+        sessionStorage.removeItem(formKey);
+      }
+
+      // Mostrar toast de sucesso
+      toast({
+        title: "Resposta enviada com sucesso!",
+        description: "Os dados foram salvos e a demanda foi respondida.",
+        variant: "success"
+      });
+      
     } catch (error) {
       console.error('Erro ao salvar informações adicionais:', error);
+      
+      // Mostrar toast de erro
+      toast({
+        title: "Erro ao enviar resposta",
+        description: "Ocorreu um problema ao salvar sua resposta. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -203,27 +273,27 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   if (!selectedDemanda) return null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <Button 
             variant="outline" 
             onClick={onBack} 
-            className="mr-4"
+            className="mr-4 hover:bg-gray-100 transition-colors duration-300"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Voltar
           </Button>
-          <h2 className="text-lg font-semibold">Responder Demanda</h2>
+          <h2 className="text-xl font-semibold text-subpi-blue">Responder Demanda</h2>
         </div>
         
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
           <span className="font-medium">Autor:</span> {selectedDemanda.autor?.nome_completo || 'Não informado'} · 
           <span className="ml-2 font-medium">Criado em:</span> {format(new Date(selectedDemanda.horario_publicacao), 'dd/MM/yyyy às HH:mm', { locale: ptBR })}
         </div>
       </div>
       
-      <Card>
+      <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader>
           <DemandaHeader demanda={selectedDemanda} />
           
@@ -233,20 +303,35 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             onValueChange={setActiveTab}
             className="mt-4"
           >
-            <TabsList className="grid grid-cols-3 w-full lg:w-auto">
-              <TabsTrigger value="details">Detalhes da Demanda</TabsTrigger>
-              <TabsTrigger value="questions">Perguntas e Respostas</TabsTrigger>
-              <TabsTrigger value="comments">Comentários</TabsTrigger>
+            <TabsList className="grid grid-cols-3 w-full lg:w-auto mb-4 bg-gray-100">
+              <TabsTrigger 
+                value="details" 
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-subpi-blue transition-all duration-300"
+              >
+                Detalhes da Demanda
+              </TabsTrigger>
+              <TabsTrigger 
+                value="questions" 
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-subpi-blue transition-all duration-300"
+              >
+                Perguntas e Respostas
+              </TabsTrigger>
+              <TabsTrigger 
+                value="comments" 
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-subpi-blue transition-all duration-300"
+              >
+                Comentários
+              </TabsTrigger>
             </TabsList>
         
             <CardContent className="space-y-6">
-              <TabsContent value="details" className="pt-2 m-0">
+              <TabsContent value="details" className="pt-2 m-0 animate-fade-in">
                 {/* Layout com duas colunas para desktop */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Coluna 1: Informações da demanda, tema, serviço e anexos */}
                   <div className="lg:col-span-1 space-y-6">
-                    <div>
-                      <h3 className="text-sm font-medium mb-2">Tema</h3>
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-subpi-blue">Tema</h3>
                       <TemaSelector 
                         selectedProblemId={selectedProblemId}
                         problems={problems}
@@ -257,17 +342,18 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium mb-2">Serviço</h3>
-                      <div className="flex items-center space-x-2 mb-2">
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-subpi-blue">Serviço</h3>
+                      <div className="flex items-center space-x-2 mb-3">
                         <Checkbox 
                           id="nao-sabe-servico" 
                           checked={dontKnowService} 
                           onCheckedChange={handleServiceToggle}
+                          className="data-[state=checked]:bg-subpi-blue data-[state=checked]:border-subpi-blue"
                         />
                         <label 
                           htmlFor="nao-sabe-servico" 
-                          className="text-sm text-gray-700 cursor-pointer"
+                          className="text-sm text-gray-700 cursor-pointer hover:text-subpi-blue transition-colors duration-300"
                         >
                           Não sei informar o serviço
                         </label>
@@ -289,18 +375,18 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                     
                     {/* Anexos da demanda */}
                     {(selectedDemanda.arquivo_url || (selectedDemanda.anexos && selectedDemanda.anexos.length > 0)) && (
-                      <div className="mt-4">
-                        <h3 className="text-base font-medium mb-3">Anexos</h3>
+                      <div className="mt-4 space-y-3">
+                        <h3 className="text-base font-medium text-subpi-blue">Anexos</h3>
                         <div className="space-y-2">
                           {selectedDemanda.arquivo_url && (
-                            <div className="flex items-center p-3 bg-gray-50 rounded border border-gray-200">
+                            <div className="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors duration-300 animate-fade-in">
                               {getFileIcon(selectedDemanda.arquivo_url)}
                               <span className="ml-2 text-sm truncate flex-1">{getFileName(selectedDemanda.arquivo_url)}</span>
                               <div className="flex space-x-1">
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="h-8 w-8 p-0"
+                                  className="h-8 w-8 p-0 text-subpi-blue hover:text-subpi-blue-dark hover:bg-blue-50 transition-colors duration-300"
                                   onClick={() => handleViewAttachment(selectedDemanda.arquivo_url)}
                                 >
                                   <Eye className="h-4 w-4" />
@@ -308,7 +394,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="h-8 w-8 p-0"
+                                  className="h-8 w-8 p-0 text-subpi-blue hover:text-subpi-blue-dark hover:bg-blue-50 transition-colors duration-300"
                                   onClick={() => handleDownloadAttachment(selectedDemanda.arquivo_url)}
                                 >
                                   <Download className="h-4 w-4" />
@@ -318,14 +404,14 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                           )}
                           
                           {selectedDemanda.anexos && selectedDemanda.anexos.map((anexo: string, index: number) => (
-                            <div key={index} className="flex items-center p-3 bg-gray-50 rounded border border-gray-200">
+                            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors duration-300 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
                               {getFileIcon(anexo)}
                               <span className="ml-2 text-sm truncate flex-1">{getFileName(anexo)}</span>
                               <div className="flex space-x-1">
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="h-8 w-8 p-0"
+                                  className="h-8 w-8 p-0 text-subpi-blue hover:text-subpi-blue-dark hover:bg-blue-50 transition-colors duration-300"
                                   onClick={() => handleViewAttachment(anexo)}
                                 >
                                   <Eye className="h-4 w-4" />
@@ -333,7 +419,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="h-8 w-8 p-0"
+                                  className="h-8 w-8 p-0 text-subpi-blue hover:text-subpi-blue-dark hover:bg-blue-50 transition-colors duration-300"
                                   onClick={() => handleDownloadAttachment(anexo)}
                                 >
                                   <Download className="h-4 w-4" />
@@ -348,7 +434,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                   
                   {/* Coluna 2: Detalhes da solicitação (spans 2 cols) */}
                   <div className="lg:col-span-2 space-y-6">
-                    <Card className="bg-gray-50 border border-gray-200">
+                    <Card className="bg-gray-50 border border-gray-200 hover:shadow-md transition-all duration-300">
                       <CardContent className="p-4">
                         <DemandaDetailsSection detalhes={selectedDemanda.detalhes_solicitacao} />
                       </CardContent>
@@ -356,9 +442,9 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                     
                     {/* Informações do solicitante */}
                     {(selectedDemanda.nome_solicitante || selectedDemanda.email_solicitante || selectedDemanda.telefone_solicitante) && (
-                      <div>
-                        <h3 className="text-base font-medium mb-3">Informações do Solicitante</h3>
-                        <div className="bg-blue-50 border border-blue-100 rounded-md p-4 space-y-2">
+                      <div className="animate-fade-in">
+                        <h3 className="text-base font-medium text-subpi-blue mb-3">Informações do Solicitante</h3>
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2 hover:bg-blue-100/50 transition-colors duration-300">
                           {selectedDemanda.nome_solicitante && (
                             <div>
                               <span className="text-sm font-medium text-blue-700">Nome:</span>
@@ -386,7 +472,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                 </div>
               </TabsContent>
               
-              <TabsContent value="questions" className="pt-2 m-0">
+              <TabsContent value="questions" className="pt-2 m-0 animate-fade-in">
                 {selectedDemanda.perguntas && Object.keys(selectedDemanda.perguntas).length > 0 ? (
                   <QuestionsAnswersSection 
                     perguntas={selectedDemanda.perguntas}
@@ -394,13 +480,13 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                     onRespostaChange={handleRespostaChange}
                   />
                 ) : (
-                  <div className="bg-gray-50 p-4 rounded-md text-center">
+                  <div className="bg-gray-50 p-6 rounded-xl text-center animate-fade-in">
                     <p className="text-gray-500">Não há perguntas registradas para esta demanda.</p>
                   </div>
                 )}
               </TabsContent>
               
-              <TabsContent value="comments" className="pt-2 m-0">
+              <TabsContent value="comments" className="pt-2 m-0 animate-fade-in">
                 <CommentsSection 
                   comentarios={setComentarios ? comentarios : localComentarios}
                   onChange={(value) => {
@@ -416,10 +502,10 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           </Tabs>
         </CardHeader>
 
-        <CardFooter className="border-t p-4 justify-between">
+        <CardFooter className="border-t p-4 sticky bottom-0 bg-white shadow-md z-10 flex justify-between">
           <div className="text-sm text-gray-500">
             {!allQuestionsAnswered() && (
-              <div className="text-orange-500">
+              <div className="text-orange-500 animate-pulse">
                 Responda todas as perguntas antes de enviar
               </div>
             )}
@@ -428,7 +514,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           <Button 
             onClick={handleSubmitWithExtra}
             disabled={isLoading || !allQuestionsAnswered()}
-            className="space-x-2"
+            className="space-x-2 bg-subpi-orange hover:bg-subpi-orange-dark transition-all duration-300 hover:shadow-lg"
           >
             {isLoading ? (
               <>
