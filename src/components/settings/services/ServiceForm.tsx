@@ -1,94 +1,141 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Area } from '@/hooks/services/types';
+import { Button } from '@/components/ui/button';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+
+const serviceSchema = z.object({
+  descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
+  supervisao_tecnica_id: z.string().min(1, 'Selecione uma coordenação')
+});
 
 interface ServiceFormProps {
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<any>;
+  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
   onCancel: () => void;
-  defaultValues?: {
-    descricao: string;
-    supervisao_tecnica_id: string;
-  };
-  areas: Area[];
   isSubmitting: boolean;
 }
 
-const ServiceForm: React.FC<ServiceFormProps> = ({
-  onSubmit,
-  onCancel,
-  defaultValues = {
-    descricao: '',
-    supervisao_tecnica_id: '',
-  },
-  areas,
-  isSubmitting
+const ServiceForm: React.FC<ServiceFormProps> = ({ 
+  onSubmit, 
+  onCancel, 
+  isSubmitting 
 }) => {
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
-    defaultValues
+  const [coordinations, setCoordenations] = useState<{ id: string; descricao: string }[]>([]);
+
+  useEffect(() => {
+    const fetchCoordenations = async () => {
+      const { data, error } = await supabase
+        .from('coordenacoes')
+        .select('id, descricao')
+        .order('descricao');
+
+      if (data) setCoordenations(data);
+      if (error) console.error('Error fetching coordinations:', error);
+    };
+
+    fetchCoordenations();
+  }, []);
+
+  const form = useForm<z.infer<typeof serviceSchema>>({
+    resolver: zodResolver(serviceSchema),
+    defaultValues: {
+      descricao: '',
+      supervisao_tecnica_id: ''
+    }
   });
 
-  const selectedAreaId = watch('supervisao_tecnica_id');
-
-  const handleFormSubmit = async (data: any) => {
-    console.log('Enviando dados do formulário:', data);
+  const handleSubmit = async (data: z.infer<typeof serviceSchema>) => {
     try {
       await onSubmit(data);
+      form.reset();
     } catch (error) {
-      console.error('Erro ao enviar formulário:', error);
+      console.error('Submission error:', error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="descricao">Descrição</Label>
-        <Input
-          id="descricao"
-          placeholder="Digite a descrição do serviço"
-          {...register('descricao', { required: 'Descrição é obrigatória' })}
-          className={errors.descricao ? 'border-red-500' : ''}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="descricao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição do Serviço</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite a descrição do serviço" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        {errors.descricao && (
-          <p className="text-sm text-red-500">{errors.descricao.message}</p>
-        )}
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
-        <Select
-          onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
-          value={selectedAreaId}
-        >
-          <SelectTrigger id="supervisao_tecnica_id" className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}>
-            <SelectValue placeholder="Selecione uma supervisão técnica" />
-          </SelectTrigger>
-          <SelectContent>
-            {areas.map((area) => (
-              <SelectItem key={area.id} value={area.id}>
-                {area.descricao}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.supervisao_tecnica_id && (
-          <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
-        )}
-      </div>
+        <FormField
+          control={form.control}
+          name="supervisao_tecnica_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Coordenação</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                value={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma coordenação" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {coordinations.map((coordination) => (
+                    <SelectItem 
+                      key={coordination.id} 
+                      value={coordination.id}
+                    >
+                      {coordination.descricao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando...' : 'Salvar'}
-        </Button>
-      </div>
-    </form>
+        <div className="flex justify-end space-x-2">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Salvando...' : 'Salvar'}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

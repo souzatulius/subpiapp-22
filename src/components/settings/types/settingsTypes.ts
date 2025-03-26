@@ -21,16 +21,6 @@ export interface SettingsStats {
   configuracoesNotificacoes: number;
   permissoes: number;
   temas: number;
-}
-
-export interface CardData {
-  title: string;
-  description: string;
-  icon: JSX.Element;
-  link: string;
-  color: string;
-  count?: number;
-  category: string;
-  loading?: boolean;
-  chart?: JSX.Element;
+  services: number;
+  notificacoes: number;
 }

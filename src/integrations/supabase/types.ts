@@ -1093,6 +1093,35 @@ export type Database = {
         }
         Relationships: []
       }
+      servicos: {
+        Row: {
+          criado_em: string
+          descricao: string
+          id: string
+          supervisao_tecnica_id: string
+        }
+        Insert: {
+          criado_em?: string
+          descricao: string
+          id?: string
+          supervisao_tecnica_id: string
+        }
+        Update: {
+          criado_em?: string
+          descricao?: string
+          id?: string
+          supervisao_tecnica_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicos_supervisao_tecnica_id_fkey"
+            columns: ["supervisao_tecnica_id"]
+            isOneToOne: false
+            referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sgz_departamentos_tecnicos: {
         Row: {
           id: string
