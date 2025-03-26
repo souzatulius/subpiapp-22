@@ -55,6 +55,7 @@ interface FormContentProps {
   servicos?: any[];
   filteredServicos?: any[];
   handleServiceSearch?: (value: string) => void;
+  nextStep?: () => void; // Add this prop to fix the first error
 }
 
 const FormContent: React.FC<FormContentProps> = ({
@@ -135,6 +136,9 @@ const FormContent: React.FC<FormContentProps> = ({
           handlePerguntaChange={handlePerguntaChange}
           handleSelectChange={handleSelectChange}
           handleAnexosChange={handleAnexosChange}
+          problemas={problemas}
+          servicos={servicos}
+          filteredBairros={filteredBairros}
           errors={errors}
         />
       );
