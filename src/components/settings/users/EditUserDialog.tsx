@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -16,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface EditUserDialogProps {
   open: boolean;
@@ -150,72 +152,75 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-gray-50">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-hidden bg-gray-50">
         <DialogHeader>
           <DialogTitle className="text-xl text-subpi-blue font-semibold">Editar Usuário</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-          <div className="flex flex-col items-center space-y-3 py-2">
-            <Avatar className="h-24 w-24">
-              {photoPreview ? (
-                <AvatarImage src={photoPreview} alt="Preview" />
-              ) : user?.foto_perfil_url ? (
-                <AvatarImage src={user.foto_perfil_url} alt={user.nome_completo} />
-              ) : (
-                <AvatarFallback className="text-lg bg-blue-100 text-blue-600">
-                  {user ? getInitials(user.nome_completo) : 'U'}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            
-            <div className="flex items-center gap-2">
-              <Label htmlFor="photo-upload" className="cursor-pointer">
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md border border-blue-200 hover:bg-blue-100 transition-colors">
-                  <ImageIcon className="h-4 w-4" />
-                  <span>Alterar foto</span>
-                </div>
-                <input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="hidden"
-                />
-              </Label>
+        
+        <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+            <div className="flex flex-col items-center space-y-3 py-2">
+              <Avatar className="h-24 w-24">
+                {photoPreview ? (
+                  <AvatarImage src={photoPreview} alt="Preview" />
+                ) : user?.foto_perfil_url ? (
+                  <AvatarImage src={user.foto_perfil_url} alt={user.nome_completo} />
+                ) : (
+                  <AvatarFallback className="text-lg bg-blue-100 text-blue-600">
+                    {user ? getInitials(user.nome_completo) : 'U'}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              
+              <div className="flex items-center gap-2">
+                <Label htmlFor="photo-upload" className="cursor-pointer">
+                  <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md border border-blue-200 hover:bg-blue-100 transition-colors">
+                    <ImageIcon className="h-4 w-4" />
+                    <span>Alterar foto</span>
+                  </div>
+                  <input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                  />
+                </Label>
+              </div>
             </div>
-          </div>
-          
-          <div className="space-y-1">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              {...register('email')}
-              disabled
-              className="bg-gray-100"
+            
+            <div className="space-y-1">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                {...register('email')}
+                disabled
+                className="bg-gray-100"
+              />
+              <p className="text-xs text-gray-500">O email não pode ser alterado</p>
+            </div>
+            
+            <UserFormFields 
+              watch={watch}
+              setValue={setValue}
+              errors={errors}
+              supervisoesTecnicas={supervisoesTecnicas}
+              cargos={cargos}
+              coordenacoes={coordenacoes}
+              register={register}
+              filteredSupervisoes={filteredSupervisoes}
+              coordenacao={coordenacao}
+              showWhatsapp={true}
+              showBirthday={true}
             />
-            <p className="text-xs text-gray-500">O email não pode ser alterado</p>
-          </div>
-          
-          <UserFormFields 
-            watch={watch}
-            setValue={setValue}
-            errors={errors}
-            supervisoesTecnicas={supervisoesTecnicas}
-            cargos={cargos}
-            coordenacoes={coordenacoes}
-            register={register}
-            filteredSupervisoes={filteredSupervisoes}
-            coordenacao={coordenacao}
-            showWhatsapp={true}
-            showBirthday={true}
-          />
-          
-          <DialogFooterActions 
-            isSubmitting={isSubmitting} 
-            onCancel={() => onOpenChange(false)} 
-          />
-        </form>
+            
+            <DialogFooterActions 
+              isSubmitting={isSubmitting} 
+              onCancel={() => onOpenChange(false)} 
+            />
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

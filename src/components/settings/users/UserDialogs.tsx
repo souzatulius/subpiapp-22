@@ -33,16 +33,18 @@ const UserDialogs: React.FC<UserDialogsProps> = ({
         coordenacoes={coordenacoes.map(c => ({ coordenacao_id: c.id, coordenacao: c.descricao }))}
       />
 
-      <EditUserDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        user={selectedUser}
-        onSubmit={handleEditUser}
-        supervisoesTecnicas={supervisoesTecnicas}
-        cargos={cargos}
-        coordenacoes={coordenacoes}
-        isSubmitting={isEditSubmitting}
-      />
+      {selectedUser && (
+        <EditUserDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          user={selectedUser}
+          onSubmit={handleEditUser}
+          supervisoesTecnicas={supervisoesTecnicas}
+          cargos={cargos}
+          coordenacoes={coordenacoes}
+          isSubmitting={isEditSubmitting}
+        />
+      )}
 
       <DeleteUserDialog
         open={isDeleteDialogOpen}
