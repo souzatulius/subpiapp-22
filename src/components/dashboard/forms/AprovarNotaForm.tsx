@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,7 @@ import { Search, Edit2 } from 'lucide-react';
 import { LoadingState, EmptyState } from './components/NotasListStates';
 import NotasList from './components/NotasList';
 import NotaDetail from './components/NotaDetail';
-import { NotaOficial } from '@/types/nota';
+import { NotaOficial, NotaEdicao } from '@/types/nota';
 
 interface AprovarNotaFormProps {
   onClose: () => void;
@@ -31,20 +30,37 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const fetchNotas = async () => {
     setIsLoading(true);
     try {
-      // Fetch only pending notes
       const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
         .select(`
           *,
           autor:autor_id(id, nome_completo),
-          supervisao_tecnica:supervisao_tecnica_id(id, descricao)
+          supervisao_tecnica:supervisao_tecnica_id(id, descricao),
+          historico_edicoes:notas_historico_edicoes(
+            id,
+            nota_id,
+            texto_anterior,
+            texto_novo,
+            titulo_anterior,
+            titulo_novo,
+            editor_id,
+            criado_em,
+            editor:editor_id(id, nome_completo)
+          )
         `)
         .eq('status', 'pendente')
         .order('criado_em', { ascending: false });
       
       if (notasError) throw notasError;
       
-      setNotas(notasData || []);
+      const formattedNotas = (notasData || []).map(nota => ({
+        ...nota,
+        autor: nota.autor || { id: '', nome_completo: 'Não informado' },
+        supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
+        historico_edicoes: nota.historico_edicoes || []
+      }));
+      
+      setNotas(formattedNotas);
     } catch (error) {
       console.error('Erro ao carregar notas oficiais:', error);
       toast({
@@ -84,7 +100,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     try {
       setIsSubmitting(true);
       
-      // Create edit history record
       const { error: historyError } = await supabase
         .from('notas_historico_edicoes')
         .insert({
@@ -98,7 +113,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       if (historyError) throw historyError;
       
-      // Update the note
       const { error: updateError } = await supabase
         .from('notas_oficiais')
         .update({ 
@@ -115,7 +129,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         description: "A nota oficial foi atualizada com sucesso."
       });
       
-      // Refresh and exit edit mode
       fetchNotas();
       setIsEditing(false);
       setSelectedNota(null);

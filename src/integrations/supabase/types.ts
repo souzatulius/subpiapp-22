@@ -467,6 +467,47 @@ export type Database = {
           },
         ]
       }
+      notas_historico_edicoes: {
+        Row: {
+          criado_em: string
+          editor_id: string
+          id: string
+          nota_id: string
+          texto_anterior: string
+          texto_novo: string
+          titulo_anterior: string | null
+          titulo_novo: string | null
+        }
+        Insert: {
+          criado_em?: string
+          editor_id: string
+          id?: string
+          nota_id: string
+          texto_anterior: string
+          texto_novo: string
+          titulo_anterior?: string | null
+          titulo_novo?: string | null
+        }
+        Update: {
+          criado_em?: string
+          editor_id?: string
+          id?: string
+          nota_id?: string
+          texto_anterior?: string
+          texto_novo?: string
+          titulo_anterior?: string | null
+          titulo_novo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notas_historico_edicoes_nota_id_fkey"
+            columns: ["nota_id"]
+            isOneToOne: false
+            referencedRelation: "notas_oficiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notas_oficiais: {
         Row: {
           aprovador_id: string | null
