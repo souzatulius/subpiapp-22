@@ -9,7 +9,7 @@ export const useProblemsData = () => {
     data: problems = [],
     isLoading,
     error,
-    refetch: fetchProblems
+    refetch
   } = useQuery({
     queryKey: ['problems'],
     queryFn: async () => {
@@ -36,7 +36,17 @@ export const useProblemsData = () => {
         .order('descricao');
 
       if (error) throw error;
-      return data as Problem[];
+      
+      // Ensure the data conforms to Problem type
+      return (data || []).map(item => ({
+        id: item.id,
+        descricao: item.descricao,
+        supervisao_tecnica_id: item.supervisao_tecnica_id,
+        supervisao_tecnica: item.supervisao_tecnica,
+        icone: item.icone || undefined,
+        criado_em: item.criado_em,
+        atualizado_em: item.atualizado_em
+      })) as Problem[];
     },
     meta: {
       onError: (err: any) => {
@@ -70,6 +80,11 @@ export const useProblemsData = () => {
       return data as Area[];
     }
   });
+
+  // Create a promise-based wrapper for refetch to match the expected type
+  const fetchProblems = async () => {
+    await refetch();
+  };
 
   return {
     problems,

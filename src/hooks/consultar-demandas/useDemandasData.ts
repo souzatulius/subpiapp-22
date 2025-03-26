@@ -23,12 +23,12 @@ export const useDemandasData = (): UseDemandasDataReturn => {
     setIsDeleteDialogOpen,
     deleteLoading,
     handleDeleteConfirm
-  } = useDemandasActions(refetch);
+  } = useDemandasActions(() => refetch());
 
   const filteredDemandas = demandas.filter((demand: Demand) => 
     demand.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    demand.servico?.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    demand.area_coordenacao?.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
+    (demand.servico?.descricao || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (demand.area_coordenacao?.descricao || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return {

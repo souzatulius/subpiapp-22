@@ -22,6 +22,12 @@ export interface Problem {
 export interface Area {
   id: string;
   descricao: string;
+  sigla?: string;
+  coordenacao_id?: string;
+  coordenacao?: {
+    id: string;
+    descricao: string;
+  };
 }
 
 export const problemSchema = z.object({
