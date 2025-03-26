@@ -4,23 +4,28 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Pencil, Trash2, KeyRound, UserCheck, UserX, Shield } from 'lucide-react';
-import { User } from '@/types/common';
+import { 
+  MoreHorizontal, 
+  Pencil, 
+  Trash, 
+  KeyRound, 
+  UserCheck, 
+  UserX
+} from 'lucide-react';
+import { User } from './types';
 
 interface UserActionsMenuProps {
   user: User;
-  onEdit: (user: User) => void;
-  onDelete: (user: User) => void;
-  onResetPassword: (user: User) => void;
-  onApprove?: (user: User, roleName?: string) => void;
+  onEdit?: (user: User) => void;
+  onDelete?: (user: User) => void;
+  onResetPassword?: (user: User) => void;
+  onApprove?: (user: User) => void;
   onRemoveAccess?: (user: User) => void;
-  onManageRoles?: (user: User) => void;
-  isApproving?: boolean;
-  isRemoving?: boolean;
 }
 
 const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
@@ -30,11 +35,9 @@ const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
   onResetPassword,
   onApprove,
   onRemoveAccess,
-  onManageRoles,
-  isApproving,
-  isRemoving
 }) => {
-  const hasPermissions = user.permissoes && user.permissoes.length > 0;
+  // Check if user is active (has permissions)
+  const isActive = user.permissoes && user.permissoes.length > 0;
   
   return (
     <DropdownMenu>
@@ -45,48 +48,48 @@ const UserActionsMenu: React.FC<UserActionsMenuProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onEdit(user)}>
-          <Pencil className="mr-2 h-4 w-4" />
-          <span>Editar</span>
-        </DropdownMenuItem>
+        <DropdownMenuLabel>Ações</DropdownMenuLabel>
         
-        <DropdownMenuItem onClick={() => onResetPassword(user)}>
-          <KeyRound className="mr-2 h-4 w-4" />
-          <span>Redefinir senha</span>
-        </DropdownMenuItem>
-        
-        {hasPermissions && onManageRoles && (
-          <DropdownMenuItem onClick={() => onManageRoles(user)}>
-            <Shield className="mr-2 h-4 w-4" />
-            <span>Gerenciar permissões</span>
+        {onEdit && (
+          <DropdownMenuItem onClick={() => onEdit(user)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
           </DropdownMenuItem>
         )}
         
-        <DropdownMenuSeparator />
+        {onResetPassword && (
+          <DropdownMenuItem onClick={() => onResetPassword(user)}>
+            <KeyRound className="mr-2 h-4 w-4" />
+            Redefinir senha
+          </DropdownMenuItem>
+        )}
         
-        {!hasPermissions && onApprove && (
+        {!isActive && onApprove && (
           <DropdownMenuItem onClick={() => onApprove(user)}>
             <UserCheck className="mr-2 h-4 w-4" />
-            <span>Aprovar acesso</span>
+            Aprovar acesso
           </DropdownMenuItem>
         )}
         
-        {hasPermissions && onRemoveAccess && (
+        {isActive && onRemoveAccess && (
           <DropdownMenuItem onClick={() => onRemoveAccess(user)}>
             <UserX className="mr-2 h-4 w-4" />
-            <span>Remover acesso</span>
+            Remover acesso
           </DropdownMenuItem>
         )}
         
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem 
-          onClick={() => onDelete(user)}
-          className="text-red-600 focus:text-red-500"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          <span>Excluir</span>
-        </DropdownMenuItem>
+        {onDelete && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={() => onDelete(user)}
+              className="text-red-600 hover:text-red-700 focus:text-red-700"
+            >
+              <Trash className="mr-2 h-4 w-4" />
+              Excluir
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

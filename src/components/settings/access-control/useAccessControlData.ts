@@ -10,6 +10,7 @@ export const useAccessControlData = () => {
   const [userPermissions, setUserPermissions] = useState<UserPermissionMapping>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -35,6 +36,9 @@ export const useAccessControlData = () => {
         
       if (usersError) throw usersError;
       
+      // Set total user count
+      setTotalUsers(usersData?.length || 0);
+      
       // Fetch permissions
       const { data: permissionsData, error: permissionsError } = await supabase
         .from('permissoes')
@@ -52,7 +56,7 @@ export const useAccessControlData = () => {
       if (!permissionsData || permissionsData.length === 0) {
         console.log('No permissions found, creating defaults...');
         try {
-          // Try to create default permissions using our new function
+          // Try to create default permissions using our function
           const { error: createError } = await supabase.rpc('create_default_permissions');
           
           if (createError) {
@@ -86,21 +90,45 @@ export const useAccessControlData = () => {
         setPermissions(permissionsData);
       }
       
-      // Fetch user permissions
+      // Fetch user permissions (based on roles table now)
+      const { data: userRolesData, error: userRolesError } = await supabase
+        .from('usuario_roles')
+        .select(`
+          usuario_id,
+          role_id,
+          roles:role_id(id, role_nome, descricao)
+        `);
+        
+      if (userRolesError) throw userRolesError;
+      
+      // Process user permissions from roles
+      const userPerms: UserPermissionMapping = {};
+      userRolesData?.forEach(ur => {
+        if (!userPerms[ur.usuario_id]) {
+          userPerms[ur.usuario_id] = [];
+        }
+        if (ur.roles && typeof ur.roles === 'object') {
+          // Convert role to permission ID format (for compatibility)
+          const roleId = `role_${ur.role_id}`;
+          if (!userPerms[ur.usuario_id].includes(roleId)) {
+            userPerms[ur.usuario_id].push(roleId);
+          }
+        }
+      });
+      
+      // Also get the classic permissions for backward compatibility
       const { data: userPermissionsData, error: userPermissionsError } = await supabase
         .from('usuario_permissoes')
         .select('usuario_id, permissao_id');
         
-      if (userPermissionsError) throw userPermissionsError;
-      
-      // Process user permissions
-      const userPerms: UserPermissionMapping = {};
-      userPermissionsData?.forEach(up => {
-        if (!userPerms[up.usuario_id]) {
-          userPerms[up.usuario_id] = [];
-        }
-        userPerms[up.usuario_id].push(up.permissao_id);
-      });
+      if (!userPermissionsError && userPermissionsData) {
+        userPermissionsData.forEach(up => {
+          if (!userPerms[up.usuario_id]) {
+            userPerms[up.usuario_id] = [];
+          }
+          userPerms[up.usuario_id].push(up.permissao_id);
+        });
+      }
       
       setUsers(usersData || []);
       setUserPermissions(userPerms);
@@ -127,6 +155,7 @@ export const useAccessControlData = () => {
     setUserPermissions,
     loading,
     error,
-    fetchData
+    fetchData,
+    totalUsers
   };
 };
