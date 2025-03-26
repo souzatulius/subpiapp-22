@@ -38,8 +38,12 @@ export const useDemandasData = () => {
             veiculo_imprensa,
             arquivo_url,
             supervisao_tecnica_id,
+            origem_id,
+            tipo_midia_id,
             bairro_id,
             autor_id,
+            problema_id,
+            servico_id,
             area_coordenacao_id:supervisao_tecnica_id (id, descricao),
             origens_demandas:origem_id (id, descricao),
             tipos_midia:tipo_midia_id (id, descricao)
@@ -101,6 +105,8 @@ export const useDemandasData = () => {
             autor_id: item.autor_id,
             tipo_midia_id: item.tipos_midia?.id,
             origem_id: item.origens_demandas?.id,
+            problema_id: item.problema_id,
+            servico_id: item.servico_id,
             areas_coordenacao: item.area_coordenacao_id,
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia

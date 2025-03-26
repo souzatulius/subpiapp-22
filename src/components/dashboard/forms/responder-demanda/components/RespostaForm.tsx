@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -71,6 +72,11 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   const [selectedProblemId, setSelectedProblemId] = useState<string>('');
   const [selectedServicoId, setSelectedServicoId] = useState<string>('');
   const [localComentarios, setLocalComentarios] = useState<string>(comentarios);
+  
+  // Add the missing state variables
+  const [originalCoordination, setOriginalCoordination] = useState<string>('');
+  const [newCoordination, setNewCoordination] = useState<string>('');
+  const [changingProblem, setChangingProblem] = useState<boolean>(false);
   
   const { problems, isLoading: problemsLoading } = useProblemsData();
   const { servicos, isLoading: servicosLoading } = useServicosData();
