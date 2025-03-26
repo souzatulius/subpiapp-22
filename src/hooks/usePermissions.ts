@@ -72,17 +72,18 @@ export const usePermissions = (): UsePermissionsReturn => {
             .single();
             
           if (!coordError && coordData) {
-            // Safely handle potentially null or undefined descriptions
-            const coordDescription = coordData.descricao?.toLowerCase()?.trim() || "";
-            console.log("Coordination description:", coordData.descricao);
-            console.log("Lowercased and trimmed:", coordDescription);
+            // Normalize the coordination description to handle accents and variations
+            const normalized = coordData.descricao
+              ?.normalize("NFD")                // separates letters and accents
+              .replace(/[\u0300-\u036f]/g, "")  // removes accents
+              .toLowerCase()
+              .trim() || "";
             
-            // Check various forms of "comunicacao" and "gabinete" to handle potential inconsistencies
-            if (
-              coordDescription.includes('gabinete') || 
-              coordDescription.includes('comunicacao') || 
-              coordDescription.includes('comunicação')
-            ) {
+            console.log("Coordination description:", coordData.descricao);
+            console.log("Normalized description:", normalized);
+            
+            // Check for privileged coordinations using normalized string
+            if (normalized.includes('gabinete') || normalized.includes('comunicacao')) {
               console.log("User belongs to privileged coordination, granting admin access");
               adminStatus = true;
             }

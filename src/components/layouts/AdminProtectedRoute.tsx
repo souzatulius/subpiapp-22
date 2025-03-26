@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from '@/components/ui/use-toast';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
@@ -90,7 +91,22 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
   if (authLoading || permissionLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
-        <div className="loading-spinner animate-spin"></div>
+        <div className="loading-spinner animate-spin h-12 w-12 border-t-2 border-b-2 border-primary rounded-full"></div>
+      </div>
+    );
+  }
+
+  // Show error state if there are permission problems but user is logged in
+  if (user && !isAdmin && !canAccessProtectedRoute(location.pathname)) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50 p-4">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertTitle>Acesso Restrito</AlertTitle>
+          <AlertDescription>
+            Você não tem permissão para acessar esta página. 
+            Entre em contato com um administrador caso acredite que isso seja um erro.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
