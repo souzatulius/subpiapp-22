@@ -1,14 +1,66 @@
 
 import React from 'react';
-import IdentificationStep from '../steps/IdentificationStep';
-import OriginClassificationStep from '../steps/OriginClassificationStep';
-import RequesterInfoStep from '../steps/RequesterInfoStep';
+import OriginStep from '../steps/OriginStep';
+import RequestInfoStep from '../steps/RequestInfoStep';
+import ProblemStep from '../steps/ProblemStep';
 import LocationStep from '../steps/LocationStep';
 import QuestionsDetailsStep from '../steps/QuestionsDetailsStep';
-import PriorityDeadlineStep from '../steps/PriorityDeadlineStep';
 import ReviewStep from '../steps/ReviewStep';
+import ProtocolStep from '../steps/ProtocolStep';
 import { ValidationError } from '@/lib/formValidationUtils';
-import { FORM_STEPS, FormContentProps } from './FormStepConfig';
+
+export const FORM_STEPS = [
+  {
+    title: 'Protocolo 156',
+    description: 'Informe se a demanda tem um protocolo 156 associado.',
+  },
+  {
+    title: 'Origem',
+    description: 'Selecione a origem e o tipo de mídia da demanda.',
+  },
+  {
+    title: 'Informações do Solicitante',
+    description: 'Dados do solicitante e prioridade da demanda.',
+  },
+  {
+    title: 'Tema/Problema',
+    description: 'Selecione o tema e serviço relacionado à demanda.',
+  },
+  {
+    title: 'Localização',
+    description: 'Endereço e bairro relacionados à demanda.',
+  },
+  {
+    title: 'Perguntas e Anexos',
+    description: 'Adicione perguntas específicas e anexos se necessário.',
+  },
+  {
+    title: 'Revisão',
+    description: 'Revise e confirme as informações antes de finalizar.',
+  },
+];
+
+interface FormContentProps {
+  activeStep: number;
+  formData: any;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
+  handlePerguntaChange: (index: number, value: string) => void;
+  handleAnexosChange: (files: string[]) => void;
+  areasCoord: any[];
+  problemas: any[];
+  serviceSearch: string;
+  origens: any[];
+  tiposMidia: any[];
+  selectedDistrito: string;
+  setSelectedDistrito: (value: string) => void;
+  distritos: any[];
+  filteredBairros: any[];
+  errors: ValidationError[];
+  servicos?: any[];
+  filteredServicos?: any[];
+  handleServiceSearch?: (value: string) => void;
+}
 
 const FormContent: React.FC<FormContentProps> = ({
   activeStep,
@@ -26,43 +78,55 @@ const FormContent: React.FC<FormContentProps> = ({
   setSelectedDistrito,
   distritos,
   filteredBairros,
-  errors
+  errors,
+  servicos = [],
+  filteredServicos = [],
+  handleServiceSearch
 }) => {
-  const getStepErrors = (step: number) => {
-    return errors.filter(err => FORM_STEPS[step].fields.includes(err.field));
-  };
-
   switch (activeStep) {
     case 0:
       return (
-        <IdentificationStep
+        <ProtocolStep
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
-          problemas={problemas}
-          errors={getStepErrors(0)}
+          errors={errors}
         />
       );
     case 1:
       return (
-        <OriginClassificationStep
+        <OriginStep
           formData={formData}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
           origens={origens}
           tiposMidia={tiposMidia}
-          errors={getStepErrors(1)}
+          handleChange={handleChange}
+          handleSelectChange={handleSelectChange}
+          errors={errors}
         />
       );
     case 2:
       return (
-        <RequesterInfoStep
+        <RequestInfoStep
           formData={formData}
           handleChange={handleChange}
-          errors={getStepErrors(2)}
+          handleSelectChange={handleSelectChange}
+          errors={errors}
         />
       );
     case 3:
+      return (
+        <ProblemStep
+          formData={formData}
+          problemas={problemas}
+          servicos={servicos}
+          filteredServicos={filteredServicos}
+          handleChange={handleChange}
+          handleSelectChange={handleSelectChange}
+          handleServiceSearch={handleServiceSearch}
+          errors={errors}
+        />
+      );
+    case 4:
       return (
         <LocationStep
           formData={formData}
@@ -72,10 +136,10 @@ const FormContent: React.FC<FormContentProps> = ({
           selectedDistrito={selectedDistrito}
           setSelectedDistrito={setSelectedDistrito}
           filteredBairros={filteredBairros}
-          errors={getStepErrors(3)}
+          errors={errors}
         />
       );
-    case 4:
+    case 5:
       return (
         <QuestionsDetailsStep
           formData={formData}
@@ -83,15 +147,7 @@ const FormContent: React.FC<FormContentProps> = ({
           handlePerguntaChange={handlePerguntaChange}
           handleSelectChange={handleSelectChange}
           handleAnexosChange={handleAnexosChange}
-          errors={getStepErrors(4)}
-        />
-      );
-    case 5:
-      return (
-        <PriorityDeadlineStep
-          formData={formData}
-          handleSelectChange={handleSelectChange}
-          errors={getStepErrors(5)}
+          errors={errors}
         />
       );
     case 6:
@@ -99,17 +155,17 @@ const FormContent: React.FC<FormContentProps> = ({
         <ReviewStep
           formData={formData}
           handleChange={handleChange}
-          errors={getStepErrors(6)}
           problemas={problemas}
           origens={origens}
           tiposMidia={tiposMidia}
           filteredBairros={filteredBairros}
+          servicos={servicos}
+          errors={errors}
         />
       );
     default:
-      return <div>Passo não encontrado</div>;
+      return <div>Step not found</div>;
   }
 };
 
-export { FORM_STEPS };
 export default FormContent;

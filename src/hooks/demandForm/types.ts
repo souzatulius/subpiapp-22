@@ -15,22 +15,9 @@ export interface DemandFormData {
   perguntas: string[];
   detalhes_solicitacao: string;
   arquivo_url: string;
-  anexos: string[];
+  anexos: string[]; 
   tem_protocolo_156?: boolean;
   numero_protocolo_156?: string;
-}
-
-export interface FormState {
-  formData: DemandFormData;
-  areasCoord: any[];
-  origens: any[];
-  tiposMidia: any[];
-  distritos: any[];
-  bairros: any[];
-  problemas: any[];
-  filteredBairros: any[];
-  isLoading: boolean;
-  serviceSearch: string;
-  selectedDistrito: string;
-  activeStep: number;
+  servico_id?: string; // New field for service
+  nao_sabe_servico?: boolean; // New field for "Não sei informar"
 }

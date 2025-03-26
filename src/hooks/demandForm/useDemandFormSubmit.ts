@@ -1,8 +1,8 @@
 
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { DemandFormData } from './types';
-import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
 
 export const useDemandFormSubmit = (
   userId: string | undefined,
@@ -10,92 +10,72 @@ export const useDemandFormSubmit = (
   setIsLoading: (loading: boolean) => void,
   onClose: () => void
 ) => {
-  const navigate = useNavigate();
-  
   const handleSubmit = async () => {
+    if (!userId) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar logado para cadastrar uma demanda.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
+      // Format the perguntas field to be stored as JSON
+      const perguntas: Record<string, string> = {};
+      formData.perguntas.forEach((pergunta, index) => {
+        if (pergunta.trim()) {
+          perguntas[`pergunta_${index + 1}`] = pergunta;
+        }
+      });
 
-      if (!userId) {
-        throw new Error("Usuário não identificado. Por favor, faça login novamente.");
-      }
-
-      // Filtrar perguntas vazias
-      const filteredPerguntas = formData.perguntas.filter(p => p.trim() !== '');
-      
-      // Preparar normalização da prioridade
-      let normalizedPrioridade = formData.prioridade.toLowerCase();
-      if (normalizedPrioridade === 'média') {
-        normalizedPrioridade = 'media';
-      }
-      
-      // Garantir valor permitido
-      if (!['alta', 'media', 'baixa'].includes(normalizedPrioridade)) {
-        normalizedPrioridade = 'media'; // Default para média se inválido
-      }
-      
-      // Formatar data corretamente
-      const prazoResposta = formData.prazo_resposta ? new Date(formData.prazo_resposta).toISOString() : null;
-      
-      // Obter a supervisão técnica do problema selecionado
-      let supervisao_tecnica_id = null;
-      
-      if (formData.problema_id) {
-        const { data: problemaData, error: problemaError } = await supabase
-          .from('problemas')
-          .select('supervisao_tecnica_id')
-          .eq('id', formData.problema_id)
-          .single();
-          
-        if (problemaError) throw problemaError;
-        
-        supervisao_tecnica_id = problemaData.supervisao_tecnica_id;
-      }
-      
-      // Preparar dados para inserção
+      // Prepare data for insertion
       const demandaData = {
-        prazo_resposta: prazoResposta,
-        prioridade: normalizedPrioridade,
-        perguntas: filteredPerguntas.length > 0 ? filteredPerguntas : null,
-        autor_id: userId,
-        status: 'pendente',
         titulo: formData.titulo,
-        supervisao_tecnica_id: supervisao_tecnica_id,
         problema_id: formData.problema_id,
         origem_id: formData.origem_id,
-        tipo_midia_id: formData.tipo_midia_id,
-        bairro_id: formData.bairro_id,
-        nome_solicitante: formData.nome_solicitante,
-        email_solicitante: formData.email_solicitante,
-        telefone_solicitante: formData.telefone_solicitante,
-        veiculo_imprensa: formData.veiculo_imprensa,
-        endereco: formData.endereco,
-        detalhes_solicitacao: formData.detalhes_solicitacao,
-        arquivo_url: formData.arquivo_url
+        tipo_midia_id: formData.tipo_midia_id || null,
+        prioridade: formData.prioridade,
+        prazo_resposta: formData.prazo_resposta,
+        nome_solicitante: formData.nome_solicitante || null,
+        telefone_solicitante: formData.telefone_solicitante || null,
+        email_solicitante: formData.email_solicitante || null,
+        veiculo_imprensa: formData.veiculo_imprensa || null,
+        endereco: formData.endereco || null,
+        bairro_id: formData.bairro_id || null,
+        perguntas: Object.keys(perguntas).length > 0 ? perguntas : null,
+        detalhes_solicitacao: formData.detalhes_solicitacao || null,
+        arquivo_url: formData.arquivo_url || null,
+        anexos: formData.anexos.length > 0 ? formData.anexos : null,
+        autor_id: userId,
+        status: 'pendente',
+        horario_publicacao: new Date().toISOString(),
+        protocolo: formData.tem_protocolo_156 ? formData.numero_protocolo_156 : null,
+        servico_id: formData.nao_sabe_servico ? null : formData.servico_id || null
       };
 
-      console.log('Submitting demand data:', demandaData);
-
-      // Inserir na tabela demandas
-      const { data, error } = await supabase
+      // Insert into demandas table
+      const { data: insertedDemanda, error: insertError } = await supabase
         .from('demandas')
         .insert(demandaData)
-        .select();
+        .select('id')
+        .single();
 
-      if (error) {
-        console.error('Supabase error details:', error);
-        throw error;
-      }
+      if (insertError) throw insertError;
 
+      // Success notification
       toast({
         title: "Demanda cadastrada com sucesso!",
-        description: "A solicitação foi registrada no sistema."
+        description: "A demanda foi cadastrada e será encaminhada para a área responsável.",
+        variant: "default"
       });
-      
-      // Redirecionar para dashboard
-      navigate('/dashboard/comunicacao/consultar-demandas');
+
+      // Redirect/close
+      onClose();
     } catch (error: any) {
-      console.error('Erro ao cadastrar demanda:', error);
+      console.error("Error submitting demand:", error);
       toast({
         title: "Erro ao cadastrar demanda",
         description: error.message || "Ocorreu um erro ao processar sua solicitação.",

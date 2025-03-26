@@ -1,28 +1,31 @@
 
 import React from 'react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { DemandFormData } from '@/hooks/demandForm/types';
 import { ValidationError } from '@/lib/formValidationUtils';
-import { AlertCircle } from 'lucide-react';
 
 interface ReviewStepProps {
-  formData: any;
+  formData: DemandFormData;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  errors: ValidationError[];
   problemas: any[];
   origens: any[];
   tiposMidia: any[];
   filteredBairros: any[];
+  servicos: any[];
+  errors?: ValidationError[];
 }
 
 const ReviewStep: React.FC<ReviewStepProps> = ({
   formData,
   handleChange,
-  errors,
   problemas,
   origens,
   tiposMidia,
-  filteredBairros
+  filteredBairros,
+  servicos,
+  errors = []
 }) => {
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
@@ -30,138 +33,189 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     return error ? error.message : '';
   };
 
-  const selectedProblema = problemas.find(p => p.id === formData.problema_id);
-  const selectedOrigem = origens.find(o => o.id === formData.origem_id);
-  const selectedTipoMidia = tiposMidia.find(t => t.id === formData.tipo_midia_id);
-  const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
-  
+  const getProblemaDescricao = () => {
+    const problema = problemas.find(p => p.id === formData.problema_id);
+    return problema ? problema.descricao : 'Não informado';
+  };
+
+  const getServicoDescricao = () => {
+    if (formData.nao_sabe_servico) return 'Não informado pelo solicitante';
+    const servico = servicos.find(s => s.id === formData.servico_id);
+    return servico ? servico.descricao : 'Não informado';
+  };
+
+  const getOrigemDescricao = () => {
+    const origem = origens.find(o => o.id === formData.origem_id);
+    return origem ? origem.descricao : 'Não informado';
+  };
+
+  const getTipoMidiaDescricao = () => {
+    const tipoMidia = tiposMidia.find(t => t.id === formData.tipo_midia_id);
+    return tipoMidia ? tipoMidia.descricao : 'Não informado';
+  };
+
+  const getBairroNome = () => {
+    const bairro = filteredBairros.find(b => b.id === formData.bairro_id);
+    return bairro ? bairro.nome : 'Não informado';
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'Não informado';
+    try {
+      return format(new Date(dateStr), 'dd/MM/yyyy', { locale: ptBR });
+    } catch (e) {
+      return 'Data inválida';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <Label htmlFor="titulo" className={`block mb-2 ${hasError('titulo') ? 'text-orange-500 font-semibold' : ''}`}>
-          Título da Demanda {hasError('titulo') && <span className="text-orange-500">*</span>}
-        </Label>
+        <label className={`block text-sm font-medium ${hasError('titulo') ? 'text-orange-500' : 'text-gray-700'} mb-1`}>
+          Título da Demanda
+        </label>
         <Input
-          id="titulo"
           name="titulo"
           value={formData.titulo}
           onChange={handleChange}
-          className={hasError('titulo') ? 'border-orange-500 focus:ring-orange-500' : ''}
-          placeholder="Título da demanda"
+          className={`w-full ${hasError('titulo') ? 'border-orange-500' : ''}`}
         />
         {hasError('titulo') && (
-          <div className="flex items-center mt-2 text-orange-500 text-sm">
-            <AlertCircle className="h-4 w-4 mr-1" />
-            <p>{getErrorMessage('titulo')}</p>
-          </div>
-        )}
-        {!hasError('titulo') && (
-          <p className="text-gray-500 text-sm mt-1">
-            O título da demanda é obrigatório para finalizar o cadastro.
-          </p>
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <Label className="block mb-2">Tema</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {selectedProblema ? selectedProblema.descricao : 'Não selecionado'}
+          <h3 className="font-medium text-gray-800 mb-4">Informações da Demanda</h3>
+          
+          <div className="space-y-3">
+            <div>
+              <p className="text-gray-600 text-sm">Protocolo 156:</p>
+              <p className="font-medium">
+                {formData.tem_protocolo_156 ? 
+                  (formData.numero_protocolo_156 || 'Sim, número não informado') : 
+                  'Não possui'
+                }
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Origem:</p>
+              <p className="font-medium">{getOrigemDescricao()}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Tipo de Mídia:</p>
+              <p className="font-medium">{getTipoMidiaDescricao()}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Prioridade:</p>
+              <p className="font-medium capitalize">{
+                formData.prioridade === 'alta' ? 'Alta' :
+                formData.prioridade === 'media' ? 'Média' :
+                formData.prioridade === 'baixa' ? 'Baixa' : 
+                formData.prioridade
+              }</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Prazo de Resposta:</p>
+              <p className="font-medium">{formatDate(formData.prazo_resposta)}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Tema/Problema:</p>
+              <p className="font-medium">{getProblemaDescricao()}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Serviço:</p>
+              <p className="font-medium">{getServicoDescricao()}</p>
+            </div>
           </div>
         </div>
         
         <div>
-          <Label className="block mb-2">Origem</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {selectedOrigem ? selectedOrigem.descricao : 'Não selecionada'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Tipo de Mídia</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {selectedTipoMidia ? selectedTipoMidia.descricao : 'Não selecionado'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Prioridade</Label>
-          <div className="p-2 border rounded-md bg-gray-50 capitalize">
-            {formData.prioridade}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Prazo</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {formData.prazo_resposta ? new Date(formData.prazo_resposta).toLocaleDateString('pt-BR') : 'Não definido'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Solicitante</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {formData.nome_solicitante || 'Não informado'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Telefone</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {formData.telefone_solicitante || 'Não informado'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Email</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {formData.email_solicitante || 'Não informado'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Veículo de Imprensa</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {formData.veiculo_imprensa || 'Não informado'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Endereço</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {formData.endereco || 'Não informado'}
-          </div>
-        </div>
-
-        <div>
-          <Label className="block mb-2">Bairro</Label>
-          <div className="p-2 border rounded-md bg-gray-50">
-            {selectedBairro ? selectedBairro.nome : 'Não selecionado'}
+          <h3 className="font-medium text-gray-800 mb-4">Informações do Solicitante</h3>
+          
+          <div className="space-y-3">
+            <div>
+              <p className="text-gray-600 text-sm">Nome:</p>
+              <p className="font-medium">{formData.nome_solicitante || 'Não informado'}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Telefone:</p>
+              <p className="font-medium">{formData.telefone_solicitante || 'Não informado'}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Email:</p>
+              <p className="font-medium">{formData.email_solicitante || 'Não informado'}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Veículo de Imprensa:</p>
+              <p className="font-medium">{formData.veiculo_imprensa || 'Não informado'}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Bairro:</p>
+              <p className="font-medium">{getBairroNome()}</p>
+            </div>
+            
+            <div>
+              <p className="text-gray-600 text-sm">Endereço:</p>
+              <p className="font-medium">{formData.endereco || 'Não informado'}</p>
+            </div>
           </div>
         </div>
       </div>
-
+      
       <div>
-        <Label className="block mb-2">Perguntas</Label>
-        <div className="p-3 border rounded-md bg-gray-50">
-          {formData.perguntas.filter(Boolean).length > 0 ? (
-            <ul className="list-disc pl-5 space-y-1">
-              {formData.perguntas.filter(Boolean).map((pergunta: string, index: number) => (
-                <li key={index}>{pergunta}</li>
-              ))}
-            </ul>
+        <h3 className="font-medium text-gray-800 mb-2">Detalhes da Solicitação</h3>
+        <div className="bg-gray-50 p-3 rounded-lg border">
+          <p className="whitespace-pre-line">{formData.detalhes_solicitacao || 'Não informado'}</p>
+        </div>
+      </div>
+      
+      <div>
+        <h3 className="font-medium text-gray-800 mb-2">Perguntas</h3>
+        <div className="bg-gray-50 p-3 rounded-lg border">
+          {formData.perguntas.filter(p => p.trim()).length > 0 ? (
+            <ol className="list-decimal list-inside space-y-2">
+              {formData.perguntas
+                .filter(pergunta => pergunta.trim())
+                .map((pergunta, index) => (
+                  <li key={index}>{pergunta}</li>
+                ))
+              }
+            </ol>
           ) : (
-            <p className="text-gray-500">Nenhuma pergunta cadastrada</p>
+            <p className="text-gray-500">Nenhuma pergunta adicionada</p>
           )}
         </div>
       </div>
-
-      <div>
-        <Label className="block mb-2">Detalhes da Solicitação</Label>
-        <div className="p-3 border rounded-md bg-gray-50 whitespace-pre-line">
-          {formData.detalhes_solicitacao || 'Não informado'}
+      
+      {formData.anexos.length > 0 && (
+        <div>
+          <h3 className="font-medium text-gray-800 mb-2">Anexos</h3>
+          <div className="bg-gray-50 p-3 rounded-lg border">
+            <ul className="list-disc list-inside space-y-1">
+              {formData.anexos.map((anexo, index) => (
+                <li key={index} className="text-blue-600 truncate">
+                  {typeof anexo === 'string' 
+                    ? anexo.split('/').pop() || `Anexo ${index + 1}`
+                    : `Anexo ${index + 1}`
+                  }
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

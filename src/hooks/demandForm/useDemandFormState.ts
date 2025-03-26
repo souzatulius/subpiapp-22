@@ -1,6 +1,6 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useDemandFormState = (
   bairros: any[],
@@ -23,6 +23,8 @@ export const useDemandFormState = (
     detalhes_solicitacao: '',
     arquivo_url: '',
     anexos: [],
+    servico_id: '',
+    nao_sabe_servico: false,
   };
 
   const [formData, setFormData] = useState<DemandFormData>(initialFormState);
@@ -30,45 +32,72 @@ export const useDemandFormState = (
   const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
   const [selectedDistrito, setSelectedDistrito] = useState('');
   const [activeStep, setActiveStep] = useState(0);
+  const [servicos, setServicos] = useState<any[]>([]);
+  const [filteredServicos, setFilteredServicos] = useState<any[]>([]);
 
-  // Generate title suggestion when reaching the review step
+  useEffect(() => {
+    const fetchServicos = async () => {
+      if (!formData.problema_id) {
+        setServicos([]);
+        setFilteredServicos([]);
+        return;
+      }
+
+      try {
+        const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+        if (!selectedProblem || !selectedProblem.supervisao_tecnica_id) {
+          setServicos([]);
+          setFilteredServicos([]);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from('servicos')
+          .select('*')
+          .eq('supervisao_tecnica_id', selectedProblem.supervisao_tecnica_id);
+
+        if (error) throw error;
+        setServicos(data || []);
+        setFilteredServicos(data || []);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        setServicos([]);
+        setFilteredServicos([]);
+      }
+    };
+
+    fetchServicos();
+  }, [formData.problema_id, problemas]);
+
   useEffect(() => {
     if (activeStep === 6) {
       generateTitleSuggestion();
     }
-  }, [activeStep, formData.problema_id, formData.bairro_id]);
-
-  // Update title when problema or bairro changes while on review step
-  useEffect(() => {
-    if (activeStep === 6) {
-      generateTitleSuggestion();
-    }
-  }, [formData.problema_id, formData.bairro_id]);
+  }, [activeStep, formData.problema_id, formData.bairro_id, formData.servico_id]);
 
   const generateTitleSuggestion = () => {
-    // Only generate if we don't already have a title
-    if (!formData.titulo || formData.titulo.trim() === '') {
-      const selectedProblema = problemas.find(p => p.id === formData.problema_id);
-      const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
-      
+    if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 6) {
       let suggestedTitle = '';
       
-      if (selectedProblema) {
-        suggestedTitle = selectedProblema.descricao;
-        
-        if (selectedBairro) {
-          suggestedTitle += ` - ${selectedBairro.nome}`;
+      const selectedService = servicos.find(s => s.id === formData.servico_id);
+      const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+      const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
+      
+      if (selectedService && !formData.nao_sabe_servico) {
+        suggestedTitle = selectedService.descricao;
+      } else if (selectedProblem) {
+        suggestedTitle = selectedProblem.descricao;
+      }
+      
+      if (selectedBairro) {
+        suggestedTitle += ` - ${selectedBairro.nome}`;
+      }
+      
+      if (!formData.endereco && formData.detalhes_solicitacao && formData.detalhes_solicitacao.length > 0) {
+        const detailsSnippet = formData.detalhes_solicitacao.substring(0, 30).trim();
+        if (detailsSnippet.length > 0) {
+          suggestedTitle += ` (${detailsSnippet}${formData.detalhes_solicitacao.length > 30 ? '...' : ''})`;
         }
-        
-        if (formData.detalhes_solicitacao && formData.detalhes_solicitacao.length > 0) {
-          // Add a short snippet from details if available (first 30 chars)
-          const detailsSnippet = formData.detalhes_solicitacao.substring(0, 30).trim();
-          if (detailsSnippet.length > 0) {
-            suggestedTitle += ` (${detailsSnippet}${formData.detalhes_solicitacao.length > 30 ? '...' : ''})`;
-          }
-        }
-      } else if (selectedBairro) {
-        suggestedTitle = `Demanda ${selectedBairro.nome}`;
       }
       
       if (suggestedTitle) {
@@ -91,6 +120,15 @@ export const useDemandFormState = (
     }
   }, [selectedDistrito, bairros]);
 
+  useEffect(() => {
+    if (formData.nao_sabe_servico) {
+      setFormData(prev => ({
+        ...prev,
+        servico_id: ''
+      }));
+    }
+  }, [formData.nao_sabe_servico]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === 'serviceSearch') {
@@ -104,10 +142,25 @@ export const useDemandFormState = (
   };
 
   const handleSelectChange = (name: string, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name === 'problema_id' && value !== formData.problema_id) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        servico_id: '',
+        nao_sabe_servico: false
+      }));
+    } else if (name === 'nao_sabe_servico') {
+      setFormData(prev => ({
+        ...prev,
+        nao_sabe_servico: Boolean(value),
+        servico_id: value ? '' : prev.servico_id
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handlePerguntaChange = (index: number, value: string) => {
@@ -124,6 +177,19 @@ export const useDemandFormState = (
       ...prev,
       anexos: files
     }));
+  };
+
+  const handleServiceSearch = (value: string) => {
+    setServiceSearch(value);
+    if (!value.trim()) {
+      setFilteredServicos(servicos);
+      return;
+    }
+    
+    const filtered = servicos.filter(
+      servico => servico.descricao.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredServicos(filtered);
   };
 
   const nextStep = () => {
@@ -159,6 +225,9 @@ export const useDemandFormState = (
     prevStep,
     setSelectedDistrito,
     resetForm,
-    setActiveStep
+    setActiveStep,
+    servicos,
+    filteredServicos,
+    handleServiceSearch
   };
 };

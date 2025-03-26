@@ -29,7 +29,10 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     prevStep,
     setSelectedDistrito,
     resetForm,
-    setActiveStep
+    setActiveStep,
+    servicos,
+    filteredServicos,
+    handleServiceSearch
   } = useDemandFormState(bairros, problemas);
 
   const { handleSubmit } = useDemandFormSubmit(
@@ -61,6 +64,9 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     prevStep,
     setSelectedDistrito,
     resetForm,
-    setActiveStep
+    setActiveStep,
+    servicos,
+    filteredServicos,
+    handleServiceSearch
   };
 };

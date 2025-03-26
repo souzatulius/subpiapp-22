@@ -44,7 +44,10 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     prevStep,
     setSelectedDistrito,
     resetForm,
-    setActiveStep
+    setActiveStep,
+    servicos,
+    filteredServicos,
+    handleServiceSearch
   } = useDemandForm(user?.id, onClose);
 
   const handleStepClick = (stepIndex: number) => {
@@ -143,6 +146,9 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             distritos={distritos}
             filteredBairros={filteredBairros}
             errors={validationErrors}
+            servicos={servicos}
+            filteredServicos={filteredServicos}
+            handleServiceSearch={handleServiceSearch}
           />
           
           <FormActions 
