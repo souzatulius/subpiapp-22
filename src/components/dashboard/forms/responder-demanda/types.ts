@@ -34,6 +34,10 @@ export interface Demanda {
         id?: string;
         descricao: string;
     };
+    bairros?: {
+        id?: string;
+        nome: string;
+    };
 }
 
 export interface Resposta {
