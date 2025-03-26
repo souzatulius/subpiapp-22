@@ -95,9 +95,12 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     try {
       // Atualizar o serviço selecionado (se houver)
       if (selectedServicoId) {
+        // Fix: update to properly handle servico_id when updating demandas
+        const updatePayload: any = { servico_id: selectedServicoId };
+        
         const { error: servicoError } = await supabase
           .from('demandas')
-          .update({ servico_id: selectedServicoId })
+          .update(updatePayload)
           .eq('id', selectedDemanda.id);
           
         if (servicoError) throw servicoError;
