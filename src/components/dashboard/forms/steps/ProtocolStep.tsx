@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,9 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   errors = [],
   nextStep
 }) => {
+  // State to track the form flow
+  const [showProtocolFields, setShowProtocolFields] = useState(false);
+  const [showPriorityFields, setShowPriorityFields] = useState(false);
 
   // Função para obter o ícone com base na descrição da origem
   const getOriginIcon = (descricao: string) => {
@@ -51,12 +54,21 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
     return error ? error.message : '';
   };
 
+  const handleOriginSelect = (id: string) => {
+    handleSelectChange('origem_id', id);
+    setShowProtocolFields(true);
+    // Reset subsequent steps when origin changes
+    setShowPriorityFields(false);
+  };
+
   const handleProtocol156Change = (checked: boolean) => {
     handleSelectChange('tem_protocolo_156', checked);
     
-    // Se selecionou "Não", avança para a próxima etapa automaticamente
-    if (!checked && nextStep) {
-      setTimeout(nextStep, 300); // Pequeno atraso para melhor UX
+    // Se selecionou "Não", mostrar campos de prioridade
+    if (!checked) {
+      setShowPriorityFields(true);
+    } else {
+      setShowPriorityFields(false);
     }
   };
 
@@ -80,7 +92,7 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
               } ${
                 hasError('origem_id') ? 'border-orange-500' : ''
               }`} 
-              onClick={() => handleSelectChange('origem_id', origem.id)}
+              onClick={() => handleOriginSelect(origem.id)}
             >
               {getOriginIcon(origem.descricao)}
               <span className="text-sm font-semibold">{origem.descricao}</span>
@@ -92,7 +104,7 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         )}
       </div>
 
-      {formData.origem_id && (
+      {formData.origem_id && showProtocolFields && (
         <div className="animate-fadeIn">
           <Separator className="my-4" />
           
@@ -106,14 +118,31 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         </div>
       )}
 
-      {/* Adicionando os campos de prioridade e prazo */}
-      <Separator className="my-4" />
-      
-      <PriorityDeadlineStep 
-        formData={formData}
-        handleSelectChange={handleSelectChange}
-        errors={errors}
-      />
+      {/* Mostrar campos de prioridade apenas quando escolher "Não" para protocolo */}
+      {showPriorityFields && formData.tem_protocolo_156 === false && (
+        <div className="animate-fadeIn">
+          <Separator className="my-4" />
+          
+          <PriorityDeadlineStep 
+            formData={formData}
+            handleSelectChange={handleSelectChange}
+            errors={errors}
+          />
+        </div>
+      )}
+
+      {/* Se tem protocolo 156, mostrar o campo de prioridade após preencher o número */}
+      {formData.tem_protocolo_156 === true && formData.numero_protocolo_156 && (
+        <div className="animate-fadeIn">
+          <Separator className="my-4" />
+          
+          <PriorityDeadlineStep 
+            formData={formData}
+            handleSelectChange={handleSelectChange}
+            errors={errors}
+          />
+        </div>
+      )}
     </div>
   );
 };

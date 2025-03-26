@@ -11,7 +11,7 @@ import { ValidationError } from '@/lib/formValidationUtils';
 export const FORM_STEPS = [
   {
     title: 'Vamos iniciar agora o cadastro da demanda',
-    description: 'Selecione a origem da demanda, prioridade e prazo para resposta.',
+    description: 'Selecione a origem da demanda, informe se possui protocolo, prioridade e prazo para resposta.',
   },
   {
     title: 'Vamos entender melhor o que está acontecendo',
@@ -55,7 +55,7 @@ interface FormContentProps {
   servicos?: any[];
   filteredServicos?: any[];
   handleServiceSearch?: (value: string) => void;
-  nextStep?: () => void; // Add this prop to fix the first error
+  nextStep?: () => void; 
 }
 
 const FormContent: React.FC<FormContentProps> = ({

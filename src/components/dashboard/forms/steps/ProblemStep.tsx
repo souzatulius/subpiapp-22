@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from "@/components/ui/checkbox";
 import { ValidationError } from '@/lib/formValidationUtils';
 import { getProblemIcon } from '@/components/settings/problems/renderIcon';
+import ServiceSearch from './identification/ServiceSearch';
 
 interface ProblemStepProps {
   formData: {
@@ -32,11 +33,36 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
   handleServiceSearch,
   errors = []
 }) => {
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
   };
+
+  const handleLocalServiceSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setServiceSearch(e.target.value);
+    if (handleServiceSearch) {
+      handleServiceSearch(e.target.value);
+    }
+  };
+
+  const handleServiceSelect = (serviceId: string) => {
+    handleSelectChange('servico_id', serviceId);
+    setServiceSearch(''); // Clear search after selection
+    setIsPopoverOpen(false);
+  };
+
+  const handleServiceRemove = () => {
+    handleSelectChange('servico_id', '');
+  };
+
+  // Find the selected service
+  const selectedService = formData.servico_id 
+    ? servicos.find(s => s.id === formData.servico_id) 
+    : null;
 
   return (
     <div className="space-y-6">
@@ -72,18 +98,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
       
       {formData.problema_id && (
         <div className="animate-fadeIn space-y-4">
-          <div>
-            <Label htmlFor="serviceSearch" className="block mb-2">
-              Qual serviço está relacionado a esse tema?
-            </Label>
-            <Input 
-              id="serviceSearch" 
-              name="serviceSearch" 
-              placeholder="Digite o nome do serviço..." 
-              onChange={(e) => handleServiceSearch && handleServiceSearch(e.target.value)} 
-            />
-          </div>
-          
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="nao-sabe-servico" 
@@ -96,36 +110,17 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
           </div>
           
           {!formData.nao_sabe_servico && (
-            <div>
-              <div className="space-y-2">
-                {filteredServicos.length > 0 ? (
-                  filteredServicos.map(servico => (
-                    <Button 
-                      key={servico.id} 
-                      type="button" 
-                      variant={formData.servico_id === servico.id ? "default" : "outline"} 
-                      className={`w-full justify-start py-3 px-4 ${
-                        formData.servico_id === servico.id ? "ring-2 ring-[#003570]" : ""
-                      } ${
-                        hasError('servico_id') ? 'border-orange-500' : ''
-                      }`} 
-                      onClick={() => handleSelectChange('servico_id', servico.id)}
-                    >
-                      <span>{servico.descricao}</span>
-                    </Button>
-                  ))
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    {servicos.length === 0 
-                      ? "Não há serviços disponíveis para o tema selecionado." 
-                      : "Nenhum serviço encontrado para sua pesquisa."}
-                  </div>
-                )}
-              </div>
-              {hasError('servico_id') && (
-                <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>
-              )}
-            </div>
+            <ServiceSearch
+              serviceSearch={serviceSearch}
+              handleChange={handleLocalServiceSearch}
+              filteredServicesBySearch={filteredServicos}
+              handleServiceSelect={handleServiceSelect}
+              selectedService={selectedService}
+              handleServiceRemove={handleServiceRemove}
+              errors={errors}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
+            />
           )}
         </div>
       )}
