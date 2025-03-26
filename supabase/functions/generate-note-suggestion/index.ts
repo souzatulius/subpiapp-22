@@ -18,29 +18,43 @@ serve(async (req) => {
   try {
     const { demandInfo, responses } = await req.json();
     
-    // Format the demand information and responses for the prompt
-    let promptContent = `Você é um especialista em comunicação institucional. Preciso que você crie uma nota oficial com base nas seguintes informações:\n\n`;
+    // Format the prompt with the specific structure requested
+    let promptContent = `Como assessor de imprensa da Subprefeitura de Pinheiros, crie uma nota de imprensa que utilize as informações abaixo e organize as ideias iniciando com:
+
+"A Subprefeitura de Pinheiros informa/esclarece/avalia/alerta/ou outros verbos que..."
+
+Desenvolva um, dois ou três parágrafos com tom institucional, informativo e claro.
+
+Finalize com:
+
+Subprefeitura de Pinheiros  
+Prefeitura de São Paulo  
+Data: ${demandInfo.currentDate}
+
+INFORMAÇÕES SOBRE A DEMANDA:
+`;
     
     // Add demand information
-    promptContent += `Título da Demanda: ${demandInfo.titulo}\n`;
-    if (demandInfo.area_coordenacao) {
-      promptContent += `Área: ${demandInfo.area_coordenacao.descricao}\n`;
-    }
+    promptContent += `Título/Resumo do problema: ${demandInfo.problemSummary}\n`;
+    promptContent += `Tema/Área: ${demandInfo.theme}\n`;
+    promptContent += `Local: ${demandInfo.location}\n`;
+    promptContent += `Status: ${demandInfo.status}\n`;
+    promptContent += `Prazo: ${demandInfo.deadline}\n`;
+    
+    // Add more details from the request if available
     if (demandInfo.detalhes_solicitacao) {
       promptContent += `Detalhes da Solicitação: ${demandInfo.detalhes_solicitacao}\n\n`;
     }
     
     // Add Q&A if available
     if (responses && responses.length > 0) {
-      promptContent += "Perguntas e Respostas:\n";
-      responses.forEach(qa => {
-        promptContent += `Pergunta: ${qa.question}\n`;
-        promptContent += `Resposta: ${qa.answer}\n\n`;
+      promptContent += "\nPERGUNTAS E RESPOSTAS:\n";
+      responses.forEach((qa, index) => {
+        promptContent += `Pergunta ${index + 1}: ${qa.question}\n`;
+        promptContent += `Resposta ${index + 1}: ${qa.answer}\n\n`;
       });
     }
     
-    promptContent += `Por favor, crie uma nota oficial clara e objetiva com base nas informações acima. A nota deve ter um tom formal e institucional, e deve abordar os principais pontos apresentados nas perguntas e respostas.`;
-
     console.log("Sending prompt to OpenAI:", promptContent);
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -52,7 +66,10 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Você é um especialista em comunicação institucional, especializado em redigir notas oficiais.' },
+          { 
+            role: 'system', 
+            content: 'Você é um assessor de imprensa profissional que redige notas oficiais em nome da Subprefeitura de Pinheiros. Utilize linguagem institucional, clara e objetiva.' 
+          },
           { role: 'user', content: promptContent }
         ],
         temperature: 0.7,

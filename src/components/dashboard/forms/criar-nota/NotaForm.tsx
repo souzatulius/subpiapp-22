@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { ResponseQA, Demand } from './types';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface NotaFormProps {
   titulo: string;
@@ -47,9 +49,36 @@ const NotaForm: React.FC<NotaFormProps> = ({
     try {
       setIsGeneratingSuggestion(true);
       
+      // Get current date formatted in Portuguese
+      const currentDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+      
+      // Prepare problem summary from demand title
+      const problemSummary = selectedDemanda.titulo || '';
+      
+      // Prepare location information
+      const location = selectedDemanda.bairro?.nome || selectedDemanda.endereco || 'Região de Pinheiros';
+      
+      // Get demand theme/area
+      const theme = selectedDemanda.supervisao_tecnica?.descricao || selectedDemanda.area_coordenacao?.descricao || '';
+      
+      // Get deadline and status
+      const deadline = selectedDemanda.prazo_resposta 
+        ? format(new Date(selectedDemanda.prazo_resposta), "dd/MM/yyyy", { locale: ptBR })
+        : 'Não informado';
+      
+      const status = selectedDemanda.status || 'Em andamento';
+      
       const { data, error } = await supabase.functions.invoke('generate-note-suggestion', {
         body: {
-          demandInfo: selectedDemanda,
+          demandInfo: {
+            ...selectedDemanda,
+            problemSummary,
+            location,
+            theme,
+            deadline,
+            status,
+            currentDate
+          },
           responses: formattedResponses
         }
       });
@@ -61,25 +90,13 @@ const NotaForm: React.FC<NotaFormProps> = ({
       }
 
       if (data.suggestion) {
-        // Try to extract a title and content from the suggestion
-        const lines = data.suggestion.split('\n');
-        let suggestedTitle = '';
-        let suggestedContent = data.suggestion;
-        
-        // Check if the first non-empty line could be a title
-        for (let i = 0; i < Math.min(5, lines.length); i++) {
-          if (lines[i].trim()) {
-            // Check if it's likely a title (short, no punctuation at end)
-            if (lines[i].length < 100 && !lines[i].endsWith('.')) {
-              suggestedTitle = lines[i].replace(/^(título:|titulo:)/i, '').trim();
-              suggestedContent = lines.slice(i + 1).join('\n').trim();
-            }
-            break;
-          }
+        // Set title based on the problem summary
+        if (!titulo && problemSummary) {
+          setTitulo(problemSummary);
         }
         
-        if (suggestedTitle) setTitulo(suggestedTitle);
-        setTexto(suggestedContent);
+        // Set content from the generated suggestion
+        setTexto(data.suggestion);
         
         toast({
           title: "Sugestão gerada com sucesso!",
