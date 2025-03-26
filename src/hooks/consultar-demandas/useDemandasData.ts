@@ -23,7 +23,9 @@ export const useDemandasData = (): UseDemandasDataReturn => {
     setIsDeleteDialogOpen,
     deleteLoading,
     handleDeleteConfirm
-  } = useDemandasActions(() => refetch());
+  } = useDemandasActions(async () => {
+    await refetch();
+  });
 
   const filteredDemandas = demandas.filter((demand: Demand) => 
     demand.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || 

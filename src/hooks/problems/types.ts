@@ -5,8 +5,11 @@ export interface SupervisaoTecnica {
   id: string;
   descricao: string;
   sigla?: string;
-  coordenacao?: string;
   coordenacao_id?: string;
+  coordenacao?: {
+    id: string;
+    descricao: string;
+  };
 }
 
 export interface Problem {

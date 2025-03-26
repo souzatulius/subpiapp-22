@@ -65,9 +65,12 @@ export const useDemandasQuery = () => {
           bairro_id,
           bairro:bairro_id(id, nome),
           perguntas
-        `)
-        .in('status', ['pendente', 'em_andamento'])
-        .order('horario_publicacao', { ascending: false });
+        `);
+      
+      // Apply status filter  
+      query = query.in('status', ['pendente', 'em_andamento']);
+      
+      query = query.order('horario_publicacao', { ascending: false });
       
       // Apply filtering if not admin
       if (!isAdmin && userInfo) {
@@ -87,14 +90,16 @@ export const useDemandasQuery = () => {
       
       // Transform the data to match our Demand type
       const transformedData = (data || []).map(item => {
-        return {
+        const result = {
           ...item,
           // Set default values for potentially missing fields
           servico: item.servico || { descricao: '' },
           area_coordenacao: item.area_coordenacao || { descricao: '' },
           supervisao_tecnica_id: item.problema?.supervisao_tecnica?.id,
           supervisao_tecnica: item.problema?.supervisao_tecnica,
-        } as unknown as Demand;
+        };
+        
+        return result as unknown as Demand;
       });
       
       return transformedData;
