@@ -8,18 +8,20 @@ import { NotaOficial } from '@/types/nota';
 
 interface NotasListProps {
   notas: NotaOficial[];
-  selectedNota: NotaOficial | null;
   onSelectNota: (nota: NotaOficial) => void;
-  isAdmin: boolean;
+  emptyMessage?: string;
   isLoading: boolean;
+  selectedNota?: NotaOficial | null;
+  isAdmin?: boolean;
 }
 
 const NotasList: React.FC<NotasListProps> = ({ 
   notas, 
-  selectedNota, 
+  selectedNota = null, 
   onSelectNota, 
-  isAdmin, 
-  isLoading 
+  isAdmin = true, 
+  isLoading,
+  emptyMessage = "Nenhuma nota pendente de aprovação no momento."
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -32,14 +34,14 @@ const NotasList: React.FC<NotasListProps> = ({
   }
 
   if (notas.length === 0) {
-    return <EmptyState />;
+    return <EmptyState message={emptyMessage} />;
   }
 
   // Filtrar notas com base no termo de busca
   const filteredNotas = notas.filter(nota => 
     nota.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    nota.autor?.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    nota.supervisao_tecnica?.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
+    (nota.autor?.nome_completo?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (nota.supervisao_tecnica?.descricao?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   return (

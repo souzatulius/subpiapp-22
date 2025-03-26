@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,7 +36,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
         .order('criado_em', { ascending: false });
         
       if (error) throw error;
-      return data as NotaOficial[];
+      return data as unknown as NotaOficial[];
     }
   });
 
@@ -65,7 +64,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
-      // Save original text for history
       const { error: historyError } = await supabase
         .from('notas_historico_edicoes')
         .insert({
@@ -79,7 +77,6 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       
       if (historyError) throw historyError;
       
-      // Update the note
       const { error: updateError } = await supabase
         .from('notas_oficiais')
         .update({
@@ -96,11 +93,9 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
         description: "As alterações foram salvas com sucesso.",
       });
       
-      // Refresh data
       refetch();
       setEditMode(false);
       
-      // Update selected nota with new values
       if (selectedNota) {
         setSelectedNota({
           ...selectedNota,
@@ -273,8 +268,9 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
         <TabsContent value="pendentes">
           <NotasList 
             notas={notas || []}
-            loading={isLoading}
+            isLoading={isLoading}
             onSelectNota={handleSelectNota}
+            selectedNota={selectedNota}
             emptyMessage="Nenhuma nota pendente de aprovação no momento."
           />
         </TabsContent>

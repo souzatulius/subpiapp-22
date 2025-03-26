@@ -21,7 +21,7 @@ import { ValidationError } from '@/lib/formValidationUtils';
 interface ProtocolStepProps {
   formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
   origens: any[];
   tiposMidia: any[];
   errors: ValidationError[];
