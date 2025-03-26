@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, ArrowUpRight, Briefcase, AlertTriangle, Settings, Shield, FileText, MapPin, Bell, Globe, Image, MessageSquare } from 'lucide-react';
 import StatCard from './StatCard';
 import { SettingsStats } from '../types/settingsTypes';
@@ -10,6 +11,12 @@ interface UserServiceStatsProps {
 }
 
 const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (section: string) => {
+    navigate(`/settings?tab=${section}`);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard 
@@ -18,6 +25,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<Users className="h-4 w-4 text-muted-foreground" />} 
         description="Total de usuários cadastrados"
         section="usuarios"
+        onClick={() => handleCardClick('usuarios')}
       />
       <StatCard 
         title="Cargos" 
@@ -25,6 +33,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<Briefcase className="h-4 w-4 text-muted-foreground" />} 
         description="Tipos de cargos disponíveis"
         section="cargos"
+        onClick={() => handleCardClick('cargos')}
       />
       <StatCard 
         title="Permissões" 
@@ -32,6 +41,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<Shield className="h-4 w-4 text-muted-foreground" />} 
         description="Níveis de acesso"
         section="permissoes"
+        onClick={() => handleCardClick('permissoes')}
       />
       <StatCard 
         title="Coordenações" 
@@ -39,6 +49,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<Settings className="h-4 w-4 text-muted-foreground" />} 
         description="Total de coordenações"
         section="coordenacoes_lista"
+        onClick={() => handleCardClick('coordenacoes_lista')}
       />
       <StatCard 
         title="Supervisões Técnicas" 
@@ -46,6 +57,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<ArrowUpRight className="h-4 w-4 text-muted-foreground" />} 
         description="Supervisões técnicas registradas"
         section="areas"
+        onClick={() => handleCardClick('areas')}
       />
       <StatCard 
         title="Serviços" 
@@ -53,6 +65,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<FileText className="h-4 w-4 text-muted-foreground" />} 
         description="Serviços cadastrados"
         section="servicos"
+        onClick={() => handleCardClick('servicos')}
       />
       <StatCard 
         title="Problemas/Temas" 
@@ -60,6 +73,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />} 
         description="Problemas registrados"
         section="problemas"
+        onClick={() => handleCardClick('problemas')}
       />
       <StatCard 
         title="Distritos/Bairros" 
@@ -67,6 +81,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<MapPin className="h-4 w-4 text-muted-foreground" />} 
         description="Total de distritos e bairros"
         section="distritos_bairros"
+        onClick={() => handleCardClick('distritos_bairros')}
       />
       <StatCard 
         title="Comunicados" 
@@ -74,6 +89,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />} 
         description="Comunicados enviados"
         section="comunicados"
+        onClick={() => handleCardClick('comunicados')}
       />
       <StatCard 
         title="Notificações" 
@@ -81,6 +97,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<Bell className="h-4 w-4 text-muted-foreground" />} 
         description="Total de notificações"
         section="notificacoes"
+        onClick={() => handleCardClick('notificacoes')}
       />
       <StatCard 
         title="Origem das Demandas" 
@@ -88,6 +105,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<Globe className="h-4 w-4 text-muted-foreground" />} 
         description="Fontes de demandas"
         section="origens_demanda"
+        onClick={() => handleCardClick('origens_demanda')}
       />
       <StatCard 
         title="Tipos de Mídia" 
@@ -95,6 +113,7 @@ const UserServiceStats: React.FC<UserServiceStatsProps> = ({ stats, loading }) =
         icon={<Image className="h-4 w-4 text-muted-foreground" />} 
         description="Tipos de mídia"
         section="tipos_midia"
+        onClick={() => handleCardClick('tipos_midia')}
       />
     </div>
   );
