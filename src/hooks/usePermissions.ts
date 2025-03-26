@@ -13,6 +13,154 @@ export interface UsePermissionsReturn {
   canAccessProtectedRoute: (route: string) => boolean;
 }
 
+/**
+ * Checks if user has a specific role in the database
+ */
+const checkUserRole = async (userId: string, roleName: string): Promise<boolean> => {
+  try {
+    console.log(`Checking if user ${userId} has role: ${roleName}`);
+    const { data: hasRole, error } = await supabase
+      .rpc('user_has_role', {
+        _user_id: userId,
+        _role_nome: roleName
+      });
+    
+    if (error) {
+      console.error(`Error checking if user has role ${roleName}:`, error);
+      return false;
+    }
+    
+    console.log(`User ${userId} has role ${roleName}: ${Boolean(hasRole)}`);
+    return Boolean(hasRole);
+  } catch (err) {
+    console.error(`Exception checking if user has role ${roleName}:`, err);
+    return false;
+  }
+};
+
+/**
+ * Fetches user's coordination and supervisao tecnica IDs
+ */
+const fetchUserData = async (userId: string): Promise<{ 
+  coordenacaoId: string | null; 
+  supervisaoTecnicaId: string | null 
+}> => {
+  try {
+    console.log(`Fetching data for user ${userId}`);
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('coordenacao_id, supervisao_tecnica_id')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error(`Error fetching user data for ${userId}:`, error);
+      return { coordenacaoId: null, supervisaoTecnicaId: null };
+    }
+    
+    console.log(`User data retrieved:`, data);
+    return { 
+      coordenacaoId: data?.coordenacao_id || null, 
+      supervisaoTecnicaId: data?.supervisao_tecnica_id || null 
+    };
+  } catch (err) {
+    console.error(`Exception fetching user data for ${userId}:`, err);
+    return { coordenacaoId: null, supervisaoTecnicaId: null };
+  }
+};
+
+/**
+ * Checks if user belongs to a privileged coordination
+ */
+const checkCoordinationPrivileges = async (coordenacaoId: string): Promise<boolean> => {
+  if (!coordenacaoId) return false;
+  
+  try {
+    console.log(`Checking privileges for coordination ${coordenacaoId}`);
+    const { data, error } = await supabase
+      .from('coordenacoes')
+      .select('descricao')
+      .eq('id', coordenacaoId)
+      .single();
+    
+    if (error) {
+      console.error(`Error fetching coordination data for ${coordenacaoId}:`, error);
+      return false;
+    }
+    
+    if (!data?.descricao) {
+      console.log(`No description found for coordination ${coordenacaoId}`);
+      return false;
+    }
+    
+    // Normalize the coordination description to handle accents and variations
+    const normalized = data.descricao
+      .normalize("NFD")                
+      .replace(/[\u0300-\u036f]/g, "")  
+      .toLowerCase()
+      .trim();
+    
+    console.log(`Coordination description: "${data.descricao}"`);
+    console.log(`Normalized description: "${normalized}"`);
+    
+    // Check for privileged coordinations using normalized string
+    const isPrivileged = normalized.includes('gabinete') || normalized.includes('comunicacao');
+    console.log(`Coordination ${coordenacaoId} is privileged: ${isPrivileged}`);
+    
+    return isPrivileged;
+  } catch (err) {
+    console.error(`Exception checking coordination privileges for ${coordenacaoId}:`, err);
+    return false;
+  }
+};
+
+/**
+ * Checks if user has legacy admin permissions
+ */
+const checkLegacyPermissions = async (userId: string): Promise<boolean> => {
+  try {
+    console.log(`Checking legacy permissions for user ${userId}`);
+    const { data: isAdmin, error } = await supabase
+      .rpc('is_admin', { user_id: userId });
+    
+    if (error) {
+      console.error(`Error checking legacy permissions for ${userId}:`, error);
+      return false;
+    }
+    
+    console.log(`User ${userId} has legacy admin permissions: ${Boolean(isAdmin)}`);
+    return Boolean(isAdmin);
+  } catch (err) {
+    console.error(`Exception checking legacy permissions for ${userId}:`, err);
+    return false;
+  }
+};
+
+/**
+ * Checks if user is admin by coordination
+ */
+const checkAdminByCoordination = async (userId: string): Promise<boolean> => {
+  try {
+    console.log(`Checking admin by coordination for user ${userId}`);
+    const { data: isAdmin, error } = await supabase
+      .rpc('is_admin_by_coordenacao', { user_id: userId });
+    
+    if (error) {
+      console.error(`Error checking admin by coordination for ${userId}:`, error);
+      return false;
+    }
+    
+    console.log(`User ${userId} is admin by coordination: ${Boolean(isAdmin)}`);
+    return Boolean(isAdmin);
+  } catch (err) {
+    console.error(`Exception checking admin by coordination for ${userId}:`, err);
+    return false;
+  }
+};
+
+/**
+ * Hook that checks user permissions and admin status
+ */
 export const usePermissions = (): UsePermissionsReturn => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -24,126 +172,62 @@ export const usePermissions = (): UsePermissionsReturn => {
   useEffect(() => {
     const fetchUserPermissions = async () => {
       setIsLoading(true);
+      setError(null);
       
       if (!user) {
+        console.log("No user found, skipping permission checks");
         setIsLoading(false);
         return;
       }
 
       try {
-        console.log("Checking permissions for user:", user.id);
-        
+        console.log(`Starting permission checks for user: ${user.id}`);
         let adminStatus = false;
 
-        // 1. Verifica se o usuário tem role 'admin'
-        try {
-          const { data: isUserAdmin, error: adminCheckError } = await supabase
-            .rpc('user_has_role', {
-              _user_id: user.id,
-              _role_nome: 'admin'
-            });
+        // 1. Check if user has admin role
+        const hasAdminRole = await checkUserRole(user.id, 'admin');
+        if (hasAdminRole) {
+          console.log("User granted admin status via admin role");
+          adminStatus = true;
+        }
 
-          if (adminCheckError) {
-            console.error("Error in user_has_role check:", adminCheckError);
-          } else if (isUserAdmin === true) {
-            console.log("User has admin role");
+        // 2. Fetch user coordination and supervisao data
+        const { coordenacaoId, supervisaoTecnicaId } = await fetchUserData(user.id);
+        setUserCoordination(coordenacaoId);
+        setUserSupervisaoTecnica(supervisaoTecnicaId);
+
+        // 3. Check if user belongs to privileged coordination
+        if (coordenacaoId && !adminStatus) {
+          const hasCoordinationPrivileges = await checkCoordinationPrivileges(coordenacaoId);
+          if (hasCoordinationPrivileges) {
+            console.log("User granted admin status via privileged coordination");
             adminStatus = true;
           }
-        } catch (roleError) {
-          console.error("Exception in user_has_role RPC:", roleError);
         }
 
-        // 2. Fetch user data for coordination and supervisao tecnica
-        try {
-          const { data: userData, error: userError } = await supabase
-            .from('usuarios')
-            .select('coordenacao_id, supervisao_tecnica_id')
-            .eq('id', user.id)
-            .single();
-
-          if (userError) {
-            console.error("Error fetching user data:", userError);
-          } else if (userData) {
-            console.log("User data:", userData);
-            setUserCoordination(userData?.coordenacao_id || null);
-            setUserSupervisaoTecnica(userData?.supervisao_tecnica_id || null);
-
-            // 3. Check if user belongs to privileged coordination (Gabinete or Comunicação)
-            if (userData.coordenacao_id && !adminStatus) {
-              try {
-                const { data: coordData, error: coordError } = await supabase
-                  .from('coordenacoes')
-                  .select('descricao')
-                  .eq('id', userData.coordenacao_id)
-                  .single();
-                  
-                if (coordError) {
-                  console.error("Error fetching coordination data:", coordError);
-                } else if (coordData?.descricao) {
-                  // Normalize the coordination description to handle accents and variations
-                  const normalized = coordData.descricao
-                    .normalize("NFD")                // separates letters and accents
-                    .replace(/[\u0300-\u036f]/g, "")  // removes accents
-                    .toLowerCase()
-                    .trim();
-                  
-                  console.log("Coordination description:", coordData.descricao);
-                  console.log("Normalized description:", normalized);
-                  
-                  // Check for privileged coordinations using normalized string
-                  if (normalized.includes('gabinete') || normalized.includes('comunicacao')) {
-                    console.log("User belongs to privileged coordination, granting admin access");
-                    adminStatus = true;
-                  }
-                }
-              } catch (coordCheckError) {
-                console.error("Exception checking coordination:", coordCheckError);
-              }
-            }
-          }
-        } catch (userDataError) {
-          console.error("Exception fetching user data:", userDataError);
-        }
-
-        // 4. If not admin by role or coordination, check by legacy permissions
+        // 4. Check legacy permissions if not admin yet
         if (!adminStatus) {
-          try {
-            const { data: isAdminByPermission, error: permissionError } = await supabase
-              .rpc('is_admin', { user_id: user.id });
-              
-            if (permissionError) {
-              console.error("Error checking is_admin RPC:", permissionError);
-            } else if (isAdminByPermission === true) {
-              console.log("User is admin by legacy permission");
-              adminStatus = true;
-            }
-          } catch (permissionError) {
-            console.error("Exception in is_admin RPC:", permissionError);
+          const hasLegacyPermissions = await checkLegacyPermissions(user.id);
+          if (hasLegacyPermissions) {
+            console.log("User granted admin status via legacy permissions");
+            adminStatus = true;
           }
         }
 
-        // 5. Also check if admin by coordination (fallback method)
+        // 5. Final fallback - check admin by coordination
         if (!adminStatus) {
-          try {
-            const { data: isAdminByCoord, error: coordError } = await supabase
-              .rpc('is_admin_by_coordenacao', { user_id: user.id });
-              
-            if (coordError) {
-              console.error("Error checking is_admin_by_coordenacao RPC:", coordError);
-            } else if (isAdminByCoord === true) {
-              console.log("User is admin by coordination (via RPC function)");
-              adminStatus = true;
-            }
-          } catch (coordError) {
-            console.error("Exception in is_admin_by_coordenacao RPC:", coordError);
+          const isAdminByCoord = await checkAdminByCoordination(user.id);
+          if (isAdminByCoord) {
+            console.log("User granted admin status via admin_by_coordenacao function");
+            adminStatus = true;
           }
         }
 
-        console.log("Final admin status:", adminStatus);
+        console.log(`Final admin status for user ${user.id}: ${adminStatus}`);
         setIsAdmin(adminStatus);
       } catch (err: any) {
-        console.error('Error fetching user permissions:', err);
-        setError(err);
+        console.error('Error in permission check process:', err);
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
       }
@@ -152,11 +236,13 @@ export const usePermissions = (): UsePermissionsReturn => {
     fetchUserPermissions();
   }, [user]);
   
-  // Function to check if user can access a protected route
+  /**
+   * Checks if user can access a protected route
+   */
   const canAccessProtectedRoute = (route: string): boolean => {
     // Admin can access all routes
     if (isAdmin) {
-      console.log("User is admin, allowing access to route:", route);
+      console.log(`User has admin status, allowing access to route: ${route}`);
       return true;
     }
     
@@ -179,8 +265,9 @@ export const usePermissions = (): UsePermissionsReturn => {
       route.startsWith(`${adminRoute}/`)
     );
     
-    console.log(`Route ${route} is ${isAdminRoute ? 'admin-only' : 'accessible to all'}`);
-    return !isAdminRoute;
+    const canAccess = !isAdminRoute;
+    console.log(`Route "${route}" is ${isAdminRoute ? 'admin-only' : 'accessible to all'}, access granted: ${canAccess}`);
+    return canAccess;
   };
 
   return { 
