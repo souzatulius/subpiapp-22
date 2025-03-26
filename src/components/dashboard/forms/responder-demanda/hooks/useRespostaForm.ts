@@ -14,14 +14,14 @@ export const useRespostaForm = (
   setFilteredDemandas: (demandas: Demanda[]) => void
 ) => {
   const { user } = useAuth();
-  const [resposta, setResposta] = useState('');
+  const [resposta, setResposta] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmitResposta = async () => {
-    if (!selectedDemanda || !resposta.trim()) {
+    if (!selectedDemanda || Object.keys(resposta).length === 0) {
       toast({
         title: "Resposta não pode ser vazia",
-        description: "Por favor, digite uma resposta para a demanda.",
+        description: "Por favor, responda todas as perguntas da demanda.",
         variant: "destructive"
       });
       return;
@@ -46,7 +46,7 @@ export const useRespostaForm = (
         .insert([{
           demanda_id: selectedDemanda.id,
           usuario_id: user?.id,
-          texto: resposta
+          respostas: resposta
         }]);
         
       if (respostaError) throw respostaError;
@@ -70,7 +70,7 @@ export const useRespostaForm = (
       setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
       setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
       setSelectedDemanda(null);
-      setResposta('');
+      setResposta({});
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
       toast({
