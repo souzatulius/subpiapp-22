@@ -8,11 +8,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, isApproved } = useAuth();
+  const { user, isLoading, isApproved } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) {
+    if (!isLoading) {
       if (!user) {
         navigate('/login');
       } else if (isApproved === false) {
@@ -20,9 +20,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         navigate('/pending-approval');
       }
     }
-  }, [user, loading, isApproved, navigate]);
+  }, [user, isLoading, isApproved, navigate]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="loading-spinner animate-spin"></div>

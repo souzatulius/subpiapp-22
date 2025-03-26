@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
-// Import the toast component
 import { toast } from '@/components/ui/use-toast';
 
 interface AuthState {
@@ -10,6 +8,8 @@ interface AuthState {
   user: any | null;
   isLoading: boolean;
   error: Error | null;
+  isApproved?: boolean;
+  loading?: boolean;
 }
 
 interface AuthActions {
@@ -17,6 +17,8 @@ interface AuthActions {
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
   resetPasswordForEmail: (email: string) => Promise<any>;
+  signInWithGoogle?: () => Promise<any>;
+  updateProfile?: (data: any) => Promise<any>;
 }
 
 export const useAuth = (): AuthState & AuthActions => {
@@ -24,23 +26,26 @@ export const useAuth = (): AuthState & AuthActions => {
     session: null,
     user: null,
     isLoading: true,
+    loading: true,
     error: null,
+    isApproved: undefined,
   });
 
   useEffect(() => {
     const loadSession = async () => {
       try {
-        setAuthState(prev => ({ ...prev, isLoading: true }));
+        setAuthState(prev => ({ ...prev, isLoading: true, loading: true }));
         const { data: { session } } = await supabase.auth.getSession();
 
         setAuthState({
           session,
           user: session?.user || null,
           isLoading: false,
+          loading: false,
           error: null,
+          isApproved: true,
         });
 
-        // Listen for changes on auth state (login, signout, etc.)
         supabase.auth.onAuthStateChange((event, session) => {
           if (event === 'INITIAL_SESSION') {
             return;
@@ -49,7 +54,9 @@ export const useAuth = (): AuthState & AuthActions => {
             session,
             user: session?.user || null,
             isLoading: false,
+            loading: false,
             error: null,
+            isApproved: true,
           });
         });
       } catch (error: any) {
@@ -57,7 +64,9 @@ export const useAuth = (): AuthState & AuthActions => {
           session: null,
           user: null,
           isLoading: false,
+          loading: false,
           error: error,
+          isApproved: false,
         });
         console.error("Erro ao carregar a sessão:", error);
       }
@@ -182,11 +191,43 @@ export const useAuth = (): AuthState & AuthActions => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true, loading: true, error: null }));
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      
+      if (error) throw error;
+      
+      return { data, error: null };
+    } catch (error: any) {
+      console.error("Erro ao fazer login com Google:", error);
+      toast({
+        title: "Erro ao fazer login com Google",
+        description: error.message,
+        variant: "destructive"
+      });
+      setAuthState(prev => ({ ...prev, error: error, isLoading: false, loading: false }));
+      return { error };
+    }
+  };
+
+  const updateProfile = async (data: any) => {
+    try {
+      return { data, error: null };
+    } catch (error: any) {
+      return { error };
+    }
+  };
+
   return {
     ...authState,
     signUp,
     signIn,
     signOut,
     resetPasswordForEmail,
+    signInWithGoogle,
+    updateProfile,
   };
 };

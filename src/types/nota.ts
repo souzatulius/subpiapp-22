@@ -1,35 +1,4 @@
 
-export interface NotaOficial {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  criado_em: string;
-  atualizado_em: string;
-  autor_id: string;
-  autor: {
-    id: string;
-    nome_completo: string;
-  };
-  aprovador_id?: string;
-  aprovador?: {
-    id: string;
-    nome_completo: string;
-  } | null;
-  supervisao_tecnica_id: string;
-  supervisao_tecnica?: {
-    id: string;
-    descricao: string;
-  } | null;
-  area_coordenacao: {
-    id: string;
-    descricao: string;
-  };
-  demanda_id?: string;
-  problema_id: string;
-  historico_edicoes?: NotaEdicao[];
-}
-
 export interface NotaEdicao {
   id: string;
   nota_id: string;
@@ -45,8 +14,45 @@ export interface NotaEdicao {
   criado_em: string;
 }
 
+export interface NotaOficial {
+  id: string;
+  titulo: string;
+  texto: string;
+  status: string;
+  criado_em: string;
+  atualizado_em: string;
+  autor_id: string;
+  autor?: {
+    id: string;
+    nome_completo: string;
+  } | null;
+  aprovador_id?: string;
+  aprovador?: {
+    id: string;
+    nome_completo: string;
+  } | null;
+  supervisao_tecnica_id: string | null;
+  supervisao_tecnica?: {
+    id: string;
+    descricao: string;
+  } | null;
+  area_coordenacao: {
+    id: string;
+    descricao: string;
+  };
+  demanda_id?: string;
+  demanda?: {
+    titulo: string;
+  } | null;
+  problema_id: string;
+  problema?: {
+    descricao: string;
+  } | null;
+  historico_edicoes?: NotaEdicao[];
+}
+
 export interface UseNotasDataReturn {
-  notas: NotaOficial[];
+  notas: NotaOficial[] | null;
   filteredNotas: NotaOficial[];
   isLoading: boolean;
   searchQuery: string;

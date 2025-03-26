@@ -64,7 +64,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           
           return {
             ...edit,
-            editor
+            editor: editor // Make sure editor can be null
           };
         }) as NotaEdicao[];
         

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -21,7 +20,7 @@ const LoginForm = () => {
   const {
     signIn,
     signInWithGoogle,
-    loading: authLoading
+    isLoading: authLoading
   } = useAuth();
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,17 +31,14 @@ const LoginForm = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Reset errors
     setError(null);
     setEmailError(false);
 
-    // Basic validation
     if (!email.trim()) {
       setEmailError(true);
       return;
     }
 
-    // Start loading
     setLoading(true);
     try {
       const completeEmail = completeEmailWithDomain(email);
@@ -50,9 +46,7 @@ const LoginForm = () => {
         error
       } = await signIn(completeEmail, password);
       if (error) {
-        setError(null); // Remove the error message text since we show it as a toast
-        
-        // Exibir mensagem clara quando o usuário já está cadastrado
+        setError(null);
         if (error.message.includes('Email already') || error.message.includes('already registered')) {
           toast({
             title: "Usuário já cadastrado",
@@ -71,7 +65,7 @@ const LoginForm = () => {
       }
     } catch (err: any) {
       console.error('Erro ao fazer login:', err);
-      setError(null); // Remove the error message text
+      setError(null);
       toast({
         title: "Erro de login",
         description: err.message || 'Erro ao tentar fazer login',

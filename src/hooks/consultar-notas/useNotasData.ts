@@ -61,6 +61,7 @@ export const useNotasData = (): UseNotasDataReturn => {
         description: "A nota oficial foi excluída com sucesso."
       });
       
+      // Make sure refetch returns a Promise
       await refetch();
     } catch (error: any) {
       console.error('Erro ao excluir nota:', error);
