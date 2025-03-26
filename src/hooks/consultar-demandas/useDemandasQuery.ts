@@ -29,7 +29,7 @@ export const useDemandasQuery = () => {
   return useQuery({
     queryKey: ['demandas', isAdmin],
     queryFn: async () => {
-      console.log('Fetching demandas, isAdmin:', isAdmin);
+      console.log('Fetching all demandas, isAdmin:', isAdmin);
       
       // Buscar demandas com base no status admin
       let demandaQuery;
@@ -60,62 +60,8 @@ export const useDemandasQuery = () => {
         throw demandasError;
       }
       
-      // Now fetch all notas to update the demandas that have notas
-      const { data: notasData, error: notasError } = await supabase
-        .from('notas_oficiais')
-        .select('id, demanda_id, status')
-        .neq('status', 'excluida'); // Ignorar notas excluídas
-        
-      if (notasError) {
-        console.error('Error fetching notas:', notasError);
-        throw notasError;
-      }
-      
-      // Create a map of demanda_id to nota status for quick lookup
-      const demandaToNotaStatus = new Map();
-      
-      notasData?.forEach(nota => {
-        if (nota.demanda_id) {
-          // If there are multiple notas for a demanda, use the most "advanced" status
-          // Priority: aprovada > pendente > rejeitada
-          const currentStatus = demandaToNotaStatus.get(nota.demanda_id);
-          if (!currentStatus || 
-              (currentStatus !== 'aprovado' && nota.status === 'aprovado') ||
-              (currentStatus === 'rejeitado' && nota.status === 'pendente')) {
-            demandaToNotaStatus.set(nota.demanda_id, nota.status);
-          }
-        }
-      });
-      
-      // Update demanda status based on nota status
-      const updatedDemandas = allDemandas?.map(demanda => {
-        const notaStatus = demandaToNotaStatus.get(demanda.id);
-        
-        // If this demanda has a nota, update its status based on the nota's status
-        if (notaStatus) {
-          let updatedStatus = demanda.status;
-          
-          if (notaStatus === 'aprovado') {
-            updatedStatus = 'nota_aprovada';
-          } else if (notaStatus === 'pendente') {
-            updatedStatus = 'nota_criada';
-          } else if (notaStatus === 'rejeitado') {
-            updatedStatus = 'nota_rejeitada';
-          }
-          
-          return {
-            ...demanda,
-            status: updatedStatus
-          };
-        }
-        
-        return demanda;
-      });
-      
-      console.log('Demandas data:', updatedDemandas);
-      
       // Parse perguntas JSON if it's a string
-      const processedData = updatedDemandas?.map(item => {
+      const processedData = allDemandas?.map(item => {
         if (typeof item.perguntas === 'string') {
           try {
             item.perguntas = JSON.parse(item.perguntas);
