@@ -46,9 +46,18 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
   }, [service, form]);
 
   const handleSubmit = async (data: z.infer<typeof serviceSchema>) => {
-    await onSubmit(data);
-    onClose();
+    // Ensure both required fields are non-empty strings before submitting
+    if (data.descricao && data.supervisao_tecnica_id) {
+      await onSubmit({
+        descricao: data.descricao,
+        supervisao_tecnica_id: data.supervisao_tecnica_id
+      });
+      onClose();
+    }
   };
+
+  // Filter out areas with empty IDs to prevent Radix UI Select error
+  const validAreas = areas.filter(area => area.id && area.id.trim() !== '');
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -88,7 +97,7 @@ const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {areas.map((area) => (
+                      {validAreas.map((area) => (
                         <SelectItem key={area.id} value={area.id}>
                           {area.descricao}
                         </SelectItem>
