@@ -31,6 +31,15 @@ export interface Demand {
   veiculo_imprensa: string | null;
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null | any; // Changed to accept any type to handle JSON
+  resposta?: {
+    id: string;
+    demanda_id: string;
+    texto: string;
+    respostas: Record<string, string> | null;
+    usuario_id: string;
+    criado_em: string;
+    comentarios: string | null;
+  } | null;
 }
 
 export interface UseDemandasDataReturn {

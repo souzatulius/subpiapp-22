@@ -64,11 +64,13 @@ export const useDemandasQuery = () => {
           area_coordenacao:problema_id (descricao),
           bairro_id,
           bairro:bairro_id(id, nome),
-          perguntas
+          perguntas,
+          endereco,
+          nome_solicitante,
+          email_solicitante,
+          telefone_solicitante,
+          veiculo_imprensa
         `);
-      
-      // Apply status filter  
-      query = query.in('status', ['pendente', 'em_andamento']);
       
       query = query.order('horario_publicacao', { ascending: false });
       
@@ -88,6 +90,19 @@ export const useDemandasQuery = () => {
       
       if (error) throw error;
       
+      // Get responses for all demands
+      const { data: respostasData, error: respostasError } = await supabase
+        .from('respostas_demandas')
+        .select('*');
+        
+      if (respostasError) throw respostasError;
+      
+      // Create a map of demand_id to response
+      const respostasMap = (respostasData || []).reduce((acc, resposta) => {
+        acc[resposta.demanda_id] = resposta;
+        return acc;
+      }, {} as Record<string, any>);
+      
       // Transform the data to match our Demand type
       const transformedData = (data || []).map(item => {
         const result = {
@@ -97,6 +112,8 @@ export const useDemandasQuery = () => {
           area_coordenacao: item.area_coordenacao || { descricao: '' },
           supervisao_tecnica_id: item.problema?.supervisao_tecnica?.id,
           supervisao_tecnica: item.problema?.supervisao_tecnica,
+          // Add response data if available
+          resposta: respostasMap[item.id] || null
         };
         
         return result as unknown as Demand;

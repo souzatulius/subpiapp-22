@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -55,6 +55,16 @@ interface DemandDetailProps {
   onClose: () => void;
 }
 
+interface Resposta {
+  id: string;
+  demanda_id: string;
+  texto: string;
+  respostas: Record<string, string> | null;
+  usuario_id: string;
+  criado_em: string;
+  comentarios: string | null;
+}
+
 // Form schema for responses
 const formSchema = z.object({
   responses: z.record(z.string().min(1, "A resposta é obrigatória"))
@@ -68,6 +78,8 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
   onClose
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resposta, setResposta] = useState<Resposta | null>(null);
+  const [isLoadingResposta, setIsLoadingResposta] = useState(false);
   const queryClient = useQueryClient();
 
   // Set up the form with default values based on questions
@@ -81,9 +93,45 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
     }
   });
 
+  // Fetch response data when demand changes
+  useEffect(() => {
+    const fetchResposta = async () => {
+      if (!demand) return;
+      
+      setIsLoadingResposta(true);
+      
+      try {
+        const { data, error } = await supabase
+          .from('respostas_demandas')
+          .select('*')
+          .eq('demanda_id', demand.id)
+          .maybeSingle();
+          
+        if (error) throw error;
+        
+        setResposta(data);
+        
+        // If there's a response with answer data, populate the form
+        if (data && data.respostas) {
+          form.reset({
+            responses: data.respostas
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching response:', error);
+      } finally {
+        setIsLoadingResposta(false);
+      }
+    };
+    
+    if (isOpen && demand) {
+      fetchResposta();
+    }
+  }, [demand, isOpen, form]);
+
   // Reset form when demand changes
-  React.useEffect(() => {
-    if (demand?.perguntas) {
+  useEffect(() => {
+    if (demand?.perguntas && !resposta) {
       const defaultResponses = Object.keys(demand.perguntas).reduce((acc, key) => {
         acc[key] = "";
         return acc;
@@ -92,19 +140,12 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
         responses: defaultResponses
       });
     }
-  }, [demand, form]);
+  }, [demand, form, resposta]);
 
   const submitResponseMutation = useMutation({
     mutationFn: async (data: FormValues) => {
       if (!demand) throw new Error("Demanda não encontrada");
       
-      const {
-        data: existingResponses,
-        error: fetchError
-      } = await supabase.from('respostas_demandas').select('*').eq('demanda_id', demand.id).limit(1);
-      
-      if (fetchError) throw fetchError;
-
       // Format the response text with questions and answers
       const responseText = Object.entries(data.responses).map(([key, value]) => {
         const question = demand.perguntas?.[key] || key;
@@ -112,12 +153,13 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
       }).join('\n\n');
 
       // If there's already a response, update it
-      if (existingResponses && existingResponses.length > 0) {
+      if (resposta) {
         const {
           error
         } = await supabase.from('respostas_demandas').update({
-          texto: responseText
-        }).eq('id', existingResponses[0].id);
+          texto: responseText,
+          respostas: data.responses
+        }).eq('id', resposta.id);
         
         if (error) throw error;
       } else {
@@ -127,6 +169,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
         } = await supabase.from('respostas_demandas').insert({
           demanda_id: demand.id,
           texto: responseText,
+          respostas: data.responses,
           usuario_id: (await supabase.auth.getUser()).data.user?.id
         });
         
@@ -179,6 +222,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
       case 'em_andamento':
         return <AlertCircle className="h-5 w-5 text-blue-500" />;
       case 'concluida':
+      case 'respondida':
         return <CheckCircle2 className="h-5 w-5 text-green-500" />;
       case 'arquivada':
         return <Archive className="h-5 w-5 text-gray-500" />;
@@ -196,6 +240,8 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
         return 'Pendente';
       case 'em_andamento':
         return 'Em Andamento';
+      case 'respondida':
+        return 'Respondida';
       case 'concluida':
         return 'Concluída';
       case 'arquivada':
@@ -233,6 +279,35 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
       default:
         return prioridade;
     }
+  };
+
+  // Render previously saved responses
+  const renderSavedResponses = () => {
+    if (!resposta || !resposta.respostas || !demand?.perguntas) return null;
+    
+    return (
+      <div className="space-y-4 mt-4">
+        <h3 className="text-lg font-medium text-blue-700">Respostas Salvas</h3>
+        {Object.entries(resposta.respostas).map(([key, answer]) => {
+          const question = demand.perguntas?.[key] || key;
+          return (
+            <div key={key} className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <h4 className="font-medium text-blue-800">{question}</h4>
+              <p className="mt-2 text-blue-900 whitespace-pre-line">{answer}</p>
+            </div>
+          );
+        })}
+        
+        {resposta.comentarios && (
+          <div className="mt-4">
+            <h4 className="font-medium text-gray-700">Comentários Internos</h4>
+            <p className="mt-1 text-gray-600 whitespace-pre-line bg-gray-50 p-3 rounded border border-gray-200">
+              {resposta.comentarios}
+            </p>
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (!demand) return null;
@@ -378,8 +453,16 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
             </>
           )}
           
+          {/* Display Saved Responses */}
+          {resposta && (
+            <>
+              <Separator />
+              {renderSavedResponses()}
+            </>
+          )}
+          
           {/* Questions & Responses Section */}
-          {demand.perguntas && Object.keys(demand.perguntas).length > 0 && (
+          {!resposta && demand.perguntas && Object.keys(demand.perguntas).length > 0 && (
             <>
               <Separator />
               <div className="space-y-4">
@@ -402,7 +485,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
                               <Textarea
                                 {...field}
                                 placeholder="Digite sua resposta aqui..."
-                                className="min-h-[100px]"
+                                className="min-h-[100px] focus:border-[#003570] focus:ring-[#003570]"
                               />
                             </FormControl>
                             <FormMessage />

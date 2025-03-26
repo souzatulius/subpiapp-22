@@ -13,6 +13,7 @@ export const useFetchDemandas = () => {
       try {
         setIsLoadingDemandas(true);
         
+        // First get demands
         const { data, error } = await supabase
           .from('demandas')
           .select(`
@@ -42,6 +43,7 @@ export const useFetchDemandas = () => {
             tipos_midia:tipo_midia_id (id, descricao),
             bairros:bairro_id (id, nome)
           `)
+          .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
         
         if (error) {
@@ -53,9 +55,30 @@ export const useFetchDemandas = () => {
           });
           return;
         }
+
+        // Now fetch all respostas_demandas to filter out answered demands
+        const { data: respostasData, error: respostasError } = await supabase
+          .from('respostas_demandas')
+          .select('demanda_id');
+
+        if (respostasError) {
+          console.error('Error fetching respostas:', respostasError);
+          toast({
+            title: "Erro ao verificar respostas",
+            description: respostasError.message,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Create a set of demand IDs that already have responses
+        const respondedDemandIds = new Set(respostasData.map(resposta => resposta.demanda_id));
+        
+        // Filter out demands that already have responses
+        const filteredData = data.filter(demanda => !respondedDemandIds.has(demanda.id));
         
         // Transform the data to match the Demanda type
-        const transformedData: Demanda[] = (data || []).map(item => {
+        const transformedData: Demanda[] = (filteredData || []).map(item => {
           // Handle perguntas type conversion: ensure it's string[] or null
           let perguntasArray: string[] | null = null;
           if (item.perguntas) {
