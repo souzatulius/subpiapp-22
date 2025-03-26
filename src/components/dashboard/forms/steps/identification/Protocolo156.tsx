@@ -1,12 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { hasFieldError, getFieldErrorMessage } from './ValidationUtils';
 
 interface Protocolo156Props {
-  temProtocolo156: boolean;
-  numeroProtocolo156: string;
+  temProtocolo156?: boolean;
+  numeroProtocolo156?: string;
   handleSelectChange: (checked: boolean) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   errors?: ValidationError[];
@@ -14,46 +16,48 @@ interface Protocolo156Props {
 
 const Protocolo156: React.FC<Protocolo156Props> = ({
   temProtocolo156,
-  numeroProtocolo156,
+  numeroProtocolo156 = '',
   handleSelectChange,
   handleChange,
   errors = []
 }) => {
-  const hasError = (field: string) => errors.some(err => err.field === field);
-  const getErrorMessage = (field: string) => {
-    const error = errors.find(err => err.field === field);
-    return error ? error.message : '';
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="tem_protocolo_156" 
-          checked={temProtocolo156} 
-          onCheckedChange={handleSelectChange}
-        />
-        <label 
-          htmlFor="tem_protocolo_156" 
-          className="text-sm font-medium leading-none cursor-pointer"
+      <Label className="block mb-2 text-lg font-medium">
+        Essa solicitação já tem protocolo no 156?
+      </Label>
+      <div className="flex gap-3">
+        <Button 
+          type="button" 
+          variant={temProtocolo156 ? "default" : "outline"} 
+          onClick={() => handleSelectChange(true)}
+          className="rounded-xl"
         >
-          Essa demanda tem protocolo aberto no 156?
-        </label>
+          Sim
+        </Button>
+        <Button 
+          type="button" 
+          variant={temProtocolo156 === false ? "default" : "outline"} 
+          onClick={() => handleSelectChange(false)}
+          className="rounded-xl"
+        >
+          Não
+        </Button>
       </div>
       
       {temProtocolo156 && (
-        <div className="animate-fadeIn">
+        <div className="mt-4 animate-fadeIn">
           <Input 
             id="numero_protocolo_156" 
             name="numero_protocolo_156" 
             value={numeroProtocolo156} 
-            onChange={handleChange} 
-            placeholder="Digite aqui os 10 dígitos do protocolo" 
-            className={`w-full ${hasError('numero_protocolo_156') ? 'border-orange-500' : ''}`}
+            onChange={handleChange}
+            className={`rounded-xl ${hasFieldError('numero_protocolo_156', errors) ? 'border-orange-500' : ''}`}
+            placeholder="Digite aqui os 10 dígitos do protocolo"
             maxLength={10}
           />
-          {hasError('numero_protocolo_156') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('numero_protocolo_156')}</p>
+          {hasFieldError('numero_protocolo_156', errors) && (
+            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('numero_protocolo_156', errors)}</p>
           )}
         </div>
       )}

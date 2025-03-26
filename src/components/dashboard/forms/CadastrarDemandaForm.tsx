@@ -56,42 +56,36 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   };
 
   const handleNextStep = () => {
-    // Validar etapa atual
-    const errors = validateDemandForm(formData, activeStep);
-    setValidationErrors(errors);
-    
-    if (errors.length === 0) {
-      nextStep();
-    } else {
-      console.log('Validation errors:', errors);
-      toast({
-        title: "Formulário incompleto",
-        description: getErrorSummary(errors),
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleSubmit = async () => {
-    // Validar etapa final antes da submissão
-    const errors = validateDemandForm(formData, activeStep);
-    setValidationErrors(errors);
-    
-    if (errors.length === 0) {
-      try {
-        await submitForm();
-      } catch (error: any) {
-        console.error('Submission error:', error);
+    // Só validar na última etapa
+    if (activeStep === 5) {
+      const errors = validateDemandForm(formData, activeStep);
+      setValidationErrors(errors);
+      
+      if (errors.length === 0) {
+        // Se não tiver erros, prossegue com o envio
+        handleSubmit();
+      } else {
+        console.log('Validation errors:', errors);
         toast({
-          title: "Erro ao cadastrar demanda",
-          description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+          title: "Formulário incompleto",
+          description: getErrorSummary(errors),
           variant: "destructive"
         });
       }
     } else {
+      // Para outras etapas, apenas avança sem validar
+      nextStep();
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await submitForm();
+    } catch (error: any) {
+      console.error('Submission error:', error);
       toast({
-        title: "Formulário incompleto",
-        description: getErrorSummary(errors),
+        title: "Erro ao cadastrar demanda",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
         variant: "destructive"
       });
     }
@@ -119,7 +113,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
           </div>
           
           {/* Apenas mostrar erro geral na etapa de revisão (etapa 6) */}
-          {validationErrors.length > 0 && activeStep === 6 && (
+          {validationErrors.length > 0 && activeStep === 5 && (
             <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               <AlertTitle>Campos obrigatórios não preenchidos</AlertTitle>

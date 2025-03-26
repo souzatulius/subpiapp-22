@@ -1,20 +1,22 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Input } from '@/components/ui/input';
-import { DemandFormData } from '@/hooks/demandForm/types';
-import { ValidationError } from '@/lib/formValidationUtils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ValidationError, getErrorSummary } from '@/lib/formValidationUtils';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 interface ReviewStepProps {
-  formData: DemandFormData;
+  formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   problemas: any[];
   origens: any[];
   tiposMidia: any[];
   filteredBairros: any[];
-  servicos: any[];
-  errors?: ValidationError[];
+  servicos?: any[];
+  errors: ValidationError[];
+  showValidationErrors?: boolean;
 }
 
 const ReviewStep: React.FC<ReviewStepProps> = ({
@@ -24,198 +26,172 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   origens,
   tiposMidia,
   filteredBairros,
-  servicos,
-  errors = []
+  servicos = [],
+  errors,
+  showValidationErrors = false
 }) => {
-  const hasError = (field: string) => errors.some(err => err.field === field);
-  const getErrorMessage = (field: string) => {
-    const error = errors.find(err => err.field === field);
-    return error ? error.message : '';
-  };
+  const selectedProblema = problemas.find(p => p.id === formData.problema_id);
+  const selectedOrigem = origens.find(o => o.id === formData.origem_id);
+  const selectedTipoMidia = tiposMidia.find(t => t.id === formData.tipo_midia_id);
+  const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
+  const selectedServico = servicos.find(s => s.id === formData.servico_id);
 
-  const getProblemaDescricao = () => {
-    const problema = problemas.find(p => p.id === formData.problema_id);
-    return problema ? problema.descricao : 'Não informado';
-  };
+  const ReviewSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
+    <div className="mb-4">
+      <h3 className="text-md font-medium mb-2">{title}</h3>
+      <Card>
+        <CardContent className="p-4">
+          {children}
+        </CardContent>
+      </Card>
+    </div>
+  );
 
-  const getServicoDescricao = () => {
-    if (formData.nao_sabe_servico) return 'Não informado pelo solicitante';
-    const servico = servicos.find(s => s.id === formData.servico_id);
-    return servico ? servico.descricao : 'Não informado';
-  };
-
-  const getOrigemDescricao = () => {
-    const origem = origens.find(o => o.id === formData.origem_id);
-    return origem ? origem.descricao : 'Não informado';
-  };
-
-  const getTipoMidiaDescricao = () => {
-    const tipoMidia = tiposMidia.find(t => t.id === formData.tipo_midia_id);
-    return tipoMidia ? tipoMidia.descricao : 'Não informado';
-  };
-
-  const getBairroNome = () => {
-    const bairro = filteredBairros.find(b => b.id === formData.bairro_id);
-    return bairro ? bairro.nome : 'Não informado';
-  };
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return 'Não informado';
-    try {
-      return format(new Date(dateStr), 'dd/MM/yyyy', { locale: ptBR });
-    } catch (e) {
-      return 'Data inválida';
-    }
-  };
+  const ReviewItem = ({ label, value, error }: { label: string, value: string | undefined, error?: boolean }) => (
+    <div className="py-1">
+      <span className={`text-sm font-medium ${error ? 'text-orange-500' : 'text-gray-500'}`}>{label}: </span>
+      {value ? (
+        <span className="text-sm">{value}</span>
+      ) : (
+        <span className="text-sm text-gray-400 italic">Não informado</span>
+      )}
+      {error && <Badge variant="outline" className="ml-2 bg-orange-50 text-orange-800 border-orange-200">Obrigatório</Badge>}
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <label className={`block text-sm font-medium ${hasError('titulo') ? 'text-orange-500' : 'text-gray-700'} mb-1`}>
-          Título da Demanda
-        </label>
-        <Input
-          name="titulo"
-          value={formData.titulo}
-          onChange={handleChange}
-          className={`w-full ${hasError('titulo') ? 'border-orange-500' : ''}`}
-        />
-        {hasError('titulo') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('titulo')}</p>
-        )}
-      </div>
+    <div className="space-y-4">
+      {showValidationErrors && errors.length > 0 && (
+        <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
+          <AlertTriangle className="h-4 w-4 text-orange-500" />
+          <AlertTitle>Campos obrigatórios não preenchidos</AlertTitle>
+          <AlertDescription>
+            {getErrorSummary(errors)}
+          </AlertDescription>
+        </Alert>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h3 className="font-medium text-gray-800 mb-4">Informações da Demanda</h3>
-          
-          <div className="space-y-3">
-            <div>
-              <p className="text-gray-600 text-sm">Protocolo 156:</p>
-              <p className="font-medium">
-                {formData.tem_protocolo_156 ? 
-                  (formData.numero_protocolo_156 || 'Sim, número não informado') : 
-                  'Não possui'
-                }
-              </p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Origem:</p>
-              <p className="font-medium">{getOrigemDescricao()}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Tipo de Mídia:</p>
-              <p className="font-medium">{getTipoMidiaDescricao()}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Prioridade:</p>
-              <p className="font-medium capitalize">{
-                formData.prioridade === 'alta' ? 'Alta' :
-                formData.prioridade === 'media' ? 'Média' :
-                formData.prioridade === 'baixa' ? 'Baixa' : 
-                formData.prioridade
-              }</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Prazo de Resposta:</p>
-              <p className="font-medium">{formatDate(formData.prazo_resposta)}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Tema/Problema:</p>
-              <p className="font-medium">{getProblemaDescricao()}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Serviço:</p>
-              <p className="font-medium">{getServicoDescricao()}</p>
-            </div>
-          </div>
+      <ReviewSection title="Origem e Protocolo">
+        <ReviewItem 
+          label="Origem da Demanda" 
+          value={selectedOrigem?.descricao}
+          error={errors.some(e => e.field === 'origem_id')}
+        />
+        {formData.tem_protocolo_156 && (
+          <ReviewItem 
+            label="Protocolo 156" 
+            value={formData.numero_protocolo_156}
+            error={errors.some(e => e.field === 'numero_protocolo_156')}
+          />
+        )}
+        {selectedTipoMidia && (
+          <ReviewItem 
+            label="Tipo de Mídia" 
+            value={selectedTipoMidia.descricao}
+          />
+        )}
+        {formData.veiculo_imprensa && (
+          <ReviewItem 
+            label="Veículo de Imprensa" 
+            value={formData.veiculo_imprensa}
+          />
+        )}
+      </ReviewSection>
+
+      <ReviewSection title="Problema e Serviço">
+        <ReviewItem 
+          label="Tema/Problema" 
+          value={selectedProblema?.descricao}
+          error={errors.some(e => e.field === 'problema_id')}
+        />
+        {!formData.nao_sabe_servico && (
+          <ReviewItem 
+            label="Serviço" 
+            value={selectedServico?.descricao}
+          />
+        )}
+        <div className="mt-2">
+          <span className="text-sm font-medium text-gray-500">Detalhes da Solicitação: </span>
+          <p className="text-sm mt-1 p-2 bg-gray-50 rounded-md">
+            {formData.detalhes_solicitacao || <span className="text-gray-400 italic">Não informado</span>}
+          </p>
         </div>
-        
-        <div>
-          <h3 className="font-medium text-gray-800 mb-4">Informações do Solicitante</h3>
-          
-          <div className="space-y-3">
-            <div>
-              <p className="text-gray-600 text-sm">Nome:</p>
-              <p className="font-medium">{formData.nome_solicitante || 'Não informado'}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Telefone:</p>
-              <p className="font-medium">{formData.telefone_solicitante || 'Não informado'}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Email:</p>
-              <p className="font-medium">{formData.email_solicitante || 'Não informado'}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Veículo de Imprensa:</p>
-              <p className="font-medium">{formData.veiculo_imprensa || 'Não informado'}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Bairro:</p>
-              <p className="font-medium">{getBairroNome()}</p>
-            </div>
-            
-            <div>
-              <p className="text-gray-600 text-sm">Endereço:</p>
-              <p className="font-medium">{formData.endereco || 'Não informado'}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div>
-        <h3 className="font-medium text-gray-800 mb-2">Detalhes da Solicitação</h3>
-        <div className="bg-gray-50 p-3 rounded-lg border">
-          <p className="whitespace-pre-line">{formData.detalhes_solicitacao || 'Não informado'}</p>
-        </div>
-      </div>
-      
-      <div>
-        <h3 className="font-medium text-gray-800 mb-2">Perguntas</h3>
-        <div className="bg-gray-50 p-3 rounded-lg border">
-          {formData.perguntas.filter(p => p.trim()).length > 0 ? (
-            <ol className="list-decimal list-inside space-y-2">
-              {formData.perguntas
-                .filter(pergunta => pergunta.trim())
-                .map((pergunta, index) => (
-                  <li key={index}>{pergunta}</li>
-                ))
-              }
-            </ol>
+      </ReviewSection>
+
+      <ReviewSection title="Dados do Solicitante">
+        <ReviewItem 
+          label="Nome" 
+          value={formData.nome_solicitante}
+          error={errors.some(e => e.field === 'nome_solicitante')}
+        />
+        <ReviewItem 
+          label="Telefone" 
+          value={formData.telefone_solicitante}
+        />
+        <ReviewItem 
+          label="E-mail" 
+          value={formData.email_solicitante}
+        />
+        <ReviewItem 
+          label="Prioridade" 
+          value={formData.prioridade ? formData.prioridade.charAt(0).toUpperCase() + formData.prioridade.slice(1) : undefined}
+          error={errors.some(e => e.field === 'prioridade')}
+        />
+      </ReviewSection>
+
+      <ReviewSection title="Localização">
+        <ReviewItem 
+          label="Bairro" 
+          value={selectedBairro?.nome}
+          error={errors.some(e => e.field === 'bairro_id')}
+        />
+        <ReviewItem 
+          label="Endereço" 
+          value={formData.endereco}
+        />
+      </ReviewSection>
+
+      <ReviewSection title="Perguntas e Anexos">
+        <ReviewItem 
+          label="Título" 
+          value={formData.titulo}
+          error={errors.some(e => e.field === 'titulo')}
+        />
+
+        <Separator className="my-2" />
+
+        <span className="text-sm font-medium text-gray-500">Perguntas para a Área Técnica:</span>
+        <div className="mt-1 space-y-1">
+          {formData.perguntas.filter((p: string) => p.trim() !== '').length > 0 ? (
+            formData.perguntas.map((pergunta: string, index: number) => (
+              pergunta.trim() !== '' && (
+                <div key={index} className="p-2 bg-gray-50 rounded-md text-sm">
+                  {index + 1}. {pergunta}
+                </div>
+              )
+            ))
           ) : (
-            <p className="text-gray-500">Nenhuma pergunta adicionada</p>
+            <p className="text-sm text-gray-400 italic">Nenhuma pergunta adicionada</p>
           )}
         </div>
-      </div>
-      
-      {formData.anexos.length > 0 && (
-        <div>
-          <h3 className="font-medium text-gray-800 mb-2">Anexos</h3>
-          <div className="bg-gray-50 p-3 rounded-lg border">
-            <ul className="list-disc list-inside space-y-1">
-              {formData.anexos.map((anexo, index) => (
-                <li key={index} className="text-blue-600 truncate">
-                  {typeof anexo === 'string' 
-                    ? anexo.split('/').pop() || `Anexo ${index + 1}`
-                    : `Anexo ${index + 1}`
-                  }
-                </li>
+
+        <Separator className="my-2" />
+
+        <span className="text-sm font-medium text-gray-500">Anexos:</span>
+        <div className="mt-1">
+          {formData.anexos.length > 0 ? (
+            <div className="grid grid-cols-1 gap-1">
+              {formData.anexos.map((anexo: string, index: number) => (
+                <div key={index} className="text-sm p-1 bg-gray-50 rounded-md truncate">
+                  {typeof anexo === 'string' ? anexo.split('/').pop() : ''}
+                </div>
               ))}
-            </ul>
-          </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 italic">Nenhum anexo adicionado</p>
+          )}
         </div>
-      )}
+      </ReviewSection>
     </div>
   );
 };

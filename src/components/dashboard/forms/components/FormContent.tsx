@@ -1,37 +1,37 @@
 
 import React from 'react';
-import RequestInfoStep from '../steps/RequestInfoStep';
-import ProblemStep from '../steps/ProblemStep';
-import LocationStep from '../steps/LocationStep';
-import QuestionsDetailsStep from '../steps/QuestionsDetailsStep';
-import ReviewStep from '../steps/ReviewStep';
 import ProtocolStep from '../steps/ProtocolStep';
+import DetailsStep from '../steps/DetailsStep';
+import ProblemStep from '../steps/ProblemStep';
+import PracticalInfoStep from '../steps/PracticalInfoStep';
+import OrganizeStep from '../steps/OrganizeStep';
+import ReviewStep from '../steps/ReviewStep';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 export const FORM_STEPS = [
   {
-    title: 'Protocolo e Origem',
-    description: 'Informe o protocolo 156 e a origem da demanda.',
+    title: 'De onde vem a sua solicitação?',
+    description: 'Selecione a origem da demanda e informe se há protocolo 156.',
   },
   {
-    title: 'Informações do Solicitante',
-    description: 'Dados do solicitante e prioridade da demanda.',
+    title: 'Vamos entender melhor o que está acontecendo',
+    description: 'Descreva a solicitação com detalhes.',
   },
   {
-    title: 'Tema/Problema',
+    title: 'Qual é o problema que precisa ser resolvido?',
     description: 'Selecione o tema e serviço relacionado à demanda.',
   },
   {
-    title: 'Localização',
-    description: 'Endereço e bairro relacionados à demanda.',
+    title: 'Agora precisamos de algumas informações práticas',
+    description: 'Dados do solicitante e localização da demanda.',
   },
   {
-    title: 'Perguntas e Anexos',
-    description: 'Adicione perguntas específicas e anexos se necessário.',
+    title: 'Vamos organizar e revisar essa demanda',
+    description: 'Adicione título, perguntas específicas e anexos se necessário.',
   },
   {
-    title: 'Revisão',
-    description: 'Revise e confirme as informações antes de finalizar.',
+    title: 'Revise tudo antes de enviar',
+    description: 'Verifique todas as informações antes de finalizar.',
   },
 ];
 
@@ -92,10 +92,12 @@ const FormContent: React.FC<FormContentProps> = ({
       );
     case 1:
       return (
-        <RequestInfoStep
+        <DetailsStep
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
+          origens={origens}
+          tiposMidia={tiposMidia}
           errors={errors}
         />
       );
@@ -114,7 +116,7 @@ const FormContent: React.FC<FormContentProps> = ({
       );
     case 3:
       return (
-        <LocationStep
+        <PracticalInfoStep
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
@@ -127,7 +129,7 @@ const FormContent: React.FC<FormContentProps> = ({
       );
     case 4:
       return (
-        <QuestionsDetailsStep
+        <OrganizeStep
           formData={formData}
           handleChange={handleChange}
           handlePerguntaChange={handlePerguntaChange}
@@ -147,6 +149,7 @@ const FormContent: React.FC<FormContentProps> = ({
           filteredBairros={filteredBairros}
           servicos={servicos}
           errors={errors}
+          showValidationErrors={true}
         />
       );
     default:

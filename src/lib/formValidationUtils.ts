@@ -9,8 +9,9 @@ export interface ValidationError {
 export const validateDemandForm = (formData: any, activeStep: number): ValidationError[] => {
   const errors: ValidationError[] = [];
   
-  // Step 0: Identification
-  if (activeStep === 0) {
+  // Only validate on the review step (step 5)
+  if (activeStep === 5) {
+    // Validate all required fields
     if (!formData.problema_id) {
       errors.push({
         field: 'problema_id',
@@ -32,10 +33,7 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
         message: 'Digite os 10 dígitos do protocolo 156'
       });
     }
-  }
-  
-  // Step 1: Classification and Origin
-  else if (activeStep === 1) {
+    
     if (!formData.origem_id) {
       errors.push({
         field: 'origem_id',
@@ -43,11 +41,6 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       });
     }
 
-    // Tipo de mídia não é mais obrigatório
-  }
-  
-  // Step 2: Requester Info
-  else if (activeStep === 2) {
     if (!formData.nome_solicitante || formData.nome_solicitante.trim() === '') {
       errors.push({
         field: 'nome_solicitante',
@@ -61,23 +54,14 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
         message: 'E-mail inválido'
       });
     }
-  }
-  
-  // Step 3: Location
-  else if (activeStep === 3) {
+    
     if (!formData.bairro_id) {
       errors.push({
         field: 'bairro_id',
         message: 'Selecione o bairro'
       });
     }
-  }
-  
-  // Step 4: Questions and Details
-  // No required fields for now
-  
-  // Step 5: Priority and Deadline
-  else if (activeStep === 5) {
+    
     if (!formData.prioridade) {
       errors.push({
         field: 'prioridade',
@@ -85,16 +69,6 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       });
     }
 
-    if (!formData.prazo_resposta) {
-      errors.push({
-        field: 'prazo_resposta',
-        message: 'Selecione o prazo para resposta'
-      });
-    }
-  }
-
-  // Step 6: Review
-  else if (activeStep === 6) {
     if (!formData.titulo || formData.titulo.trim() === '') {
       errors.push({
         field: 'titulo',
