@@ -2,7 +2,7 @@
 import React from 'react';
 import UsersManagement from './users/UsersManagement';
 import Positions from './Positions';
-import CoordinationAreas from './CoordinationAreas';
+import CoordinationsManager from './coordination/CoordinationsManager';
 import Problems from './Problems';
 import Services from './Services';
 import DemandOrigins from './DemandOrigins';
@@ -20,10 +20,8 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
     return <UsersManagement />;
   } else if (activeSection === 'cargos') {
     return <Positions />;
-  } else if (activeSection === 'coordenacoes_lista') {
-    return <CoordinationAreas />;
-  } else if (activeSection === 'areas') {
-    return <CoordinationAreas />;
+  } else if (activeSection === 'coordenacoes_lista' || activeSection === 'areas') {
+    return <CoordinationsManager />;
   } else if (activeSection === 'problemas') {
     return <Problems />;
   } else if (activeSection === 'servicos') {
