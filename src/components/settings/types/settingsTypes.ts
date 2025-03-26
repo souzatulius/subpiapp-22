@@ -3,7 +3,6 @@ export interface SettingsStats {
   users: number;
   areas: number;
   positions: number;
-  services: number;
   districts: number;
   neighborhoods: number;
   announcements: number;
@@ -21,6 +20,6 @@ export interface SettingsStats {
   configuracoesNotificacoes: number;
   permissoes: number;
   temas: number;
-  services: number;
   notificacoes: number;
+  servicos: number;
 }

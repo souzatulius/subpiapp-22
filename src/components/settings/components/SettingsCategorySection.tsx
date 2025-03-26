@@ -30,6 +30,7 @@ const SettingsCategorySection: React.FC<SettingsCategorySectionProps> = ({
             description={card.description}
             icon={card.icon}
             color={card.color}
+            link={card.link}
             onClick={() => onCardClick(getSectionFromLink(card.link))}
             count={card.count}
             loading={card.loading}

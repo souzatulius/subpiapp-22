@@ -64,7 +64,12 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
 
   const handleSubmit = async (data: z.infer<typeof serviceSchema>) => {
     try {
-      await onSubmit(data);
+      // Ensure data has both required properties as non-optional
+      const serviceData = {
+        descricao: data.descricao,
+        supervisao_tecnica_id: data.supervisao_tecnica_id
+      };
+      await onSubmit(serviceData);
       form.reset();
     } catch (error) {
       console.error('Submission error:', error);
