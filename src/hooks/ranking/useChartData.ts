@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FilterOptions, SGZOrdemServico } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Helper functions for chart data generation
 const generateChartData = (data: SGZOrdemServico[], filters: FilterOptions) => {
@@ -494,67 +495,125 @@ export const useChartData = (filters: FilterOptions) => {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [ordensData, setOrdensData] = useState<SGZOrdemServico[]>([]);
+  const [lastUploadId, setLastUploadId] = useState<string | null>(null);
+  const [chartLoadingProgress, setChartLoadingProgress] = useState(0); // New progress tracking
 
-  const fetchSGZData = useCallback(async () => {
+  // Get the last upload ID
+  const fetchLastUploadId = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sgz_uploads')
+        .select('id')
+        .order('data_upload', { ascending: false })
+        .limit(1);
+        
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        return data[0].id;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching last upload ID:', error);
+      return null;
+    }
+  }, []);
+
+  const fetchSGZData = useCallback(async (uploadId?: string | null) => {
     try {
       setIsLoading(true);
+      setChartLoadingProgress(25);
       
-      // Fetch all SGZ data
-      const { data, error } = await supabase
+      let query = supabase
         .from('sgz_ordens_servico')
         .select('*')
         .order('sgz_criado_em', { ascending: false });
       
+      // If uploadId is provided, filter by that specific upload
+      if (uploadId) {
+        query = query.eq('planilha_referencia', uploadId);
+      }
+      
+      const { data, error } = await query;
+      
       if (error) throw error;
       
+      setChartLoadingProgress(75);
       return data || [];
     } catch (error) {
       console.error('Error fetching SGZ data:', error);
+      toast.error('Erro ao carregar dados. Por favor, tente novamente.');
       return [];
     } finally {
+      setChartLoadingProgress(100);
       setIsLoading(false);
     }
   }, []);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (forceRefresh = false) => {
     setIsLoading(true);
     
     try {
-      // Fetch data from Supabase
-      const data = await fetchSGZData();
+      // Get last upload ID if needed
+      let uploadId = lastUploadId;
+      if (!uploadId || forceRefresh) {
+        uploadId = await fetchLastUploadId();
+        setLastUploadId(uploadId);
+      }
       
-      // Cast the data to the correct type
-      const typedData: SGZOrdemServico[] = data.map(item => ({
-        ...item,
-        id: item.id,
-        ordem_servico: item.ordem_servico,
-        sgz_status: item.sgz_status,
-        sgz_departamento_tecnico: item.sgz_departamento_tecnico,
-        sgz_bairro: item.sgz_bairro || '',
-        sgz_distrito: item.sgz_distrito,
-        sgz_tipo_servico: item.sgz_tipo_servico,
-        sgz_empresa: item.sgz_empresa || '',
-        sgz_criado_em: item.sgz_criado_em,
-        sgz_modificado_em: item.sgz_modificado_em || '',
-        sgz_dias_ate_status_atual: item.sgz_dias_ate_status_atual,
-        planilha_referencia: item.planilha_referencia
-      }));
+      // Fetch data filtered by last upload ID
+      const data = await fetchSGZData(uploadId);
       
-      setOrdensData(typedData);
-      
-      // Generate chart data with the fetched data
-      const generatedChartData = generateChartData(typedData, filters);
-      setChartData(generatedChartData);
-      
-      // Set last update time
-      setLastUpdate(new Date().toLocaleString('pt-BR'));
+      // If no data found, try fetching all data
+      if (data.length === 0) {
+        console.log('No data found for last upload, fetching all data');
+        const allData = await fetchSGZData();
+        if (allData.length > 0) {
+          processChartData(allData);
+          return;
+        }
+      } else {
+        processChartData(data);
+      }
     } catch (error) {
       console.error('Error loading chart data:', error);
+      toast.error('Erro ao carregar dados dos gráficos');
     } finally {
       setIsLoading(false);
     }
-  }, [filters, fetchSGZData]);
+  }, [fetchSGZData, fetchLastUploadId, lastUploadId]);
 
+  // Separate function to process chart data
+  const processChartData = useCallback((data: any[]) => {
+    // Cast the data to the correct type
+    const typedData: SGZOrdemServico[] = data.map(item => ({
+      ...item,
+      id: item.id,
+      ordem_servico: item.ordem_servico,
+      sgz_status: item.sgz_status,
+      sgz_departamento_tecnico: item.sgz_departamento_tecnico,
+      sgz_bairro: item.sgz_bairro || '',
+      sgz_distrito: item.sgz_distrito,
+      sgz_tipo_servico: item.sgz_tipo_servico,
+      sgz_empresa: item.sgz_empresa || '',
+      sgz_criado_em: item.sgz_criado_em,
+      sgz_modificado_em: item.sgz_modificado_em || '',
+      sgz_dias_ate_status_atual: item.sgz_dias_ate_status_atual,
+      planilha_referencia: item.planilha_referencia
+    }));
+    
+    setOrdensData(typedData);
+    
+    // Generate chart data with the fetched data
+    const generatedChartData = generateChartData(typedData, filters);
+    setChartData(generatedChartData);
+    
+    // Set last update time
+    setLastUpdate(new Date().toLocaleString('pt-BR'));
+  }, [filters]);
+
+  // Initial load on component mount
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -567,10 +626,19 @@ export const useChartData = (filters: FilterOptions) => {
     }
   }, [filters, ordensData]);
 
+  const forceRefresh = useCallback(() => {
+    toast.info('Atualizando gráficos com os dados mais recentes...');
+    // Reset lastUploadId to null to force fetching the latest
+    setLastUploadId(null);
+    return loadData(true);
+  }, [loadData]);
+
   return {
     chartData,
     isLoading,
     lastUpdate,
-    refreshData: loadData
+    chartLoadingProgress, // New progress indicator
+    refreshData: forceRefresh,
+    ordensCount: ordensData.length  // Added to show how many records were loaded
   };
 };

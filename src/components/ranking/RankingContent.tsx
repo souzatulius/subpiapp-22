@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import UploadSection from './UploadSection';
 import FilterSection from './FilterSection';
 import ChartsSection from './ChartsSection';
@@ -9,41 +9,74 @@ import { useUploadManagement } from '@/hooks/ranking/useUploadManagement';
 import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 import { useChartData } from '@/hooks/ranking/useChartData';
 import { Badge } from '@/components/ui/badge';
-import { CalendarClock, FileSpreadsheet, BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CalendarClock, FileSpreadsheet, BarChart3, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import { Progress } from '@/components/ui/progress';
 
 const RankingContent = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const {
     lastUpload,
     isLoading: isUploadLoading,
     uploads,
+    uploadProgress,
     fetchLastUpload,
     handleUpload,
     handleDeleteUpload
   } = useUploadManagement(user);
+  
   const {
     filters,
     chartVisibility,
     handleFiltersChange,
-    handleChartVisibilityChange
+    handleChartVisibilityChange,
+    resetFilters  // Added reset functionality
   } = useFilterManagement();
+  
   const {
     chartData,
     isLoading: isChartLoading,
     lastUpdate,
-    refreshData
+    chartLoadingProgress,
+    refreshData,
+    ordensCount
   } = useChartData(filters);
+
+  // Track if an upload just happened to trigger filter reset
+  const [justUploaded, setJustUploaded] = useState(false);
 
   // Combined loading state
   const isLoading = isUploadLoading || isChartLoading;
+  
+  // Custom upload handler that resets filters
+  const handleUploadWithReset = async (file: File) => {
+    await handleUpload(file);
+    setJustUploaded(true);
+  };
+  
+  // Handle refresh with filter reset
+  const handleRefreshWithReset = () => {
+    resetFilters();
+    refreshData();
+    toast.success('Filtros redefinidos e dados atualizados');
+  };
   
   useEffect(() => {
     if (user) {
       fetchLastUpload();
     }
   }, [user, fetchLastUpload]);
+  
+  // After upload completes, refresh chart data and reset filters if needed
+  useEffect(() => {
+    if (justUploaded && !isUploadLoading) {
+      resetFilters(); // Reset filters after upload
+      refreshData(); // Refresh chart data
+      setJustUploaded(false);
+      toast.success('Dados atualizados e filtros redefinidos');
+    }
+  }, [justUploaded, isUploadLoading, resetFilters, refreshData]);
   
   return (
     <div className="space-y-6">
@@ -73,16 +106,47 @@ const RankingContent = () => {
               <span>Planilha: {lastUpload.fileName}</span>
             </Badge>
           )}
+          
+          {ordensCount > 0 && (
+            <Badge variant="outline" className="flex items-center gap-1 px-3 py-1 text-orange-700 bg-orange-50 border-orange-200">
+              <span>Ordens carregadas: {ordensCount}</span>
+            </Badge>
+          )}
         </div>
       </div>
       
+      {/* Reset filters button */}
+      <div className="flex justify-end">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefreshWithReset}
+          className="text-orange-600"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Redefinir filtros e atualizar
+        </Button>
+      </div>
+      
+      {/* Chart loading progress indicator */}
+      {isChartLoading && chartLoadingProgress > 0 && (
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-gray-500">
+            <span>Atualizando gráficos...</span>
+            <span>{chartLoadingProgress}%</span>
+          </div>
+          <Progress value={chartLoadingProgress} className="h-2" />
+        </div>
+      )}
+      
       <UploadSection 
-        onUpload={handleUpload} 
+        onUpload={handleUploadWithReset}
         lastUpload={lastUpload} 
         onDelete={handleDeleteUpload} 
         isLoading={isLoading}
         onRefreshCharts={refreshData}
         uploads={uploads}
+        uploadProgress={uploadProgress}
       />
       
       <FilterSection 

@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { UploadInfo, SGZUpload } from '@/components/ranking/types';
@@ -5,10 +6,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
+// Helper function to normalize column names (new)
+const normalizeColumnName = (name: string): string => {
+  return name.toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, '_');
+};
+
+// Map of normalized column names to expected field names (new)
+const columnMapping: Record<string, string> = {
+  'ordem_de_servico': 'Ordem de Serviço',
+  'classificacao_de_servico': 'Classificação de Serviço',
+  'fornecedor': 'Fornecedor',
+  'criado_em': 'Criado em',
+  'status': 'Status',
+  'data_do_status': 'Data do Status',
+  'bairro': 'Bairro',
+  'distrito': 'Distrito'
+};
+
 export const useUploadManagement = (user: User | null) => {
   const [lastUpload, setLastUpload] = useState<UploadInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploads, setUploads] = useState<SGZUpload[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0); // Progress tracking (new)
 
   const fetchLastUpload = useCallback(async () => {
     if (!user) return;
@@ -54,12 +76,27 @@ export const useUploadManagement = (user: User | null) => {
     }
   }, [user]);
 
+  const findColumnName = (headers: string[], normalizedTarget: string): string | null => {
+    // Try to find exact match first
+    const exactMatch = headers.find(header => normalizeColumnName(header) === normalizedTarget);
+    if (exactMatch) return exactMatch;
+    
+    // Try to find similar match
+    const similarMatch = headers.find(header => {
+      const normalized = normalizeColumnName(header);
+      return normalized.includes(normalizedTarget) || normalizedTarget.includes(normalized);
+    });
+    
+    return similarMatch || null;
+  };
+
   const processExcelFile = async (file: File): Promise<any[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       
       reader.onload = async (e) => {
         try {
+          setUploadProgress(25); // Start processing
           const data = new Uint8Array(e.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: 'array' });
           
@@ -68,39 +105,73 @@ export const useUploadManagement = (user: User | null) => {
           const worksheet = workbook.Sheets[firstSheetName];
           
           // Converter para JSON
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          const rawJsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
           
           // Validar dados
-          if (!jsonData || jsonData.length === 0) {
+          if (!rawJsonData || rawJsonData.length === 0) {
             throw new Error('A planilha está vazia ou em formato inválido.');
           }
+
+          setUploadProgress(50); // Halfway through processing
           
-          // Validar colunas obrigatórias
+          // Get headers from first row
+          const headers = Object.keys(rawJsonData[0]);
+          
+          // Check for required columns using normalization
           const requiredColumns = [
-            'Ordem de Serviço', 
-            'Classificação de Serviço',
-            'Criado em',
-            'Status',
-            'Data do Status',
-            'Distrito'
+            'ordem_de_servico', 
+            'classificacao_de_servico',
+            'criado_em',
+            'status',
+            'data_do_status',
+            'distrito'
           ];
           
-          const firstRow = jsonData[0];
-          const missingColumns = requiredColumns.filter(
-            col => !Object.keys(firstRow).some(key => key.includes(col))
-          );
+          const missingColumns = requiredColumns.filter(normalizedCol => {
+            return !findColumnName(headers, normalizedCol);
+          });
           
           if (missingColumns.length > 0) {
-            throw new Error(`Colunas obrigatórias ausentes: ${missingColumns.join(', ')}`);
+            const missingOriginalNames = missingColumns.map(col => columnMapping[col] || col);
+            throw new Error(`Colunas obrigatórias ausentes: ${missingOriginalNames.join(', ')}`);
           }
           
-          resolve(jsonData);
+          // Normalize the data structure
+          const normalizedData = rawJsonData.map(row => {
+            const normalizedRow: any = {};
+            
+            // For each required column, find it in the original data and map it
+            requiredColumns.forEach(normalizedCol => {
+              const originalColName = findColumnName(headers, normalizedCol);
+              if (originalColName) {
+                // Map to the expected structure with friendly column names
+                normalizedRow[columnMapping[normalizedCol] || normalizedCol] = row[originalColName];
+              }
+            });
+            
+            // Additional optional columns
+            const fornecedorCol = findColumnName(headers, 'fornecedor');
+            if (fornecedorCol) normalizedRow['Fornecedor'] = row[fornecedorCol];
+            
+            const bairroCol = findColumnName(headers, 'bairro');
+            if (bairroCol) normalizedRow['Bairro'] = row[bairroCol];
+            
+            return normalizedRow;
+          });
+          
+          setUploadProgress(75); // Processing complete
+          resolve(normalizedData);
         } catch (error) {
+          setUploadProgress(0);
           reject(error);
         }
       };
       
-      reader.onerror = (error) => reject(error);
+      reader.onerror = (error) => {
+        setUploadProgress(0);
+        reject(error);
+      };
+      
       reader.readAsArrayBuffer(file);
     });
   };
@@ -109,26 +180,10 @@ export const useUploadManagement = (user: User | null) => {
     // Determinar o departamento técnico com base no tipo de serviço
     const servicoTipo = row['Classificação de Serviço'] || '';
     
-    // Usar a função do banco para mapear o serviço para departamento técnico (no frontend)
-    const mapServiceToArea = (serviceType: string): "STM" | "STLP" => {
-      const stlpKeywords = [
-        'AREAS AJARDINADAS', 'AREAS AJARDINADAS MANUAL', 
-        'HIDROJATO', 'MICRODRENAGEM MECANIZADA', 
-        'LIMPEZA DE CORREGOS', 'LIMPEZA MANUAL DE CORREGOS', 
-        'MICRODRENAGEM', 'PODA', 'REMOCAO', 'ARVORES', 'MANEJO'
-      ];
-      
-      const upperService = serviceType.toUpperCase();
-      for (const keyword of stlpKeywords) {
-        if (upperService.includes(keyword)) {
-          return 'STLP';
-        }
-      }
-      
-      return 'STM';
-    };
-    
-    const departamentoTecnico = mapServiceToArea(servicoTipo);
+    // Use the database function to map the service to technical department
+    const departamentoTecnico = servicoTipo ? supabase.rpc('sgz_map_service_to_area', {
+      service_type: servicoTipo
+    }) : 'STM';
     
     return {
       ordem_servico: row['Ordem de Serviço'] || '',
@@ -152,11 +207,13 @@ export const useUploadManagement = (user: User | null) => {
 
     try {
       setIsLoading(true);
+      setUploadProgress(10); // Initial progress
       
       // Verificar tipo de arquivo
       if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
         toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
         setIsLoading(false);
+        setUploadProgress(0);
         return;
       }
       
@@ -213,6 +270,8 @@ export const useUploadManagement = (user: User | null) => {
         }
       }
       
+      setUploadProgress(90); // Almost done
+      
       // Inserir novas ordens em lote
       if (ordensParaInserir.length > 0) {
         const { error: insertError } = await supabase
@@ -231,9 +290,11 @@ export const useUploadManagement = (user: User | null) => {
       // Buscar o upload atualizado
       await fetchLastUpload();
       
+      setUploadProgress(100); // Complete
       toast.success(`Planilha SGZ processada com sucesso! ${ordensParaInserir.length} novas ordens inseridas.`);
     } catch (error: any) {
       console.error('Error uploading file:', error);
+      setUploadProgress(0);
       toast.error(`Erro ao processar a planilha SGZ: ${error.message || 'Falha no processamento'}`);
     } finally {
       setIsLoading(false);
@@ -285,6 +346,7 @@ export const useUploadManagement = (user: User | null) => {
     lastUpload,
     isLoading,
     uploads,
+    uploadProgress, // New progress indicator
     fetchLastUpload,
     handleUpload,
     handleDeleteUpload

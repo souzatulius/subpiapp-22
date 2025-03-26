@@ -1,18 +1,18 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { FilterOptions, ChartVisibility } from '@/components/ranking/types';
 
 export const useFilterManagement = () => {
-  // State for filters
-  const [filters, setFilters] = useState<FilterOptions>({
+  // Default filter state
+  const defaultFilters: FilterOptions = {
     dateRange: undefined,
     statuses: ['Todos'],
     serviceTypes: ['Todos'],
     districts: ['Todos']
-  });
+  };
 
-  // State for chart visibility
-  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
+  // Default visibility state
+  const defaultChartVisibility: ChartVisibility = {
     statusDistribution: true,
     resolutionTime: true,
     topCompanies: true,
@@ -29,7 +29,13 @@ export const useFilterManagement = () => {
     externalDistricts: true,
     serviceDiversity: true,
     closureTime: true
-  });
+  };
+
+  // State for filters
+  const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
+
+  // State for chart visibility
+  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>(defaultChartVisibility);
 
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -39,10 +45,16 @@ export const useFilterManagement = () => {
     setChartVisibility(prev => ({ ...prev, ...newVisibility }));
   };
 
+  // Reset filters to defaults
+  const resetFilters = useCallback(() => {
+    setFilters(defaultFilters);
+  }, []);
+
   return {
     filters,
     chartVisibility,
     handleFiltersChange,
-    handleChartVisibilityChange
+    handleChartVisibilityChange,
+    resetFilters
   };
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
+import { Progress } from '@/components/ui/progress'; // Import Progress component
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
@@ -16,6 +18,7 @@ interface UploadSectionProps {
   isLoading: boolean;
   onRefreshCharts: () => void;
   uploads?: any[];
+  uploadProgress?: number; // New prop for tracking upload progress
 }
 
 const UploadSection: React.FC<UploadSectionProps> = ({ 
@@ -24,7 +27,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   onDelete,
   isLoading,
   onRefreshCharts,
-  uploads = []
+  uploads = [],
+  uploadProgress = 0
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +87,16 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     toast.success('Modelo de planilha SGZ baixado com sucesso!');
   };
 
+  // Progress UI helper
+  const getProgressText = () => {
+    if (uploadProgress === 0) return "";
+    if (uploadProgress < 25) return "Validando arquivo...";
+    if (uploadProgress < 50) return "Processando dados...";
+    if (uploadProgress < 75) return "Salvando no banco de dados...";
+    if (uploadProgress < 100) return "Finalizando importação...";
+    return "Concluído!";
+  };
+
   return (
     <Card className="border-orange-200">
       <CardHeader className="pb-2">
@@ -120,6 +134,17 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </Button>
           </div>
           
+          {/* New progress indicator */}
+          {isLoading && uploadProgress > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>{getProgressText()}</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+          
           {lastUpload && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-4 p-3 border rounded-md bg-orange-50 border-orange-200">
@@ -147,7 +172,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                 onClick={handleRefreshClick}
                 disabled={isLoading}
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Atualizar gráficos
               </Button>
             </div>
