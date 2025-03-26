@@ -108,10 +108,10 @@ export const useNotasQuery = () => {
 
         return {
           ...nota,
-          autor: autor,
-          aprovador: aprovador,
-          supervisao_tecnica: supervisao_tecnica,
-          area_coordenacao: { id: '', descricao: supervisao_tecnica.descricao },
+          autor,
+          aprovador,
+          supervisao_tecnica,
+          area_coordenacao: { id: '', descricao: supervisao_tecnica?.descricao || 'Não informada' },
           historico_edicoes: processedHistorico
         };
       }) as NotaOficial[];
@@ -121,8 +121,8 @@ export const useNotasQuery = () => {
         return processedData.filter(nota => 
           nota.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || 
           nota.texto.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (nota.autor?.nome_completo?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-          (nota.supervisao_tecnica?.descricao?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+          nota.autor.nome_completo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (nota.supervisao_tecnica?.descricao || '').toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
 
@@ -135,8 +135,8 @@ export const useNotasQuery = () => {
     ? notas.filter(nota => 
         nota.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || 
         nota.texto.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (nota.autor?.nome_completo?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-        (nota.supervisao_tecnica?.descricao?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+        nota.autor.nome_completo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (nota.supervisao_tecnica?.descricao || '').toLowerCase().includes(searchQuery.toLowerCase())
       )
     : notas;
 

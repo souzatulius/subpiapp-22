@@ -64,7 +64,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           
           return {
             ...edit,
-            editor // Safe null handling
+            editor: editor // Safe null handling
           };
         }) as NotaEdicao[];
         
@@ -88,7 +88,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           aprovador,
           supervisao_tecnica,
           historico_edicoes: processedHistorico,
-          area_coordenacao: { id: '', descricao: supervisao_tecnica.descricao }
+          area_coordenacao: { id: '', descricao: supervisao_tecnica?.descricao || 'Não informada' }
         };
       }) as NotaOficial[];
       
