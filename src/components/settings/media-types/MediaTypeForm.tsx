@@ -7,12 +7,14 @@ import { mediaTypeSchema, MediaType } from '@/hooks/useMediaTypes';
 import MediaTypeButton from './MediaTypeButton';
 import { useMediaTypes } from '@/hooks/useMediaTypes';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, Image } from 'lucide-react';
+import IconSelector from '../IconSelector';
 
 interface MediaTypeFormProps {
-  onSubmit: (data: { descricao: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; icone?: string }) => Promise<void>;
   onCancel: () => void;
   defaultValue?: string;
+  defaultIcon?: string;
   isSubmitting: boolean;
   submitText?: string;
 }
@@ -21,13 +23,16 @@ const MediaTypeForm: React.FC<MediaTypeFormProps> = ({
   onSubmit,
   onCancel,
   defaultValue = '',
+  defaultIcon = '',
   isSubmitting,
   submitText = 'Salvar'
 }) => {
   const { mediaTypes } = useMediaTypes();
   const [selectedType, setSelectedType] = useState<string | null>(defaultValue);
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(defaultIcon);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(defaultValue !== '' && !mediaTypes.some(type => type.descricao === defaultValue));
+  const [showIconSelector, setShowIconSelector] = useState(false);
 
   // Filter media types based on search term
   const filteredMediaTypes = mediaTypes.filter(type => 
@@ -44,10 +49,22 @@ const MediaTypeForm: React.FC<MediaTypeFormProps> = ({
     setSelectedType('');
   };
 
+  const handleIconSelect = (iconName: string) => {
+    setSelectedIcon(iconName);
+    setShowIconSelector(false);
+  };
+
+  const handleSubmit = (data: any) => {
+    return onSubmit({
+      ...data,
+      icone: selectedIcon || undefined
+    });
+  };
+
   return (
     <DataEntryForm
       schema={mediaTypeSchema}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       onCancel={onCancel}
       defaultValues={{
         descricao: defaultValue,
@@ -65,6 +82,27 @@ const MediaTypeForm: React.FC<MediaTypeFormProps> = ({
                 className="rounded-lg"
                 {...form.register('descricao')}
               />
+              
+              <div className="mt-4">
+                <Label htmlFor="icon">Ícone</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-10 h-10 border rounded-md flex items-center justify-center bg-gray-50">
+                    {selectedIcon ? (
+                      <img src={selectedIcon} alt="Selected icon" className="w-6 h-6" />
+                    ) : (
+                      <Image className="w-6 h-6 text-gray-400" />
+                    )}
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowIconSelector(true)}
+                  >
+                    Selecionar ícone
+                  </Button>
+                </div>
+              </div>
+              
               <Button 
                 type="button" 
                 variant="outline" 
@@ -115,6 +153,13 @@ const MediaTypeForm: React.FC<MediaTypeFormProps> = ({
                 />
               )}
             </>
+          )}
+          
+          {showIconSelector && (
+            <IconSelector
+              onSelect={handleIconSelect}
+              onClose={() => setShowIconSelector(false)} 
+            />
           )}
         </div>
       )}

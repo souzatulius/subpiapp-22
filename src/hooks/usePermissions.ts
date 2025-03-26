@@ -9,8 +9,8 @@ export interface UsePermissionsReturn {
   userSupervisaoTecnica: string | null;
   isLoading: boolean;
   error: Error | null;
-  loading: boolean; // Add the loading property
-  canAccessProtectedRoute: (route: string) => boolean; // Add the function
+  loading: boolean;
+  canAccessProtectedRoute: (route: string) => boolean;
 }
 
 export const usePermissions = (): UsePermissionsReturn => {
@@ -40,7 +40,7 @@ export const usePermissions = (): UsePermissionsReturn => {
 
         if (adminCheckError) throw adminCheckError;
         
-        setIsAdmin(!!isUserAdmin);
+        let adminStatus = !!isUserAdmin;
 
         // Fetch user data for coordination and supervisao tecnica
         const { data: userData, error: userError } = await supabase
@@ -54,26 +54,43 @@ export const usePermissions = (): UsePermissionsReturn => {
         setUserCoordination(userData?.coordenacao_id || null);
         setUserSupervisaoTecnica(userData?.supervisao_tecnica_id || null);
 
-        // If not admin by role, check also by legacy permission
-        if (!isUserAdmin) {
+        // If user belongs to Gabinete or Comunicação coordination, grant admin access
+        if (userData?.coordenacao_id) {
+          const { data: coordData, error: coordError } = await supabase
+            .from('coordenacoes')
+            .select('descricao')
+            .eq('id', userData.coordenacao_id)
+            .single();
+            
+          if (!coordError && coordData) {
+            const coordDescription = coordData.descricao.toLowerCase();
+            if (coordDescription.includes('gabinete') || coordDescription.includes('comunicação') || coordDescription.includes('comunicacao')) {
+              adminStatus = true;
+            }
+          }
+        }
+
+        // If not admin by role or coordination, check by legacy permissions
+        if (!adminStatus) {
           const { data: isAdminByPermission, error: permissionError } = await supabase
             .rpc('is_admin', { user_id: user.id });
             
           if (!permissionError && isAdminByPermission) {
-            setIsAdmin(true);
+            adminStatus = true;
           }
         }
 
         // Also check if admin by coordination (fallback method)
-        if (!isUserAdmin) {
+        if (!adminStatus) {
           const { data: isAdminByCoord, error: coordError } = await supabase
             .rpc('is_admin_by_coordenacao', { user_id: user.id });
             
           if (!coordError && isAdminByCoord) {
-            setIsAdmin(true);
+            adminStatus = true;
           }
         }
 
+        setIsAdmin(adminStatus);
       } catch (err: any) {
         console.error('Error fetching user permissions:', err);
         setError(err);

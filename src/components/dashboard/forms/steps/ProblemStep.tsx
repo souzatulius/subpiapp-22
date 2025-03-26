@@ -5,18 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from "@/components/ui/checkbox";
 import { ValidationError } from '@/lib/formValidationUtils';
-import { 
-  AlertTriangle, 
-  Map, 
-  MapPin, 
-  Trash2, 
-  Droplets, 
-  Building2, 
-  Trees, 
-  Lightbulb, 
-  HardHat, 
-  Shield 
-} from 'lucide-react';
+import { getProblemIcon } from '@/components/settings/problems/renderIcon';
 
 interface ProblemStepProps {
   formData: {
@@ -47,36 +36,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
-  };
-
-  // Get problem icon based on description
-  const getProblemIcon = (problema: any) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      "Buraco": <HardHat className="h-8 w-8" />,
-      "Iluminação": <Lightbulb className="h-8 w-8" />,
-      "Árvore": <Trees className="h-8 w-8" />,
-      "Esgoto": <Droplets className="h-8 w-8" />,
-      "Calçada": <Building2 className="h-8 w-8" />,
-      "Lixo": <Trash2 className="h-8 w-8" />,
-      "Sinalização": <MapPin className="h-8 w-8" />,
-      "Segurança": <Shield className="h-8 w-8" />,
-      "Outros": <AlertTriangle className="h-8 w-8" />
-    };
-    
-    // Default icon or from database
-    if (problema.icone) {
-      // Here we could return a custom icon if it's stored in the database
-      return <img src={problema.icone} alt={problema.descricao} className="h-8 w-8" />;
-    }
-    
-    // Try to match by keywords in the description
-    for (const [keyword, icon] of Object.entries(iconMap)) {
-      if (problema.descricao.toLowerCase().includes(keyword.toLowerCase())) {
-        return icon;
-      }
-    }
-    
-    return <Map className="h-8 w-8" />;
   };
 
   return (

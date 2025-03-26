@@ -1,16 +1,16 @@
 
 import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogClose
+  DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { User, Calendar, Building, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, User, Building, FileDown } from 'lucide-react';
 import { NotaOficial } from '@/types/nota';
+import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
 
 interface NotaDetailDialogProps {
   nota: NotaOficial;
@@ -22,61 +22,91 @@ interface NotaDetailDialogProps {
 const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({ 
   nota, 
   isOpen, 
-  onClose, 
-  formatDate 
+  onClose,
+  formatDate
 }) => {
-  // Extraction with fallbacks for optional fields
-  const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
-  const areaNome = nota.supervisao_tecnica?.descricao || 'Área não informada';
-  const aprovadorNome = nota.aprovador?.nome_completo;
-  const temDemanda = !!(nota.demanda_id || nota.demanda?.id);
-  // Use either criado_em or created_at, whichever is available
-  const dataCreated = nota.criado_em || nota.created_at;
+  const { exportNotaToPDF, exporting } = useExportNotaPDF(formatDate);
+  
+  const handleExportPDF = () => {
+    exportNotaToPDF(nota);
+  };
 
+  const autorNome = nota.autor?.nome_completo || "Autor desconhecido";
+  const areaNome = nota.supervisao_tecnica?.descricao || "Área não especificada";
+  const dataCriacao = nota.criado_em || nota.created_at || "";
+  const dataAtualizacao = nota.atualizado_em || nota.updated_at || "";
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">{nota.titulo}</DialogTitle>
-          <div className="flex flex-col space-y-1 mt-2 text-sm text-gray-500">
-            <div className="flex items-center">
-              <User className="w-4 h-4 mr-2" />
-              <span>Por: {autorNome}</span>
-            </div>
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
-              <span>Data: {formatDate(dataCreated)}</span>
-            </div>
-            <div className="flex items-center">
-              <Building className="w-4 h-4 mr-2" />
-              <span>Área: {areaNome}</span>
-            </div>
-            {temDemanda && (
-              <div className="flex items-center">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                <span>Vinculada a demanda: {nota.demanda?.titulo || 'Demanda não encontrada'}</span>
-              </div>
-            )}
-          </div>
+          <DialogTitle className="text-xl">{nota.titulo}</DialogTitle>
         </DialogHeader>
         
-        <div className="my-4 pb-4 border-b">
-          <div className="prose prose-sm max-w-none">
-            <p className="text-gray-700 whitespace-pre-wrap">{nota.texto}</p>
+        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-gray-500 my-2">
+          <div className="flex items-center">
+            <User className="w-4 h-4 mr-1" />
+            <span>{autorNome}</span>
           </div>
+          <div className="flex items-center">
+            <Building className="w-4 h-4 mr-1" />
+            <span>{areaNome}</span>
+          </div>
+          <div className="flex items-center">
+            <Calendar className="w-4 h-4 mr-1" />
+            <span>{formatDate(dataCriacao)}</span>
+          </div>
+          {nota.atualizado_em && nota.atualizado_em !== nota.criado_em && (
+            <div className="flex items-center">
+              <Clock className="w-4 h-4 mr-1" />
+              <span>Atualizado em: {formatDate(dataAtualizacao)}</span>
+            </div>
+          )}
         </div>
         
-        {aprovadorNome && (
-          <div className="text-sm text-gray-500 flex items-center">
-            <span className="font-medium mr-2">Aprovado por:</span>
-            <span>{aprovadorNome}</span>
+        <div className="relative border border-gray-200 rounded-md p-4 bg-white">
+          <div className="absolute top-2 right-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+            {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
+          </div>
+          
+          <div className="prose max-w-none mt-4" dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br />') }} />
+        </div>
+        
+        {nota.historico_edicoes && nota.historico_edicoes.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-medium mb-2">Histórico de Edições</h3>
+            <div className="space-y-4">
+              {nota.historico_edicoes.map((edicao) => (
+                <div key={edicao.id} className="border border-gray-200 rounded-md p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-medium">
+                      {edicao.editor?.nome_completo || "Editor desconhecido"}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatDate(edicao.criado_em)}
+                    </span>
+                  </div>
+                  <div className="text-sm">
+                    <p className="mb-1"><span className="font-medium">Título anterior:</span> {edicao.titulo_anterior}</p>
+                    <p><span className="font-medium">Título novo:</span> {edicao.titulo_novo}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline">Fechar</Button>
-          </DialogClose>
+        <DialogFooter className="mt-6">
+          <Button 
+            variant="outline" 
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="flex items-center"
+          >
+            <FileDown className="w-4 h-4 mr-1" />
+            {exporting ? 'Exportando...' : 'Exportar PDF'}
+          </Button>
+          <Button onClick={onClose}>Fechar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

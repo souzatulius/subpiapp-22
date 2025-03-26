@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DataTable from './data-table/DataTable';
 import MediaTypeForm from './media-types/MediaTypeForm';
@@ -37,7 +38,7 @@ const MediaTypes = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string }) => {
+  const handleEdit = async (data: { descricao: string; icone?: string }) => {
     if (!editingMediaType) return Promise.reject(new Error('Nenhum tipo de mídia selecionado'));
     
     try {
@@ -49,7 +50,7 @@ const MediaTypes = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string }) => {
+  const handleAdd = async (data: { descricao: string; icone?: string }) => {
     try {
       await addMediaType(data);
       closeAddForm();
@@ -66,12 +67,17 @@ const MediaTypes = () => {
 
   const columns = [
     {
+      key: 'icone',
+      header: 'Ícone',
+      render: (row: MediaType) => getMediaTypeIcon(row),
+      width: '60px'
+    },
+    {
       key: 'descricao',
       header: 'Descrição',
       render: (row: MediaType) => (
         <div className="flex items-center gap-2">
-          {getMediaTypeIcon(row)}
-          <span>{row.descricao}</span>
+          {row.descricao}
         </div>
       ),
     },

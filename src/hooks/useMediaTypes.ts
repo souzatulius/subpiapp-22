@@ -12,6 +12,7 @@ export type MediaType = {
   id: string;
   descricao: string;
   criado_em: string;
+  icone?: string;
 };
 
 export function useMediaTypes() {
@@ -46,18 +47,24 @@ export function useMediaTypes() {
     }
   };
 
-  const addMediaType = async (data: { descricao: string }) => {
+  const addMediaType = async (data: { descricao: string; icone?: string }) => {
     setIsSubmitting(true);
     try {
       console.log('Adicionando tipo de mídia:', data);
       
-      const { data: newId, error } = await supabase.rpc('insert_tipo_midia', {
-        p_descricao: data.descricao
-      });
+      // Insert directly instead of using the function because we now have an icon field
+      const { data: newData, error } = await supabase
+        .from('tipos_midia')
+        .insert({
+          descricao: data.descricao,
+          icone: data.icone
+        })
+        .select()
+        .single();
       
       if (error) throw error;
       
-      console.log('Tipo de mídia adicionado com sucesso:', newId);
+      console.log('Tipo de mídia adicionado com sucesso:', newData);
       
       toast({
         title: 'Sucesso',
@@ -79,15 +86,21 @@ export function useMediaTypes() {
     }
   };
 
-  const updateMediaType = async (id: string, data: { descricao: string }) => {
+  const updateMediaType = async (id: string, data: { descricao: string; icone?: string }) => {
     setIsSubmitting(true);
     try {
       console.log('Atualizando tipo de mídia:', id, data);
       
-      const { data: result, error } = await supabase.rpc('update_tipo_midia', {
-        p_id: id,
-        p_descricao: data.descricao
-      });
+      // Update directly instead of using the function because we now have an icon field
+      const { data: result, error } = await supabase
+        .from('tipos_midia')
+        .update({
+          descricao: data.descricao,
+          icone: data.icone
+        })
+        .eq('id', id)
+        .select()
+        .single();
       
       if (error) throw error;
       
@@ -134,9 +147,10 @@ export function useMediaTypes() {
         return;
       }
       
-      const { error } = await supabase.rpc('delete_tipo_midia', {
-        p_id: mediaType.id
-      });
+      const { error } = await supabase
+        .from('tipos_midia')
+        .delete()
+        .eq('id', mediaType.id);
       
       if (error) throw error;
       

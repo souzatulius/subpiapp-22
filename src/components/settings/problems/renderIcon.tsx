@@ -1,45 +1,74 @@
 
 import React from 'react';
 import { 
-  LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, 
-  Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb,
-  Landmark, Globe, Building, FileText, Phone, Map, Activity, FileCheck,
-  Truck, BusFront, TentTree, Waves, CloudRain, Radiation
+  AlertTriangle, 
+  Map, 
+  MapPin, 
+  Trash2, 
+  Droplets, 
+  Building2, 
+  Trees, 
+  Lightbulb, 
+  HardHat, 
+  Shield 
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
-export const renderIcon = (iconName?: string) => {
-  if (!iconName) return <div className="w-5 h-5 bg-gray-100 rounded-full"></div>;
+export const renderIcon = (iconPath?: string) => {
+  if (!iconPath) {
+    return <Map className="h-5 w-5" />;
+  }
 
-  const icons: { [key: string]: React.ReactElement } = {
-    "LayoutDashboard": <LayoutDashboard className="h-5 w-5" />,
-    "Droplet": <Droplet className="h-5 w-5" />,
-    "Trash2": <Trash2 className="h-5 w-5" />,
-    "Trees": <Trees className="h-5 w-5" />,
-    "AlertTriangle": <AlertTriangle className="h-5 w-5" />,
-    "MessageSquare": <MessageSquare className="h-5 w-5" />,
-    "Briefcase": <Briefcase className="h-5 w-5" />,
-    "Book": <Book className="h-5 w-5" />,
-    "Users": <Users className="h-5 w-5" />,
-    "Mail": <Mail className="h-5 w-5" />,
-    "Heart": <Heart className="h-5 w-5" />,
-    "Home": <Home className="h-5 w-5" />,
-    "Code": <Code className="h-5 w-5" />,
-    "Lightbulb": <Lightbulb className="h-5 w-5" />,
-    "Landmark": <Landmark className="h-5 w-5" />,
-    "Globe": <Globe className="h-5 w-5" />,
-    "Building": <Building className="h-5 w-5" />,
-    "FileText": <FileText className="h-5 w-5" />,
-    "Phone": <Phone className="h-5 w-5" />,
-    "Map": <Map className="h-5 w-5" />,
-    "Activity": <Activity className="h-5 w-5" />,
-    "FileCheck": <FileCheck className="h-5 w-5" />,
-    "Truck": <Truck className="h-5 w-5" />,
-    "BusFront": <BusFront className="h-5 w-5" />,
-    "TentTree": <TentTree className="h-5 w-5" />,
-    "Waves": <Waves className="h-5 w-5" />,
-    "CloudRain": <CloudRain className="h-5 w-5" />,
-    "Radiation": <Radiation className="h-5 w-5" />
+  // Check if it's a Lucide icon name
+  if (Object.keys(LucideIcons).includes(iconPath)) {
+    const IconComponent = LucideIcons[iconPath as keyof typeof LucideIcons] as React.FC<{ className?: string }>;
+    return <IconComponent className="h-5 w-5" />;
+  }
+
+  // If not a Lucide icon name, render as image
+  try {
+    return (
+      <div className="w-5 h-5 flex items-center justify-center">
+        <img 
+          src={iconPath} 
+          alt="Icon" 
+          className="max-w-full max-h-full"
+          onError={() => {
+            console.error('Failed to load icon:', iconPath);
+          }}
+        />
+      </div>
+    );
+  } catch (e) {
+    console.error('Error rendering icon:', e);
+    return <Map className="h-5 w-5" />;
+  }
+};
+
+export const getProblemIcon = (problema: any) => {
+  if (problema.icone) {
+    return renderIcon(problema.icone);
+  }
+  
+  const iconMap: Record<string, React.ReactNode> = {
+    "Buraco": <HardHat className="h-8 w-8" />,
+    "Iluminação": <Lightbulb className="h-8 w-8" />,
+    "Árvore": <Trees className="h-8 w-8" />,
+    "Esgoto": <Droplets className="h-8 w-8" />,
+    "Calçada": <Building2 className="h-8 w-8" />,
+    "Lixo": <Trash2 className="h-8 w-8" />,
+    "Sinalização": <MapPin className="h-8 w-8" />,
+    "Segurança": <Shield className="h-8 w-8" />,
+    "Outros": <AlertTriangle className="h-8 w-8" />
   };
-
-  return icons[iconName] || <div className="w-5 h-5 bg-gray-100 rounded-full"></div>;
+  
+  // Try to match by keywords in the description
+  const description = problema.descricao.toLowerCase();
+  for (const [keyword, icon] of Object.entries(iconMap)) {
+    if (description.includes(keyword.toLowerCase())) {
+      return icon;
+    }
+  }
+  
+  return <Map className="h-8 w-8" />;
 };

@@ -1,38 +1,47 @@
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SupervisaoTecnica } from '@/types/common';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Area } from '@/hooks/problems/types';
-import IconSelector from './IconSelector';
+import { useForm } from 'react-hook-form';
+import { Image } from 'lucide-react';
+import IconSelector from '../IconSelector';
 
 interface ProblemFormProps {
   onSubmit: (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => Promise<void>;
   onCancel: () => void;
-  areas: Area[];
+  areas: SupervisaoTecnica[];
   isSubmitting: boolean;
 }
 
-const ProblemForm = ({ onSubmit, onCancel, areas, isSubmitting }: ProblemFormProps) => {
+const ProblemForm: React.FC<ProblemFormProps> = ({ onSubmit, onCancel, areas, isSubmitting }) => {
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
       descricao: '',
-      supervisao_tecnica_id: '',
-      icone: ''
+      supervisao_tecnica_id: ''
     }
   });
-
+  
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const [showIconSelector, setShowIconSelector] = useState(false);
   const selectedArea = watch('supervisao_tecnica_id');
-  const selectedIcon = watch('icone');
 
-  const handleIconSelect = (icon: string) => {
-    setValue('icone', icon);
+  const handleFormSubmit = async (data: any) => {
+    await onSubmit({
+      ...data,
+      icone: selectedIcon
+    });
+  };
+
+  const handleIconSelect = (iconName: string) => {
+    setSelectedIcon(iconName);
+    setShowIconSelector(false);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="descricao">Descrição</Label>
         <Input
@@ -67,11 +76,43 @@ const ProblemForm = ({ onSubmit, onCancel, areas, isSubmitting }: ProblemFormPro
           <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
         )}
       </div>
-
+      
       <div className="space-y-2">
-        <Label>Ícone</Label>
-        <IconSelector selectedIcon={selectedIcon} onSelectIcon={handleIconSelect} />
+        <Label htmlFor="icon">Ícone</Label>
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 border rounded-md flex items-center justify-center bg-gray-50">
+            {selectedIcon ? (
+              <img src={selectedIcon} alt="Selected icon" className="w-6 h-6" />
+            ) : (
+              <Image className="w-6 h-6 text-gray-400" />
+            )}
+          </div>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => setShowIconSelector(true)}
+          >
+            {selectedIcon ? 'Alterar ícone' : 'Selecionar ícone'}
+          </Button>
+          {selectedIcon && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setSelectedIcon(null)}
+              className="text-red-500"
+            >
+              Remover
+            </Button>
+          )}
+        </div>
       </div>
+
+      {showIconSelector && (
+        <IconSelector
+          onSelect={handleIconSelect}
+          onClose={() => setShowIconSelector(false)} 
+        />
+      )}
 
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
