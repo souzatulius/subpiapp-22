@@ -40,7 +40,7 @@ export const useUsersData = () => {
       }
       
       // Process to add related data
-      const processedUsers = await Promise.all((usersData || []).map(async (user) => {
+      const processedUsers = await Promise.all((usersData || []).map(async (user: any) => {
         // Fetch position
         let cargoInfo = { id: '', descricao: '' };
         if (user.cargo_id) {
