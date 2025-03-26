@@ -57,6 +57,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       const formattedNotas = (notasData || []).map(nota => {
         const processedHistorico = (nota.historico_edicoes || []).map(edit => {
+          // Safely handle editor data with null check
           const editor = edit.editor && typeof edit.editor === 'object' && !('error' in edit.editor) 
             ? edit.editor 
             : null;
@@ -67,10 +68,12 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           };
         }) as NotaEdicao[];
         
+        // Safely handle author data with null check
         const autor = nota.autor && typeof nota.autor === 'object' && !('error' in nota.autor)
           ? nota.autor
           : { id: '', nome_completo: 'Não informado' };
           
+        // Safely handle approver data with null check
         const aprovador = nota.aprovador && typeof nota.aprovador === 'object' && !('error' in nota.aprovador)
           ? nota.aprovador
           : null;
