@@ -85,17 +85,35 @@ export const useNotasQuery = () => {
         const formattedNotas = (data || []).map(nota => {
           // Process historic edits to ensure the type is correct
           const processedHistorico = (nota.historico_edicoes || []).map(edit => {
+            // Handle potential error in editor relationship
+            const editor = typeof edit.editor === 'object' && !('error' in edit.editor) 
+              ? edit.editor 
+              : { id: '', nome_completo: 'Não informado' };
+            
             return {
               ...edit,
-              editor: edit.editor || { id: '', nome_completo: 'Não informado' }
+              editor
             };
           }) as NotaEdicao[];
           
+          // Handle potential error in relationships
+          const autor = typeof nota.autor === 'object' && !('error' in nota.autor)
+            ? nota.autor
+            : { id: '', nome_completo: 'Não informado' };
+            
+          const aprovador = typeof nota.aprovador === 'object' && !('error' in nota.aprovador)
+            ? nota.aprovador
+            : { id: '', nome_completo: 'Não informado' };
+            
+          const supervisao_tecnica = typeof nota.supervisao_tecnica === 'object' && !('error' in nota.supervisao_tecnica)
+            ? nota.supervisao_tecnica
+            : { id: '', descricao: 'Não informada' };
+          
           return {
             ...nota,
-            autor: nota.autor || { id: '', nome_completo: 'Não informado' },
-            aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
-            supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
+            autor,
+            aprovador,
+            supervisao_tecnica,
             historico_edicoes: processedHistorico
           };
         }) as NotaOficial[];
