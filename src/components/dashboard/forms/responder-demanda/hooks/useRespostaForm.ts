@@ -16,6 +16,7 @@ export const useRespostaForm = (
   const { user } = useAuth();
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [comentarios, setComentarios] = useState<string>('');
 
   const handleSubmitResposta = async () => {
     if (!selectedDemanda || Object.keys(resposta).length === 0) {
@@ -50,14 +51,15 @@ export const useRespostaForm = (
         })
         .join('\n\n');
 
-      // Then create the response with both text and JSON format
+      // Then create the response with text, JSON format, and comments
       const { error: respostaError } = await supabase
         .from('respostas_demandas')
         .insert({
           demanda_id: selectedDemanda.id,
           usuario_id: user?.id,
           respostas: resposta,
-          texto: respostasText // Add required texto field
+          texto: respostasText,
+          comentarios: comentarios || null
         });
         
       if (respostaError) throw respostaError;
@@ -82,6 +84,7 @@ export const useRespostaForm = (
       setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
       setSelectedDemanda(null);
       setResposta({});
+      setComentarios('');
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
       toast({
@@ -97,6 +100,8 @@ export const useRespostaForm = (
   return {
     resposta,
     setResposta,
+    comentarios,
+    setComentarios,
     isLoading,
     handleSubmitResposta
   };

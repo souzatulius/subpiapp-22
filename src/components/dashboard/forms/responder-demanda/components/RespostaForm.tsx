@@ -30,9 +30,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
 import { useProblemsData } from '@/hooks/problems';
+import { useServicosData } from '@/hooks/demandForm/useServicosData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { renderIcon } from '@/components/settings/problems/renderIcon';
+import { Label } from '@/components/ui/label';
 
 interface RespostaFormProps {
   selectedDemanda: any;
@@ -41,6 +52,8 @@ interface RespostaFormProps {
   onBack: () => void;
   isLoading: boolean;
   onSubmit: () => Promise<void>;
+  comentarios?: string;
+  setComentarios?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const RespostaForm: React.FC<RespostaFormProps> = ({
@@ -49,15 +62,24 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   setResposta,
   onBack,
   isLoading,
-  onSubmit
+  onSubmit,
+  comentarios = '',
+  setComentarios
 }) => {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [showTemaDialog, setShowTemaDialog] = useState(false);
   const [selectedProblemId, setSelectedProblemId] = useState<string>('');
-  const [originalCoordination, setOriginalCoordination] = useState<string | null>(null);
-  const [newCoordination, setNewCoordination] = useState<string | null>(null);
-  const [changingProblem, setChangingProblem] = useState(false);
+  const [selectedServicoId, setSelectedServicoId] = useState<string>('');
+  const [localComentarios, setLocalComentarios] = useState<string>(comentarios);
   
   const { problems, isLoading: problemsLoading } = useProblemsData();
+  const { servicos, isLoading: servicosLoading } = useServicosData();
+
+  useEffect(() => {
+    if (setComentarios) {
+      setComentarios(localComentarios);
+    }
+  }, [localComentarios, setComentarios]);
 
   useEffect(() => {
     if (selectedDemanda?.problema_id) {
@@ -168,6 +190,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       });
       
       selectedDemanda.problema_id = problemId;
+      setShowTemaDialog(false);
       
     } catch (error) {
       console.error('Error updating problem:', error);
@@ -189,6 +212,36 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     }));
   };
   
+  const handleSubmitWithExtra = async () => {
+    try {
+      // Atualizar o serviço selecionado (se houver)
+      if (selectedServicoId) {
+        const { error: servicoError } = await supabase
+          .from('demandas')
+          .update({ servico_id: selectedServicoId })
+          .eq('id', selectedDemanda.id);
+          
+        if (servicoError) throw servicoError;
+      }
+      
+      // Salvar comentários
+      if (comentarios.trim()) {
+        // Será salvo junto com a resposta no onSubmit
+      }
+      
+      // Chamar o onSubmit original que salva as respostas
+      await onSubmit();
+      
+    } catch (error) {
+      console.error('Erro ao salvar informações adicionais:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar as informações adicionais",
+        variant: "destructive"
+      });
+    }
+  };
+  
   const allQuestionsAnswered = () => {
     if (!selectedDemanda?.perguntas) return false;
     
@@ -202,6 +255,9 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     
     return answers.every(answer => !!answer.trim());
   };
+
+  // Encontrar o tema atual
+  const currentProblem = problems.find(p => p.id === selectedProblemId);
 
   if (!selectedDemanda) return null;
 
@@ -245,26 +301,65 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         <CardContent className="space-y-6">
           <div>
             <h3 className="text-sm font-medium mb-2">Tema</h3>
+            {currentProblem ? (
+              <div className="flex items-center">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2 py-3 bg-blue-50 hover:bg-blue-100"
+                  onClick={() => setShowTemaDialog(true)}
+                >
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    {renderIcon(currentProblem.icone)}
+                  </div>
+                  <span>{currentProblem.descricao}</span>
+                </Button>
+              </div>
+            ) : (
+              <Select
+                value={selectedProblemId}
+                onValueChange={(value) => handleProblemChange(value)}
+                disabled={changingProblem}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione um tema" />
+                </SelectTrigger>
+                <SelectContent>
+                  {problemsLoading ? (
+                    <SelectItem value="loading" disabled>Carregando temas...</SelectItem>
+                  ) : problems.length > 0 ? (
+                    problems.map((problem) => (
+                      <SelectItem key={problem.id} value={problem.id}>
+                        {problem.descricao}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="none" disabled>Nenhum tema encontrado</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="servico" className="text-sm font-medium mb-2">Serviço</Label>
             <Select
-              value={selectedProblemId}
-              onValueChange={handleProblemChange}
-              disabled={changingProblem}
+              value={selectedServicoId}
+              onValueChange={setSelectedServicoId}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione um tema" />
+                <SelectValue placeholder="Selecione um serviço" />
               </SelectTrigger>
               <SelectContent>
-                {problemsLoading ? (
-                  <SelectItem value="loading" disabled>Carregando temas...</SelectItem>
-                ) : problems.length > 0 ? (
-                  problems.map((problem) => (
-                    <SelectItem key={problem.id} value={problem.id}>
-                      {problem.descricao} 
-                      {problem.supervisao_tecnica?.coordenacao && ` (${problem.supervisao_tecnica.coordenacao})`}
+                {servicosLoading ? (
+                  <SelectItem value="loading" disabled>Carregando serviços...</SelectItem>
+                ) : servicos.length > 0 ? (
+                  servicos.map((servico) => (
+                    <SelectItem key={servico.id} value={servico.id}>
+                      {servico.descricao}
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="none" disabled>Nenhum tema encontrado</SelectItem>
+                  <SelectItem value="none" disabled>Nenhum serviço encontrado</SelectItem>
                 )}
               </SelectContent>
             </Select>
@@ -312,10 +407,27 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               )}
             </div>
           )}
+          
+          <div>
+            <Label htmlFor="comentarios" className="text-sm font-medium mb-2">Comentários (opcional)</Label>
+            <Textarea 
+              id="comentarios"
+              placeholder="Adicione comentários internos sobre esta demanda"
+              className="min-h-[100px]"
+              value={setComentarios ? comentarios : localComentarios}
+              onChange={(e) => {
+                if (setComentarios) {
+                  setComentarios(e.target.value);
+                } else {
+                  setLocalComentarios(e.target.value);
+                }
+              }}
+            />
+          </div>
         </CardContent>
         <CardFooter className="justify-end">
           <Button 
-            onClick={onSubmit}
+            onClick={handleSubmitWithExtra}
             disabled={isLoading || !allQuestionsAnswered()}
             className="space-x-2"
           >
@@ -334,6 +446,43 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         </CardFooter>
       </Card>
       
+      {/* Dialog para seleção de tema */}
+      <Dialog open={showTemaDialog} onOpenChange={setShowTemaDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Selecionar Tema</DialogTitle>
+            <DialogDescription>
+              Escolha um tema para esta demanda
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+            {problems.map((problem) => (
+              <Button 
+                key={problem.id} 
+                variant={selectedProblemId === problem.id ? "default" : "outline"} 
+                className={`flex flex-col items-center justify-center gap-2 p-3 h-auto ${
+                  selectedProblemId === problem.id ? "ring-2 ring-[#003570]" : ""
+                }`}
+                onClick={() => handleProblemChange(problem.id)}
+              >
+                <div className="w-6 h-6 flex items-center justify-center">
+                  {renderIcon(problem.icone)}
+                </div>
+                <span className="text-sm text-center">{problem.descricao}</span>
+              </Button>
+            ))}
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowTemaDialog(false)}>
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Diálogo de alerta para mudança de coordenação */}
       <AlertDialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

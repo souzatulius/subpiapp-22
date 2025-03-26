@@ -12,14 +12,16 @@ export interface Demanda {
     telefone_solicitante: string | null;
     veiculo_imprensa: string | null;
     detalhes_solicitacao: string | null;
-    perguntas: string[] | null;
+    perguntas: string[] | Record<string, string> | null;
     arquivo_url: string | null;
     supervisao_tecnica_id: string | null;
     origem_id: string | null;
     tipo_midia_id: string | null;
     bairro_id: string | null;
     autor_id: string | null;
-    areas_coordenacao: {
+    problema_id: string;
+    servico_id?: string | null;
+    areas_coordenacao?: {
         id: string;
         descricao: string;
     } | null;
@@ -34,6 +36,7 @@ export interface Demanda {
 export interface Resposta {
     texto: string;
     respostas?: { [key: string]: string };
+    comentarios?: string | null;
 }
 
 export interface Area {

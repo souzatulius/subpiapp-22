@@ -1024,6 +1024,7 @@ export type Database = {
         Row: {
           arquivo_url: string | null
           atualizado_em: string
+          comentarios: string | null
           criado_em: string
           demanda_id: string
           id: string
@@ -1034,6 +1035,7 @@ export type Database = {
         Insert: {
           arquivo_url?: string | null
           atualizado_em?: string
+          comentarios?: string | null
           criado_em?: string
           demanda_id: string
           id?: string
@@ -1044,6 +1046,7 @@ export type Database = {
         Update: {
           arquivo_url?: string | null
           atualizado_em?: string
+          comentarios?: string | null
           criado_em?: string
           demanda_id?: string
           id?: string

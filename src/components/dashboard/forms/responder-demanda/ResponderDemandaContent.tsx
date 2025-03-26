@@ -36,6 +36,8 @@ const ResponderDemandaContent: React.FC = () => {
   const {
     resposta,
     setResposta,
+    comentarios,
+    setComentarios,
     isLoading,
     handleSubmitResposta
   } = useRespostaForm(
@@ -86,6 +88,8 @@ const ResponderDemandaContent: React.FC = () => {
               selectedDemanda={selectedDemanda}
               resposta={resposta}
               setResposta={setResposta}
+              comentarios={comentarios}
+              setComentarios={setComentarios}
               onBack={() => setSelectedDemanda(null)}
               isLoading={isLoading}
               onSubmit={handleSubmitResposta}
