@@ -76,7 +76,7 @@ const NeighborhoodForm: React.FC<NeighborhoodFormProps> = ({
               >
                 <FormControl>
                   <SelectTrigger className="rounded-lg">
-                    <SelectValue />
+                    <SelectValue placeholder="Selecione um distrito" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
