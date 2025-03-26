@@ -1,3 +1,4 @@
+
 import { DemandFormData } from '@/hooks/demandForm/types';
 
 export interface ValidationError {
@@ -24,6 +25,13 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       });
     }
 
+    if (!formData.detalhes_solicitacao || formData.detalhes_solicitacao.trim() === '') {
+      errors.push({
+        field: 'detalhes_solicitacao',
+        message: 'Detalhes da solicitação é obrigatório'
+      });
+    }
+
     // Validar campos do protocolo 156
     if (formData.tem_protocolo_156 === true && (!formData.numero_protocolo_156 || formData.numero_protocolo_156.length !== 10)) {
       errors.push({
@@ -39,6 +47,15 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       errors.push({
         field: 'origem_id',
         message: 'Selecione a origem da demanda'
+      });
+    }
+
+    // Se a origem for SECOM ou Imprensa, tipo_midia_id é obrigatório
+    const origensRequireMediaType = ["SECOM", "Imprensa", "SMSUB"];
+    if (formData.origem && origensRequireMediaType.includes(formData.origem.descricao) && !formData.tipo_midia_id) {
+      errors.push({
+        field: 'tipo_midia_id',
+        message: 'Selecione o tipo de mídia'
       });
     }
   }
@@ -61,7 +78,14 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
   }
   
   // Step 3: Location
-  // No required fields for now
+  else if (activeStep === 3) {
+    if (!formData.bairro_id) {
+      errors.push({
+        field: 'bairro_id',
+        message: 'Selecione o bairro'
+      });
+    }
+  }
   
   // Step 4: Questions and Details
   // No required fields for now
@@ -72,6 +96,23 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       errors.push({
         field: 'prioridade',
         message: 'Selecione a prioridade da demanda'
+      });
+    }
+
+    if (!formData.prazo_resposta) {
+      errors.push({
+        field: 'prazo_resposta',
+        message: 'Selecione o prazo para resposta'
+      });
+    }
+  }
+
+  // Step 6: Review
+  else if (activeStep === 6) {
+    if (!formData.titulo || formData.titulo.trim() === '') {
+      errors.push({
+        field: 'titulo',
+        message: 'O título da demanda é obrigatório'
       });
     }
   }
@@ -92,3 +133,34 @@ function validateEmail(email: string): boolean {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 }
+
+export const getErrorSummary = (errors: ValidationError[]): string => {
+  if (errors.length === 0) return '';
+
+  const fieldNames = errors.map(err => {
+    switch (err.field) {
+      case 'problema_id': return 'Tema';
+      case 'detalhes_solicitacao': return 'Detalhes da Solicitação';
+      case 'origem_id': return 'Origem da Demanda';
+      case 'tipo_midia_id': return 'Tipo de Mídia';
+      case 'nome_solicitante': return 'Nome do Solicitante';
+      case 'email_solicitante': return 'Email';
+      case 'telefone_solicitante': return 'Telefone';
+      case 'bairro_id': return 'Bairro';
+      case 'prioridade': return 'Prioridade';
+      case 'prazo_resposta': return 'Prazo de Resposta';
+      case 'titulo': return 'Título';
+      case 'numero_protocolo_156': return 'Protocolo 156';
+      default: return err.field;
+    }
+  });
+
+  if (fieldNames.length === 1) {
+    return `Preencha o campo obrigatório: ${fieldNames[0]}`;
+  } else if (fieldNames.length === 2) {
+    return `Preencha os campos obrigatórios: ${fieldNames[0]} e ${fieldNames[1]}`;
+  } else {
+    const lastField = fieldNames.pop();
+    return `Preencha os campos obrigatórios: ${fieldNames.join(', ')} e ${lastField}`;
+  }
+};

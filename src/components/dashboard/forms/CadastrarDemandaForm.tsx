@@ -8,7 +8,7 @@ import FormSteps from './components/FormSteps';
 import FormActions from './components/FormActions';
 import FormContent, { FORM_STEPS } from './components/FormContent';
 import { useDemandForm } from '@/hooks/demandForm';
-import { ValidationError, validateDemandForm } from '@/lib/formValidationUtils';
+import { ValidationError, validateDemandForm, getErrorSummary } from '@/lib/formValidationUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 
@@ -63,7 +63,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       console.log('Validation errors:', errors);
       toast({
         title: "Formulário incompleto",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        description: getErrorSummary(errors),
         variant: "destructive"
       });
     }
@@ -85,6 +85,12 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
           variant: "destructive"
         });
       }
+    } else {
+      toast({
+        title: "Formulário incompleto",
+        description: getErrorSummary(errors),
+        variant: "destructive"
+      });
     }
   };
 
@@ -114,11 +120,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               <AlertTitle>Campos obrigatórios não preenchidos</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-5 mt-2 text-sm">
-                  {validationErrors.map((error, index) => (
-                    <li key={index}>{error.message}</li>
-                  ))}
-                </ul>
+                {getErrorSummary(validationErrors)}
               </AlertDescription>
             </Alert>
           )}
