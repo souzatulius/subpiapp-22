@@ -1,15 +1,20 @@
 
 import React from 'react';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 interface OriginStepProps {
   formData: any;
   origens: any[];
   tiposMidia: any[];
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
   errors: ValidationError[];
 }
 
@@ -17,7 +22,6 @@ const OriginStep: React.FC<OriginStepProps> = ({
   formData,
   origens,
   tiposMidia,
-  handleChange,
   handleSelectChange,
   errors
 }) => {
@@ -28,18 +32,18 @@ const OriginStep: React.FC<OriginStepProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <FormItem className={hasError('origem_id') ? 'error' : ''}>
-        <FormLabel>Origem da Demanda *</FormLabel>
+    <div className="space-y-6">
+      <div>
+        <Label htmlFor="origem_id" className={hasError('origem_id') ? 'text-destructive' : ''}>
+          Origem da Demanda *
+        </Label>
         <Select
-          value={formData.origem_id}
+          value={formData.origem_id || ''}
           onValueChange={(value) => handleSelectChange('origem_id', value)}
         >
-          <FormControl>
-            <SelectTrigger className={hasError('origem_id') ? 'border-red-500' : ''}>
-              <SelectValue placeholder="Selecione a origem" />
-            </SelectTrigger>
-          </FormControl>
+          <SelectTrigger id="origem_id" className={hasError('origem_id') ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Selecione a origem da demanda" />
+          </SelectTrigger>
           <SelectContent>
             {origens.map((origem) => (
               <SelectItem key={origem.id} value={origem.id}>
@@ -49,35 +53,30 @@ const OriginStep: React.FC<OriginStepProps> = ({
           </SelectContent>
         </Select>
         {hasError('origem_id') && (
-          <FormMessage>{getErrorMessage('origem_id')}</FormMessage>
+          <p className="text-sm font-medium text-destructive">{getErrorMessage('origem_id')}</p>
         )}
-      </FormItem>
+      </div>
 
-      {formData.origem_id === '1' && (
-        <FormItem className={hasError('tipo_midia_id') ? 'error' : ''}>
-          <FormLabel>Tipo de Mídia *</FormLabel>
-          <Select
-            value={formData.tipo_midia_id}
-            onValueChange={(value) => handleSelectChange('tipo_midia_id', value)}
-          >
-            <FormControl>
-              <SelectTrigger className={hasError('tipo_midia_id') ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Selecione o tipo de mídia" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {tiposMidia.map((tipo) => (
-                <SelectItem key={tipo.id} value={tipo.id}>
-                  {tipo.descricao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {hasError('tipo_midia_id') && (
-            <FormMessage>{getErrorMessage('tipo_midia_id')}</FormMessage>
-          )}
-        </FormItem>
-      )}
+      <div>
+        <Label htmlFor="tipo_midia_id">
+          Tipo de Mídia
+        </Label>
+        <Select
+          value={formData.tipo_midia_id || ''}
+          onValueChange={(value) => handleSelectChange('tipo_midia_id', value)}
+        >
+          <SelectTrigger id="tipo_midia_id">
+            <SelectValue placeholder="Selecione o tipo de mídia (opcional)" />
+          </SelectTrigger>
+          <SelectContent>
+            {tiposMidia.map((tipo) => (
+              <SelectItem key={tipo.id} value={tipo.id}>
+                {tipo.descricao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 };

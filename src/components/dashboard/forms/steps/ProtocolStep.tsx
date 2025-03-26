@@ -1,14 +1,6 @@
 
 import React from 'react';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ValidationError } from '@/lib/formValidationUtils';
@@ -51,21 +43,22 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
       </div>
 
       {formData.tem_protocolo_156 && (
-        <FormItem className={hasError('numero_protocolo_156') ? 'error' : ''}>
-          <FormLabel>Número do Protocolo 156 *</FormLabel>
-          <FormControl>
-            <Input
-              name="numero_protocolo_156"
-              value={formData.numero_protocolo_156 || ''}
-              onChange={handleChange}
-              placeholder="Digite o número do protocolo"
-              className={hasError('numero_protocolo_156') ? 'border-red-500' : ''}
-            />
-          </FormControl>
+        <div className={hasError('numero_protocolo_156') ? 'error' : ''}>
+          <Label htmlFor="numero_protocolo_156" className={hasError('numero_protocolo_156') ? 'text-destructive' : ''}>
+            Número do Protocolo 156 *
+          </Label>
+          <Input
+            id="numero_protocolo_156"
+            name="numero_protocolo_156"
+            value={formData.numero_protocolo_156 || ''}
+            onChange={handleChange}
+            placeholder="Digite o número do protocolo"
+            className={hasError('numero_protocolo_156') ? 'border-red-500' : ''}
+          />
           {hasError('numero_protocolo_156') && (
-            <FormMessage>{getErrorMessage('numero_protocolo_156')}</FormMessage>
+            <p className="text-sm font-medium text-destructive">{getErrorMessage('numero_protocolo_156')}</p>
           )}
-        </FormItem>
+        </div>
       )}
     </div>
   );

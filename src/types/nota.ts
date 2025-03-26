@@ -15,12 +15,12 @@ export interface NotaOficial {
   aprovador?: {
     id: string;
     nome_completo: string;
-  };
+  } | null;
   supervisao_tecnica_id: string;
   supervisao_tecnica?: {
     id: string;
     descricao: string;
-  };
+  } | null;
   area_coordenacao: {
     id: string;
     descricao: string;

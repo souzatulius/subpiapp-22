@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,7 +87,7 @@ export const useNotasQuery = () => {
 
           return {
             ...edit,
-            editor
+            editor: editor // Safe null handling
           };
         }) as NotaEdicao[];
 
@@ -107,9 +108,9 @@ export const useNotasQuery = () => {
 
         return {
           ...nota,
-          autor,
-          aprovador,
-          supervisao_tecnica,
+          autor: autor,
+          aprovador: aprovador,
+          supervisao_tecnica: supervisao_tecnica,
           area_coordenacao: { id: '', descricao: supervisao_tecnica.descricao },
           historico_edicoes: processedHistorico
         };

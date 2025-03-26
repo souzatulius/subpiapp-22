@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ValidationError } from '@/lib/formValidationUtils';
 
@@ -25,21 +25,22 @@ const RequestInfoStep: React.FC<RequestInfoStepProps> = ({
 
   return (
     <div className="space-y-4">
-      <FormItem className={hasError('detalhes_solicitacao') ? 'error' : ''}>
-        <FormLabel>Detalhes da Solicitação *</FormLabel>
-        <FormControl>
-          <Textarea
-            name="detalhes_solicitacao"
-            value={formData.detalhes_solicitacao || ''}
-            onChange={handleChange}
-            placeholder="Descreva com detalhes a solicitação"
-            className={`min-h-[150px] ${hasError('detalhes_solicitacao') ? 'border-red-500' : ''}`}
-          />
-        </FormControl>
+      <div className={hasError('detalhes_solicitacao') ? 'error' : ''}>
+        <Label htmlFor="detalhes_solicitacao" className={hasError('detalhes_solicitacao') ? 'text-destructive' : ''}>
+          Detalhes da Solicitação *
+        </Label>
+        <Textarea
+          id="detalhes_solicitacao"
+          name="detalhes_solicitacao"
+          value={formData.detalhes_solicitacao || ''}
+          onChange={handleChange}
+          placeholder="Descreva com detalhes a solicitação"
+          className={`min-h-[150px] ${hasError('detalhes_solicitacao') ? 'border-red-500' : ''}`}
+        />
         {hasError('detalhes_solicitacao') && (
-          <FormMessage>{getErrorMessage('detalhes_solicitacao')}</FormMessage>
+          <p className="text-sm font-medium text-destructive">{getErrorMessage('detalhes_solicitacao')}</p>
         )}
-      </FormItem>
+      </div>
     </div>
   );
 };
