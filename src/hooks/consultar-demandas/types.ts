@@ -31,6 +31,21 @@ export interface Demand {
   veiculo_imprensa: string | null;
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null;
+  problema_id?: string;
+  problema?: {
+    id: string;
+    descricao: string;
+    supervisao_tecnica?: {
+      id: string;
+      descricao: string;
+      coordenacao_id: string;
+    }
+  };
+  supervisao_tecnica_id?: string;
+  supervisao_tecnica?: {
+    id: string;
+    descricao: string;
+  };
   resposta?: {
     id: string;
     demanda_id: string;

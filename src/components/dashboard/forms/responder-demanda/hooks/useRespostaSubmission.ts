@@ -38,6 +38,8 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     resposta: Record<string, string>,
     comentarios: string | null = null
   ): Promise<boolean> => {
+    console.log("Submit resposta called", { selectedDemanda, resposta, comentarios });
+    
     // Validate the response
     const validation = validateResposta(selectedDemanda, resposta);
     if (!validation.isValid) {
@@ -49,16 +51,21 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
       return false;
     }
 
-    if (!selectedDemanda || !user) return false;
+    if (!selectedDemanda || !user) {
+      console.error("Missing selectedDemanda or user", { selectedDemanda, user });
+      return false;
+    }
 
     try {
       setIsSubmitting(true);
+      console.log("Setting status to em_andamento");
 
       // Set status to "in progress" to indicate we're handling it
       await updateDemandaStatus(selectedDemanda.id, 'em_andamento');
 
       // Generate text summary of responses
       const respostasText = formatRespostaText(selectedDemanda, resposta);
+      console.log("Generated respostasText", respostasText);
 
       // Insert the response
       const { error: respostaError } = await supabase
@@ -71,8 +78,12 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
           comentarios: comentarios || null
         });
         
-      if (respostaError) throw respostaError;
+      if (respostaError) {
+        console.error("Error inserting response:", respostaError);
+        throw respostaError;
+      }
 
+      console.log("Response inserted, updating status to respondida");
       // Update status to "responded"
       await updateDemandaStatus(selectedDemanda.id, 'respondida');
       
@@ -82,6 +93,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
       });
 
       if (options?.onSuccess) {
+        console.log("Calling onSuccess callback");
         options.onSuccess();
       }
 

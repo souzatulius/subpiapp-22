@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Demanda } from '../types';
 import { useRespostaSubmission } from './useRespostaSubmission';
+import { toast } from '@/components/ui/use-toast';
 
 export const useRespostaForm = (
   selectedDemanda: Demanda | null,
@@ -18,19 +19,67 @@ export const useRespostaForm = (
     onSuccess: () => {
       // Update local state to remove the answered demand
       if (selectedDemanda) {
+        console.log("Resposta enviada com sucesso. Atualizando listas locais.");
         setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
         setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
         setSelectedDemanda(null);
         setResposta({});
         setComentarios('');
+        
+        toast({
+          title: "Resposta enviada",
+          description: "A demanda foi respondida com sucesso."
+        });
       }
+    },
+    onError: (error) => {
+      console.error("Erro ao enviar resposta:", error);
+      toast({
+        title: "Erro ao enviar resposta",
+        description: "Ocorreu um erro ao enviar a resposta. Por favor, tente novamente.",
+        variant: "destructive"
+      });
     }
   });
 
   const handleSubmitResposta = async (): Promise<void> => {
-    // We'll ignore the return value here, as we're using the callbacks
-    // to handle success/failure states
-    await submitResposta(selectedDemanda, resposta, comentarios);
+    console.log("handleSubmitResposta chamado", { selectedDemanda, resposta, comentarios });
+    
+    if (!selectedDemanda) {
+      console.error("Nenhuma demanda selecionada");
+      toast({
+        title: "Erro",
+        description: "Nenhuma demanda selecionada para resposta.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (Object.keys(resposta).length === 0) {
+      console.error("Nenhuma resposta fornecida");
+      toast({
+        title: "Erro",
+        description: "Por favor, forneça respostas para todas as perguntas.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Verificar se todas as perguntas foram respondidas
+    const hasEmptyAnswers = Object.values(resposta).some(r => !r || r.trim() === '');
+    if (hasEmptyAnswers) {
+      console.error("Algumas respostas estão vazias");
+      toast({
+        title: "Validação",
+        description: "Por favor, responda a todas as perguntas antes de enviar.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Chamamos a função submitResposta do hook useRespostaSubmission
+    const result = await submitResposta(selectedDemanda, resposta, comentarios);
+    console.log("Resultado do submitResposta:", result);
   };
 
   return {

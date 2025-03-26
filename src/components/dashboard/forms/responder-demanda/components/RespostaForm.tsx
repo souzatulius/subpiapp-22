@@ -115,7 +115,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   };
   
   const allQuestionsAnswered = () => {
-    if (!selectedDemanda?.perguntas) return false;
+    if (!selectedDemanda?.perguntas) return true;
     
     const questions = Array.isArray(selectedDemanda.perguntas) 
       ? selectedDemanda.perguntas 
@@ -123,9 +123,14 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       
     const answers = Object.values(resposta);
     
-    if (questions.length !== answers.length) return false;
+    // Se não tiver perguntas, considera que está tudo respondido
+    if (questions.length === 0) return true;
     
-    return answers.every(answer => !!answer.trim());
+    // Verifica se tem o mesmo número de respostas e perguntas
+    if (Object.keys(resposta).length !== Object.keys(selectedDemanda.perguntas).length) return false;
+    
+    // Verifica se todas as respostas estão preenchidas
+    return !Object.values(resposta).some(answer => !answer || answer.trim() === '');
   };
 
   // Find the current theme/problem
