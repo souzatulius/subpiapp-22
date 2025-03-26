@@ -24,6 +24,7 @@ export interface UsersLayoutProps {
   approving: boolean;
   removing: boolean;
   isEditSubmitting?: boolean;
+  onRefresh?: () => void;
 }
 
 export interface UsersTableProps {
@@ -35,7 +36,6 @@ export interface UsersTableProps {
   onResetPassword?: (user: User) => void;
   onApprove?: (user: User, roleName?: string) => void;
   onRemoveAccess?: (user: User) => void;
-  onManageRoles?: (user: User) => void;
 }
 
 export interface UserDialogsProps {

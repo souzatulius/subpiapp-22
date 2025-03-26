@@ -13,6 +13,7 @@ import { User, UsersLayoutProps } from './types';
 import UsersTable from './UsersTable';
 import UserDialogs from './UserDialogs';
 import { FileSpreadsheet, RefreshCw, UserPlus } from 'lucide-react';
+import EditUserDialog from './EditUserDialog';
 
 const UsersLayout: React.FC<UsersLayoutProps> = ({
   users,
@@ -83,6 +84,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
       <UsersTable
         users={users}
         loading={loading}
+        filter={filter}
         onEdit={userActions.handleEdit}
         onDelete={userActions.handleDelete}
         onResetPassword={userActions.handleResetPassword}
@@ -106,6 +108,17 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         handleEditUser={handleEditUser}
         handleDeleteUser={handleDeleteUser}
         isEditSubmitting={isEditSubmitting}
+      />
+
+      <EditUserDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        user={selectedUser}
+        onSubmit={handleEditUser}
+        supervisoesTecnicas={supervisoesTecnicas}
+        cargos={cargos}
+        coordenacoes={coordenacoes}
+        isSubmitting={isEditSubmitting}
       />
     </div>
   );

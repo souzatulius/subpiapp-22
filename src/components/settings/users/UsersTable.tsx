@@ -1,39 +1,15 @@
 
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import { User } from './types';
+import { formatDate } from '@/types/common';
+import UserActionsMenu from './UserActionsMenu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MoreHorizontal, 
-  Edit, 
-  Trash, 
-  KeyRound, 
-  UserCheck, 
-  UserX
-} from 'lucide-react';
-import { User } from './types';
-import LoadingSkeleton from '@/components/ui/loading-skeleton';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
 
 interface UsersTableProps {
   users: User[];
   loading: boolean;
+  filter: string;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onResetPassword?: (user: User) => void;
@@ -44,13 +20,48 @@ interface UsersTableProps {
 const UsersTable: React.FC<UsersTableProps> = ({
   users,
   loading,
+  filter,
   onEdit,
   onDelete,
   onResetPassword,
   onApprove,
   onRemoveAccess
 }) => {
-  const getInitials = (name: string) => {
+  // Filter users based on the search query
+  const filteredUsers = users.filter(user => {
+    if (!filter) return true;
+    
+    const searchTerm = filter.toLowerCase();
+    return (
+      user.nome_completo?.toLowerCase().includes(searchTerm) ||
+      user.email?.toLowerCase().includes(searchTerm) ||
+      user.cargos?.descricao?.toLowerCase().includes(searchTerm) ||
+      user.coordenacao?.descricao?.toLowerCase().includes(searchTerm) ||
+      user.supervisao_tecnica?.descricao?.toLowerCase().includes(searchTerm)
+    );
+  });
+
+  if (loading) {
+    return (
+      <div className="w-full text-center py-10">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+        <p className="mt-2 text-gray-500">Carregando usuários...</p>
+      </div>
+    );
+  }
+
+  if (filteredUsers.length === 0) {
+    return (
+      <div className="w-full text-center py-10">
+        <p className="text-gray-500">
+          {filter ? 'Nenhum usuário encontrado para a pesquisa.' : 'Nenhum usuário cadastrado.'}
+        </p>
+      </div>
+    );
+  }
+
+  // Function to get initials from name
+  const getInitials = (name: string = '') => {
     return name
       .split(' ')
       .map(part => part[0])
@@ -59,127 +70,80 @@ const UsersTable: React.FC<UsersTableProps> = ({
       .substring(0, 2);
   };
 
+  // Function to check if user has permissions
   const hasPermissions = (user: User) => {
     return user.permissoes && user.permissoes.length > 0;
   };
 
-  if (loading) {
-    return <LoadingSkeleton rows={5} columns={6} />;
-  }
-
   return (
     <div className="rounded-md border overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/50">
-            <TableHead className="w-[250px]">Usuário</TableHead>
-            <TableHead>Cargo</TableHead>
-            <TableHead>Coordenação</TableHead>
-            <TableHead>Supervisão Técnica</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
-                Nenhum usuário encontrado.
-              </TableCell>
-            </TableRow>
-          ) : (
-            users.map(user => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Usuário</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Cargo</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Área</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Status</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Cadastro</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-500">Ações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {filteredUsers.map(user => (
+              <tr key={user.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3">
                   <div className="flex items-center space-x-3">
-                    <Avatar className="h-9 w-9">
+                    <Avatar className="h-8 w-8">
                       {user.foto_perfil_url ? (
                         <AvatarImage src={user.foto_perfil_url} alt={user.nome_completo} />
-                      ) : null}
-                      <AvatarFallback>{getInitials(user.nome_completo)}</AvatarFallback>
+                      ) : (
+                        <AvatarFallback className="bg-blue-100 text-blue-600">
+                          {getInitials(user.nome_completo)}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <div>
                       <div className="font-medium">{user.nome_completo}</div>
-                      <div className="text-sm text-muted-foreground">{user.email}</div>
+                      <div className="text-gray-500 text-xs">{user.email}</div>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell>
-                  {user.cargos?.descricao || "-"}
-                </TableCell>
-                <TableCell>
-                  {user.coordenacao?.descricao || "-"}
-                </TableCell>
-                <TableCell>
-                  {user.supervisao_tecnica?.descricao || "-"}
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-4 py-3 text-gray-700">
+                  {user.cargos?.descricao || '-'}
+                </td>
+                <td className="px-4 py-3 text-gray-700">
+                  {user.supervisao_tecnica?.descricao || user.coordenacao?.descricao || '-'}
+                </td>
+                <td className="px-4 py-3">
                   {hasPermissions(user) ? (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                       Ativo
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                      Aguardando aprovação
+                      Pendente
                     </Badge>
                   )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onEdit(user)}
-                      title="Editar usuário"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {onResetPassword && (
-                          <DropdownMenuItem onClick={() => onResetPassword(user)}>
-                            <KeyRound className="h-4 w-4 mr-2" />
-                            Resetar senha
-                          </DropdownMenuItem>
-                        )}
-                        
-                        {onApprove && !hasPermissions(user) && (
-                          <DropdownMenuItem onClick={() => onApprove(user)}>
-                            <UserCheck className="h-4 w-4 mr-2" />
-                            Aprovar acesso
-                          </DropdownMenuItem>
-                        )}
-                        
-                        {onRemoveAccess && hasPermissions(user) && (
-                          <DropdownMenuItem onClick={() => onRemoveAccess(user)}>
-                            <UserX className="h-4 w-4 mr-2" />
-                            Remover acesso
-                          </DropdownMenuItem>
-                        )}
-                        
-                        <DropdownMenuSeparator />
-                        
-                        <DropdownMenuItem 
-                          onClick={() => onDelete(user)}
-                          className="text-red-600 focus:text-red-700"
-                        >
-                          <Trash className="h-4 w-4 mr-2" />
-                          Excluir usuário
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                </td>
+                <td className="px-4 py-3 text-gray-700">
+                  {user.criado_em ? formatDate(user.criado_em) : '-'}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <UserActionsMenu
+                    user={user}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onResetPassword={onResetPassword}
+                    onApprove={onApprove}
+                    onRemoveAccess={onRemoveAccess}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
