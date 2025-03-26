@@ -115,7 +115,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             />
           </div>
           
-          {validationErrors.length > 0 && (
+          {/* Apenas mostrar erro geral na etapa de revisão (etapa 6) */}
+          {validationErrors.length > 0 && activeStep === 6 && (
             <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               <AlertTitle>Campos obrigatórios não preenchidos</AlertTitle>
