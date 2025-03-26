@@ -7,21 +7,7 @@ import { Button } from '@/components/ui/button';
 import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
 import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
-
-interface NotaOficial {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  criado_em: string;
-  autor: {
-    nome_completo: string;
-  };
-  area_coordenacao: {
-    descricao: string;
-  };
-  demanda_id?: string;
-}
+import { NotaOficial } from '@/types/nota';
 
 interface NotasCardsProps {
   notas: NotaOficial[];
@@ -105,7 +91,7 @@ const NotasCards: React.FC<NotasCardsProps> = ({
                 
                 <div className="flex items-center text-sm text-gray-600">
                   <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                  <span>{nota.area_coordenacao?.descricao || 'Área não informada'}</span>
+                  <span>{nota.supervisao_tecnica?.descricao || 'Área não informada'}</span>
                 </div>
                 
                 <div className="flex items-center text-sm text-gray-600">
