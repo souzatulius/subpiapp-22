@@ -2,18 +2,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { User, UsersLayoutProps } from './types';
+import { FileSpreadsheet, RefreshCw, UserPlus } from 'lucide-react';
+import { UsersLayoutProps } from '@/types/users';
 import UsersTable from './UsersTable';
 import UserDialogs from './UserDialogs';
-import { FileSpreadsheet, RefreshCw, UserPlus } from 'lucide-react';
-import EditUserDialog from './EditUserDialog';
+import { exportUsersToExcel } from './userExportUtils';
 
 const UsersLayout: React.FC<UsersLayoutProps> = ({
   users,
@@ -40,6 +33,10 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   isEditSubmitting,
   onRefresh
 }) => {
+  const handleExportUsers = () => {
+    exportUsersToExcel(users);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -65,7 +62,7 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
           <Button 
             variant="outline"
             className="gap-2"
-            onClick={() => {}}
+            onClick={handleExportUsers}
             title="Exportar lista de usuários"
           >
             <FileSpreadsheet className="h-4 w-4" />
@@ -108,17 +105,6 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
         handleEditUser={handleEditUser}
         handleDeleteUser={handleDeleteUser}
         isEditSubmitting={isEditSubmitting}
-      />
-
-      <EditUserDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        user={selectedUser}
-        onSubmit={handleEditUser}
-        supervisoesTecnicas={supervisoesTecnicas}
-        cargos={cargos}
-        coordenacoes={coordenacoes}
-        isSubmitting={isEditSubmitting}
       />
     </div>
   );

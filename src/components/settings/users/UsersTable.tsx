@@ -83,9 +83,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
             <tr>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Usuário</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Cargo</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">Área</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Coordenação</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Status</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">Cadastro</th>
               <th className="px-4 py-3 text-right font-medium text-gray-500">Ações</th>
             </tr>
           </thead>
@@ -113,7 +112,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   {user.cargos?.descricao || '-'}
                 </td>
                 <td className="px-4 py-3 text-gray-700">
-                  {user.supervisao_tecnica?.descricao || user.coordenacao?.descricao || '-'}
+                  {user.coordenacao?.descricao || '-'}
                 </td>
                 <td className="px-4 py-3">
                   {hasPermissions(user) ? (
@@ -125,9 +124,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
                       Pendente
                     </Badge>
                   )}
-                </td>
-                <td className="px-4 py-3 text-gray-700">
-                  {user.criado_em ? formatDate(user.criado_em) : '-'}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <UserActionsMenu
