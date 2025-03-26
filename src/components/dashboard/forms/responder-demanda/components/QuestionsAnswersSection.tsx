@@ -49,7 +49,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-blue-700">Perguntas e Respostas</h3>
         <Badge 
-          variant={answered === total ? "success" : "outline"} 
+          variant={answered === total ? "default" : "outline"} 
           className={`${answered === total ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'} transition-colors duration-300`}
         >
           <span className="font-medium">{answered}</span> de <span className="font-medium">{total}</span> respondidas
