@@ -1625,6 +1625,7 @@ export type Database = {
           id: string
           nome_completo: string
           problema_id: string | null
+          status: string | null
           supervisao_tecnica_id: string | null
           whatsapp: string | null
         }
@@ -1639,6 +1640,7 @@ export type Database = {
           id: string
           nome_completo: string
           problema_id?: string | null
+          status?: string | null
           supervisao_tecnica_id?: string | null
           whatsapp?: string | null
         }
@@ -1653,6 +1655,7 @@ export type Database = {
           id?: string
           nome_completo?: string
           problema_id?: string | null
+          status?: string | null
           supervisao_tecnica_id?: string | null
           whatsapp?: string | null
         }
