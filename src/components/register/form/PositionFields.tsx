@@ -30,6 +30,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
 }) => {
   const [filteredAreas, setFilteredAreas] = useState<SelectOption[]>([]);
   const [fetchingAreas, setFetchingAreas] = useState(false);
+  const [hasSupervisions, setHasSupervisions] = useState(false);
 
   // Filter areas based on selected coordenação
   useEffect(() => {
@@ -46,25 +47,29 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             
           if (error) throw error;
           
-          if (data) {
+          if (data && data.length > 0) {
             const formattedAreas = data.map(area => ({
               id: area.id,
               value: area.descricao
             }));
             console.log(`Found ${formattedAreas.length} supervisions for coordination ${coordenacao}`);
             setFilteredAreas(formattedAreas);
+            setHasSupervisions(true);
           } else {
             setFilteredAreas([]);
+            setHasSupervisions(false);
           }
         } catch (error) {
           console.error('Error filtering areas:', error);
           setFilteredAreas([]);
+          setHasSupervisions(false);
         } finally {
           setFetchingAreas(false);
         }
       } else {
         // If no coordenação is selected, show no areas
         setFilteredAreas([]);
+        setHasSupervisions(false);
       }
     };
     
@@ -159,50 +164,53 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
         {errors.coordenacao && <p className="mt-1 text-sm text-[#f57b35]">Coordenação é obrigatória</p>}
       </div>
       
-      <div>
-        <label htmlFor="area" className="block text-sm font-medium text-[#111827] mb-1">
-          Supervisão Técnica
-        </label>
-        {loadingOptions || fetchingAreas ? (
-          <div className="w-full px-4 py-2 border border-gray-300 rounded-xl flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-gray-500">Carregando...</span>
-          </div>
-        ) : (
-          <Select 
-            value={area} 
-            onValueChange={(value) => handleChange('area', value)}
-            disabled={loadingOptions || !coordenacao || coordenacao === 'select-coordenacao' || filteredAreas.length === 0}
-          >
-            <SelectTrigger 
-              className={`${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
+      {/* Only show the supervision field if the coordination has supervisions */}
+      {hasSupervisions && (
+        <div className="animate-fadeIn">
+          <label htmlFor="area" className="block text-sm font-medium text-[#111827] mb-1">
+            Supervisão Técnica
+          </label>
+          {loadingOptions || fetchingAreas ? (
+            <div className="w-full px-4 py-2 border border-gray-300 rounded-xl flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-gray-500">Carregando...</span>
+            </div>
+          ) : (
+            <Select 
+              value={area} 
+              onValueChange={(value) => handleChange('area', value)}
+              disabled={loadingOptions || !coordenacao || coordenacao === 'select-coordenacao' || filteredAreas.length === 0}
             >
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              {!coordenacao || coordenacao === 'select-coordenacao' ? (
-                <SelectItem value="no-coordenacao-selected" disabled>
-                  Selecione uma coordenação primeiro
-                </SelectItem>
-              ) : filteredAreas.length === 0 ? (
-                <SelectItem value="no-supervisions-available" disabled>
-                  Nenhuma supervisão técnica disponível para esta coordenação
-                </SelectItem>
-              ) : (
-                <>
-                  <SelectItem value="select-area" disabled>Selecione uma supervisão técnica</SelectItem>
-                  {filteredAreas.map(area => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.value}
-                    </SelectItem>
-                  ))}
-                </>
-              )}
-            </SelectContent>
-          </Select>
-        )}
-        {errors.area && <p className="mt-1 text-sm text-[#f57b35]">Supervisão Técnica é obrigatória</p>}
-      </div>
+              <SelectTrigger 
+                className={`${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
+              >
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                {!coordenacao || coordenacao === 'select-coordenacao' ? (
+                  <SelectItem value="no-coordenacao-selected" disabled>
+                    Selecione uma coordenação primeiro
+                  </SelectItem>
+                ) : filteredAreas.length === 0 ? (
+                  <SelectItem value="no-supervisions-available" disabled>
+                    Nenhuma supervisão técnica disponível para esta coordenação
+                  </SelectItem>
+                ) : (
+                  <>
+                    <SelectItem value="select-area" disabled>Selecione uma supervisão técnica</SelectItem>
+                    {filteredAreas.map(area => (
+                      <SelectItem key={area.id} value={area.id}>
+                        {area.value}
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+          )}
+          {errors.area && <p className="mt-1 text-sm text-[#f57b35]">Supervisão Técnica é obrigatória</p>}
+        </div>
+      )}
     </div>
   );
 };

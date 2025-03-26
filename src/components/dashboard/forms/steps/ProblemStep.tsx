@@ -1,17 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from "@/components/ui/checkbox";
 import { ValidationError } from '@/lib/formValidationUtils';
-import { Checkbox } from '@/components/ui/checkbox';
-import { DemandFormData } from '@/hooks/demandForm/types';
+import { 
+  AlertTriangle, 
+  Map, 
+  MapPin, 
+  Trash2, 
+  Droplets, 
+  Construction, 
+  Tree, 
+  Lightbulb, 
+  Road, 
+  Shield 
+} from 'lucide-react';
 
 interface ProblemStepProps {
-  formData: DemandFormData;
+  formData: {
+    problema_id: string;
+    servico_id: string;
+    nao_sabe_servico?: boolean;
+  };
   problemas: any[];
   servicos: any[];
-  filteredServicos: any[]; 
+  filteredServicos: any[];
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
   handleServiceSearch?: (value: string) => void;
@@ -28,183 +43,136 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
   handleServiceSearch,
   errors = []
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [serviceSearchTerm, setServiceSearchTerm] = useState('');
-  const [filteredProblems, setFilteredProblems] = useState(problemas);
-  const [isServiceVisible, setIsServiceVisible] = useState(!!formData.problema_id);
-  const [isDetailsVisible, setIsDetailsVisible] = useState(
-    !!formData.servico_id || formData.nao_sabe_servico
-  );
-  
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
   };
 
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = problemas.filter(p => 
-        p.descricao.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredProblems(filtered);
-    } else {
-      setFilteredProblems(problemas);
-    }
-  }, [searchTerm, problemas]);
-
-  useEffect(() => {
-    // Show service section if a problem is selected
-    setIsServiceVisible(!!formData.problema_id);
+  // Get problem icon based on description
+  const getProblemIcon = (problema: any) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      "Buraco": <Road className="h-8 w-8" />,
+      "Iluminação": <Lightbulb className="h-8 w-8" />,
+      "Árvore": <Tree className="h-8 w-8" />,
+      "Esgoto": <Droplets className="h-8 w-8" />,
+      "Calçada": <Construction className="h-8 w-8" />,
+      "Lixo": <Trash2 className="h-8 w-8" />,
+      "Sinalização": <MapPin className="h-8 w-8" />,
+      "Segurança": <Shield className="h-8 w-8" />,
+      "Outros": <AlertTriangle className="h-8 w-8" />
+    };
     
-    // Show details section if a service is selected or "Não sei informar" is checked
-    setIsDetailsVisible(!!formData.servico_id || formData.nao_sabe_servico);
-  }, [formData.problema_id, formData.servico_id, formData.nao_sabe_servico]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleServiceSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setServiceSearchTerm(e.target.value);
-    if (handleServiceSearch) {
-      handleServiceSearch(e.target.value);
+    // Default icon or from database
+    if (problema.icone) {
+      // Here we could return a custom icon if it's stored in the database
+      return <img src={problema.icone} alt={problema.descricao} className="h-8 w-8" />;
     }
-  };
-
-  const handleProblemSelection = (id: string) => {
-    handleSelectChange('problema_id', id);
-  };
-
-  const handleServiceSelection = (id: string) => {
-    handleSelectChange('servico_id', id);
-    handleSelectChange('nao_sabe_servico', false);
-  };
-
-  const handleDontKnowService = (checked: boolean) => {
-    handleSelectChange('nao_sabe_servico', checked);
+    
+    // Try to match by keywords in the description
+    for (const [keyword, icon] of Object.entries(iconMap)) {
+      if (problema.descricao.toLowerCase().includes(keyword.toLowerCase())) {
+        return icon;
+      }
+    }
+    
+    return <Map className="h-8 w-8" />;
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <div className="flex justify-between items-center mb-2">
-          <Label className={`block ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
-            Tema/Problema
-          </Label>
-          <div className="w-1/3">
-            <Input
-              placeholder="Buscar tema..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="py-1 px-2 h-8"
-            />
-          </div>
-        </div>
-        
-        <RadioGroup
-          value={formData.problema_id}
-          onValueChange={handleProblemSelection}
-          className="flex flex-col space-y-1"
+        <Label 
+          htmlFor="problema_id" 
+          className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}
         >
-          {filteredProblems.length === 0 ? (
-            <div className="text-gray-500 p-4 text-center">
-              Nenhum tema encontrado
-            </div>
-          ) : (
-            filteredProblems.map((problem) => (
-              <div key={problem.id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
-                <RadioGroupItem value={problem.id} id={`problem-${problem.id}`} />
-                <Label htmlFor={`problem-${problem.id}`} className="cursor-pointer w-full">
-                  {problem.descricao}
-                </Label>
-              </div>
-            ))
-          )}
-        </RadioGroup>
-        
+          Tema/Problema {hasError('problema_id') && <span className="text-orange-500">*</span>}
+        </Label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {problemas.map(problema => (
+            <Button 
+              key={problema.id} 
+              type="button" 
+              variant={formData.problema_id === problema.id ? "default" : "outline"} 
+              className={`h-auto py-3 px-2 flex flex-col items-center justify-center gap-2 ${
+                formData.problema_id === problema.id ? "ring-2 ring-[#003570]" : ""
+              } ${
+                hasError('problema_id') ? 'border-orange-500' : ''
+              }`} 
+              onClick={() => handleSelectChange('problema_id', problema.id)}
+            >
+              {getProblemIcon(problema)}
+              <span className="text-sm font-semibold text-center">{problema.descricao}</span>
+            </Button>
+          ))}
+        </div>
         {hasError('problema_id') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('problema_id')}</p>
         )}
       </div>
-
-      {isServiceVisible && (
-        <div className="border-t pt-4">
-          <div className="flex justify-between items-center mb-2">
-            <Label className={`block ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}>
-              Serviço
+      
+      {formData.problema_id && (
+        <div className="animate-fadeIn space-y-4">
+          <div>
+            <Label htmlFor="serviceSearch" className="block mb-2">
+              Pesquisar Serviço
             </Label>
-            <div className="w-1/3">
-              <Input
-                placeholder="Buscar serviço..."
-                value={serviceSearchTerm}
-                onChange={handleServiceSearchChange}
-                className="py-1 px-2 h-8"
-              />
-            </div>
+            <Input 
+              id="serviceSearch" 
+              name="serviceSearch" 
+              placeholder="Digite o nome do serviço..." 
+              onChange={(e) => handleServiceSearch && handleServiceSearch(e.target.value)} 
+            />
           </div>
           
-          <div className="mb-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="nao-sei-servico" 
-                checked={formData.nao_sabe_servico} 
-                onCheckedChange={handleDontKnowService}
-              />
-              <label 
-                htmlFor="nao-sei-servico" 
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Não sei informar o serviço
-              </label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="nao-sabe-servico" 
+              checked={formData.nao_sabe_servico} 
+              onCheckedChange={(checked) => handleSelectChange('nao_sabe_servico', Boolean(checked))}
+            />
+            <Label htmlFor="nao-sabe-servico" className="text-sm cursor-pointer">
+              Não sei qual serviço selecionar
+            </Label>
           </div>
           
           {!formData.nao_sabe_servico && (
-            <RadioGroup
-              value={formData.servico_id}
-              onValueChange={handleServiceSelection}
-              className="flex flex-col space-y-1"
-            >
-              {filteredServicos.length === 0 ? (
-                <div className="text-gray-500 p-4 text-center">
-                  Nenhum serviço encontrado para este tema
-                </div>
-              ) : (
-                filteredServicos.map((servico) => (
-                  <div key={servico.id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
-                    <RadioGroupItem value={servico.id} id={`servico-${servico.id}`} />
-                    <Label htmlFor={`servico-${servico.id}`} className="cursor-pointer w-full">
-                      {servico.descricao}
-                    </Label>
+            <div>
+              <Label 
+                htmlFor="servico_id" 
+                className={`block mb-2 ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}
+              >
+                Serviço {hasError('servico_id') && <span className="text-orange-500">*</span>}
+              </Label>
+              <div className="space-y-2">
+                {filteredServicos.length > 0 ? (
+                  filteredServicos.map(servico => (
+                    <Button 
+                      key={servico.id} 
+                      type="button" 
+                      variant={formData.servico_id === servico.id ? "default" : "outline"} 
+                      className={`w-full justify-start py-3 px-4 ${
+                        formData.servico_id === servico.id ? "ring-2 ring-[#003570]" : ""
+                      } ${
+                        hasError('servico_id') ? 'border-orange-500' : ''
+                      }`} 
+                      onClick={() => handleSelectChange('servico_id', servico.id)}
+                    >
+                      <span>{servico.descricao}</span>
+                    </Button>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    {servicos.length === 0 
+                      ? "Não há serviços disponíveis para o tema selecionado." 
+                      : "Nenhum serviço encontrado para sua pesquisa."}
                   </div>
-                ))
+                )}
+              </div>
+              {hasError('servico_id') && (
+                <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>
               )}
-            </RadioGroup>
-          )}
-        </div>
-      )}
-
-      {isDetailsVisible && (
-        <div className="border-t pt-4">
-          <div className="mb-2">
-            <Label className={`block ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}>
-              Detalhes da Solicitação
-            </Label>
-          </div>
-          
-          <textarea
-            name="detalhes_solicitacao"
-            value={formData.detalhes_solicitacao}
-            onChange={handleChange}
-            placeholder="Descreva os detalhes da solicitação..."
-            className={`w-full min-h-[150px] p-3 border rounded-lg ${
-              hasError('detalhes_solicitacao') ? 'border-orange-500' : 'border-gray-300'
-            }`}
-          />
-          
-          {hasError('detalhes_solicitacao') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
+            </div>
           )}
         </div>
       )}

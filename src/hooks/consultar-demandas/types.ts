@@ -39,15 +39,15 @@ export interface Demand {
       id: string;
       descricao: string;
       coordenacao_id: string;
-    }
-  };
+    } | null;
+  } | null;
   supervisao_tecnica_id?: string;
   supervisao_tecnica?: {
     id: string;
     descricao: string;
-  };
-  arquivo_url: string | null; // Added missing property
-  anexos: string[] | null; // Added missing property
+  } | null;
+  arquivo_url: string | null; 
+  anexos: string[] | null; 
   resposta?: {
     id: string;
     demanda_id: string;

@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import OriginClassificationStep from '../OriginClassificationStep';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface OriginStepProps {
@@ -10,40 +12,129 @@ interface OriginStepProps {
     tipo_midia_id: string;
     veiculo_imprensa: string;
   };
+  handleSelectChange: (name: string, value: string) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   origens: any[];
   tiposMidia: any[];
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: string | boolean) => void;
-  errors: ValidationError[];
+  errors?: ValidationError[];
 }
 
 const OriginStep: React.FC<OriginStepProps> = ({
   formData,
+  handleSelectChange,
+  handleChange,
   origens,
   tiposMidia,
-  handleChange,
-  handleSelectChange,
-  errors
+  errors = []
 }) => {
+  const hasError = (field: string) => errors.some(err => err.field === field);
+  const getErrorMessage = (field: string) => {
+    const error = errors.find(err => err.field === field);
+    return error ? error.message : '';
+  };
+  
+  // Always show the media type selection, regardless of origin
+  const showVeiculoImprensa = formData.tipo_midia_id;
+  
+  // Get media type icon based on description
+  const getMediaTypeIcon = (descricao: string) => {
+    const iconMap: {
+      [key: string]: React.ReactNode;
+    } = {
+      "Revista": <Book className="h-6 w-6" />,
+      "Impresso": <Newspaper className="h-6 w-6" />,
+      "Jornal Online": <Monitor className="h-6 w-6" />,
+      "Portal": <MousePointer className="h-6 w-6" />,
+      "Blog": <Globe className="h-6 w-6" />,
+      "Podcast": <Mic className="h-6 w-6" />,
+      "TV": <Tv className="h-6 w-6" />,
+      "Rádio": <Radio className="h-6 w-6" />,
+      "Outros": <HelpCircle className="h-6 w-6" />
+    };
+    return iconMap[descricao] || <HelpCircle className="h-6 w-6" />;
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <Label className="text-base font-semibold">
-          Origem e Classificação da Demanda
+        <Label 
+          htmlFor="origem_id" 
+          className={`block mb-2 ${hasError('origem_id') ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Origem da Demanda {hasError('origem_id') && <span className="text-orange-500">*</span>}
         </Label>
-        <p className="text-sm text-gray-500 mb-4">
-          Selecione a origem da demanda e sua classificação
-        </p>
+        <div className="flex flex-wrap gap-3">
+          {origens.map(origem => (
+            <Button 
+              key={origem.id} 
+              type="button" 
+              variant={formData.origem_id === origem.id ? "default" : "outline"} 
+              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
+                formData.origem_id === origem.id ? "ring-2 ring-[#003570]" : ""
+              } ${
+                hasError('origem_id') ? 'border-orange-500' : ''
+              }`} 
+              onClick={() => handleSelectChange('origem_id', origem.id)}
+            >
+              <span className="text-sm font-semibold">{origem.descricao}</span>
+            </Button>
+          ))}
+        </div>
+        {hasError('origem_id') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('origem_id')}</p>
+        )}
       </div>
-
-      <OriginClassificationStep
-        formData={formData}
-        origens={origens}
-        tiposMidia={tiposMidia}
-        handleChange={handleChange}
-        handleSelectChange={handleSelectChange}
-        errors={errors}
-      />
+      
+      <div className="animate-fadeIn">
+        <Label 
+          htmlFor="tipo_midia_id" 
+          className={`block mb-2 ${hasError('tipo_midia_id') ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Tipo de Mídia {hasError('tipo_midia_id') && <span className="text-orange-500">*</span>}
+        </Label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {tiposMidia.map(tipo => (
+            <Button 
+              key={tipo.id} 
+              type="button" 
+              variant={formData.tipo_midia_id === tipo.id ? "default" : "outline"} 
+              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
+                formData.tipo_midia_id === tipo.id ? "ring-2 ring-[#003570]" : ""
+              } ${
+                hasError('tipo_midia_id') ? 'border-orange-500' : ''
+              }`} 
+              onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
+            >
+              {getMediaTypeIcon(tipo.descricao)}
+              <span className="text-sm font-semibold">{tipo.descricao}</span>
+            </Button>
+          ))}
+        </div>
+        {hasError('tipo_midia_id') && (
+          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('tipo_midia_id')}</p>
+        )}
+      </div>
+      
+      {showVeiculoImprensa && (
+        <div className="animate-fadeIn">
+          <Label 
+            htmlFor="veiculo_imprensa" 
+            className={`block mb-2 ${hasError('veiculo_imprensa') ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Veículo de Imprensa
+          </Label>
+          <Input 
+            id="veiculo_imprensa" 
+            name="veiculo_imprensa" 
+            value={formData.veiculo_imprensa} 
+            onChange={handleChange} 
+            className={hasError('veiculo_imprensa') ? 'border-orange-500' : ''}
+          />
+          {hasError('veiculo_imprensa') && (
+            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('veiculo_imprensa')}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
