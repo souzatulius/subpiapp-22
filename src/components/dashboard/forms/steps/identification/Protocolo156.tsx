@@ -37,24 +37,18 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
           htmlFor="tem_protocolo_156" 
           className="text-sm font-medium leading-none cursor-pointer"
         >
-          A demanda possui um protocolo 156 associado
+          Essa demanda tem protocolo aberto no 156?
         </label>
       </div>
       
       {temProtocolo156 && (
         <div className="animate-fadeIn">
-          <label 
-            htmlFor="numero_protocolo_156" 
-            className={`block mb-2 ${hasError('numero_protocolo_156') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Número do protocolo 156 {hasError('numero_protocolo_156') && <span className="text-orange-500">*</span>}
-          </label>
           <Input 
             id="numero_protocolo_156" 
             name="numero_protocolo_156" 
             value={numeroProtocolo156} 
             onChange={handleChange} 
-            placeholder="Digite os 10 dígitos do protocolo 156" 
+            placeholder="Digite aqui os 10 dígitos do protocolo" 
             className={`w-full ${hasError('numero_protocolo_156') ? 'border-orange-500' : ''}`}
             maxLength={10}
           />

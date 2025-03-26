@@ -40,7 +40,7 @@ export interface FormState {
 export interface Demand {
   id: string;
   titulo: string;
-  status: string;
+  status: string; // Valores atualizados: pendente, em_andamento, aguardando_nota, aguardando_aprovacao, concluida, concluida_editada, concluida_recusada, cancelada, arquivada
   prioridade: string;
   horario_publicacao: string;
   prazo_resposta: string;

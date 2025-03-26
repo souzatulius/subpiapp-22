@@ -31,6 +31,32 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   // Use either criado_em or created_at, whichever is available
   const dataCreated = nota.criado_em || nota.created_at;
 
+  // Mapear status para descrições mais amigáveis
+  const getStatusDescription = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'pendente': 'Aguardando aprovação',
+      'aprovado': 'Aprovada',
+      'concluida': 'Concluída',
+      'concluida_editada': 'Editada após aprovação',
+      'concluida_recusada': 'Recusada',
+      'rejeitado': 'Recusada'
+    };
+    return statusMap[status] || status;
+  };
+
+  // Mapear status para cores
+  const getStatusColor = (status: string) => {
+    const statusColorMap: Record<string, string> = {
+      'pendente': 'bg-blue-50 text-blue-700',
+      'aprovado': 'bg-green-50 text-green-700',
+      'concluida': 'bg-green-50 text-green-700',
+      'concluida_editada': 'bg-purple-50 text-purple-700',
+      'concluida_recusada': 'bg-red-50 text-red-700',
+      'rejeitado': 'bg-red-50 text-red-700'
+    };
+    return statusColorMap[status] || 'bg-gray-50 text-gray-700';
+  };
+
   return (
     <Card 
       key={nota.id} 
@@ -58,8 +84,8 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
           </div>
           
           <div className="flex flex-col items-end justify-start">
-            <div className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">
-              Pendente
+            <div className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(nota.status)}`}>
+              {getStatusDescription(nota.status)}
             </div>
             
             <div className="mt-2 text-xs text-gray-500 flex items-center">

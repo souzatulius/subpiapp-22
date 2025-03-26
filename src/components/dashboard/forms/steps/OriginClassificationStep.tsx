@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio } from 'lucide-react';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag, Building, Phone, Users, MessageSquare, Mail } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface OriginClassificationStepProps {
@@ -47,6 +47,22 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
     }
   }, [showMediaFields, formData.tipo_midia_id]);
 
+  // Get origin icon based on description
+  const getOriginIcon = (descricao: string) => {
+    const iconMap: {
+      [key: string]: React.ReactNode;
+    } = {
+      "Imprensa": <Newspaper className="h-5 w-5" />,
+      "SMSUB": <Building className="h-5 w-5" />,
+      "SECOM": <MessageSquare className="h-5 w-5" />,
+      "Telefone": <Phone className="h-5 w-5" />,
+      "Email": <Mail className="h-5 w-5" />,
+      "Ouvidoria": <Users className="h-5 w-5" />,
+      "Outros": <Flag className="h-5 w-5" />
+    };
+    return iconMap[descricao] || <Flag className="h-5 w-5" />;
+  };
+
   // Get media type icon based on description
   const getMediaTypeIcon = (descricao: string) => {
     const iconMap: {
@@ -72,7 +88,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
           htmlFor="origem_id" 
           className={`block mb-2 ${hasError('origem_id') ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Origem da Demanda {hasError('origem_id') && <span className="text-orange-500">*</span>}
+          De onde vem a sua solicitação? {hasError('origem_id') && <span className="text-orange-500">*</span>}
         </label>
         <div className="flex flex-wrap gap-3">
           {origens.map(origem => (
@@ -87,6 +103,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
               }`} 
               onClick={() => handleSelectChange('origem_id', origem.id)}
             >
+              {getOriginIcon(origem.descricao)}
               <span className="text-sm font-semibold">{origem.descricao}</span>
             </Button>
           ))}

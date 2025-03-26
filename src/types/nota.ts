@@ -32,10 +32,10 @@ export interface NotaOficial {
   };
   revisado_em?: string;
   
-  // Additional properties needed for the application
-  criado_em: string;
-  atualizado_em?: string;
-  demanda_id?: string;
+  // Campos adicionais necessários para a aplicação
+  criado_em: string;        // Duplicado de created_at para compatibilidade
+  atualizado_em?: string;   // Duplicado de updated_at para compatibilidade
+  demanda_id?: string;      // ID direto da demanda para facilitar relações
   aprovador?: {
     id?: string;
     nome_completo?: string;
@@ -53,7 +53,7 @@ export interface NotaOficial {
   }>;
 }
 
-// Define the interface for the return value of useNotasData hook
+// Interface para dados de retorno do hook useNotasData
 export interface UseNotasDataReturn {
   notas: NotaOficial[] | null;
   filteredNotas: NotaOficial[];
@@ -75,7 +75,7 @@ export interface UseNotasDataReturn {
   isAdmin: boolean;
 }
 
-// Define interface for nota editing history
+// Interface para histórico de edição de notas
 export interface NotaEdicao {
   id: string;
   nota_id: string;
