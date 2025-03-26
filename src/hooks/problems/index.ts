@@ -5,7 +5,7 @@ import { useProblemOperations } from './useProblemOperations';
 // Create compatibility hook for ease of use
 export const useProblems = () => {
   const problemsData = useProblemsData();
-  const problemOperations = useProblemOperations(problemsData.refetch);
+  const problemOperations = useProblemOperations(problemsData.fetchProblems);
   
   return {
     ...problemsData,

@@ -3,6 +3,7 @@ import React from 'react';
 import { Map, MessageSquare, Bell } from 'lucide-react';
 import StatCard from './StatCard';
 import { SettingsStats } from '../types/settingsTypes';
+import { useSettingsStats } from '@/hooks/settings/useSettingsStats';
 
 interface LocationCommunicationStatsProps {
   stats: SettingsStats;

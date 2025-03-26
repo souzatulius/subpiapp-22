@@ -2,13 +2,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Download, Printer, Shield } from 'lucide-react';
+import { Search, FileDown, Printer, Shield, RefreshCw } from 'lucide-react';
 
 interface AccessControlHeaderProps {
   filter: string;
   setFilter: (value: string) => void;
   handleExportCsv: () => void;
   handlePrint: () => void;
+  handleRefresh: () => Promise<void>;
 }
 
 const AccessControlHeader: React.FC<AccessControlHeaderProps> = ({
@@ -16,6 +17,7 @@ const AccessControlHeader: React.FC<AccessControlHeaderProps> = ({
   setFilter,
   handleExportCsv,
   handlePrint,
+  handleRefresh,
 }) => {
   return (
     <>
@@ -39,11 +41,15 @@ const AccessControlHeader: React.FC<AccessControlHeaderProps> = ({
           
           <div className="flex gap-2">
             <Button variant="outline" size="icon" onClick={handleExportCsv} title="Exportar CSV">
-              <Download className="h-4 w-4" />
+              <FileDown className="h-4 w-4" />
             </Button>
             
             <Button variant="outline" size="icon" onClick={handlePrint} title="Imprimir">
               <Printer className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="outline" size="icon" onClick={handleRefresh} title="Atualizar">
+              <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
         </div>

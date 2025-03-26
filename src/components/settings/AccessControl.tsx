@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FileCsv, Printer, RefreshCw } from 'lucide-react';
+import { FileDown, Printer, RefreshCw } from 'lucide-react';
 import AccessControlTable from './access-control/AccessControlTable';
 import AccessControlHeader from './access-control/AccessControlHeader';
 import UserInfoEditDialog from './access-control/UserInfoEditDialog';
@@ -36,9 +36,9 @@ const AccessControl: React.FC = () => {
       <AccessControlHeader 
         filter={filter} 
         setFilter={setFilter} 
-        onExportCsv={handleExportCsv} 
-        onPrint={handlePrint}
-        onRefresh={fetchData}
+        handleExportCsv={handleExportCsv} 
+        handlePrint={handlePrint}
+        handleRefresh={fetchData}
       />
 
       {error && (
@@ -68,7 +68,7 @@ const AccessControl: React.FC = () => {
         onOpenChange={setIsEditDialogOpen}
         user={currentUser}
         onSave={handleUpdateUserInfo}
-        isSaving={saving}
+        saving={saving}
       />
     </div>
   );

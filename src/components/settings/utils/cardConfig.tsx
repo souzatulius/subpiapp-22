@@ -28,21 +28,7 @@ export const getCoordsUsageData = () => [
   { name: 'Coord D', value: 15 }
 ];
 
-export const getSettingsCards = (
-  positionsLength = 0,
-  positionsLoading = false,
-  problemsLength = 0,
-  problemsLoading = false,
-  servicesLength = 0,
-  servicesLoading = false,
-  areasLength = 0,
-  coordinationsLength = 0,
-  areasLoading = false,
-  originsLength = 0,
-  originsLoading = false,
-  mediaTypesLength = 0,
-  mediaTypesLoading = false
-) => [
+export const userManagementCards = [
   {
     title: "Usuários e Permissões",
     description: "Gerencie usuários e suas permissões de acesso no sistema.",
@@ -59,9 +45,8 @@ export const getSettingsCards = (
     icon: <Briefcase className="h-5 w-5" />,
     link: "/settings?tab=cargos",
     color: "bg-amber-600",
-    count: positionsLength,
-    category: "Gestão de Usuários e Permissões",
-    loading: positionsLoading
+    count: 15,
+    category: "Gestão de Usuários e Permissões"
   },
   {
     title: "Permissões",
@@ -76,16 +61,18 @@ export const getSettingsCards = (
       { name: 'Editar', value: 10 },
       { name: 'Admin', value: 6 }
     ]} color="#f59e0b" />
-  },
+  }
+];
+
+export const organizationalCards = [
   {
     title: "Coordenações",
     description: "Gerencie as coordenações.",
     icon: <Building className="h-5 w-5" />,
     link: "/settings?tab=coordenacoes_lista",
     color: "bg-blue-600",
-    count: coordinationsLength,
+    count: 4,
     category: "Gestão Organizacional",
-    loading: areasLoading,
     chart: <MiniBarChart data={getCoordsUsageData()} />
   },
   {
@@ -94,9 +81,8 @@ export const getSettingsCards = (
     icon: <Layers className="h-5 w-5" />,
     link: "/settings?tab=areas",
     color: "bg-blue-600",
-    count: areasLength,
-    category: "Gestão Organizacional",
-    loading: areasLoading
+    count: 12,
+    category: "Gestão Organizacional"
   },
   {
     title: "Serviços",
@@ -104,20 +90,21 @@ export const getSettingsCards = (
     icon: <FileText className="h-5 w-5" />,
     link: "/settings?tab=servicos",
     color: "bg-blue-600",
-    count: servicesLength,
+    count: 24,
     category: "Gestão Organizacional",
-    loading: servicesLoading,
     chart: <MiniBarChart data={getServicesByAreaData()} color="#2563eb" />
-  },
+  }
+];
+
+export const operationalCards = [
   {
     title: "Origens das Demandas",
     description: "Gerencie as origens das demandas.",
     icon: <Globe className="h-5 w-5" />,
     link: "/settings?tab=origens_demanda",
     color: "bg-green-600",
-    count: originsLength,
-    category: "Gestão Operacional",
-    loading: originsLoading
+    count: 8,
+    category: "Gestão Operacional"
   },
   {
     title: "Problemas/Temas",
@@ -125,9 +112,8 @@ export const getSettingsCards = (
     icon: <AlertTriangle className="h-5 w-5" />,
     link: "/settings?tab=problemas",
     color: "bg-green-600",
-    count: problemsLength,
-    category: "Gestão Operacional",
-    loading: problemsLoading
+    count: 32,
+    category: "Gestão Operacional"
   },
   {
     title: "Tipos de Mídia",
@@ -135,9 +121,8 @@ export const getSettingsCards = (
     icon: <Image className="h-5 w-5" />,
     link: "/settings?tab=tipos_midia",
     color: "bg-green-600",
-    count: mediaTypesLength,
-    category: "Gestão Operacional",
-    loading: mediaTypesLoading
+    count: 6,
+    category: "Gestão Operacional"
   },
   {
     title: "Distritos e Bairros",
@@ -182,6 +167,11 @@ export const filterCards = (cards: any[], searchQuery: string) => {
     card.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     card.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
+};
+
+// Get all cards
+export const getSettingsCards = () => {
+  return [...userManagementCards, ...organizationalCards, ...operationalCards];
 };
 
 // Function to group cards by category

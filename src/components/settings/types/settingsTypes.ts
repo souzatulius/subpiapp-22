@@ -1,6 +1,5 @@
 
 export interface SettingsStats {
-  // English names (legacy)
   users: number;
   areas: number;
   positions: number;
@@ -9,8 +8,6 @@ export interface SettingsStats {
   neighborhoods: number;
   announcements: number;
   notifications: number;
-  
-  // Portuguese names (current)
   usuarios: number;
   supervisoesTecnicas: number;
   coordenacoes: number;
@@ -24,4 +21,16 @@ export interface SettingsStats {
   configuracoesNotificacoes: number;
   permissoes: number;
   temas: number;
+}
+
+export interface CardData {
+  title: string;
+  description: string;
+  icon: JSX.Element;
+  link: string;
+  color: string;
+  count?: number;
+  category: string;
+  loading?: boolean;
+  chart?: JSX.Element;
 }
