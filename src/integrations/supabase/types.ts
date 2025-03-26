@@ -291,6 +291,7 @@ export type Database = {
       }
       demandas: {
         Row: {
+          anexos: string[] | null
           arquivo_url: string | null
           atualizado_em: string
           autor_id: string
@@ -315,6 +316,7 @@ export type Database = {
           veiculo_imprensa: string | null
         }
         Insert: {
+          anexos?: string[] | null
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id: string
@@ -339,6 +341,7 @@ export type Database = {
           veiculo_imprensa?: string | null
         }
         Update: {
+          anexos?: string[] | null
           arquivo_url?: string | null
           atualizado_em?: string
           autor_id?: string
