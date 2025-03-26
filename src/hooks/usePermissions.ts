@@ -30,6 +30,7 @@ export const usePermissions = (): UsePermissionsReturn => {
 
       try {
         setIsLoading(true);
+        console.log("Checking permissions for user:", user.id);
 
         // Check if user has admin role using the RPC function
         const { data: isUserAdmin, error: adminCheckError } = await supabase
@@ -41,6 +42,7 @@ export const usePermissions = (): UsePermissionsReturn => {
         if (adminCheckError) throw adminCheckError;
         
         let adminStatus = !!isUserAdmin;
+        console.log("Admin status from RPC user_has_role:", adminStatus);
 
         // Fetch user data for coordination and supervisao tecnica
         const { data: userData, error: userError } = await supabase
@@ -50,7 +52,8 @@ export const usePermissions = (): UsePermissionsReturn => {
           .single();
 
         if (userError) throw userError;
-
+        
+        console.log("User data:", userData);
         setUserCoordination(userData?.coordenacao_id || null);
         setUserSupervisaoTecnica(userData?.supervisao_tecnica_id || null);
 
@@ -63,10 +66,21 @@ export const usePermissions = (): UsePermissionsReturn => {
             .single();
             
           if (!coordError && coordData) {
-            const coordDescription = coordData.descricao.toLowerCase();
-            if (coordDescription.includes('gabinete') || coordDescription.includes('comunicação') || coordDescription.includes('comunicacao')) {
+            const coordDescription = coordData.descricao.toLowerCase().trim();
+            console.log("Coordination description:", coordData.descricao);
+            console.log("Lowercased and trimmed:", coordDescription);
+            
+            // Check various forms of "comunicacao" and "gabinete" to handle potential inconsistencies
+            if (
+              coordDescription.includes('gabinete') || 
+              coordDescription.includes('comunicacao') || 
+              coordDescription.includes('comunicação')
+            ) {
+              console.log("User belongs to privileged coordination, granting admin access");
               adminStatus = true;
             }
+          } else if (coordError) {
+            console.error("Error fetching coordination data:", coordError);
           }
         }
 
@@ -76,7 +90,10 @@ export const usePermissions = (): UsePermissionsReturn => {
             .rpc('is_admin', { user_id: user.id });
             
           if (!permissionError && isAdminByPermission) {
+            console.log("User is admin by legacy permission");
             adminStatus = true;
+          } else if (permissionError) {
+            console.error("Error checking is_admin RPC:", permissionError);
           }
         }
 
@@ -86,10 +103,14 @@ export const usePermissions = (): UsePermissionsReturn => {
             .rpc('is_admin_by_coordenacao', { user_id: user.id });
             
           if (!coordError && isAdminByCoord) {
+            console.log("User is admin by coordination (via RPC function)");
             adminStatus = true;
+          } else if (coordError) {
+            console.error("Error checking is_admin_by_coordenacao RPC:", coordError);
           }
         }
 
+        console.log("Final admin status:", adminStatus);
         setIsAdmin(adminStatus);
       } catch (err: any) {
         console.error('Error fetching user permissions:', err);
@@ -105,7 +126,10 @@ export const usePermissions = (): UsePermissionsReturn => {
   // Function to check if user can access a protected route
   const canAccessProtectedRoute = (route: string): boolean => {
     // Admin can access all routes
-    if (isAdmin) return true;
+    if (isAdmin) {
+      console.log("User is admin, allowing access to route:", route);
+      return true;
+    }
     
     // Protected routes that only admins can access
     const adminOnlyRoutes = [
@@ -121,10 +145,13 @@ export const usePermissions = (): UsePermissionsReturn => {
     ];
     
     // Check if the route starts with any of the admin-only routes
-    return !adminOnlyRoutes.some(adminRoute => 
+    const isAdminRoute = adminOnlyRoutes.some(adminRoute => 
       route === adminRoute || 
       route.startsWith(`${adminRoute}/`)
     );
+    
+    console.log(`Route ${route} is ${isAdminRoute ? 'admin-only' : 'accessible to all'}`);
+    return !isAdminRoute;
   };
 
   return { 

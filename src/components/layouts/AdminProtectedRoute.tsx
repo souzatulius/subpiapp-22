@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { usePermissions } from '@/hooks/usePermissions';
+import { toast } from '@/components/ui/use-toast';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
@@ -19,20 +20,50 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
       // Wait for auth and permission checks to complete
       if (authLoading || permissionLoading) return;
       
+      console.log("Checking access to admin route:", location.pathname);
+      console.log("User auth state:", { user: !!user, isApproved, isAdmin });
+      
       // Check if user is logged in and approved
       if (!user) {
+        console.log("User not logged in, redirecting to login");
+        toast({
+          title: "Acesso negado",
+          description: "Você precisa estar logado para acessar esta página.",
+          variant: "destructive"
+        });
         navigate('/login');
         return;
       }
       
       if (isApproved === false) {
+        console.log("User not approved, redirecting to pending approval");
+        toast({
+          title: "Conta não aprovada",
+          description: "Sua conta ainda está aguardando aprovação.",
+          variant: "destructive"
+        });
         navigate('/pending-approval');
         return;
       }
       
       // Check if user has admin permissions for this route
       if (!isAdmin && !canAccessProtectedRoute(location.pathname)) {
-        // Redirect to dashboard or show unauthorized page
+        console.log("User does not have admin permissions, redirecting to dashboard");
+        toast({
+          title: "Acesso restrito",
+          description: "Você não tem permissão para acessar esta página. Este incidente foi registrado.",
+          variant: "destructive"
+        });
+        
+        // Log access attempt for security auditing
+        console.warn("Unauthorized access attempt", {
+          userId: user.id,
+          email: user.email,
+          path: location.pathname,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Redirect to dashboard
         navigate('/dashboard');
       }
     };
