@@ -6,11 +6,12 @@ import { Separator } from '@/components/ui/separator';
 import { NotaOficial } from '@/types/nota';
 
 interface AprovarNotaFormProps {
-  nota: NotaOficial;
-  onApprove: () => void;
-  onReject: () => void;
-  loading: boolean;
-  formatDate: (dateStr: string) => string;
+  nota?: NotaOficial;
+  onApprove?: () => void;
+  onReject?: () => void;
+  loading?: boolean;
+  formatDate?: (dateStr: string) => string;
+  onClose: () => void;
 }
 
 const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({
@@ -18,7 +19,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({
   onApprove,
   onReject,
   loading,
-  formatDate
+  formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('pt-BR'),
+  onClose
 }) => {
   if (!nota) {
     return <div>Nota não encontrada</div>;

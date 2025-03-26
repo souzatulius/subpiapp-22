@@ -51,3 +51,24 @@ export interface NotaOficial {
     descricao: string;
   };
 }
+
+export interface UseNotasDataReturn {
+  notas: NotaOficial[] | null;
+  filteredNotas: NotaOficial[];
+  isLoading: boolean;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  areaFilter: string;
+  setAreaFilter: (area: string) => void;
+  dataInicioFilter: Date | undefined;
+  setDataInicioFilter: (date: Date | undefined) => void;
+  dataFimFilter: Date | undefined;
+  setDataFimFilter: (date: Date | undefined) => void;
+  formatDate: (dateStr: string) => string;
+  refetch: () => Promise<any>;
+  deleteNota: (notaId: string) => Promise<void>;
+  deleteLoading: boolean;
+  isAdmin: boolean;
+}
