@@ -7,32 +7,6 @@ import { startOfDay, endOfDay, isAfter, isBefore, isEqual } from 'date-fns';
 import { useCurrentUser } from '@/components/settings/access-control/hooks/useCurrentUser';
 import { NotaOficial } from '@/types/nota';
 
-interface RawNotaOficial {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  criado_em: string;
-  atualizado_em: string;
-  autor_id: string;
-  aprovador_id?: string;
-  supervisao_tecnica_id: string;
-  demanda_id?: string;
-  problema_id: string;
-  autor?: {
-    id: string;
-    nome_completo: string;
-  } | null;
-  aprovador?: {
-    id: string;
-    nome_completo: string;
-  } | null;
-  supervisao_tecnica?: {
-    id: string;
-    descricao: string;
-  } | null;
-}
-
 export const useNotasQuery = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -78,7 +52,18 @@ export const useNotasQuery = () => {
             problema_id,
             autor:autor_id(id, nome_completo),
             aprovador:aprovador_id(id, nome_completo),
-            supervisao_tecnica:supervisao_tecnica_id(id, descricao)
+            supervisao_tecnica:supervisao_tecnica_id(id, descricao),
+            historico_edicoes:notas_historico_edicoes(
+              id,
+              nota_id,
+              texto_anterior,
+              texto_novo,
+              titulo_anterior,
+              titulo_novo,
+              editor_id,
+              criado_em,
+              editor:editor_id(id, nome_completo)
+            )
           `)
           .neq('status', 'excluida'); // Ignorar notas excluídas
 
@@ -101,7 +86,8 @@ export const useNotasQuery = () => {
           ...nota,
           autor: nota.autor || { id: '', nome_completo: 'Não informado' },
           aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
-          supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' }
+          supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
+          historico_edicoes: nota.historico_edicoes || []
         })) as NotaOficial[];
 
         return formattedNotas;

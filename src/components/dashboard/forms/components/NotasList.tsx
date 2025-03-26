@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import NotaCard from './NotaCard';
 import { LoadingState, EmptyState, NoAccessState, SearchEmptyState } from './NotasListStates';
-import { NotaOficial } from '../types';
+import { NotaOficial } from '@/types/nota';
 
 interface NotasListProps {
   notas: NotaOficial[];
@@ -35,11 +35,11 @@ const NotasList: React.FC<NotasListProps> = ({
     return <EmptyState />;
   }
 
-  // Filter notas based on search term
+  // Filtrar notas com base no termo de busca
   const filteredNotas = notas.filter(nota => 
     nota.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     nota.autor?.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    nota.areas_coordenacao?.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
+    nota.supervisao_tecnica?.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

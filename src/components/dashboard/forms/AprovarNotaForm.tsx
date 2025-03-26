@@ -3,12 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
-import { Search } from 'lucide-react';
+import { Search, Edit2 } from 'lucide-react';
 import { LoadingState, EmptyState } from './components/NotasListStates';
-import { NotaOficial } from './types';
+import NotasList from './components/NotasList';
+import NotaDetail from './components/NotaDetail';
+import { NotaOficial } from '@/types/nota';
 
 interface AprovarNotaFormProps {
   onClose: () => void;
@@ -20,57 +23,28 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
-  const [isApproving, setIsApproving] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedText, setEditedText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchNotas = async () => {
     setIsLoading(true);
     try {
-      // Fetch notas with basic info
+      // Fetch only pending notes
       const { data: notasData, error: notasError } = await supabase
         .from('notas_oficiais')
-        .select('*')
+        .select(`
+          *,
+          autor:autor_id(id, nome_completo),
+          supervisao_tecnica:supervisao_tecnica_id(id, descricao)
+        `)
         .eq('status', 'pendente')
         .order('criado_em', { ascending: false });
       
       if (notasError) throw notasError;
       
-      // Process data to add related info
-      const processedNotas = await Promise.all((notasData || []).map(async (nota) => {
-        // Get author info
-        const { data: authorData, error: authorError } = await supabase
-          .from('usuarios')
-          .select('id, nome_completo')
-          .eq('id', nota.autor_id)
-          .single();
-        
-        let autor = { id: nota.autor_id, nome_completo: 'Usuário não encontrado' };
-        if (!authorError && authorData) {
-          autor = authorData;
-        }
-        
-        // Get area info
-        let areaInfo = { id: '', descricao: 'Área não especificada' };
-        if (nota.supervisao_tecnica_id) {
-          const { data: areaData, error: areaError } = await supabase
-            .from('supervisoes_tecnicas')
-            .select('id, descricao')
-            .eq('id', nota.supervisao_tecnica_id)
-            .single();
-            
-          if (!areaError && areaData) {
-            areaInfo = areaData;
-          }
-        }
-        
-        return {
-          ...nota,
-          autor,
-          areas_coordenacao: areaInfo
-        } as NotaOficial;
-      }));
-      
-      setNotas(processedNotas);
+      setNotas(notasData || []);
     } catch (error) {
       console.error('Erro ao carregar notas oficiais:', error);
       toast({
@@ -87,22 +61,87 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
     fetchNotas();
   }, []);
 
-  const filteredNotas = notas.filter(nota => 
-    nota.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (nota.areas_coordenacao?.descricao?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-  );
+  const handleSelectNota = (nota: NotaOficial) => {
+    setSelectedNota(nota);
+    setIsEditing(false);
+  };
 
-  const handleApprove = async () => {
-    if (!selectedNota) return;
+  const handleStartEdit = () => {
+    if (selectedNota) {
+      setEditedTitle(selectedNota.titulo);
+      setEditedText(selectedNota.texto);
+      setIsEditing(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedNota || !user) return;
     
     try {
-      setIsApproving(true);
+      setIsSubmitting(true);
+      
+      // Create edit history record
+      const { error: historyError } = await supabase
+        .from('notas_historico_edicoes')
+        .insert({
+          nota_id: selectedNota.id,
+          texto_anterior: selectedNota.texto,
+          texto_novo: editedText,
+          titulo_anterior: selectedNota.titulo,
+          titulo_novo: editedTitle,
+          editor_id: user.id
+        });
+      
+      if (historyError) throw historyError;
+      
+      // Update the note
+      const { error: updateError } = await supabase
+        .from('notas_oficiais')
+        .update({ 
+          titulo: editedTitle,
+          texto: editedText,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', selectedNota.id);
+      
+      if (updateError) throw updateError;
+      
+      toast({
+        title: "Nota atualizada",
+        description: "A nota oficial foi atualizada com sucesso."
+      });
+      
+      // Refresh and exit edit mode
+      fetchNotas();
+      setIsEditing(false);
+      setSelectedNota(null);
+    } catch (error: any) {
+      console.error('Erro ao editar nota:', error);
+      toast({
+        title: "Erro ao editar nota",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!selectedNota || !user) return;
+    
+    try {
+      setIsSubmitting(true);
       
       const { error: notaError } = await supabase
         .from('notas_oficiais')
         .update({ 
           status: 'aprovado',
-          aprovador_id: user?.id,
+          aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
         .eq('id', selectedNota.id);
@@ -123,8 +162,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         description: "A nota oficial foi aprovada e está pronta para divulgação."
       });
       
-      setSelectedNota(null);
       fetchNotas();
+      setSelectedNota(null);
     } catch (error: any) {
       console.error('Erro ao aprovar nota:', error);
       toast({
@@ -133,21 +172,21 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         variant: "destructive"
       });
     } finally {
-      setIsApproving(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleReject = async () => {
-    if (!selectedNota) return;
+    if (!selectedNota || !user) return;
     
     try {
-      setIsRejecting(true);
+      setIsSubmitting(true);
       
       const { error: notaError } = await supabase
         .from('notas_oficiais')
         .update({ 
           status: 'rejeitado',
-          aprovador_id: user?.id,
+          aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
         .eq('id', selectedNota.id);
@@ -168,8 +207,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         description: "A nota oficial foi rejeitada e retornada para revisão."
       });
       
-      setSelectedNota(null);
       fetchNotas();
+      setSelectedNota(null);
     } catch (error: any) {
       console.error('Erro ao rejeitar nota:', error);
       toast({
@@ -178,7 +217,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         variant: "destructive"
       });
     } finally {
-      setIsRejecting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -190,7 +229,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         </CardHeader>
         <CardContent className="p-6">
           {!selectedNota ? (
-            <>
+            <div>
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -201,62 +240,71 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
                 />
               </div>
               
-              {isLoading ? (
-                <LoadingState />
-              ) : filteredNotas.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredNotas.map(nota => (
-                    <div 
-                      key={nota.id}
-                      className="border p-4 rounded-md cursor-pointer hover:bg-gray-50"
-                      onClick={() => setSelectedNota(nota)}
-                    >
-                      <h3 className="font-medium text-lg">{nota.titulo}</h3>
-                      <div className="text-sm text-gray-500">
-                        <p>Autor: {nota.autor?.nome_completo || 'Desconhecido'}</p>
-                        <p>Área: {nota.areas_coordenacao?.descricao || 'Desconhecida'}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState />
-              )}
-            </>
-          ) : (
+              <NotasList 
+                notas={notas}
+                selectedNota={selectedNota}
+                onSelectNota={handleSelectNota}
+                isAdmin={true}
+                isLoading={isLoading}
+              />
+            </div>
+          ) : isEditing ? (
             <div>
-              <Button variant="outline" className="mb-4" onClick={() => setSelectedNota(null)}>
+              <Button variant="outline" className="mb-4" onClick={handleCancelEdit}>
                 Voltar
               </Button>
               
-              <div className="border p-6 rounded-md">
-                <h2 className="text-xl font-bold mb-4">{selectedNota.titulo}</h2>
-                <div className="mb-4">
-                  <p><strong>Autor:</strong> {selectedNota.autor?.nome_completo || 'Desconhecido'}</p>
-                  <p><strong>Área:</strong> {selectedNota.areas_coordenacao?.descricao || 'Desconhecida'}</p>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 mb-1">
+                    Título
+                  </label>
+                  <Input
+                    id="titulo"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="w-full"
+                  />
                 </div>
-                <div className="mb-6 whitespace-pre-line border-t pt-4">
-                  {selectedNota.texto}
+                
+                <div>
+                  <label htmlFor="texto" className="block text-sm font-medium text-gray-700 mb-1">
+                    Conteúdo
+                  </label>
+                  <Textarea
+                    id="texto"
+                    value={editedText}
+                    onChange={(e) => setEditedText(e.target.value)}
+                    className="w-full min-h-[300px]"
+                  />
                 </div>
                 
                 <div className="flex justify-end space-x-2">
                   <Button
-                    variant="destructive"
-                    onClick={handleReject}
-                    disabled={isRejecting || isApproving}
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    disabled={isSubmitting}
                   >
-                    {isRejecting ? "Rejeitando..." : "Rejeitar Nota"}
+                    Cancelar
                   </Button>
                   <Button
-                    onClick={handleApprove}
-                    disabled={isApproving || isRejecting}
-                    className="bg-green-600 hover:bg-green-700"
+                    onClick={handleSaveEdit}
+                    disabled={isSubmitting || !editedTitle.trim() || !editedText.trim()}
                   >
-                    {isApproving ? "Aprovando..." : "Aprovar Nota"}
+                    {isSubmitting ? "Salvando..." : "Salvar Edições"}
                   </Button>
                 </div>
               </div>
             </div>
+          ) : (
+            <NotaDetail 
+              nota={selectedNota}
+              onBack={() => setSelectedNota(null)}
+              onAprovar={handleApprove}
+              onRejeitar={handleReject}
+              onEditar={handleStartEdit}
+              isSubmitting={isSubmitting}
+            />
           )}
         </CardContent>
       </Card>

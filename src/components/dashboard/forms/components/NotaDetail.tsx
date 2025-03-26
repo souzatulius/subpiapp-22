@@ -2,16 +2,17 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { NotaOficial } from '../types';
+import { NotaOficial } from '@/types/nota';
 
 interface NotaDetailProps {
   nota: NotaOficial;
   onBack: () => void;
   onAprovar: () => void;
   onRejeitar: () => void;
+  onEditar: () => void;
   isSubmitting: boolean;
 }
 
@@ -19,7 +20,8 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
   nota, 
   onBack, 
   onAprovar, 
-  onRejeitar, 
+  onRejeitar,
+  onEditar,
   isSubmitting 
 }) => {
   return (
@@ -50,7 +52,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
                 <div className="flex items-center">
                   <FileText className="h-4 w-4 mr-2 text-gray-500" />
                   <span className="font-medium mr-1">Área:</span>
-                  <span>{nota.areas_coordenacao?.descricao || 'Não informada'}</span>
+                  <span>{nota.supervisao_tecnica?.descricao || 'Não informada'}</span>
                 </div>
                 
                 <div className="flex items-center">
@@ -102,6 +104,16 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
           >
             <XCircle className="h-4 w-4 mr-2 text-red-500" />
             Rejeitar
+          </Button>
+          
+          <Button 
+            variant="outline"
+            onClick={onEditar}
+            disabled={isSubmitting}
+            className="flex items-center"
+          >
+            <Edit className="h-4 w-4 mr-2 text-blue-500" />
+            Editar
           </Button>
           
           <Button 

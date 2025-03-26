@@ -23,6 +23,22 @@ export interface NotaOficial {
   };
   demanda_id?: string;
   problema_id: string;
+  historico_edicoes?: NotaEdicao[];
+}
+
+export interface NotaEdicao {
+  id: string;
+  nota_id: string;
+  texto_anterior: string;
+  texto_novo: string;
+  titulo_anterior?: string;
+  titulo_novo?: string;
+  editor_id: string;
+  editor?: {
+    id: string;
+    nome_completo: string;
+  };
+  criado_em: string;
 }
 
 export interface UseNotasDataReturn {
