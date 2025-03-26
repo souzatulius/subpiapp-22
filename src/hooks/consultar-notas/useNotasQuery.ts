@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +23,6 @@ export interface UseNotasQueryResult {
   setIsApproveModalOpen: (open: boolean) => void;
   formatNotaInfo: (nota: NotaOficial | null) => any;
   formatNotaHistory: (nota: NotaOficial | null) => any[];
-  // Add the missing properties needed by useNotasData
   filteredNotas: NotaOficial[];
   isLoading: boolean;
   searchQuery: string;
@@ -41,7 +39,6 @@ export interface UseNotasQueryResult {
   isAdmin: boolean;
 }
 
-// Function to format timestamp
 function formatDate(isoString: string) {
   const date = new Date(isoString);
   return date.toLocaleDateString('pt-BR', {
@@ -53,6 +50,12 @@ function formatDate(isoString: string) {
   });
 }
 
+function safeFormatDate(nota: NotaOficial, field: 'criado_em' | 'atualizado_em'): string {
+  const dateValue = nota[field] || (field === 'criado_em' ? nota.created_at : nota.updated_at);
+  if (!dateValue) return 'Data não disponível';
+  return formatDate(dateValue);
+}
+
 export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQueryResult => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -61,13 +64,12 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   
-  // Added state for useNotasData compatibility
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [areaFilter, setAreaFilter] = useState('all');
   const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
   const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
-  const [isAdmin, setIsAdmin] = useState(true); // Default to true for now
+  const [isAdmin, setIsAdmin] = useState(true);
   const [filteredNotas, setFilteredNotas] = useState<NotaOficial[]>([]);
 
   const {
@@ -104,9 +106,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
         throw error;
       }
 
-      // Add area_coordenacao property to match NotaOficial type
       const formattedData = (data || []).map(nota => {
-        // Transform the data to match NotaOficial type
         return {
           ...nota,
           autor: nota.autor || null,
@@ -117,7 +117,12 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
           area_coordenacao: {
             id: nota.supervisao_tecnica_id || '',
             descricao: nota.supervisao_tecnica?.descricao || 'Não informada'
-          }
+          },
+          criado_em: nota.criado_em || nota.created_at || new Date().toISOString(),
+          atualizado_em: nota.atualizado_em || nota.updated_at,
+          created_at: nota.criado_em || nota.created_at || new Date().toISOString(),
+          updated_at: nota.atualizado_em || nota.updated_at,
+          demanda_id: nota.demanda_id || nota.demanda?.id
         } as unknown as NotaOficial;
       });
 
@@ -125,7 +130,6 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
     }
   });
 
-  // Update filtered notas when primary data changes
   useEffect(() => {
     if (notas) {
       setFilteredNotas(notas);
@@ -258,11 +262,10 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
     }
   };
 
-  // Format the note history for display
   const formatNotaHistory = (nota: NotaOficial | null) => {
     if (!nota || !nota.historico_edicoes || nota.historico_edicoes.length === 0) return [];
 
-    return nota.historico_edicoes.map((edit) => {
+    return (nota.historico_edicoes || []).map((edit) => {
       return {
         id: edit.id,
         date: formatDate(edit.criado_em),
@@ -275,7 +278,6 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
     });
   };
 
-  // Format note information for display
   const formatNotaInfo = (nota: NotaOficial | null) => {
     if (!nota) return null;
     
@@ -284,8 +286,8 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
       title: nota.titulo,
       text: nota.texto,
       status: nota.status,
-      createdAt: formatDate(nota.criado_em),
-      updatedAt: formatDate(nota.atualizado_em),
+      createdAt: safeFormatDate(nota, 'criado_em'),
+      updatedAt: safeFormatDate(nota, 'atualizado_em'),
       author: nota.autor?.nome_completo || "Usuário Desconhecido",
       approver: nota.aprovador?.nome_completo || "Não aprovado",
       problem: nota.problema?.descricao || "Não especificado",

@@ -24,6 +24,10 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
   onEditar,
   isSubmitting 
 }) => {
+  // Use either criado_em or created_at, whichever is available
+  const dataCreated = nota.criado_em || nota.created_at;
+  const temDemanda = !!(nota.demanda_id || nota.demanda?.id);
+
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
@@ -58,8 +62,8 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2 text-gray-500" />
                   <span className="font-medium mr-1">Data:</span>
-                  <span>{nota.criado_em ? format(
-                    new Date(nota.criado_em), 
+                  <span>{dataCreated ? format(
+                    new Date(dataCreated), 
                     "dd 'de' MMMM 'de' yyyy", 
                     { locale: ptBR }
                   ) : 'Data desconhecida'}</span>
@@ -68,8 +72,8 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-2 text-gray-500" />
                   <span className="font-medium mr-1">Horário:</span>
-                  <span>{nota.criado_em ? format(
-                    new Date(nota.criado_em), 
+                  <span>{dataCreated ? format(
+                    new Date(dataCreated), 
                     "HH:mm", 
                     { locale: ptBR }
                   ) : 'Horário desconhecido'}</span>
@@ -77,7 +81,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
               </div>
             </Card>
             
-            {nota.demanda_id && (
+            {temDemanda && (
               <Card className="p-4 bg-gray-50 border border-gray-200">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Vinculada à Demanda</h4>
                 <p className="text-sm text-gray-600">

@@ -97,12 +97,13 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       setEditMode(false);
       
       if (selectedNota) {
-        setSelectedNota({
-          ...selectedNota,
+        setSelectedNota(prevNota => ({
+          ...prevNota,
           titulo: editedTitle,
           texto: editedText,
-          atualizado_em: new Date().toISOString()
-        });
+          atualizado_em: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
       }
     } catch (error) {
       console.error('Erro ao salvar edições:', error);

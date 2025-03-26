@@ -28,6 +28,8 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   // Garantir que temos nome do autor mesmo quando opcional
   const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
   const areaNome = nota.supervisao_tecnica?.descricao || 'Área não informada';
+  // Use either criado_em or created_at, whichever is available
+  const dataCreated = nota.criado_em || nota.created_at;
 
   return (
     <Card 
@@ -62,14 +64,14 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
             
             <div className="mt-2 text-xs text-gray-500 flex items-center">
               <Calendar className="h-3 w-3 mr-1" />
-              <time dateTime={nota.criado_em} title={
-                nota.criado_em ? format(
-                  new Date(nota.criado_em), 
+              <time dateTime={dataCreated} title={
+                dataCreated ? format(
+                  new Date(dataCreated), 
                   "dd/MM/yyyy 'às' HH:mm", 
                   { locale: ptBR }
                 ) : ''
               }>
-                {nota.criado_em ? formatRelativeTime(nota.criado_em) : 'Data desconhecida'}
+                {dataCreated ? formatRelativeTime(dataCreated) : 'Data desconhecida'}
               </time>
             </div>
           </div>

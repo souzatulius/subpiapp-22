@@ -29,7 +29,9 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
   const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
   const areaNome = nota.supervisao_tecnica?.descricao || 'Área não informada';
   const aprovadorNome = nota.aprovador?.nome_completo;
-  const temDemanda = !!nota.demanda_id;
+  const temDemanda = !!(nota.demanda_id || nota.demanda?.id);
+  // Use either criado_em or created_at, whichever is available
+  const dataCreated = nota.criado_em || nota.created_at;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -43,7 +45,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
             </div>
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-2" />
-              <span>Data: {formatDate(nota.criado_em)}</span>
+              <span>Data: {formatDate(dataCreated)}</span>
             </div>
             <div className="flex items-center">
               <Building className="w-4 h-4 mr-2" />
