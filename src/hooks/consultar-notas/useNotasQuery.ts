@@ -121,7 +121,7 @@ export const useNotasQuery = () => {
         return processedData.filter(nota => 
           nota.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || 
           nota.texto.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          nota.autor.nome_completo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          nota.autor?.nome_completo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (nota.supervisao_tecnica?.descricao || '').toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
@@ -135,7 +135,7 @@ export const useNotasQuery = () => {
     ? notas.filter(nota => 
         nota.titulo.toLowerCase().includes(searchQuery.toLowerCase()) || 
         nota.texto.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        nota.autor.nome_completo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        nota.autor?.nome_completo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (nota.supervisao_tecnica?.descricao || '').toLowerCase().includes(searchQuery.toLowerCase())
       )
     : notas;
