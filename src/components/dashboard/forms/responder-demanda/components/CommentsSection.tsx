@@ -17,7 +17,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ comentarios, onChange
         <h3 className="text-lg font-semibold text-blue-700">Comentários Internos</h3>
       </div>
       
-      <Card className="bg-blue-50/50 border border-blue-100">
+      <Card className="bg-blue-50/50 border border-blue-100 shadow-sm hover:shadow transition-all duration-300">
         <CardContent className="p-4">
           <div className="flex items-start gap-3 text-sm text-blue-600 mb-3">
             <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
