@@ -9,7 +9,10 @@ interface ResolutionTimeChartProps {
 }
 
 const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ data, isLoading }) => {
-  const averageTime = isLoading ? '' : `${data.datasets[0].data[0]} dias`;
+  // Safely check if data exists and has the required properties before accessing them
+  const averageTime = isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data
+    ? '0 dias'
+    : `${data.datasets[0].data[0]} dias`;
   
   return (
     <ChartCard
@@ -17,7 +20,7 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ data, isLoadi
       value={averageTime}
       isLoading={isLoading}
     >
-      {!isLoading && (
+      {!isLoading && data && (
         <Line 
           data={data} 
           options={{

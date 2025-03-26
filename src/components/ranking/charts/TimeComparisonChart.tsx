@@ -9,7 +9,10 @@ interface TimeComparisonChartProps {
 }
 
 const TimeComparisonChart: React.FC<TimeComparisonChartProps> = ({ data, isLoading }) => {
-  const concluido = isLoading ? '' : `${data.datasets[0].data[0]} dias`;
+  // Safely check if data exists and has the required properties before accessing them
+  const concluido = isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data
+    ? '0 dias'
+    : `${data.datasets[0].data[0]} dias`;
   
   return (
     <ChartCard
@@ -17,7 +20,7 @@ const TimeComparisonChart: React.FC<TimeComparisonChartProps> = ({ data, isLoadi
       value={concluido}
       isLoading={isLoading}
     >
-      {!isLoading && (
+      {!isLoading && data && (
         <Bar 
           data={data} 
           options={{

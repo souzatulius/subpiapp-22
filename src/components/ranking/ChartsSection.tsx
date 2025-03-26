@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { ChartVisibility } from './types';
 import NoDataMessage from './charts/NoDataMessage';
@@ -118,6 +117,22 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   // Initialize chart order state
   const [hiddenCharts, setHiddenCharts] = useState<string[]>([]);
   
+  // Helper function to prepare chart data
+  const prepareChartData = (rawData: any) => {
+    // Return empty default data if raw data is missing
+    if (!rawData) {
+      return { 
+        labels: [], 
+        datasets: [{ 
+          label: 'No Data', 
+          data: [0],
+          backgroundColor: '#ccc' 
+        }] 
+      };
+    }
+    return rawData;
+  };
+  
   // Function to create initial chart items
   const createChartItems = useCallback(() => {
     const items: ChartItem[] = [];
@@ -125,7 +140,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.statusDistribution) {
       items.push({
         id: 'statusDistribution',
-        component: <StatusDistributionChart data={chartData?.statusDistribution} isLoading={isLoading} />,
+        component: <StatusDistributionChart 
+          data={prepareChartData(chartData?.statusDistribution)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('statusDistribution'),
         title: "Distribuição por Status",
         analysis: "Este gráfico mostra a proporção atual de ordens em cada status, permitindo identificar gargalos operacionais e tendências de conclusão."
@@ -135,7 +153,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.resolutionTime) {
       items.push({
         id: 'resolutionTime',
-        component: <ResolutionTimeChart data={chartData?.resolutionTime} isLoading={isLoading} />,
+        component: <ResolutionTimeChart 
+          data={prepareChartData(chartData?.resolutionTime)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('resolutionTime'),
         title: "Tempo de Resolução",
         analysis: "Análise do tempo médio que leva para resolver ordens de serviço por tipo, permitindo identificar quais serviços são mais eficientes."
@@ -145,7 +166,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.topCompanies) {
       items.push({
         id: 'topCompanies',
-        component: <TopCompaniesChart data={chartData?.topCompanies} isLoading={isLoading} />,
+        component: <TopCompaniesChart 
+          data={prepareChartData(chartData?.topCompanies)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('topCompanies'),
         title: "Empresas com Ordens Concluídas",
         analysis: "Ranking das empresas com maior número de ordens concluídas, indicando os principais parceiros em volume de entregas."
@@ -155,7 +179,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.districtDistribution) {
       items.push({
         id: 'districtDistribution',
-        component: <NeighborhoodsChart data={chartData?.districtDistribution} isLoading={isLoading} />,
+        component: <NeighborhoodsChart 
+          data={prepareChartData(chartData?.districtDistribution)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('districtDistribution'),
         title: "Ordens por Subprefeitura",
         analysis: "Distribuição geográfica das ordens de serviço, mostrando quais regiões têm maior demanda de intervenções."
@@ -165,7 +192,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.servicesByDepartment) {
       items.push({
         id: 'servicesByDepartment',
-        component: <ServiceTypesChart data={chartData?.servicesByDepartment} isLoading={isLoading} />,
+        component: <ServiceTypesChart 
+          data={prepareChartData(chartData?.servicesByDepartment)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('servicesByDepartment'),
         title: "Serviços por Departamento",
         analysis: "Visualização dos tipos de serviços distribuídos por departamento técnico, indicando áreas de especialização."
@@ -175,7 +205,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.servicesByDistrict) {
       items.push({
         id: 'servicesByDistrict',
-        component: <ServicesByDistrictChart data={chartData?.servicesByDistrict} isLoading={isLoading} />,
+        component: <ServicesByDistrictChart 
+          data={prepareChartData(chartData?.servicesByDistrict)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('servicesByDistrict'),
         title: "Serviços por Distrito",
         analysis: "Análise da diversidade de serviços por distrito, permitindo identificar necessidades específicas de cada região."
@@ -185,7 +218,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.timeComparison) {
       items.push({
         id: 'timeComparison',
-        component: <TimeComparisonChart data={chartData?.timeComparison} isLoading={isLoading} />,
+        component: <TimeComparisonChart 
+          data={prepareChartData(chartData?.timeComparison)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('timeComparison'),
         title: "Comparativo de Tempo Médio",
         analysis: "Comparação do tempo médio de resolução entre diferentes períodos ou tipos de serviço, mostrando evolução da eficiência."
@@ -195,7 +231,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.efficiencyImpact) {
       items.push({
         id: 'efficiencyImpact',
-        component: <EfficiencyImpactChart data={chartData?.efficiencyImpact} isLoading={isLoading} />,
+        component: <EfficiencyImpactChart 
+          data={prepareChartData(chartData?.efficiencyImpact)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('efficiencyImpact'),
         title: "Impacto na Eficiência",
         analysis: "Análise do impacto de exclusão de terceiros nos tempos médios de resolução, mostrando potencial interno da equipe."
@@ -205,7 +244,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.dailyDemands) {
       items.push({
         id: 'dailyDemands',
-        component: <DailyDemandsChart data={chartData?.dailyDemands} isLoading={isLoading} />,
+        component: <DailyDemandsChart 
+          data={prepareChartData(chartData?.dailyDemands)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('dailyDemands'),
         title: "Volume Diário",
         analysis: "Tendência diária de novas demandas, permitindo identificar picos sazonais e planejar recursos adequadamente."
@@ -215,7 +257,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.neighborhoodComparison) {
       items.push({
         id: 'neighborhoodComparison',
-        component: <NeighborhoodComparisonChart data={chartData?.neighborhoodComparison} isLoading={isLoading} />,
+        component: <NeighborhoodComparisonChart 
+          data={prepareChartData(chartData?.neighborhoodComparison)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('neighborhoodComparison'),
         title: "Comparativo por Bairros",
         analysis: "Comparação de volume de ordens entre diferentes bairros, indicando áreas com maior necessidade de manutenção."
@@ -225,7 +270,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.districtEfficiencyRadar) {
       items.push({
         id: 'districtEfficiencyRadar',
-        component: <DistrictEfficiencyRadarChart data={chartData?.districtEfficiencyRadar} isLoading={isLoading} />,
+        component: <DistrictEfficiencyRadarChart 
+          data={prepareChartData(chartData?.districtEfficiencyRadar)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('districtEfficiencyRadar'),
         title: "Radar de Eficiência",
         analysis: "Visualização multidimensional da eficiência de cada distrito em diferentes métricas operacionais."
@@ -235,7 +283,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.statusTransition) {
       items.push({
         id: 'statusTransition',
-        component: <StatusTransitionChart data={chartData?.statusTransition} isLoading={isLoading} />,
+        component: <StatusTransitionChart 
+          data={prepareChartData(chartData?.statusTransition)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('statusTransition'),
         title: "Transição de Status",
         analysis: "Evolução temporal da transição entre diferentes status, mostrando o fluxo de progresso das ordens."
@@ -245,7 +296,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.criticalStatus) {
       items.push({
         id: 'criticalStatus',
-        component: <CriticalStatusChart data={chartData?.criticalStatus} isLoading={isLoading} />,
+        component: <CriticalStatusChart 
+          data={prepareChartData(chartData?.criticalStatus)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('criticalStatus'),
         title: "Status Críticos",
         analysis: "Destaque para ordens em status que requerem atenção especial, ajudando a priorizar intervenções urgentes."
@@ -255,7 +309,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.externalDistricts) {
       items.push({
         id: 'externalDistricts',
-        component: <ExternalDistrictsChart data={chartData?.externalDistricts} isLoading={isLoading} />,
+        component: <ExternalDistrictsChart 
+          data={prepareChartData(chartData?.externalDistricts)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('externalDistricts'),
         title: "Distritos Externos",
         analysis: "Mapeamento de ordens originadas de distritos externos à jurisdição principal, indicando relações interterritoriais."
@@ -265,7 +322,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.serviceDiversity) {
       items.push({
         id: 'serviceDiversity',
-        component: <ServiceDiversityChart data={chartData?.serviceDiversity} isLoading={isLoading} />,
+        component: <ServiceDiversityChart 
+          data={prepareChartData(chartData?.serviceDiversity)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('serviceDiversity'),
         title: "Diversidade de Serviços",
         analysis: "Análise da variedade de serviços executados por cada departamento técnico, mostrando áreas de especialização."
@@ -275,7 +335,10 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     if (chartVisibility.closureTime) {
       items.push({
         id: 'closureTime',
-        component: <ClosureTimeChart data={chartData?.closureTime} isLoading={isLoading} />,
+        component: <ClosureTimeChart 
+          data={prepareChartData(chartData?.closureTime)} 
+          isLoading={isLoading} 
+        />,
         isVisible: !hiddenCharts.includes('closureTime'),
         title: "Tempo até Fechamento",
         analysis: "Estimativa do tempo médio até o fechamento completo de diferentes tipos de ordens, ajudando no planejamento de recursos."

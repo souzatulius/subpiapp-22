@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { FilterOptions, ChartVisibility } from '@/components/ranking/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -137,6 +136,297 @@ const statusColors = {
   'PAUSADA': '#607D8B',
   'REPROGRAMADA': '#795548',
   default: '#9E9E9E'
+};
+
+// Function to format raw data into chart-ready format
+const formatChartData = (rawData: ChartData): Record<string, any> => {
+  // Create formatted data for each chart type
+  const formattedData: Record<string, any> = {};
+  
+  // Format Status Distribution
+  if (rawData.statusDistribution && rawData.statusDistribution.length > 0) {
+    formattedData.statusDistribution = {
+      labels: rawData.statusDistribution.map(item => item.name),
+      datasets: [{
+        data: rawData.statusDistribution.map(item => item.value),
+        backgroundColor: rawData.statusDistribution.map(item => item.fill || statusColors.default),
+        borderWidth: 0,
+      }]
+    };
+  }
+  
+  // Format Resolution Time
+  if (rawData.resolutionTime && rawData.resolutionTime.length > 0) {
+    formattedData.resolutionTime = {
+      labels: rawData.resolutionTime.map(item => item.name),
+      datasets: [{
+        label: 'Tempo médio (dias)',
+        data: rawData.resolutionTime.map(item => item.average),
+        borderColor: '#FF9800',
+        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+        borderWidth: 2,
+        tension: 0.2,
+      }]
+    };
+  }
+  
+  // Format Top Companies
+  if (rawData.topCompanies && rawData.topCompanies.length > 0) {
+    formattedData.topCompanies = {
+      labels: rawData.topCompanies.map(item => item.name),
+      datasets: [{
+        label: 'Ordens concluídas',
+        data: rawData.topCompanies.map(item => item.value),
+        backgroundColor: '#4CAF50',
+        barThickness: 20,
+      }]
+    };
+  }
+  
+  // Format District Distribution
+  if (rawData.districtDistribution && rawData.districtDistribution.length > 0) {
+    formattedData.districtDistribution = {
+      labels: rawData.districtDistribution.map(item => item.district),
+      datasets: [{
+        label: 'Número de ordens',
+        data: rawData.districtDistribution.map(item => item.count),
+        backgroundColor: [
+          '#FF9800', '#F57C00', '#EF6C00', '#E65100',
+          '#FFB74D', '#FFA726', '#FF9800', '#FB8C00'
+        ],
+        borderWidth: 0,
+      }]
+    };
+  }
+  
+  // Format Services by Department
+  if (rawData.servicesByDepartment && rawData.servicesByDepartment.length > 0) {
+    // Group by department
+    const departmentGroups = rawData.servicesByDepartment.reduce((acc, item) => {
+      if (!acc[item.department]) {
+        acc[item.department] = [];
+      }
+      acc[item.department].push(item);
+      return acc;
+    }, {} as Record<string, ServiceDataItem[]>);
+    
+    const departments = Object.keys(departmentGroups);
+    const datasets = departments.map((dept, index) => ({
+      label: dept,
+      data: departments.map(d => d === dept ? 
+        departmentGroups[dept].reduce((sum, item) => sum + item.count, 0) : 0),
+      backgroundColor: [
+        '#2196F3', '#1976D2', '#0D47A1', '#64B5F6',
+        '#42A5F5', '#2196F3', '#1E88E5', '#1976D2'
+      ][index % 8],
+      barThickness: 20,
+    }));
+    
+    formattedData.servicesByDepartment = {
+      labels: departments,
+      datasets: datasets
+    };
+  }
+  
+  // Format Services by District
+  if (rawData.servicesByDistrict && rawData.servicesByDistrict.length > 0) {
+    const districtGroups = rawData.servicesByDistrict.reduce((acc, item) => {
+      if (!acc[item.department]) {
+        acc[item.department] = [];
+      }
+      acc[item.department].push(item);
+      return acc;
+    }, {} as Record<string, ServiceDataItem[]>);
+    
+    const districts = Object.keys(districtGroups);
+    const datasets = districts.map((district, index) => ({
+      label: district,
+      data: districtGroups[district].map(item => item.count),
+      backgroundColor: [
+        '#FF9800', '#F57C00', '#EF6C00', '#E65100',
+      ][index % 4],
+      barThickness: 20,
+    }));
+    
+    formattedData.servicesByDistrict = {
+      labels: districts.flatMap(d => districtGroups[d].map(item => item.service)),
+      datasets: datasets
+    };
+  }
+  
+  // Format Time Comparison (simple placeholder data)
+  if (rawData.timeComparison && rawData.timeComparison.length > 0) {
+    formattedData.timeComparison = {
+      labels: rawData.timeComparison.map(item => item.name),
+      datasets: [{
+        label: 'Atual',
+        data: rawData.timeComparison.map(item => item.atual),
+        backgroundColor: '#FF9800',
+        barThickness: 15,
+      }, {
+        label: 'Anterior',
+        data: rawData.timeComparison.map(item => item.anterior),
+        backgroundColor: '#2196F3',
+        barThickness: 15,
+      }]
+    };
+  }
+  
+  // Format Efficiency Impact
+  if (rawData.efficiencyImpact && rawData.efficiencyImpact.length > 0) {
+    formattedData.efficiencyImpact = {
+      labels: rawData.efficiencyImpact.map(item => item.name),
+      datasets: [{
+        label: 'Índice (%)',
+        data: rawData.efficiencyImpact.map(item => item.value),
+        backgroundColor: [
+          '#4CAF50', '#2196F3', '#FF9800', '#9C27B0',
+        ],
+        borderWidth: 0,
+      }]
+    };
+  }
+  
+  // Format Daily Demands
+  if (rawData.dailyDemands && rawData.dailyDemands.length > 0) {
+    formattedData.dailyDemands = {
+      labels: rawData.dailyDemands.map(item => {
+        const date = new Date(item.date);
+        return `${date.getDate()}/${date.getMonth() + 1}`;
+      }),
+      datasets: [{
+        label: 'Volume diário',
+        data: rawData.dailyDemands.map(item => item.count),
+        borderColor: '#2196F3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+      }]
+    };
+  }
+  
+  // Format Neighborhood Comparison
+  if (rawData.neighborhoodComparison && rawData.neighborhoodComparison.length > 0) {
+    formattedData.neighborhoodComparison = {
+      labels: rawData.neighborhoodComparison.map(item => item.neighborhood),
+      datasets: [{
+        label: 'Número de ordens',
+        data: rawData.neighborhoodComparison.map(item => item.count),
+        backgroundColor: '#9C27B0',
+        barThickness: 20,
+      }]
+    };
+  }
+  
+  // Format District Efficiency Radar
+  if (rawData.districtEfficiencyRadar && rawData.districtEfficiencyRadar.length > 0) {
+    const districts = rawData.districtEfficiencyRadar.map(item => item.district);
+    
+    formattedData.districtEfficiencyRadar = {
+      labels: ['Tempo de Resolução', 'Taxa de Conclusão', 'Volume', 'Eficiência Geral'],
+      datasets: rawData.districtEfficiencyRadar.map((item, index) => ({
+        label: item.district,
+        data: [
+          item.resolution_time, 
+          item.completion_rate, 
+          item.volume / 10, // Scale volume for better visualization
+          item.efficiency_score
+        ],
+        borderColor: [
+          '#FF9800', '#2196F3', '#4CAF50', '#9C27B0',
+        ][index % 4],
+        backgroundColor: [
+          'rgba(255, 152, 0, 0.2)', 
+          'rgba(33, 150, 243, 0.2)', 
+          'rgba(76, 175, 80, 0.2)', 
+          'rgba(156, 39, 176, 0.2)',
+        ][index % 4],
+        borderWidth: 2,
+      }))
+    };
+  }
+  
+  // Format Status Transition
+  if (rawData.statusTransition && rawData.statusTransition.length > 0) {
+    formattedData.statusTransition = {
+      nodes: [...new Set([
+        ...rawData.statusTransition.map(item => item.from_status),
+        ...rawData.statusTransition.map(item => item.to_status),
+      ])].map(status => ({
+        name: status,
+        color: statusColors[status as keyof typeof statusColors] || statusColors.default,
+      })),
+      links: rawData.statusTransition.map(item => ({
+        source: item.from_status,
+        target: item.to_status,
+        value: item.count,
+      }))
+    };
+  }
+  
+  // Format Critical Status
+  if (rawData.criticalStatus && rawData.criticalStatus.length > 0) {
+    formattedData.criticalStatus = {
+      labels: rawData.criticalStatus.map(item => item.status),
+      datasets: [{
+        label: 'Ocorrências',
+        data: rawData.criticalStatus.map(item => item.count),
+        backgroundColor: rawData.criticalStatus.map(item => 
+          statusColors[item.status as keyof typeof statusColors] || statusColors.default
+        ),
+        borderWidth: 0,
+      }]
+    };
+  }
+  
+  // Format External Districts
+  if (rawData.externalDistricts && rawData.externalDistricts.length > 0) {
+    formattedData.externalDistricts = {
+      labels: rawData.externalDistricts.map(item => item.district),
+      datasets: [{
+        label: 'Ordens de serviço',
+        data: rawData.externalDistricts.map(item => item.count),
+        backgroundColor: '#F44336',
+        barThickness: 20,
+      }]
+    };
+  }
+  
+  // Format Service Diversity
+  if (rawData.serviceDiversity && rawData.serviceDiversity.length > 0) {
+    formattedData.serviceDiversity = {
+      labels: rawData.serviceDiversity.map(item => item.district),
+      datasets: [{
+        label: 'Índice de diversidade',
+        data: rawData.serviceDiversity.map(item => item.diversity_index),
+        backgroundColor: '#4CAF50',
+        barThickness: 20,
+      }, {
+        label: 'Serviços únicos',
+        data: rawData.serviceDiversity.map(item => item.unique_services),
+        backgroundColor: '#2196F3',
+        barThickness: 20,
+      }]
+    };
+  }
+  
+  // Format Closure Time
+  if (rawData.closureTime && rawData.closureTime.length > 0) {
+    formattedData.closureTime = {
+      labels: rawData.closureTime.map(item => item.status),
+      datasets: [{
+        label: 'Dias até conclusão',
+        data: rawData.closureTime.map(item => item.days),
+        backgroundColor: rawData.closureTime.map(item => 
+          statusColors[item.status as keyof typeof statusColors] || statusColors.default
+        ),
+        barThickness: 25,
+      }]
+    };
+  }
+  
+  return formattedData;
 };
 
 // Function to process chart data from raw database data
@@ -507,7 +797,8 @@ const processChartData = (rawData: any[], filters: FilterOptions): ChartData => 
 };
 
 export const useChartData = (filters: FilterOptions) => {
-  const [chartData, setChartData] = useState<ChartData>(defaultChartData);
+  const [chartData, setChartData] = useState<Record<string, any>>({});
+  const [rawChartData, setRawChartData] = useState<ChartData>(defaultChartData);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [chartLoadingProgress, setChartLoadingProgress] = useState<number>(0);
@@ -540,17 +831,17 @@ export const useChartData = (filters: FilterOptions) => {
       }
       
       // Apply status filter if provided
-      if (filters.statuses && filters.statuses.length > 0) {
+      if (filters.statuses && filters.statuses.length > 0 && !filters.statuses.includes('Todos')) {
         query = query.in('sgz_status', filters.statuses);
       }
       
       // Apply service type filter if provided
-      if (filters.serviceTypes && filters.serviceTypes.length > 0) {
+      if (filters.serviceTypes && filters.serviceTypes.length > 0 && !filters.serviceTypes.includes('Todos')) {
         query = query.in('sgz_tipo_servico', filters.serviceTypes);
       }
       
       // Apply district filter if provided
-      if (filters.districts && filters.districts.length > 0) {
+      if (filters.districts && filters.districts.length > 0 && !filters.districts.includes('Todos')) {
         query = query.in('sgz_distrito', filters.districts);
       }
       
@@ -566,7 +857,8 @@ export const useChartData = (filters: FilterOptions) => {
       }
       
       if (!data || data.length === 0) {
-        setChartData(defaultChartData);
+        setRawChartData(defaultChartData);
+        setChartData({});
         setOrdensCount(0);
         setLastUpdate('Sem dados disponíveis');
         setIsLoading(false);
@@ -579,7 +871,14 @@ export const useChartData = (filters: FilterOptions) => {
       
       // Process the data
       const processedData = processChartData(data, filters);
-      setChartData(processedData);
+      setRawChartData(processedData);
+      
+      // Format the data for charts
+      const formattedChartData = formatChartData(processedData);
+      setChartData(formattedChartData);
+      
+      console.log('Raw chart data processed:', processedData);
+      console.log('Formatted chart data:', formattedChartData);
       
       setChartLoadingProgress(90);
       
@@ -594,7 +893,8 @@ export const useChartData = (filters: FilterOptions) => {
       toast.error(`Erro ao carregar dados dos gráficos: ${(error as Error).message}`);
       
       // Set empty chart data on error
-      setChartData(defaultChartData);
+      setRawChartData(defaultChartData);
+      setChartData({});
       setOrdensCount(0);
     } finally {
       setIsLoading(false);
