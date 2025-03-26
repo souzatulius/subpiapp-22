@@ -112,7 +112,7 @@ export const useRegisterForm = () => {
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
         cargo_id: formData.role,
-        area_coordenacao_id: formData.area || null,
+        supervisao_tecnica_id: formData.area || null,
         coordenacao_id: formData.coordenacao
       });
 
