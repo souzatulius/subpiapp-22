@@ -91,7 +91,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione um cargo" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="select-cargo">Selecione um cargo</SelectItem>
+            <SelectItem value="select-cargo-option">Selecione um cargo</SelectItem>
             {cargos.map(cargo => (
               <SelectItem key={cargo.id} value={cargo.id}>
                 {cargo.descricao}
@@ -117,7 +117,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione uma coordenação" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="select-coord">Selecione uma coordenação</SelectItem>
+            <SelectItem value="select-coord-option">Selecione uma coordenação</SelectItem>
             {coordenacoes.map(coord => (
               <SelectItem key={coord.id} value={coord.id}>
                 {coord.descricao}
@@ -135,11 +135,11 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
         <Select
           value={watch('supervisao_tecnica_id')}
           onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
-          disabled={!coordenacao || coordenacao === 'select-coord'}
+          disabled={!coordenacao || coordenacao === 'select-coord-option'}
         >
           <SelectTrigger id="supervisao_tecnica_id" className="rounded-xl border-gray-300 h-12">
             <SelectValue placeholder={
-              !coordenacao || coordenacao === 'select-coord'
+              !coordenacao || coordenacao === 'select-coord-option'
                 ? 'Selecione uma coordenação primeiro' 
                 : filteredSupervisoes.length === 0 
                   ? 'Nenhuma supervisão técnica disponível' 
@@ -147,17 +147,17 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             } />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            {!coordenacao || coordenacao === 'select-coord' ? (
-              <SelectItem value="need-coord-first">
+            {!coordenacao || coordenacao === 'select-coord-option' ? (
+              <SelectItem value="need-coord-first-option">
                 Selecione uma coordenação primeiro
               </SelectItem>
             ) : filteredSupervisoes.length === 0 ? (
-              <SelectItem value="no-supervisoes-available">
+              <SelectItem value="no-supervisoes-available-option">
                 Nenhuma supervisão técnica disponível
               </SelectItem>
             ) : (
               <>
-                <SelectItem value="select-supervisao">Selecione uma supervisão técnica</SelectItem>
+                <SelectItem value="select-supervisao-option">Selecione uma supervisão técnica</SelectItem>
                 {filteredSupervisoes.map(supervisao => (
                   <SelectItem key={supervisao.id} value={supervisao.id}>
                     {supervisao.descricao}

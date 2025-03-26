@@ -99,7 +99,7 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
               </SelectItem>
             ))
           ) : (
-            <SelectItem value="no-permissions-available">
+            <SelectItem value="no-permissions-available-option">
               {permissions.length === 0 
                 ? "Nenhuma permissão cadastrada" 
                 : "Não há permissões disponíveis"}
