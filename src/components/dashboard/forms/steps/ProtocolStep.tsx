@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Phone, Mail, MessageSquare, Building, Users, Flag } from 'lucide-react';
 import Protocolo156 from './identification/Protocolo156';
+import PriorityDeadlineStep from './PriorityDeadlineStep';
 
 interface ProtocolStepProps {
   formData: any;
@@ -68,13 +69,13 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         >
           De onde vem a sua solicitação?
         </Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="flex flex-wrap gap-3">
           {origens.map(origem => (
             <Button 
               key={origem.id} 
               type="button" 
               variant={formData.origem_id === origem.id ? "default" : "outline"} 
-              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 rounded-xl ${
+              className={`h-auto py-2 px-3 flex items-center gap-2 ${
                 formData.origem_id === origem.id ? "ring-2 ring-[#003570]" : ""
               } ${
                 hasError('origem_id') ? 'border-orange-500' : ''
@@ -104,6 +105,15 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
           />
         </div>
       )}
+
+      {/* Adicionando os campos de prioridade e prazo */}
+      <Separator className="my-4" />
+      
+      <PriorityDeadlineStep 
+        formData={formData}
+        handleSelectChange={handleSelectChange}
+        errors={errors}
+      />
     </div>
   );
 };

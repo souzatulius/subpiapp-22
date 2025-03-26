@@ -93,13 +93,6 @@ export const useDemandFormState = (
         suggestedTitle += ` - ${selectedBairro.nome}`;
       }
       
-      if (!formData.endereco && formData.detalhes_solicitacao && formData.detalhes_solicitacao.length > 0) {
-        const detailsSnippet = formData.detalhes_solicitacao.substring(0, 30).trim();
-        if (detailsSnippet.length > 0) {
-          suggestedTitle += ` (${detailsSnippet}${formData.detalhes_solicitacao.length > 30 ? '...' : ''})`;
-        }
-      }
-      
       if (suggestedTitle) {
         setFormData(prev => ({
           ...prev,

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ValidationError, getErrorSummary } from '@/lib/formValidationUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Paperclip, FileText } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface ReviewStepProps {
@@ -58,6 +58,25 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       {error && <Badge variant="outline" className="ml-2 bg-orange-50 text-orange-800 border-orange-200">Obrigatório</Badge>}
     </div>
   );
+
+  // Função para obter a extensão do arquivo a partir do nome ou URL
+  const getFileExtension = (filename: string) => {
+    if (!filename) return '';
+    return filename.split('.').pop()?.toLowerCase() || '';
+  };
+
+  // Função para verificar se o arquivo é uma imagem
+  const isImageFile = (filename: string) => {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+    const ext = getFileExtension(filename);
+    return imageExtensions.includes(ext);
+  };
+
+  // Função para extrair o nome do arquivo da URL
+  const getFileNameFromUrl = (url: string) => {
+    if (!url) return '';
+    return url.split('/').pop() || url;
+  };
 
   return (
     <div className="space-y-4">
@@ -137,6 +156,17 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           value={formData.prioridade ? formData.prioridade.charAt(0).toUpperCase() + formData.prioridade.slice(1) : undefined}
           error={errors.some(e => e.field === 'prioridade')}
         />
+        <ReviewItem 
+          label="Prazo para Resposta" 
+          value={formData.prazo_resposta ? new Date(formData.prazo_resposta).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : undefined}
+          error={errors.some(e => e.field === 'prazo_resposta')}
+        />
       </ReviewSection>
 
       <ReviewSection title="Localização">
@@ -180,12 +210,31 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         <span className="text-sm font-medium text-gray-500">Anexos:</span>
         <div className="mt-1">
           {formData.anexos.length > 0 ? (
-            <div className="grid grid-cols-1 gap-1">
-              {formData.anexos.map((anexo: string, index: number) => (
-                <div key={index} className="text-sm p-1 bg-gray-50 rounded-md truncate">
-                  {typeof anexo === 'string' ? anexo.split('/').pop() : ''}
-                </div>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {formData.anexos.map((anexo: string, index: number) => {
+                const fileName = getFileNameFromUrl(anexo);
+                return (
+                  <div key={index} className="p-2 bg-gray-50 rounded-md">
+                    {isImageFile(anexo) ? (
+                      <div className="space-y-1">
+                        <div className="relative h-24 w-full overflow-hidden rounded border border-gray-200">
+                          <img 
+                            src={anexo} 
+                            alt={fileName} 
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <p className="text-xs truncate text-gray-600">{fileName}</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-5 w-5 text-gray-400" />
+                        <span className="text-sm truncate">{fileName}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <p className="text-sm text-gray-400 italic">Nenhum anexo adicionado</p>

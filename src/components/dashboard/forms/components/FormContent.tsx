@@ -11,7 +11,7 @@ import { ValidationError } from '@/lib/formValidationUtils';
 export const FORM_STEPS = [
   {
     title: 'Vamos iniciar agora o cadastro da demanda',
-    description: 'Selecione a origem da demanda e informe se há protocolo 156.',
+    description: 'Selecione a origem da demanda, prioridade e prazo para resposta.',
   },
   {
     title: 'Vamos entender melhor o que está acontecendo',
@@ -77,7 +77,8 @@ const FormContent: React.FC<FormContentProps> = ({
   errors,
   servicos = [],
   filteredServicos = [],
-  handleServiceSearch
+  handleServiceSearch,
+  nextStep
 }) => {
   switch (activeStep) {
     case 0:
@@ -89,6 +90,7 @@ const FormContent: React.FC<FormContentProps> = ({
           origens={origens}
           tiposMidia={tiposMidia}
           errors={errors}
+          nextStep={nextStep}
         />
       );
     case 1:
