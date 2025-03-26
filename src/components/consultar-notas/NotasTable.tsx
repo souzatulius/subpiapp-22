@@ -151,7 +151,7 @@ const NotasTable: React.FC<NotasTableProps> = ({
                   <TableCell className="font-medium">{nota.titulo}</TableCell>
                   <TableCell>{autorNome}</TableCell>
                   <TableCell>{areaNome}</TableCell>
-                  <TableCell>{formatDate(nota.criado_em)}</TableCell>
+                  <TableCell>{formatDate(nota.criado_em || nota.created_at || "")}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(nota.status)}`}>
                       {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,7 +102,6 @@ const NotasCards: React.FC<NotasCardsProps> = ({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {notas.map((nota) => {
-          // Extract optional properties with fallbacks
           const autorNome = nota.autor?.nome_completo || "Autor desconhecido";
           const areaNome = nota.supervisao_tecnica?.descricao || "Área não especificada";
           
@@ -141,11 +139,11 @@ const NotasCards: React.FC<NotasCardsProps> = ({
                   </div>
                   <div className="flex items-center">
                     <Calendar className="w-3 h-3 mr-1" />
-                    <span>{formatDate(nota.criado_em).split(' ')[0]}</span>
+                    <span>{formatDate(nota.criado_em || nota.created_at || "").split(' ')[0]}</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="w-3 h-3 mr-1" />
-                    <span>{formatDate(nota.criado_em).split(' ')[1]}</span>
+                    <span>{formatDate(nota.criado_em || nota.created_at || "").split(' ')[1]}</span>
                   </div>
                 </div>
               </CardContent>

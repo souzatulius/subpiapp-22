@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +41,8 @@ export interface UseNotasQueryResult {
 }
 
 function formatDate(isoString: string) {
+  if (!isoString) return '';
+  
   const date = new Date(isoString);
   return date.toLocaleDateString('pt-BR', {
     day: '2-digit',
