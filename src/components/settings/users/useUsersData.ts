@@ -2,14 +2,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { User } from './types';
+import { User, UserStatus } from './types';
 
 export const useUsersData = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('todos');
+  const [statusFilter, setStatusFilter] = useState<string>('todos');
 
   const fetchUsers = async () => {
     try {
@@ -28,8 +28,10 @@ export const useUsersData = () => {
           cargo_id,
           supervisao_tecnica_id,
           coordenacao_id,
-          criado_em
+          criado_em,
+          status
         `)
+        .not('status', 'eq', 'excluido')
         .order('nome_completo');
       
       if (usersError) throw usersError;
@@ -99,6 +101,20 @@ export const useUsersData = () => {
         if (!permissionsError && permissionsData) {
           permissoes = permissionsData.map((p: any) => p.permissoes);
         }
+
+        // If user has permissions but status is not set or is 'pendente', update it to 'ativo'
+        if (permissoes.length > 0 && (!user.status || user.status === 'pendente')) {
+          const { error: updateError } = await supabase
+            .from('usuarios')
+            .update({ status: 'ativo' })
+            .eq('id', user.id);
+            
+          if (updateError) {
+            console.error('Error updating user status:', updateError);
+          }
+          
+          user.status = 'ativo';
+        }
         
         return { 
           ...user, 
@@ -141,11 +157,16 @@ export const useUsersData = () => {
     
     // Apply status filter
     if (statusFilter !== 'todos') {
-      if (statusFilter === 'ativos') {
-        filtered = filtered.filter(user => user.permissoes && user.permissoes.length > 0);
-      } else if (statusFilter === 'inativos') {
-        filtered = filtered.filter(user => !user.permissoes || user.permissoes.length === 0);
-      }
+      filtered = filtered.filter(user => {
+        if (statusFilter === 'aguardando_email') {
+          return user.status === 'aguardando_email';
+        } else if (statusFilter === 'pendente') {
+          return user.status === 'pendente';
+        } else if (statusFilter === 'ativo') {
+          return user.status === 'ativo';
+        }
+        return true;
+      });
     }
     
     setFilteredUsers(filtered);

@@ -7,6 +7,15 @@ import { UsersLayoutProps } from '@/types/users';
 import UsersTable from './UsersTable';
 import UserDialogs from './UserDialogs';
 import { exportUsersToExcel } from './userExportUtils';
+import { 
+  Select, 
+  SelectContent, 
+  SelectGroup, 
+  SelectItem, 
+  SelectLabel, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 const UsersLayout: React.FC<UsersLayoutProps> = ({
   users,
@@ -31,7 +40,9 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   approving,
   removing,
   isEditSubmitting,
-  onRefresh
+  onRefresh,
+  statusFilter = 'todos',
+  setStatusFilter
 }) => {
   const handleExportUsers = () => {
     exportUsersToExcel(users);
@@ -40,13 +51,33 @@ const UsersLayout: React.FC<UsersLayoutProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex-1">
+        <div className="flex flex-1 gap-2">
           <Input
             placeholder="Buscar usuários..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="max-w-sm"
           />
+          
+          {setStatusFilter && (
+            <Select 
+              value={statusFilter} 
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filtrar por status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Status</SelectLabel>
+                  <SelectItem value="todos">Todos os status</SelectItem>
+                  <SelectItem value="aguardando_email">Aguardando Email</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="ativo">Ativo</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div className="flex gap-2">
           {onRefresh && (

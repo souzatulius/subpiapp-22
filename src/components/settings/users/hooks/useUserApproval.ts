@@ -36,6 +36,14 @@ export const useUserApproval = (fetchData: () => Promise<void>) => {
       
       if (assignError) throw assignError;
       
+      // 3. Update user status to 'ativo'
+      const { error: updateError } = await supabase
+        .from('usuarios')
+        .update({ status: 'ativo' })
+        .eq('id', userId);
+        
+      if (updateError) throw updateError;
+      
       toast({
         title: 'Acesso aprovado',
         description: `O usuário ${userName} agora tem acesso como "${roleName}".`,

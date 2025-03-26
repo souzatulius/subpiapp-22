@@ -1,23 +1,25 @@
 
 import { useState } from 'react';
-import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { User } from '../types';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 export const useUserDelete = (fetchData: () => Promise<void>) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteUser = async () => {
-    if (!userToDelete?.id) return;
+  const deleteUser = async (userId: string) => {
+    if (!userId) return;
     
-    setIsSubmitting(true);
+    setIsDeleting(true);
+    
     try {
+      // Update user status to 'excluido' instead of deleting
       const { error } = await supabase
         .from('usuarios')
-        .delete()
-        .eq('id', userToDelete.id);
+        .update({ status: 'excluido' })
+        .eq('id', userId);
       
       if (error) throw error;
       
@@ -26,31 +28,34 @@ export const useUserDelete = (fetchData: () => Promise<void>) => {
         description: 'O usuário foi excluído com sucesso.',
       });
       
-      // Refresh users data
+      // Refresh users list
       await fetchData();
-      
-      // Close dialog
-      setIsDeleteDialogOpen(false);
     } catch (error: any) {
       console.error('Erro ao excluir usuário:', error);
       toast({
         title: 'Erro',
-        description: error.message || 'Não foi possível excluir o usuário. Por favor, tente novamente.',
+        description: error.message || 'Não foi possível excluir o usuário.',
         variant: 'destructive',
       });
     } finally {
-      setIsSubmitting(false);
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
     }
   };
 
-  const openDeleteDialog = (user: User) => {
-    setUserToDelete(user);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const deleteUser = (user: User) => {
-    setUserToDelete(user);
-    setIsDeleteDialogOpen(true);
+  const handleDeleteUser = async () => {
+    if (!userToDelete) {
+      console.error('Nenhum usuário selecionado para exclusão');
+      toast({
+        title: 'Erro',
+        description: 'Nenhum usuário selecionado para exclusão.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    return await deleteUser(userToDelete.id);
   };
 
   return {
@@ -60,7 +65,6 @@ export const useUserDelete = (fetchData: () => Promise<void>) => {
     setUserToDelete,
     handleDeleteUser,
     deleteUser,
-    openDeleteDialog,
-    isSubmitting
+    isDeleting,
   };
 };

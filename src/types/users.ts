@@ -25,6 +25,8 @@ export interface UsersLayoutProps {
   removing: boolean;
   isEditSubmitting?: boolean;
   onRefresh?: () => void;
+  statusFilter?: string;
+  setStatusFilter?: (status: string) => void;
 }
 
 export interface UsersTableProps {
@@ -54,4 +56,70 @@ export interface UserDialogsProps {
   handleEditUser: (data: any) => Promise<void>;
   handleDeleteUser: () => Promise<void>;
   isEditSubmitting?: boolean;
+}
+
+export type UserStatus = 'aguardando_email' | 'pendente' | 'ativo' | 'excluido';
+
+export type User = {
+  id: string;
+  nome_completo: string;
+  email: string;
+  whatsapp?: string;
+  aniversario?: string | Date;
+  foto_perfil_url?: string;
+  cargo_id?: string;
+  supervisao_tecnica_id?: string;
+  coordenacao_id?: string;
+  criado_em?: string;
+  status?: UserStatus;
+  cargos?: {
+    id: string;
+    descricao: string;
+  };
+  supervisao_tecnica?: {
+    id: string;
+    descricao: string;
+    coordenacao_id?: string;
+  };
+  coordenacao?: {
+    id: string;
+    descricao: string;
+  };
+  permissoes?: Array<{
+    id: string;
+    descricao: string;
+    nivel_acesso: number;
+  }>;
+};
+
+export type SupervisaoTecnica = {
+  id: string;
+  descricao: string;
+  sigla?: string;
+  coordenacao_id?: string;
+};
+
+export type Coordenacao = {
+  id: string;
+  descricao: string;
+  sigla?: string;
+};
+
+export type Cargo = {
+  id: string;
+  descricao: string;
+};
+
+export type Area = SupervisaoTecnica;
+
+export interface UserFormData {
+  nome_completo: string;
+  email?: string;
+  cargo_id?: string;
+  coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
+  whatsapp?: string;
+  aniversario?: Date;
+  foto_perfil_url?: string;
+  status?: UserStatus;
 }

@@ -152,7 +152,9 @@ const UsersManagement = () => {
     approving,
     removing,
     isEditSubmitting,
-    onRefresh: handleRefreshData
+    onRefresh: handleRefreshData,
+    statusFilter,
+    setStatusFilter
   };
   
   return (
