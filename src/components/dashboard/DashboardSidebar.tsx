@@ -22,7 +22,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     <aside className={`bg-[#051b2c] transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'} flex-shrink-0 overflow-x-hidden`}>
       <nav className="py-6">
         <ul className="space-y-2 px-3">
-          {navSections.filter(section => !section.adminOnly || isAdmin).map((section) => (
+          {navSections.map((section) => (
             <li key={section.id} className="flex flex-col">
               <SidebarSection
                 id={section.id}
