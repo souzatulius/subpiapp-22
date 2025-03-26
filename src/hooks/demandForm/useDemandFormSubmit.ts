@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DemandFormData } from './types';
 import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export const useDemandFormSubmit = (
   userId: string | undefined,
@@ -68,6 +69,7 @@ export const useDemandFormSubmit = (
         variant: "default"
       });
 
+      // The onClose function is still called for cleanup
       onClose();
     } catch (error: any) {
       console.error("Error submitting demand:", error);

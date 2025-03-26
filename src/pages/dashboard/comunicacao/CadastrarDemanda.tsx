@@ -8,7 +8,8 @@ const CadastrarDemanda = () => {
   const navigate = useNavigate();
 
   const handleClose = () => {
-    navigate('/dashboard/comunicacao/consultar-demandas');
+    // Redirect to dashboard instead of the previous page
+    navigate('/dashboard');
   };
 
   return (
