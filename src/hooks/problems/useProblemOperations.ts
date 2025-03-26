@@ -7,7 +7,7 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const addProblem = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const addProblem = async (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
     if (!data.descricao || !data.supervisao_tecnica_id) {
       toast({
         title: "Erro",
@@ -24,7 +24,8 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
         .from('problemas')
         .insert({
           descricao: data.descricao,
-          supervisao_tecnica_id: data.supervisao_tecnica_id
+          supervisao_tecnica_id: data.supervisao_tecnica_id,
+          icone: data.icone
         });
         
       if (error) throw error;
@@ -49,7 +50,7 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
     }
   };
 
-  const updateProblem = async (id: string, data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const updateProblem = async (id: string, data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
     if (!id || !data.descricao || !data.supervisao_tecnica_id) {
       toast({
         title: "Erro",
@@ -62,21 +63,12 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
     try {
       setIsSubmitting(true);
       
-      // Check if problem has associated services (commented out since servicos table is removed)
-      /*
-      const { data: servicosData, error: servicosError } = await supabase
-        .from('servicos')
-        .select('id')
-        .eq('problema_id', id);
-        
-      if (servicosError) throw servicosError;
-      */
-      
       const { error } = await supabase
         .from('problemas')
         .update({
           descricao: data.descricao,
-          supervisao_tecnica_id: data.supervisao_tecnica_id
+          supervisao_tecnica_id: data.supervisao_tecnica_id,
+          icone: data.icone
         })
         .eq('id', id);
         
@@ -114,25 +106,6 @@ export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
     
     try {
       setIsDeleting(true);
-      
-      // Check if problem has associated services (commented out since servicos table is removed)
-      /*
-      const { data: servicosData, error: servicosError } = await supabase
-        .from('servicos')
-        .select('id')
-        .eq('problema_id', id);
-        
-      if (servicosError) throw servicosError;
-      
-      if (servicosData && servicosData.length > 0) {
-        toast({
-          title: "Erro",
-          description: "Este problema está associado a serviços e não pode ser excluído.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      */
       
       const { error } = await supabase
         .from('problemas')
