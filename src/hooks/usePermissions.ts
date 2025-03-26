@@ -39,7 +39,10 @@ export const usePermissions = (): UsePermissionsReturn => {
             _role_nome: 'admin'
           });
 
-        if (adminCheckError) throw adminCheckError;
+        if (adminCheckError) {
+          console.error("Error in user_has_role check:", adminCheckError);
+          // Don't throw, just log and continue
+        }
         
         let adminStatus = !!isUserAdmin;
         console.log("Admin status from RPC user_has_role:", adminStatus);
@@ -51,11 +54,14 @@ export const usePermissions = (): UsePermissionsReturn => {
           .eq('id', user.id)
           .single();
 
-        if (userError) throw userError;
-        
-        console.log("User data:", userData);
-        setUserCoordination(userData?.coordenacao_id || null);
-        setUserSupervisaoTecnica(userData?.supervisao_tecnica_id || null);
+        if (userError) {
+          console.error("Error fetching user data:", userError);
+          // Don't throw, just log and continue
+        } else {
+          console.log("User data:", userData);
+          setUserCoordination(userData?.coordenacao_id || null);
+          setUserSupervisaoTecnica(userData?.supervisao_tecnica_id || null);
+        }
 
         // If user belongs to Gabinete or Comunicação coordination, grant admin access
         if (userData?.coordenacao_id) {
@@ -66,7 +72,8 @@ export const usePermissions = (): UsePermissionsReturn => {
             .single();
             
           if (!coordError && coordData) {
-            const coordDescription = coordData.descricao.toLowerCase().trim();
+            // Safely handle potentially null or undefined descriptions
+            const coordDescription = coordData.descricao?.toLowerCase()?.trim() || "";
             console.log("Coordination description:", coordData.descricao);
             console.log("Lowercased and trimmed:", coordDescription);
             
@@ -86,27 +93,35 @@ export const usePermissions = (): UsePermissionsReturn => {
 
         // If not admin by role or coordination, check by legacy permissions
         if (!adminStatus) {
-          const { data: isAdminByPermission, error: permissionError } = await supabase
-            .rpc('is_admin', { user_id: user.id });
-            
-          if (!permissionError && isAdminByPermission) {
-            console.log("User is admin by legacy permission");
-            adminStatus = true;
-          } else if (permissionError) {
-            console.error("Error checking is_admin RPC:", permissionError);
+          try {
+            const { data: isAdminByPermission, error: permissionError } = await supabase
+              .rpc('is_admin', { user_id: user.id });
+              
+            if (!permissionError && isAdminByPermission) {
+              console.log("User is admin by legacy permission");
+              adminStatus = true;
+            } else if (permissionError) {
+              console.error("Error checking is_admin RPC:", permissionError);
+            }
+          } catch (permissionError) {
+            console.error("Exception in is_admin RPC:", permissionError);
           }
         }
 
         // Also check if admin by coordination (fallback method)
         if (!adminStatus) {
-          const { data: isAdminByCoord, error: coordError } = await supabase
-            .rpc('is_admin_by_coordenacao', { user_id: user.id });
-            
-          if (!coordError && isAdminByCoord) {
-            console.log("User is admin by coordination (via RPC function)");
-            adminStatus = true;
-          } else if (coordError) {
-            console.error("Error checking is_admin_by_coordenacao RPC:", coordError);
+          try {
+            const { data: isAdminByCoord, error: coordError } = await supabase
+              .rpc('is_admin_by_coordenacao', { user_id: user.id });
+              
+            if (!coordError && isAdminByCoord) {
+              console.log("User is admin by coordination (via RPC function)");
+              adminStatus = true;
+            } else if (coordError) {
+              console.error("Error checking is_admin_by_coordenacao RPC:", coordError);
+            }
+          } catch (coordError) {
+            console.error("Exception in is_admin_by_coordenacao RPC:", coordError);
           }
         }
 
@@ -115,6 +130,7 @@ export const usePermissions = (): UsePermissionsReturn => {
       } catch (err: any) {
         console.error('Error fetching user permissions:', err);
         setError(err);
+        // Still set loading to false to avoid infinite loading state
       } finally {
         setIsLoading(false);
       }

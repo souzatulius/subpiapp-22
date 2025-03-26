@@ -21,7 +21,13 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
       if (authLoading || permissionLoading) return;
       
       console.log("Checking access to admin route:", location.pathname);
-      console.log("User auth state:", { user: !!user, isApproved, isAdmin });
+      console.log("User auth state:", { 
+        user: !!user, 
+        isApproved, 
+        isAdmin, 
+        email: user?.email,
+        path: location.pathname
+      });
       
       // Check if user is logged in and approved
       if (!user) {
@@ -68,7 +74,17 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
       }
     };
     
-    checkAccess();
+    try {
+      checkAccess();
+    } catch (error) {
+      console.error("Error checking admin access:", error);
+      toast({
+        title: "Erro de verificação",
+        description: "Ocorreu um erro ao verificar suas permissões. Por favor, tente novamente mais tarde.",
+        variant: "destructive"
+      });
+      navigate('/dashboard');
+    }
   }, [user, authLoading, isApproved, isAdmin, permissionLoading, canAccessProtectedRoute, navigate, location.pathname]);
 
   if (authLoading || permissionLoading) {
