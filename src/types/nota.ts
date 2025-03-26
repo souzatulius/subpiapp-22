@@ -46,7 +46,7 @@ export interface NotaOficial {
     titulo: string;
   } | null;
   historico_edicoes?: NotaEdicao[];
-  area_coordenacao: {
+  area_coordenacao?: {
     id: string;
     descricao: string;
   };

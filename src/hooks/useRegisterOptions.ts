@@ -15,7 +15,7 @@ export function useRegisterOptions() {
       try {
         setLoadingOptions(true);
         
-        // Fetch cargos (roles)
+        // Fetch cargos (roles) from the cargos table
         const { data: rolesData, error: rolesError } = await supabase
           .from('cargos')
           .select('id, descricao')

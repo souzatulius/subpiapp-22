@@ -11,12 +11,8 @@ import { ValidationError } from '@/lib/formValidationUtils';
 
 export const FORM_STEPS = [
   {
-    title: 'Protocolo 156',
-    description: 'Informe se a demanda tem um protocolo 156 associado.',
-  },
-  {
-    title: 'Origem',
-    description: 'Selecione a origem e o tipo de mídia da demanda.',
+    title: 'Protocolo e Origem',
+    description: 'Informe o protocolo 156 e a origem da demanda.',
   },
   {
     title: 'Informações do Solicitante',
@@ -90,21 +86,12 @@ const FormContent: React.FC<FormContentProps> = ({
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
+          origens={origens}
+          tiposMidia={tiposMidia}
           errors={errors}
         />
       );
     case 1:
-      return (
-        <OriginStep
-          formData={formData}
-          origens={origens}
-          tiposMidia={tiposMidia}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
-          errors={errors}
-        />
-      );
-    case 2:
       return (
         <RequestInfoStep
           formData={formData}
@@ -113,7 +100,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 3:
+    case 2:
       return (
         <ProblemStep
           formData={formData}
@@ -126,7 +113,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 4:
+    case 3:
       return (
         <LocationStep
           formData={formData}
@@ -139,7 +126,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 5:
+    case 4:
       return (
         <QuestionsDetailsStep
           formData={formData}
@@ -150,7 +137,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 6:
+    case 5:
       return (
         <ReviewStep
           formData={formData}

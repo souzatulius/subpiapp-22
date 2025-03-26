@@ -32,6 +32,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (currentSession?.user) {
           const approved = await isUserApproved(currentSession.user.id);
           setIsApproved(approved);
+          
+          // Se estiver aprovado e estiver na página de login, redireciona para o dashboard
+          if (approved && window.location.pathname === '/login') {
+            navigate('/dashboard');
+          }
         }
 
         // Configura ouvinte para mudanças de autenticação
@@ -43,6 +48,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (newSession?.user) {
             const approved = await isUserApproved(newSession.user.id);
             setIsApproved(approved);
+            
+            // Se estiver aprovado e estiver na página de login, redireciona para o dashboard
+            if (approved && window.location.pathname === '/login') {
+              navigate('/dashboard');
+            }
           } else {
             setIsApproved(null);
           }
@@ -59,7 +69,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     initialize();
-  }, []);
+  }, [navigate]);
 
   // Create or update user profile - already defined in authUtils.ts, so we'll use that instead
   const handleUpdateUserProfile = async (userId: string, userData: any) => {
@@ -109,6 +119,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         };
       }
       
+      // Explicitly redirect to dashboard on successful login
       navigate('/dashboard');
     }
     
