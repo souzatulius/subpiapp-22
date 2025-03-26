@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { startOfDay, endOfDay, isAfter, isBefore, isEqual } from 'date-fns';
 import { useCurrentUser } from '@/components/settings/access-control/hooks/useCurrentUser';
-import { NotaOficial } from '@/types/nota';
+import { NotaOficial, NotaEdicao } from '@/types/nota';
 
 export const useNotasQuery = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,14 +81,24 @@ export const useNotasQuery = () => {
 
         if (error) throw error;
 
-        // Cast data to the expected type with proper formatting for nullable fields
-        const formattedNotas = (data || []).map((nota: any) => ({
-          ...nota,
-          autor: nota.autor || { id: '', nome_completo: 'Não informado' },
-          aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
-          supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
-          historico_edicoes: nota.historico_edicoes || []
-        })) as NotaOficial[];
+        // Format the data to ensure type safety
+        const formattedNotas = (data || []).map(nota => {
+          // Process historic edits to ensure the type is correct
+          const processedHistorico = (nota.historico_edicoes || []).map(edit => {
+            return {
+              ...edit,
+              editor: edit.editor || { id: '', nome_completo: 'Não informado' }
+            };
+          }) as NotaEdicao[];
+          
+          return {
+            ...nota,
+            autor: nota.autor || { id: '', nome_completo: 'Não informado' },
+            aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
+            supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
+            historico_edicoes: processedHistorico
+          };
+        }) as NotaOficial[];
 
         return formattedNotas;
       } catch (error: any) {

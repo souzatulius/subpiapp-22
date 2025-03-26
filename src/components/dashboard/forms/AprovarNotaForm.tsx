@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -54,13 +55,23 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
       
       if (notasError) throw notasError;
       
-      const formattedNotas = (notasData || []).map(nota => ({
-        ...nota,
-        autor: nota.autor || { id: '', nome_completo: 'Não informado' },
-        aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
-        supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
-        historico_edicoes: nota.historico_edicoes || []
-      })) as NotaOficial[];
+      const formattedNotas = (notasData || []).map(nota => {
+        // Process historic edits to ensure the type is correct
+        const processedHistorico = (nota.historico_edicoes || []).map(edit => {
+          return {
+            ...edit,
+            editor: edit.editor || { id: '', nome_completo: 'Não informado' }
+          };
+        }) as NotaEdicao[];
+        
+        return {
+          ...nota,
+          autor: nota.autor || { id: '', nome_completo: 'Não informado' },
+          aprovador: nota.aprovador || { id: '', nome_completo: 'Não informado' },
+          supervisao_tecnica: nota.supervisao_tecnica || { id: '', descricao: 'Não informada' },
+          historico_edicoes: processedHistorico
+        };
+      }) as NotaOficial[];
       
       setNotas(formattedNotas);
     } catch (error) {

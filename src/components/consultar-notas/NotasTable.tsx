@@ -6,6 +6,7 @@ import { Eye, FileDown, Trash } from 'lucide-react';
 import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
 import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
+import { NotaOficial } from '@/types/nota';
 import {
   Table,
   TableBody,
@@ -14,26 +15,6 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-
-interface Autor {
-  nome_completo: string;
-}
-
-interface AreaCoordenacao {
-  descricao: string;
-}
-
-export interface NotaOficial {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  criado_em: string;
-  atualizado_em: string;
-  autor: Autor;
-  area_coordenacao: AreaCoordenacao;
-  demanda_id?: string;
-}
 
 interface NotasTableProps {
   notas: NotaOficial[];
@@ -115,8 +96,8 @@ const NotasTable: React.FC<NotasTableProps> = ({
               notas.map((nota) => (
                 <TableRow key={nota.id} className="hover:bg-gray-50">
                   <TableCell className="font-medium">{nota.titulo}</TableCell>
-                  <TableCell>{nota.autor.nome_completo}</TableCell>
-                  <TableCell>{nota.area_coordenacao.descricao}</TableCell>
+                  <TableCell>{nota.autor?.nome_completo || 'Autor desconhecido'}</TableCell>
+                  <TableCell>{nota.supervisao_tecnica?.descricao || 'Área não informada'}</TableCell>
                   <TableCell>
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${nota.status === 'aprovado' ? 'bg-green-100 text-green-800' : ''}
