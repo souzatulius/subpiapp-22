@@ -31,68 +31,82 @@ export const usePermissions = (): UsePermissionsReturn => {
       try {
         setIsLoading(true);
         console.log("Checking permissions for user:", user.id);
-
-        // Check if user has admin role using the RPC function
-        const { data: isUserAdmin, error: adminCheckError } = await supabase
-          .rpc('user_has_role', {
-            _user_id: user.id,
-            _role_nome: 'admin'
-          });
-
-        if (adminCheckError) {
-          console.error("Error in user_has_role check:", adminCheckError);
-          // Don't throw, just log and continue
-        }
         
-        let adminStatus = !!isUserAdmin;
-        console.log("Admin status from RPC user_has_role:", adminStatus);
+        let adminStatus = false;
 
-        // Fetch user data for coordination and supervisao tecnica
-        const { data: userData, error: userError } = await supabase
-          .from('usuarios')
-          .select('coordenacao_id, supervisao_tecnica_id')
-          .eq('id', user.id)
-          .single();
+        // 1. Verifica se o usuário tem role 'admin'
+        try {
+          const { data: isUserAdmin, error: adminCheckError } = await supabase
+            .rpc('user_has_role', {
+              _user_id: user.id,
+              _role_nome: 'admin'
+            });
 
-        if (userError) {
-          console.error("Error fetching user data:", userError);
-          // Don't throw, just log and continue
-        } else {
-          console.log("User data:", userData);
-          setUserCoordination(userData?.coordenacao_id || null);
-          setUserSupervisaoTecnica(userData?.supervisao_tecnica_id || null);
-        }
-
-        // If user belongs to Gabinete or Comunicação coordination, grant admin access
-        if (userData?.coordenacao_id) {
-          const { data: coordData, error: coordError } = await supabase
-            .from('coordenacoes')
-            .select('descricao')
-            .eq('id', userData.coordenacao_id)
-            .single();
-            
-          if (!coordError && coordData) {
-            // Normalize the coordination description to handle accents and variations
-            const normalized = coordData.descricao
-              ?.normalize("NFD")                // separates letters and accents
-              .replace(/[\u0300-\u036f]/g, "")  // removes accents
-              .toLowerCase()
-              .trim() || "";
-            
-            console.log("Coordination description:", coordData.descricao);
-            console.log("Normalized description:", normalized);
-            
-            // Check for privileged coordinations using normalized string
-            if (normalized.includes('gabinete') || normalized.includes('comunicacao')) {
-              console.log("User belongs to privileged coordination, granting admin access");
-              adminStatus = true;
-            }
-          } else if (coordError) {
-            console.error("Error fetching coordination data:", coordError);
+          if (adminCheckError) {
+            console.error("Error in user_has_role check:", adminCheckError);
+            // Don't throw, just log and continue
           }
+          
+          adminStatus = !!isUserAdmin;
+          console.log("Admin status from RPC user_has_role:", adminStatus);
+        } catch (roleError) {
+          console.error("Exception in user_has_role RPC:", roleError);
         }
 
-        // If not admin by role or coordination, check by legacy permissions
+        // 2. Fetch user data for coordination and supervisao tecnica
+        try {
+          const { data: userData, error: userError } = await supabase
+            .from('usuarios')
+            .select('coordenacao_id, supervisao_tecnica_id')
+            .eq('id', user.id)
+            .single();
+
+          if (userError) {
+            console.error("Error fetching user data:", userError);
+            // Don't throw, just log and continue
+          } else {
+            console.log("User data:", userData);
+            setUserCoordination(userData?.coordenacao_id || null);
+            setUserSupervisaoTecnica(userData?.supervisao_tecnica_id || null);
+          }
+
+          // 3. Check if user belongs to privileged coordination (Gabinete or Comunicação)
+          if (userData?.coordenacao_id && !adminStatus) {
+            try {
+              const { data: coordData, error: coordError } = await supabase
+                .from('coordenacoes')
+                .select('descricao')
+                .eq('id', userData.coordenacao_id)
+                .single();
+                
+              if (!coordError && coordData) {
+                // Normalize the coordination description to handle accents and variations
+                const normalized = coordData.descricao
+                  ?.normalize("NFD")                // separates letters and accents
+                  .replace(/[\u0300-\u036f]/g, "")  // removes accents
+                  .toLowerCase()
+                  .trim() || "";
+                
+                console.log("Coordination description:", coordData.descricao);
+                console.log("Normalized description:", normalized);
+                
+                // Check for privileged coordinations using normalized string
+                if (normalized.includes('gabinete') || normalized.includes('comunicacao')) {
+                  console.log("User belongs to privileged coordination, granting admin access");
+                  adminStatus = true;
+                }
+              } else if (coordError) {
+                console.error("Error fetching coordination data:", coordError);
+              }
+            } catch (coordCheckError) {
+              console.error("Exception checking coordination:", coordCheckError);
+            }
+          }
+        } catch (userDataError) {
+          console.error("Exception fetching user data:", userDataError);
+        }
+
+        // 4. If not admin by role or coordination, check by legacy permissions
         if (!adminStatus) {
           try {
             const { data: isAdminByPermission, error: permissionError } = await supabase
@@ -109,7 +123,7 @@ export const usePermissions = (): UsePermissionsReturn => {
           }
         }
 
-        // Also check if admin by coordination (fallback method)
+        // 5. Also check if admin by coordination (fallback method)
         if (!adminStatus) {
           try {
             const { data: isAdminByCoord, error: coordError } = await supabase
