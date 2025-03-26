@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import DataTable from './data-table/DataTable';
 import ServiceForm from './services/ServiceForm';
 import ServiceEditDialog from './services/ServiceEditDialog'; 
+import DeleteServiceDialog from './services/DeleteServiceDialog';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -16,6 +17,8 @@ const Services = () => {
   const { services, loading, fetchServices, addService, updateService, deleteService } = useServices();
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [deletingService, setDeletingService] = useState<Service | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [areas, setAreas] = useState<Area[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -117,6 +120,30 @@ const Services = () => {
       setIsSubmitting(false);
     }
   };
+  
+  const handleDeleteClick = (service: Service) => {
+    setDeletingService(service);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingService) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteService(deletingService.id);
+      await fetchServices(); // Refresh the services list after deletion
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o serviço.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeletingService(null);
+    }
+  };
 
   const renderForm = (onClose: () => void) => (
     <ServiceForm
@@ -134,7 +161,7 @@ const Services = () => {
         columns={columns}
         onAdd={() => setIsAddFormOpen(true)}
         onEdit={handleEdit}
-        onDelete={deleteService}
+        onDelete={handleDeleteClick}
         filterPlaceholder="Filtrar serviços..."
         renderForm={renderForm}
         isLoading={loading}
@@ -148,6 +175,15 @@ const Services = () => {
         areas={areas}
         onSubmit={handleUpdate}
         isSubmitting={isSubmitting}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteServiceDialog
+        isOpen={!!deletingService}
+        onOpenChange={(open) => !open && setDeletingService(null)}
+        onConfirm={handleConfirmDelete}
+        serviceName={deletingService?.descricao || ''}
+        isDeleting={isDeleting}
       />
     </div>
   );

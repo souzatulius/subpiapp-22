@@ -130,6 +130,7 @@ export const useServices = () => {
         description: 'Não foi possível remover o serviço.',
         variant: 'destructive'
       });
+      throw error;
     }
   };
 
