@@ -8,12 +8,14 @@ interface RequestInfoStepProps {
   formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   errors: ValidationError[];
+  handleSelectChange?: (name: string, value: string | boolean) => void;
 }
 
 const RequestInfoStep: React.FC<RequestInfoStepProps> = ({
   formData,
   handleChange,
-  errors
+  errors,
+  handleSelectChange
 }) => {
   const hasError = (field: string) => errors.some(error => error.field === field);
   const getErrorMessage = (field: string) => {

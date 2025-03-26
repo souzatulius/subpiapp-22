@@ -7,7 +7,7 @@ export interface NotaOficial {
   criado_em: string;
   atualizado_em: string;
   autor_id: string;
-  autor?: {
+  autor: {
     id: string;
     nome_completo: string;
   };
@@ -21,7 +21,7 @@ export interface NotaOficial {
     id: string;
     descricao: string;
   };
-  area_coordenacao?: {
+  area_coordenacao: {
     id: string;
     descricao: string;
   };
