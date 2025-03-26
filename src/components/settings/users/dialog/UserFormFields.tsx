@@ -2,97 +2,135 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select';
-import { User, SupervisaoTecnica, Cargo, Coordenacao } from '../types';
-import { UseFormWatch, UseFormSetValue, FieldErrors } from 'react-hook-form';
-import { UserFormData } from '../types';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { SupervisaoTecnica, Cargo, Coordenacao } from '../types';
 
 interface UserFormFieldsProps {
-  watch: UseFormWatch<UserFormData>;
-  setValue: UseFormSetValue<UserFormData>;
-  errors: FieldErrors<UserFormData>;
+  register: any;
+  errors: any;
   supervisoesTecnicas: SupervisaoTecnica[];
   cargos: Cargo[];
-  coordenacoes?: Coordenacao[];
-  register: any;
+  coordenacoes: Coordenacao[];
   filteredSupervisoes: SupervisaoTecnica[];
   coordenacao: string;
+  watch: any;
+  setValue: any;
+  showWhatsapp?: boolean;
+  showBirthday?: boolean;
 }
 
 const UserFormFields: React.FC<UserFormFieldsProps> = ({
-  watch,
-  setValue,
+  register,
   errors,
   supervisoesTecnicas,
   cargos,
-  coordenacoes = [],
-  register,
+  coordenacoes,
   filteredSupervisoes,
-  coordenacao
+  coordenacao,
+  watch,
+  setValue,
+  showWhatsapp = false,
+  showBirthday = false
 }) => {
   return (
-    <div className="space-y-5 bg-white p-5 rounded-xl">
-      <div className="grid gap-2">
-        <Label htmlFor="nome_completo" className="text-subpi-gray-text">Nome Completo</Label>
+    <>
+      {/* Nome completo */}
+      <div className="space-y-1">
+        <Label htmlFor="nome_completo">Nome completo</Label>
         <Input
           id="nome_completo"
-          className="rounded-xl border-gray-300 focus:border-subpi-blue focus:ring-subpi-blue"
           {...register('nome_completo', { required: 'Nome é obrigatório' })}
+          placeholder="Digite o nome completo"
+          className={errors.nome_completo ? 'border-red-500' : ''}
         />
         {errors.nome_completo && (
           <p className="text-sm text-red-500">{errors.nome_completo.message}</p>
         )}
       </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="email" className="text-subpi-gray-text">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          className="rounded-xl border-gray-300 bg-gray-100"
-          {...register('email', { required: 'Email é obrigatório' })}
-          disabled
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="whatsapp" className="text-subpi-gray-text">WhatsApp</Label>
-        <Input
-          id="whatsapp"
-          className="rounded-xl border-gray-300 focus:border-subpi-blue focus:ring-subpi-blue"
-          {...register('whatsapp')}
-          placeholder="(DDD) XXXXX-XXXX"
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="aniversario" className="text-subpi-gray-text">Data de Aniversário</Label>
-        <Input
-          id="aniversario"
-          type="date"
-          className="rounded-xl border-gray-300 focus:border-subpi-blue focus:ring-subpi-blue"
-          {...register('aniversario')}
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="cargo_id" className="text-subpi-gray-text">Cargo</Label>
+      
+      {/* WhatsApp number */}
+      {showWhatsapp && (
+        <div className="space-y-1">
+          <Label htmlFor="whatsapp">WhatsApp</Label>
+          <Input
+            id="whatsapp"
+            {...register('whatsapp')}
+            placeholder="(11) 98765-4321"
+            className={errors.whatsapp ? 'border-red-500' : ''}
+          />
+          {errors.whatsapp && (
+            <p className="text-sm text-red-500">{errors.whatsapp.message}</p>
+          )}
+        </div>
+      )}
+      
+      {/* Birthday field */}
+      {showBirthday && (
+        <div className="space-y-1">
+          <Label htmlFor="aniversario">Data de aniversário</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !watch('aniversario') && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {watch('aniversario') ? (
+                  format(watch('aniversario'), 'P', { locale: pt })
+                ) : (
+                  <span>Selecione uma data</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={watch('aniversario')}
+                onSelect={(date) => setValue('aniversario', date)}
+                locale={pt}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
+      
+      {/* Cargo */}
+      <div className="space-y-1">
+        <Label htmlFor="cargo_id">Cargo</Label>
         <Select
-          value={watch('cargo_id')}
+          value={watch('cargo_id') || ''}
           onValueChange={(value) => setValue('cargo_id', value)}
         >
-          <SelectTrigger id="cargo_id" className="rounded-xl border-gray-300 h-12">
-            <SelectValue placeholder="Selecione um cargo" />
+          <SelectTrigger id="cargo_id" className={errors.cargo_id ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Selecione" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="select-cargo-option">Selecione um cargo</SelectItem>
-            {cargos.map(cargo => (
+          <SelectContent>
+            <SelectItem value="">Nenhum</SelectItem>
+            {cargos.map((cargo) => (
               <SelectItem key={cargo.id} value={cargo.id}>
                 {cargo.descricao}
               </SelectItem>
@@ -103,24 +141,27 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           <p className="text-sm text-red-500">{errors.cargo_id.message}</p>
         )}
       </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="coordenacao_id" className="text-subpi-gray-text">Coordenação</Label>
+      
+      {/* Coordenacao */}
+      <div className="space-y-1">
+        <Label htmlFor="coordenacao_id">Coordenação</Label>
         <Select
-          value={watch('coordenacao_id')}
+          value={watch('coordenacao_id') || ''}
           onValueChange={(value) => {
             setValue('coordenacao_id', value);
-            setValue('supervisao_tecnica_id', '');
+            if (value !== coordenacao) {
+              setValue('supervisao_tecnica_id', '');
+            }
           }}
         >
-          <SelectTrigger id="coordenacao_id" className="rounded-xl border-gray-300 h-12">
-            <SelectValue placeholder="Selecione uma coordenação" />
+          <SelectTrigger id="coordenacao_id" className={errors.coordenacao_id ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Selecione" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="select-coord-option">Selecione uma coordenação</SelectItem>
-            {coordenacoes.map(coord => (
-              <SelectItem key={coord.id} value={coord.id}>
-                {coord.descricao}
+          <SelectContent>
+            <SelectItem value="">Nenhuma</SelectItem>
+            {coordenacoes.map((coordenacao) => (
+              <SelectItem key={coordenacao.id} value={coordenacao.id}>
+                {coordenacao.descricao}
               </SelectItem>
             ))}
           </SelectContent>
@@ -129,49 +170,35 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
           <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
         )}
       </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="supervisao_tecnica_id" className="text-subpi-gray-text">Supervisão Técnica (Opcional)</Label>
+      
+      {/* Supervisão Técnica */}
+      <div className="space-y-1">
+        <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
         <Select
-          value={watch('supervisao_tecnica_id')}
+          value={watch('supervisao_tecnica_id') || ''}
           onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
-          disabled={!coordenacao || coordenacao === 'select-coord-option'}
+          disabled={!coordenacao}
         >
-          <SelectTrigger id="supervisao_tecnica_id" className="rounded-xl border-gray-300 h-12">
-            <SelectValue placeholder={
-              !coordenacao || coordenacao === 'select-coord-option'
-                ? 'Selecione uma coordenação primeiro' 
-                : filteredSupervisoes.length === 0 
-                  ? 'Nenhuma supervisão técnica disponível' 
-                  : 'Selecione uma supervisão técnica'
-            } />
+          <SelectTrigger 
+            id="supervisao_tecnica_id" 
+            className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}
+          >
+            <SelectValue placeholder="Selecione" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {!coordenacao || coordenacao === 'select-coord-option' ? (
-              <SelectItem value="need-coord-first-option">
-                Selecione uma coordenação primeiro
+          <SelectContent>
+            <SelectItem value="">Nenhuma</SelectItem>
+            {filteredSupervisoes.map((supervisao) => (
+              <SelectItem key={supervisao.id} value={supervisao.id}>
+                {supervisao.descricao}
               </SelectItem>
-            ) : filteredSupervisoes.length === 0 ? (
-              <SelectItem value="no-supervisoes-available-option">
-                Nenhuma supervisão técnica disponível
-              </SelectItem>
-            ) : (
-              <>
-                <SelectItem value="select-supervisao-option">Selecione uma supervisão técnica</SelectItem>
-                {filteredSupervisoes.map(supervisao => (
-                  <SelectItem key={supervisao.id} value={supervisao.id}>
-                    {supervisao.descricao}
-                  </SelectItem>
-                ))}
-              </>
-            )}
+            ))}
           </SelectContent>
         </Select>
         {errors.supervisao_tecnica_id && (
           <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

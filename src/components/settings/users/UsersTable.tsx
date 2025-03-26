@@ -39,7 +39,6 @@ interface UsersTableProps {
   onResetPassword?: (user: User) => void;
   onApprove?: (user: User, roleName?: string) => void;
   onRemoveAccess?: (user: User) => void;
-  onManageRoles?: (user: User) => void;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({
@@ -49,8 +48,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   onDelete,
   onResetPassword,
   onApprove,
-  onRemoveAccess,
-  onManageRoles
+  onRemoveAccess
 }) => {
   const getInitials = (name: string) => {
     return name
@@ -66,7 +64,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   };
 
   if (loading) {
-    return <LoadingSkeleton rows={5} columns={5} />;
+    return <LoadingSkeleton rows={5} columns={6} />;
   }
 
   return (
@@ -74,9 +72,10 @@ const UsersTable: React.FC<UsersTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="w-[280px]">Usuário</TableHead>
-            <TableHead>Equipe</TableHead>
-            <TableHead>Contato</TableHead>
+            <TableHead className="w-[250px]">Usuário</TableHead>
+            <TableHead>Cargo</TableHead>
+            <TableHead>Coordenação</TableHead>
+            <TableHead>Supervisão Técnica</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -84,7 +83,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
         <TableBody>
           {users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 Nenhum usuário encontrado.
               </TableCell>
             </TableRow>
@@ -106,31 +105,13 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-1">
-                    {user.cargos?.descricao && (
-                      <div className="text-sm">{user.cargos.descricao}</div>
-                    )}
-                    {user.coordenacao?.descricao && (
-                      <div className="text-sm text-muted-foreground">
-                        {user.coordenacao.descricao}
-                        {user.supervisao_tecnica?.descricao 
-                          ? ` / ${user.supervisao_tecnica.descricao}` 
-                          : ''}
-                      </div>
-                    )}
-                  </div>
+                  {user.cargos?.descricao || "-"}
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-1">
-                    {user.whatsapp && (
-                      <div className="text-sm">{user.whatsapp}</div>
-                    )}
-                    {user.aniversario && (
-                      <div className="text-sm text-muted-foreground">
-                        {format(new Date(user.aniversario), 'dd/MM/yyyy', { locale: pt })}
-                      </div>
-                    )}
-                  </div>
+                  {user.coordenacao?.descricao || "-"}
+                </TableCell>
+                <TableCell>
+                  {user.supervisao_tecnica?.descricao || "-"}
                 </TableCell>
                 <TableCell>
                   {hasPermissions(user) ? (

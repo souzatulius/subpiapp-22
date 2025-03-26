@@ -28,14 +28,6 @@ export type User = {
     descricao: string;
     nivel_acesso: number;
   }>;
-  roles?: Array<{
-    id: string;
-    role_id: number;
-    role_nome: string;
-    descricao: string;
-    coordenacao_id?: string;
-    supervisao_tecnica_id?: string;
-  }>;
 };
 
 export type SupervisaoTecnica = {
@@ -66,6 +58,7 @@ export interface UserFormData {
   supervisao_tecnica_id?: string;
   whatsapp?: string;
   aniversario?: Date;
+  foto_perfil_url?: string;
 }
 
 export interface UsersLayoutProps {
@@ -93,7 +86,6 @@ export interface UsersLayoutProps {
     handleResetPassword: (user: User) => void;
     handleApprove: (user: User, roleName?: string) => void;
     handleRemoveAccess: (user: User) => void;
-    handleManageRoles: (user: User) => void;
   };
   approving: boolean;
   removing: boolean;

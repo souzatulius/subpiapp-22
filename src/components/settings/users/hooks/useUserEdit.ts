@@ -22,6 +22,11 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         aniversario: data.aniversario ? data.aniversario.toISOString() : null,
       };
       
+      // Include photo profile URL if present
+      if (data.foto_perfil_url) {
+        cleanData.foto_perfil_url = data.foto_perfil_url;
+      }
+      
       // Process fields
       // Set to null if not selected or "select-" default value
       cleanData.cargo_id = data.cargo_id && !data.cargo_id.startsWith('select-') 
