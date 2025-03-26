@@ -30,7 +30,7 @@ export interface Demand {
   telefone_solicitante: string | null;
   veiculo_imprensa: string | null;
   detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null | any; // Changed to accept any type to handle JSON
+  perguntas: Record<string, string> | null;
   resposta?: {
     id: string;
     demanda_id: string;

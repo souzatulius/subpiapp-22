@@ -32,7 +32,7 @@ export const useDemandasQuery = () => {
         .from('usuarios')
         .select('coordenacao_id, supervisao_tecnica_id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (userError && userError.code !== 'PGRST116') throw userError;
       
@@ -99,12 +99,47 @@ export const useDemandasQuery = () => {
       
       // Create a map of demand_id to response
       const respostasMap = (respostasData || []).reduce((acc, resposta) => {
-        acc[resposta.demanda_id] = resposta;
+        // Ensure respostas is a proper object
+        let parsedRespostas: Record<string, string> | null = null;
+        
+        if (resposta.respostas) {
+          if (typeof resposta.respostas === 'string') {
+            try {
+              parsedRespostas = JSON.parse(resposta.respostas);
+            } catch (e) {
+              console.error('Error parsing respostas:', e);
+            }
+          } else if (typeof resposta.respostas === 'object') {
+            parsedRespostas = resposta.respostas as Record<string, string>;
+          }
+        }
+        
+        // Store formatted response in the map
+        acc[resposta.demanda_id] = {
+          ...resposta,
+          respostas: parsedRespostas
+        };
+        
         return acc;
       }, {} as Record<string, any>);
       
       // Transform the data to match our Demand type
       const transformedData = (data || []).map(item => {
+        // Handle perguntas formatting
+        let perguntasObj: Record<string, string> | null = null;
+        
+        if (item.perguntas) {
+          if (typeof item.perguntas === 'string') {
+            try {
+              perguntasObj = JSON.parse(item.perguntas);
+            } catch (e) {
+              console.error('Error parsing perguntas:', e);
+            }
+          } else if (typeof item.perguntas === 'object') {
+            perguntasObj = item.perguntas as Record<string, string>;
+          }
+        }
+        
         const result = {
           ...item,
           // Set default values for potentially missing fields
@@ -112,6 +147,7 @@ export const useDemandasQuery = () => {
           area_coordenacao: item.area_coordenacao || { descricao: '' },
           supervisao_tecnica_id: item.problema?.supervisao_tecnica?.id,
           supervisao_tecnica: item.problema?.supervisao_tecnica,
+          perguntas: perguntasObj,
           // Add response data if available
           resposta: respostasMap[item.id] || null
         };

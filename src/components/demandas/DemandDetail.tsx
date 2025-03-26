@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -109,13 +110,44 @@ const DemandDetail: React.FC<DemandDetailProps> = ({
           
         if (error) throw error;
         
-        setResposta(data);
-        
-        // If there's a response with answer data, populate the form
-        if (data && data.respostas) {
-          form.reset({
-            responses: data.respostas
-          });
+        if (data) {
+          // Parse the respostas field properly
+          let parsedRespostas: Record<string, string> | null = null;
+          
+          if (data.respostas) {
+            // If it's a string, try to parse it as JSON
+            if (typeof data.respostas === 'string') {
+              try {
+                parsedRespostas = JSON.parse(data.respostas);
+              } catch (e) {
+                console.error('Error parsing respostas as JSON:', e);
+                parsedRespostas = null;
+              }
+            } 
+            // If it's already an object, use it directly
+            else if (typeof data.respostas === 'object') {
+              parsedRespostas = data.respostas as Record<string, string>;
+            }
+          }
+          
+          const formattedResposta: Resposta = {
+            id: data.id,
+            demanda_id: data.demanda_id,
+            texto: data.texto,
+            respostas: parsedRespostas,
+            usuario_id: data.usuario_id,
+            criado_em: data.criado_em,
+            comentarios: data.comentarios
+          };
+          
+          setResposta(formattedResposta);
+          
+          // If there's a response with answer data, populate the form
+          if (formattedResposta.respostas) {
+            form.reset({
+              responses: formattedResposta.respostas
+            });
+          }
         }
       } catch (error) {
         console.error('Error fetching response:', error);
