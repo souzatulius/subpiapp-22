@@ -27,8 +27,10 @@ export const useRespostaForm = (
     }
   });
 
-  const handleSubmitResposta = async () => {
-    return submitResposta(selectedDemanda, resposta, comentarios);
+  const handleSubmitResposta = async (): Promise<void> => {
+    // We'll ignore the return value here, as we're using the callbacks
+    // to handle success/failure states
+    await submitResposta(selectedDemanda, resposta, comentarios);
   };
 
   return {

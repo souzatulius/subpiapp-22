@@ -37,7 +37,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
     selectedDemanda: Demanda | null,
     resposta: Record<string, string>,
     comentarios: string | null = null
-  ) => {
+  ): Promise<boolean> => {
     // Validate the response
     const validation = validateResposta(selectedDemanda, resposta);
     if (!validation.isValid) {
