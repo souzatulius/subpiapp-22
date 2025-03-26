@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useProblemsData, useProblemOperations } from '@/hooks/useProblems';
+import { useProblemsData, useProblemOperations } from '@/hooks/problems';
 import { Problem } from '@/types/problem';
 import { SupervisaoTecnica } from '@/types/common';
 import DataTable from './data-table/DataTable';
@@ -16,7 +15,6 @@ const Problems = () => {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
-  // Initial load
   useEffect(() => {
     console.log('Problems component loaded');
   }, []);

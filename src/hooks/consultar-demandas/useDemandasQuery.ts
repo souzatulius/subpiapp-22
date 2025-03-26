@@ -7,133 +7,97 @@ export const useDemandasQuery = () => {
   return useQuery({
     queryKey: ['demandas'],
     queryFn: async () => {
-      // Fetch only visible demandas (not 'oculta' status)
-      const { data: visibleDemandas, error: fetchError } = await supabase
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // First get the user's permissions
+      const { data: userPermissions, error: permissionsError } = await supabase
+        .from('usuario_permissoes')
+        .select('permissao_id')
+        .eq('usuario_id', user.id);
+      
+      if (permissionsError) throw permissionsError;
+      
+      // Check if user has admin permission
+      const isAdmin = (userPermissions || []).some(p => 
+        p.permissao_id === 'some-admin-permission-id'
+      );
+      
+      // Get the user's areas/coordinations info
+      const { data: userInfo, error: userError } = await supabase
+        .from('usuarios')
+        .select('coordenacao_id, supervisao_tecnica_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError && userError.code !== 'PGRST116') throw userError;
+      
+      let query = supabase
         .from('demandas')
         .select(`
-          id, 
-          titulo, 
-          status, 
+          id,
+          titulo,
+          status,
           prioridade,
           horario_publicacao,
           prazo_resposta,
-          detalhes_solicitacao,
-          endereco,
-          email_solicitante,
-          telefone_solicitante,
-          nome_solicitante,
-          veiculo_imprensa,
-          perguntas,
-          supervisao_tecnica_id,
-          autor_id,
-          problema_id,
           origem_id,
+          origem:origem_id(id, descricao),
+          problema_id,
+          problema:problema_id(id, descricao,
+            supervisao_tecnica:supervisao_tecnica_id (
+              id, 
+              descricao,
+              coordenacao_id
+            )
+          ),
+          tipo_midia_id,
+          tipo_midia:tipo_midia_id(id, descricao),
+          autor_id,
+          autor:autor_id(id, nome_completo),
+          detalhes_solicitacao,
+          servico:problema_id (descricao),
+          area_coordenacao:problema_id (descricao),
           bairro_id,
-          tipo_midia_id
+          bairro:bairro_id(id, nome),
+          perguntas
         `)
-        .neq('status', 'oculta')
+        .in('status', ['pendente', 'em_andamento'])
         .order('horario_publicacao', { ascending: false });
-        
-      if (fetchError) throw fetchError;
-      if (!visibleDemandas) return [] as Demand[];
-
-      // Now fetch all related data in parallel
-      const [supervisoesTecnicasResult, problemasResult, origensResult, tiposMidiaResult, bairrosResult, autoresResult] = await Promise.all([
-        // Fetch supervisoes_tecnicas data
-        supabase
-          .from('supervisoes_tecnicas')
-          .select(`
-            id, 
-            descricao,
-            coordenacao_id
-          `),
-          
-        // Fetch problemas data  
-        supabase
-          .from('problemas')
-          .select('id, descricao'),
-          
-        // Fetch origens data
-        supabase
-          .from('origens_demandas')
-          .select('id, descricao'),
-          
-        // Fetch tipos_midia data
-        supabase
-          .from('tipos_midia')
-          .select('id, descricao'),
-          
-        // Fetch bairros data
-        supabase
-          .from('bairros')
-          .select('id, nome'),
-          
-        // Fetch user data
-        supabase
-          .from('usuarios')
-          .select('id, nome_completo')
-      ]);
-
-      // Create lookup tables for faster data access
-      const supervisoesTecnicas = supervisoesTecnicasResult.data?.reduce(
-        (acc, st) => ({ ...acc, [st.id]: st }), {}
-      ) || {};
       
-      const problemas = problemasResult.data?.reduce(
-        (acc, p) => ({ ...acc, [p.id]: p }), {}
-      ) || {};
-      
-      const origens = origensResult.data?.reduce(
-        (acc, o) => ({ ...acc, [o.id]: o }), {}
-      ) || {};
-      
-      const tiposMidia = tiposMidiaResult.data?.reduce(
-        (acc, tm) => ({ ...acc, [tm.id]: tm }), {}
-      ) || {};
-      
-      const bairros = bairrosResult.data?.reduce(
-        (acc, b) => ({ ...acc, [b.id]: b }), {}
-      ) || {};
-      
-      const autores = autoresResult.data?.reduce(
-        (acc, a) => ({ ...acc, [a.id]: a }), {}
-      ) || {};
-
-      // Map the data to the Demand type with all related information
-      const mappedDemandas = visibleDemandas.map(demanda => {
-        const supervisaoTecnica = supervisoesTecnicas[demanda.supervisao_tecnica_id];
-        
-        return {
-          ...demanda,
-          supervisao_tecnica: supervisaoTecnica ? {
-            id: supervisaoTecnica.id,
-            descricao: supervisaoTecnica.descricao
-          } : null,
-          area_coordenacao: supervisaoTecnica ? {
-            descricao: supervisaoTecnica.descricao
-          } : null,
-          servico: null, // No servico in current schema
-          origem: demanda.origem_id ? {
-            descricao: origens[demanda.origem_id]?.descricao || ''
-          } : null,
-          tipo_midia: demanda.tipo_midia_id ? {
-            descricao: tiposMidia[demanda.tipo_midia_id]?.descricao || ''
-          } : null,
-          bairro: demanda.bairro_id ? {
-            nome: bairros[demanda.bairro_id]?.nome || ''
-          } : null,
-          autor: demanda.autor_id ? {
-            nome_completo: autores[demanda.autor_id]?.nome_completo || ''
-          } : null
-        } as Demand;
-      });
-
-      return mappedDemandas;
-    },
-    meta: {
-      onError: (err: any) => {
-        console.error('Error fetching demandas:', err);
+      // Apply filtering if not admin
+      if (!isAdmin && userInfo) {
+        // If the user belongs to a coordination
+        if (userInfo.coordenacao_id) {
+          query = query.eq('problema.supervisao_tecnica.coordenacao_id', userInfo.coordenacao_id);
+        }
+        // If the user belongs to a technical supervision
+        else if (userInfo.supervisao_tecnica_id) {
+          query = query.eq('problema.supervisao_tecnica_id', userInfo.supervisao_tecnica_id);
+        }
       }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      // Transform the data to match our Demand type
+      const transformedData = (data || []).map(item => {
+        return {
+          ...item,
+          // Set default values for potentially missing fields
+          servico: item.servico || { descricao: '' },
+          area_coordenacao: item.area_coordenacao || { descricao: '' },
+          supervisao_tecnica_id: item.problema?.supervisao_tecnica?.id,
+          supervisao_tecnica: item.problema?.supervisao_tecnica,
+        } as unknown as Demand;
+      });
+      
+      return transformedData;
     }
   });
 };

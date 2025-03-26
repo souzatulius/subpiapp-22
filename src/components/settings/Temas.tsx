@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useProblemsData, useProblemOperations } from '@/hooks/useProblems';
+import { useProblemsData, useProblemOperations } from '@/hooks/problems';
 import { Problem } from '@/types/problem';
 import { useCoordinationAreas } from '@/hooks/coordination-areas/useCoordinationAreas';
 import { SupervisaoTecnica } from '@/types/common';

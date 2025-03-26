@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useProblems } from '@/hooks/useProblems';
+import { useProblemsData } from '@/hooks/problems';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -58,14 +57,12 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   const [newCoordination, setNewCoordination] = useState<string | null>(null);
   const [changingProblem, setChangingProblem] = useState(false);
   
-  const { data: problems = [], isLoading: problemsLoading } = useProblems();
+  const { problems, isLoading: problemsLoading } = useProblemsData();
 
   useEffect(() => {
-    // Set the initial problem ID when the demanda is loaded
     if (selectedDemanda?.problema_id) {
       setSelectedProblemId(selectedDemanda.problema_id);
       
-      // Fetch the original coordination information
       const fetchOriginalCoordination = async () => {
         try {
           const { data, error } = await supabase
@@ -95,7 +92,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       fetchOriginalCoordination();
     }
     
-    // Initialize resposta with empty strings for each pergunta
     if (selectedDemanda?.perguntas) {
       const initialRespostas: Record<string, string> = {};
       
@@ -115,17 +111,15 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   
   const handleProblemChange = async (problemId: string) => {
     if (problemId === selectedDemanda.problema_id) {
-      return; // No change
+      return;
     }
     
-    // Find the new problem's coordination
     const newProblem = problems.find(p => p.id === problemId);
     if (!newProblem || !newProblem.supervisao_tecnica) {
       return;
     }
 
     try {
-      // Get the coordination info for the new problem
       const { data, error } = await supabase
         .from('supervisoes_tecnicas')
         .select(`
@@ -139,14 +133,12 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         
       if (error) throw error;
       
-      // If coordination is changing, show alert
       if (data?.coordenacoes?.descricao && 
           data.coordenacoes.descricao !== originalCoordination) {
-        setSelectedProblemId(problemId); // Update selected problem
+        setSelectedProblemId(problemId);
         setNewCoordination(data.coordenacoes.descricao);
         setShowAlertDialog(true);
       } else {
-        // Same coordination, just update
         await updateProblem(problemId);
       }
     } catch (error) {
@@ -175,7 +167,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         description: "Tema da demanda atualizado com sucesso",
       });
       
-      // Update the selected demanda with the new problem
       selectedDemanda.problema_id = problemId;
       
     } catch (error) {
@@ -343,7 +334,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         </CardFooter>
       </Card>
       
-      {/* Alert Dialog for coordination change */}
       <AlertDialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

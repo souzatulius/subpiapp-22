@@ -916,6 +916,7 @@ export type Database = {
           atualizado_em: string | null
           criado_em: string
           descricao: string
+          icone: string | null
           id: string
           supervisao_tecnica_id: string
         }
@@ -923,6 +924,7 @@ export type Database = {
           atualizado_em?: string | null
           criado_em?: string
           descricao: string
+          icone?: string | null
           id?: string
           supervisao_tecnica_id: string
         }
@@ -930,6 +932,7 @@ export type Database = {
           atualizado_em?: string | null
           criado_em?: string
           descricao?: string
+          icone?: string | null
           id?: string
           supervisao_tecnica_id?: string
         }
