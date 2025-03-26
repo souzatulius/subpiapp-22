@@ -1,9 +1,8 @@
 
 import React, { useEffect } from 'react';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag } from 'lucide-react';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface OriginClassificationStepProps {
@@ -69,12 +68,12 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <Label 
+        <label 
           htmlFor="origem_id" 
           className={`block mb-2 ${hasError('origem_id') ? 'text-orange-500 font-semibold' : ''}`}
         >
           Origem da Demanda {hasError('origem_id') && <span className="text-orange-500">*</span>}
-        </Label>
+        </label>
         <div className="flex flex-wrap gap-3">
           {origens.map(origem => (
             <Button 
@@ -99,12 +98,12 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
       
       {showMediaFields && (
         <div className="animate-fadeIn">
-          <Label 
+          <label 
             htmlFor="tipo_midia_id" 
-            className="block mb-2"
+            className={`block mb-2 ${hasError('tipo_midia_id') ? 'text-orange-500 font-semibold' : ''}`}
           >
-            Tipo de Mídia
-          </Label>
+            Tipo de Mídia {hasError('tipo_midia_id') && <span className="text-orange-500">*</span>}
+          </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {tiposMidia.map(tipo => (
               <Button 
@@ -113,6 +112,8 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
                 variant={formData.tipo_midia_id === tipo.id ? "default" : "outline"} 
                 className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
                   formData.tipo_midia_id === tipo.id ? "ring-2 ring-[#003570]" : ""
+                } ${
+                  hasError('tipo_midia_id') ? 'border-orange-500' : ''
                 }`} 
                 onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
               >
@@ -121,23 +122,30 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
               </Button>
             ))}
           </div>
+          {hasError('tipo_midia_id') && (
+            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('tipo_midia_id')}</p>
+          )}
         </div>
       )}
       
       {showVeiculoImprensa && (
         <div className="animate-fadeIn">
-          <Label 
+          <label 
             htmlFor="veiculo_imprensa" 
-            className="block mb-2"
+            className={`block mb-2 ${hasError('veiculo_imprensa') ? 'text-orange-500 font-semibold' : ''}`}
           >
             Veículo de Imprensa
-          </Label>
+          </label>
           <Input 
             id="veiculo_imprensa" 
             name="veiculo_imprensa" 
             value={formData.veiculo_imprensa} 
             onChange={handleChange} 
+            className={hasError('veiculo_imprensa') ? 'border-orange-500' : ''}
           />
+          {hasError('veiculo_imprensa') && (
+            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('veiculo_imprensa')}</p>
+          )}
         </div>
       )}
     </div>
