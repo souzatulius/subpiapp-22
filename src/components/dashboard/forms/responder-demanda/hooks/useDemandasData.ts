@@ -44,9 +44,11 @@ export const useDemandasData = () => {
             autor_id,
             problema_id,
             servico_id,
+            protocolo,
             area_coordenacao_id:supervisao_tecnica_id (id, descricao),
             origens_demandas:origem_id (id, descricao),
-            tipos_midia:tipo_midia_id (id, descricao)
+            tipos_midia:tipo_midia_id (id, descricao),
+            bairros:bairro_id (id, nome)
           `)
           .order('horario_publicacao', { ascending: false });
         
@@ -107,9 +109,11 @@ export const useDemandasData = () => {
             origem_id: item.origens_demandas?.id,
             problema_id: item.problema_id,
             servico_id: item.servico_id,
+            protocolo: item.protocolo,
             areas_coordenacao: item.area_coordenacao_id,
             origens_demandas: item.origens_demandas,
-            tipos_midia: item.tipos_midia
+            tipos_midia: item.tipos_midia,
+            bairros: item.bairros
           };
         });
         

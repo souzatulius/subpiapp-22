@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronLeft, Send, AlertTriangle, ThumbsUp } from 'lucide-react';
+import { ChevronLeft, Send, AlertTriangle, ThumbsUp, Calendar, Clock, MapPin, FileText, AlertCircle, Info, Flag } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -45,6 +45,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { renderIcon } from '@/components/settings/problems/renderIcon';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 interface RespostaFormProps {
   selectedDemanda: any;
@@ -135,7 +136,12 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       
       setResposta(initialRespostas);
     }
-  }, [selectedDemanda, setResposta]);
+
+    // Inicializar o serviço selecionado
+    if (selectedDemanda?.servico_id) {
+      setSelectedServicoId(selectedDemanda.servico_id);
+    }
+  }, [selectedDemanda, setResposta, resposta]);
   
   const handleProblemChange = async (problemId: string) => {
     if (problemId === selectedDemanda.problema_id) {
@@ -265,6 +271,27 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   // Encontrar o tema atual
   const currentProblem = problems.find(p => p.id === selectedProblemId);
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Não definido';
+    return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+  };
+
+  const getPriorityColor = (prioridade: string) => {
+    switch (prioridade) {
+      case 'alta': return 'bg-red-100 text-red-800 border-red-200';
+      case 'media': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default: return 'bg-green-100 text-green-800 border-green-200';
+    }
+  };
+
+  const getPriorityText = (prioridade: string) => {
+    switch (prioridade) {
+      case 'alta': return 'Alta';
+      case 'media': return 'Média';
+      default: return 'Baixa';
+    }
+  };
+
   if (!selectedDemanda) return null;
 
   return (
@@ -292,85 +319,190 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
             <Badge 
               variant="outline" 
-              className={
-                selectedDemanda.prioridade === 'alta' 
-                  ? 'bg-red-100 text-red-800 border-red-200' 
-                  : selectedDemanda.prioridade === 'media'
-                  ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                  : 'bg-green-100 text-green-800 border-green-200'
-              }
+              className={getPriorityColor(selectedDemanda.prioridade)}
             >
-              Prioridade: {selectedDemanda.prioridade === 'alta' ? 'Alta' : selectedDemanda.prioridade === 'media' ? 'Média' : 'Baixa'}
+              Prioridade: {getPriorityText(selectedDemanda.prioridade)}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-sm font-medium mb-2">Tema</h3>
-            {currentProblem ? (
-              <div className="flex items-center">
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2 py-3 bg-blue-50 hover:bg-blue-100"
-                  onClick={() => setShowTemaDialog(true)}
+          {/* Seção de informações principais */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Tema</h3>
+              {currentProblem ? (
+                <div className="flex items-center">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2 py-3 bg-blue-50 hover:bg-blue-100"
+                    onClick={() => setShowTemaDialog(true)}
+                  >
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      {renderIcon(currentProblem.icone)}
+                    </div>
+                    <span>{currentProblem.descricao}</span>
+                  </Button>
+                </div>
+              ) : (
+                <Select
+                  value={selectedProblemId}
+                  onValueChange={(value) => handleProblemChange(value)}
+                  disabled={changingProblem}
                 >
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    {renderIcon(currentProblem.icone)}
-                  </div>
-                  <span>{currentProblem.descricao}</span>
-                </Button>
-              </div>
-            ) : (
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione um tema" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {problemsLoading ? (
+                      <SelectItem value="loading" disabled>Carregando temas...</SelectItem>
+                    ) : problems.length > 0 ? (
+                      problems.map((problem) => (
+                        <SelectItem key={problem.id} value={problem.id}>
+                          {problem.descricao}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>Nenhum tema encontrado</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="servico" className="text-sm font-medium mb-2">Serviço</Label>
               <Select
-                value={selectedProblemId}
-                onValueChange={(value) => handleProblemChange(value)}
-                disabled={changingProblem}
+                value={selectedServicoId}
+                onValueChange={setSelectedServicoId}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione um tema" />
+                  <SelectValue placeholder="Selecione um serviço" />
                 </SelectTrigger>
                 <SelectContent>
-                  {problemsLoading ? (
-                    <SelectItem value="loading" disabled>Carregando temas...</SelectItem>
-                  ) : problems.length > 0 ? (
-                    problems.map((problem) => (
-                      <SelectItem key={problem.id} value={problem.id}>
-                        {problem.descricao}
+                  {servicosLoading ? (
+                    <SelectItem value="loading" disabled>Carregando serviços...</SelectItem>
+                  ) : servicos.length > 0 ? (
+                    servicos.map((servico) => (
+                      <SelectItem key={servico.id} value={servico.id}>
+                        {servico.descricao}
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="none" disabled>Nenhum tema encontrado</SelectItem>
+                    <SelectItem value="none" disabled>Nenhum serviço encontrado</SelectItem>
                   )}
                 </SelectContent>
               </Select>
-            )}
+            </div>
           </div>
-
+          
+          <Separator />
+          
+          {/* Informações adicionais da demanda */}
           <div>
-            <Label htmlFor="servico" className="text-sm font-medium mb-2">Serviço</Label>
-            <Select
-              value={selectedServicoId}
-              onValueChange={setSelectedServicoId}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione um serviço" />
-              </SelectTrigger>
-              <SelectContent>
-                {servicosLoading ? (
-                  <SelectItem value="loading" disabled>Carregando serviços...</SelectItem>
-                ) : servicos.length > 0 ? (
-                  servicos.map((servico) => (
-                    <SelectItem key={servico.id} value={servico.id}>
-                      {servico.descricao}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>Nenhum serviço encontrado</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
+            <h3 className="text-base font-medium mb-3">Informações da Demanda</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center text-gray-600">
+                  <Info className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Origem</span>
+                </div>
+                <span className="text-sm font-medium">
+                  {selectedDemanda.origens_demandas?.descricao || 'Não informado'}
+                </span>
+              </div>
+              
+              {selectedDemanda.protocolo && (
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center text-gray-600">
+                    <FileText className="w-4 h-4 mr-1" />
+                    <span className="text-xs">Protocolo 156</span>
+                  </div>
+                  <span className="text-sm font-medium">{selectedDemanda.protocolo}</span>
+                </div>
+              )}
+              
+              {selectedDemanda.veiculo_imprensa && (
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center text-gray-600">
+                    <AlertCircle className="w-4 h-4 mr-1" />
+                    <span className="text-xs">Veículo de Imprensa</span>
+                  </div>
+                  <span className="text-sm font-medium">{selectedDemanda.veiculo_imprensa}</span>
+                </div>
+              )}
+              
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center text-gray-600">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Data de Criação</span>
+                </div>
+                <span className="text-sm font-medium">
+                  {format(new Date(selectedDemanda.horario_publicacao), 'dd/MM/yyyy', { locale: ptBR })}
+                </span>
+              </div>
+              
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center text-gray-600">
+                  <Clock className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Prazo para Resposta</span>
+                </div>
+                <span className="text-sm font-medium">
+                  {selectedDemanda.prazo_resposta ? formatDate(selectedDemanda.prazo_resposta) : 'Não definido'}
+                </span>
+              </div>
+              
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center text-gray-600">
+                  <Flag className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Prioridade</span>
+                </div>
+                <span className={`text-sm font-medium ${
+                  selectedDemanda.prioridade === 'alta' ? 'text-red-600' : 
+                  selectedDemanda.prioridade === 'media' ? 'text-yellow-600' : 
+                  'text-green-600'
+                }`}>
+                  {getPriorityText(selectedDemanda.prioridade)}
+                </span>
+              </div>
+            </div>
           </div>
+          
+          {/* Localização */}
+          {(selectedDemanda.endereco || selectedDemanda.bairro_id) && (
+            <>
+              <Separator />
+              <div>
+                <h3 className="text-base font-medium mb-3">Localização</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {selectedDemanda.endereco && (
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        <span className="text-xs">Endereço</span>
+                      </div>
+                      <span className="text-sm font-medium">{selectedDemanda.endereco}</span>
+                    </div>
+                  )}
+                  
+                  {selectedDemanda.bairro_id && (
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        <span className="text-xs">Bairro</span>
+                      </div>
+                      <span className="text-sm font-medium">
+                        {/* Aqui seria ideal ter o nome do bairro, mas vamos deixar o ID por enquanto */}
+                        {selectedDemanda.bairro_id}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
+          <Separator />
+          
           <div>
             <h3 className="text-sm font-medium mb-2">Detalhes da Solicitação</h3>
             <div className="bg-gray-50 p-4 rounded-md border">

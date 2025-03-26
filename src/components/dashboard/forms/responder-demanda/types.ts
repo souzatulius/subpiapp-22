@@ -21,14 +21,17 @@ export interface Demanda {
     autor_id: string | null;
     problema_id: string;
     servico_id?: string | null;
+    protocolo?: string | null;
     areas_coordenacao?: {
         id: string;
         descricao: string;
     } | null;
     origens_demandas?: {
+        id?: string;
         descricao: string;
     };
     tipos_midia?: {
+        id?: string;
         descricao: string;
     };
 }
