@@ -496,21 +496,35 @@ export const useChartData = (filters: FilterOptions) => {
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [ordensData, setOrdensData] = useState<SGZOrdemServico[]>([]);
   const [lastUploadId, setLastUploadId] = useState<string | null>(null);
-  const [chartLoadingProgress, setChartLoadingProgress] = useState(0); // New progress tracking
+  const [chartLoadingProgress, setChartLoadingProgress] = useState(0);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Get the last upload ID
   const fetchLastUploadId = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('sgz_uploads')
-        .select('id')
+        .select('id, processado')
         .order('data_upload', { ascending: false })
         .limit(1);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching last upload ID:', error);
+        setFetchError(`Erro ao buscar último upload: ${error.message}`);
+        throw error;
+      }
       
       if (data && data.length > 0) {
-        return data[0].id;
+        console.log("Latest upload data:", data[0]);
+        
+        // Only return the ID if the upload is marked as processed
+        if (data[0].processado) {
+          return data[0].id;
+        } else {
+          console.log("Latest upload is not processed yet");
+          setFetchError('O último upload ainda está sendo processado. Tente novamente em instantes.');
+          return null;
+        }
       }
       
       return null;
@@ -524,6 +538,9 @@ export const useChartData = (filters: FilterOptions) => {
     try {
       setIsLoading(true);
       setChartLoadingProgress(25);
+      setFetchError(null);
+      
+      console.log(`Fetching SGZ data with uploadId: ${uploadId || 'none (will fetch all)'}`);
       
       let query = supabase
         .from('sgz_ordens_servico')
@@ -537,13 +554,18 @@ export const useChartData = (filters: FilterOptions) => {
       
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching SGZ data:', error);
+        setFetchError(`Erro ao carregar dados: ${error.message}`);
+        throw error;
+      }
       
+      console.log(`Fetched ${data?.length || 0} records from sgz_ordens_servico`);
       setChartLoadingProgress(75);
       return data || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching SGZ data:', error);
-      toast.error('Erro ao carregar dados. Por favor, tente novamente.');
+      toast.error(`Erro ao carregar dados: ${error.message || 'Falha na conexão'}`);
       return [];
     } finally {
       setChartLoadingProgress(100);
@@ -553,39 +575,64 @@ export const useChartData = (filters: FilterOptions) => {
 
   const loadData = useCallback(async (forceRefresh = false) => {
     setIsLoading(true);
+    setFetchError(null);
     
     try {
       // Get last upload ID if needed
       let uploadId = lastUploadId;
       if (!uploadId || forceRefresh) {
         uploadId = await fetchLastUploadId();
+        console.log(`Fetched last upload ID: ${uploadId || 'none'}`);
         setLastUploadId(uploadId);
       }
       
       // Fetch data filtered by last upload ID
-      const data = await fetchSGZData(uploadId);
-      
-      // If no data found, try fetching all data
-      if (data.length === 0) {
-        console.log('No data found for last upload, fetching all data');
+      if (uploadId) {
+        const data = await fetchSGZData(uploadId);
+        
+        if (data.length === 0) {
+          console.log('No data found for last upload, fetching all data');
+          setFetchError('Não foram encontrados dados para o último upload. Verifique se a planilha contém registros válidos.');
+          
+          const allData = await fetchSGZData();
+          if (allData.length > 0) {
+            processChartData(allData);
+            return;
+          } else {
+            setFetchError('Não foram encontrados dados em nenhum upload. Por favor, carregue uma planilha válida.');
+          }
+        } else {
+          processChartData(data);
+        }
+      } else {
+        // If no upload ID is available (no uploads yet), try fetching all data
+        console.log('No upload ID available, fetching all data');
         const allData = await fetchSGZData();
         if (allData.length > 0) {
           processChartData(allData);
-          return;
+        } else {
+          setFetchError('Nenhum dado encontrado. Por favor, carregue uma planilha.');
         }
-      } else {
-        processChartData(data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading chart data:', error);
-      toast.error('Erro ao carregar dados dos gráficos');
+      toast.error(`Erro ao carregar dados dos gráficos: ${error.message || 'Falha desconhecida'}`);
+      setFetchError(`Erro ao carregar dados: ${error.message || 'Falha desconhecida'}`);
     } finally {
       setIsLoading(false);
     }
-  }, [fetchSGZData, fetchLastUploadId, lastUploadId]);
+  }, [fetchSGZData, fetchLastUploadId, lastUploadId, processChartData]);
 
   // Separate function to process chart data
   const processChartData = useCallback((data: any[]) => {
+    if (!data || data.length === 0) {
+      console.log('No data to process');
+      setFetchError('Não há dados para processar. Verifique se a planilha contém registros válidos.');
+      return;
+    }
+    
+    console.log(`Processing ${data.length} records for chart data`);
+    
     // Cast the data to the correct type
     const typedData: SGZOrdemServico[] = data.map(item => ({
       ...item,
@@ -611,6 +658,7 @@ export const useChartData = (filters: FilterOptions) => {
     
     // Set last update time
     setLastUpdate(new Date().toLocaleString('pt-BR'));
+    setFetchError(null);
   }, [filters]);
 
   // Initial load on component mount
@@ -621,12 +669,14 @@ export const useChartData = (filters: FilterOptions) => {
   // Update charts whenever filters change
   useEffect(() => {
     if (ordensData.length > 0) {
+      console.log('Filters changed, regenerating chart data');
       const generatedChartData = generateChartData(ordensData, filters);
       setChartData(generatedChartData);
     }
-  }, [filters, ordensData]);
+  }, [filters, ordensData, generateChartData]);
 
   const forceRefresh = useCallback(() => {
+    console.log('Forcing chart data refresh');
     toast.info('Atualizando gráficos com os dados mais recentes...');
     // Reset lastUploadId to null to force fetching the latest
     setLastUploadId(null);
@@ -637,8 +687,9 @@ export const useChartData = (filters: FilterOptions) => {
     chartData,
     isLoading,
     lastUpdate,
-    chartLoadingProgress, // New progress indicator
+    chartLoadingProgress,
+    fetchError,
     refreshData: forceRefresh,
-    ordensCount: ordensData.length  // Added to show how many records were loaded
+    ordensCount: ordensData.length
   };
 };

@@ -1,10 +1,5 @@
 
-export interface UploadInfo {
-  id: string;
-  fileName: string;
-  uploadDate: string;
-}
-
+// Export these interfaces to be used in components
 export interface ChartVisibility {
   statusDistribution: boolean;
   resolutionTime: boolean;
@@ -29,30 +24,37 @@ export interface FilterOptions {
     from: Date;
     to: Date;
   };
-  statuses: ('Todos' | 'PREPLAN' | 'PRECANC' | 'Aprovado' | 'Em Andamento' | 'Concluído' | 'FECHADO')[];
-  serviceTypes: ('Todos' | string)[];
-  districts: ('Todos' | 'Pinheiros' | 'Itaim Bibi' | 'Alto de Pinheiros' | 'Jardim Paulista')[];
+  statuses: string[];
+  serviceTypes: string[];
+  districts: string[];
 }
 
-export interface SGZOrdemServico {
+export interface UploadInfo {
   id: string;
-  ordem_servico: string;
-  sgz_status: string;
-  sgz_departamento_tecnico: string; // Mudado de "STM" | "STLP" para string para resolver o erro de tipagem
-  sgz_bairro: string;
-  sgz_distrito: string;
-  sgz_tipo_servico: string;
-  sgz_empresa: string;
-  sgz_criado_em: string;
-  sgz_modificado_em: string;
-  sgz_dias_ate_status_atual?: number;
-  planilha_referencia: string;
+  fileName: string;
+  uploadDate: string;
+  processed?: boolean;
 }
 
 export interface SGZUpload {
   id: string;
   nome_arquivo: string;
-  data_upload: string;
   usuario_id: string;
+  data_upload: string;
   processado: boolean;
+}
+
+export interface SGZOrdemServico {
+  id: string;
+  ordem_servico: string;
+  sgz_tipo_servico: string;
+  sgz_empresa: string;
+  sgz_status: string;
+  sgz_criado_em: string;
+  sgz_modificado_em: string;
+  sgz_bairro: string;
+  sgz_distrito: string;
+  sgz_departamento_tecnico: string;
+  sgz_dias_ate_status_atual?: number;
+  planilha_referencia: string;
 }

@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
-// Helper function to normalize column names (new)
+// Helper function to normalize column names (enhanced)
 const normalizeColumnName = (name: string): string => {
   return name.toLowerCase()
     .normalize("NFD")
@@ -14,7 +14,7 @@ const normalizeColumnName = (name: string): string => {
     .replace(/\s+/g, '_');
 };
 
-// Map of normalized column names to expected field names (new)
+// Map of normalized column names to expected field names
 const columnMapping: Record<string, string> = {
   'ordem_de_servico': 'Ordem de Serviço',
   'classificacao_de_servico': 'Classificação de Serviço',
@@ -30,7 +30,17 @@ export const useUploadManagement = (user: User | null) => {
   const [lastUpload, setLastUpload] = useState<UploadInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploads, setUploads] = useState<SGZUpload[]>([]);
-  const [uploadProgress, setUploadProgress] = useState(0); // Progress tracking (new)
+  const [uploadProgress, setUploadProgress] = useState(0); // Progress tracking
+  const [processingStats, setProcessingStats] = useState<{
+    newOrders: number;
+    updatedOrders: number;
+    processingStatus: 'idle' | 'processing' | 'success' | 'error';
+    errorMessage?: string;
+  }>({
+    newOrders: 0,
+    updatedOrders: 0,
+    processingStatus: 'idle'
+  });
 
   const fetchLastUpload = useCallback(async () => {
     if (!user) return;
@@ -52,7 +62,8 @@ export const useUploadManagement = (user: User | null) => {
         setLastUpload({
           id: upload.id,
           fileName: upload.nome_arquivo,
-          uploadDate: new Date(upload.data_upload).toLocaleString('pt-BR')
+          uploadDate: new Date(upload.data_upload).toLocaleString('pt-BR'),
+          processed: upload.processado
         });
       }
       
@@ -116,6 +127,12 @@ export const useUploadManagement = (user: User | null) => {
           
           // Get headers from first row
           const headers = Object.keys(rawJsonData[0]);
+          console.log("Detected headers:", headers);
+          
+          // Debug headers normalization
+          headers.forEach(header => {
+            console.log(`Original: "${header}" -> Normalized: "${normalizeColumnName(header)}"`);
+          });
           
           // Check for required columns using normalization
           const requiredColumns = [
@@ -179,11 +196,22 @@ export const useUploadManagement = (user: User | null) => {
   const mapExcelRowToSGZOrdem = (row: any, uploadId: string) => {
     // Determinar o departamento técnico com base no tipo de serviço
     const servicoTipo = row['Classificação de Serviço'] || '';
+    let departamentoTecnico = 'STM'; // Default value
     
-    // Use the database function to map the service to technical department
-    const departamentoTecnico = servicoTipo ? supabase.rpc('sgz_map_service_to_area', {
-      service_type: servicoTipo
-    }) : 'STM';
+    // Map service type to technical department using consistent rules
+    const servicoTipoUpper = servicoTipo.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    // STLP keywords
+    const stlpKeywords = [
+      'AREAS AJARDINADAS', 'AREAS AJARDINADAS MANUAL', 
+      'HIDROJATO', 'MICRODRENAGEM MECANIZADA', 
+      'LIMPEZA DE CORREGOS', 'LIMPEZA MANUAL DE CORREGOS', 
+      'MICRODRENAGEM', 'PODA', 'REMOCAO', 'ARVORES', 'MANEJO'
+    ];
+    
+    if (stlpKeywords.some(keyword => servicoTipoUpper.includes(keyword))) {
+      departamentoTecnico = 'STLP';
+    }
     
     return {
       ordem_servico: row['Ordem de Serviço'] || '',
@@ -208,17 +236,24 @@ export const useUploadManagement = (user: User | null) => {
     try {
       setIsLoading(true);
       setUploadProgress(10); // Initial progress
+      setProcessingStats({
+        newOrders: 0,
+        updatedOrders: 0,
+        processingStatus: 'processing'
+      });
       
       // Verificar tipo de arquivo
       if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
         toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
         setIsLoading(false);
         setUploadProgress(0);
+        setProcessingStats(prev => ({...prev, processingStatus: 'error', errorMessage: 'Formato de arquivo inválido'}));
         return;
       }
       
       // Processar arquivo Excel
       const excelData = await processExcelFile(file);
+      console.log(`Processed ${excelData.length} rows from Excel file`);
       
       // Criar o registro de upload
       const { data: uploadData, error: uploadError } = await supabase
@@ -234,10 +269,12 @@ export const useUploadManagement = (user: User | null) => {
       if (uploadError) throw uploadError;
       
       const uploadId = uploadData.id;
+      console.log(`Created upload record with ID: ${uploadId}`);
       
       // Processar e inserir cada linha da planilha
       const ordens = [];
       const ordensParaInserir = [];
+      let ordensAtualizadas = 0;
       
       for (const row of excelData) {
         const ordem = mapExcelRowToSGZOrdem(row, uploadId);
@@ -255,7 +292,7 @@ export const useUploadManagement = (user: User | null) => {
         if (existingOrdem) {
           // Se existir e o status mudou, atualizar
           if (existingOrdem.sgz_status !== ordem.sgz_status) {
-            await supabase
+            const { error: updateError } = await supabase
               .from('sgz_ordens_servico')
               .update({
                 sgz_status: ordem.sgz_status,
@@ -263,6 +300,9 @@ export const useUploadManagement = (user: User | null) => {
                 planilha_referencia: uploadId
               })
               .eq('id', existingOrdem.id);
+              
+            if (updateError) throw updateError;
+            ordensAtualizadas++;
           }
         } else {
           // Se não existir, adicionar à lista para inserção
@@ -270,7 +310,12 @@ export const useUploadManagement = (user: User | null) => {
         }
       }
       
-      setUploadProgress(90); // Almost done
+      // Update progress based on processing status
+      setUploadProgress(85); 
+      setProcessingStats(prev => ({
+        ...prev,
+        updatedOrders: ordensAtualizadas
+      }));
       
       // Inserir novas ordens em lote
       if (ordensParaInserir.length > 0) {
@@ -279,22 +324,41 @@ export const useUploadManagement = (user: User | null) => {
           .insert(ordensParaInserir);
         
         if (insertError) throw insertError;
+        
+        console.log(`Inserted ${ordensParaInserir.length} new orders`);
+        setProcessingStats(prev => ({
+          ...prev,
+          newOrders: ordensParaInserir.length
+        }));
       }
       
       // Marcar upload como processado
-      await supabase
+      const { error: updateUploadError } = await supabase
         .from('sgz_uploads')
         .update({ processado: true })
         .eq('id', uploadId);
+        
+      if (updateUploadError) throw updateUploadError;
+      console.log(`Marked upload ${uploadId} as processed`);
       
       // Buscar o upload atualizado
       await fetchLastUpload();
       
       setUploadProgress(100); // Complete
-      toast.success(`Planilha SGZ processada com sucesso! ${ordensParaInserir.length} novas ordens inseridas.`);
+      setProcessingStats(prev => ({
+        ...prev,
+        processingStatus: 'success'
+      }));
+      
+      toast.success(`Planilha SGZ processada com sucesso! ${ordensParaInserir.length} novas ordens inseridas e ${ordensAtualizadas} atualizadas.`);
     } catch (error: any) {
       console.error('Error uploading file:', error);
       setUploadProgress(0);
+      setProcessingStats(prev => ({
+        ...prev,
+        processingStatus: 'error',
+        errorMessage: error.message || 'Falha no processamento'
+      }));
       toast.error(`Erro ao processar a planilha SGZ: ${error.message || 'Falha no processamento'}`);
     } finally {
       setIsLoading(false);
@@ -346,7 +410,8 @@ export const useUploadManagement = (user: User | null) => {
     lastUpload,
     isLoading,
     uploads,
-    uploadProgress, // New progress indicator
+    uploadProgress,
+    processingStats,
     fetchLastUpload,
     handleUpload,
     handleDeleteUpload

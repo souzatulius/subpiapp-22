@@ -10,9 +10,10 @@ import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 import { useChartData } from '@/hooks/ranking/useChartData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarClock, FileSpreadsheet, BarChart3, RefreshCw } from 'lucide-react';
+import { CalendarClock, FileSpreadsheet, BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const RankingContent = () => {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ const RankingContent = () => {
     isLoading: isUploadLoading,
     uploads,
     uploadProgress,
+    processingStats,
     fetchLastUpload,
     handleUpload,
     handleDeleteUpload
@@ -31,7 +33,8 @@ const RankingContent = () => {
     chartVisibility,
     handleFiltersChange,
     handleChartVisibilityChange,
-    resetFilters  // Added reset functionality
+    resetFilters,
+    isModified
   } = useFilterManagement();
   
   const {
@@ -39,6 +42,7 @@ const RankingContent = () => {
     isLoading: isChartLoading,
     lastUpdate,
     chartLoadingProgress,
+    fetchError,
     refreshData,
     ordensCount
   } = useChartData(filters);
@@ -71,12 +75,17 @@ const RankingContent = () => {
   // After upload completes, refresh chart data and reset filters if needed
   useEffect(() => {
     if (justUploaded && !isUploadLoading) {
+      console.log('Upload completed, resetting filters and refreshing data');
       resetFilters(); // Reset filters after upload
       refreshData(); // Refresh chart data
       setJustUploaded(false);
-      toast.success('Dados atualizados e filtros redefinidos');
+      
+      // Show success message based on processing stats
+      if (processingStats.processingStatus === 'success') {
+        toast.success(`Dados atualizados e filtros redefinidos. ${processingStats.newOrders} ordens inseridas e ${processingStats.updatedOrders} atualizadas.`);
+      }
     }
-  }, [justUploaded, isUploadLoading, resetFilters, refreshData]);
+  }, [justUploaded, isUploadLoading, resetFilters, refreshData, processingStats]);
   
   return (
     <div className="space-y-6">
@@ -103,7 +112,7 @@ const RankingContent = () => {
           {lastUpload && (
             <Badge variant="outline" className="flex items-center gap-1 px-3 py-1 text-orange-700 bg-orange-50 border-orange-200">
               <FileSpreadsheet className="w-4 h-4" />
-              <span>Planilha: {lastUpload.fileName}</span>
+              <span>Planilha: {lastUpload.fileName} {lastUpload.processed === false && "(Processando...)"}</span>
             </Badge>
           )}
           
@@ -115,6 +124,15 @@ const RankingContent = () => {
         </div>
       </div>
       
+      {/* Error display */}
+      {fetchError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro ao carregar dados</AlertTitle>
+          <AlertDescription>{fetchError}</AlertDescription>
+        </Alert>
+      )}
+      
       {/* Reset filters button */}
       <div className="flex justify-end">
         <Button 
@@ -122,11 +140,23 @@ const RankingContent = () => {
           size="sm" 
           onClick={handleRefreshWithReset}
           className="text-orange-600"
+          disabled={isLoading}
         >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Redefinir filtros e atualizar
+          <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          {isModified ? 'Redefinir filtros e atualizar' : 'Atualizar dados'}
         </Button>
       </div>
+      
+      {/* Upload progress indicator */}
+      {isUploadLoading && uploadProgress > 0 && (
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-gray-500">
+            <span>Carregando planilha...</span>
+            <span>{uploadProgress}%</span>
+          </div>
+          <Progress value={uploadProgress} className="h-2" />
+        </div>
+      )}
       
       {/* Chart loading progress indicator */}
       {isChartLoading && chartLoadingProgress > 0 && (
@@ -147,6 +177,7 @@ const RankingContent = () => {
         onRefreshCharts={refreshData}
         uploads={uploads}
         uploadProgress={uploadProgress}
+        processingStats={processingStats}
       />
       
       <FilterSection 

@@ -3,13 +3,14 @@ import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet } from 'lucide-react';
+import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
 import { UploadInfo } from './types';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
-import { Progress } from '@/components/ui/progress'; // Import Progress component
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
@@ -18,7 +19,13 @@ interface UploadSectionProps {
   isLoading: boolean;
   onRefreshCharts: () => void;
   uploads?: any[];
-  uploadProgress?: number; // New prop for tracking upload progress
+  uploadProgress?: number;
+  processingStats?: {
+    newOrders: number;
+    updatedOrders: number;
+    processingStatus: 'idle' | 'processing' | 'success' | 'error';
+    errorMessage?: string;
+  };
 }
 
 const UploadSection: React.FC<UploadSectionProps> = ({ 
@@ -28,7 +35,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   isLoading,
   onRefreshCharts,
   uploads = [],
-  uploadProgress = 0
+  uploadProgress = 0,
+  processingStats = {
+    newOrders: 0,
+    updatedOrders: 0,
+    processingStatus: 'idle'
+  }
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +109,29 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     return "Concluído!";
   };
 
+  // Get status badge for uploads history
+  const getStatusBadge = (upload: any) => {
+    if (!upload.processado && upload === uploads[0]) {
+      return (
+        <Badge className="bg-yellow-500 text-white">
+          Processando
+        </Badge>
+      );
+    } else if (upload.processado) {
+      return (
+        <Badge className="bg-green-500 text-white">
+          Concluído
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-gray-500 text-white">
+          Desconhecido
+        </Badge>
+      );
+    }
+  };
+
   return (
     <Card className="border-orange-200">
       <CardHeader className="pb-2">
@@ -134,7 +169,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </Button>
           </div>
           
-          {/* New progress indicator */}
+          {/* New progress indicator with better feedback */}
           {isLoading && uploadProgress > 0 && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-500">
@@ -142,6 +177,36 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                 <span>{uploadProgress}%</span>
               </div>
               <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+          
+          {/* Processing stats feedback */}
+          {processingStats.processingStatus === 'processing' && (
+            <div className="p-3 border rounded-md bg-blue-50 border-blue-200 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
+              <p className="text-sm text-blue-700">Processando planilha...</p>
+            </div>
+          )}
+          
+          {processingStats.processingStatus === 'success' && processingStats.newOrders + processingStats.updatedOrders > 0 && (
+            <div className="p-3 border rounded-md bg-green-50 border-green-200 flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-green-700">Processamento concluído com sucesso!</p>
+                <p className="text-xs text-green-600">
+                  {processingStats.newOrders} novas ordens inseridas e {processingStats.updatedOrders} ordens atualizadas
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {processingStats.processingStatus === 'error' && (
+            <div className="p-3 border rounded-md bg-red-50 border-red-200 flex items-start gap-2">
+              <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-700">Erro ao processar planilha</p>
+                <p className="text-xs text-red-600">{processingStats.errorMessage}</p>
+              </div>
             </div>
           )}
           
@@ -153,6 +218,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="mr-2 h-3 w-3" />
                     {lastUpload.uploadDate}
+                    {!lastUpload.processed && (
+                      <Badge className="ml-2 bg-yellow-500 text-white text-xs">Processando</Badge>
+                    )}
                   </div>
                 </div>
                 <Button 
@@ -188,6 +256,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                     <tr>
                       <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-orange-700 uppercase tracking-wider">Arquivo</th>
                       <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-orange-700 uppercase tracking-wider">Data</th>
+                      <th scope="col" className="px-3 py-2 text-xs font-medium text-orange-700 uppercase tracking-wider">Status</th>
                       <th scope="col" className="px-3 py-2 text-xs font-medium text-orange-700 uppercase tracking-wider">Ações</th>
                     </tr>
                   </thead>
@@ -197,6 +266,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                         <td className="px-3 py-2 whitespace-nowrap text-xs">{upload.nome_arquivo}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-xs">
                           {new Date(upload.data_upload).toLocaleString('pt-BR')}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap text-xs">
+                          {getStatusBadge(upload)}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap text-right text-xs">
                           <Button
