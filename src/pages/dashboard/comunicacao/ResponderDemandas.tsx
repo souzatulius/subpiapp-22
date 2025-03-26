@@ -5,7 +5,7 @@ import ResponderDemandaForm from '@/components/dashboard/forms/ResponderDemandaF
 const ResponderDemandas = () => {
   return (
     <div className="max-w-7xl mx-auto">
-      <ResponderDemandaForm onClose={() => {}} />
+      <ResponderDemandaForm />
     </div>
   );
 };

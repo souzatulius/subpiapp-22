@@ -19,7 +19,7 @@ export function useDemandas(filterStatus: string) {
       try {
         console.log('Fetching demandas with status:', filterStatus);
         
-        // Construir a consulta base
+        // Build the base query
         let query = supabase.from('demandas')
           .select(`
             id,
@@ -43,12 +43,12 @@ export function useDemandas(filterStatus: string) {
             problema_id
           `);
           
-        // Aplicar filtro de status se não for 'todos'
+        // Apply status filter if not 'todos'
         if (filterStatus !== 'todos') {
           query = query.eq('status', filterStatus);
         }
         
-        // Executar a consulta principal
+        // Execute the main query
         const { data, error } = await query.order('horario_publicacao', {
           ascending: false
         });
@@ -60,7 +60,7 @@ export function useDemandas(filterStatus: string) {
         
         console.log('Demandas data from DB:', data);
         
-        // Agora vamos buscar as informações relacionadas em consultas separadas
+        // Now fetch related information in separate queries
         const enhancedData = await Promise.all((data || []).map(async (demanda: any) => {
           // Create an enhanced demand object with all required properties
           let enhancedDemand: Partial<Demand> = { 
@@ -73,20 +73,22 @@ export function useDemandas(filterStatus: string) {
             autor: null
           };
           
-          // Buscar areas de coordenacao (que substituem a supervisao_tecnica)
+          // Fetch areas de coordenacao (that replace supervisao_tecnica)
           if (demanda.supervisao_tecnica_id) {
             const { data: stData } = await supabase
-              .from('areas_coordenacao')
+              .from('supervisoes_tecnicas')
               .select('id, descricao')
               .eq('id', demanda.supervisao_tecnica_id)
               .maybeSingle();
               
             if (stData) {
-              enhancedDemand.areas_coordenacao = stData;
+              enhancedDemand.area_coordenacao = {
+                descricao: stData.descricao
+              };
             }
           }
           
-          // Buscar origem
+          // Fetch origin
           if (demanda.origem_id) {
             const { data: origemData } = await supabase
               .from('origens_demandas')
@@ -94,10 +96,10 @@ export function useDemandas(filterStatus: string) {
               .eq('id', demanda.origem_id)
               .maybeSingle();
               
-            enhancedDemand.origens_demandas = origemData;
+            enhancedDemand.origem = origemData;
           }
           
-          // Buscar tipo de mídia
+          // Fetch media type
           if (demanda.tipo_midia_id) {
             const { data: midiaData } = await supabase
               .from('tipos_midia')
@@ -105,10 +107,10 @@ export function useDemandas(filterStatus: string) {
               .eq('id', demanda.tipo_midia_id)
               .maybeSingle();
               
-            enhancedDemand.tipos_midia = midiaData;
+            enhancedDemand.tipo_midia = midiaData;
           }
           
-          // Buscar bairro
+          // Fetch neighborhood
           if (demanda.bairro_id) {
             const { data: bairroData } = await supabase
               .from('bairros')
@@ -119,7 +121,7 @@ export function useDemandas(filterStatus: string) {
             enhancedDemand.bairro = bairroData;
           }
           
-          // Buscar autor
+          // Fetch author
           if (demanda.autor_id) {
             const { data: autorData } = await supabase
               .from('usuarios')
@@ -152,7 +154,7 @@ export function useDemandas(filterStatus: string) {
     }
   });
 
-  // Transformar os dados para garantir que 'perguntas' está com o tipo correto
+  // Transform data to ensure 'perguntas' has the correct type
   const demandas: Demand[] = demandasData ? demandasData.map(item => ({
     ...item,
     perguntas: item.perguntas ? 
