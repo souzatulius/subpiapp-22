@@ -21,6 +21,10 @@ export interface NotaOficial {
     id: string;
     descricao: string;
   };
+  area_coordenacao?: {
+    id: string;
+    descricao: string;
+  };
   demanda_id?: string;
   problema_id: string;
   historico_edicoes?: NotaEdicao[];
@@ -37,7 +41,7 @@ export interface NotaEdicao {
   editor?: {
     id: string;
     nome_completo: string;
-  };
+  } | null;
   criado_em: string;
 }
 

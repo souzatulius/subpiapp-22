@@ -1,4 +1,3 @@
-
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
@@ -18,6 +17,8 @@ export interface DemandFormData {
   anexos: string[]; 
   tem_protocolo_156?: boolean;
   numero_protocolo_156?: string;
+  servico_id?: string;
+  nao_sabe_servico?: boolean;
 }
 
 export interface FormState {
@@ -72,6 +73,8 @@ export interface Demand {
   servico: {
     descricao: string;
   } | null;
+  arquivo_url: string | null;
+  anexos: string[] | null;
 }
 
 export interface DemandResponse {

@@ -60,7 +60,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         // Process historic edits to ensure the type is correct
         const processedHistorico = (nota.historico_edicoes || []).map(edit => {
           // Handle potential error in editor relationship
-          const editor = typeof edit.editor === 'object' && !('error' in edit.editor) 
+          const editor = edit.editor && typeof edit.editor === 'object' && !('error' in edit.editor) 
             ? edit.editor 
             : { id: '', nome_completo: 'Não informado' };
           
@@ -71,15 +71,15 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
         }) as NotaEdicao[];
         
         // Handle potential error in relationships
-        const autor = typeof nota.autor === 'object' && !('error' in nota.autor)
+        const autor = nota.autor && typeof nota.autor === 'object' && !('error' in nota.autor)
           ? nota.autor
           : { id: '', nome_completo: 'Não informado' };
           
-        const aprovador = typeof nota.aprovador === 'object' && !('error' in nota.aprovador)
+        const aprovador = nota.aprovador && typeof nota.aprovador === 'object' && !('error' in nota.aprovador)
           ? nota.aprovador
           : { id: '', nome_completo: 'Não informado' };
           
-        const supervisao_tecnica = typeof nota.supervisao_tecnica === 'object' && !('error' in nota.supervisao_tecnica)
+        const supervisao_tecnica = nota.supervisao_tecnica && typeof nota.supervisao_tecnica === 'object' && !('error' in nota.supervisao_tecnica)
           ? nota.supervisao_tecnica
           : { id: '', descricao: 'Não informada' };
         
@@ -88,7 +88,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = ({ onClose }) => {
           autor,
           aprovador,
           supervisao_tecnica,
-          historico_edicoes: processedHistorico
+          historico_edicoes: processedHistorico,
+          area_coordenacao: { id: '', descricao: supervisao_tecnica.descricao }
         };
       }) as NotaOficial[];
       

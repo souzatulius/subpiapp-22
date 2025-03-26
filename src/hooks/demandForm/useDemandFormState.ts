@@ -142,7 +142,7 @@ export const useDemandFormState = (
   };
 
   const handleSelectChange = (name: string, value: string | boolean) => {
-    if (name === 'problema_id' && value !== formData.problema_id) {
+    if (name === 'problema_id' && typeof value === 'string' && value !== formData.problema_id) {
       setFormData(prev => ({
         ...prev,
         [name]: value,
@@ -155,7 +155,12 @@ export const useDemandFormState = (
         nao_sabe_servico: Boolean(value),
         servico_id: value ? '' : prev.servico_id
       }));
-    } else {
+    } else if (typeof value === 'string') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    } else if (typeof value === 'boolean' && name !== 'problema_id') {
       setFormData(prev => ({
         ...prev,
         [name]: value
