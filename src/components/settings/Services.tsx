@@ -6,6 +6,7 @@ import DataTable from './data-table/DataTable';
 import ServiceForm from './services/ServiceForm';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const Services = () => {
   const { user } = useAuth();
@@ -14,7 +15,12 @@ const Services = () => {
 
   useEffect(() => {
     fetchServices();
-  }, []);
+  }, [fetchServices]);
+
+  useEffect(() => {
+    // Log services data to debug
+    console.log('Services data:', services);
+  }, [services]);
 
   const columns = [
     {
@@ -32,8 +38,19 @@ const Services = () => {
     try {
       await addService(data);
       setIsAddFormOpen(false);
+      toast({
+        title: "Serviço adicionado",
+        description: "O serviço foi cadastrado com sucesso.",
+      });
+      // Refresh the services list after adding
+      fetchServices();
     } catch (error) {
       console.error('Error adding service:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o serviço.",
+        variant: "destructive"
+      });
     }
   };
 

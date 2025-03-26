@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useCallback } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
@@ -8,6 +8,9 @@ export interface Service {
   id?: string;
   descricao: string;
   supervisao_tecnica_id: string;
+  supervisao_tecnica?: {
+    descricao: string;
+  };
   criado_em?: string;
 }
 
@@ -16,19 +19,33 @@ export const useServices = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
     try {
+      console.log('Fetching services...');
       const { data, error } = await supabase
         .from('servicos')
-        .select('*, supervisao_tecnica:areas_coordenacao(descricao)');
+        .select(`
+          *,
+          supervisao_tecnica:supervisao_tecnica_id (
+            id,
+            descricao,
+            coordenacao_id
+          )
+        `)
+        .order('descricao');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching services:', error);
+        throw error;
+      }
+      
+      console.log('Services fetched:', data);
       setServices(data || []);
     } catch (error) {
-      console.error('Error fetching services:', error);
+      console.error('Error in fetchServices:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar os serviços.',
@@ -37,12 +54,13 @@ export const useServices = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addService = async (service: Omit<Service, 'id' | 'criado_em'>) => {
     if (!user) return;
 
     try {
+      console.log('Adding service:', service);
       const { data, error } = await supabase
         .from('servicos')
         .insert(service)
@@ -51,11 +69,8 @@ export const useServices = () => {
 
       if (error) throw error;
 
+      console.log('Service added:', data);
       setServices(prev => [...prev, data]);
-      toast({
-        title: 'Serviço adicionado',
-        description: 'O serviço foi cadastrado com sucesso.',
-      });
       
       return data;
     } catch (error) {
@@ -73,6 +88,7 @@ export const useServices = () => {
     if (!user) return;
 
     try {
+      console.log('Deleting service:', serviceId);
       const { error } = await supabase
         .from('servicos')
         .delete()

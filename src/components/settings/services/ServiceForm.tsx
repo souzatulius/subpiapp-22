@@ -1,84 +1,70 @@
 
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { z } from 'zod';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from '@/components/ui/form';
+import { supabase } from "@/integrations/supabase/client";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-
-const serviceSchema = z.object({
-  descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
-  supervisao_tecnica_id: z.string().min(1, 'Selecione uma coordenação')
-});
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { serviceSchema } from '@/types/service';
 
 interface ServiceFormProps {
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
+  onSubmit: (data: z.infer<typeof serviceSchema>) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
+  initialData?: z.infer<typeof serviceSchema>;
 }
 
-const ServiceForm: React.FC<ServiceFormProps> = ({ 
-  onSubmit, 
-  onCancel, 
-  isSubmitting 
+const ServiceForm: React.FC<ServiceFormProps> = ({
+  onSubmit,
+  onCancel,
+  isSubmitting,
+  initialData
 }) => {
-  const [coordinations, setCoordenations] = useState<{ id: string; descricao: string }[]>([]);
-
-  useEffect(() => {
-    const fetchCoordenations = async () => {
-      const { data, error } = await supabase
-        .from('coordenacoes')
-        .select('id, descricao')
-        .order('descricao');
-
-      if (data) setCoordenations(data);
-      if (error) console.error('Error fetching coordinations:', error);
-    };
-
-    fetchCoordenations();
-  }, []);
+  const [areas, setAreas] = useState<{ id: string; descricao: string }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const form = useForm<z.infer<typeof serviceSchema>>({
     resolver: zodResolver(serviceSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       descricao: '',
-      supervisao_tecnica_id: ''
+      supervisao_tecnica_id: '',
     }
   });
 
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        console.log('Fetching supervision areas...');
+        const { data, error } = await supabase
+          .from('supervisoes_tecnicas')
+          .select('id, descricao, coordenacao_id')
+          .order('descricao');
+
+        if (error) throw error;
+        
+        console.log('Areas fetched:', data);
+        setAreas(data || []);
+      } catch (error) {
+        console.error('Error fetching areas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAreas();
+  }, []);
+
   const handleSubmit = async (data: z.infer<typeof serviceSchema>) => {
-    try {
-      // Ensure data has both required properties as non-optional
-      const serviceData = {
-        descricao: data.descricao,
-        supervisao_tecnica_id: data.supervisao_tecnica_id
-      };
-      await onSubmit(serviceData);
-      form.reset();
-    } catch (error) {
-      console.error('Submission error:', error);
-    }
+    await onSubmit(data);
+    form.reset();
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="descricao"
@@ -98,23 +84,21 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           name="supervisao_tecnica_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Coordenação</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value}
+              <FormLabel>Supervisão Técnica</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={loading}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma coordenação" />
+                    <SelectValue placeholder="Selecione uma supervisão técnica" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {coordinations.map((coordination) => (
-                    <SelectItem 
-                      key={coordination.id} 
-                      value={coordination.id}
-                    >
-                      {coordination.descricao}
+                  {areas.map((area) => (
+                    <SelectItem key={area.id} value={area.id}>
+                      {area.descricao}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -125,17 +109,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         />
 
         <div className="flex justify-end space-x-2">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onCancel}
-          >
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-          >
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>

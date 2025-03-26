@@ -1,24 +1,25 @@
 
 import { z } from 'zod';
+import { SupervisaoTecnica } from '@/types/common';
 
 export interface Service {
-  id: string;
+  id?: string;
   descricao: string;
-  supervisao_id?: string;
-  supervisao_tecnica_id?: string;
+  supervisao_tecnica_id: string;
+  supervisao_tecnica?: SupervisaoTecnica;
   problema_id?: string;
-  supervisao_tecnica?: {
-    id: string;
-    descricao: string;
-  };
   criado_em?: string;
 }
 
 export interface Area {
   id: string;
   descricao: string;
-  coordenacao_id?: string;
   sigla?: string;
+  coordenacao_id?: string;
+  coordenacao?: {
+    id: string;
+    descricao: string;
+  };
 }
 
 export const serviceSchema = z.object({
