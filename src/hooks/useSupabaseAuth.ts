@@ -1,233 +1,33 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Session } from '@supabase/supabase-js';
-import { toast } from '@/components/ui/use-toast';
 
-interface AuthState {
-  session: Session | null;
-  user: any | null;
-  isLoading: boolean;
-  error: Error | null;
-  isApproved?: boolean;
-  loading?: boolean;
-}
+import { useState } from 'react';
+import { useAuthState } from './auth/useAuthState';
+import { useAuthActions } from './auth/useAuthActions';
 
-interface AuthActions {
-  signUp: (email: string, password: string, metadata?: any) => Promise<any>;
-  signIn: (email: string, password: string) => Promise<any>;
-  signOut: () => Promise<void>;
-  resetPasswordForEmail: (email: string) => Promise<any>;
-  signInWithGoogle?: () => Promise<any>;
-  updateProfile?: (data: any) => Promise<any>;
-}
-
-export const useAuth = (): AuthState & AuthActions => {
-  const [authState, setAuthState] = useState<AuthState>({
-    session: null,
-    user: null,
-    isLoading: true,
-    loading: true,
-    error: null,
-    isApproved: undefined,
+/**
+ * Main authentication hook that combines state and actions
+ */
+export const useAuth = () => {
+  const [localError, setLocalError] = useState<Error | null>(null);
+  const [localLoading, setLocalLoading] = useState<boolean>(false);
+  
+  // Get authentication state
+  const authState = useAuthState();
+  
+  // Set up auth actions with state change handler
+  const authActions = useAuthActions({
+    onAuthStateChange: (isLoading, error) => {
+      setLocalLoading(isLoading);
+      setLocalError(error);
+    }
   });
 
-  useEffect(() => {
-    const loadSession = async () => {
-      try {
-        setAuthState(prev => ({ ...prev, isLoading: true, loading: true }));
-        const { data: { session } } = await supabase.auth.getSession();
-
-        setAuthState({
-          session,
-          user: session?.user || null,
-          isLoading: false,
-          loading: false,
-          error: null,
-          isApproved: true,
-        });
-
-        supabase.auth.onAuthStateChange((event, session) => {
-          if (event === 'INITIAL_SESSION') {
-            return;
-          }
-          setAuthState({
-            session,
-            user: session?.user || null,
-            isLoading: false,
-            loading: false,
-            error: null,
-            isApproved: true,
-          });
-        });
-      } catch (error: any) {
-        setAuthState({
-          session: null,
-          user: null,
-          isLoading: false,
-          loading: false,
-          error: error,
-          isApproved: false,
-        });
-        console.error("Erro ao carregar a sessão:", error);
-      }
-    };
-
-    loadSession();
-  }, []);
-
-  const signUp = async (email: string, password: string, metadata?: any) => {
-    try {
-      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata
-        }
-      });
-      if (error) {
-        console.error("Erro ao registrar:", error);
-        toast({
-          title: "Erro ao registrar",
-          description: error.message,
-          variant: "destructive"
-        });
-        setAuthState(prev => ({ ...prev, error: error, isLoading: false }));
-        return { error };
-      }
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-      return { data, error: null };
-    } catch (error: any) {
-      console.error("Erro ao registrar:", error);
-      toast({
-        title: "Erro ao registrar",
-        description: error.message,
-        variant: "destructive"
-      });
-      setAuthState(prev => ({ ...prev, error: error, isLoading: false }));
-      return { error };
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        console.error("Erro ao logar:", error);
-        toast({
-          title: "Erro ao logar",
-          description: error.message,
-          variant: "destructive"
-        });
-        setAuthState(prev => ({ ...prev, error: error, isLoading: false }));
-        return { error };
-      }
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-      return { data, error: null };
-    } catch (error: any) {
-      console.error("Erro ao logar:", error);
-      toast({
-        title: "Erro ao logar",
-        description: error.message,
-        variant: "destructive"
-      });
-      setAuthState(prev => ({ ...prev, error: error, isLoading: false }));
-      return { error };
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      await supabase.auth.signOut();
-      setAuthState({ session: null, user: null, isLoading: false, error: null });
-    } catch (error: any) {
-      console.error("Erro ao sair:", error);
-      toast({
-        title: "Erro ao sair",
-        description: error.message,
-        variant: "destructive"
-      });
-      setAuthState(prev => ({ ...prev, error: error, isLoading: false, session: null, user: null }));
-    }
-  };
-
-  const resetPasswordForEmail = async (email: string) => {
-    try {
-      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/redefinir-senha`,
-      });
-
-      if (error) {
-        console.error("Erro ao solicitar redefinição de senha:", error);
-        toast({
-          title: "Erro ao solicitar redefinição de senha",
-          description: error.message,
-          variant: "destructive"
-        });
-        setAuthState(prev => ({ ...prev, error: error, isLoading: false }));
-        return { error };
-      }
-       toast({
-          title: "Solicitação enviada",
-          description: "Verifique seu email para redefinir sua senha.",
-        });
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-      return { data, error: null };
-    } catch (error: any) {
-      console.error("Erro ao solicitar redefinição de senha:", error);
-       toast({
-          title: "Erro ao solicitar redefinição de senha",
-          description: error.message,
-          variant: "destructive"
-        });
-      setAuthState(prev => ({ ...prev, error: error, isLoading: false }));
-      return { error };
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      setAuthState(prev => ({ ...prev, isLoading: true, loading: true, error: null }));
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-      });
-      
-      if (error) throw error;
-      
-      return { data, error: null };
-    } catch (error: any) {
-      console.error("Erro ao fazer login com Google:", error);
-      toast({
-        title: "Erro ao fazer login com Google",
-        description: error.message,
-        variant: "destructive"
-      });
-      setAuthState(prev => ({ ...prev, error: error, isLoading: false, loading: false }));
-      return { error };
-    }
-  };
-
-  const updateProfile = async (data: any) => {
-    try {
-      return { data, error: null };
-    } catch (error: any) {
-      return { error };
-    }
-  };
-
+  // Combine state and actions
   return {
     ...authState,
-    signUp,
-    signIn,
-    signOut,
-    resetPasswordForEmail,
-    signInWithGoogle,
-    updateProfile,
+    ...authActions,
+    // Override loading and error with local state when actions are in progress
+    isLoading: authState.isLoading || localLoading,
+    loading: authState.isLoading || localLoading,
+    error: localError || authState.error,
   };
 };
