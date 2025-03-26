@@ -238,183 +238,183 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               <TabsTrigger value="questions">Perguntas e Respostas</TabsTrigger>
               <TabsTrigger value="comments">Comentários</TabsTrigger>
             </TabsList>
-          </Tabs>
-        </CardHeader>
+        
+            <CardContent className="space-y-6">
+              <TabsContent value="details" className="pt-2 m-0">
+                {/* Layout com duas colunas para desktop */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Coluna 1: Informações da demanda, tema, serviço e anexos */}
+                  <div className="lg:col-span-1 space-y-6">
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Tema</h3>
+                      <TemaSelector 
+                        selectedProblemId={selectedProblemId}
+                        problems={problems}
+                        problemsLoading={problemsLoading}
+                        demandaId={selectedDemanda.id}
+                        currentProblem={currentProblem}
+                        onProblemChange={setSelectedProblemId}
+                      />
+                    </div>
 
-        <CardContent className="space-y-6">
-          <TabsContent value="details" className="pt-2 m-0">
-            {/* Layout com duas colunas para desktop */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Coluna 1: Informações da demanda, tema, serviço e anexos */}
-              <div className="lg:col-span-1 space-y-6">
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Tema</h3>
-                  <TemaSelector 
-                    selectedProblemId={selectedProblemId}
-                    problems={problems}
-                    problemsLoading={problemsLoading}
-                    demandaId={selectedDemanda.id}
-                    currentProblem={currentProblem}
-                    onProblemChange={setSelectedProblemId}
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium mb-2">Serviço</h3>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Checkbox 
+                          id="nao-sabe-servico" 
+                          checked={dontKnowService} 
+                          onCheckedChange={handleServiceToggle}
+                        />
+                        <label 
+                          htmlFor="nao-sabe-servico" 
+                          className="text-sm text-gray-700 cursor-pointer"
+                        >
+                          Não sei informar o serviço
+                        </label>
+                      </div>
+                      
+                      {!dontKnowService && (
+                        <ServicoSelector 
+                          selectedServicoId={selectedServicoId}
+                          servicos={servicos}
+                          servicosLoading={servicosLoading}
+                          onServicoChange={setSelectedServicoId}
+                        />
+                      )}
+                    </div>
 
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium mb-2">Serviço</h3>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Checkbox 
-                      id="nao-sabe-servico" 
-                      checked={dontKnowService} 
-                      onCheckedChange={handleServiceToggle}
-                    />
-                    <label 
-                      htmlFor="nao-sabe-servico" 
-                      className="text-sm text-gray-700 cursor-pointer"
-                    >
-                      Não sei informar o serviço
-                    </label>
+                    <Separator className="my-4" />
+                    
+                    <DemandaInfoSection demanda={selectedDemanda} />
+                    
+                    {/* Anexos da demanda */}
+                    {(selectedDemanda.arquivo_url || (selectedDemanda.anexos && selectedDemanda.anexos.length > 0)) && (
+                      <div className="mt-4">
+                        <h3 className="text-base font-medium mb-3">Anexos</h3>
+                        <div className="space-y-2">
+                          {selectedDemanda.arquivo_url && (
+                            <div className="flex items-center p-3 bg-gray-50 rounded border border-gray-200">
+                              {getFileIcon(selectedDemanda.arquivo_url)}
+                              <span className="ml-2 text-sm truncate flex-1">{getFileName(selectedDemanda.arquivo_url)}</span>
+                              <div className="flex space-x-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleViewAttachment(selectedDemanda.arquivo_url)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleDownloadAttachment(selectedDemanda.arquivo_url)}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {selectedDemanda.anexos && selectedDemanda.anexos.map((anexo: string, index: number) => (
+                            <div key={index} className="flex items-center p-3 bg-gray-50 rounded border border-gray-200">
+                              {getFileIcon(anexo)}
+                              <span className="ml-2 text-sm truncate flex-1">{getFileName(anexo)}</span>
+                              <div className="flex space-x-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleViewAttachment(anexo)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleDownloadAttachment(anexo)}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
-                  {!dontKnowService && (
-                    <ServicoSelector 
-                      selectedServicoId={selectedServicoId}
-                      servicos={servicos}
-                      servicosLoading={servicosLoading}
-                      onServicoChange={setSelectedServicoId}
-                    />
-                  )}
+                  {/* Coluna 2: Detalhes da solicitação (spans 2 cols) */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <Card className="bg-gray-50 border border-gray-200">
+                      <CardContent className="p-4">
+                        <DemandaDetailsSection detalhes={selectedDemanda.detalhes_solicitacao} />
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Informações do solicitante */}
+                    {(selectedDemanda.nome_solicitante || selectedDemanda.email_solicitante || selectedDemanda.telefone_solicitante) && (
+                      <div>
+                        <h3 className="text-base font-medium mb-3">Informações do Solicitante</h3>
+                        <div className="bg-blue-50 border border-blue-100 rounded-md p-4 space-y-2">
+                          {selectedDemanda.nome_solicitante && (
+                            <div>
+                              <span className="text-sm font-medium text-blue-700">Nome:</span>
+                              <span className="text-sm ml-2 text-blue-900">{selectedDemanda.nome_solicitante}</span>
+                            </div>
+                          )}
+                          
+                          {selectedDemanda.email_solicitante && (
+                            <div>
+                              <span className="text-sm font-medium text-blue-700">Email:</span>
+                              <span className="text-sm ml-2 text-blue-900">{selectedDemanda.email_solicitante}</span>
+                            </div>
+                          )}
+                          
+                          {selectedDemanda.telefone_solicitante && (
+                            <div>
+                              <span className="text-sm font-medium text-blue-700">Telefone:</span>
+                              <span className="text-sm ml-2 text-blue-900">{selectedDemanda.telefone_solicitante}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <Separator className="my-4" />
-                
-                <DemandaInfoSection demanda={selectedDemanda} />
-                
-                {/* Anexos da demanda */}
-                {(selectedDemanda.arquivo_url || (selectedDemanda.anexos && selectedDemanda.anexos.length > 0)) && (
-                  <div className="mt-4">
-                    <h3 className="text-base font-medium mb-3">Anexos</h3>
-                    <div className="space-y-2">
-                      {selectedDemanda.arquivo_url && (
-                        <div className="flex items-center p-3 bg-gray-50 rounded border border-gray-200">
-                          {getFileIcon(selectedDemanda.arquivo_url)}
-                          <span className="ml-2 text-sm truncate flex-1">{getFileName(selectedDemanda.arquivo_url)}</span>
-                          <div className="flex space-x-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleViewAttachment(selectedDemanda.arquivo_url)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleDownloadAttachment(selectedDemanda.arquivo_url)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {selectedDemanda.anexos && selectedDemanda.anexos.map((anexo: string, index: number) => (
-                        <div key={index} className="flex items-center p-3 bg-gray-50 rounded border border-gray-200">
-                          {getFileIcon(anexo)}
-                          <span className="ml-2 text-sm truncate flex-1">{getFileName(anexo)}</span>
-                          <div className="flex space-x-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleViewAttachment(anexo)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleDownloadAttachment(anexo)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              </TabsContent>
               
-              {/* Coluna 2: Detalhes da solicitação (spans 2 cols) */}
-              <div className="lg:col-span-2 space-y-6">
-                <Card className="bg-gray-50 border border-gray-200">
-                  <CardContent className="p-4">
-                    <DemandaDetailsSection detalhes={selectedDemanda.detalhes_solicitacao} />
-                  </CardContent>
-                </Card>
-                
-                {/* Informações do solicitante */}
-                {(selectedDemanda.nome_solicitante || selectedDemanda.email_solicitante || selectedDemanda.telefone_solicitante) && (
-                  <div>
-                    <h3 className="text-base font-medium mb-3">Informações do Solicitante</h3>
-                    <div className="bg-blue-50 border border-blue-100 rounded-md p-4 space-y-2">
-                      {selectedDemanda.nome_solicitante && (
-                        <div>
-                          <span className="text-sm font-medium text-blue-700">Nome:</span>
-                          <span className="text-sm ml-2 text-blue-900">{selectedDemanda.nome_solicitante}</span>
-                        </div>
-                      )}
-                      
-                      {selectedDemanda.email_solicitante && (
-                        <div>
-                          <span className="text-sm font-medium text-blue-700">Email:</span>
-                          <span className="text-sm ml-2 text-blue-900">{selectedDemanda.email_solicitante}</span>
-                        </div>
-                      )}
-                      
-                      {selectedDemanda.telefone_solicitante && (
-                        <div>
-                          <span className="text-sm font-medium text-blue-700">Telefone:</span>
-                          <span className="text-sm ml-2 text-blue-900">{selectedDemanda.telefone_solicitante}</span>
-                        </div>
-                      )}
-                    </div>
+              <TabsContent value="questions" className="pt-2 m-0">
+                {selectedDemanda.perguntas && Object.keys(selectedDemanda.perguntas).length > 0 ? (
+                  <QuestionsAnswersSection 
+                    perguntas={selectedDemanda.perguntas}
+                    resposta={resposta}
+                    onRespostaChange={handleRespostaChange}
+                  />
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-md text-center">
+                    <p className="text-gray-500">Não há perguntas registradas para esta demanda.</p>
                   </div>
                 )}
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="questions" className="pt-2 m-0">
-            {selectedDemanda.perguntas && Object.keys(selectedDemanda.perguntas).length > 0 ? (
-              <QuestionsAnswersSection 
-                perguntas={selectedDemanda.perguntas}
-                resposta={resposta}
-                onRespostaChange={handleRespostaChange}
-              />
-            ) : (
-              <div className="bg-gray-50 p-4 rounded-md text-center">
-                <p className="text-gray-500">Não há perguntas registradas para esta demanda.</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="comments" className="pt-2 m-0">
-            <CommentsSection 
-              comentarios={setComentarios ? comentarios : localComentarios}
-              onChange={(value) => {
-                if (setComentarios) {
-                  setComentarios(value);
-                } else {
-                  setLocalComentarios(value);
-                }
-              }}
-            />
-          </TabsContent>
-        </CardContent>
+              </TabsContent>
+              
+              <TabsContent value="comments" className="pt-2 m-0">
+                <CommentsSection 
+                  comentarios={setComentarios ? comentarios : localComentarios}
+                  onChange={(value) => {
+                    if (setComentarios) {
+                      setComentarios(value);
+                    } else {
+                      setLocalComentarios(value);
+                    }
+                  }}
+                />
+              </TabsContent>
+            </CardContent>
+          </Tabs>
+        </CardHeader>
 
         <CardFooter className="border-t p-4 justify-between">
           <div className="text-sm text-gray-500">
