@@ -9,17 +9,23 @@ interface StatusTransitionChartProps {
 }
 
 const StatusTransitionChart: React.FC<StatusTransitionChartProps> = ({ data, isLoading }) => {
+  // Safely check if data exists and has the required properties
+  const hasValidData = !isLoading && data && data.datasets && Array.isArray(data.datasets);
+  
+  // Default text value
+  const statusText = isLoading ? '' : 'Evolução temporal';
+  
   return (
     <ChartCard
       title="Transição de status ao longo dos dias"
-      value={isLoading ? '' : 'Evolução temporal'}
+      value={statusText}
       isLoading={isLoading}
     >
-      {!isLoading && (
+      {hasValidData && (
         <Line
           data={{
-            ...data,
-            datasets: data.datasets.map((dataset, index) => ({
+            labels: data.labels || [],
+            datasets: data.datasets.map((dataset: any, index: number) => ({
               ...dataset,
               borderColor: index === 0 ? '#f97316' : // orange-500
                            index === 1 ? '#fb923c' : // orange-400

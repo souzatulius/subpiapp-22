@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { ChartVisibility } from './types';
 import NoDataMessage from './charts/NoDataMessage';
@@ -125,7 +126,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         labels: [], 
         datasets: [{ 
           label: 'No Data', 
-          data: [0],
+          data: [],
           backgroundColor: '#ccc' 
         }] 
       };
