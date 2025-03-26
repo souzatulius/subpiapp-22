@@ -68,22 +68,62 @@ const Services = () => {
     }
   ];
 
-  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const handleAdd = async (data: { 
+    supervisao_tecnica_id: string; 
+    services: { descricao: string }[] 
+  }) => {
     try {
       setIsSubmitting(true);
-      await addService(data);
+      
+      // Track success and failure counts
+      let successCount = 0;
+      let failureCount = 0;
+      
+      // Submit each service one by one
+      for (const serviceItem of data.services) {
+        if (serviceItem.descricao.trim()) {
+          try {
+            await addService({
+              descricao: serviceItem.descricao,
+              supervisao_tecnica_id: data.supervisao_tecnica_id
+            });
+            successCount++;
+          } catch (error) {
+            console.error('Error adding service:', error);
+            failureCount++;
+          }
+        }
+      }
+      
       setIsAddFormOpen(false);
-      toast({
-        title: "Serviço adicionado",
-        description: "O serviço foi cadastrado com sucesso.",
-      });
+      
+      // Show appropriate toast message based on results
+      if (successCount > 0 && failureCount === 0) {
+        toast({
+          title: "Serviços adicionados",
+          description: `${successCount} serviço(s) cadastrado(s) com sucesso.`,
+        });
+      } else if (successCount > 0 && failureCount > 0) {
+        toast({
+          title: "Parcialmente concluído",
+          description: `${successCount} serviço(s) cadastrado(s) com sucesso. ${failureCount} falha(s).`,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível adicionar os serviços.",
+          variant: "destructive"
+        });
+      }
+      
       // Refresh the services list after adding
       fetchServices();
     } catch (error) {
-      console.error('Error adding service:', error);
+      console.error('Error in batch service add:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível adicionar o serviço.",
+        description: "Não foi possível adicionar os serviços.",
         variant: "destructive"
       });
     } finally {
