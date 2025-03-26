@@ -51,7 +51,10 @@ function formatDate(isoString: string) {
 }
 
 function safeFormatDate(nota: NotaOficial, field: 'criado_em' | 'atualizado_em'): string {
-  const dateValue = nota[field] || (field === 'criado_em' ? nota.created_at : nota.updated_at);
+  const dateValue = field === 'criado_em' 
+    ? (nota.criado_em || nota.created_at)
+    : (nota.atualizado_em || nota.updated_at);
+    
   if (!dateValue) return 'Data não disponível';
   return formatDate(dateValue);
 }
@@ -118,12 +121,12 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
             id: nota.supervisao_tecnica_id || '',
             descricao: nota.supervisao_tecnica?.descricao || 'Não informada'
           },
-          criado_em: nota.criado_em || nota.created_at || new Date().toISOString(),
-          atualizado_em: nota.atualizado_em || nota.updated_at,
-          created_at: nota.criado_em || nota.created_at || new Date().toISOString(),
-          updated_at: nota.atualizado_em || nota.updated_at,
+          criado_em: nota.criado_em || new Date().toISOString(),
+          atualizado_em: nota.atualizado_em,
+          created_at: nota.criado_em || new Date().toISOString(),
+          updated_at: nota.atualizado_em,
           demanda_id: nota.demanda_id || nota.demanda?.id
-        } as unknown as NotaOficial;
+        } as NotaOficial;
       });
 
       return formattedData;
