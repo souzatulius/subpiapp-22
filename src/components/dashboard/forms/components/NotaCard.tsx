@@ -25,6 +25,10 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
     }
   };
 
+  // Garantir que temos nome do autor mesmo quando opcional
+  const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
+  const areaNome = nota.supervisao_tecnica?.descricao || 'Área não informada';
+
   return (
     <Card 
       key={nota.id} 
@@ -41,12 +45,12 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
             <div className="space-y-1.5">
               <div className="flex items-center text-sm text-gray-600">
                 <User className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-                <span>{nota.autor?.nome_completo || 'Autor desconhecido'}</span>
+                <span>{autorNome}</span>
               </div>
               
               <div className="flex items-center text-sm text-gray-600">
                 <FileText className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-                <span>{nota.supervisao_tecnica?.descricao || 'Área não informada'}</span>
+                <span>{areaNome}</span>
               </div>
             </div>
           </div>
