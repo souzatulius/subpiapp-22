@@ -25,6 +25,7 @@ export interface NotaOficial {
   problema?: {
     id?: string;
     descricao?: string;
+    icone?: string;
   };
   revisado_por?: {
     id?: string;

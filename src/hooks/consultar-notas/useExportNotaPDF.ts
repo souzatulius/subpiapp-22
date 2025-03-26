@@ -1,110 +1,71 @@
 
 import { useState } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import { toast } from '@/components/ui/use-toast';
+import { NotaOficial } from '@/types/nota';
 
-interface NotaOficial {
-  id: string;
-  titulo: string;
-  texto: string;
-  status: string;
-  criado_em: string;
-  autor: {
-    nome_completo: string;
-  };
-  area_coordenacao: {
-    descricao: string;
-  };
-}
-
-export const useExportNotaPDF = (formatDate: (date: string) => string) => {
+export const useExportNotaPDF = (formatDate: (dateStr: string) => string) => {
   const [exporting, setExporting] = useState(false);
 
   const exportNotaToPDF = async (nota: NotaOficial) => {
+    if (!nota) return;
+    
+    setExporting(true);
     try {
-      setExporting(true);
+      // Criar um novo documento PDF
+      const doc = new jsPDF();
       
-      // Create a temporary div to render the note content
-      const tempDiv = document.createElement('div');
-      tempDiv.style.width = '600px';
-      tempDiv.style.padding = '20px';
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      // Configurar estilo do documento
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
       
-      // Add the content
-      tempDiv.innerHTML = `
-        <div style="border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
-          <h1 style="color: #003570; font-size: 24px; margin-bottom: 10px;">${nota.titulo}</h1>
-          <div style="color: #666; font-size: 12px;">
-            <p>Autor: ${nota.autor?.nome_completo || 'Não informado'}</p>
-            <p>Área: ${nota.area_coordenacao?.descricao || 'Não informada'}</p>
-            <p>Data de criação: ${formatDate(nota.criado_em)}</p>
-            <p>Status: ${nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}</p>
-          </div>
-        </div>
-        <div style="font-size: 14px; line-height: 1.5;">
-          ${nota.texto?.replace(/\n/g, '<br>') || ''}
-        </div>
-      `;
+      // Título
+      doc.text('NOTA OFICIAL', 105, 20, { align: 'center' });
       
-      document.body.appendChild(tempDiv);
+      // Configurar texto normal
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
       
-      // Convert the div to canvas
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        logging: false,
-        useCORS: true
-      });
+      // Informações da nota
+      // Usar o valor efetivo ou um valor padrão quando a propriedade não existir
+      const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
+      const areaNome = nota.supervisao_tecnica?.descricao || 'Área não especificada';
+      const dataFormated = formatDate(nota.criado_em || '');
       
-      // Remove the temporary div
-      document.body.removeChild(tempDiv);
+      // Título da nota
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Título: ${nota.titulo}`, 20, 40);
       
-      // Create PDF
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      // Metadados
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Autor: ${autorNome}`, 20, 50);
+      doc.text(`Área: ${areaNome}`, 20, 60);
+      doc.text(`Data: ${dataFormated}`, 20, 70);
+      doc.text(`Status: ${nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}`, 20, 80);
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const ratio = canvas.width / canvas.height;
-      const imgWidth = pdfWidth;
-      const imgHeight = imgWidth / ratio;
+      // Conteúdo
+      doc.setFont('helvetica', 'bold');
+      doc.text('Conteúdo:', 20, 100);
       
-      let heightLeft = imgHeight;
-      let position = 0;
+      doc.setFont('helvetica', 'normal');
       
-      // First page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
+      // Quebrar linhas longas para melhor formatação
+      const splitText = doc.splitTextToSize(nota.texto, 170);
+      doc.text(splitText, 20, 110);
       
-      // Additional pages if needed
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
-      }
-      
-      // Save the PDF
-      pdf.save(`nota-${nota.titulo.substring(0, 20)}.pdf`);
+      // Gerar o PDF
+      doc.save(`nota_oficial_${nota.id}.pdf`);
       
       toast({
-        title: 'PDF gerado com sucesso',
-        description: 'O PDF da nota foi gerado e baixado.',
-        variant: 'default',
+        title: "Exportação concluída",
+        description: "A nota foi exportada como PDF."
       });
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
+      console.error('Erro ao exportar PDF:', error);
       toast({
-        title: 'Erro ao gerar PDF',
-        description: 'Ocorreu um erro ao gerar o PDF da nota.',
-        variant: 'destructive',
+        title: "Erro na exportação",
+        description: "Não foi possível exportar a nota como PDF.",
+        variant: "destructive"
       });
     } finally {
       setExporting(false);
