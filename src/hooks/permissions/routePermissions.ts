@@ -15,7 +15,6 @@ export const canAccessProtectedRoute = (route: string, isAdmin: boolean): boolea
   
   // Protected routes that only admins can access
   const adminOnlyRoutes = [
-    '/settings',
     '/dashboard/comunicacao/cadastrar-demanda',
     '/dashboard/comunicacao/consultar-demandas',
     '/dashboard/comunicacao/criar-nota-oficial',
@@ -25,6 +24,8 @@ export const canAccessProtectedRoute = (route: string, isAdmin: boolean): boolea
     '/criar-nota-oficial',
     '/consultar-notas'
   ];
+  
+  // Removemos '/settings' da lista de rotas administrativas
   
   // Check if the route starts with any of the admin-only routes
   const isAdminRoute = adminOnlyRoutes.some(adminRoute => 

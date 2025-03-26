@@ -49,24 +49,9 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
       return;
     }
     
-    if (!isAdmin && !canAccessProtectedRoute(location.pathname)) {
-      toast({
-        title: "Acesso restrito",
-        description: "Você não tem permissão para acessar esta página. Este incidente foi registrado.",
-        variant: "destructive"
-      });
-      
-      console.warn("Unauthorized access attempt", {
-        userId: user.id,
-        email: user.email,
-        path: location.pathname,
-        timestamp: new Date().toISOString()
-      });
-      
-      navigate('/dashboard');
-    } else {
-      setAccessChecked(true);
-    }
+    // Removendo verificação de admin para a página de Settings
+    // Todos os usuários autenticados e aprovados poderão acessar
+    setAccessChecked(true);
   }, [
     user,
     authLoading,
@@ -86,7 +71,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
     );
   }
 
-  if (!user || !isApproved || (!isAdmin && !canAccessProtectedRoute(location.pathname))) {
+  if (!user || !isApproved) {
     return null; // Não renderiza nada enquanto aguarda o redirecionamento
   }
 

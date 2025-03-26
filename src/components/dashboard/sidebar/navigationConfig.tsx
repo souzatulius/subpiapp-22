@@ -51,13 +51,12 @@ export const getNavigationSections = () => [
     path: '/dashboard/zeladoria/ranking-subs',
     isSection: false
   },
-  // Seção 6: Ajustes
+  // Seção 6: Ajustes - Removida a restrição adminOnly
   {
     id: 'ajustes',
     icon: <Settings size={20} />,
     label: 'Ajustes',
     path: '/settings',
-    isSection: false,
-    adminOnly: true
+    isSection: false
   }
 ];
