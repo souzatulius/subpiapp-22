@@ -15,6 +15,9 @@ export interface SettingsCardProps {
   actionText?: string;
   category?: string;
   children?: React.ReactNode;
+  onClick?: () => void;
+  loading?: boolean;
+  chart?: React.ReactNode;
 }
 
 const SettingsCard: React.FC<SettingsCardProps> = ({
@@ -26,10 +29,21 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
   color = "bg-blue-600",
   actionText = "Gerenciar",
   category,
-  children
+  children,
+  onClick,
+  loading,
+  chart
 }) => {
+  // If onClick is provided, use it, otherwise use the default Link behavior
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <Link to={link} className="block h-full">
+    <Link to={link} className="block h-full" onClick={handleClick}>
       <Card className="h-full hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
         <CardHeader className={`flex flex-row items-center justify-between pb-2 ${color} text-white rounded-t-xl`}>
           <CardTitle className="text-sm font-medium flex items-center">
@@ -52,6 +66,11 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
                 </span>
               )}
             </div>
+            {chart && (
+              <div className="mt-3">
+                {chart}
+              </div>
+            )}
             {children && (
               <div className="mt-3">
                 {children}
