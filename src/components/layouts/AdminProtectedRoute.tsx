@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/hooks/permissions';
 import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
