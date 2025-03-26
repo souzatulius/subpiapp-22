@@ -16,12 +16,43 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   onRespostaChange
 }) => {
   if (!perguntas) return null;
+  
+  // Count answered questions
+  const getTotalAnswered = () => {
+    let answered = 0;
+    let total = 0;
+    
+    if (Array.isArray(perguntas)) {
+      total = perguntas.length;
+      perguntas.forEach((_, index) => {
+        if (resposta[index.toString()] && resposta[index.toString()].trim() !== '') {
+          answered++;
+        }
+      });
+    } else {
+      total = Object.keys(perguntas).length;
+      Object.keys(perguntas).forEach(key => {
+        if (resposta[key] && resposta[key].trim() !== '') {
+          answered++;
+        }
+      });
+    }
+    
+    return { answered, total };
+  };
+  
+  const { answered, total } = getTotalAnswered();
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium text-blue-700">Perguntas e Respostas</h3>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium text-blue-700">Perguntas e Respostas</h3>
+        <div className="text-sm text-gray-600">
+          <span className="font-medium">{answered}</span> de <span className="font-medium">{total}</span> respondidas
+        </div>
+      </div>
       
-      <div className="space-y-4">
+      <div className="space-y-5">
         {Array.isArray(perguntas) ? (
           perguntas.map((pergunta: string, index: number) => (
             <Card key={index} className="overflow-hidden border-blue-100">

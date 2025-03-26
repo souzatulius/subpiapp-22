@@ -94,59 +94,6 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     <div className="space-y-6">
       <div>
         <Label 
-          htmlFor="prioridade" 
-          className={`block mb-2 ${hasError('prioridade') ? 'text-orange-500 font-semibold' : ''}`}
-        >
-          Prioridade {hasError('prioridade') && <span className="text-orange-500">*</span>}
-        </Label>
-        <div className="grid grid-cols-3 gap-3">
-          <Button 
-            type="button" 
-            variant={formData.prioridade === 'alta' ? "default" : "outline"} 
-            className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-              formData.prioridade === 'alta' ? "ring-2 ring-[#003570]" : ""
-            } ${
-              hasError('prioridade') ? 'border-orange-500' : ''
-            }`} 
-            onClick={() => handleSelectChange('prioridade', 'alta')}
-          >
-            <AlertTriangleIcon className="h-5 w-5 text-red-500" />
-            <span className="text-sm font-semibold">Alta</span>
-          </Button>
-          <Button 
-            type="button" 
-            variant={formData.prioridade === 'media' ? "default" : "outline"} 
-            className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-              formData.prioridade === 'media' ? "ring-2 ring-[#003570]" : ""
-            } ${
-              hasError('prioridade') ? 'border-orange-500' : ''
-            }`} 
-            onClick={() => handleSelectChange('prioridade', 'media')}
-          >
-            <ClockIcon className="h-5 w-5 text-amber-500" />
-            <span className="text-sm font-semibold">Média</span>
-          </Button>
-          <Button 
-            type="button" 
-            variant={formData.prioridade === 'baixa' ? "default" : "outline"} 
-            className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-              formData.prioridade === 'baixa' ? "ring-2 ring-[#003570]" : ""
-            } ${
-              hasError('prioridade') ? 'border-orange-500' : ''
-            }`}
-            onClick={() => handleSelectChange('prioridade', 'baixa')}
-          >
-            <Flag className="h-5 w-5 text-green-500" />
-            <span className="text-sm font-semibold">Baixa</span>
-          </Button>
-        </div>
-        {hasError('prioridade') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prioridade')}</p>
-        )}
-      </div>
-
-      <div>
-        <Label 
           htmlFor="prazo_resposta" 
           className={`block mb-2 ${hasError('prazo_resposta') ? 'text-orange-500 font-semibold' : ''}`}
         >

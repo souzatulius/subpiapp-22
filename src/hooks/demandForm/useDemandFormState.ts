@@ -1,6 +1,9 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
+
+const FORM_STORAGE_KEY = 'demandForm_state';
 
 export const useDemandFormState = (
   bairros: any[],
@@ -27,13 +30,43 @@ export const useDemandFormState = (
     nao_sabe_servico: false,
   };
 
-  const [formData, setFormData] = useState<DemandFormData>(initialFormState);
-  const [serviceSearch, setServiceSearch] = useState('');
+  // Restore form state from localStorage on component mount
+  const savedState = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(FORM_STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsedState = JSON.parse(saved);
+          return parsedState;
+        } catch (error) {
+          console.error('Error parsing saved form state:', error);
+          return null;
+        }
+      }
+    }
+    return null;
+  }, []);
+
+  const [formData, setFormData] = useState<DemandFormData>(savedState?.formData || initialFormState);
+  const [serviceSearch, setServiceSearch] = useState(savedState?.serviceSearch || '');
   const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
-  const [selectedDistrito, setSelectedDistrito] = useState('');
-  const [activeStep, setActiveStep] = useState(0);
+  const [selectedDistrito, setSelectedDistrito] = useState(savedState?.selectedDistrito || '');
+  const [activeStep, setActiveStep] = useState(savedState?.activeStep || 0);
   const [servicos, setServicos] = useState<any[]>([]);
   const [filteredServicos, setFilteredServicos] = useState<any[]>([]);
+
+  // Save form state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stateToSave = {
+        formData,
+        serviceSearch,
+        selectedDistrito,
+        activeStep
+      };
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(stateToSave));
+    }
+  }, [formData, serviceSearch, selectedDistrito, activeStep]);
 
   useEffect(() => {
     const fetchServicos = async () => {
@@ -207,6 +240,7 @@ export const useDemandFormState = (
     setServiceSearch('');
     setSelectedDistrito('');
     setActiveStep(0);
+    localStorage.removeItem(FORM_STORAGE_KEY);
   };
 
   return {

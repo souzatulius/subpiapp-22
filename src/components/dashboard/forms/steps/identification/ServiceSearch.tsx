@@ -19,6 +19,8 @@ interface ServiceSearchProps {
   isPopoverOpen: boolean;
   setIsPopoverOpen: (isOpen: boolean) => void;
   className?: string;
+  onDontKnow?: () => void;
+  isInvalid?: boolean;
 }
 
 const ServiceSearch: React.FC<ServiceSearchProps> = ({
@@ -32,8 +34,10 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
   isPopoverOpen,
   setIsPopoverOpen,
   className = '',
+  onDontKnow,
+  isInvalid = false,
 }) => {
-  const hasError = (field: string) => errors.some(err => err.field === field);
+  const hasError = (field: string) => errors.some(err => err.field === field) || isInvalid;
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
@@ -106,6 +110,22 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
                   ))
                 ) : (
                   <p className="p-4 text-sm text-gray-500">Nenhum serviço encontrado</p>
+                )}
+                
+                {onDontKnow && (
+                  <>
+                    <div className="border-t border-gray-200 my-1"></div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start px-4 py-3 text-left text-orange-600 hover:bg-orange-50 hover:text-orange-700 rounded-none"
+                      onClick={() => {
+                        onDontKnow();
+                        setIsPopoverOpen(false);
+                      }}
+                    >
+                      Não sei informar o serviço
+                    </Button>
+                  </>
                 )}
               </div>
             </PopoverContent>
