@@ -8,7 +8,7 @@ import { renderIcon } from '@/components/settings/problems/renderIcon';
 interface TemaSelectorProps {
   problemas: any[];
   selectedTemaId: string;
-  handleSelectChange: (name: string, value: string) => void;
+  handleSelectChange: (id: string) => void;
   errors?: ValidationError[];
 }
 
@@ -40,7 +40,7 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
             } ${
               hasError('problema_id') ? 'border-orange-500' : ''
             }`} 
-            onClick={() => handleSelectChange('problema_id', tema.id)}
+            onClick={() => handleSelectChange(tema.id)}
           >
             <div className="w-6 h-6 flex items-center justify-center">
               {renderIcon(tema.icone)}
