@@ -24,13 +24,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setLoading(true);
       try {
         // Verifica sessão atual
-        const { data: { session } } = await authService.getSession();
-        setSession(session);
-        setUser(session?.user || null);
+        const { data } = await authService.getSession();
+        const currentSession = data.session;
+        setSession(currentSession);
+        setUser(currentSession?.user || null);
 
         // Verifica se o usuário está aprovado
-        if (session?.user) {
-          const approved = await isUserApproved(session.user.id);
+        if (currentSession?.user) {
+          const approved = await isUserApproved(currentSession.user.id);
           setIsApproved(approved);
           
           // Se estiver aprovado e estiver na página de login, redireciona para o dashboard

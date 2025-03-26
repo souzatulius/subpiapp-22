@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DemandasTable from './DemandasTable';
 import DemandasSearchBar from './DemandasSearchBar';
-import LoadingState from './LoadingState';
+import { LoadingState } from './LoadingState';
 import DeleteDemandDialog from './DeleteDemandDialog';
-import { useDemandasData, useDemandasActions } from '@/hooks/consultar-demandas';
+import { useDemandasData } from '@/hooks/consultar-demandas';
 import { Demand } from '@/types/demand';
 import { usePermissions } from '@/hooks/permissions';
 
@@ -16,25 +17,27 @@ const ConsultarDemandasContent = () => {
   const { isAdmin } = usePermissions();
 
   const {
-    data: demandas,
+    filteredDemandas: demandas,
     isLoading,
     error,
-    totalCount,
-    page,
-    pageSize,
-    setPage,
-    setPageSize,
     refetch,
-  } = useDemandasData({ searchTerm });
+    setSearchTerm: updateSearchTerm,
+    handleDeleteConfirm,
+    selectedDemand: hookSelectedDemand,
+    setSelectedDemand: hookSetSelectedDemand,
+  } = useDemandasData();
 
-  const { deleteDemanda } = useDemandasActions();
+  // Add pagination state directly in this component
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const totalCount = demandas ? demandas.length : 0;
 
   useEffect(() => {
     refetch();
   }, [searchTerm, refetch]);
 
   const handleSearch = (term: string) => {
-    setSearchTerm(term);
+    updateSearchTerm(term);
     setPage(1);
   };
 
@@ -49,7 +52,7 @@ const ConsultarDemandasContent = () => {
 
   const confirmDelete = async () => {
     if (selectedDemand) {
-      await deleteDemanda(selectedDemand.id);
+      await handleDeleteConfirm();
       setIsDeleteModalOpen(false);
       setSelectedDemand(null);
       refetch();
@@ -77,7 +80,7 @@ const ConsultarDemandasContent = () => {
         demandas={demandas || []}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        totalCount={totalCount || 0}
+        totalCount={totalCount}
         page={page}
         pageSize={pageSize}
         setPage={setPage}
@@ -87,7 +90,7 @@ const ConsultarDemandasContent = () => {
       {selectedDemand && (
         <DeleteDemandDialog
           isOpen={isDeleteModalOpen}
-          demand={selectedDemand}
+          demandId={selectedDemand.id}
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
         />
