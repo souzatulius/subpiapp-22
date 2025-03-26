@@ -102,80 +102,86 @@ const NotasCards: React.FC<NotasCardsProps> = ({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {notas.map((nota) => (
-          <Card key={nota.id} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-semibold line-clamp-1">{nota.titulo}</CardTitle>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(nota.status)}`}>
-                  {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
-                </span>
-              </div>
-              <CardDescription className="flex items-center text-sm text-gray-500">
-                {nota.demanda_id ? (
+        {notas.map((nota) => {
+          // Extract optional properties with fallbacks
+          const autorNome = nota.autor?.nome_completo || "Autor desconhecido";
+          const areaNome = nota.supervisao_tecnica?.descricao || "Área não especificada";
+          
+          return (
+            <Card key={nota.id} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg font-semibold line-clamp-1">{nota.titulo}</CardTitle>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(nota.status)}`}>
+                    {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
+                  </span>
+                </div>
+                <CardDescription className="flex items-center text-sm text-gray-500">
+                  {nota.demanda_id ? (
+                    <div className="flex items-center">
+                      <MessageSquare className="w-3 h-3 mr-1" />
+                      <span>Vinculada a demanda</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <Building className="w-3 h-3 mr-1" />
+                      <span>{areaNome}</span>
+                    </div>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <div className="text-sm text-gray-600 mb-2 line-clamp-3">
+                  {nota.texto}
+                </div>
+                <div className="flex flex-wrap gap-y-1 gap-x-3 text-xs text-gray-500">
                   <div className="flex items-center">
-                    <MessageSquare className="w-3 h-3 mr-1" />
-                    <span>Vinculada a demanda</span>
+                    <User className="w-3 h-3 mr-1" />
+                    <span>{autorNome}</span>
                   </div>
-                ) : (
                   <div className="flex items-center">
-                    <Building className="w-3 h-3 mr-1" />
-                    <span>{nota.supervisao_tecnica?.descricao || "Área não especificada"}</span>
+                    <Calendar className="w-3 h-3 mr-1" />
+                    <span>{formatDate(nota.criado_em).split(' ')[0]}</span>
                   </div>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <div className="text-sm text-gray-600 mb-2 line-clamp-3">
-                {nota.texto}
-              </div>
-              <div className="flex flex-wrap gap-y-1 gap-x-3 text-xs text-gray-500">
-                <div className="flex items-center">
-                  <User className="w-3 h-3 mr-1" />
-                  <span>{nota.autor?.nome_completo || "Autor desconhecido"}</span>
+                  <div className="flex items-center">
+                    <Clock className="w-3 h-3 mr-1" />
+                    <span>{formatDate(nota.criado_em).split(' ')[1]}</span>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  <span>{formatDate(nota.criado_em).split(' ')[0]}</span>
+              </CardContent>
+              <CardFooter className="pt-2 pb-4">
+                <div className="flex space-x-2 w-full">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1" 
+                    onClick={() => handleViewNota(nota)}
+                  >
+                    <Eye className="w-3.5 h-3.5 mr-2" />
+                    Ver
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleExportPDF(nota)}
+                    disabled={exporting}
+                  >
+                    <FileDown className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => handleDeleteClick(nota)}
+                    disabled={deleteLoading}
+                  >
+                    <Trash className="w-3.5 h-3.5" />
+                  </Button>
                 </div>
-                <div className="flex items-center">
-                  <Clock className="w-3 h-3 mr-1" />
-                  <span>{formatDate(nota.criado_em).split(' ')[1]}</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="pt-2 pb-4">
-              <div className="flex space-x-2 w-full">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1" 
-                  onClick={() => handleViewNota(nota)}
-                >
-                  <Eye className="w-3.5 h-3.5 mr-2" />
-                  Ver
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleExportPDF(nota)}
-                  disabled={exporting}
-                >
-                  <FileDown className="w-3.5 h-3.5" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleDeleteClick(nota)}
-                  disabled={deleteLoading}
-                >
-                  <Trash className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
 
       {selectedNota && (

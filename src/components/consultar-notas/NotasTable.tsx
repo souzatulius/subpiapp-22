@@ -141,92 +141,98 @@ const NotasTable: React.FC<NotasTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {notas.map((nota) => (
-              <TableRow key={nota.id}>
-                <TableCell className="font-medium">{nota.titulo}</TableCell>
-                <TableCell>{nota.autor?.nome_completo || 'Autor desconhecido'}</TableCell>
-                <TableCell>{nota.supervisao_tecnica?.descricao || 'Não informada'}</TableCell>
-                <TableCell>{formatDate(nota.criado_em)}</TableCell>
-                <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(nota.status)}`}>
-                    {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => handleViewNota(nota)}
-                      title="Visualizar"
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                    </Button>
-                    
-                    {isAdmin && nota.status === 'pendente' && (
-                      <>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 w-8 p-0 text-blue-600" 
-                          onClick={() => handleEditNota(nota.id)}
-                          title="Editar"
-                        >
-                          <EditIcon className="h-4 w-4" />
-                        </Button>
-                        
-                        {onApproveNota && (
+            {notas.map((nota) => {
+              // Extract optional properties with fallbacks
+              const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
+              const areaNome = nota.supervisao_tecnica?.descricao || 'Não informada';
+              
+              return (
+                <TableRow key={nota.id}>
+                  <TableCell className="font-medium">{nota.titulo}</TableCell>
+                  <TableCell>{autorNome}</TableCell>
+                  <TableCell>{areaNome}</TableCell>
+                  <TableCell>{formatDate(nota.criado_em)}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(nota.status)}`}>
+                      {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0" 
+                        onClick={() => handleViewNota(nota)}
+                        title="Visualizar"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </Button>
+                      
+                      {isAdmin && nota.status === 'pendente' && (
+                        <>
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="h-8 w-8 p-0 text-green-600" 
-                            onClick={() => onApproveNota(nota.id)}
-                            title="Aprovar"
+                            className="h-8 w-8 p-0 text-blue-600" 
+                            onClick={() => handleEditNota(nota.id)}
+                            title="Editar"
                           >
-                            <CheckIcon className="h-4 w-4" />
+                            <EditIcon className="h-4 w-4" />
                           </Button>
-                        )}
-                        
-                        {onRejectNota && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 w-8 p-0 text-red-600" 
-                            onClick={() => onRejectNota(nota.id)}
-                            title="Rejeitar"
-                          >
-                            <XIcon className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </>
-                    )}
-                    
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => handleExportPDF(nota)}
-                      disabled={exporting}
-                      title="Exportar PDF"
-                    >
-                      <FileDownIcon className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700" 
-                      onClick={() => handleDeleteClick(nota)}
-                      disabled={deleteLoading}
-                      title="Excluir"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                          
+                          {onApproveNota && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-green-600" 
+                              onClick={() => onApproveNota(nota.id)}
+                              title="Aprovar"
+                            >
+                              <CheckIcon className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
+                          {onRejectNota && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-red-600" 
+                              onClick={() => onRejectNota(nota.id)}
+                              title="Rejeitar"
+                            >
+                              <XIcon className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </>
+                      )}
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0" 
+                        onClick={() => handleExportPDF(nota)}
+                        disabled={exporting}
+                        title="Exportar PDF"
+                      >
+                        <FileDownIcon className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700" 
+                        onClick={() => handleDeleteClick(nota)}
+                        disabled={deleteLoading}
+                        title="Excluir"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
