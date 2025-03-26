@@ -7,7 +7,11 @@ interface ResponderDemandaFormProps {
 }
 
 const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({ onClose }) => {
-  return <ResponderDemandaContent />;
+  return (
+    <div className="w-full">
+      <ResponderDemandaContent />
+    </div>
+  );
 };
 
 export default ResponderDemandaForm;

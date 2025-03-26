@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { ArrowLeft, Upload } from 'lucide-react';
 import { formatarData } from '../utils/formatters';
 import { Demanda } from '../types';
