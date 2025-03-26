@@ -36,7 +36,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       return (
         <ul className="list-disc pl-5 space-y-1">
           {perguntas.map((pergunta, index) => (
-            <li key={index} className="text-sm">{pergunta}</li>
+            <li key={index} className="text-sm">{String(pergunta)}</li>
           ))}
         </ul>
       );
@@ -47,13 +47,13 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       return (
         <ul className="list-disc pl-5 space-y-1">
           {Object.entries(perguntas).map(([key, value], index) => (
-            <li key={index} className="text-sm">{value}</li>
+            <li key={index} className="text-sm">{String(value)}</li>
           ))}
         </ul>
       );
     }
     
-    // If perguntas is a string, just display it without calling toString()
+    // If perguntas is a string or any other primitive, convert to string
     return <p className="text-sm">{String(perguntas)}</p>;
   };
 
