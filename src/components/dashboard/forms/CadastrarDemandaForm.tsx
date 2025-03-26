@@ -143,6 +143,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             servicos={servicos}
             filteredServicos={filteredServicos}
             handleServiceSearch={handleServiceSearch}
+            nextStep={nextStep}
           />
           
           <FormActions 

@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Phone, Mail, MessageSquare, Building, Users, Flag } from 'lucide-react';
+import Protocolo156 from './identification/Protocolo156';
 
 interface ProtocolStepProps {
   formData: any;
@@ -14,6 +15,7 @@ interface ProtocolStepProps {
   origens: any[];
   tiposMidia: any[];
   errors?: ValidationError[];
+  nextStep?: () => void;
 }
 
 const ProtocolStep: React.FC<ProtocolStepProps> = ({
@@ -22,17 +24,9 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   handleSelectChange,
   origens,
   tiposMidia,
-  errors = []
+  errors = [],
+  nextStep
 }) => {
-  const [hasProtocol, setHasProtocol] = useState<boolean | undefined>(formData.tem_protocolo_156);
-
-  const handleProtocolChange = (hasProtocol: boolean) => {
-    setHasProtocol(hasProtocol);
-    handleSelectChange('tem_protocolo_156', hasProtocol);
-    if (!hasProtocol) {
-      handleSelectChange('numero_protocolo_156', '');
-    }
-  };
 
   // Função para obter o ícone com base na descrição da origem
   const getOriginIcon = (descricao: string) => {
@@ -54,6 +48,15 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
+  };
+
+  const handleProtocol156Change = (checked: boolean) => {
+    handleSelectChange('tem_protocolo_156', checked);
+    
+    // Se selecionou "Não", avança para a próxima etapa automaticamente
+    if (!checked && nextStep) {
+      setTimeout(nextStep, 300); // Pequeno atraso para melhor UX
+    }
   };
 
   return (
@@ -88,48 +91,19 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         )}
       </div>
 
-      <Separator />
-      
-      <div>
-        <Label className="block mb-2 text-lg font-medium">
-          Essa solicitação já tem protocolo no 156?
-        </Label>
-        <div className="flex gap-3 mt-2">
-          <Button 
-            type="button" 
-            variant={hasProtocol ? "default" : "outline"} 
-            onClick={() => handleProtocolChange(true)}
-            className="rounded-xl"
-          >
-            Sim
-          </Button>
-          <Button 
-            type="button" 
-            variant={hasProtocol === false ? "default" : "outline"} 
-            onClick={() => handleProtocolChange(false)}
-            className="rounded-xl"
-          >
-            Não
-          </Button>
+      {formData.origem_id && (
+        <div className="animate-fadeIn">
+          <Separator className="my-4" />
+          
+          <Protocolo156
+            temProtocolo156={formData.tem_protocolo_156}
+            numeroProtocolo156={formData.numero_protocolo_156}
+            handleSelectChange={handleProtocol156Change}
+            handleChange={handleChange}
+            errors={errors}
+          />
         </div>
-        
-        {hasProtocol && (
-          <div className="mt-4 animate-fadeIn">
-            <Input 
-              id="numero_protocolo_156" 
-              name="numero_protocolo_156" 
-              value={formData.numero_protocolo_156 || ''} 
-              onChange={handleChange}
-              className={`${hasError('numero_protocolo_156') ? 'border-orange-500' : ''}`}
-              placeholder="Digite aqui os 10 dígitos do protocolo"
-              maxLength={10}
-            />
-            {hasError('numero_protocolo_156') && (
-              <p className="text-orange-500 text-sm mt-1">{getErrorMessage('numero_protocolo_156')}</p>
-            )}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

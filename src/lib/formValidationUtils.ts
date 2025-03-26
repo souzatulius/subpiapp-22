@@ -40,13 +40,6 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
         message: 'Selecione a origem da demanda'
       });
     }
-
-    if (!formData.nome_solicitante || formData.nome_solicitante.trim() === '') {
-      errors.push({
-        field: 'nome_solicitante',
-        message: 'O nome do solicitante é obrigatório'
-      });
-    }
     
     if (formData.email_solicitante && !validateEmail(formData.email_solicitante)) {
       errors.push({
@@ -59,6 +52,13 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       errors.push({
         field: 'bairro_id',
         message: 'Selecione o bairro'
+      });
+    }
+    
+    if (!formData.endereco || formData.endereco.trim() === '') {
+      errors.push({
+        field: 'endereco',
+        message: 'Endereço é obrigatório'
       });
     }
     
@@ -111,6 +111,7 @@ export const getErrorSummary = (errors: ValidationError[]): string => {
       case 'prazo_resposta': return 'Prazo de Resposta';
       case 'titulo': return 'Título';
       case 'numero_protocolo_156': return 'Protocolo 156';
+      case 'endereco': return 'Endereço';
       default: return err.field;
     }
   });

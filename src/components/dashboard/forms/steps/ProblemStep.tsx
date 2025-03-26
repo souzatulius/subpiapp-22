@@ -45,7 +45,7 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
           htmlFor="problema_id" 
           className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Tema/Problema {hasError('problema_id') && <span className="text-orange-500">*</span>}
+          Qual é o tema do problema? {hasError('problema_id') && <span className="text-orange-500">*</span>}
         </Label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {problemas.map(problema => (
@@ -74,7 +74,7 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
         <div className="animate-fadeIn space-y-4">
           <div>
             <Label htmlFor="serviceSearch" className="block mb-2">
-              Pesquisar Serviço
+              Qual serviço está relacionado a esse tema?
             </Label>
             <Input 
               id="serviceSearch" 
@@ -97,12 +97,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
           
           {!formData.nao_sabe_servico && (
             <div>
-              <Label 
-                htmlFor="servico_id" 
-                className={`block mb-2 ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}
-              >
-                Serviço {hasError('servico_id') && <span className="text-orange-500">*</span>}
-              </Label>
               <div className="space-y-2">
                 {filteredServicos.length > 0 ? (
                   filteredServicos.map(servico => (

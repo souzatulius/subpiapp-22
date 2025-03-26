@@ -10,7 +10,7 @@ import { ValidationError } from '@/lib/formValidationUtils';
 
 export const FORM_STEPS = [
   {
-    title: 'De onde vem a sua solicitação?',
+    title: 'Vamos iniciar agora o cadastro da demanda',
     description: 'Selecione a origem da demanda e informe se há protocolo 156.',
   },
   {

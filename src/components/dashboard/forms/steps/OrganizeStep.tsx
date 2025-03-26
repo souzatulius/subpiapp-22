@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,14 @@ interface OrganizeStepProps {
     titulo: string;
     perguntas: string[];
     anexos: string[];
+    problema_id: string;
+    servico_id: string;
+    bairro_id: string;
+    endereco: string;
   };
+  problemas: any[];
+  servicos: any[];
+  filteredBairros: any[];
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handlePerguntaChange: (index: number, value: string) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
@@ -22,15 +29,74 @@ interface OrganizeStepProps {
 
 const OrganizeStep: React.FC<OrganizeStepProps> = ({
   formData,
+  problemas,
+  servicos,
+  filteredBairros,
   handleChange,
   handlePerguntaChange,
   handleSelectChange,
   handleAnexosChange,
   errors = []
 }) => {
+  const [showNextPergunta, setShowNextPergunta] = useState<{ [key: number]: boolean }>({});
+
+  // Gerar título sugerido com base nos campos já preenchidos
+  useEffect(() => {
+    if (!formData.titulo || formData.titulo.trim() === '') {
+      let suggestedTitle = '';
+      
+      const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+      const selectedService = servicos.find(s => s.id === formData.servico_id);
+      const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
+      
+      if (selectedProblem) {
+        suggestedTitle += selectedProblem.descricao;
+      }
+      
+      if (selectedService) {
+        suggestedTitle += ` - ${selectedService.descricao}`;
+      }
+      
+      if (selectedBairro) {
+        suggestedTitle += ` - ${selectedBairro.nome}`;
+      }
+      
+      if (formData.endereco) {
+        const shortAddress = formData.endereco.length > 30 
+          ? formData.endereco.substring(0, 30) + '...' 
+          : formData.endereco;
+        suggestedTitle += ` (${shortAddress})`;
+      }
+      
+      if (suggestedTitle) {
+        // Usar handleSelectChange para evitar perder a referência no handleChange
+        handleSelectChange('titulo', suggestedTitle.trim());
+      }
+    }
+  }, [
+    formData.problema_id, 
+    formData.servico_id, 
+    formData.bairro_id, 
+    formData.endereco,
+    problemas,
+    servicos,
+    filteredBairros
+  ]);
+
+  // Monitorar digitação nas perguntas para exibir a próxima
+  useEffect(() => {
+    const newShowNextPergunta = { ...showNextPergunta };
+    
+    formData.perguntas.forEach((pergunta, index) => {
+      if (pergunta.trim() !== '' && index < 4) { // Mostrar próxima pergunta se atual tiver conteúdo
+        newShowNextPergunta[index + 1] = true;
+      }
+    });
+    
+    setShowNextPergunta(newShowNextPergunta);
+  }, [formData.perguntas]);
+
   const addPergunta = () => {
-    const newPerguntas = [...formData.perguntas, ''];
-    // Use handleAnexosChange for consistency, even though it's for questions
     handlePerguntaChange(formData.perguntas.length, '');
   };
 
@@ -93,40 +159,95 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
           <Label htmlFor="perguntas" className="block">
             Perguntas para a Área Técnica
           </Label>
-          <Button 
-            type="button" 
-            size="sm" 
-            variant="outline" 
-            onClick={addPergunta}
-            className="rounded-xl"
-            disabled={formData.perguntas.filter(p => p !== '').length >= 5}
-          >
-            <Plus className="h-4 w-4 mr-1" /> Adicionar Pergunta
-          </Button>
         </div>
         
         <div className="space-y-2">
-          {formData.perguntas.map((pergunta, index) => (
-            pergunta !== '' || index === 0 ? (
-              <div key={index} className="flex gap-2">
-                <Input 
-                  value={pergunta} 
-                  onChange={(e) => handlePerguntaChange(index, e.target.value)} 
-                  placeholder="Digite sua pergunta aqui"
-                  className="flex-1 rounded-xl"
-                />
-                <Button 
-                  type="button" 
-                  size="icon" 
-                  variant="ghost" 
-                  onClick={() => removePergunta(index)}
-                  disabled={index === 0 && formData.perguntas.filter(p => p !== '').length === 1}
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </div>
-            ) : null
-          ))}
+          {/* Sempre mostrar a primeira pergunta */}
+          <div className="flex gap-2">
+            <Input 
+              value={formData.perguntas[0] || ''} 
+              onChange={(e) => handlePerguntaChange(0, e.target.value)} 
+              placeholder="Digite sua pergunta aqui"
+              className="flex-1 rounded-xl"
+            />
+          </div>
+          
+          {/* Mostrar próximas perguntas de forma condicional */}
+          {(formData.perguntas[0]?.trim() || showNextPergunta[1]) && (
+            <div className="flex gap-2 animate-fadeIn">
+              <Input 
+                value={formData.perguntas[1] || ''} 
+                onChange={(e) => handlePerguntaChange(1, e.target.value)} 
+                placeholder="Digite sua pergunta aqui"
+                className="flex-1 rounded-xl"
+              />
+              <Button 
+                type="button" 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => removePergunta(1)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          )}
+          
+          {(formData.perguntas[1]?.trim() || showNextPergunta[2]) && (
+            <div className="flex gap-2 animate-fadeIn">
+              <Input 
+                value={formData.perguntas[2] || ''} 
+                onChange={(e) => handlePerguntaChange(2, e.target.value)} 
+                placeholder="Digite sua pergunta aqui"
+                className="flex-1 rounded-xl"
+              />
+              <Button 
+                type="button" 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => removePergunta(2)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          )}
+          
+          {(formData.perguntas[2]?.trim() || showNextPergunta[3]) && (
+            <div className="flex gap-2 animate-fadeIn">
+              <Input 
+                value={formData.perguntas[3] || ''} 
+                onChange={(e) => handlePerguntaChange(3, e.target.value)} 
+                placeholder="Digite sua pergunta aqui"
+                className="flex-1 rounded-xl"
+              />
+              <Button 
+                type="button" 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => removePergunta(3)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          )}
+          
+          {(formData.perguntas[3]?.trim() || showNextPergunta[4]) && (
+            <div className="flex gap-2 animate-fadeIn">
+              <Input 
+                value={formData.perguntas[4] || ''} 
+                onChange={(e) => handlePerguntaChange(4, e.target.value)} 
+                placeholder="Digite sua pergunta aqui"
+                className="flex-1 rounded-xl"
+              />
+              <Button 
+                type="button" 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => removePergunta(4)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          )}
           
           {formData.perguntas.filter(p => p !== '').length === 0 && (
             <p className="text-sm text-gray-500 italic">

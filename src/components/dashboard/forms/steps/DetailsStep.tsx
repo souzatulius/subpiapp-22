@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -13,8 +14,8 @@ interface DetailsStepProps {
     veiculo_imprensa: string;
     detalhes_solicitacao: string;
   };
-  handleSelectChange: (name: string, value: string) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSelectChange: (name: string, value: string) => void;
   origens: any[];
   tiposMidia: any[];
   errors?: ValidationError[];
@@ -22,8 +23,8 @@ interface DetailsStepProps {
 
 const DetailsStep: React.FC<DetailsStepProps> = ({
   formData,
-  handleSelectChange,
   handleChange,
+  handleSelectChange,
   origens,
   tiposMidia,
   errors = []
@@ -39,8 +40,6 @@ const DetailsStep: React.FC<DetailsStepProps> = ({
   const showMediaFields = selectedOrigin?.descricao === "Imprensa" || 
                          selectedOrigin?.descricao === "SMSUB" ||
                          selectedOrigin?.descricao === "SECOM";
-                         
-  const showVeiculoImprensa = showMediaFields && formData.tipo_midia_id;
   
   // Resetar tipo_midia_id quando a origem não exige este campo
   useEffect(() => {
@@ -71,12 +70,12 @@ const DetailsStep: React.FC<DetailsStepProps> = ({
     <div className="space-y-6">
       {showMediaFields && (
         <div className="animate-fadeIn">
-          <label 
+          <Label 
             htmlFor="tipo_midia_id" 
-            className={`block mb-2 text-lg font-medium ${hasError('tipo_midia_id') ? 'text-orange-500 font-semibold' : ''}`}
+            className={`block mb-2 ${hasError('tipo_midia_id') ? 'text-orange-500 font-semibold' : ''}`}
           >
             Tipo de Mídia
-          </label>
+          </Label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {tiposMidia.map(tipo => (
               <Button 
@@ -101,14 +100,14 @@ const DetailsStep: React.FC<DetailsStepProps> = ({
         </div>
       )}
       
-      {showVeiculoImprensa && (
+      {formData.tipo_midia_id && (
         <div className="animate-fadeIn">
-          <label 
+          <Label 
             htmlFor="veiculo_imprensa" 
-            className={`block mb-2 text-lg font-medium ${hasError('veiculo_imprensa') ? 'text-orange-500 font-semibold' : ''}`}
+            className={`block mb-2 ${hasError('veiculo_imprensa') ? 'text-orange-500 font-semibold' : ''}`}
           >
-            Veículo de Imprensa
-          </label>
+            Qual é o veículo de imprensa?
+          </Label>
           <Input 
             id="veiculo_imprensa" 
             name="veiculo_imprensa" 
@@ -121,21 +120,21 @@ const DetailsStep: React.FC<DetailsStepProps> = ({
           )}
         </div>
       )}
-
+      
       <div>
-        <label 
+        <Label 
           htmlFor="detalhes_solicitacao" 
-          className={`block mb-2 text-lg font-medium ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}
+          className={`block mb-2 ${hasError('detalhes_solicitacao') ? 'text-orange-500 font-semibold' : ''}`}
         >
           Detalhes da Solicitação
-        </label>
+        </Label>
         <Textarea 
           id="detalhes_solicitacao" 
           name="detalhes_solicitacao" 
           value={formData.detalhes_solicitacao} 
           onChange={handleChange} 
           className={`min-h-[150px] rounded-xl ${hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}`}
-          placeholder="Descreva com detalhes o que está acontecendo..."
+          placeholder="Descreva detalhadamente a solicitação..."
         />
         {hasError('detalhes_solicitacao') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>
