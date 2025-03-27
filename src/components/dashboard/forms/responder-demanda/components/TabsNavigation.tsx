@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 interface TabsNavigationProps {
   activeTab: string;
   onTabChange: (value: string) => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const TabsNavigation: React.FC<TabsNavigationProps> = ({ 
@@ -18,7 +18,7 @@ const TabsNavigation: React.FC<TabsNavigationProps> = ({
       defaultValue="details" 
       value={activeTab}
       onValueChange={onTabChange}
-      className="mt-4"
+      className="w-full"
     >
       <TabsList className="grid grid-cols-2 w-full lg:w-auto mb-4 bg-gray-100">
         <TabsTrigger 

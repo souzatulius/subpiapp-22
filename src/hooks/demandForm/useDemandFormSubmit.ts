@@ -1,78 +1,74 @@
 
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { DemandFormData } from './types';
 import { toast } from '@/components/ui/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { DemandFormData } from './types';
 
-export const useDemandFormSubmit = (
-  userId: string | undefined,
-  formData: DemandFormData,
-  setIsLoading: (loading: boolean) => void,
-  onClose: () => void
-) => {
-  const handleSubmit = async () => {
-    if (!userId) {
+export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+
+  const formatPerguntasToObject = (perguntas: string[]) => {
+    // Filter out empty questions and create a structured object
+    const filteredPerguntas = perguntas.filter(p => p.trim() !== '');
+    
+    // Create a formatted perguntas object
+    const perguntasObj: Record<string, string> = {};
+    
+    filteredPerguntas.forEach((pergunta, index) => {
+      perguntasObj[`pergunta_${index + 1}`] = pergunta;
+    });
+    
+    return perguntasObj;
+  };
+
+  const submitForm = async (formData: DemandFormData) => {
+    if (!user) {
       toast({
         title: "Erro de autenticação",
-        description: "Você precisa estar logado para cadastrar uma demanda.",
+        description: "Você precisa estar logado para submeter o formulário.",
         variant: "destructive"
       });
       return;
     }
-
+    
     setIsLoading(true);
-
+    
     try {
-      // Format the perguntas field to be stored as JSON
-      const perguntas: Record<string, string> = {};
-      formData.perguntas.forEach((pergunta, index) => {
-        if (pergunta.trim()) {
-          perguntas[`pergunta_${index + 1}`] = pergunta;
-        }
-      });
-
-      const demandaData = {
-        titulo: formData.titulo,
-        problema_id: formData.problema_id,
-        origem_id: formData.origem_id,
-        tipo_midia_id: formData.tipo_midia_id || null,
-        prioridade: formData.prioridade,
-        prazo_resposta: formData.prazo_resposta,
-        nome_solicitante: formData.nome_solicitante || null,
-        telefone_solicitante: formData.telefone_solicitante || null,
-        email_solicitante: formData.email_solicitante || null,
-        veiculo_imprensa: formData.veiculo_imprensa || null,
-        endereco: formData.endereco || null,
-        bairro_id: formData.bairro_id || null,
-        perguntas: Object.keys(perguntas).length > 0 ? perguntas : null,
-        detalhes_solicitacao: formData.detalhes_solicitacao || null,
-        arquivo_url: formData.arquivo_url || null,
-        anexos: formData.anexos.length > 0 ? formData.anexos : null,
-        autor_id: userId,
-        status: 'pendente',
-        horario_publicacao: new Date().toISOString(),
-        protocolo: formData.tem_protocolo_156 ? formData.numero_protocolo_156 : null,
-        servico_id: formData.nao_sabe_servico ? null : formData.servico_id || null
+      // Format perguntas as an object with proper structure
+      const formattedPerguntas = formatPerguntasToObject(formData.perguntas);
+      
+      // Make sure anexos has valid URLs
+      const validAnexos = formData.anexos.filter(url => 
+        url && url.startsWith('http') && !url.startsWith('blob:')
+      );
+      
+      // Prepare the payload
+      const payload = {
+        ...formData,
+        perguntas: formattedPerguntas,
+        anexos: validAnexos,
+        autor_id: user.id,
+        status: 'pendente'
       };
-
-      const { data: insertedDemanda, error: insertError } = await supabase
+      
+      // Submit to Supabase
+      const { error } = await supabase
         .from('demandas')
-        .insert(demandaData)
-        .select('id')
-        .single();
-
-      if (insertError) throw insertError;
-
+        .insert(payload);
+        
+      if (error) throw error;
+      
       toast({
         title: "Demanda cadastrada com sucesso!",
-        description: "A demanda foi cadastrada e será encaminhada para a área responsável.",
-        variant: "default"
+        description: "A demanda foi cadastrada e será analisada pela equipe.",
       });
-
-      // The onClose function is still called for cleanup
+      
+      resetForm();
       onClose();
     } catch (error: any) {
-      console.error("Error submitting demand:", error);
+      console.error("Erro ao submeter formulário:", error);
       toast({
         title: "Erro ao cadastrar demanda",
         description: error.message || "Ocorreu um erro ao processar sua solicitação.",
@@ -83,5 +79,7 @@ export const useDemandFormSubmit = (
     }
   };
 
-  return { handleSubmit };
+  return { isLoading, submitForm };
 };
+
+export default useDemandFormSubmit;

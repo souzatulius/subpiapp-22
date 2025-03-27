@@ -18,6 +18,42 @@ export const useRespostaFormState = ({
   const [selectedServicoId, setSelectedServicoId] = useState<string>('');
   const [dontKnowService, setDontKnowService] = useState<boolean>(false);
 
+  // Parse perguntas into a normalized format for resposta
+  const normalizePerguntas = (perguntas: any): { key: string, value: string }[] => {
+    if (!perguntas) return [];
+
+    // If it's already an object with key/value pairs
+    if (typeof perguntas === 'object' && !Array.isArray(perguntas)) {
+      return Object.entries(perguntas).map(([key, value]) => ({
+        key: key.startsWith('pergunta_') ? key : `pergunta_${key}`,
+        value: String(value)
+      }));
+    }
+    
+    // If it's an array of strings
+    if (Array.isArray(perguntas)) {
+      return perguntas
+        .filter(p => p && String(p).trim() !== '')
+        .map((pergunta, index) => ({
+          key: `${index}`,
+          value: String(pergunta)
+        }));
+    }
+    
+    // If it's a JSON string, parse it first
+    if (typeof perguntas === 'string') {
+      try {
+        const parsed = JSON.parse(perguntas);
+        return normalizePerguntas(parsed);
+      } catch {
+        // If it can't be parsed, treat as a single question
+        return [{ key: '0', value: perguntas }];
+      }
+    }
+
+    return [];
+  };
+
   // Initialize form state when demanda changes
   useEffect(() => {
     if (selectedDemanda?.problema_id) {
@@ -26,19 +62,17 @@ export const useRespostaFormState = ({
     
     // Initialize perguntas and respostas
     if (selectedDemanda?.perguntas) {
-      const initialRespostas: Record<string, string> = {};
+      const normalizedPerguntas = normalizePerguntas(selectedDemanda.perguntas);
       
-      if (Array.isArray(selectedDemanda.perguntas)) {
-        selectedDemanda.perguntas.forEach((pergunta: string, index: number) => {
-          initialRespostas[index.toString()] = resposta[index.toString()] || '';
-        });
-      } else if (typeof selectedDemanda.perguntas === 'object') {
-        Object.keys(selectedDemanda.perguntas).forEach((key) => {
-          initialRespostas[key] = resposta[key] || '';
-        });
-      }
+      const initialRespostas: Record<string, string> = { ...resposta };
       
-      console.log('Initializing perguntas:', selectedDemanda.perguntas);
+      normalizedPerguntas.forEach(({ key, value }) => {
+        if (!initialRespostas[key]) {
+          initialRespostas[key] = '';
+        }
+      });
+      
+      console.log('Normalized perguntas:', normalizedPerguntas);
       console.log('Initial respostas:', initialRespostas);
       
       setResposta(initialRespostas);
@@ -54,7 +88,7 @@ export const useRespostaFormState = ({
     }
     
     console.log('Initializing servico_id:', selectedDemanda?.servico_id);
-  }, [selectedDemanda, setResposta, resposta]);
+  }, [selectedDemanda, setResposta]);
 
   const handleRespostaChange = (key: string, value: string) => {
     console.log('Changing resposta for key:', key, 'to value:', value);
@@ -109,25 +143,24 @@ export const useRespostaFormState = ({
   const allQuestionsAnswered = () => {
     if (!selectedDemanda?.perguntas) return true;
     
-    const questions = Array.isArray(selectedDemanda.perguntas) 
-      ? selectedDemanda.perguntas 
-      : Object.values(selectedDemanda.perguntas);
-      
-    const answers = Object.values(resposta);
+    const normalizedPerguntas = normalizePerguntas(selectedDemanda.perguntas);
     
-    // Se não tiver perguntas, considera que está tudo respondido
-    if (questions.length === 0) return true;
+    // If there are no questions, consider everything answered
+    if (normalizedPerguntas.length === 0) return true;
     
-    // Verifica se tem o mesmo número de respostas e perguntas
-    if (Object.keys(resposta).length !== (Array.isArray(selectedDemanda.perguntas) 
-      ? selectedDemanda.perguntas.length 
-      : Object.keys(selectedDemanda.perguntas).length)) return false;
-    
-    // Verifica se todas as respostas estão preenchidas
-    return !Object.values(resposta).some(answer => !answer || answer.trim() === '');
+    // Check if all questions have answers
+    return normalizedPerguntas.every(({ key }) => resposta[key] && resposta[key].trim() !== '');
   };
 
   const handleAttachmentAction = (url: string, action: 'view' | 'download') => {
+    if (!url.startsWith('http') || url.startsWith('blob:')) {
+      toast({
+        title: "Erro ao acessar anexo",
+        description: "O URL do anexo é inválido ou não está acessível.",
+        variant: "destructive"
+      });
+      return;
+    }
     window.open(url, '_blank');
   };
 

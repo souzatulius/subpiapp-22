@@ -91,16 +91,16 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 
   const handleSubmitWithExtra = async () => {
     try {
-      // Atualizar o serviço selecionado (se houver)
+      // Update selected service (if any)
       await updateService();
       
-      // Chamar o onSubmit original que salva as respostas
+      // Call the original onSubmit to save responses
       await onSubmit();
       
-      // Limpar dados do sessionStorage após envio bem-sucedido
+      // Clear data from sessionStorage after successful submission
       clearFormStorage();
 
-      // Mostrar toast de sucesso
+      // Show success toast
       toast({
         title: "Resposta enviada com sucesso!",
         description: "Os dados foram salvos e a demanda foi respondida.",
@@ -110,7 +110,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     } catch (error) {
       console.error('Erro ao salvar informações adicionais:', error);
       
-      // Mostrar toast de erro
+      // Show error toast
       toast({
         title: "Erro ao enviar resposta",
         description: "Ocorreu um problema ao salvar sua resposta. Tente novamente.",
@@ -135,40 +135,44 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           <TabsNavigation
             activeTab={activeTab}
             onTabChange={setActiveTab}
-          >
-            <CardContent className="space-y-6">
-              <DetailsTab 
-                selectedDemanda={selectedDemanda}
-                selectedProblemId={selectedProblemId}
-                selectedServicoId={selectedServicoId}
-                dontKnowService={dontKnowService}
-                problems={problems}
-                problemsLoading={problemsLoading}
-                servicos={servicos}
-                servicosLoading={servicosLoading}
-                currentProblem={currentProblem}
-                onProblemChange={setSelectedProblemId}
-                onServicoChange={setSelectedServicoId}
-                onDontKnowServiceChange={handleServiceToggle}
-                onViewAttachment={handleViewAttachment}
-                onDownloadAttachment={handleDownloadAttachment}
-                resposta={resposta}
-                onRespostaChange={handleRespostaChange}
-              />
-              
-              <CommentsTab 
-                comentarios={setComentarios ? comentarios : localComentarios}
-                onChange={(value) => {
-                  if (setComentarios) {
-                    setComentarios(value);
-                  } else {
-                    setLocalComentarios(value);
-                  }
-                }}
-              />
-            </CardContent>
-          </TabsNavigation>
+          />
         </CardHeader>
+        
+        <CardContent className="space-y-6">
+          {activeTab === 'details' && (
+            <DetailsTab 
+              selectedDemanda={selectedDemanda}
+              selectedProblemId={selectedProblemId}
+              selectedServicoId={selectedServicoId}
+              dontKnowService={dontKnowService}
+              problems={problems}
+              problemsLoading={problemsLoading}
+              servicos={servicos}
+              servicosLoading={servicosLoading}
+              currentProblem={currentProblem}
+              onProblemChange={setSelectedProblemId}
+              onServicoChange={setSelectedServicoId}
+              onDontKnowServiceChange={handleServiceToggle}
+              onViewAttachment={handleViewAttachment}
+              onDownloadAttachment={handleDownloadAttachment}
+              resposta={resposta}
+              onRespostaChange={handleRespostaChange}
+            />
+          )}
+          
+          {activeTab === 'comments' && (
+            <CommentsTab 
+              comentarios={setComentarios ? comentarios : localComentarios}
+              onChange={(value) => {
+                if (setComentarios) {
+                  setComentarios(value);
+                } else {
+                  setLocalComentarios(value);
+                }
+              }}
+            />
+          )}
+        </CardContent>
 
         <CardFooter className="border-t p-4 sticky bottom-0 bg-white shadow-md z-10 flex justify-between">
           <FormFooter 

@@ -17,47 +17,52 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   onViewAttachment,
   onDownloadAttachment
 }) => {
-  // Validação melhorada para garantir que os anexos sejam exibidos corretamente
+  // Enhanced validation to ensure attachments are displayed correctly
   const hasAttachments = () => {
-    // Verifica se tem arquivo_url
-    if (arquivo_url) return true;
+    // Check if there's a valid arquivo_url
+    if (arquivo_url && arquivo_url.startsWith('http') && !arquivo_url.startsWith('blob:')) return true;
     
-    // Verifica se tem anexos
+    // Check if there are anexos
     if (!anexos) return false;
     
-    // Se anexos for uma string, tenta converter
+    // If anexos is a string, try to parse it
     if (typeof anexos === 'string') {
       try {
         const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) && parsed.length > 0;
+        return Array.isArray(parsed) && 
+               parsed.length > 0 && 
+               parsed.some(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:'));
       } catch {
         return false;
       }
     }
     
-    // Se anexos for um array, verifica se tem elementos
+    // If anexos is an array, check if it has valid elements
     if (Array.isArray(anexos)) {
-      return anexos.length > 0 && anexos.some(anexo => anexo);
+      return anexos.length > 0 && 
+             anexos.some(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:'));
     }
     
     return false;
   };
   
-  // Normaliza os anexos para garantir que sempre temos um array
+  // Normalize the anexos to ensure we always have a valid array
   const normalizeAttachments = () => {
     if (!anexos) return [];
     
     if (typeof anexos === 'string') {
       try {
         const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed) ? 
+               parsed.filter(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:')) : 
+               [];
       } catch {
         return [];
       }
     }
     
     if (Array.isArray(anexos)) {
-      return anexos.filter(anexo => anexo);
+      return anexos.filter(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:'));
     }
     
     return [];
@@ -73,7 +78,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     <div className="mt-4 space-y-3 animate-fade-in">
       <h3 className="text-base font-medium text-subpi-blue">Anexos</h3>
       <div className="space-y-2">
-        {arquivo_url && (
+        {arquivo_url && arquivo_url.startsWith('http') && !arquivo_url.startsWith('blob:') && (
           <AttachmentItem 
             url={arquivo_url} 
             onView={onViewAttachment} 

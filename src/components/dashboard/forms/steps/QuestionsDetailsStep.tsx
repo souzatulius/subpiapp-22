@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
-import { Plus, Trash2, Upload, File, FileText } from 'lucide-react';
+import { Plus, Trash2, Upload, FileText } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/components/ui/use-toast';
 
 interface QuestionsDetailsStepProps {
   formData: {
@@ -32,8 +34,8 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
       : [0]
   );
   
-  const [anexos, setAnexos] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   
   const hasError = (field: string) => errors.some(err => err.field === field);
   const getErrorMessage = (field: string) => {
@@ -41,11 +43,11 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
     return error ? error.message : '';
   };
 
-  // Observa digitação para adicionar nova pergunta automaticamente
+  // Observe typing to automatically add a new question
   useEffect(() => {
     const nonEmptyQuestions = formData.perguntas.filter(p => p.trim() !== '');
     
-    // Se a última pergunta não está vazia e podemos adicionar mais perguntas
+    // If the last question isn't empty and we can add more questions
     if (nonEmptyQuestions.length > 0 && 
         nonEmptyQuestions.length === activeQuestions.length && 
         activeQuestions.length < 5) {
@@ -61,16 +63,16 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
   };
 
   const removeQuestion = (index: number) => {
-    // Atualizar perguntas ativas
+    // Update active questions
     const newActiveQuestions = activeQuestions.filter(i => i !== index).map((val, idx) => idx);
     setActiveQuestions(newActiveQuestions);
     
-    // Atualizar formData
+    // Update formData
     const newPerguntas = [...formData.perguntas];
     newPerguntas.splice(index, 1);
-    newPerguntas.push(''); // Manter array com 5 posições
+    newPerguntas.push(''); // Keep array with 5 positions
     
-    // Atualizar usando o método existente
+    // Update using the existing method
     for (let i = 0; i < newPerguntas.length; i++) {
       if (i < newActiveQuestions.length) {
         handlePerguntaChange(i, newPerguntas[i]);
@@ -80,28 +82,77 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setAnexos([...anexos, ...newFiles]);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const newFiles = Array.from(e.target.files);
+    setUploading(true);
+    
+    try {
+      // Upload each file to Supabase and get public URLs
+      const publicUrls: string[] = [];
       
-      // Simular upload e adicionar URLs (numa aplicação real, isto seria substituído pelo upload real)
-      if (handleAnexosChange) {
-        const fakeUrls = newFiles.map(file => URL.createObjectURL(file));
-        handleAnexosChange([...(formData.anexos || []), ...fakeUrls]);
+      for (const file of newFiles) {
+        const fileId = uuidv4();
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${fileId}.${fileExt}`;
+        const filePath = `uploads/${fileName}`;
+        
+        // Set initial progress
+        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
+        
+        // Upload file
+        const { error: uploadError } = await supabase.storage
+          .from('demandas')
+          .upload(filePath, file, {
+            onUploadProgress: (progress) => {
+              const percent = Math.round((progress.loaded / progress.total) * 100);
+              setUploadProgress(prev => ({ ...prev, [fileId]: percent }));
+            }
+          });
+          
+        if (uploadError) throw uploadError;
+        
+        // Get public URL
+        const { data } = supabase.storage
+          .from('demandas')
+          .getPublicUrl(filePath);
+          
+        publicUrls.push(data.publicUrl);
       }
+      
+      // Update form data with public URLs
+      if (handleAnexosChange) {
+        handleAnexosChange([...(formData.anexos || []), ...publicUrls]);
+      }
+      
+      toast({
+        title: 'Arquivos anexados',
+        description: `${newFiles.length} arquivos foram anexados com sucesso.`,
+      });
+    } catch (error: any) {
+      console.error('Erro ao fazer upload:', error);
+      toast({
+        title: 'Erro ao anexar arquivos',
+        description: error.message || 'Não foi possível anexar um ou mais arquivos.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+      setUploadProgress({});
     }
   };
 
   const removeFile = (index: number) => {
-    const newAnexos = [...anexos];
-    newAnexos.splice(index, 1);
-    setAnexos(newAnexos);
-    
     if (handleAnexosChange && formData.anexos) {
       const newAnexosUrls = [...formData.anexos];
       newAnexosUrls.splice(index, 1);
       handleAnexosChange(newAnexosUrls);
+      
+      toast({
+        title: 'Arquivo removido',
+        description: 'O arquivo foi removido da lista de anexos.',
+      });
     }
   };
 
@@ -154,28 +205,28 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
             multiple
             className="hidden"
             onChange={handleFileChange}
+            disabled={uploading}
           />
           <label htmlFor="file-upload" className="cursor-pointer">
             <div className="flex flex-col items-center">
               <Upload className="h-10 w-10 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600 mb-1">Arraste arquivos ou clique para fazer upload</p>
+              <p className="text-sm text-gray-600 mb-1">
+                {uploading ? 'Enviando arquivos...' : 'Arraste arquivos ou clique para fazer upload'}
+              </p>
               <p className="text-xs text-gray-500">Suporta imagens, PDFs e documentos (máximo 5MB)</p>
             </div>
           </label>
         </div>
 
-        {anexos.length > 0 && (
+        {formData.anexos && formData.anexos.length > 0 && (
           <div className="mt-4 space-y-2">
             <Label>Arquivos anexados</Label>
             <div className="flex flex-col gap-2">
-              {anexos.map((file, index) => (
+              {formData.anexos.map((fileUrl, index) => (
                 <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-blue-500" />
-                    <span className="text-sm">{file.name}</span>
-                    <span className="text-xs text-gray-500">
-                      ({(file.size / 1024).toFixed(1)} KB)
-                    </span>
+                    <span className="text-sm">{fileUrl.split('/').pop()}</span>
                   </div>
                   <Button
                     type="button"

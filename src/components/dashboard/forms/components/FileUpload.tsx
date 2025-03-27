@@ -14,6 +14,19 @@ interface FileUploadProps {
 const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [displayFile, setDisplayFile] = useState<string | null>(null);
+  
+  // Set display file name when component mounts or value changes
+  React.useEffect(() => {
+    if (value) {
+      // Extract filename from the URL
+      const filename = value.split('/').pop();
+      if (filename) {
+        setFileName(filename);
+        setDisplayFile(value);
+      }
+    }
+  }, [value]);
   
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,11 +46,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
         
       if (uploadError) throw uploadError;
       
+      // Get the public URL and save that instead of the blob URL
       const { data } = supabase.storage
         .from('demandas')
         .getPublicUrl(filePath);
         
-      onChange(data.publicUrl);
+      const publicUrl = data.publicUrl;
+      
+      // Set the public URL to be saved in the database
+      onChange(publicUrl);
+      setDisplayFile(publicUrl);
       
       toast({
         title: 'Arquivo anexado',
@@ -51,6 +69,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
         variant: 'destructive',
       });
       setFileName('');
+      setDisplayFile(null);
     } finally {
       setIsUploading(false);
     }
@@ -59,16 +78,17 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const handleRemoveFile = () => {
     onChange('');
     setFileName('');
+    setDisplayFile(null);
   };
   
   return (
     <div>
       <Label>Anexar Arquivo</Label>
-      {value || fileName ? (
+      {displayFile ? (
         <div className="mt-2 flex items-center gap-2 p-2 border border-gray-300 rounded-lg">
           <FileText className="h-5 w-5 text-gray-500" />
           <span className="text-sm text-gray-700 flex-1 truncate">
-            {fileName || value.split('/').pop()}
+            {fileName}
           </span>
           <button 
             type="button"
