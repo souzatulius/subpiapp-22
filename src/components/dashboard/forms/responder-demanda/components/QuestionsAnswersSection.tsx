@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { normalizeQuestions } from '@/utils/questionFormatUtils';
 
 interface QuestionsAnswersSectionProps {
   perguntas: string[] | Record<string, string> | null | any;
@@ -18,51 +19,10 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
 }) => {
   if (!perguntas) return null;
 
-  const normalizeQuestions = () => {
-    if (!perguntas) return [];
-    
-    // Se for um array, filtrar valores vazios
-    if (Array.isArray(perguntas)) {
-      return perguntas.filter(p => p && p.trim !== undefined && p.trim() !== '');
-    }
-    
-    // Se for um objeto, converter para array de perguntas
-    if (typeof perguntas === 'object' && !Array.isArray(perguntas)) {
-      return Object.entries(perguntas)
-        .filter(([_, value]) => value && String(value).trim() !== '')
-        .map(([key, value]) => {
-          // Se a pergunta tem formato "pergunta_X", exibir apenas o valor
-          if (key.startsWith('pergunta_')) {
-            return String(value);
-          }
-          // Caso contrário, exibir a chave como pergunta
-          return typeof value === 'string' ? value : String(value);
-        });
-    }
-    
-    // Se for uma string, tentar parsear JSON
-    if (typeof perguntas === 'string') {
-      try {
-        const parsed = JSON.parse(perguntas);
-        if (Array.isArray(parsed)) {
-          return parsed.filter(p => p && String(p).trim() !== '');
-        }
-        if (typeof parsed === 'object') {
-          return Object.values(parsed)
-            .filter(p => p && String(p).trim() !== '')
-            .map(p => String(p));
-        }
-      } catch (e) {
-        // Se não puder parsear, tratar como uma única pergunta
-        return [perguntas];
-      }
-    }
-    
-    return [];
-  };
+  // Use our utility function to normalize questions
+  const normalizedQuestions = normalizeQuestions(perguntas);
 
   const getTotalAnswered = () => {
-    const normalizedQuestions = normalizeQuestions();
     let answered = 0;
     let total = normalizedQuestions.length;
     
@@ -76,7 +36,6 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   };
 
   const { answered, total } = getTotalAnswered();
-  const normalizedQuestions = normalizeQuestions();
 
   return (
     <div className="space-y-5 transition-all duration-300">

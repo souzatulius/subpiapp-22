@@ -1,8 +1,9 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import QuestionsAnswersSection from './QuestionsAnswersSection';
 import { Card } from '@/components/ui/card';
+import { normalizeQuestions } from '@/utils/questionFormatUtils';
 
 interface QuestionsTabProps {
   selectedDemanda: any;
@@ -15,55 +16,17 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
   resposta,
   onRespostaChange
 }) => {
-  // Processar as perguntas - converter de string para objeto/array se necessário
-  const processedPerguntas = useMemo(() => {
-    if (!selectedDemanda.perguntas) return null;
-    
-    // Se já for um objeto ou array, retornar como está
-    if (typeof selectedDemanda.perguntas !== 'string') {
-      return selectedDemanda.perguntas;
-    }
-    
-    // Tentar fazer o parse da string JSON
-    try {
-      return JSON.parse(selectedDemanda.perguntas);
-    } catch (e) {
-      console.error('Erro ao processar perguntas:', e);
-      // Se não for um JSON válido, retornar a própria string
-      return selectedDemanda.perguntas;
-    }
+  // Check if there are questions
+  const hasQuestions = React.useMemo(() => {
+    const normalized = normalizeQuestions(selectedDemanda.perguntas);
+    return normalized.length > 0;
   }, [selectedDemanda.perguntas]);
-
-  // Função melhorada para verificar se existem perguntas
-  const hasQuestions = useMemo(() => {
-    if (!processedPerguntas) return false;
-    
-    // Se for uma array vazia
-    if (Array.isArray(processedPerguntas) && processedPerguntas.length === 0) return false;
-    
-    // Se for um objeto vazio
-    if (typeof processedPerguntas === 'object' && !Array.isArray(processedPerguntas)) {
-      if (Object.keys(processedPerguntas).length === 0) return false;
-      
-      // Verifica se há pelo menos uma pergunta não vazia
-      return Object.values(processedPerguntas).some(pergunta => 
-        pergunta && String(pergunta).trim() !== ''
-      );
-    }
-    
-    // Se for uma string
-    if (typeof processedPerguntas === 'string') {
-      return processedPerguntas.trim() !== '';
-    }
-    
-    return true;
-  }, [processedPerguntas]);
 
   return (
     <TabsContent value="questions" className="pt-2 m-0 animate-fade-in">
       {hasQuestions ? (
         <QuestionsAnswersSection 
-          perguntas={processedPerguntas}
+          perguntas={selectedDemanda.perguntas}
           resposta={resposta}
           onRespostaChange={onRespostaChange}
         />

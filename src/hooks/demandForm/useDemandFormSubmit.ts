@@ -23,6 +23,10 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
     return perguntasObj;
   };
 
+  const validateAttachmentUrl = (url: string): boolean => {
+    return url && url.startsWith('http') && !url.startsWith('blob:');
+  };
+
   const submitForm = async (formData: DemandFormData) => {
     if (!user) {
       toast({
@@ -40,18 +44,24 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
       const formattedPerguntas = formatPerguntasToObject(formData.perguntas);
       
       // Make sure anexos has valid URLs
-      const validAnexos = formData.anexos.filter(url => 
-        url && url.startsWith('http') && !url.startsWith('blob:')
-      );
+      const validAnexos = formData.anexos.filter(url => validateAttachmentUrl(url));
+      
+      // Validate arquivo_url
+      const arquivo_url = formData.arquivo_url && validateAttachmentUrl(formData.arquivo_url) 
+        ? formData.arquivo_url 
+        : null;
       
       // Prepare the payload
       const payload = {
         ...formData,
         perguntas: formattedPerguntas,
         anexos: validAnexos,
+        arquivo_url,
         autor_id: user.id,
         status: 'pendente'
       };
+      
+      console.log('Submitting demand with payload:', payload);
       
       // Submit to Supabase
       const { error } = await supabase

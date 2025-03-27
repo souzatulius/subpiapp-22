@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -81,25 +82,19 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  const uploadMultipleFiles = async (files: File[]) => {
+    const urls: string[] = [];
     
-    const newFiles = Array.from(e.target.files);
-    setUploading(true);
-    
-    try {
-      // Upload each file to Supabase and get public URLs
-      const publicUrls: string[] = [];
+    for (const file of files) {
+      const fileId = uuidv4();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${fileId}.${fileExt}`;
+      const filePath = `uploads/${fileName}`;
       
-      for (const file of newFiles) {
-        const fileId = uuidv4();
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${fileId}.${fileExt}`;
-        const filePath = `uploads/${fileName}`;
-        
-        // Set initial progress
-        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
-        
+      // Set initial progress
+      setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
+      
+      try {
         // Upload file - Fixed by removing onUploadProgress which is not in FileOptions type
         const { error: uploadError } = await supabase.storage
           .from('demandas')
@@ -112,17 +107,37 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
           .from('demandas')
           .getPublicUrl(filePath);
           
-        publicUrls.push(data.publicUrl);
+        urls.push(data.publicUrl);
+        
+        // Update progress to complete
+        setUploadProgress(prev => ({ ...prev, [fileId]: 100 }));
+      } catch (error) {
+        console.error(`Error uploading file ${file.name}:`, error);
+        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
       }
+    }
+    
+    return urls;
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const newFiles = Array.from(e.target.files);
+    setUploading(true);
+    
+    try {
+      // Upload files and get public URLs
+      const publicUrls = await uploadMultipleFiles(newFiles);
       
       // Update form data with public URLs
-      if (handleAnexosChange) {
+      if (handleAnexosChange && publicUrls.length > 0) {
         handleAnexosChange([...(formData.anexos || []), ...publicUrls]);
       }
       
       toast({
         title: 'Arquivos anexados',
-        description: `${newFiles.length} arquivos foram anexados com sucesso.`,
+        description: `${publicUrls.length} arquivos foram anexados com sucesso.`,
       });
     } catch (error: any) {
       console.error('Erro ao fazer upload:', error);
