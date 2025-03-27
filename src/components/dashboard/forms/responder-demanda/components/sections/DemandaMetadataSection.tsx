@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare } from 'lucide-react';
