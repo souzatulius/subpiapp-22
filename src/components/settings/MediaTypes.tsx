@@ -42,6 +42,7 @@ const MediaTypes = () => {
     if (!editingMediaType) return Promise.reject(new Error('Nenhum tipo de mídia selecionado'));
     
     try {
+      console.log('Editando tipo de mídia:', editingMediaType.id, data);
       await updateMediaType(editingMediaType.id, data);
       closeEditForm();
       return Promise.resolve();

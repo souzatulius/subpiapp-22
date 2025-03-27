@@ -83,6 +83,8 @@ export function useMediaTypes() {
   const updateMediaType = async (id: string, data: { descricao: string; icone?: string }) => {
     setIsSubmitting(true);
     try {
+      console.log('Atualizando tipo de mídia:', id, data);
+      
       const { error } = await supabase
         .from('tipos_midia')
         .update({

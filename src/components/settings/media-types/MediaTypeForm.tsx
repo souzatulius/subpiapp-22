@@ -55,6 +55,7 @@ const MediaTypeForm: React.FC<MediaTypeFormProps> = ({
   ];
 
   const handleSubmit = async (data: FormValues) => {
+    console.log('Submitting form with data:', data);
     try {
       await onSubmit(data);
       form.reset();
