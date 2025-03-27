@@ -1,17 +1,21 @@
+
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
+import { ValidationError } from '@/lib/formValidationUtils';
 
 interface QuestionsSectionProps {
   perguntas: string[];
   onPerguntaChange: (index: number, value: string) => void;
+  errors?: ValidationError[];
 }
 
 const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   perguntas,
-  onPerguntaChange
+  onPerguntaChange,
+  errors = []
 }) => {
   const [showNextPergunta, setShowNextPergunta] = useState<{ [key: number]: boolean }>({});
 

@@ -13,6 +13,7 @@ interface RequesterInfoStepProps {
     email_solicitante: string;
     tipo_midia_id: string;
     veiculo_imprensa: string;
+    origem_id?: string; // Add the origen_id as optional property
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
