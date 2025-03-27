@@ -18,11 +18,13 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
   // This component is now just a wrapper for QuestionsAnswersSection
   // and is kept for backward compatibility
   
-  // Check if there are questions
+  // Check if there are questions and log for debugging
   const hasQuestions = React.useMemo(() => {
-    const normalized = normalizeQuestions(selectedDemanda.perguntas);
+    console.log('QuestionsTab - perguntas input:', selectedDemanda?.perguntas);
+    const normalized = normalizeQuestions(selectedDemanda?.perguntas || []);
+    console.log('QuestionsTab - normalized perguntas:', normalized);
     return normalized.length > 0;
-  }, [selectedDemanda.perguntas]);
+  }, [selectedDemanda?.perguntas]);
 
   return (
     hasQuestions ? (

@@ -79,6 +79,11 @@ export const useRespostaFormState = ({
     }
 
     // Initialize servico
+    console.log('Initializing service with data:', {
+      servico_id: selectedDemanda?.servico_id,
+      servicos: selectedDemanda?.servicos
+    });
+    
     if (selectedDemanda?.servico_id) {
       setSelectedServicoId(selectedDemanda.servico_id);
       setDontKnowService(false);
@@ -86,8 +91,6 @@ export const useRespostaFormState = ({
       setDontKnowService(selectedDemanda?.servico_id === null);
       setSelectedServicoId('');
     }
-    
-    console.log('Initializing servico_id:', selectedDemanda?.servico_id);
   }, [selectedDemanda, setResposta]);
 
   const handleRespostaChange = (key: string, value: string) => {

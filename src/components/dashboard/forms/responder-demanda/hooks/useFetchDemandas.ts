@@ -31,17 +31,20 @@ export const useFetchDemandas = () => {
             telefone_solicitante,
             veiculo_imprensa,
             arquivo_url,
+            anexos,
             supervisao_tecnica_id,
             origem_id,
             tipo_midia_id,
             bairro_id,
             autor_id,
             problema_id,
+            servico_id,
             protocolo,
             area_coordenacao_id:supervisao_tecnica_id (id, descricao),
             origens_demandas:origem_id (id, descricao),
             tipos_midia:tipo_midia_id (id, descricao),
-            bairros:bairro_id (id, nome)
+            bairros:bairro_id (id, nome),
+            servicos:servico_id (id, descricao)
           `)
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
@@ -102,6 +105,21 @@ export const useFetchDemandas = () => {
             }
           }
           
+          // Process anexos to ensure it's always an array
+          let anexosArray: string[] | null = null;
+          if (item.anexos) {
+            if (Array.isArray(item.anexos)) {
+              anexosArray = item.anexos.filter(a => a && typeof a === 'string');
+            } else if (typeof item.anexos === 'string') {
+              try {
+                const parsed = JSON.parse(item.anexos);
+                anexosArray = Array.isArray(parsed) ? parsed : [item.anexos];
+              } catch {
+                anexosArray = [item.anexos];
+              }
+            }
+          }
+          
           return {
             id: item.id,
             titulo: item.titulo,
@@ -117,18 +135,20 @@ export const useFetchDemandas = () => {
             telefone_solicitante: item.telefone_solicitante,
             veiculo_imprensa: item.veiculo_imprensa,
             arquivo_url: item.arquivo_url,
+            anexos: anexosArray,
             supervisao_tecnica_id: item.supervisao_tecnica_id,
             bairro_id: item.bairro_id,
             autor_id: item.autor_id,
             tipo_midia_id: item.tipos_midia?.id,
             origem_id: item.origens_demandas?.id,
             problema_id: item.problema_id,
-            servico_id: null, // Note: Add servico_id property but set to null
+            servico_id: item.servico_id, // Corrigido para usar servico_id fornecido pela API
             protocolo: item.protocolo,
             areas_coordenacao: item.area_coordenacao_id,
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia,
-            bairros: item.bairros
+            bairros: item.bairros,
+            servicos: item.servicos // Incluindo dados do serviço
           };
         });
         

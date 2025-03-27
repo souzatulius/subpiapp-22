@@ -17,10 +17,12 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   resposta,
   onRespostaChange
 }) => {
-  if (!perguntas) return null;
+  console.log('QuestionsAnswersSection - props perguntas:', perguntas);
+  console.log('QuestionsAnswersSection - props resposta:', resposta);
 
   // Use our utility function to normalize questions
   const normalizedQuestions = normalizeQuestions(perguntas);
+  console.log('QuestionsAnswersSection - normalizedQuestions:', normalizedQuestions);
 
   const getTotalAnswered = () => {
     let answered = 0;
@@ -37,10 +39,17 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
 
   const { answered, total } = getTotalAnswered();
 
+  if (!perguntas || normalizedQuestions.length === 0) {
+    return (
+      <Card className="bg-gray-50 p-6 rounded-xl text-center shadow-sm border border-gray-200 animate-fade-in hover:shadow-md transition-all duration-300">
+        <p className="text-gray-500">Não há perguntas registradas para esta demanda.</p>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-5 transition-all duration-300">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-blue-700">Perguntas e Respostas</h3>
         <Badge 
           variant={answered === total ? "default" : "outline"} 
           className={`${answered === total ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'} transition-colors duration-300`}
@@ -50,34 +59,28 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
       </div>
 
       <div className="space-y-5">
-        {normalizedQuestions.length > 0 ? (
-          normalizedQuestions.map((pergunta: string, index: number) => (
-            <Card key={index} className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300 animate-fade-in">
-              <CardContent className="p-0">
-                <div className="bg-blue-50 p-4 border-b border-blue-100">
-                  <Label className="font-medium text-blue-800">Pergunta {index+1}:</Label>
-                  <p className="mt-1 text-blue-900">{pergunta}</p>
-                </div>
-                <div className="p-4">
-                  <Label htmlFor={`resposta-${index}`} className="text-sm font-medium text-gray-700 mb-2 block">
-                    Sua resposta:
-                  </Label>
-                  <Textarea 
-                    id={`resposta-${index}`}
-                    placeholder="Digite sua resposta"
-                    className="min-h-[120px] w-full border-gray-300 focus:border-blue-400 focus:ring-blue-300"
-                    value={resposta[index.toString()] || ''}
-                    onChange={(e) => onRespostaChange(index.toString(), e.target.value)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Card className="bg-gray-50 p-6 rounded-xl text-center shadow-sm border border-gray-200 animate-fade-in hover:shadow-md transition-all duration-300">
-            <p className="text-gray-500">Não há perguntas registradas para esta demanda.</p>
+        {normalizedQuestions.map((pergunta: string, index: number) => (
+          <Card key={index} className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300 animate-fade-in">
+            <CardContent className="p-0">
+              <div className="bg-blue-50 p-4 border-b border-blue-100">
+                <Label className="font-medium text-blue-800">Pergunta {index+1}:</Label>
+                <p className="mt-1 text-blue-900">{pergunta}</p>
+              </div>
+              <div className="p-4">
+                <Label htmlFor={`resposta-${index}`} className="text-sm font-medium text-gray-700 mb-2 block">
+                  Sua resposta:
+                </Label>
+                <Textarea 
+                  id={`resposta-${index}`}
+                  placeholder="Digite sua resposta"
+                  className="min-h-[120px] w-full border-gray-300 focus:border-blue-400 focus:ring-blue-300"
+                  value={resposta[index.toString()] || ''}
+                  onChange={(e) => onRespostaChange(index.toString(), e.target.value)}
+                />
+              </div>
+            </CardContent>
           </Card>
-        )}
+        ))}
       </div>
     </div>
   );

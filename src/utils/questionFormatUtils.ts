@@ -5,19 +5,26 @@
  * @returns Array of question strings
  */
 export const normalizeQuestions = (input: any): string[] => {
+  console.log('normalizeQuestions input:', input);
+  
   if (!input) return [];
 
   // If input is an array, filter out empty values
   if (Array.isArray(input)) {
-    return input.filter(q => q && typeof q === 'string' && q.trim() !== '');
+    const result = input.filter(q => q && typeof q === 'string' && q.trim() !== '');
+    console.log('normalizeQuestions - input is array, result:', result);
+    return result;
   }
 
   // If input is an object (like perguntas in jsonb format)
   if (typeof input === 'object' && !Array.isArray(input)) {
     // Extract values and filter out empty ones
-    return Object.values(input)
+    const result = Object.values(input)
       .filter(value => value && typeof value === 'string' && value.trim() !== '')
       .map(String);
+    
+    console.log('normalizeQuestions - input is object, result:', result);
+    return result;
   }
 
   // If input is a string, try to parse it as JSON
@@ -28,10 +35,13 @@ export const normalizeQuestions = (input: any): string[] => {
       return normalizeQuestions(parsed);
     } catch (e) {
       // If parsing fails, treat it as a single question
-      return input.trim() !== '' ? [input] : [];
+      const result = input.trim() !== '' ? [input] : [];
+      console.log('normalizeQuestions - input is string, result:', result);
+      return result;
     }
   }
 
+  console.log('normalizeQuestions - no match, returning empty array');
   return [];
 };
 

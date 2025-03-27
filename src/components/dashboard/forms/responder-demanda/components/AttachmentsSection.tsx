@@ -73,10 +73,11 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   }
 
   const normalizedAttachments = normalizeAttachments();
+  
+  console.log('Rendered AttachmentsSection with:', { arquivo_url, anexos: normalizedAttachments });
 
   return (
-    <div className="mt-4 space-y-3 animate-fade-in">
-      <h3 className="text-base font-medium text-subpi-blue">Anexos</h3>
+    <div className="space-y-3 animate-fade-in">
       <div className="space-y-2">
         {arquivo_url && arquivo_url.startsWith('http') && !arquivo_url.startsWith('blob:') && (
           <AttachmentItem 
