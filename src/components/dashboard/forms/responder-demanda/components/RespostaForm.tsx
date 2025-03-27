@@ -64,7 +64,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <RespostaFormHeader selectedDemanda={selectedDemanda} onBack={onBack} />
+      <RespostaFormHeader selectedDemanda={selectedDemanda} />
 
       <Card className="border shadow-sm">
         <CardContent className="p-4 space-y-4">
