@@ -18,4 +18,6 @@ export interface DemandFormData {
   anexos: string[];
   servico_id: string;
   nao_sabe_servico: boolean;
+  tem_protocolo_156?: boolean;
+  numero_protocolo_156?: string;
 }

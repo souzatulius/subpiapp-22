@@ -6,14 +6,20 @@ import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from '../identification/ValidationUtils';
 
 interface TitleSectionProps {
-  title: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  titulo: string;  // Changed from title to titulo to match usage
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  selectedProblem?: any;
+  selectedService?: any;
+  selectedBairro?: any;
   errors?: ValidationError[];
 }
 
 const TitleSection: React.FC<TitleSectionProps> = ({
-  title,
-  onChange,
+  titulo,  // Changed from title to titulo
+  handleChange,
+  selectedProblem,
+  selectedService,
+  selectedBairro,
   errors = []
 }) => {
   return (
@@ -27,8 +33,8 @@ const TitleSection: React.FC<TitleSectionProps> = ({
       <Input 
         id="titulo" 
         name="titulo" 
-        value={title} 
-        onChange={onChange} 
+        value={titulo} 
+        onChange={handleChange} 
         className={`rounded-xl ${hasFieldError('titulo', errors) ? 'border-orange-500' : ''}`}
         placeholder="Digite um título claro e conciso"
       />

@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { X, Plus } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { hasFieldError, getFieldErrorMessage } from '../identification/ValidationUtils';
 
 interface QuestionsSectionProps {
   perguntas: string[];
@@ -12,136 +13,73 @@ interface QuestionsSectionProps {
   errors?: ValidationError[];
 }
 
-const QuestionsSection: React.FC<QuestionsSectionProps> = ({
-  perguntas,
+const QuestionsSection: React.FC<QuestionsSectionProps> = ({ 
+  perguntas, 
   onPerguntaChange,
-  errors = []
+  errors = [] 
 }) => {
-  const [showNextPergunta, setShowNextPergunta] = useState<{ [key: number]: boolean }>({});
+  const handleAddQuestion = () => {
+    onPerguntaChange(perguntas.length, '');
+  };
 
-  // Monitorar digitação nas perguntas para exibir a próxima
-  useEffect(() => {
-    const newShowNextPergunta = { ...showNextPergunta };
-    
-    perguntas.forEach((pergunta, index) => {
-      if (pergunta.trim() !== '' && index < 4) { // Mostrar próxima pergunta se atual tiver conteúdo
-        newShowNextPergunta[index + 1] = true;
-      }
-    });
-    
-    setShowNextPergunta(newShowNextPergunta);
-  }, [perguntas]);
-
-  const removePergunta = (index: number) => {
+  const handleRemoveQuestion = (index: number) => {
     const newPerguntas = [...perguntas];
     newPerguntas.splice(index, 1);
-    // Update the entire perguntas array
-    const updatedPerguntas = newPerguntas.filter(pergunta => pergunta !== '');
-    for (let i = 0; i < 5; i++) {
-      if (i < updatedPerguntas.length) {
-        onPerguntaChange(i, updatedPerguntas[i]);
-      } else {
-        onPerguntaChange(i, '');
-      }
+    // Manually update all indices after the removed one
+    for (let i = index; i < newPerguntas.length; i++) {
+      onPerguntaChange(i, newPerguntas[i]);
     }
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-2">
-        <Label htmlFor="perguntas" className="block">
-          Perguntas para a Área Técnica
-        </Label>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <Label className="text-base font-medium">Perguntas para a Área Técnica</Label>
+        <Button 
+          type="button" 
+          onClick={handleAddQuestion}
+          size="sm"
+          variant="outline"
+          className="flex items-center gap-1"
+        >
+          <Plus className="h-4 w-4" />
+          Adicionar Pergunta
+        </Button>
       </div>
       
-      <div className="space-y-2">
-        {/* Sempre mostrar a primeira pergunta */}
-        <div className="flex gap-2">
-          <Input 
-            value={perguntas[0] || ''} 
-            onChange={(e) => onPerguntaChange(0, e.target.value)} 
-            placeholder="Digite sua pergunta aqui"
-            className="flex-1 rounded-xl"
-          />
+      {perguntas.length === 0 ? (
+        <div className="text-center py-4 text-gray-500 border border-dashed border-gray-300 rounded-md">
+          Nenhuma pergunta adicionada. Clique no botão acima para adicionar perguntas.
         </div>
-        
-        {/* Mostrar próximas perguntas de forma condicional */}
-        {(perguntas[0]?.trim() || showNextPergunta[1]) && (
-          <div className="flex gap-2 animate-fadeIn">
-            <Input 
-              value={perguntas[1] || ''} 
-              onChange={(e) => onPerguntaChange(1, e.target.value)} 
-              placeholder="Digite sua pergunta aqui"
-              className="flex-1 rounded-xl"
-            />
-            <Button 
-              type="button" 
-              size="icon" 
-              variant="ghost" 
-              onClick={() => removePergunta(1)}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          </div>
-        )}
-        
-        {(perguntas[1]?.trim() || showNextPergunta[2]) && (
-          <div className="flex gap-2 animate-fadeIn">
-            <Input 
-              value={perguntas[2] || ''} 
-              onChange={(e) => onPerguntaChange(2, e.target.value)} 
-              placeholder="Digite sua pergunta aqui"
-              className="flex-1 rounded-xl"
-            />
-            <Button 
-              type="button" 
-              size="icon" 
-              variant="ghost" 
-              onClick={() => removePergunta(2)}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          </div>
-        )}
-        
-        {(perguntas[2]?.trim() || showNextPergunta[3]) && (
-          <div className="flex gap-2 animate-fadeIn">
-            <Input 
-              value={perguntas[3] || ''} 
-              onChange={(e) => onPerguntaChange(3, e.target.value)} 
-              placeholder="Digite sua pergunta aqui"
-              className="flex-1 rounded-xl"
-            />
-            <Button 
-              type="button" 
-              size="icon" 
-              variant="ghost" 
-              onClick={() => removePergunta(3)}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          </div>
-        )}
-        
-        {(perguntas[3]?.trim() || showNextPergunta[4]) && (
-          <div className="flex gap-2 animate-fadeIn">
-            <Input 
-              value={perguntas[4] || ''} 
-              onChange={(e) => onPerguntaChange(4, e.target.value)} 
-              placeholder="Digite sua pergunta aqui"
-              className="flex-1 rounded-xl"
-            />
-            <Button 
-              type="button" 
-              size="icon" 
-              variant="ghost" 
-              onClick={() => removePergunta(4)}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          </div>
-        )}
-      </div>
+      ) : (
+        <div className="space-y-3">
+          {perguntas.map((pergunta, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <div className="flex-1">
+                <Textarea
+                  value={pergunta}
+                  onChange={(e) => onPerguntaChange(index, e.target.value)}
+                  placeholder={`Pergunta ${index + 1}`}
+                  className="min-h-[80px]"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => handleRemoveQuestion(index)}
+                className="text-gray-500 hover:text-red-500 mt-2"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {hasFieldError('perguntas', errors) && (
+        <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('perguntas', errors)}</p>
+      )}
     </div>
   );
 };
