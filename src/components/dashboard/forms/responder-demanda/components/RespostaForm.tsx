@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
@@ -14,7 +15,6 @@ import QuestionsAnswersSection from './QuestionsAnswersSection';
 import CommentsSection from './CommentsSection';
 import { normalizeQuestions } from '@/utils/questionFormatUtils';
 import AttachmentsSection from './AttachmentsSection';
-import TemaSelector from './TemaSelector';
 import ServicoSelector from './ServicoSelector';
 import { Separator } from '@/components/ui/separator';
 import { User, MapPin, Calendar, Clock, Flag, BookOpen, MessageSquare, PaperclipIcon, Send } from 'lucide-react';
@@ -137,27 +137,16 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <RespostaFormHeader 
-          selectedDemanda={selectedDemanda} 
-          onBack={onBack} 
-        />
-      </div>
+      <RespostaFormHeader 
+        selectedDemanda={selectedDemanda} 
+        onBack={onBack} 
+      />
       
       <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
         <CardContent className="p-6 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b">
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-subpi-blue">{selectedDemanda.titulo || 'Sem título definido'}</h3>
-              
-              {selectedDemanda.endereco && (
-                <div className="flex items-start gap-2 text-gray-700">
-                  <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                  <span>{selectedDemanda.endereco}</span>
-                </div>
-              )}
-              
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-3">
                 {currentProblem && (
                   <Badge className="px-3 py-1.5 bg-blue-50 text-subpi-blue border border-blue-100">
                     {currentProblem.descricao}
@@ -183,6 +172,15 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                   </Badge>
                 )}
               </div>
+              
+              <h3 className="text-xl font-semibold text-subpi-blue">{selectedDemanda.titulo || 'Sem título definido'}</h3>
+              
+              {selectedDemanda.endereco && (
+                <div className="flex items-start gap-2 text-gray-700">
+                  <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+                  <span>{selectedDemanda.endereco}</span>
+                </div>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -236,40 +234,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
           </div>
           
-          {(selectedDemanda.nome_solicitante || selectedDemanda.email_solicitante || selectedDemanda.telefone_solicitante) && (
-            <div className="py-6 border-b">
-              <h3 className="text-lg font-semibold text-subpi-blue mb-4 flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Informações do Solicitante
-              </h3>
-              
-              <Card className="bg-gray-50 border border-gray-200 p-4 rounded-xl shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {selectedDemanda.nome_solicitante && (
-                    <div>
-                      <span className="text-sm text-gray-500">Nome:</span>
-                      <p className="font-medium">{selectedDemanda.nome_solicitante}</p>
-                    </div>
-                  )}
-                  
-                  {selectedDemanda.email_solicitante && (
-                    <div>
-                      <span className="text-sm text-gray-500">Email:</span>
-                      <p className="font-medium">{selectedDemanda.email_solicitante}</p>
-                    </div>
-                  )}
-                  
-                  {selectedDemanda.telefone_solicitante && (
-                    <div>
-                      <span className="text-sm text-gray-500">Telefone:</span>
-                      <p className="font-medium">{selectedDemanda.telefone_solicitante}</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </div>
-          )}
-          
           {selectedDemanda.detalhes_solicitacao && (
             <div className="py-6 border-b">
               <h3 className="text-lg font-semibold text-subpi-blue mb-4">Detalhes da Solicitação</h3>
@@ -285,40 +249,47 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Tema:</h4>
-                <TemaSelector
-                  selectedProblemId={selectedProblemId}
-                  problems={problems}
-                  problemsLoading={problemsLoading}
-                  onProblemChange={setSelectedProblemId}
-                  demandaId={selectedDemanda.id}
-                  currentProblem={currentProblem}
-                />
+                <div className="p-3 border rounded-md bg-gray-50">
+                  {currentProblem ? (
+                    <span className="font-medium">{currentProblem.descricao}</span>
+                  ) : (
+                    <span className="text-gray-500">Tema não definido</span>
+                  )}
+                </div>
               </div>
               
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-gray-700">Serviço:</h4>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="dontKnowService"
-                      checked={dontKnowService}
-                      onChange={handleServiceToggle}
-                      className="rounded border-gray-300 text-subpi-blue focus:ring-subpi-blue"
-                    />
-                    <label htmlFor="dontKnowService" className="text-sm text-gray-700">
-                      Não sei informar o serviço
-                    </label>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Serviço:</h4>
+                {selectedDemanda.servico && selectedDemanda.servico.descricao ? (
+                  <div className="p-3 border rounded-md bg-gray-50">
+                    <span className="font-medium">{selectedDemanda.servico.descricao}</span>
                   </div>
-                </div>
-                
-                {!dontKnowService && (
-                  <ServicoSelector
-                    selectedServicoId={selectedServicoId}
-                    servicos={servicos}
-                    servicosLoading={servicosLoading}
-                    onServicoChange={setSelectedServicoId}
-                  />
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="dontKnowService"
+                          checked={dontKnowService}
+                          onChange={handleServiceToggle}
+                          className="rounded border-gray-300 text-subpi-blue focus:ring-subpi-blue"
+                        />
+                        <label htmlFor="dontKnowService" className="text-sm text-gray-700">
+                          Não sei informar o serviço
+                        </label>
+                      </div>
+                    </div>
+                    
+                    {!dontKnowService && (
+                      <ServicoSelector
+                        selectedServicoId={selectedServicoId}
+                        servicos={servicos}
+                        servicosLoading={servicosLoading}
+                        onServicoChange={setSelectedServicoId}
+                      />
+                    )}
+                  </div>
                 )}
               </div>
             </div>

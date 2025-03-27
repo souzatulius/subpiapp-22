@@ -1,95 +1,68 @@
 
-/**
- * Normalizes questions data from different formats into a consistent array of strings
- * @param input The input questions data that could be in different formats
- * @returns Array of question strings
- */
-export const normalizeQuestions = (input: any): string[] => {
-  console.log('normalizeQuestions input:', input);
+export const normalizeQuestions = (perguntas: any): string[] => {
+  if (!perguntas) return [];
   
-  if (!input) return [];
+  console.log('normalizeQuestions input:', perguntas);
 
-  // If input is an array, filter out empty values
-  if (Array.isArray(input)) {
-    const result = input.filter(q => q && typeof q === 'string' && q.trim() !== '');
-    console.log('normalizeQuestions - input is array, result:', result);
-    return result;
-  }
+  let result: string[] = [];
 
-  // If input is an object (like perguntas in jsonb format)
-  if (typeof input === 'object' && !Array.isArray(input)) {
-    // Check if object has keys like "pergunta_1", "pergunta_2"
-    const hasPerguntaKeys = Object.keys(input).some(key => key.startsWith('pergunta_'));
-    
-    if (hasPerguntaKeys) {
-      // Sort keys to ensure correct order (pergunta_1, pergunta_2, etc.)
-      const sortedKeys = Object.keys(input).sort((a, b) => {
-        // Extract numbers from keys
-        const numA = parseInt(a.replace('pergunta_', ''));
-        const numB = parseInt(b.replace('pergunta_', ''));
-        return numA - numB;
-      });
+  try {
+    // Case 1: perguntas is an array already
+    if (Array.isArray(perguntas)) {
+      console.log('perguntas is an array');
+      result = perguntas.filter(p => p && typeof p === 'string');
+    } 
+    // Case 2: perguntas is a string that can be parsed as JSON
+    else if (typeof perguntas === 'string') {
+      console.log('perguntas is a string');
+      try {
+        const parsed = JSON.parse(perguntas);
+        result = Array.isArray(parsed) ? parsed.filter(p => p && typeof p === 'string') : [];
+      } catch (e) {
+        console.log('perguntas string could not be parsed as JSON');
+        // Not valid JSON, just use as a single question
+        result = [perguntas];
+      }
+    } 
+    // Case 3: perguntas is an object with keys like "0", "1", "2" or "pergunta_1", "pergunta_2"
+    else if (typeof perguntas === 'object' && perguntas !== null) {
+      console.log('perguntas is an object');
       
-      // Extract values and filter out empty ones
-      const result = sortedKeys
-        .map(key => input[key])
-        .filter(value => value && typeof value === 'string' && value.trim() !== '');
+      // First, check if it has numeric keys (0, 1, 2...) or pergunta_X keys
+      const keys = Object.keys(perguntas);
+      const numericFormat = keys.every(k => !isNaN(Number(k)));
+      const perguntaFormat = keys.some(k => k.startsWith('pergunta_'));
       
-      console.log('normalizeQuestions - input has pergunta_X keys, result:', result);
-      return result;
+      if (numericFormat) {
+        console.log('perguntas has numeric keys');
+        // Convert to array preserving the order from keys (0, 1, 2...)
+        result = keys
+          .sort((a, b) => Number(a) - Number(b))
+          .map(k => perguntas[k])
+          .filter(p => p && typeof p === 'string');
+      } else if (perguntaFormat) {
+        console.log('perguntas has pergunta_X keys');
+        // Extract all keys starting with pergunta_ and convert to array
+        result = keys
+          .filter(k => k.startsWith('pergunta_'))
+          .sort((a, b) => {
+            const numA = parseInt(a.replace('pergunta_', ''));
+            const numB = parseInt(b.replace('pergunta_', ''));
+            return numA - numB;
+          })
+          .map(k => perguntas[k])
+          .filter(p => p && typeof p === 'string');
+      } else {
+        console.log('perguntas has other object format');
+        // For any other object format, convert values to array
+        result = Object.values(perguntas).filter(p => p && typeof p === 'string');
+      }
     }
-    
-    // For other object formats, extract values
-    const result = Object.values(input)
-      .filter(value => value && typeof value === 'string' && value.trim() !== '')
-      .map(String);
-    
-    console.log('normalizeQuestions - input is object, result:', result);
-    return result;
+  } catch (error) {
+    console.error('Error normalizing questions:', error);
+    result = [];
   }
 
-  // If input is a string, try to parse it as JSON
-  if (typeof input === 'string') {
-    try {
-      const parsed = JSON.parse(input);
-      // Recursively call normalizeQuestions with the parsed value
-      return normalizeQuestions(parsed);
-    } catch (e) {
-      // If parsing fails, treat it as a single question
-      const result = input.trim() !== '' ? [input] : [];
-      console.log('normalizeQuestions - input is string, result:', result);
-      return result;
-    }
-  }
-
-  console.log('normalizeQuestions - no match, returning empty array');
-  return [];
-};
-
-/**
- * Formats an array of questions into a standardized object format
- * @param questions Array of question strings
- * @returns Object with questions in format { pergunta_1: "...", pergunta_2: "..." }
- */
-export const formatQuestionsToObject = (questions: string[]): Record<string, string> => {
-  // Filter out empty questions
-  const filteredQuestions = questions.filter(q => q && q.trim() !== '');
-  
-  // Create a formatted questions object
-  const questionsObj: Record<string, string> = {};
-  
-  filteredQuestions.forEach((question, index) => {
-    questionsObj[`pergunta_${index + 1}`] = question;
-  });
-  
-  return questionsObj;
-};
-
-/**
- * Validates if a URL is a valid public URL (not a blob URL)
- * @param url The URL to validate
- * @returns Boolean indicating if the URL is a valid public URL
- */
-export const isValidPublicUrl = (url: string): boolean => {
-  return !!url && url.startsWith('http') && !url.startsWith('blob:');
+  console.log('normalizeQuestions output:', result);
+  return result;
 };

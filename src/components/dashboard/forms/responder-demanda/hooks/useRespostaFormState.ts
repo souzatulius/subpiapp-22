@@ -27,6 +27,8 @@ export const useRespostaFormState = ({
     
     // Initialize perguntas and respostas
     if (selectedDemanda?.perguntas) {
+      console.log('Initializing responses from perguntas:', selectedDemanda.perguntas);
+      
       // Normalize questions to array format
       const normalizedPerguntas = normalizeQuestions(selectedDemanda.perguntas);
       
@@ -48,7 +50,7 @@ export const useRespostaFormState = ({
     // Initialize servico
     console.log('Initializing service with data:', {
       servico_id: selectedDemanda?.servico_id,
-      servicos: selectedDemanda?.servicos
+      servico: selectedDemanda?.servico
     });
     
     if (selectedDemanda?.servico_id) {
@@ -124,16 +126,36 @@ export const useRespostaFormState = ({
     );
   };
 
-  const handleAttachmentAction = (url: string, action: 'view' | 'download') => {
-    if (!url.startsWith('http') || url.startsWith('blob:')) {
+  const handleViewAttachment = (url: string) => {
+    if (!url.startsWith('http')) {
       toast({
-        title: "Erro ao acessar anexo",
+        title: "Erro ao visualizar anexo",
         description: "O URL do anexo é inválido ou não está acessível.",
         variant: "destructive"
       });
       return;
     }
     window.open(url, '_blank');
+  };
+
+  const handleDownloadAttachment = (url: string) => {
+    if (!url.startsWith('http')) {
+      toast({
+        title: "Erro ao baixar anexo",
+        description: "O URL do anexo é inválido ou não está acessível.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create temporary link for download
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.download = url.split('/').pop() || 'arquivo';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return {
@@ -146,7 +168,7 @@ export const useRespostaFormState = ({
     handleRespostaChange,
     updateService,
     allQuestionsAnswered,
-    handleViewAttachment: (url: string) => handleAttachmentAction(url, 'view'),
-    handleDownloadAttachment: (url: string) => handleAttachmentAction(url, 'download'),
+    handleViewAttachment,
+    handleDownloadAttachment,
   };
 };

@@ -1,7 +1,7 @@
 
 import React from 'react';
+import { FileIcon, ExternalLink, Download, Image, FileText, Video, Music, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FileIcon, Eye, Download, File } from 'lucide-react';
 
 interface AttachmentItemProps {
   url: string;
@@ -10,70 +10,77 @@ interface AttachmentItemProps {
   index?: number;
 }
 
-const AttachmentItem: React.FC<AttachmentItemProps> = ({ 
-  url, 
-  onView, 
-  onDownload, 
-  index = 0 
+const AttachmentItem: React.FC<AttachmentItemProps> = ({
+  url,
+  onView,
+  onDownload,
+  index
 }) => {
-  // Get filename from URL
   const getFileName = (url: string) => {
-    if (!url) return 'Arquivo';
-    return url.split('/').pop() || 'Arquivo';
-  };
-
-  // Helper function to get file extension/type
-  const getFileType = (url: string) => {
-    if (!url) return 'unknown';
-    const extension = url.split('.').pop()?.toLowerCase();
-    return extension || 'unknown';
-  };
-
-  // Helper to get icon based on file type
-  const getFileIcon = (url: string) => {
-    const type = getFileType(url);
-    switch (type) {
-      case 'pdf':
-        return <FileIcon className="h-5 w-5 text-red-500" />;
-      case 'doc':
-      case 'docx':
-        return <FileIcon className="h-5 w-5 text-blue-500" />;
-      case 'xls':
-      case 'xlsx':
-        return <FileIcon className="h-5 w-5 text-green-500" />;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return <FileIcon className="h-5 w-5 text-purple-500" />;
-      default:
-        return <File className="h-5 w-5 text-gray-500" />;
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const segments = pathname.split('/');
+      const fileName = segments[segments.length - 1];
+      
+      // Try to decode URI component (handle special characters)
+      try {
+        return decodeURIComponent(fileName);
+      } catch {
+        return fileName;
+      }
+    } catch {
+      return `Arquivo ${index !== undefined ? index + 1 : ''}`;
     }
   };
   
+  const getFileIcon = () => {
+    const fileName = getFileName(url).toLowerCase();
+    const extension = fileName.split('.').pop();
+    
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(extension || '')) {
+      return <Image className="h-5 w-5 text-blue-600" />;
+    } else if (['pdf', 'doc', 'docx', 'txt', 'rtf'].includes(extension || '')) {
+      return <FileText className="h-5 w-5 text-red-600" />;
+    } else if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(extension || '')) {
+      return <Video className="h-5 w-5 text-purple-600" />;
+    } else if (['mp3', 'wav', 'ogg', 'aac', 'flac'].includes(extension || '')) {
+      return <Music className="h-5 w-5 text-green-600" />;
+    } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension || '')) {
+      return <Archive className="h-5 w-5 text-orange-600" />;
+    } else {
+      return <FileIcon className="h-5 w-5 text-gray-600" />;
+    }
+  };
+
   return (
-    <div 
-      className="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors duration-300 animate-fade-in" 
-      style={{animationDelay: `${index * 100}ms`}}
-    >
-      {getFileIcon(url)}
-      <span className="ml-2 text-sm truncate flex-1">{getFileName(url)}</span>
-      <div className="flex space-x-1">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-8 w-8 p-0 text-subpi-blue hover:text-subpi-blue-dark hover:bg-blue-50 transition-colors duration-300"
+    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors duration-300">
+      <div className="flex items-center gap-3">
+        {getFileIcon()}
+        <span className="text-sm font-medium text-gray-700 truncate max-w-[200px] md:max-w-[400px]">
+          {getFileName(url)}
+        </span>
+      </div>
+      
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onView(url)}
+          className="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
         >
-          <Eye className="h-4 w-4" />
+          <ExternalLink className="h-4 w-4" />
+          <span className="hidden sm:inline">Visualizar</span>
         </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-8 w-8 p-0 text-subpi-blue hover:text-subpi-blue-dark hover:bg-blue-50 transition-colors duration-300"
+        
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onDownload(url)}
+          className="flex items-center gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
         >
           <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">Baixar</span>
         </Button>
       </div>
     </div>

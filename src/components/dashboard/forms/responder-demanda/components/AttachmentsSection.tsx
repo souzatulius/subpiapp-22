@@ -17,10 +17,12 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   onViewAttachment,
   onDownloadAttachment
 }) => {
+  console.log('AttachmentsSection input:', { arquivo_url, anexos });
+  
   // Enhanced validation to ensure attachments are displayed correctly
   const hasAttachments = () => {
     // Check if there's a valid arquivo_url
-    if (arquivo_url && arquivo_url.startsWith('http') && !arquivo_url.startsWith('blob:')) return true;
+    if (arquivo_url && arquivo_url.startsWith('http')) return true;
     
     // Check if there are anexos
     if (!anexos) return false;
@@ -29,9 +31,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     if (typeof anexos === 'string') {
       try {
         const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) && 
-               parsed.length > 0 && 
-               parsed.some(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:'));
+        return Array.isArray(parsed) && parsed.length > 0 && parsed.some(anexo => anexo && anexo.startsWith('http'));
       } catch {
         return false;
       }
@@ -39,8 +39,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     
     // If anexos is an array, check if it has valid elements
     if (Array.isArray(anexos)) {
-      return anexos.length > 0 && 
-             anexos.some(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:'));
+      return anexos.length > 0 && anexos.some(anexo => anexo && anexo.startsWith('http'));
     }
     
     return false;
@@ -53,33 +52,35 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     if (typeof anexos === 'string') {
       try {
         const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) ? 
-               parsed.filter(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:')) : 
-               [];
+        return Array.isArray(parsed) ? parsed.filter(anexo => anexo && anexo.startsWith('http')) : [];
       } catch {
         return [];
       }
     }
     
     if (Array.isArray(anexos)) {
-      return anexos.filter(anexo => anexo && anexo.startsWith('http') && !anexo.startsWith('blob:'));
+      return anexos.filter(anexo => anexo && anexo.startsWith('http'));
     }
     
     return [];
   };
   
-  if (!hasAttachments()) {
-    return null;
-  }
-
   const normalizedAttachments = normalizeAttachments();
   
-  console.log('Rendered AttachmentsSection with:', { arquivo_url, anexos: normalizedAttachments });
+  console.log('Normalized attachments:', normalizedAttachments);
+  
+  if (!hasAttachments() && (!arquivo_url || !arquivo_url.startsWith('http'))) {
+    return (
+      <div className="bg-gray-50 p-6 rounded-xl text-center shadow-sm border border-gray-200">
+        <p className="text-gray-500">Não há anexos para esta demanda.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 animate-fade-in">
       <div className="space-y-2">
-        {arquivo_url && arquivo_url.startsWith('http') && !arquivo_url.startsWith('blob:') && (
+        {arquivo_url && arquivo_url.startsWith('http') && (
           <AttachmentItem 
             url={arquivo_url} 
             onView={onViewAttachment} 
