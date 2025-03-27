@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
 
@@ -119,7 +120,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
                   name="nome_solicitante"
                   value={formData.nome_solicitante || ''}
                   onChange={handleChange}
-                  placeholder="Nome completo do solicitante"
+                  placeholder=""
                   className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
                 />
               </div>
@@ -144,7 +145,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
             name="nome_solicitante"
             value={formData.nome_solicitante || ''}
             onChange={handleChange}
-            placeholder="Nome completo do solicitante"
+            placeholder=""
             className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
           />
           {hasFieldError('nome_solicitante', errors) && (
