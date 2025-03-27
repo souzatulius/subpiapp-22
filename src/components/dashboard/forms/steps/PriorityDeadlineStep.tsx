@@ -6,7 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ClockIcon, AlertTriangleIcon, Flag } from 'lucide-react';
+import { CalendarIcon, ClockIcon } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -99,12 +99,12 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
         >
           Prazo para Resposta {hasError('prazo_resposta') && <span className="text-orange-500">*</span>}
         </Label>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 max-w-xl">
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className={`flex-grow justify-start text-left font-normal ${
+                className={`w-56 justify-start text-left font-normal ${
                   hasError('prazo_resposta') ? 'border-orange-500' : ''
                 }`}
               >

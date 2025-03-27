@@ -23,10 +23,19 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
     return error ? error.message : '';
   };
 
+  // Allow deselection of a tema
+  const handleTemaClick = (temaId: string) => {
+    if (selectedTemaId === temaId) {
+      handleSelectChange(''); // Deselect if clicking the same tema
+    } else {
+      handleSelectChange(temaId);
+    }
+  };
+
   return (
     <div>
       <label className={`block mb-2 font-semibold ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
-        Tema {hasError('problema_id') && <span className="text-orange-500">*</span>}
+        Sobre qual assunto é a demanda? {hasError('problema_id') && <span className="text-orange-500">*</span>}
       </label>
       <div className="flex flex-wrap gap-3">
         {problemas.map(tema => (
@@ -39,7 +48,7 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
             } ${
               hasError('problema_id') ? 'border-orange-500' : ''
             }`} 
-            onClick={() => handleSelectChange(tema.id)}
+            onClick={() => handleTemaClick(tema.id)}
           >
             <div className="w-6 h-6 flex items-center justify-center">
               {renderIcon(tema.icone)}
