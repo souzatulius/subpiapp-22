@@ -63,7 +63,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       
       if (errors.length === 0) {
         // Se não tiver erros, prossegue com o envio
-        handleSubmit();
+        handleSubmit(formData);
       } else {
         console.log('Validation errors:', errors);
         toast({
@@ -78,9 +78,9 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (formData: any) => {
     try {
-      await submitForm();
+      await submitForm(formData);
     } catch (error: any) {
       console.error('Submission error:', error);
       toast({
@@ -152,7 +152,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             isLastStep={activeStep === FORM_STEPS.length - 1}
             isFirstStep={activeStep === 0}
             isSubmitting={isLoading}
-            onSubmit={handleSubmit}
+            onSubmit={() => handleSubmit(formData)}
           />
         </div>
       </Card>
