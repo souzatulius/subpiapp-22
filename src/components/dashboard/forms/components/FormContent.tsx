@@ -1,40 +1,13 @@
 
 import React from 'react';
 import ProtocolStep from '../steps/ProtocolStep';
-import DetailsStep from '../steps/DetailsStep';
 import ProblemStep from '../steps/ProblemStep';
 import OrganizeStep from '../steps/OrganizeStep';
 import ReviewStep from '../steps/ReviewStep';
 import { ValidationError } from '@/lib/formValidationUtils';
 import RequesterInfoStep from '../steps/RequesterInfoStep';
 import LocationStep from '../steps/LocationStep';
-
-export const FORM_STEPS = [
-  {
-    title: 'Origem e Prazo',
-    component: 'OriginClassificationStep',
-  },
-  {
-    title: 'Problema',
-    component: 'ProblemStep',
-  },
-  {
-    title: 'Localização',
-    component: 'LocationStep',
-  },
-  {
-    title: 'Organização',
-    component: 'OrganizeStep',
-  },
-  {
-    title: 'Informações do Solicitante',
-    component: 'RequesterInfoStep',
-  },
-  {
-    title: 'Revisão',
-    component: 'ReviewStep',
-  }
-];
+import { FORM_STEPS } from './FormStepConfig';
 
 interface FormContentProps {
   activeStep: number;
@@ -98,13 +71,16 @@ const FormContent: React.FC<FormContentProps> = ({
       );
     case 1:
       return (
-        <RequesterInfoStep
+        <ProblemStep
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
+          problemas={problemas}
+          servicos={servicos}
+          filteredServicos={filteredServicos}
+          serviceSearch={serviceSearch}
+          handleServiceSearch={handleServiceSearch}
           errors={errors}
-          tiposMidia={tiposMidia}
-          origens={origens}
         />
       );
     case 2:
@@ -118,11 +94,6 @@ const FormContent: React.FC<FormContentProps> = ({
           setSelectedDistrito={setSelectedDistrito}
           filteredBairros={filteredBairros}
           errors={errors}
-          problemas={problemas}
-          servicos={servicos}
-          filteredServicos={filteredServicos}
-          serviceSearch={serviceSearch}
-          handleServiceSearch={handleServiceSearch}
         />
       );
     case 3:
@@ -141,18 +112,13 @@ const FormContent: React.FC<FormContentProps> = ({
       );
     case 4:
       return (
-        <ReviewStep
+        <RequesterInfoStep
           formData={formData}
           handleChange={handleChange}
-          problemas={problemas}
-          origens={origens}
-          tiposMidia={tiposMidia}
-          filteredBairros={filteredBairros}
-          distritos={distritos}
-          servicos={servicos}
+          handleSelectChange={handleSelectChange}
           errors={errors}
-          showValidationErrors={true}
-          onNavigateToStep={onNavigateToStep}
+          tiposMidia={tiposMidia}
+          origens={origens}
         />
       );
     default:
