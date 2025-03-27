@@ -17,9 +17,57 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   onViewAttachment,
   onDownloadAttachment
 }) => {
-  if (!arquivo_url && (!anexos || anexos.length === 0)) {
+  // Validação melhorada para garantir que os anexos sejam exibidos corretamente
+  const hasAttachments = () => {
+    // Verifica se tem arquivo_url
+    if (arquivo_url) return true;
+    
+    // Verifica se tem anexos
+    if (!anexos) return false;
+    
+    // Se anexos for uma string, tenta converter
+    if (typeof anexos === 'string') {
+      try {
+        const parsed = JSON.parse(anexos);
+        return Array.isArray(parsed) && parsed.length > 0;
+      } catch {
+        return false;
+      }
+    }
+    
+    // Se anexos for um array, verifica se tem elementos
+    if (Array.isArray(anexos)) {
+      return anexos.length > 0 && anexos.some(anexo => anexo);
+    }
+    
+    return false;
+  };
+  
+  // Normaliza os anexos para garantir que sempre temos um array
+  const normalizeAttachments = () => {
+    if (!anexos) return [];
+    
+    if (typeof anexos === 'string') {
+      try {
+        const parsed = JSON.parse(anexos);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    
+    if (Array.isArray(anexos)) {
+      return anexos.filter(anexo => anexo);
+    }
+    
+    return [];
+  };
+  
+  if (!hasAttachments()) {
     return null;
   }
+
+  const normalizedAttachments = normalizeAttachments();
 
   return (
     <div className="mt-4 space-y-3 animate-fade-in">
@@ -33,7 +81,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
           />
         )}
         
-        {anexos && anexos.map((anexo: string, index: number) => (
+        {normalizedAttachments.map((anexo: string, index: number) => (
           <AttachmentItem 
             key={index} 
             url={anexo} 

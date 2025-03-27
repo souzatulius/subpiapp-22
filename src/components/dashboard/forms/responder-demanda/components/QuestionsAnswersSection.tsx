@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface QuestionsAnswersSectionProps {
-  perguntas: string[] | Record<string, string> | null;
+  perguntas: string[] | Record<string, string> | null | any;
   resposta: Record<string, string>;
   onRespostaChange: (key: string, value: string) => void;
 }
@@ -26,14 +26,14 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
     
     // Se já for um array, retorna diretamente
     if (Array.isArray(perguntas)) {
-      return perguntas.filter(p => p && p.trim() !== '');
+      return perguntas.filter(p => p && p.trim !== undefined && p.trim() !== '');
     }
     
     // Se for um objeto, converte para array de valores
     if (typeof perguntas === 'object') {
       return Object.entries(perguntas)
         .filter(([_, value]) => value && String(value).trim() !== '')
-        .map(([key, value]) => value);
+        .map(([key, value]) => typeof value === 'string' ? value : String(value));
     }
     
     // Se for string, tenta parsear como JSON
@@ -47,8 +47,8 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
           return Object.values(parsed).filter(p => p && String(p).trim() !== '');
         }
       } catch (e) {
-        console.error('Erro ao parsear perguntas:', e);
-        return [perguntas]; // Se não conseguir parsear, usa como string única
+        // Se não conseguir parsear, usa como string única
+        return [perguntas];
       }
     }
     
@@ -73,11 +73,6 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   
   const { answered, total } = getTotalAnswered();
   const normalizedQuestions = normalizeQuestions();
-
-  // Log para debug
-  console.log('Perguntas originais:', perguntas);
-  console.log('Perguntas normalizadas:', normalizedQuestions);
-  console.log('Respostas atuais:', resposta);
 
   return (
     <div className="space-y-5 transition-all duration-300">

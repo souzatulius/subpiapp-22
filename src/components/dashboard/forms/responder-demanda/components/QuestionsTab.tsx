@@ -51,10 +51,6 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
     return true;
   };
 
-  console.log('Tipo das perguntas:', typeof selectedDemanda.perguntas);
-  console.log('Conteúdo das perguntas:', selectedDemanda.perguntas);
-  console.log('Has questions:', hasQuestions());
-
   return (
     <TabsContent value="questions" className="pt-2 m-0 animate-fade-in">
       {hasQuestions() ? (
