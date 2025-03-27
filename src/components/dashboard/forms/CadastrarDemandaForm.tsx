@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -55,37 +55,52 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     setActiveStep(stepIndex);
   };
 
+  // Validate form on last step or when trying to submit
+  const validateFormBeforeSubmit = () => {
+    const errors = validateDemandForm(formData, 7); // Always validate as if on review step
+    setValidationErrors(errors);
+    return errors.length === 0;
+  };
+
   const handleNextStep = () => {
-    // Só validar na última etapa
-    if (activeStep === 5) {
-      const errors = validateDemandForm(formData, activeStep);
-      setValidationErrors(errors);
-      
-      if (errors.length === 0) {
-        // Se não tiver erros, prossegue com o envio
+    // Se for a última etapa (review), validar antes de enviar
+    if (activeStep === FORM_STEPS.length - 1) {
+      if (validateFormBeforeSubmit()) {
         handleSubmit(formData);
       } else {
-        console.log('Validation errors:', errors);
+        // Mostrar os erros de validação
         toast({
           title: "Formulário incompleto",
-          description: getErrorSummary(errors),
+          description: getErrorSummary(validationErrors),
           variant: "destructive"
         });
       }
     } else {
-      // Para outras etapas, apenas avança sem validar
+      // Para as outras etapas, apenas avança
       nextStep();
     }
   };
 
   const handleSubmit = async (formData: any) => {
     try {
-      await submitForm(formData);
+      if (validateFormBeforeSubmit()) {
+        await submitForm(formData);
+      }
     } catch (error: any) {
       console.error('Submission error:', error);
+      
+      // Show a user-friendly error message based on the error
+      let errorMsg = "Ocorreu um erro ao processar sua solicitação.";
+      
+      if (error.message && error.message.includes("invalid input syntax")) {
+        errorMsg = "Existem campos obrigatórios não preenchidos. Por favor, verifique todos os campos e tente novamente.";
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      
       toast({
         title: "Erro ao cadastrar demanda",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        description: errorMsg,
         variant: "destructive"
       });
     }
@@ -112,8 +127,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             />
           </div>
           
-          {/* Apenas mostrar erro geral na etapa de revisão (etapa 6) */}
-          {validationErrors.length > 0 && activeStep === 5 && (
+          {/* Mostrar erro geral na etapa de revisão */}
+          {validationErrors.length > 0 && activeStep === FORM_STEPS.length - 1 && (
             <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               <AlertTitle>Campos obrigatórios não preenchidos</AlertTitle>

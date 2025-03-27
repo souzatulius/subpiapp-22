@@ -7,11 +7,18 @@ import PracticalInfoStep from '../steps/PracticalInfoStep';
 import OrganizeStep from '../steps/OrganizeStep';
 import ReviewStep from '../steps/ReviewStep';
 import { ValidationError } from '@/lib/formValidationUtils';
+import OriginStep from '../steps/OriginStep';
+import RequesterInfoStep from '../steps/RequesterInfoStep';
+import LocationStep from '../steps/LocationStep';
 
 export const FORM_STEPS = [
   {
     title: 'Vamos iniciar agora o cadastro da demanda',
     description: 'Selecione a origem da demanda, informe se possui protocolo, prioridade e prazo para resposta.',
+  },
+  {
+    title: 'Sobre a origem da demanda',
+    description: 'Informe a origem da demanda.',
   },
   {
     title: 'Vamos entender melhor o que está acontecendo',
@@ -22,12 +29,16 @@ export const FORM_STEPS = [
     description: 'Selecione o tema e serviço relacionado à demanda.',
   },
   {
-    title: 'Agora precisamos de algumas informações práticas',
-    description: 'Dados do solicitante e localização da demanda.',
+    title: 'Dados do solicitante e mídia',
+    description: 'Informações sobre o solicitante e meio de comunicação.',
   },
   {
-    title: 'Vamos organizar e revisar essa demanda',
-    description: 'Adicione título, perguntas específicas e anexos se necessário.',
+    title: 'Localização da demanda',
+    description: 'Dados sobre a localização da demanda.',
+  },
+  {
+    title: 'Perguntas e anexos',
+    description: 'Adicione perguntas específicas e anexos se necessário.',
   },
   {
     title: 'Revise tudo antes de enviar',
@@ -95,6 +106,17 @@ const FormContent: React.FC<FormContentProps> = ({
       );
     case 1:
       return (
+        <OriginStep
+          formData={formData}
+          handleSelectChange={handleSelectChange}
+          handleChange={handleChange}
+          origens={origens}
+          tiposMidia={tiposMidia}
+          errors={errors}
+        />
+      );
+    case 2:
+      return (
         <DetailsStep
           formData={formData}
           handleChange={handleChange}
@@ -104,7 +126,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 2:
+    case 3:
       return (
         <ProblemStep
           formData={formData}
@@ -117,9 +139,20 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 3:
+    case 4:
       return (
-        <PracticalInfoStep
+        <RequesterInfoStep
+          formData={formData}
+          handleChange={handleChange}
+          handleSelectChange={handleSelectChange}
+          errors={errors}
+          tiposMidia={tiposMidia}
+          origens={origens}
+        />
+      );
+    case 5:
+      return (
+        <LocationStep
           formData={formData}
           handleChange={handleChange}
           handleSelectChange={handleSelectChange}
@@ -130,7 +163,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 4:
+    case 6:
       return (
         <OrganizeStep
           formData={formData}
@@ -144,7 +177,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 5:
+    case 7:
       return (
         <ReviewStep
           formData={formData}

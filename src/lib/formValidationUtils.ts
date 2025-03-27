@@ -9,8 +9,8 @@ export interface ValidationError {
 export const validateDemandForm = (formData: any, activeStep: number): ValidationError[] => {
   const errors: ValidationError[] = [];
   
-  // Only validate on the review step (step 5)
-  if (activeStep === 5) {
+  // Only validate the full form on the final review step (now step 7)
+  if (activeStep === 7) {
     // Validate all required fields
     if (!formData.problema_id) {
       errors.push({
@@ -73,6 +73,20 @@ export const validateDemandForm = (formData: any, activeStep: number): Validatio
       errors.push({
         field: 'titulo',
         message: 'O título da demanda é obrigatório'
+      });
+    }
+    
+    // Validate media type if the origin requires it
+    const requiredMediaOrigins = ["Imprensa", "SMSUB", "SECOM"];
+    const selectedOrigin = formData.origem_id ? true : false;
+    const originRequiresMedia = selectedOrigin 
+      ? requiredMediaOrigins.includes(formData.origem_descricao)
+      : false;
+    
+    if (originRequiresMedia && !formData.tipo_midia_id) {
+      errors.push({
+        field: 'tipo_midia_id',
+        message: 'Selecione o tipo de mídia'
       });
     }
   }
