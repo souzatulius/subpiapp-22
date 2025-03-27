@@ -11,29 +11,25 @@ import LocationStep from '../steps/LocationStep';
 
 export const FORM_STEPS = [
   {
-    title: 'Origem e Prazo',
-    component: 'OriginClassificationStep',
+    title: 'Origem e prazo da demanda',
+    description: '', // Removing subtitle as requested
   },
   {
-    title: 'Problema',
-    component: 'ProblemStep',
+    title: 'Dados do solicitante e mídia',
+    description: '', // Removing subtitle as requested
   },
   {
-    title: 'Localização',
-    component: 'LocationStep',
+    title: 'Tema, serviço e localização',
+    description: '', // Removing subtitle as requested
   },
   {
-    title: 'Organização',
-    component: 'OrganizeStep',
+    title: 'Título, perguntas e anexos',
+    description: '', // Removing subtitle as requested
   },
   {
-    title: 'Informações do Solicitante',
-    component: 'RequesterInfoStep',
+    title: 'Revise tudo antes de enviar',
+    description: '', // Removing subtitle as requested
   },
-  {
-    title: 'Revisão',
-    component: 'ReviewStep',
-  }
 ];
 
 interface FormContentProps {

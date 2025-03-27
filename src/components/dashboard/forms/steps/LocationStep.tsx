@@ -1,120 +1,110 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
-import ServiceSearch from './identification/ServiceSearch';
+import ProblemStep from './ProblemStep';
 
 interface LocationStepProps {
   formData: {
-    endereco: string;
+    problema_id: string;
+    servico_id: string;
+    nao_sabe_servico?: boolean;
     bairro_id: string;
+    endereco: string;
   };
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
-  errors: ValidationError[];
+  problemas: any[];
+  servicos: any[];
+  filteredServicos: any[];
   selectedDistrito: string;
   setSelectedDistrito: (value: string) => void;
   distritos: any[];
   filteredBairros: any[];
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSelectChange: (name: string, value: string | boolean) => void;
+  serviceSearch?: string;
+  handleServiceSearch?: (value: string) => void;
+  errors?: ValidationError[];
 }
 
 const LocationStep: React.FC<LocationStepProps> = ({
   formData,
-  handleChange,
-  handleSelectChange,
-  errors,
+  problemas,
+  servicos,
+  filteredServicos,
   selectedDistrito,
   setSelectedDistrito,
   distritos,
-  filteredBairros
+  filteredBairros,
+  handleChange,
+  handleSelectChange,
+  serviceSearch = '',
+  handleServiceSearch,
+  errors = []
 }) => {
-  // Toggle district selection to allow deselection
-  const toggleDistrito = (distritoId: string) => {
-    if (selectedDistrito === distritoId) {
-      setSelectedDistrito('');
-      handleSelectChange('bairro_id', '');
-    } else {
-      setSelectedDistrito(distritoId);
-      handleSelectChange('bairro_id', '');
-    }
-  };
-
-  // Toggle bairro selection to allow deselection
-  const toggleBairro = (bairroId: string) => {
-    handleSelectChange('bairro_id', formData.bairro_id === bairroId ? '' : bairroId);
-  };
+  // Show address field only if bairro is selected
+  const showAddressField = formData.bairro_id !== '';
 
   return (
     <div className="space-y-6">
-      <div>
-        <Label 
-          htmlFor="endereco" 
-          className={`text-lg font-medium block mb-2 ${hasFieldError('endereco', errors) ? 'text-orange-500' : 'text-blue-950'}`}
-        >
-          Endereço {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
-        </Label>
-        <Input
-          id="endereco"
-          name="endereco"
-          value={formData.endereco}
-          onChange={handleChange}
-          placeholder="Rua e Número - Ex: Av. São João, 473"
-          className={hasFieldError('endereco', errors) ? 'border-orange-500' : ''}
-        />
-        {hasFieldError('endereco', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('endereco', errors)}</p>
-        )}
-      </div>
+      <ProblemStep
+        formData={{
+          problema_id: formData.problema_id,
+          servico_id: formData.servico_id,
+          nao_sabe_servico: formData.nao_sabe_servico
+        }}
+        problemas={problemas}
+        servicos={servicos}
+        filteredServicos={filteredServicos}
+        handleChange={handleChange}
+        handleSelectChange={handleSelectChange}
+        handleServiceSearch={handleServiceSearch}
+        errors={errors}
+      />
 
       <div>
         <Label 
-          htmlFor="distrito" 
-          className={`text-lg font-medium block mb-2 ${hasFieldError('bairro_id', errors) ? 'text-orange-500' : 'text-blue-950'}`}
+          className={`form-question-title ${hasFieldError('distrito', errors) ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Distrito {hasFieldError('bairro_id', errors) && <span className="text-orange-500">*</span>}
+          Distrito {hasFieldError('distrito', errors) && <span className="text-orange-500">*</span>}
         </Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="flex flex-wrap gap-2">
           {distritos.map(distrito => (
-            <Button
-              key={distrito.id}
-              type="button"
-              variant={selectedDistrito === distrito.id ? "default" : "outline"}
-              className={`rounded-xl selection-button ${
-                selectedDistrito === distrito.id ? "bg-orange-500 text-white" : ""
-              } ${
-                hasFieldError('bairro_id', errors) ? 'border-orange-500' : ''
-              } hover:bg-orange-500 hover:text-white`}
-              onClick={() => toggleDistrito(distrito.id)}
+            <Button 
+              key={distrito.id} 
+              type="button" 
+              variant={selectedDistrito === distrito.id ? "default" : "outline"} 
+              className={`selection-button ${selectedDistrito === distrito.id ? "bg-orange-500 text-white" : ""}`}
+              onClick={() => setSelectedDistrito(distrito.id)}
             >
               {distrito.nome}
             </Button>
           ))}
         </div>
+        {hasFieldError('distrito', errors) && (
+          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('distrito', errors)}</p>
+        )}
       </div>
-
+      
       {selectedDistrito && filteredBairros.length > 0 && (
         <div className="animate-fadeIn">
           <Label 
             htmlFor="bairro_id" 
-            className={`text-lg font-medium block mb-2 ${hasFieldError('bairro_id', errors) ? 'text-orange-500' : 'text-blue-950'}`}
+            className={`form-question-title ${hasFieldError('bairro_id', errors) ? 'text-orange-500 font-semibold' : ''}`}
           >
             Bairro {hasFieldError('bairro_id', errors) && <span className="text-orange-500">*</span>}
           </Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="flex flex-wrap gap-2">
             {filteredBairros.map(bairro => (
-              <Button
-                key={bairro.id}
-                type="button"
-                variant={formData.bairro_id === bairro.id ? "default" : "outline"}
-                className={`rounded-xl selection-button ${
-                  formData.bairro_id === bairro.id ? "bg-orange-500 text-white" : ""
-                } ${
-                  hasFieldError('bairro_id', errors) ? 'border-orange-500' : ''
-                } hover:bg-orange-500 hover:text-white`}
-                onClick={() => toggleBairro(bairro.id)}
+              <Button 
+                key={bairro.id} 
+                type="button" 
+                variant={formData.bairro_id === bairro.id ? "default" : "outline"} 
+                className={`selection-button ${formData.bairro_id === bairro.id ? "bg-orange-500 text-white" : ""}`}
+                onClick={() => handleSelectChange('bairro_id', bairro.id)}
               >
                 {bairro.nome}
               </Button>
@@ -122,6 +112,28 @@ const LocationStep: React.FC<LocationStepProps> = ({
           </div>
           {hasFieldError('bairro_id', errors) && (
             <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('bairro_id', errors)}</p>
+          )}
+        </div>
+      )}
+      
+      {showAddressField && (
+        <div className="animate-fadeIn">
+          <Label 
+            htmlFor="endereco" 
+            className={`form-question-title ${hasFieldError('endereco', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Endereço completo {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
+          </Label>
+          <Input
+            id="endereco"
+            name="endereco"
+            value={formData.endereco}
+            onChange={handleChange}
+            placeholder="Ex: Av. São João, 473 - República"
+            className={hasFieldError('endereco', errors) ? 'border-orange-500' : ''}
+          />
+          {hasFieldError('endereco', errors) && (
+            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('endereco', errors)}</p>
           )}
         </div>
       )}

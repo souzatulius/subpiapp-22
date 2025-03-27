@@ -18,7 +18,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <Label className="text-lg font-medium block mb-2 text-blue-950">Perguntas principais sobre o caso</Label>
+      <Label className="form-question-title">Perguntas principais sobre o caso</Label>
       
       <div className="space-y-4">
         {perguntas.slice(0, 5).map((pergunta, index) => (

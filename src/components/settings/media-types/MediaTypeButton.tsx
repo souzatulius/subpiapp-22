@@ -23,7 +23,7 @@ const MediaTypeButton: React.FC<MediaTypeButtonProps> = ({
       type="button"
       variant={isSelected ? "default" : "outline"}
       className={`h-24 w-full py-3 flex flex-col items-center justify-center gap-2 rounded-lg selection-button
-        ${isSelected ? "bg-orange-500 text-white hover:bg-orange-600" : "hover:bg-orange-500 hover:text-white"}
+        ${isSelected ? "bg-orange-500 text-white" : "hover:bg-orange-500 hover:text-white"}
       `}
       onClick={onClick}
     >
