@@ -13,10 +13,6 @@ interface CommentsSectionProps {
 const CommentsSection: React.FC<CommentsSectionProps> = ({ comentarios, onChange }) => {
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center gap-2 mb-2">
-        <h3 className="text-lg font-semibold text-blue-700">Comentários Internos</h3>
-      </div>
-      
       <Card className="bg-blue-50/50 border border-blue-100 shadow-sm hover:shadow transition-all duration-300">
         <CardContent className="p-4">
           <div className="flex items-start gap-3 text-sm text-blue-600 mb-3">

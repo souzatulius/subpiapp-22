@@ -15,6 +15,9 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
   resposta,
   onRespostaChange
 }) => {
+  // This component is now just a wrapper for QuestionsAnswersSection
+  // and is kept for backward compatibility
+  
   // Check if there are questions
   const hasQuestions = React.useMemo(() => {
     const normalized = normalizeQuestions(selectedDemanda.perguntas);

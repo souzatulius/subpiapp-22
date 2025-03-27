@@ -15,11 +15,12 @@ const FormFooter: React.FC<FormFooterProps> = ({
   onSubmit 
 }) => {
   return (
-    <div className="border-t p-4 sticky bottom-0 bg-white shadow-md z-10 flex justify-between">
+    <div className="w-full flex justify-between items-center">
       <div className="text-sm text-gray-500">
         {!allQuestionsAnswered && (
-          <div className="text-orange-500 animate-pulse">
-            Responda todas as perguntas antes de enviar
+          <div className="text-orange-500 animate-pulse flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            <span>Responda todas as perguntas antes de enviar</span>
           </div>
         )}
       </div>

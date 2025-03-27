@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { TabsContent } from '@/components/ui/tabs';
 import CommentsSection from './CommentsSection';
 import { Card } from '@/components/ui/card';
 
@@ -13,8 +12,8 @@ const CommentsTab: React.FC<CommentsTabProps> = ({
   comentarios,
   onChange
 }) => {
-  // Instead of returning TabsContent directly, just return the content
-  // The parent component (TabsNavigation) will handle the Tabs structure
+  // This component is now just a wrapper for CommentsSection
+  // and is kept for backward compatibility
   return (
     <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
       <CommentsSection 

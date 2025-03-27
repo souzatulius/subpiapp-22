@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DetailsTab from './DetailsTab';
 import CommentsTab from './CommentsTab';
+import QuestionsTab from './QuestionsTab';
 
 interface TabsNavigationProps {
   activeTab: string;
@@ -27,8 +26,10 @@ interface TabsNavigationProps {
   onDownloadAttachment: (url: string) => void;
 }
 
-const TabsNavigation: React.FC<TabsNavigationProps> = ({ 
-  activeTab, 
+// This component is kept for backward compatibility, but is now just a pass-through
+// since we've consolidated all the content into the single RespostaForm view
+const TabsNavigation: React.FC<TabsNavigationProps> = ({
+  activeTab,
   onTabChange,
   comentarios,
   onComentariosChange,
@@ -50,28 +51,10 @@ const TabsNavigation: React.FC<TabsNavigationProps> = ({
   onDownloadAttachment
 }) => {
   return (
-    <Tabs 
-      defaultValue="details" 
-      value={activeTab}
-      onValueChange={onTabChange}
-      className="w-full"
-    >
-      <TabsList className="grid grid-cols-2 w-full lg:w-auto mb-4 bg-gray-100">
-        <TabsTrigger 
-          value="details" 
-          className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-subpi-blue transition-all duration-300"
-        >
-          Detalhes da Demanda
-        </TabsTrigger>
-        <TabsTrigger 
-          value="comments" 
-          className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-subpi-blue transition-all duration-300"
-        >
-          Comentários
-        </TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="details" className="pt-2 m-0 animate-fade-in">
+    <div className="w-full">
+      {/* Content is now all in the main RespostaForm component */}
+      {/* This component is maintained for backward compatibility */}
+      {activeTab === 'details' && (
         <DetailsTab 
           selectedDemanda={selectedDemanda}
           selectedProblemId={selectedProblemId}
@@ -90,15 +73,15 @@ const TabsNavigation: React.FC<TabsNavigationProps> = ({
           resposta={resposta}
           onRespostaChange={onRespostaChange}
         />
-      </TabsContent>
+      )}
       
-      <TabsContent value="comments" className="pt-2 m-0 animate-fade-in">
+      {activeTab === 'comments' && (
         <CommentsTab 
           comentarios={comentarios}
           onChange={onComentariosChange}
         />
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   );
 };
 
