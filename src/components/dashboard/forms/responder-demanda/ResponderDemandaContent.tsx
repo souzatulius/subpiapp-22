@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge'; // <-- Apenas UMA importação do Badge
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useDemandasData } from './hooks/useDemandasData';
