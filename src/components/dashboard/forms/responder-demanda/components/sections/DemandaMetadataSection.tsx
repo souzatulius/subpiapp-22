@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare } from 'lucide-react';
+import { renderIcon } from '@/components/settings/problems/renderIcon';
 
 interface DemandaMetadataSectionProps {
   selectedDemanda: any;
@@ -23,13 +24,19 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         {selectedDemanda.tema && (
-          <Badge className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full">
+          <Badge className="px-3 py-1.5 flex items-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full">
+            <span className="flex-shrink-0">
+              {renderIcon(selectedDemanda.tema.icone)}
+            </span>
             {selectedDemanda.tema.descricao || 'Tema não definido'}
           </Badge>
         )}
         
         {selectedDemanda.problema && (
-          <Badge className="px-3 py-1.5 bg-blue-50 text-subpi-blue border border-blue-100 rounded-full">
+          <Badge className="px-3 py-1.5 flex items-center gap-2 bg-blue-50 text-subpi-blue border border-blue-100 rounded-full">
+            <span className="flex-shrink-0">
+              {renderIcon(selectedDemanda.problema.icone)}
+            </span>
             {selectedDemanda.problema.descricao || selectedDemanda.problema}
           </Badge>
         )}
