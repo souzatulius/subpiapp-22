@@ -17,8 +17,6 @@ import { useRespostaFormState } from '../hooks/useRespostaFormState';
 // Components
 import RespostaFormHeader from './RespostaFormHeader';
 import TabsNavigation from './TabsNavigation';
-import DetailsTab from './DetailsTab';
-import CommentsTab from './CommentsTab';
 import FormFooter from './FormFooter';
 
 interface RespostaFormProps {
@@ -121,6 +119,15 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 
   if (!selectedDemanda) return null;
 
+  // Helper function to handle comentarios changes
+  const handleComentariosChange = (value: string) => {
+    if (setComentarios) {
+      setComentarios(value);
+    } else {
+      setLocalComentarios(value);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between mb-4">
@@ -135,44 +142,26 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           <TabsNavigation
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            comentarios={setComentarios ? comentarios : localComentarios}
+            onComentariosChange={handleComentariosChange}
+            selectedDemanda={selectedDemanda}
+            resposta={resposta}
+            onRespostaChange={handleRespostaChange}
+            selectedProblemId={selectedProblemId}
+            selectedServicoId={selectedServicoId}
+            dontKnowService={dontKnowService}
+            problems={problems}
+            problemsLoading={problemsLoading}
+            servicos={servicos}
+            servicosLoading={servicosLoading}
+            currentProblem={currentProblem}
+            onProblemChange={setSelectedProblemId}
+            onServicoChange={setSelectedServicoId}
+            onDontKnowServiceChange={handleServiceToggle}
+            onViewAttachment={handleViewAttachment}
+            onDownloadAttachment={handleDownloadAttachment}
           />
         </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {activeTab === 'details' && (
-            <DetailsTab 
-              selectedDemanda={selectedDemanda}
-              selectedProblemId={selectedProblemId}
-              selectedServicoId={selectedServicoId}
-              dontKnowService={dontKnowService}
-              problems={problems}
-              problemsLoading={problemsLoading}
-              servicos={servicos}
-              servicosLoading={servicosLoading}
-              currentProblem={currentProblem}
-              onProblemChange={setSelectedProblemId}
-              onServicoChange={setSelectedServicoId}
-              onDontKnowServiceChange={handleServiceToggle}
-              onViewAttachment={handleViewAttachment}
-              onDownloadAttachment={handleDownloadAttachment}
-              resposta={resposta}
-              onRespostaChange={handleRespostaChange}
-            />
-          )}
-          
-          {activeTab === 'comments' && (
-            <CommentsTab 
-              comentarios={setComentarios ? comentarios : localComentarios}
-              onChange={(value) => {
-                if (setComentarios) {
-                  setComentarios(value);
-                } else {
-                  setLocalComentarios(value);
-                }
-              }}
-            />
-          )}
-        </CardContent>
 
         <CardFooter className="border-t p-4 sticky bottom-0 bg-white shadow-md z-10 flex justify-between">
           <FormFooter 

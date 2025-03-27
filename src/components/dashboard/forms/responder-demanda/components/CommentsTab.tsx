@@ -13,15 +13,15 @@ const CommentsTab: React.FC<CommentsTabProps> = ({
   comentarios,
   onChange
 }) => {
+  // Instead of returning TabsContent directly, just return the content
+  // The parent component (TabsNavigation) will handle the Tabs structure
   return (
-    <TabsContent value="comments" className="pt-2 m-0 animate-fade-in">
-      <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-        <CommentsSection 
-          comentarios={comentarios}
-          onChange={onChange}
-        />
-      </Card>
-    </TabsContent>
+    <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+      <CommentsSection 
+        comentarios={comentarios}
+        onChange={onChange}
+      />
+    </Card>
   );
 };
 
