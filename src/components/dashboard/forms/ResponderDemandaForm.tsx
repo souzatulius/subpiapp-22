@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ResponderDemandaContent from './responder-demanda/ResponderDemandaContent';
 
@@ -9,7 +8,7 @@ interface ResponderDemandaFormProps {
 const ResponderDemandaForm: React.FC<ResponderDemandaFormProps> = ({ onClose }) => {
   return (
     <div className="w-full">
-      <ResponderDemandaContent />
+      <ResponderDemandaContent onClose={onClose} />
     </div>
   );
 };
