@@ -29,14 +29,14 @@ const IdentificationStep: React.FC<IdentificationStepProps> = ({
     <div className="space-y-6">
       <TemaSelector
         problemas={problemas}
-        selectedTemaId={formData.problema_id}
-        handleSelectChange={(id) => handleSelectChange('problema_id', id)}
+        selectedProblemId={formData.problema_id}
+        onChange={(id) => handleSelectChange('problema_id', id)}
         errors={errors}
       />
       
       <DetalhesInput
         value={formData.detalhes_solicitacao}
-        handleChange={handleChange}
+        onChange={handleChange}
         errors={errors}
       />
       

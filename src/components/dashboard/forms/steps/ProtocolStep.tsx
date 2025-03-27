@@ -9,6 +9,7 @@ interface ProtocolStepProps {
     tipo_midia_id: string;
     veiculo_imprensa: string;
     prazo_resposta: string;
+    prioridade: string;
     tem_protocolo_156?: boolean;
     numero_protocolo_156?: string;
   };

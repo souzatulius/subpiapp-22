@@ -7,57 +7,53 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Search, X, ChevronDown } from 'lucide-react';
+import { hasFieldError, getFieldErrorMessage } from './ValidationUtils';
 
 interface ServiceSearchProps {
-  serviceSearch: string;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  filteredServicesBySearch: any[];
-  handleServiceSelect: (serviceId: string) => void;
-  selectedService: any;
-  handleServiceRemove: () => void;
+  servicos: any[];
+  filteredServicos: any[];
+  selectedServico: string;
+  naoSabeServico: boolean;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onServiceSelect: (serviceId: string) => void;
+  onToggleNaoSabe: (checked: boolean) => void;
   errors?: ValidationError[];
-  isPopoverOpen: boolean;
-  setIsPopoverOpen: (isOpen: boolean) => void;
-  className?: string;
-  onDontKnow?: () => void;
-  isInvalid?: boolean;
 }
 
 const ServiceSearch: React.FC<ServiceSearchProps> = ({
-  serviceSearch,
-  handleChange,
-  filteredServicesBySearch,
-  handleServiceSelect,
-  selectedService,
-  handleServiceRemove,
-  errors = [],
-  isPopoverOpen,
-  setIsPopoverOpen,
-  className = '',
-  onDontKnow,
-  isInvalid = false,
+  servicos,
+  filteredServicos,
+  selectedServico,
+  naoSabeServico,
+  searchQuery,
+  onSearchChange,
+  onServiceSelect,
+  onToggleNaoSabe,
+  errors = []
 }) => {
-  const hasError = (field: string) => errors.some(err => err.field === field) || isInvalid;
-  const getErrorMessage = (field: string) => {
-    const error = errors.find(err => err.field === field);
-    return error ? error.message : '';
-  };
-
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  
+  const selectedServiceObj = servicos.find(s => s.id === selectedServico);
+  
   return (
-    <div className={`animate-fadeIn ${className}`}>
-      <Label htmlFor="servico_id" className={`block mb-2 ${hasError('servico_id') ? 'text-orange-500 font-semibold' : ''}`}>
-        Serviço {hasError('servico_id') && <span className="text-orange-500">*</span>}
+    <div className="space-y-3">
+      <Label 
+        htmlFor="servico_id" 
+        className={`block text-base font-medium ${hasFieldError('servico_id', errors) ? 'text-orange-500' : ''}`}
+      >
+        Serviço {hasFieldError('servico_id', errors) && <span className="text-orange-500">*</span>}
       </Label>
       
-      {selectedService ? (
+      {selectedServiceObj ? (
         <div className="flex items-center">
           <Badge className="px-3 py-2 bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center">
-            {selectedService.descricao}
+            {selectedServiceObj.descricao}
             <Button 
               variant="ghost" 
               size="sm" 
               className="h-5 w-5 p-0 ml-2 text-blue-700 hover:text-blue-900 hover:bg-transparent"
-              onClick={handleServiceRemove}
+              onClick={() => onServiceSelect('')}
             >
               <X className="h-3 w-3" />
             </Button>
@@ -72,10 +68,10 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
                 <Input 
                   type="text" 
                   name="serviceSearch" 
-                  value={serviceSearch} 
-                  onChange={handleChange} 
+                  value={searchQuery} 
+                  onChange={(e) => onSearchChange(e.target.value)} 
                   onClick={() => setIsPopoverOpen(true)}
-                  className={`flex-1 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasError('servico_id') ? 'placeholder-orange-300' : ''}`} 
+                  className={`flex-1 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasFieldError('servico_id', errors) ? 'placeholder-orange-300' : ''}`} 
                   placeholder="Pesquisar serviço" 
                 />
                 <Button 
@@ -94,14 +90,14 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
               sideOffset={5}
             >
               <div className="max-h-60 overflow-y-auto">
-                {filteredServicesBySearch.length > 0 ? (
-                  filteredServicesBySearch.map(service => (
+                {filteredServicos.length > 0 ? (
+                  filteredServicos.map(service => (
                     <Button 
                       key={service.id} 
                       variant="ghost" 
                       className="w-full justify-start px-4 py-3 text-left hover:bg-blue-50 rounded-none"
                       onClick={() => {
-                        handleServiceSelect(service.id);
+                        onServiceSelect(service.id);
                         setIsPopoverOpen(false);
                       }}
                     >
@@ -112,37 +108,35 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
                   <p className="p-4 text-sm text-gray-500">Nenhum serviço encontrado</p>
                 )}
                 
-                {onDontKnow && (
-                  <>
-                    <div className="border-t border-gray-200 my-1"></div>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start px-4 py-3 text-left text-orange-600 hover:bg-orange-50 hover:text-orange-700 rounded-none"
-                      onClick={() => {
-                        onDontKnow();
-                        setIsPopoverOpen(false);
-                      }}
-                    >
-                      Não sei informar o serviço
-                    </Button>
-                  </>
-                )}
+                <div className="border-t border-gray-200 my-1"></div>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-4 py-3 text-left text-orange-600 hover:bg-orange-50 hover:text-orange-700 rounded-none"
+                  onClick={() => {
+                    onToggleNaoSabe(!naoSabeServico);
+                    setIsPopoverOpen(false);
+                  }}
+                >
+                  Não sei informar o serviço
+                </Button>
               </div>
             </PopoverContent>
           </Popover>
         </div>
       )}
       
-      {hasError('servico_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>}
+      {hasFieldError('servico_id', errors) && (
+        <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('servico_id', errors)}</p>
+      )}
 
-      {onDontKnow && !selectedService && (
+      {!selectedServiceObj && (
         <div className="mt-2">
           <Button
             type="button"
             variant="ghost"
             size="sm" 
             className="text-orange-600 hover:bg-orange-50 hover:text-orange-700 p-0 h-auto"
-            onClick={onDontKnow}
+            onClick={() => onToggleNaoSabe(!naoSabeServico)}
           >
             Não sei o serviço específico
           </Button>
