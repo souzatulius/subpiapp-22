@@ -1,10 +1,10 @@
 
-import { useState, useRef, ChangeEvent, useEffect } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
-import { UserProfile } from '../types';
+import { UserProfile } from '@/types/common';
 
 // The bucket name must only contain lowercase letters, numbers, dots, and hyphens
 const PROFILE_PHOTOS_BUCKET = 'profile-photos';
@@ -20,13 +20,7 @@ export const usePhotoUpload = (
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [photoRemoved, setPhotoRemoved] = useState(false);
-
-  // Reset state when modal opens
-  useEffect(() => {
-    setPreviewUrl(null);
-    setSelectedFile(null);
-    setPhotoRemoved(false);
-  }, []);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,6 +28,7 @@ export const usePhotoUpload = (
 
     // Check file type
     if (!file.type.startsWith('image/')) {
+      setError("Por favor, selecione uma imagem");
       toast({
         title: "Tipo de arquivo inválido",
         description: "Por favor, selecione uma imagem.",
@@ -44,6 +39,7 @@ export const usePhotoUpload = (
 
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
+      setError("O tamanho máximo da imagem é 5MB");
       toast({
         title: "Arquivo muito grande",
         description: "O tamanho máximo da imagem é 5MB.",
@@ -54,6 +50,7 @@ export const usePhotoUpload = (
 
     setSelectedFile(file);
     setPhotoRemoved(false);
+    setError(null);
     
     // Create preview
     const reader = new FileReader();
@@ -68,104 +65,137 @@ export const usePhotoUpload = (
   };
 
   const handleRemovePhoto = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      // If the user has an existing photo, remove it from storage
-      if (userProfile?.foto_perfil_url) {
-        const urlParts = userProfile.foto_perfil_url.split('/');
-        const filename = urlParts[urlParts.length - 1];
-        
-        if (filename) {
-          try {
-            await supabase.storage.from(PROFILE_PHOTOS_BUCKET).remove([filename]);
-          } catch (error) {
-            console.warn('Erro ao remover arquivo de storage, continuando com a atualização do perfil:', error);
-            // Continue with profile update even if file removal fails
-          }
-        }
-      }
+    setPreviewUrl(null);
+    setSelectedFile(null);
+    setPhotoRemoved(true);
+    setError(null);
+  };
 
-      // Mark photo as removed, but don't update the profile yet
-      setPreviewUrl(null);
-      setSelectedFile(null);
-      setPhotoRemoved(true);
+  const ensureBucketExists = async () => {
+    try {
+      // Check if bucket exists
+      const { data: buckets, error } = await supabase.storage.listBuckets();
       
-      toast({
-        title: "Foto removida",
-        description: "Clique em Salvar para confirmar a remoção da foto.",
-      });
+      if (error) throw error;
+      
+      const bucketExists = buckets.some(bucket => bucket.name === PROFILE_PHOTOS_BUCKET);
+      
+      if (!bucketExists) {
+        // Create bucket if it doesn't exist
+        const { error: createError } = await supabase.storage.createBucket(PROFILE_PHOTOS_BUCKET, {
+          public: true
+        });
+        
+        if (createError) throw createError;
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Erro ao remover foto:', error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao remover sua foto de perfil.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      console.error('Error ensuring bucket exists:', error);
+      return false;
     }
   };
 
   const handleSavePhoto = async () => {
-    if (!user) return;
+    if (!user) {
+      setError("Você precisa estar logado para fazer essa ação");
+      return;
+    }
     
     setLoading(true);
+    setError(null);
+    
     try {
-      let publicUrl = null;
+      // If photo was removed
+      if (photoRemoved) {
+        // If the user has an existing photo, remove it from storage
+        if (userProfile?.foto_perfil_url) {
+          const urlParts = userProfile.foto_perfil_url.split('/');
+          const filename = urlParts[urlParts.length - 1];
+          
+          if (filename) {
+            await supabase.storage.from(PROFILE_PHOTOS_BUCKET).remove([filename]);
+          }
+        }
+        
+        // Update user profile with null photo URL
+        const { error: updateError } = await supabase
+          .from('usuarios')
+          .update({ foto_perfil_url: null })
+          .eq('id', user.id);
+          
+        if (updateError) throw updateError;
+        
+        await fetchUserProfile();
+        onClose();
+        
+        toast({
+          title: "Foto removida",
+          description: "Sua foto de perfil foi removida com sucesso.",
+          variant: "success",
+        });
+        
+        return;
+      }
       
-      // If there's a selected file, upload it
+      // If there's a new photo to upload
       if (selectedFile) {
-        // Generate a unique filename
+        // Ensure bucket exists
+        const bucketExists = await ensureBucketExists();
+        if (!bucketExists) {
+          throw new Error("Não foi possível configurar o armazenamento para fotos");
+        }
+        
+        // Generate unique filename
         const fileExt = selectedFile.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `${fileName}`;
-
-        // Upload the file - assume bucket already exists
-        const { error: uploadError, data } = await supabase.storage
+        const fileName = `${user.id}-${uuidv4()}.${fileExt}`;
+        const filePath = fileName;
+        
+        // Upload file
+        const { error: uploadError } = await supabase.storage
           .from(PROFILE_PHOTOS_BUCKET)
           .upload(filePath, selectedFile, {
             cacheControl: '3600',
-            upsert: false
+            upsert: true
           });
-
-        if (uploadError) {
-          if (uploadError.message.includes('bucket') || uploadError.message.includes('Bucket')) {
-            // If there's a bucket-related error, inform the user
-            throw new Error(`A pasta de armazenamento "${PROFILE_PHOTOS_BUCKET}" não existe. Entre em contato com o administrador do sistema.`);
-          } else {
-            throw uploadError;
-          }
-        }
-
-        // Get public URL
-        const { data: urlData } = supabase.storage.from(PROFILE_PHOTOS_BUCKET).getPublicUrl(filePath);
-        publicUrl = urlData.publicUrl;
-      }
-
-      // Update user profile with new photo URL or null if removed
-      const { error: updateError } = await supabase
-        .from('usuarios')
-        .update({ foto_perfil_url: photoRemoved ? null : publicUrl })
-        .eq('id', user.id);
+          
+        if (uploadError) throw uploadError;
         
-      if (updateError) throw updateError;
-
-      await fetchUserProfile();
-      onClose();
-      
-      toast({
-        title: photoRemoved ? "Foto removida" : "Foto atualizada",
-        description: photoRemoved 
-          ? "Sua foto de perfil foi removida com sucesso." 
-          : "Sua foto de perfil foi atualizada com sucesso.",
-      });
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from(PROFILE_PHOTOS_BUCKET)
+          .getPublicUrl(filePath);
+        
+        if (!urlData.publicUrl) {
+          throw new Error("Não foi possível obter URL da imagem");
+        }
+        
+        // Update user profile with new photo URL
+        const { error: updateError } = await supabase
+          .from('usuarios')
+          .update({ foto_perfil_url: urlData.publicUrl })
+          .eq('id', user.id);
+          
+        if (updateError) throw updateError;
+        
+        await fetchUserProfile();
+        onClose();
+        
+        toast({
+          title: "Foto atualizada",
+          description: "Sua foto de perfil foi atualizada com sucesso.",
+          variant: "success",
+        });
+      } else if (!photoRemoved) {
+        // If neither a new photo nor removal, just close the modal
+        onClose();
+      }
     } catch (error: any) {
       console.error('Erro ao salvar foto:', error);
+      setError(error.message || "Ocorreu um erro ao salvar a foto de perfil");
       toast({
         title: "Erro",
-        description: `Ocorreu um erro ao salvar sua foto de perfil: ${error.message || 'Erro desconhecido'}`,
+        description: error.message || "Ocorreu um erro ao salvar a foto de perfil.",
         variant: "destructive",
       });
     } finally {
@@ -178,10 +208,11 @@ export const usePhotoUpload = (
     previewUrl,
     selectedFile,
     fileInputRef,
+    photoRemoved,
+    error,
     handleFileChange,
     handleUploadClick,
     handleRemovePhoto,
-    handleSavePhoto,
-    photoRemoved
+    handleSavePhoto
   };
 };

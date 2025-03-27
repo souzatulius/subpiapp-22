@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,8 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     handleUploadClick,
     handleRemovePhoto,
     handleSavePhoto,
-    photoRemoved
+    photoRemoved,
+    error
   } = usePhotoUpload(userProfile, fetchUserProfile, onClose);
 
   const footerContent = (
@@ -62,6 +64,12 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
             imageSrc={previewUrl || userProfile?.foto_perfil_url} 
             size="xl" 
           />
+          
+          {error && (
+            <div className="text-sm text-red-500 text-center">
+              {error}
+            </div>
+          )}
           
           <input
             type="file"

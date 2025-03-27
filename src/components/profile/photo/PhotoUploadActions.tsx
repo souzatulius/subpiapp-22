@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Trash2, Loader2 } from 'lucide-react';
+import { ImageIcon, X } from 'lucide-react';
 
 interface PhotoUploadActionsProps {
   handleUploadClick: () => void;
@@ -17,26 +17,28 @@ const PhotoUploadActions: React.FC<PhotoUploadActionsProps> = ({
   loading
 }) => {
   return (
-    <div className="flex space-x-3">
-      <Button
+    <div className="flex items-center gap-2">
+      <Button 
+        type="button" 
+        variant="outline" 
         onClick={handleUploadClick}
-        variant="outline"
-        size="sm"
         disabled={loading}
+        className="flex items-center"
       >
-        <Upload className="h-4 w-4 mr-2" />
-        Selecionar Imagem
+        <ImageIcon className="mr-2 h-4 w-4" />
+        Escolher foto
       </Button>
       
       {showRemoveButton && (
-        <Button
-          onClick={handleRemovePhoto}
-          variant="outline"
-          size="sm"
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={handleRemovePhoto} 
           disabled={loading}
+          className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
         >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Remover Foto
+          <X className="mr-2 h-4 w-4" />
+          Remover
         </Button>
       )}
     </div>

@@ -1,11 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format, parse } from 'date-fns';
-import { pt } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,19 +13,24 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { User } from './types';
-import { formatPhone } from '@/lib/formValidation';
+import { formatPhoneNumber, formatDateInput, parseFormattedDate, formatDateToString } from '@/lib/inputFormatting';
 
 export const formSchema = z.object({
   whatsapp: z.string().optional(),
-  aniversario: z.date().optional(),
+  aniversario: z.string()
+    .refine(val => !val || /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
+      message: "Data deve estar no formato DD/MM/AAAA"
+    })
+    .refine(val => {
+      if (!val) return true;
+      const date = parseFormattedDate(val);
+      return !!date;
+    }, {
+      message: "Data inválida"
+    })
+    .optional(),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
@@ -50,15 +52,17 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       whatsapp: user?.whatsapp || '',
-      aniversario: user?.aniversario ? new Date(user.aniversario) : undefined,
+      aniversario: user?.aniversario ? formatDateToString(new Date(user.aniversario)) : '',
     },
   });
+  
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       form.reset({
         whatsapp: user.whatsapp || '',
-        aniversario: user.aniversario ? new Date(user.aniversario) : undefined,
+        aniversario: user.aniversario ? formatDateToString(new Date(user.aniversario)) : '',
       });
     }
   }, [user, form]);
@@ -66,12 +70,31 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
   // Format WhatsApp number as the user types
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const formattedValue = formatPhone(value);
+    const formattedValue = formatPhoneNumber(value);
     form.setValue('whatsapp', formattedValue);
   };
 
+  // Format date as the user types
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatDateInput(value);
+    form.setValue('aniversario', formattedValue);
+  };
+
   const handleSubmit = async (data: FormValues) => {
-    await onSubmit(data);
+    setErrorMessage(null);
+    
+    // Validate required fields
+    if (!form.formState.isValid) {
+      setErrorMessage("Por favor, corrija os erros nos campos indicados");
+      return;
+    }
+    
+    try {
+      await onSubmit(data);
+    } catch (error: any) {
+      setErrorMessage(error.message || "Ocorreu um erro ao salvar as informações");
+    }
   };
 
   return (
@@ -81,6 +104,12 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
           <div className="font-medium">{user.nome_completo}</div>
           <div className="text-sm text-gray-500">{user.email}</div>
         </div>
+        
+        {errorMessage && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md mb-4">
+            {errorMessage}
+          </div>
+        )}
         
         <FormField
           control={form.control}
@@ -108,36 +137,15 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Data de Aniversário</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, 'dd/MM/yyyy', { locale: pt })
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                    locale={pt}
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+              <FormControl>
+                <Input
+                  placeholder="DD/MM/AAAA"
+                  {...field}
+                  onChange={(e) => {
+                    handleDateChange(e);
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

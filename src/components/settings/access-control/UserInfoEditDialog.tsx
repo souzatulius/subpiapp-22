@@ -9,6 +9,7 @@ import {
 import UserInfoForm from './UserInfoForm';
 import { useUserInfoDialog } from './useUserInfoDialog';
 import { User } from './types';
+import { toast } from '@/components/ui/use-toast';
 
 interface UserInfoEditDialogProps {
   open: boolean;
@@ -36,7 +37,7 @@ const UserInfoEditDialog: React.FC<UserInfoEditDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Editar Informações do Usuário</DialogTitle>
         </DialogHeader>
