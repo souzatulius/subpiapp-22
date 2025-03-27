@@ -4,18 +4,18 @@ import RespostaFormHeader from './RespostaFormHeader';
 import FormFooter from './FormFooter';
 import DemandaMetadataSection from './sections/DemandaMetadataSection';
 import ServicoSection from './sections/ServicoSection';
-import DemandaDetailsSection from './DemandaDetailsSection';
 import QuestionsAnswersSection from './QuestionsAnswersSection';
 import CommentsSection from './CommentsSection';
 import AttachmentsSection from './AttachmentsSection';
 import { Paperclip, MessageSquare } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { useRespostaFormState } from '../hooks/useRespostaFormState';
 
 interface RespostaFormProps {
   selectedDemanda: any;
   resposta: Record<string, string>;
   setResposta: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  onBack: () => void;
+  onBack?: () => void;
   isLoading: boolean;
   onSubmit: () => Promise<void>;
   comentarios?: string;
@@ -32,26 +32,41 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   comentarios = '',
   setComentarios
 }) => {
+  const {
+    handleRespostaChange,
+    updateService,
+    allQuestionsAnswered,
+  } = useRespostaFormState({
+    selectedDemanda,
+    resposta,
+    setResposta,
+  });
 
   const handleSubmitWithExtra = async () => {
     try {
+      await updateService();
       await onSubmit();
+
       toast({
         title: "Resposta enviada!",
         description: "Demanda respondida com sucesso.",
       });
     } catch (error) {
-      toast({ variant: "destructive", title: "Erro ao enviar resposta" });
+      console.error('Erro ao enviar resposta:', error);
+      toast({ 
+        variant: "destructive", 
+        title: "Erro ao enviar resposta",
+        description: "Ocorreu um erro ao enviar a resposta. Tente novamente."
+      });
     }
   };
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <RespostaFormHeader selectedDemanda={selectedDemanda} />
+      <RespostaFormHeader selectedDemanda={selectedDemanda} onBack={onBack} />
 
       <Card className="border shadow-sm">
         <CardContent className="p-4 space-y-4">
-
           <DemandaMetadataSection selectedDemanda={selectedDemanda} />
 
           <ServicoSection selectedDemanda={selectedDemanda} />
@@ -69,11 +84,11 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             <QuestionsAnswersSection
               perguntas={selectedDemanda.perguntas}
               resposta={resposta}
-              setResposta={setResposta}
+              onRespostaChange={handleRespostaChange} // Corrigido aqui
             />
           )}
 
-          {(selectedDemanda.arquivo_url || selectedDemanda.anexos?.length) && (
+          {(selectedDemanda.arquivo_url || selectedDemanda.anexos?.length > 0) && (
             <div>
               <h3 className="font-semibold text-subpi-blue flex items-center gap-2">
                 <Paperclip className="h-5 w-5" /> Anexos
@@ -92,13 +107,13 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               placeholder="Tem mais alguma informação?"
             />
           </div>
-
         </CardContent>
 
         <CardFooter className="border-t bg-white sticky bottom-0">
-          <FormFooter 
+          <FormFooter
             isLoading={isLoading}
             onSubmit={handleSubmitWithExtra}
+            disabled={!allQuestionsAnswered()}
           />
         </CardFooter>
       </Card>
