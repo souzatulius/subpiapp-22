@@ -15,37 +15,44 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
   resposta,
   onRespostaChange
 }) => {
+  // Processar as perguntas - converter de string para objeto/array se necessário
+  const processedPerguntas = React.useMemo(() => {
+    if (!selectedDemanda.perguntas) return null;
+    
+    // Se já for um objeto ou array, retornar como está
+    if (typeof selectedDemanda.perguntas !== 'string') {
+      return selectedDemanda.perguntas;
+    }
+    
+    // Tentar fazer o parse da string JSON
+    try {
+      return JSON.parse(selectedDemanda.perguntas);
+    } catch (e) {
+      // Se não for um JSON válido, retornar a própria string
+      return selectedDemanda.perguntas;
+    }
+  }, [selectedDemanda.perguntas]);
+
   // Função melhorada para verificar se existem perguntas
   const hasQuestions = () => {
-    if (!selectedDemanda.perguntas) return false;
+    if (!processedPerguntas) return false;
     
     // Se for uma array vazia
-    if (Array.isArray(selectedDemanda.perguntas) && selectedDemanda.perguntas.length === 0) return false;
+    if (Array.isArray(processedPerguntas) && processedPerguntas.length === 0) return false;
     
     // Se for um objeto vazio
-    if (typeof selectedDemanda.perguntas === 'object' && !Array.isArray(selectedDemanda.perguntas)) {
-      if (Object.keys(selectedDemanda.perguntas).length === 0) return false;
+    if (typeof processedPerguntas === 'object' && !Array.isArray(processedPerguntas)) {
+      if (Object.keys(processedPerguntas).length === 0) return false;
       
       // Verifica se há pelo menos uma pergunta não vazia
-      return Object.values(selectedDemanda.perguntas).some(pergunta => 
+      return Object.values(processedPerguntas).some(pergunta => 
         pergunta && String(pergunta).trim() !== ''
       );
     }
     
-    // Se for uma string JSON, tenta parsear
-    if (typeof selectedDemanda.perguntas === 'string') {
-      try {
-        const parsed = JSON.parse(selectedDemanda.perguntas);
-        
-        if (Array.isArray(parsed) && parsed.length === 0) return false;
-        
-        if (typeof parsed === 'object' && Object.keys(parsed).length === 0) return false;
-        
-        return true;
-      } catch {
-        // Se não conseguir parsear, verifica se a string não está vazia
-        return selectedDemanda.perguntas.trim() !== '';
-      }
+    // Se for uma string
+    if (typeof processedPerguntas === 'string') {
+      return processedPerguntas.trim() !== '';
     }
     
     return true;
@@ -55,7 +62,7 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
     <TabsContent value="questions" className="pt-2 m-0 animate-fade-in">
       {hasQuestions() ? (
         <QuestionsAnswersSection 
-          perguntas={selectedDemanda.perguntas}
+          perguntas={processedPerguntas}
           resposta={resposta}
           onRespostaChange={onRespostaChange}
         />
