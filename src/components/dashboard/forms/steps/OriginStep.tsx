@@ -57,6 +57,15 @@ const OriginStep: React.FC<OriginStepProps> = ({
     (formData.tem_protocolo_156 === false || 
      (formData.tem_protocolo_156 === true && formData.numero_protocolo_156 && formData.numero_protocolo_156.length > 0));
 
+  // Allow deselection of origin
+  const handleOriginClick = (originId: string) => {
+    if (formData.origem_id === originId) {
+      handleSelectChange('origem_id', ''); // Deselect if clicking the same origin
+    } else {
+      handleSelectChange('origem_id', originId);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -77,7 +86,7 @@ const OriginStep: React.FC<OriginStepProps> = ({
               } ${
                 hasError('origem_id') ? 'border-orange-500' : ''
               }`} 
-              onClick={() => handleSelectChange('origem_id', origem.id)}
+              onClick={() => handleOriginClick(origem.id)}
             >
               {getOriginIcon(origem.descricao)}
               <span className="text-sm font-semibold">{origem.descricao}</span>
@@ -156,7 +165,7 @@ const OriginStep: React.FC<OriginStepProps> = ({
           </div>
           {hasError('prazo_resposta') && (
             <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prazo_resposta')}</p>
-          )}
+        )}
         </div>
       )}
     </div>

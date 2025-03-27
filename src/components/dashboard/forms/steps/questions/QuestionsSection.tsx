@@ -33,18 +33,6 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   };
   
   const visibleFieldsCount = getVisibleFields();
-  
-  const handleRemoveQuestion = (index: number) => {
-    // Shift all questions up by one after removing
-    const newPerguntas = [...perguntas];
-    newPerguntas.splice(index, 1);
-    newPerguntas.push(''); // Add empty string at the end
-    
-    // Update all values
-    for (let i = index; i < newPerguntas.length; i++) {
-      onPerguntaChange(i, newPerguntas[i]);
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -62,17 +50,6 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
                 className="min-h-[80px]"
               />
             </div>
-            {perguntas[index] && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRemoveQuestion(index)}
-                className="text-gray-500 hover:text-red-500 mt-2"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         ))}
       </div>

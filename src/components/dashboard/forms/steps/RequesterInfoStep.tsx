@@ -54,10 +54,18 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
                         selectedOrigin?.descricao === "SMSUB" ||
                         selectedOrigin?.descricao === "SECOM";
 
+  // Allow deselection of media type
+  const handleMediaTypeClick = (mediaTypeId: string) => {
+    if (formData.tipo_midia_id === mediaTypeId) {
+      handleSelectChange('tipo_midia_id', ''); // Deselect if clicking the same media type
+    } else {
+      handleSelectChange('tipo_midia_id', mediaTypeId);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Tipo de Mídia */}
-      {showMediaFields && (
+      {showMediaFields ? (
         <div className="animate-fadeIn space-y-4">
           <div>
             <label 
@@ -77,7 +85,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
                   } ${
                     hasFieldError('tipo_midia_id', errors) ? 'border-orange-500' : ''
                   }`} 
-                  onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
+                  onClick={() => handleMediaTypeClick(tipo.id)}
                 >
                   {getMediaTypeIcon(tipo.descricao)}
                   <span className="text-sm font-semibold">{tipo.descricao}</span>
@@ -172,6 +180,68 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
               </div>
             </div>
           )}
+        </div>
+      ) : (
+        // Always show these fields regardless of origin
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label 
+              htmlFor="nome_solicitante" 
+              className={`font-semibold ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
+            >
+              Nome do Solicitante
+            </Label>
+            <Input
+              id="nome_solicitante"
+              name="nome_solicitante"
+              value={formData.nome_solicitante}
+              onChange={handleChange}
+              className={`mt-1 ${hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}`}
+            />
+            {hasFieldError('nome_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('nome_solicitante', errors)}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label 
+              htmlFor="telefone_solicitante" 
+              className={`font-semibold ${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500' : ''}`}
+            >
+              Telefone
+            </Label>
+            <Input
+              id="telefone_solicitante"
+              name="telefone_solicitante"
+              value={formData.telefone_solicitante}
+              onChange={handleChange}
+              className={`mt-1 ${hasFieldError('telefone_solicitante', errors) ? 'border-orange-500' : ''}`}
+              placeholder="(XX) XXXXX-XXXX"
+            />
+            {hasFieldError('telefone_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante', errors)}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label 
+              htmlFor="email_solicitante" 
+              className={`font-semibold ${hasFieldError('email_solicitante', errors) ? 'text-orange-500' : ''}`}
+            >
+              Email
+            </Label>
+            <Input
+              id="email_solicitante"
+              name="email_solicitante"
+              type="email"
+              value={formData.email_solicitante}
+              onChange={handleChange}
+              className={`mt-1 ${hasFieldError('email_solicitante', errors) ? 'border-orange-500' : ''}`}
+            />
+            {hasFieldError('email_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('email_solicitante', errors)}</p>
+            )}
+          </div>
         </div>
       )}
     </div>

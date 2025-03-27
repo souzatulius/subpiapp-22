@@ -100,7 +100,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     try {
       // Process date if it exists
       let aniversario: string | null = null;
-      if (data.aniversario) {
+      if (data.aniversario && data.aniversario.trim() !== '') {
         const parsedDate = parseFormattedDate(data.aniversario);
         if (parsedDate) {
           aniversario = parsedDate.toISOString();
