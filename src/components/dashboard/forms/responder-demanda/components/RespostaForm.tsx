@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
@@ -46,7 +45,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   const { problems, isLoading: problemsLoading } = useProblemsData();
   const { servicos, isLoading: servicosLoading } = useServicosData();
 
-  // Use custom hooks for form state management
   const {
     selectedProblemId,
     selectedServicoId,
@@ -65,7 +63,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     setResposta,
   });
 
-  // Use custom hook for form persistence
   const { clearFormStorage } = useFormPersistence({
     demandaId: selectedDemanda?.id,
     resposta,
@@ -77,17 +74,14 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     setActiveTab: () => {}
   });
 
-  // Sync local comments with parent component
   useEffect(() => {
     if (setComentarios) {
       setComentarios(localComentarios);
     }
   }, [localComentarios, setComentarios]);
 
-  // Find the current theme/problem
   const currentProblem = problems.find(p => p.id === selectedProblemId);
 
-  // Get question count stats
   const getQuestionStats = () => {
     if (!selectedDemanda?.perguntas) return { answered: 0, total: 0 };
     
@@ -105,16 +99,12 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 
   const handleSubmitWithExtra = async () => {
     try {
-      // Update selected service (if any)
       await updateService();
       
-      // Call the original onSubmit to save responses
       await onSubmit();
       
-      // Clear data from sessionStorage after successful submission
       clearFormStorage();
 
-      // Show success toast
       toast({
         title: "Resposta enviada com sucesso!",
         description: "Os dados foram salvos e a demanda foi respondida.",
@@ -124,7 +114,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     } catch (error) {
       console.error('Erro ao salvar informações adicionais:', error);
       
-      // Show error toast
       toast({
         title: "Erro ao enviar resposta",
         description: "Ocorreu um problema ao salvar sua resposta. Tente novamente.",
@@ -133,7 +122,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     }
   };
 
-  // Helper function to handle comentarios changes
   const handleComentariosChange = (value: string) => {
     if (setComentarios) {
       setComentarios(value);
@@ -158,7 +146,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       
       <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
         <CardContent className="p-6 space-y-8">
-          {/* Bloco Superior - Resumo da Demanda */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b">
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-subpi-blue">{selectedDemanda.titulo || 'Sem título definido'}</h3>
@@ -249,7 +236,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
           </div>
           
-          {/* Informações do Solicitante */}
           {(selectedDemanda.nome_solicitante || selectedDemanda.email_solicitante || selectedDemanda.telefone_solicitante) && (
             <div className="py-6 border-b">
               <h3 className="text-lg font-semibold text-subpi-blue mb-4 flex items-center gap-2">
@@ -284,7 +270,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
           )}
           
-          {/* Detalhes da Solicitação */}
           {selectedDemanda.detalhes_solicitacao && (
             <div className="py-6 border-b">
               <h3 className="text-lg font-semibold text-subpi-blue mb-4">Detalhes da Solicitação</h3>
@@ -294,7 +279,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
           )}
           
-          {/* Tema e Serviço */}
           <div className="py-6 border-b">
             <h3 className="text-lg font-semibold text-subpi-blue mb-4">Tema e Serviço</h3>
             
@@ -306,6 +290,8 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                   problems={problems}
                   problemsLoading={problemsLoading}
                   onProblemChange={setSelectedProblemId}
+                  demandaId={selectedDemanda.id}
+                  currentProblem={currentProblem}
                 />
               </div>
               
@@ -338,7 +324,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
           </div>
           
-          {/* Perguntas e Respostas */}
           {hasPerguntas && (
             <div className="py-6 border-b">
               <div className="flex items-center justify-between mb-4">
@@ -359,7 +344,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
           )}
           
-          {/* Anexos */}
           {(selectedDemanda.arquivo_url || (selectedDemanda.anexos && selectedDemanda.anexos.length > 0)) && (
             <div className="py-6 border-b">
               <h3 className="text-lg font-semibold text-subpi-blue mb-4 flex items-center gap-2">
@@ -376,7 +360,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </div>
           )}
           
-          {/* Comentários Internos */}
           <div className="py-6">
             <h3 className="text-lg font-semibold text-subpi-blue mb-4 flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
