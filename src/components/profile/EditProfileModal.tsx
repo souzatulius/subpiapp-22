@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -114,26 +113,16 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         cargo_id: userProfile?.cargo_id,
         coordenacao_id: userProfile?.coordenacao_id,
         supervisao_tecnica_id: userProfile?.supervisao_tecnica_id,
+        foto_perfil_url: userProfile?.foto_perfil_url
       };
       
-      // Try to use the RPC function first
-      try {
-        const { data: result, error } = await supabase.rpc('update_user_profile', {
-          user_id: user.id,
-          user_nome_completo: updateData.nome_completo,
-          user_whatsapp: updateData.whatsapp,
-          user_aniversario: updateData.aniversario,
-          user_foto_perfil_url: userProfile?.foto_perfil_url,
-          user_cargo_id: updateData.cargo_id,
-          user_coordenacao_id: updateData.coordenacao_id,
-          user_supervisao_tecnica_id: updateData.supervisao_tecnica_id
-        });
-        
-        if (error) throw error;
-      } catch (rpcError) {
-        // Fallback to direct update if RPC fails
-        await updateProfile(updateData);
-      }
+      // Use direct update instead of RPC function
+      const { error } = await supabase
+        .from('usuarios')
+        .update(updateData)
+        .eq('id', user.id);
+      
+      if (error) throw error;
       
       await fetchUserProfile();
       onClose();

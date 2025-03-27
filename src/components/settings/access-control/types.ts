@@ -5,6 +5,10 @@ export interface User {
   email: string;
   whatsapp?: string;
   aniversario?: string;
+  foto_perfil_url?: string;
+  cargo_id?: string;
+  coordenacao_id?: string;
+  supervisao_tecnica_id?: string;
 }
 
 export interface Permission {

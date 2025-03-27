@@ -39,25 +39,18 @@ export const useUserInfo = (
         throw new Error("Verifique os campos obrigatórios");
       }
       
-      // Call our new secure function instead of direct update
-      const { data: result, error } = await supabase.rpc('update_user_profile', {
-        user_id: userId,
-        user_nome_completo: currentUser?.nome_completo,
-        user_whatsapp: data.whatsapp,
-        user_aniversario: data.aniversario,
-        user_foto_perfil_url: currentUser?.foto_perfil_url,
-        user_cargo_id: currentUser?.cargo_id,
-        user_coordenacao_id: currentUser?.coordenacao_id,
-        user_supervisao_tecnica_id: currentUser?.supervisao_tecnica_id
-      });
+      // Use direct update instead of RPC function
+      const { error } = await supabase
+        .from('usuarios')
+        .update({
+          whatsapp: data.whatsapp,
+          aniversario: data.aniversario
+        })
+        .eq('id', userId);
         
       if (error) {
         console.error('Database error:', error);
         throw new Error("Erro ao atualizar os dados. " + error.message);
-      }
-      
-      if (!result) {
-        throw new Error("Não foi possível atualizar os dados do usuário");
       }
       
       // Update local state
