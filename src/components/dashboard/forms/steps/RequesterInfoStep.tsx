@@ -78,7 +78,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
                 }`} 
                 onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
               >
-                {/* Use icon from useMediaTypeIcon if available */}
+                {useMediaTypeIcon(tipo, "h-6 w-6")}
                 <span className="text-sm font-semibold">{tipo.descricao}</span>
               </Button>
             ))}
@@ -97,84 +97,63 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
           >
             Veículo de Imprensa {hasFieldError('veiculo_imprensa', errors) && <span className="text-orange-500">*</span>}
           </Label>
-          <div className={showNomeSolicitante ? "grid grid-cols-1 md:grid-cols-2 gap-4" : ""}>
-            <Input
-              id="veiculo_imprensa"
-              name="veiculo_imprensa"
-              value={formData.veiculo_imprensa || ''}
-              onChange={handleChange}
-              placeholder="Nome do veículo de imprensa"
-              className={hasFieldError('veiculo_imprensa', errors) ? 'border-orange-500' : ''}
-            />
-            
-            {showNomeSolicitante && (
-              <div className="animate-fadeIn">
-                <Label 
-                  htmlFor="nome_solicitante" 
-                  className={`block text-base font-medium mb-2 ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
-                >
-                  Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
-                </Label>
-                <Input
-                  id="nome_solicitante"
-                  name="nome_solicitante"
-                  value={formData.nome_solicitante || ''}
-                  onChange={handleChange}
-                  placeholder=""
-                  className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
-                />
-              </div>
-            )}
-          </div>
+          <Input
+            id="veiculo_imprensa"
+            name="veiculo_imprensa"
+            value={formData.veiculo_imprensa || ''}
+            onChange={handleChange}
+            placeholder="Nome do veículo de imprensa"
+            className={hasFieldError('veiculo_imprensa', errors) ? 'border-orange-500' : ''}
+          />
           {hasFieldError('veiculo_imprensa', errors) && (
             <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('veiculo_imprensa', errors)}</p>
           )}
         </div>
       )}
 
-      {!requiresMediaType && (
-        <div>
-          <Label 
-            htmlFor="nome_solicitante" 
-            className={`form-question-title ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
-          >
-            Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
-          </Label>
-          <Input
-            id="nome_solicitante"
-            name="nome_solicitante"
-            value={formData.nome_solicitante || ''}
-            onChange={handleChange}
-            placeholder=""
-            className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
-          />
-          {hasFieldError('nome_solicitante', errors) && (
-            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('nome_solicitante', errors)}</p>
-          )}
-        </div>
-      )}
-
-      {(showTelefone || !requiresMediaType) && (
-        <div className={showEmail ? "grid grid-cols-1 md:grid-cols-2 gap-4" : ""}>
-          <div className="animate-fadeIn">
+      {showNomeSolicitante && requiresMediaType && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fadeIn">
+          <div>
             <Label 
-              htmlFor="telefone_solicitante" 
-              className={`block text-base font-medium mb-2 ${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500' : ''}`}
+              htmlFor="nome_solicitante" 
+              className={`block text-base font-medium mb-2 ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
             >
-              Telefone {hasFieldError('telefone_solicitante', errors) && <span className="text-orange-500">*</span>}
+              Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
             </Label>
             <Input
-              id="telefone_solicitante"
-              name="telefone_solicitante"
-              value={formData.telefone_solicitante || ''}
+              id="nome_solicitante"
+              name="nome_solicitante"
+              value={formData.nome_solicitante || ''}
               onChange={handleChange}
-              placeholder="(11) 98765-4321"
-              className={hasFieldError('telefone_solicitante', errors) ? 'border-orange-500' : ''}
+              placeholder=""
+              className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
             />
-            {hasFieldError('telefone_solicitante', errors) && (
-              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante', errors)}</p>
+            {hasFieldError('nome_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('nome_solicitante', errors)}</p>
             )}
           </div>
+          
+          {showTelefone && (
+            <div className="animate-fadeIn">
+              <Label 
+                htmlFor="telefone_solicitante" 
+                className={`block text-base font-medium mb-2 ${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500' : ''}`}
+              >
+                Telefone {hasFieldError('telefone_solicitante', errors) && <span className="text-orange-500">*</span>}
+              </Label>
+              <Input
+                id="telefone_solicitante"
+                name="telefone_solicitante"
+                value={formData.telefone_solicitante || ''}
+                onChange={handleChange}
+                placeholder="(11) 98765-4321"
+                className={hasFieldError('telefone_solicitante', errors) ? 'border-orange-500' : ''}
+              />
+              {hasFieldError('telefone_solicitante', errors) && (
+                <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante', errors)}</p>
+              )}
+            </div>
+          )}
           
           {showEmail && (
             <div className="animate-fadeIn">
@@ -198,6 +177,71 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {!requiresMediaType && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label 
+              htmlFor="nome_solicitante" 
+              className={`form-question-title ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
+            >
+              Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <Input
+              id="nome_solicitante"
+              name="nome_solicitante"
+              value={formData.nome_solicitante || ''}
+              onChange={handleChange}
+              placeholder=""
+              className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
+            />
+            {hasFieldError('nome_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('nome_solicitante', errors)}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label 
+              htmlFor="telefone_solicitante" 
+              className={`block text-base font-medium mb-2 ${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500' : ''}`}
+            >
+              Telefone {hasFieldError('telefone_solicitante', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <Input
+              id="telefone_solicitante"
+              name="telefone_solicitante"
+              value={formData.telefone_solicitante || ''}
+              onChange={handleChange}
+              placeholder="(11) 98765-4321"
+              className={hasFieldError('telefone_solicitante', errors) ? 'border-orange-500' : ''}
+            />
+            {hasFieldError('telefone_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante', errors)}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label 
+              htmlFor="email_solicitante" 
+              className={`block text-base font-medium mb-2 ${hasFieldError('email_solicitante', errors) ? 'text-orange-500' : ''}`}
+            >
+              E-mail {hasFieldError('email_solicitante', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <Input
+              id="email_solicitante"
+              name="email_solicitante"
+              type="email"
+              value={formData.email_solicitante || ''}
+              onChange={handleChange}
+              placeholder="email@exemplo.com"
+              className={hasFieldError('email_solicitante', errors) ? 'border-orange-500' : ''}
+            />
+            {hasFieldError('email_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('email_solicitante', errors)}</p>
+            )}
+          </div>
         </div>
       )}
     </div>
