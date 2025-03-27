@@ -1,4 +1,3 @@
-// ServicoSelector.tsx
 import React, { useState, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
@@ -43,8 +42,8 @@ const ServicoSelector: React.FC<ServicoSelectorProps> = ({
         className="w-full p-2 border rounded-md bg-white"
       />
 
-      <Select 
-        value={selectedServicoId} 
+      <Select
+        value={selectedServicoId}
         onValueChange={onServicoChange}
       >
         <SelectTrigger className="w-full h-auto p-3 border rounded-md bg-white">
