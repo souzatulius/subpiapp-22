@@ -22,7 +22,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   // Enhanced validation to ensure attachments are displayed correctly
   const hasAttachments = () => {
     // Check if there's a valid arquivo_url
-    if (arquivo_url && arquivo_url.startsWith('http')) return true;
+    if (arquivo_url && typeof arquivo_url === 'string' && arquivo_url.startsWith('http')) return true;
     
     // Check if there are anexos
     if (!anexos) return false;
@@ -31,15 +31,15 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     if (typeof anexos === 'string') {
       try {
         const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) && parsed.length > 0 && parsed.some(anexo => anexo && anexo.startsWith('http'));
+        return Array.isArray(parsed) && parsed.length > 0 && parsed.some(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http'));
       } catch {
-        return false;
+        return anexos.startsWith('http');
       }
     }
     
     // If anexos is an array, check if it has valid elements
     if (Array.isArray(anexos)) {
-      return anexos.length > 0 && anexos.some(anexo => anexo && anexo.startsWith('http'));
+      return anexos.length > 0 && anexos.some(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http'));
     }
     
     return false;
@@ -52,14 +52,16 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     if (typeof anexos === 'string') {
       try {
         const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) ? parsed.filter(anexo => anexo && anexo.startsWith('http')) : [];
+        return Array.isArray(parsed) 
+          ? parsed.filter(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http')) 
+          : [anexos].filter(anexo => anexo.startsWith('http'));
       } catch {
-        return [];
+        return anexos.startsWith('http') ? [anexos] : [];
       }
     }
     
     if (Array.isArray(anexos)) {
-      return anexos.filter(anexo => anexo && anexo.startsWith('http'));
+      return anexos.filter(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http'));
     }
     
     return [];

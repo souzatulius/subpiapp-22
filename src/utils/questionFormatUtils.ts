@@ -66,3 +66,27 @@ export const normalizeQuestions = (perguntas: any): string[] => {
   console.log('normalizeQuestions output:', result);
   return result;
 };
+
+// Add these missing utility functions
+export const formatQuestionsToObject = (perguntas: string[]): Record<string, string> => {
+  const result: Record<string, string> = {};
+  
+  perguntas.forEach((pergunta, index) => {
+    if (pergunta && typeof pergunta === 'string' && pergunta.trim() !== '') {
+      result[`pergunta_${index + 1}`] = pergunta.trim();
+    }
+  });
+  
+  return result;
+};
+
+export const isValidPublicUrl = (url: string): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  
+  try {
+    const urlObj = new URL(url);
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};

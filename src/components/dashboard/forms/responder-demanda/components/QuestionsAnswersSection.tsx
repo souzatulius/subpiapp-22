@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,6 +23,15 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   // Use our utility function to normalize questions
   const normalizedQuestions = normalizeQuestions(perguntas);
   console.log('QuestionsAnswersSection - normalizedQuestions:', normalizedQuestions);
+
+  // Initialize response fields if they don't exist
+  useEffect(() => {
+    normalizedQuestions.forEach((_, index) => {
+      if (!resposta[index.toString()]) {
+        onRespostaChange(index.toString(), '');
+      }
+    });
+  }, [normalizedQuestions]);
 
   const getTotalAnswered = () => {
     let answered = 0;

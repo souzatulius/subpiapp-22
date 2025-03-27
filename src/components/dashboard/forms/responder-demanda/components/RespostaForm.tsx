@@ -134,6 +134,14 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   
   const { answered, total } = getQuestionStats();
   const hasPerguntas = total > 0;
+  const formattedDateTime = selectedDemanda.prazo_resposta ? 
+    new Date(selectedDemanda.prazo_resposta).toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }) : 'Não definido';
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -144,94 +152,150 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       
       <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
         <CardContent className="p-6 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                {currentProblem && (
-                  <Badge className="px-3 py-1.5 bg-blue-50 text-subpi-blue border border-blue-100">
-                    {currentProblem.descricao}
-                  </Badge>
-                )}
-                
-                <Badge 
-                  className={`px-3 py-1.5 ${
-                    selectedDemanda.prioridade === 'alta' ? 'bg-red-50 text-red-700 border border-red-200' : 
-                    selectedDemanda.prioridade === 'media' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' : 
-                    'bg-green-50 text-green-700 border border-green-200'
-                  }`}
-                >
-                  Prioridade: {
-                    selectedDemanda.prioridade === 'alta' ? 'Alta' : 
-                    selectedDemanda.prioridade === 'media' ? 'Média' : 'Baixa'
-                  }
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              {currentProblem && (
+                <Badge className="px-3 py-1.5 bg-blue-50 text-subpi-blue border border-blue-100">
+                  {currentProblem.descricao}
                 </Badge>
-                
-                {selectedDemanda.status && (
-                  <Badge className="bg-gray-100 text-gray-700 border border-gray-200 px-3 py-1.5">
-                    Status: {selectedDemanda.status}
-                  </Badge>
-                )}
-              </div>
+              )}
               
-              <h3 className="text-xl font-semibold text-subpi-blue">{selectedDemanda.titulo || 'Sem título definido'}</h3>
+              <Badge 
+                className={`px-3 py-1.5 ${
+                  selectedDemanda.prioridade === 'alta' ? 'bg-red-50 text-red-700 border border-red-200' : 
+                  selectedDemanda.prioridade === 'media' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' : 
+                  'bg-green-50 text-green-700 border border-green-200'
+                }`}
+              >
+                Prioridade: {
+                  selectedDemanda.prioridade === 'alta' ? 'Alta' : 
+                  selectedDemanda.prioridade === 'media' ? 'Média' : 'Baixa'
+                }
+              </Badge>
               
-              {selectedDemanda.endereco && (
-                <div className="flex items-start gap-2 text-gray-700">
-                  <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                  <span>{selectedDemanda.endereco}</span>
-                </div>
+              {selectedDemanda.status && (
+                <Badge className="bg-gray-100 text-gray-700 border border-gray-200 px-3 py-1.5">
+                  Status: {selectedDemanda.status}
+                </Badge>
               )}
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-start gap-2 text-gray-700">
-                <Calendar className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-sm text-gray-500">Criado em:</span>
-                  <p className="font-medium">{new Date(selectedDemanda.horario_publicacao).toLocaleDateString('pt-BR')} às {new Date(selectedDemanda.horario_publicacao).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</p>
-                </div>
+            <h3 className="text-xl font-semibold text-subpi-blue">{selectedDemanda.titulo || 'Sem título definido'}</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                {selectedDemanda.endereco && (
+                  <div className="flex items-start gap-2 text-gray-700">
+                    <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+                    <span>{selectedDemanda.endereco}</span>
+                  </div>
+                )}
+                
+                {selectedDemanda.autor?.nome_completo && (
+                  <div className="flex items-start gap-2 text-gray-700">
+                    <User className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-sm text-gray-500">Autor:</span>
+                      <p className="font-medium">{selectedDemanda.autor.nome_completo}</p>
+                    </div>
+                  </div>
+                )}
               </div>
               
-              {selectedDemanda.prazo_resposta && (
+              <div className="space-y-2">
                 <div className="flex items-start gap-2 text-gray-700">
-                  <Clock className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+                  <Calendar className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-sm text-gray-500">Prazo para resposta:</span>
-                    <p className="font-medium">{new Date(selectedDemanda.prazo_resposta).toLocaleDateString('pt-BR')}</p>
+                    <span className="text-sm text-gray-500">Criado em:</span>
+                    <p className="font-medium">{new Date(selectedDemanda.horario_publicacao).toLocaleDateString('pt-BR')} às {new Date(selectedDemanda.horario_publicacao).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</p>
                   </div>
                 </div>
-              )}
-              
-              {selectedDemanda.origem && (
-                <div className="flex items-start gap-2 text-gray-700">
-                  <BookOpen className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-sm text-gray-500">Origem:</span>
-                    <p className="font-medium">{selectedDemanda.origem.descricao || 'Não informado'}</p>
+                
+                {selectedDemanda.prazo_resposta && (
+                  <div className="flex items-start gap-2 text-gray-700">
+                    <Clock className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-sm text-gray-500">Prazo para resposta:</span>
+                      <p className="font-medium">{formattedDateTime}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {selectedDemanda.veiculo_imprensa && (
-                <div className="flex items-start gap-2 text-gray-700">
-                  <MessageSquare className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-sm text-gray-500">Veículo:</span>
-                    <p className="font-medium">{selectedDemanda.veiculo_imprensa}</p>
+                )}
+                
+                {selectedDemanda.origem && (
+                  <div className="flex items-start gap-2 text-gray-700">
+                    <BookOpen className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-sm text-gray-500">Origem:</span>
+                      <p className="font-medium">{selectedDemanda.origem.descricao || 'Não informado'}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {selectedDemanda.autor && (
-                <div className="flex items-start gap-2 text-gray-700">
-                  <User className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-sm text-gray-500">Autor:</span>
-                    <p className="font-medium">{selectedDemanda.autor.nome_completo || 'Não informado'}</p>
+                )}
+                
+                {selectedDemanda.veiculo_imprensa && (
+                  <div className="flex items-start gap-2 text-gray-700">
+                    <MessageSquare className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-sm text-gray-500">Veículo:</span>
+                      <p className="font-medium">{selectedDemanda.veiculo_imprensa}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
+          </div>
+          
+          <div className="py-6 border-b">
+            <h3 className="text-lg font-semibold text-subpi-blue mb-4">Tema e Serviço</h3>
+            
+            <Card className="bg-blue-50/50 border border-blue-100 p-5 rounded-xl shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Tema:</h4>
+                  <div className="p-3 border rounded-md bg-white">
+                    {currentProblem ? (
+                      <span className="font-medium">{currentProblem.descricao}</span>
+                    ) : (
+                      <span className="text-gray-500">Tema não definido</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Serviço:</h4>
+                  {selectedDemanda.servico?.descricao ? (
+                    <div className="p-3 border rounded-md bg-white">
+                      <span className="font-medium">{selectedDemanda.servico.descricao}</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="dontKnowService"
+                            checked={dontKnowService}
+                            onChange={handleServiceToggle}
+                            className="rounded border-gray-300 text-subpi-blue focus:ring-subpi-blue"
+                          />
+                          <label htmlFor="dontKnowService" className="text-sm text-gray-700">
+                            Não sei informar o serviço
+                          </label>
+                        </div>
+                      </div>
+                      
+                      {!dontKnowService && (
+                        <ServicoSelector
+                          selectedServicoId={selectedServicoId}
+                          servicos={servicos}
+                          servicosLoading={servicosLoading}
+                          onServicoChange={setSelectedServicoId}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
           </div>
           
           {selectedDemanda.detalhes_solicitacao && (
@@ -242,58 +306,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               </Card>
             </div>
           )}
-          
-          <div className="py-6 border-b">
-            <h3 className="text-lg font-semibold text-subpi-blue mb-4">Tema e Serviço</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Tema:</h4>
-                <div className="p-3 border rounded-md bg-gray-50">
-                  {currentProblem ? (
-                    <span className="font-medium">{currentProblem.descricao}</span>
-                  ) : (
-                    <span className="text-gray-500">Tema não definido</span>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Serviço:</h4>
-                {selectedDemanda.servico && selectedDemanda.servico.descricao ? (
-                  <div className="p-3 border rounded-md bg-gray-50">
-                    <span className="font-medium">{selectedDemanda.servico.descricao}</span>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="dontKnowService"
-                          checked={dontKnowService}
-                          onChange={handleServiceToggle}
-                          className="rounded border-gray-300 text-subpi-blue focus:ring-subpi-blue"
-                        />
-                        <label htmlFor="dontKnowService" className="text-sm text-gray-700">
-                          Não sei informar o serviço
-                        </label>
-                      </div>
-                    </div>
-                    
-                    {!dontKnowService && (
-                      <ServicoSelector
-                        selectedServicoId={selectedServicoId}
-                        servicos={servicos}
-                        servicosLoading={servicosLoading}
-                        onServicoChange={setSelectedServicoId}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
           
           {hasPerguntas && (
             <div className="py-6 border-b">
@@ -340,6 +352,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             <CommentsSection
               comentarios={setComentarios ? comentarios : localComentarios}
               onChange={handleComentariosChange}
+              simplifiedText={true}
             />
           </div>
         </CardContent>
