@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -16,93 +15,83 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   resposta,
   onRespostaChange
 }) => {
-  // Caso não tenhamos perguntas, não renderiza o componente
   if (!perguntas) return null;
-  
-  // Normaliza as perguntas para um formato consistente para processamento
+
   const normalizeQuestions = () => {
-    // Se for null ou undefined, retorna array vazio
     if (!perguntas) return [];
-    
-    // Se já for um array, retorna diretamente
+
     if (Array.isArray(perguntas)) {
-      return perguntas.filter(p => p && p.trim !== undefined && p.trim() !== '');
+      return perguntas.filter(p => typeof p === 'string' && p.trim() !== '');
     }
-    
-    // Se for um objeto, converte para array de valores
+
     if (typeof perguntas === 'object') {
-      return Object.entries(perguntas)
-        .filter(([_, value]) => value && String(value).trim() !== '')
-        .map(([key, value]) => typeof value === 'string' ? value : String(value));
+      return Object.values(perguntas).filter(p => typeof p === 'string' && p.trim() !== '');
     }
-    
-    // Se for string, tenta parsear como JSON
+
     if (typeof perguntas === 'string') {
       try {
         const parsed = JSON.parse(perguntas);
-        if (Array.isArray(parsed)) {
-          return parsed.filter(p => p && String(p).trim() !== '');
-        }
-        if (typeof parsed === 'object') {
-          return Object.values(parsed).filter(p => p && String(p).trim() !== '');
-        }
-      } catch (e) {
-        // Se não conseguir parsear, usa como string única
+        if (Array.isArray(parsed)) return parsed.filter(p => typeof p === 'string' && p.trim() !== '');
+        if (typeof parsed === 'object') return Object.values(parsed).filter(p => typeof p === 'string' && p.trim() !== '');
+      } catch {
         return [perguntas];
       }
     }
-    
-    // Caso padrão: retorna array vazio
+
     return [];
   };
-  
-  // Count answered questions
+
+  const normalizedQuestions = normalizeQuestions();
+
   const getTotalAnswered = () => {
-    const normalizedQuestions = normalizeQuestions();
     let answered = 0;
-    let total = normalizedQuestions.length;
-    
+    const total = normalizedQuestions.length;
+
     normalizedQuestions.forEach((_, index) => {
-      if (resposta[index.toString()] && resposta[index.toString()].trim() !== '') {
-        answered++;
-      }
+      if (resposta[index.toString()]?.trim() !== '') answered++;
     });
-    
+
     return { answered, total };
   };
-  
+
   const { answered, total } = getTotalAnswered();
-  const normalizedQuestions = normalizeQuestions();
 
   return (
     <div className="space-y-5 transition-all duration-300">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-blue-700">Perguntas e Respostas</h3>
-        <Badge 
-          variant={answered === total ? "default" : "outline"} 
-          className={`${answered === total ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'} transition-colors duration-300`}
+        <h3 className="text-lg font-medium text-subpi-blue">Perguntas e Respostas</h3>
+        <Badge
+          variant={answered === total ? 'default' : 'outline'}
+          className={`transition-colors duration-300 ${
+            answered === total
+              ? 'bg-green-100 text-green-800 hover:bg-green-200'
+              : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
+          }`}
         >
           <span className="font-medium">{answered}</span> de <span className="font-medium">{total}</span> respondidas
         </Badge>
       </div>
-      
+
       <div className="space-y-5">
         {normalizedQuestions.length > 0 ? (
           normalizedQuestions.map((pergunta: string, index: number) => (
-            <Card key={index} className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300 animate-fade-in">
+            <Card
+              key={index}
+              className="overflow-hidden border border-blue-100 bg-white hover:shadow-md transition-all duration-300 animate-fade-in"
+            >
               <CardContent className="p-0">
                 <div className="bg-blue-50 p-4 border-b border-blue-100">
-                  <Label className="font-medium text-blue-800">Pergunta {index+1}:</Label>
+                  <Label className="font-medium text-blue-800">Pergunta {index + 1}:</Label>
                   <p className="mt-1 text-blue-900">{pergunta}</p>
                 </div>
                 <div className="p-4">
-                  <Label htmlFor={`resposta-${index}`} className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label htmlFor={`resposta-${index}`} className="text-sm font-medium text-gray-700 block mb-1">
                     Sua resposta:
                   </Label>
-                  <Textarea 
+                  <Textarea
                     id={`resposta-${index}`}
-                    placeholder="Digite sua resposta"
-                    className="min-h-[120px] w-full border-gray-300 focus:border-blue-400 focus:ring-blue-300"
+                    placeholder="Digite sua resposta para essa pergunta"
+                    className="min-h-[120px] w-full border-gray-300 focus:border-subpi-blue focus:ring-subpi-blue"
                     value={resposta[index.toString()] || ''}
                     onChange={(e) => onRespostaChange(index.toString(), e.target.value)}
                   />
