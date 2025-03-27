@@ -40,7 +40,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 }) => {
   const [localComentarios, setLocalComentarios] = React.useState<string>(comentarios);
   
-  const { problems, isLoading: problemsLoading } = useProblemsData();
+  const { problems } = useProblemsData();
   const { servicos, isLoading: servicosLoading } = useServicosData();
 
   const {
@@ -97,10 +97,17 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 
   const handleSubmitWithExtra = async () => {
     try {
+      if (selectedDemanda.nao_sabe_servico && !selectedServicoId) {
+        toast({
+          title: "Serviço obrigatório",
+          description: "Esta demanda foi cadastrada sem um serviço. Você precisa selecionar um serviço antes de enviar a resposta.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await updateService();
-      
       await onSubmit();
-      
       clearFormStorage();
 
       toast({
@@ -135,17 +142,11 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <RespostaFormHeader 
-        selectedDemanda={selectedDemanda} 
-        onBack={onBack} 
-      />
+      <RespostaFormHeader selectedDemanda={selectedDemanda} onBack={onBack} />
       
       <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
         <CardContent className="p-6 space-y-8">
-          <DemandaMetadataSection 
-            selectedDemanda={selectedDemanda}
-            currentProblem={currentProblem}
-          />
+          <DemandaMetadataSection selectedDemanda={selectedDemanda} currentProblem={currentProblem} />
           
           <TemaServicoSection 
             currentProblem={currentProblem}
@@ -200,7 +201,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           <div className="py-6">
             <h3 className="text-lg font-semibold text-subpi-blue mb-4 flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              Comentários Internos
+              Comentários
             </h3>
             
             <CommentsSection
