@@ -1,0 +1,42 @@
+
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { ValidationError } from '@/lib/formValidationUtils';
+import { hasFieldError, getFieldErrorMessage } from '../identification/ValidationUtils';
+
+interface TitleSectionProps {
+  title: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errors?: ValidationError[];
+}
+
+const TitleSection: React.FC<TitleSectionProps> = ({
+  title,
+  onChange,
+  errors = []
+}) => {
+  return (
+    <div>
+      <Label 
+        htmlFor="titulo" 
+        className={`block mb-2 ${hasFieldError('titulo', errors) ? 'text-orange-500 font-semibold' : ''}`}
+      >
+        Título da Demanda
+      </Label>
+      <Input 
+        id="titulo" 
+        name="titulo" 
+        value={title} 
+        onChange={onChange} 
+        className={`rounded-xl ${hasFieldError('titulo', errors) ? 'border-orange-500' : ''}`}
+        placeholder="Digite um título claro e conciso"
+      />
+      {hasFieldError('titulo', errors) && (
+        <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('titulo', errors)}</p>
+      )}
+    </div>
+  );
+};
+
+export default TitleSection;
