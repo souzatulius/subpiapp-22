@@ -42,10 +42,10 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
     return error ? error.message : '';
   };
 
-  const handleLocalServiceSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setServiceSearch(e.target.value);
+  const handleLocalServiceSearch = (value: string) => {
+    setServiceSearch(value);
     if (handleServiceSearch) {
-      handleServiceSearch(e.target.value);
+      handleServiceSearch(value);
     }
   };
 
@@ -54,15 +54,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
     setServiceSearch(''); // Clear search after selection
     setIsPopoverOpen(false);
   };
-
-  const handleServiceRemove = () => {
-    handleSelectChange('servico_id', '');
-  };
-
-  // Find the selected service
-  const selectedService = formData.servico_id 
-    ? servicos.find(s => s.id === formData.servico_id) 
-    : null;
 
   return (
     <div className="space-y-6">
@@ -99,15 +90,15 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
       {formData.problema_id && (
         <div className="animate-fadeIn space-y-4">
           <ServiceSearch
-            serviceSearch={serviceSearch}
-            handleChange={handleLocalServiceSearch}
-            filteredServicesBySearch={filteredServicos}
-            handleServiceSelect={handleServiceSelect}
-            selectedService={selectedService}
-            handleServiceRemove={handleServiceRemove}
+            servicos={servicos}
+            filteredServicos={filteredServicos}
+            selectedServico={formData.servico_id}
+            naoSabeServico={formData.nao_sabe_servico || false}
+            searchQuery={serviceSearch}
+            onSearchChange={handleLocalServiceSearch}
+            onServiceSelect={handleServiceSelect}
+            onToggleNaoSabe={(checked) => handleSelectChange('nao_sabe_servico', checked)}
             errors={errors}
-            isPopoverOpen={isPopoverOpen}
-            setIsPopoverOpen={setIsPopoverOpen}
           />
           
           <div className="flex items-center space-x-2">
