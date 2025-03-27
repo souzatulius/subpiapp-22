@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { FileIcon, ExternalLink, Download } from 'lucide-react';
+import { FileIcon, ExternalLink, Download, Image, FileText, FilePdf, FileWord, FileSpreadsheet, FileX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AttachmentItem from './AttachmentItem';
 import { isValidPublicUrl } from '@/utils/questionFormatUtils';
@@ -71,7 +71,11 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
 
   return (
     <div className="space-y-3 animate-fade-in">
-      <div className="space-y-2">
+      <div className="mb-2 text-sm text-gray-600 font-medium">
+        {normalizedAttachments.length} {normalizedAttachments.length === 1 ? 'arquivo anexado' : 'arquivos anexados'}
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {normalizedAttachments.map((url: string, index: number) => (
           <AttachmentItem 
             key={`attachment-${index}`}

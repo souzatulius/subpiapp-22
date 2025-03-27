@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Upload, X, FileText } from 'lucide-react';
+import { Upload, X, FileText, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
@@ -15,6 +15,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
   const [displayFile, setDisplayFile] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   // Set display file name when component mounts or value changes
   React.useEffect(() => {
@@ -31,6 +32,46 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    setUploadError(null);
+    
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('Arquivo muito grande. O tamanho máximo permitido é 10MB.');
+      toast({
+        title: 'Arquivo muito grande',
+        description: 'O tamanho máximo permitido é 10MB.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Check file type
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/heic',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'application/zip',
+      'application/x-rar-compressed'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError('Formato de arquivo não permitido. Use PNG, JPG, PDF, DOC, XLS, etc.');
+      toast({
+        title: 'Formato não permitido',
+        description: 'Use formatos como PNG, JPG, PDF, DOC, XLS, etc.',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsUploading(true);
     setFileName(file.name);
@@ -60,9 +101,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
       toast({
         title: 'Arquivo anexado',
         description: 'O arquivo foi anexado com sucesso.',
+        variant: 'success',
       });
     } catch (error: any) {
       console.error('Erro ao fazer upload:', error);
+      setUploadError(error.message || 'Erro desconhecido ao enviar o arquivo');
       toast({
         title: 'Erro ao anexar arquivo',
         description: error.message || 'Não foi possível anexar o arquivo.',
@@ -79,6 +122,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
     onChange('');
     setFileName('');
     setDisplayFile(null);
+    setUploadError(null);
   };
   
   return (
@@ -99,25 +143,35 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
           </button>
         </div>
       ) : (
-        <div className="mt-2 flex items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded-lg">
-          <div className="space-y-1 text-center">
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-            <div className="text-sm text-gray-600">
-              <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 hover:text-blue-500">
-                <span>{isUploading ? 'Enviando...' : 'Clique para anexar um arquivo'}</span>
-                <input 
-                  id="file-upload" 
-                  name="file-upload" 
-                  type="file" 
-                  className="sr-only" 
-                  onChange={handleFileChange}
-                  disabled={isUploading}
-                />
-              </label>
+        <div className="mt-2">
+          {uploadError && (
+            <div className="mb-2 text-sm text-red-600 flex items-center gap-1">
+              <AlertTriangle className="h-4 w-4" />
+              <span>{uploadError}</span>
             </div>
-            <p className="text-xs text-gray-500">
-              PNG, JPG, PDF até 10MB
-            </p>
+          )}
+          
+          <div className="flex items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded-lg">
+            <div className="space-y-1 text-center">
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="text-sm text-gray-600">
+                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 hover:text-blue-500">
+                  <span>{isUploading ? 'Enviando...' : 'Clique para anexar um arquivo'}</span>
+                  <input 
+                    id="file-upload" 
+                    name="file-upload" 
+                    type="file" 
+                    className="sr-only" 
+                    accept=".png,.jpg,.jpeg,.heic,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.gif"
+                    onChange={handleFileChange}
+                    disabled={isUploading}
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-gray-500">
+                PNG, JPG, PDF, DOC, XLS até 10MB
+              </p>
+            </div>
           </div>
         </div>
       )}

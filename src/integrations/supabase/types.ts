@@ -412,6 +412,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_servico_id_fkey"
+            columns: ["servico_id"]
+            isOneToOne: false
+            referencedRelation: "servicos"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_supervisao_tecnica_id_fkey"
             columns: ["supervisao_tecnica_id"]
             isOneToOne: false
