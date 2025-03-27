@@ -2,29 +2,24 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { usePermissions } from '@/hooks/permissions';
 import { toast } from '@/components/ui/use-toast';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading: authLoading, isApproved } = useAuth();
-  const { isAdmin, isLoading: permissionLoading, canAccessProtectedRoute } = usePermissions();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [accessChecked, setAccessChecked] = useState(false);
 
   useEffect(() => {
-    if (authLoading || permissionLoading) return; // Don't proceed until both auth and permissions are loaded
+    if (authLoading) return; // Don't proceed until auth is loaded
     
     console.log("Checking access to admin route:", location.pathname);
     console.log("User auth state:", { 
       user: !!user, 
-      isApproved, 
-      isAdmin, 
       email: user?.email,
       path: location.pathname
     });
@@ -39,31 +34,16 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
       return;
     }
     
-    if (isApproved === false) {
-      toast({
-        title: "Conta não aprovada",
-        description: "Sua conta ainda está aguardando aprovação.",
-        variant: "destructive"
-      });
-      navigate('/pending-approval');
-      return;
-    }
-    
-    // Removendo verificação de admin para a página de Settings
-    // Todos os usuários autenticados e aprovados poderão acessar
+    // Permitindo acesso a todos os usuários autenticados
     setAccessChecked(true);
   }, [
     user,
     authLoading,
-    isApproved,
-    isAdmin,
-    permissionLoading,
-    canAccessProtectedRoute,
     navigate,
     location.pathname,
   ]);
 
-  if (authLoading || permissionLoading) {
+  if (authLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="loading-spinner animate-spin h-12 w-12 border-t-2 border-b-2 border-primary rounded-full"></div>
@@ -71,7 +51,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
     );
   }
 
-  if (!user || !isApproved) {
+  if (!user) {
     return null; // Não renderiza nada enquanto aguarda o redirecionamento
   }
 

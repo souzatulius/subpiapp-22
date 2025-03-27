@@ -14,28 +14,7 @@ export const useDemandasQuery = () => {
         throw new Error('User not authenticated');
       }
 
-      // First get the user's permissions
-      const { data: userPermissions, error: permissionsError } = await supabase
-        .from('usuario_permissoes')
-        .select('permissao_id')
-        .eq('usuario_id', user.id);
-      
-      if (permissionsError) throw permissionsError;
-      
-      // Check if user has admin permission
-      const isAdmin = (userPermissions || []).some(p => 
-        p.permissao_id === 'some-admin-permission-id'
-      );
-      
-      // Get the user's areas/coordinations info
-      const { data: userInfo, error: userError } = await supabase
-        .from('usuarios')
-        .select('coordenacao_id, supervisao_tecnica_id')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (userError && userError.code !== 'PGRST116') throw userError;
-      
+      // Query all demandas without area/coordination filtering
       let query = supabase
         .from('demandas')
         .select(`
@@ -60,7 +39,8 @@ export const useDemandasQuery = () => {
           autor_id,
           autor:autor_id(id, nome_completo),
           detalhes_solicitacao,
-          servico:problema_id (descricao),
+          servico_id,
+          servico:servico_id(id, descricao),
           area_coordenacao:problema_id (descricao),
           bairro_id,
           bairro:bairro_id(id, nome),
@@ -69,22 +49,13 @@ export const useDemandasQuery = () => {
           nome_solicitante,
           email_solicitante,
           telefone_solicitante,
-          veiculo_imprensa
+          veiculo_imprensa,
+          anexos
         `);
       
       query = query.order('horario_publicacao', { ascending: false });
       
-      // Apply filtering if not admin
-      if (!isAdmin && userInfo) {
-        // If the user belongs to a coordination
-        if (userInfo.coordenacao_id) {
-          query = query.eq('problema.supervisao_tecnica.coordenacao_id', userInfo.coordenacao_id);
-        }
-        // If the user belongs to a technical supervision
-        else if (userInfo.supervisao_tecnica_id) {
-          query = query.eq('problema.supervisao_tecnica_id', userInfo.supervisao_tecnica_id);
-        }
-      }
+      // Remove any filtering based on coordination or supervision
       
       const { data, error } = await query;
       

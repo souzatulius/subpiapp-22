@@ -8,19 +8,14 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading, isApproved } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        navigate('/login');
-      } else if (isApproved === false) {
-        // Redirect non-approved users when they try to access protected routes
-        navigate('/pending-approval');
-      }
+    if (!isLoading && !user) {
+      navigate('/login');
     }
-  }, [user, isLoading, isApproved, navigate]);
+  }, [user, isLoading, navigate]);
 
   if (isLoading) {
     return (
@@ -30,7 +25,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  return (user && isApproved) ? <>{children}</> : null;
+  return user ? <>{children}</> : null;
 };
 
 export default ProtectedRoute;

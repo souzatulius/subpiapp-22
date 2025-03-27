@@ -40,7 +40,10 @@ export function useDemandas(filterStatus: string) {
             veiculo_imprensa,
             detalhes_solicitacao,
             perguntas,
-            problema_id
+            problema_id,
+            servico_id,
+            anexos,
+            arquivo_url
           `);
           
         // Apply status filter if not 'todos'
@@ -48,7 +51,7 @@ export function useDemandas(filterStatus: string) {
           query = query.eq('status', filterStatus);
         }
         
-        // Execute the main query
+        // Execute the main query - no restrictions by user role or area
         const { data, error } = await query.order('horario_publicacao', {
           ascending: false
         });
@@ -130,6 +133,17 @@ export function useDemandas(filterStatus: string) {
               .maybeSingle();
               
             enhancedDemand.autor = autorData;
+          }
+          
+          // Fetch service information
+          if (demanda.servico_id) {
+            const { data: servicoData } = await supabase
+              .from('servicos')
+              .select('descricao')
+              .eq('id', demanda.servico_id)
+              .maybeSingle();
+              
+            enhancedDemand.servico = servicoData;
           }
           
           console.log('Enhanced demand:', enhancedDemand);
