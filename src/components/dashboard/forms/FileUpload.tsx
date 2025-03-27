@@ -1,183 +1,142 @@
 
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Upload, X, FileText, AlertTriangle } from 'lucide-react';
+import { Upload, X, FileText, ImageIcon } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-import { toast } from '@/components/ui/use-toast';
 
 interface FileUploadProps {
-  onChange: (fileUrl: string) => void;
+  onChange: (url: string) => void;
   value?: string;
 }
 
+const ACCEPTED_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/heic',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+];
+
+const MAX_SIZE_MB = 10;
+
 const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
-  const [displayFile, setDisplayFile] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  
-  // Set display file name when component mounts or value changes
-  React.useEffect(() => {
-    if (value && value.startsWith('http') && !value.startsWith('blob:')) {
-      // Extract filename from the URL
-      const filename = value.split('/').pop();
-      if (filename) {
-        setFileName(filename);
-        setDisplayFile(value);
-      }
+
+  const handleDrop = useCallback(
+    async (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setIsDragging(false);
+
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+      await handleUpload(file);
+    }, []);
+
+  const handleUpload = async (file: File) => {
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      toast({
+        title: 'Formato inválido',
+        description: 'Só é permitido PNG, JPG, HEIC, PDF, DOC ou XLS.',
+        variant: 'destructive'
+      });
+      return;
     }
-  }, [value]);
-  
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setUploadError(null);
-    
-    // Check file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError('Arquivo muito grande. O tamanho máximo permitido é 10MB.');
+
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
       toast({
         title: 'Arquivo muito grande',
-        description: 'O tamanho máximo permitido é 10MB.',
-        variant: 'destructive',
+        description: `O arquivo deve ter até ${MAX_SIZE_MB}MB.`,
+        variant: 'destructive'
       });
       return;
     }
-    
-    // Check file type
-    const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/heic',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'text/plain',
-      'application/zip',
-      'application/x-rar-compressed'
-    ];
-    
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError('Formato de arquivo não permitido. Use PNG, JPG, PDF, DOC, XLS, etc.');
-      toast({
-        title: 'Formato não permitido',
-        description: 'Use formatos como PNG, JPG, PDF, DOC, XLS, etc.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
+
     setIsUploading(true);
     setFileName(file.name);
-    
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
-      
-      console.log('Uploading file to bucket: demandas, path:', filePath);
-      
-      const { error: uploadError } = await supabase.storage
-        .from('demandas')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
-      
-      // Get the public URL and save that instead of the blob URL
-      const { data } = supabase.storage
-        .from('demandas')
-        .getPublicUrl(filePath);
-        
-      const publicUrl = data.publicUrl;
-      console.log('File uploaded successfully, public URL:', publicUrl);
-      
-      // Set the public URL to be saved in the database
-      onChange(publicUrl);
-      setDisplayFile(publicUrl);
-      
-      toast({
-        title: 'Arquivo anexado',
-        description: 'O arquivo foi anexado com sucesso.',
-        variant: 'success',
-      });
-    } catch (error: any) {
+
+    const ext = file.name.split('.').pop();
+    const filePath = `uploads/${uuidv4()}.${ext}`;
+
+    const { error } = await supabase.storage.from('demandas').upload(filePath, file);
+
+    if (error) {
       console.error('Erro ao fazer upload:', error);
-      setUploadError(error.message || 'Erro desconhecido ao enviar o arquivo');
       toast({
-        title: 'Erro ao anexar arquivo',
-        description: error.message || 'Não foi possível anexar o arquivo.',
-        variant: 'destructive',
+        title: 'Erro no upload',
+        description: error.message,
+        variant: 'destructive'
       });
-      setFileName('');
-      setDisplayFile(null);
-    } finally {
       setIsUploading(false);
+      return;
     }
+
+    const { data } = supabase.storage.from('demandas').getPublicUrl(filePath);
+    onChange(data.publicUrl);
+    toast({ title: 'Arquivo anexado com sucesso!' });
+    setIsUploading(false);
   };
-  
-  const handleRemoveFile = () => {
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) await handleUpload(file);
+  };
+
+  const handleRemove = () => {
     onChange('');
     setFileName('');
-    setDisplayFile(null);
-    setUploadError(null);
   };
-  
+
   return (
-    <div>
+    <div className="w-full">
       <Label>Anexar Arquivo</Label>
-      {displayFile ? (
+
+      {value ? (
         <div className="mt-2 flex items-center gap-2 p-2 border border-gray-300 rounded-lg">
-          <FileText className="h-5 w-5 text-gray-500" />
-          <span className="text-sm text-gray-700 flex-1 truncate">
-            {fileName}
-          </span>
-          <button 
-            type="button"
-            onClick={handleRemoveFile}
-            className="p-1 hover:bg-gray-100 rounded-full"
-          >
-            <X className="h-4 w-4 text-gray-500" />
+          {value.match(/\.(png|jpe?g|heic)$/i) ? (
+            <img src={value} alt="preview" className="w-10 h-10 object-cover rounded" />
+          ) : (
+            <FileText className="w-6 h-6 text-gray-500" />
+          )}
+          <span className="text-sm text-gray-700 flex-1 truncate">{fileName || value.split('/').pop()}</span>
+          <button onClick={handleRemove} className="hover:text-red-500">
+            <X className="w-4 h-4" />
           </button>
         </div>
       ) : (
-        <div className="mt-2">
-          {uploadError && (
-            <div className="mb-2 text-sm text-red-600 flex items-center gap-1">
-              <AlertTriangle className="h-4 w-4" />
-              <span>{uploadError}</span>
-            </div>
-          )}
-          
-          <div className="flex items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded-lg">
-            <div className="space-y-1 text-center">
-              <Upload className="mx-auto h-12 w-12 text-gray-400" />
-              <div className="text-sm text-gray-600">
-                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 hover:text-blue-500">
-                  <span>{isUploading ? 'Enviando...' : 'Clique para anexar um arquivo'}</span>
-                  <input 
-                    id="file-upload" 
-                    name="file-upload" 
-                    type="file" 
-                    className="sr-only" 
-                    accept=".png,.jpg,.jpeg,.heic,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.gif"
-                    onChange={handleFileChange}
-                    disabled={isUploading}
-                  />
-                </label>
-              </div>
-              <p className="text-xs text-gray-500">
-                PNG, JPG, PDF, DOC, XLS até 10MB
-              </p>
-            </div>
-          </div>
+        <div
+          className={`mt-2 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition ${isDragging ? 'bg-blue-50 border-blue-400' : 'border-gray-300'}`}
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+        >
+          <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+          <p className="text-sm text-gray-600">
+            {isUploading ? 'Enviando arquivo...' : 'Clique aqui ou arraste um arquivo'}
+          </p>
+          <p className="text-xs text-gray-500">PNG, JPG, HEIC, PDF, DOC, XLS até 10MB</p>
         </div>
       )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        hidden
+        onChange={handleFileChange}
+        accept={ACCEPTED_TYPES.join(',')}
+      />
     </div>
   );
 };
