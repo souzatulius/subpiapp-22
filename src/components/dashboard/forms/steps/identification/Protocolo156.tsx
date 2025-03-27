@@ -62,7 +62,7 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
             name="numero_protocolo_156"
             value={numeroProtocolo156}
             onChange={handleChange}
-            placeholder="Ex.: SP-ABC-12345"
+            placeholder="Digite aqui os 10 dígitos"
             className={hasFieldError('numero_protocolo_156', errors) ? 'border-orange-500' : ''}
           />
           {hasFieldError('numero_protocolo_156', errors) && (

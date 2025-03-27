@@ -4,6 +4,7 @@ import TitleSection from './organize/TitleSection';
 import { ValidationError } from '@/lib/formValidationUtils';
 import QuestionsSection from './questions/QuestionsSection';
 import FileUploadSection from './questions/FileUploadSection';
+import DetalhesInput from './identification/DetalhesInput';
 
 interface OrganizeStepProps {
   formData: {
@@ -13,6 +14,7 @@ interface OrganizeStepProps {
     servico_id: string;
     problema_id: string;
     bairro_id: string;
+    detalhes_solicitacao: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handlePerguntaChange: (index: number, value: string) => void;
@@ -53,6 +55,13 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
         problemas={problemas}
         servicos={servicos}
         filteredBairros={filteredBairros}
+      />
+
+      {/* Detalhes da Solicitação */}
+      <DetalhesInput
+        value={formData.detalhes_solicitacao}
+        onChange={handleChange}
+        errors={errors}
       />
 
       {/* Perguntas para Área Técnica */}

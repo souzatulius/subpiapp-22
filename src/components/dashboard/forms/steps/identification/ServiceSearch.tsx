@@ -115,7 +115,7 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
             )}
           </>
         ) : (
-          <div className="flex items-center bg-gray-100 p-2 rounded-md">
+          <div className="flex items-center bg-gray-100 p-2 rounded-xl">
             <span className="flex-1 text-gray-800">
               {selectedServiceObj?.descricao || (naoSabeServico ? "Serviço não especificado" : "")}
             </span>
