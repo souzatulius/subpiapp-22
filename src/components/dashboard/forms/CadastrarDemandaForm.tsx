@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -51,24 +50,20 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   } = useDemandForm(user?.id, onClose);
 
   const handleStepClick = (stepIndex: number) => {
-    // Permitir navegação direta para qualquer etapa
     setActiveStep(stepIndex);
   };
 
-  // Validate form on last step or when trying to submit
   const validateFormBeforeSubmit = () => {
-    const errors = validateDemandForm(formData, 4); // Always validate as if on review step (now index 4)
+    const errors = validateDemandForm(formData, 4);
     setValidationErrors(errors);
     return errors.length === 0;
   };
 
   const handleNextStep = () => {
-    // Se for a última etapa (review), validar antes de enviar
     if (activeStep === FORM_STEPS.length - 1) {
       if (validateFormBeforeSubmit()) {
         handleSubmit(formData);
       } else {
-        // Mostrar os erros de validação com mensagens específicas
         const missingFieldsMessage = getErrorSummary(validationErrors);
         toast({
           title: "Formulário incompleto",
@@ -77,7 +72,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
         });
       }
     } else {
-      // Para as outras etapas, apenas avança
       nextStep();
     }
   };
@@ -90,7 +84,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     } catch (error: any) {
       console.error('Submission error:', error);
       
-      // Show a user-friendly error message based on the error
       let errorMsg = "Ocorreu um erro ao processar sua solicitação.";
       
       if (error.message && error.message.includes("invalid input syntax")) {
@@ -129,7 +122,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             />
           </div>
           
-          {/* Mostrar erro geral na etapa de revisão */}
           {validationErrors.length > 0 && activeStep === FORM_STEPS.length - 1 && (
             <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
               <AlertTriangle className="h-4 w-4 text-orange-500" />

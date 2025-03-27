@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +27,8 @@ export const useDemandFormState = (
     anexos: [],
     servico_id: '',
     nao_sabe_servico: false,
+    tem_protocolo_156: false,
+    numero_protocolo_156: '',
   };
 
   // Restore form state from localStorage on component mount
@@ -157,8 +158,26 @@ export const useDemandFormState = (
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
     if (name === 'serviceSearch') {
       setServiceSearch(value);
+    } else if (name === 'telefone_solicitante') {
+      // Apply mask for phone number (XX) XXXXX-XXXX
+      const digits = value.replace(/\D/g, '');
+      let formattedValue = '';
+      
+      if (digits.length <= 2) {
+        formattedValue = digits.length ? `(${digits}` : '';
+      } else if (digits.length <= 7) {
+        formattedValue = `(${digits.substring(0, 2)}) ${digits.substring(2)}`;
+      } else {
+        formattedValue = `(${digits.substring(0, 2)}) ${digits.substring(2, 7)}-${digits.substring(7, 11)}`;
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedValue
+      }));
     } else {
       setFormData(prev => ({
         ...prev,

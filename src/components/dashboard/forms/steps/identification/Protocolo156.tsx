@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
-import { hasFieldError, getFieldErrorMessage } from './ValidationUtils';
+import { hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
 
 interface Protocolo156Props {
   temProtocolo156?: boolean;

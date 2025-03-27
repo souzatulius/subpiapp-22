@@ -25,7 +25,7 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
 
   return (
     <div>
-      <label className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
+      <label className={`block mb-2 font-semibold ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}>
         Tema {hasError('problema_id') && <span className="text-orange-500">*</span>}
       </label>
       <div className="flex flex-wrap gap-3">

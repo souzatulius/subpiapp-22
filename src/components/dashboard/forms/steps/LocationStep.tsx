@@ -1,20 +1,21 @@
 
-import React from 'react';
-import { Label } from '@/components/ui/label';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
+import { Label } from '@/components/ui/label';
+import { ValidationError } from '@/lib/formValidationUtils';
+import TemaSelector from './identification/TemaSelector';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
+import DetalhesInput from './identification/DetalhesInput';
 
 interface LocationStepProps {
   formData: {
     problema_id: string;
-    servico_id: string;
-    nao_sabe_servico: boolean;
+    bairro_id: string;
     detalhes_solicitacao: string;
     endereco: string;
-    bairro_id: string;
+    servico_id?: string;
+    nao_sabe_servico?: boolean;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string | boolean) => void;
@@ -24,9 +25,9 @@ interface LocationStepProps {
   filteredBairros: any[];
   errors: ValidationError[];
   problemas: any[];
-  servicos: any[];
-  filteredServicos: any[];
-  serviceSearch: string;
+  servicos?: any[];
+  filteredServicos?: any[];
+  serviceSearch?: string;
   handleServiceSearch?: (value: string) => void;
 }
 
@@ -40,211 +41,162 @@ const LocationStep: React.FC<LocationStepProps> = ({
   filteredBairros,
   errors,
   problemas,
-  servicos,
-  filteredServicos,
-  serviceSearch,
-  handleServiceSearch
+  servicos = [],
+  filteredServicos = [],
+  serviceSearch = '',
+  handleServiceSearch = () => {}
 }) => {
+  const hasError = (field: string) => errors.some(err => err.field === field);
+  const getErrorMessage = (field: string) => {
+    const error = errors.find(err => err.field === field);
+    return error ? error.message : '';
+  };
+
+  const showServiceSection = formData.problema_id !== '';
+  const showBairroSection = selectedDistrito !== '';
+  const showEnderecoField = formData.bairro_id !== '';
+
   return (
-    <div className="space-y-6">
-      {/* Tema/Problema */}
-      <div>
-        <Label 
-          htmlFor="problema_id" 
-          className={hasFieldError('problema_id', errors) ? 'text-orange-500' : ''}
-        >
-          Tema
-        </Label>
-        <Select
-          value={formData.problema_id}
-          onValueChange={(value) => handleSelectChange('problema_id', value)}
-        >
-          <SelectTrigger 
-            className={`w-full ${hasFieldError('problema_id', errors) ? 'border-orange-500' : ''}`}
-          >
-            <SelectValue placeholder="Selecione o tema relacionado à demanda" />
-          </SelectTrigger>
-          <SelectContent>
-            {problemas.map((problema) => (
-              <SelectItem key={problema.id} value={problema.id}>
-                {problema.descricao}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {hasFieldError('problema_id', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('problema_id', errors)}</p>
-        )}
-      </div>
+    <div className="space-y-8">
+      {/* Tema (Problema) Selector */}
+      <TemaSelector
+        problemas={problemas}
+        selectedTemaId={formData.problema_id}
+        handleSelectChange={(id) => handleSelectChange('problema_id', id)}
+        errors={errors}
+      />
 
-      {/* Serviço */}
-      {formData.problema_id && (
-        <div className="space-y-2 animate-fadeIn">
-          <Label 
-            htmlFor="servico_id" 
-            className={hasFieldError('servico_id', errors) ? 'text-orange-500' : ''}
-          >
-            Serviço
-          </Label>
+      {/* Services Selection */}
+      {showServiceSection && (
+        <div className="space-y-4">
+          <div>
+            <Label className={`font-semibold ${hasError('servico_id') ? 'text-orange-500' : ''}`}>
+              Selecione o serviço relacionado {formData.nao_sabe_servico ? '' : (hasError('servico_id') && <span className="text-orange-500">*</span>)}
+            </Label>
+            <div className="mt-2">
+              <Input
+                placeholder="Pesquisar serviço..."
+                value={serviceSearch}
+                onChange={(e) => handleServiceSearch(e.target.value)}
+                disabled={formData.nao_sabe_servico || !formData.problema_id}
+                className="mb-2"
+              />
+              <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2">
+                {filteredServicos.map(servico => (
+                  <Button
+                    key={servico.id}
+                    type="button"
+                    variant={formData.servico_id === servico.id ? "default" : "outline"}
+                    className={`justify-start text-left h-auto py-2 ${
+                      formData.servico_id === servico.id ? "ring-2 ring-[#003570]" : ""
+                    } ${
+                      hasError('servico_id') ? 'border-orange-500' : ''
+                    }`}
+                    onClick={() => handleSelectChange('servico_id', servico.id)}
+                    disabled={formData.nao_sabe_servico}
+                  >
+                    {servico.descricao}
+                  </Button>
+                ))}
+                {filteredServicos.length === 0 && serviceSearch && (
+                  <p className="text-gray-500 text-sm py-2">Nenhum serviço encontrado para "{serviceSearch}"</p>
+                )}
+              </div>
+            </div>
+          </div>
 
-          <div className="flex items-center space-x-2 mb-2">
-            <Checkbox 
-              id="nao_sabe_servico" 
-              checked={formData.nao_sabe_servico} 
-              onCheckedChange={(checked) => handleSelectChange('nao_sabe_servico', !!checked)} 
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="nao_sabe_servico"
+              checked={formData.nao_sabe_servico}
+              onCheckedChange={(checked) => handleSelectChange('nao_sabe_servico', Boolean(checked))}
             />
-            <label htmlFor="nao_sabe_servico" className="text-sm cursor-pointer">
+            <label
+              htmlFor="nao_sabe_servico"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Não sei o serviço específico
             </label>
           </div>
-
-          {!formData.nao_sabe_servico && (
-            <>
-              {handleServiceSearch && (
-                <Input 
-                  type="text" 
-                  placeholder="Buscar serviço..." 
-                  value={serviceSearch} 
-                  onChange={(e) => handleServiceSearch(e.target.value)} 
-                  className="mb-2"
-                />
-              )}
-              <Select
-                value={formData.servico_id}
-                onValueChange={(value) => handleSelectChange('servico_id', value)}
-                disabled={formData.nao_sabe_servico}
-              >
-                <SelectTrigger 
-                  className={`w-full ${hasFieldError('servico_id', errors) ? 'border-orange-500' : ''}`}
-                >
-                  <SelectValue placeholder="Selecione o serviço relacionado à demanda" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredServicos.length > 0 ? (
-                    filteredServicos.map((servico) => (
-                      <SelectItem key={servico.id} value={servico.id}>
-                        {servico.descricao}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-servicos" disabled>
-                      Nenhum serviço encontrado
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              {hasFieldError('servico_id', errors) && !formData.nao_sabe_servico && (
-                <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('servico_id', errors)}</p>
-              )}
-            </>
+          {hasError('servico_id') && !formData.nao_sabe_servico && (
+            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>
           )}
         </div>
       )}
 
       {/* Detalhes da Solicitação */}
-      <div>
-        <Label 
-          htmlFor="detalhes_solicitacao" 
-          className={hasFieldError('detalhes_solicitacao', errors) ? 'text-orange-500' : ''}
-        >
-          Detalhes da Solicitação
-        </Label>
-        <Textarea
-          id="detalhes_solicitacao"
-          name="detalhes_solicitacao"
-          value={formData.detalhes_solicitacao}
-          onChange={handleChange}
-          className={`min-h-[150px] ${hasFieldError('detalhes_solicitacao', errors) ? 'border-orange-500' : ''}`}
-          placeholder="Descreva os detalhes da solicitação..."
-        />
-        {hasFieldError('detalhes_solicitacao', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('detalhes_solicitacao', errors)}</p>
-        )}
-      </div>
+      <DetalhesInput
+        value={formData.detalhes_solicitacao}
+        onChange={(e) => handleChange(e)}
+        error={hasError('detalhes_solicitacao') ? getErrorMessage('detalhes_solicitacao') : ''}
+      />
 
-      {/* Distrito */}
-      <div>
-        <Label 
-          htmlFor="distrito" 
-          className={hasFieldError('bairro_id', errors) ? 'text-orange-500' : ''}
-        >
-          Distrito
+      {/* Distrito Selection */}
+      <div className="space-y-4">
+        <Label className={`font-semibold ${hasError('bairro_id') ? 'text-orange-500' : ''}`}>
+          Selecione o Distrito {hasError('bairro_id') && <span className="text-orange-500">*</span>}
         </Label>
-        <Select
-          value={selectedDistrito}
-          onValueChange={setSelectedDistrito}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione o distrito" />
-          </SelectTrigger>
-          <SelectContent>
-            {distritos.map((distrito) => (
-              <SelectItem key={distrito.id} value={distrito.id}>
-                {distrito.nome}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Bairro - mostra apenas quando um distrito é selecionado */}
-      {selectedDistrito && (
-        <div className="animate-fadeIn">
-          <Label 
-            htmlFor="bairro_id" 
-            className={hasFieldError('bairro_id', errors) ? 'text-orange-500' : ''}
-          >
-            Bairro
-          </Label>
-          <Select
-            value={formData.bairro_id}
-            onValueChange={(value) => handleSelectChange('bairro_id', value)}
-          >
-            <SelectTrigger 
-              className={`w-full ${hasFieldError('bairro_id', errors) ? 'border-orange-500' : ''}`}
+        <div className="flex flex-wrap gap-2">
+          {distritos.map(distrito => (
+            <Button
+              key={distrito.id}
+              type="button"
+              variant={selectedDistrito === distrito.id ? "default" : "outline"}
+              className={`${selectedDistrito === distrito.id ? "ring-2 ring-[#003570]" : ""}`}
+              onClick={() => {
+                setSelectedDistrito(distrito.id);
+                if (formData.bairro_id) {
+                  handleSelectChange('bairro_id', '');
+                }
+              }}
             >
-              <SelectValue placeholder="Selecione o bairro" />
-            </SelectTrigger>
-            <SelectContent>
-              {filteredBairros.length > 0 ? (
-                filteredBairros.map((bairro) => (
-                  <SelectItem key={bairro.id} value={bairro.id}>
-                    {bairro.nome}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="no-bairros" disabled>
-                  Nenhum bairro encontrado
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-          {hasFieldError('bairro_id', errors) && (
-            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('bairro_id', errors)}</p>
+              {distrito.nome}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Bairro Selection */}
+      {showBairroSection && (
+        <div className="animate-fadeIn space-y-4">
+          <Label className={`font-semibold ${hasError('bairro_id') ? 'text-orange-500' : ''}`}>
+            Selecione o Bairro {hasError('bairro_id') && <span className="text-orange-500">*</span>}
+          </Label>
+          <div className="flex flex-wrap gap-2">
+            {filteredBairros.map(bairro => (
+              <Button
+                key={bairro.id}
+                type="button"
+                variant={formData.bairro_id === bairro.id ? "default" : "outline"}
+                className={`${formData.bairro_id === bairro.id ? "ring-2 ring-[#003570]" : ""} ${
+                  hasError('bairro_id') ? 'border-orange-500' : ''
+                }`}
+                onClick={() => handleSelectChange('bairro_id', bairro.id)}
+              >
+                {bairro.nome}
+              </Button>
+            ))}
+          </div>
+          {hasError('bairro_id') && (
+            <p className="text-orange-500 text-sm">{getErrorMessage('bairro_id')}</p>
           )}
         </div>
       )}
 
-      {/* Endereço */}
-      <div>
-        <Label 
-          htmlFor="endereco" 
-          className={hasFieldError('endereco', errors) ? 'text-orange-500' : ''}
-        >
-          Endereço
-        </Label>
-        <Input
-          id="endereco"
-          name="endereco"
-          value={formData.endereco}
-          onChange={handleChange}
-          className={hasFieldError('endereco', errors) ? 'border-orange-500' : ''}
-          placeholder="Rua, número, complemento, etc."
-        />
-        {hasFieldError('endereco', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('endereco', errors)}</p>
-        )}
-      </div>
+      {/* Endereço Input */}
+      {showEnderecoField && (
+        <div className="animate-fadeIn">
+          <Label htmlFor="endereco" className="font-semibold">Endereço</Label>
+          <Input
+            id="endereco"
+            name="endereco"
+            value={formData.endereco}
+            onChange={handleChange}
+            placeholder="Digite o endereço completo"
+            className="mt-1"
+          />
+        </div>
+      )}
     </div>
   );
 };
