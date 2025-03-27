@@ -185,6 +185,13 @@ export type Database = {
             foreignKeyName: "comunicados_autor_id_fkey"
             columns: ["autor_id"]
             isOneToOne: false
+            referencedRelation: "status_usuario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comunicados_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -380,6 +387,13 @@ export type Database = {
             foreignKeyName: "demandas_autor_id_fkey"
             columns: ["autor_id"]
             isOneToOne: false
+            referencedRelation: "status_usuario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -559,6 +573,13 @@ export type Database = {
             foreignKeyName: "notas_oficiais_aprovador_id_fkey"
             columns: ["aprovador_id"]
             isOneToOne: false
+            referencedRelation: "status_usuario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_oficiais_aprovador_id_fkey"
+            columns: ["aprovador_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -567,6 +588,13 @@ export type Database = {
             columns: ["problema_id"]
             isOneToOne: false
             referencedRelation: "problemas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_oficiais_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "status_usuario"
             referencedColumns: ["id"]
           },
           {
@@ -628,6 +656,13 @@ export type Database = {
           usuario_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notificacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "status_usuario"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notificacoes_usuario_id_fkey"
             columns: ["usuario_id"]
@@ -1120,6 +1155,13 @@ export type Database = {
             foreignKeyName: "respostas_demandas_usuario_id_fkey"
             columns: ["usuario_id"]
             isOneToOne: false
+            referencedRelation: "status_usuario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_demandas_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -1532,6 +1574,13 @@ export type Database = {
             foreignKeyName: "usuario_permissoes_usuario_id_fkey"
             columns: ["usuario_id"]
             isOneToOne: false
+            referencedRelation: "status_usuario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_permissoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -1626,6 +1675,7 @@ export type Database = {
           nome_completo: string
           problema_id: string | null
           status: string | null
+          status_conta: string | null
           supervisao_tecnica_id: string | null
           whatsapp: string | null
         }
@@ -1641,6 +1691,7 @@ export type Database = {
           nome_completo: string
           problema_id?: string | null
           status?: string | null
+          status_conta?: string | null
           supervisao_tecnica_id?: string | null
           whatsapp?: string | null
         }
@@ -1656,6 +1707,7 @@ export type Database = {
           nome_completo?: string
           problema_id?: string | null
           status?: string | null
+          status_conta?: string | null
           supervisao_tecnica_id?: string | null
           whatsapp?: string | null
         }
@@ -1745,6 +1797,13 @@ export type Database = {
             foreignKeyName: "demandas_autor_id_fkey"
             columns: ["autor_id"]
             isOneToOne: false
+            referencedRelation: "status_usuario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -1770,6 +1829,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      status_usuario: {
+        Row: {
+          id: string | null
+          nome_completo: string | null
+          status: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {

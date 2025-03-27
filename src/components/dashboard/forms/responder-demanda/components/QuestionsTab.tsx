@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import QuestionsAnswersSection from './QuestionsAnswersSection';
 import { Card } from '@/components/ui/card';
@@ -16,7 +16,7 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
   onRespostaChange
 }) => {
   // Processar as perguntas - converter de string para objeto/array se necessário
-  const processedPerguntas = React.useMemo(() => {
+  const processedPerguntas = useMemo(() => {
     if (!selectedDemanda.perguntas) return null;
     
     // Se já for um objeto ou array, retornar como está
@@ -28,13 +28,14 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
     try {
       return JSON.parse(selectedDemanda.perguntas);
     } catch (e) {
+      console.error('Erro ao processar perguntas:', e);
       // Se não for um JSON válido, retornar a própria string
       return selectedDemanda.perguntas;
     }
   }, [selectedDemanda.perguntas]);
 
   // Função melhorada para verificar se existem perguntas
-  const hasQuestions = () => {
+  const hasQuestions = useMemo(() => {
     if (!processedPerguntas) return false;
     
     // Se for uma array vazia
@@ -56,11 +57,11 @@ const QuestionsTab: React.FC<QuestionsTabProps> = ({
     }
     
     return true;
-  };
+  }, [processedPerguntas]);
 
   return (
     <TabsContent value="questions" className="pt-2 m-0 animate-fade-in">
-      {hasQuestions() ? (
+      {hasQuestions ? (
         <QuestionsAnswersSection 
           perguntas={processedPerguntas}
           resposta={resposta}

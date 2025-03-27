@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -19,14 +20,27 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
 
   const normalizeQuestions = () => {
     if (!perguntas) return [];
+    
+    // Se for um array, filtrar valores vazios
     if (Array.isArray(perguntas)) {
       return perguntas.filter(p => p && p.trim !== undefined && p.trim() !== '');
     }
-    if (typeof perguntas === 'object') {
+    
+    // Se for um objeto, converter para array de perguntas
+    if (typeof perguntas === 'object' && !Array.isArray(perguntas)) {
       return Object.entries(perguntas)
         .filter(([_, value]) => value && String(value).trim() !== '')
-        .map(([key, value]) => typeof value === 'string' ? value : String(value));
+        .map(([key, value]) => {
+          // Se a pergunta tem formato "pergunta_X", exibir apenas o valor
+          if (key.startsWith('pergunta_')) {
+            return String(value);
+          }
+          // Caso contrário, exibir a chave como pergunta
+          return typeof value === 'string' ? value : String(value);
+        });
     }
+    
+    // Se for uma string, tentar parsear JSON
     if (typeof perguntas === 'string') {
       try {
         const parsed = JSON.parse(perguntas);
@@ -34,12 +48,16 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
           return parsed.filter(p => p && String(p).trim() !== '');
         }
         if (typeof parsed === 'object') {
-          return Object.values(parsed).filter(p => p && String(p).trim() !== '');
+          return Object.values(parsed)
+            .filter(p => p && String(p).trim() !== '')
+            .map(p => String(p));
         }
       } catch (e) {
+        // Se não puder parsear, tratar como uma única pergunta
         return [perguntas];
       }
     }
+    
     return [];
   };
 
@@ -47,11 +65,13 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
     const normalizedQuestions = normalizeQuestions();
     let answered = 0;
     let total = normalizedQuestions.length;
+    
     normalizedQuestions.forEach((_, index) => {
       if (resposta[index.toString()] && resposta[index.toString()].trim() !== '') {
         answered++;
       }
     });
+    
     return { answered, total };
   };
 
