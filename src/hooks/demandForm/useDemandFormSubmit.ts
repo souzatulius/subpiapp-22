@@ -79,7 +79,10 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
     }
   };
 
-  return { isLoading, submitForm };
+  // Added handleSubmit method to match the expected interface
+  const handleSubmit = submitForm;
+
+  return { isLoading, submitForm, handleSubmit };
 };
 
 export default useDemandFormSubmit;

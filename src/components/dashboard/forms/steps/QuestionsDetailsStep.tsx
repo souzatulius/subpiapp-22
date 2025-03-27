@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -101,15 +100,10 @@ const QuestionsDetailsStep: React.FC<QuestionsDetailsStepProps> = ({
         // Set initial progress
         setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
         
-        // Upload file
+        // Upload file - Fixed by removing onUploadProgress which is not in FileOptions type
         const { error: uploadError } = await supabase.storage
           .from('demandas')
-          .upload(filePath, file, {
-            onUploadProgress: (progress) => {
-              const percent = Math.round((progress.loaded / progress.total) * 100);
-              setUploadProgress(prev => ({ ...prev, [fileId]: percent }));
-            }
-          });
+          .upload(filePath, file);
           
         if (uploadError) throw uploadError;
         

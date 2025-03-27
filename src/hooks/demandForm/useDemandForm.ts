@@ -35,10 +35,9 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     handleServiceSearch
   } = useDemandFormState(bairros, problemas);
 
-  const { handleSubmit } = useDemandFormSubmit(
-    userId,
-    formData,
-    setIsLoading,
+  // Fixed by passing only the resetForm and onClose parameters
+  const { isLoading: submitting, submitForm, handleSubmit } = useDemandFormSubmit(
+    resetForm,
     onClose
   );
 
@@ -50,7 +49,7 @@ export const useDemandForm = (userId: string | undefined, onClose: () => void) =
     distritos,
     bairros,
     problemas,
-    isLoading,
+    isLoading: isLoading || submitting, // Use either loading state
     serviceSearch,
     filteredBairros,
     selectedDistrito,
