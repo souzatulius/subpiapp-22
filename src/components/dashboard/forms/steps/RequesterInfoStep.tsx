@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
+import { useMediaTypeIcon } from '@/hooks/useMediaTypeIcon';
 
 interface RequesterInfoStepProps {
   formData: {
@@ -31,16 +31,13 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
   tiposMidia,
   origens
 }) => {
-  // Check if the origin requires media type field
   const selectedOrigin = origens.find(o => o.id === formData.origem_id);
   const requiresMediaType = selectedOrigin && ["Imprensa", "SMSUB", "SECOM"].includes(selectedOrigin.descricao);
   
-  // State for progressive form display
   const [showNomeSolicitante, setShowNomeSolicitante] = useState(false);
   const [showTelefone, setShowTelefone] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
 
-  // Effect to control field visibility based on input
   useEffect(() => {
     if (formData.veiculo_imprensa && formData.veiculo_imprensa.trim() !== '') {
       setShowNomeSolicitante(true);
