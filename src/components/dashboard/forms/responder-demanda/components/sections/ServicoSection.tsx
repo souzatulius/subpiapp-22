@@ -32,6 +32,33 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({ selectedDemanda }) => {
             </p>
           </div>
         )}
+        
+        {selectedDemanda.bairro && (
+          <div className="space-y-1">
+            <span className="text-sm text-gray-500">Bairro:</span>
+            <p className="font-medium text-gray-900">
+              {selectedDemanda.bairro.nome || 'Não informado'}
+            </p>
+          </div>
+        )}
+        
+        {selectedDemanda.distrito && (
+          <div className="space-y-1">
+            <span className="text-sm text-gray-500">Distrito:</span>
+            <p className="font-medium text-gray-900">
+              {selectedDemanda.distrito?.nome || 'Não informado'}
+            </p>
+          </div>
+        )}
+        
+        {selectedDemanda.protocolo && (
+          <div className="space-y-1">
+            <span className="text-sm text-gray-500">Protocolo:</span>
+            <p className="font-medium text-gray-900">
+              {selectedDemanda.protocolo || 'Não informado'}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -99,7 +99,12 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               <h3 className="font-semibold text-subpi-blue flex items-center gap-2">
                 <Paperclip className="h-5 w-5" /> Anexos
               </h3>
-              <AttachmentsSection selectedDemanda={selectedDemanda} />
+              <AttachmentsSection
+                arquivo_url={selectedDemanda.arquivo_url}
+                anexos={selectedDemanda.anexos}
+                onViewAttachment={(url) => window.open(url, '_blank')}
+                onDownloadAttachment={(url) => window.open(url, '_blank')}
+              />
             </div>
           )}
 
@@ -109,8 +114,9 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             </h3>
             <CommentsSection
               comentarios={comentarios}
-              setComentarios={setComentarios}
+              onChange={setComentarios ? (value) => setComentarios(value) : () => {}}
               placeholder="Tem mais alguma informação?"
+              simplifiedText={true}
             />
           </div>
         </CardContent>
@@ -119,7 +125,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           <FormFooter
             isLoading={isLoading}
             onSubmit={handleSubmitWithExtra}
-            disabled={!allQuestionsAnswered()}
+            allQuestionsAnswered={allQuestionsAnswered()}
           />
         </CardFooter>
       </Card>

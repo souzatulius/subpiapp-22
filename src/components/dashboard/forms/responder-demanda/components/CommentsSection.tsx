@@ -5,12 +5,14 @@ import { Textarea } from '@/components/ui/textarea';
 interface CommentsSectionProps {
   comentarios: string;
   onChange: (value: string) => void;
+  placeholder?: string;
   simplifiedText?: boolean;
 }
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({ 
   comentarios, 
   onChange,
+  placeholder = "Insira seus comentários internos aqui...",
   simplifiedText = false
 }) => {
   return (
@@ -24,7 +26,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       <Textarea
         value={comentarios}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Insira seus comentários internos aqui..."
+        placeholder={placeholder}
         className="min-h-[120px] border-gray-300"
       />
     </div>
