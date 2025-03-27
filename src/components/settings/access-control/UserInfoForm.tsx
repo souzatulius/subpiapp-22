@@ -69,15 +69,13 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
 
   // Format WhatsApp number as the user types
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const formattedValue = formatPhoneNumber(value);
+    const formattedValue = formatPhoneNumber(e.target.value);
     form.setValue('whatsapp', formattedValue);
   };
 
   // Format date as the user types
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const formattedValue = formatDateInput(value);
+    const formattedValue = formatDateInput(e.target.value);
     form.setValue('aniversario', formattedValue);
   };
 
@@ -116,11 +114,11 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
           name="whatsapp"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>WhatsApp</FormLabel>
+              <FormLabel className="font-semibold">WhatsApp</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="(99) 99999-9999" 
-                  {...field} 
+                  value={field.value}
                   onChange={(e) => {
                     handleWhatsAppChange(e);
                   }}
@@ -136,11 +134,11 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
           name="aniversario"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Data de Aniversário</FormLabel>
+              <FormLabel className="font-semibold">Data de Aniversário</FormLabel>
               <FormControl>
                 <Input
                   placeholder="DD/MM/AAAA"
-                  {...field}
+                  value={field.value}
                   onChange={(e) => {
                     handleDateChange(e);
                   }}

@@ -24,6 +24,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SupervisaoTecnica, Cargo, Coordenacao } from '../types';
+import { formatPhoneNumber, formatDateInput } from '@/lib/inputFormatting';
 
 interface UserFormFieldsProps {
   register: any;
@@ -52,11 +53,23 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
   showWhatsapp = false,
   showBirthday = false
 }) => {
+  // Handle phone number input formatting
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatPhoneNumber(e.target.value);
+    setValue('whatsapp', formattedValue);
+  };
+
+  // Handle date input formatting
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatDateInput(e.target.value);
+    setValue('aniversario', formattedValue);
+  };
+
   return (
-    <>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Nome completo */}
-      <div className="space-y-1">
-        <Label htmlFor="nome_completo">Nome completo</Label>
+      <div className="space-y-1 md:col-span-2">
+        <Label htmlFor="nome_completo" className="font-semibold">Nome completo</Label>
         <Input
           id="nome_completo"
           {...register('nome_completo', { required: 'Nome é obrigatório' })}
@@ -71,12 +84,14 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
       {/* WhatsApp number */}
       {showWhatsapp && (
         <div className="space-y-1">
-          <Label htmlFor="whatsapp">WhatsApp</Label>
+          <Label htmlFor="whatsapp" className="font-semibold">WhatsApp</Label>
           <Input
             id="whatsapp"
             {...register('whatsapp')}
             placeholder="(11) 98765-4321"
             className={errors.whatsapp ? 'border-red-500' : ''}
+            onChange={handlePhoneChange}
+            value={watch('whatsapp') || ''}
           />
           {errors.whatsapp && (
             <p className="text-sm text-red-500">{errors.whatsapp.message}</p>
@@ -84,43 +99,27 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
         </div>
       )}
       
-      {/* Birthday field */}
+      {/* Birthday field as input with mask */}
       {showBirthday && (
         <div className="space-y-1">
-          <Label htmlFor="aniversario">Data de aniversário</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !watch('aniversario') && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {watch('aniversario') ? (
-                  format(watch('aniversario'), 'P', { locale: pt })
-                ) : (
-                  <span>Selecione uma data</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={watch('aniversario')}
-                onSelect={(date) => setValue('aniversario', date)}
-                locale={pt}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <Label htmlFor="aniversario" className="font-semibold">Data de aniversário</Label>
+          <Input
+            id="aniversario"
+            placeholder="DD/MM/AAAA"
+            {...register('aniversario')}
+            onChange={handleDateChange}
+            value={watch('aniversario') || ''}
+            className={errors.aniversario ? 'border-red-500' : ''}
+          />
+          {errors.aniversario && (
+            <p className="text-sm text-red-500">{errors.aniversario.message}</p>
+          )}
         </div>
       )}
       
       {/* Cargo */}
       <div className="space-y-1">
-        <Label htmlFor="cargo_id">Cargo</Label>
+        <Label htmlFor="cargo_id" className="font-semibold">Cargo</Label>
         <Select
           value={watch('cargo_id') || ''}
           onValueChange={(value) => setValue('cargo_id', value)}
@@ -129,7 +128,6 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">Nenhum</SelectItem>
             {cargos.map((cargo) => (
               <SelectItem key={cargo.id} value={cargo.id}>
                 {cargo.descricao}
@@ -144,7 +142,7 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
       
       {/* Coordenacao */}
       <div className="space-y-1">
-        <Label htmlFor="coordenacao_id">Coordenação</Label>
+        <Label htmlFor="coordenacao_id" className="font-semibold">Coordenação</Label>
         <Select
           value={watch('coordenacao_id') || ''}
           onValueChange={(value) => {
@@ -158,7 +156,6 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">Nenhuma</SelectItem>
             {coordenacoes.map((coordenacao) => (
               <SelectItem key={coordenacao.id} value={coordenacao.id}>
                 {coordenacao.descricao}
@@ -173,11 +170,11 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
       
       {/* Supervisão Técnica */}
       <div className="space-y-1">
-        <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
+        <Label htmlFor="supervisao_tecnica_id" className="font-semibold">Supervisão Técnica</Label>
         <Select
           value={watch('supervisao_tecnica_id') || ''}
           onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
-          disabled={!coordenacao}
+          disabled={!coordenacao || filteredSupervisoes.length === 0}
         >
           <SelectTrigger 
             id="supervisao_tecnica_id" 
@@ -186,7 +183,6 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
             <SelectValue placeholder="Selecione" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">Nenhuma</SelectItem>
             {filteredSupervisoes.map((supervisao) => (
               <SelectItem key={supervisao.id} value={supervisao.id}>
                 {supervisao.descricao}
@@ -197,8 +193,11 @@ const UserFormFields: React.FC<UserFormFieldsProps> = ({
         {errors.supervisao_tecnica_id && (
           <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
         )}
+        {coordenacao && filteredSupervisoes.length === 0 && (
+          <p className="text-sm text-gray-500">Não há supervisões técnicas disponíveis para esta coordenação</p>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

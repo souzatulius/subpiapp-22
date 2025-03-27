@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { User } from './types';
+import { parseFormattedDate } from '@/lib/inputFormatting';
 
 export const useUserInfo = (
   users: User[],
@@ -22,7 +23,7 @@ export const useUserInfo = (
   const validateUserData = (data: { whatsapp?: string; aniversario?: string }) => {
     const errors: string[] = [];
     
-    // No validation errors here as we're handling them in the form
+    // Add validation logic if needed
     
     return errors;
   };
@@ -39,12 +40,21 @@ export const useUserInfo = (
         throw new Error("Verifique os campos obrigatórios");
       }
       
-      // Use direct update instead of RPC function
+      // Process date if provided
+      let aniversarioDate = null;
+      if (data.aniversario) {
+        const parsedDate = parseFormattedDate(data.aniversario);
+        if (parsedDate) {
+          aniversarioDate = parsedDate.toISOString();
+        }
+      }
+      
+      // Update directly in 'usuarios' table
       const { error } = await supabase
         .from('usuarios')
         .update({
-          whatsapp: data.whatsapp,
-          aniversario: data.aniversario
+          whatsapp: data.whatsapp || null,
+          aniversario: aniversarioDate
         })
         .eq('id', userId);
         
@@ -57,7 +67,8 @@ export const useUserInfo = (
       setUsers(prev => prev.map(user => 
         user.id === userId ? { 
           ...user, 
-          ...data 
+          whatsapp: data.whatsapp,
+          aniversario: aniversarioDate
         } : user
       ));
       

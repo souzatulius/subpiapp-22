@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { parseFormattedDate } from '@/lib/inputFormatting';
 
 export const useAccessControlUserInfo = (
   users: User[],
@@ -22,16 +23,33 @@ export const useAccessControlUserInfo = (
     setSaving(true);
     
     try {
+      // Process date if provided
+      let aniversarioDate = null;
+      if (data.aniversario) {
+        const parsedDate = parseFormattedDate(data.aniversario);
+        if (parsedDate) {
+          aniversarioDate = parsedDate.toISOString();
+        }
+      }
+      
+      // Update directly in 'usuarios' table
       const { error } = await supabase
         .from('usuarios')
-        .update(data)
+        .update({
+          whatsapp: data.whatsapp || null,
+          aniversario: aniversarioDate
+        })
         .eq('id', userId);
         
       if (error) throw error;
       
       // Update local state
       setUsers(prev => prev.map(user => 
-        user.id === userId ? { ...user, ...data } : user
+        user.id === userId ? { 
+          ...user, 
+          whatsapp: data.whatsapp, 
+          aniversario: aniversarioDate
+        } : user
       ));
       
       toast({

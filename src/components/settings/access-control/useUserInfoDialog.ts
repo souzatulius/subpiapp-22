@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User } from './types';
 import { FormValues } from './UserInfoForm';
@@ -20,18 +19,11 @@ export const useUserInfoDialog = ({
   const handleSubmit = async (data: FormValues) => {
     if (!user) return;
     
-    // Convert the formatted date string to ISO format if it exists
-    let aniversario: string | undefined = undefined;
-    if (data.aniversario) {
-      const parsedDate = parseFormattedDate(data.aniversario);
-      if (parsedDate) {
-        aniversario = parsedDate.toISOString();
-      }
-    }
-    
+    // Keep the aniversario as formatted string and let the handler
+    // convert it to date format when saving to database
     await onSave(user.id, {
       whatsapp: data.whatsapp,
-      aniversario
+      aniversario: data.aniversario
     });
   };
 

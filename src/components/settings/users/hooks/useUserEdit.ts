@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, UserFormData } from '../types';
+import { parseFormattedDate } from '@/lib/inputFormatting';
 
 export const useUserEdit = (fetchData: () => Promise<void>) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -18,31 +19,32 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
       // Clean up data before submission
       const cleanData: any = {
         nome_completo: data.nome_completo,
-        whatsapp: data.whatsapp || null,
-        aniversario: data.aniversario ? data.aniversario.toISOString() : null,
+        cargo_id: data.cargo_id || null,
+        coordenacao_id: data.coordenacao_id || null,
+        supervisao_tecnica_id: data.supervisao_tecnica_id || null
       };
+      
+      // Process whatsapp
+      cleanData.whatsapp = data.whatsapp || null;
+      
+      // Process birthday if it's a string (from input mask)
+      if (typeof data.aniversario === 'string') {
+        const parsedDate = parseFormattedDate(data.aniversario);
+        cleanData.aniversario = parsedDate ? parsedDate.toISOString() : null;
+      } else if (data.aniversario instanceof Date) {
+        cleanData.aniversario = data.aniversario.toISOString();
+      } else {
+        cleanData.aniversario = null;
+      }
       
       // Include photo profile URL if present
       if (data.foto_perfil_url) {
         cleanData.foto_perfil_url = data.foto_perfil_url;
       }
       
-      // Process fields
-      // Set to null if not selected or "select-" default value
-      cleanData.cargo_id = data.cargo_id && !data.cargo_id.startsWith('select-') 
-        ? data.cargo_id 
-        : null;
-        
-      cleanData.coordenacao_id = data.coordenacao_id && !data.coordenacao_id.startsWith('select-') 
-        ? data.coordenacao_id 
-        : null;
-        
-      cleanData.supervisao_tecnica_id = data.supervisao_tecnica_id && !data.supervisao_tecnica_id.startsWith('select-')
-        ? data.supervisao_tecnica_id 
-        : null;
-      
       console.log('Updating user with data:', cleanData);
       
+      // Update user in 'usuarios' table
       const { error } = await supabase
         .from('usuarios')
         .update(cleanData)

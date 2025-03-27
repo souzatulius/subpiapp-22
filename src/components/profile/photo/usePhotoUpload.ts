@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { UserProfile } from '@/types/common';
+import { setupProfilePhotosStorage } from './setupProfilePhotosStorage';
 
 // The bucket name must only contain lowercase letters, numbers, dots, and hyphens
 const PROFILE_PHOTOS_BUCKET = 'profile-photos';
@@ -71,31 +72,6 @@ export const usePhotoUpload = (
     setError(null);
   };
 
-  const ensureBucketExists = async () => {
-    try {
-      // Check if bucket exists
-      const { data: buckets, error } = await supabase.storage.listBuckets();
-      
-      if (error) throw error;
-      
-      const bucketExists = buckets.some(bucket => bucket.name === PROFILE_PHOTOS_BUCKET);
-      
-      if (!bucketExists) {
-        // Create bucket if it doesn't exist
-        const { error: createError } = await supabase.storage.createBucket(PROFILE_PHOTOS_BUCKET, {
-          public: true
-        });
-        
-        if (createError) throw createError;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Error ensuring bucket exists:', error);
-      return false;
-    }
-  };
-
   const handleSavePhoto = async () => {
     if (!user) {
       setError("Você precisa estar logado para fazer essa ação");
@@ -106,6 +82,12 @@ export const usePhotoUpload = (
     setError(null);
     
     try {
+      // Ensure profile photos bucket exists
+      const bucketExists = await setupProfilePhotosStorage();
+      if (!bucketExists) {
+        throw new Error("Não foi possível configurar o armazenamento para fotos de perfil");
+      }
+      
       // If photo was removed
       if (photoRemoved) {
         // If the user has an existing photo, remove it from storage
@@ -140,12 +122,6 @@ export const usePhotoUpload = (
       
       // If there's a new photo to upload
       if (selectedFile) {
-        // Ensure bucket exists
-        const bucketExists = await ensureBucketExists();
-        if (!bucketExists) {
-          throw new Error("Não foi possível configurar o armazenamento para fotos");
-        }
-        
         // Generate unique filename
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${user.id}-${uuidv4()}.${fileExt}`;

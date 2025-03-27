@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -43,7 +44,7 @@ interface EditProfileModalProps {
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) => {
-  const { updateProfile, user } = useAuth();
+  const { user } = useAuth();
   const { userProfile, fetchUserProfile, isLoading: profileLoading } = useUserProfile();
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -53,6 +54,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     handleSubmit, 
     reset, 
     setValue,
+    watch,
     formState: { errors }
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -97,7 +99,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     
     try {
       // Process date if it exists
-      let aniversario: string | undefined = undefined;
+      let aniversario: string | null = null;
       if (data.aniversario) {
         const parsedDate = parseFormattedDate(data.aniversario);
         if (parsedDate) {
@@ -105,21 +107,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         }
       }
       
-      // When submitting the update, include the existing values for fields that shouldn't be updated
-      const updateData = {
-        nome_completo: data.nome_completo,
-        whatsapp: data.whatsapp || null,
-        aniversario: aniversario || null,
-        cargo_id: userProfile?.cargo_id,
-        coordenacao_id: userProfile?.coordenacao_id,
-        supervisao_tecnica_id: userProfile?.supervisao_tecnica_id,
-        foto_perfil_url: userProfile?.foto_perfil_url
-      };
-      
-      // Use direct update instead of RPC function
+      // Update directly in the usuarios table
       const { error } = await supabase
         .from('usuarios')
-        .update(updateData)
+        .update({
+          nome_completo: data.nome_completo,
+          whatsapp: data.whatsapp || null,
+          aniversario: aniversario,
+          // Preserve existing values
+          cargo_id: userProfile?.cargo_id,
+          coordenacao_id: userProfile?.coordenacao_id,
+          supervisao_tecnica_id: userProfile?.supervisao_tecnica_id,
+          foto_perfil_url: userProfile?.foto_perfil_url
+        })
         .eq('id', user.id);
       
       if (error) throw error;
@@ -182,8 +182,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nome_completo">Nome Completo</Label>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="nome_completo" className="font-semibold">Nome Completo</Label>
               <Input
                 id="nome_completo"
                 {...register('nome_completo')}
@@ -194,7 +194,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="font-semibold">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -205,11 +205,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="whatsapp">WhatsApp</Label>
+              <Label htmlFor="whatsapp" className="font-semibold">WhatsApp</Label>
               <Input
                 id="whatsapp"
-                {...register('whatsapp')}
                 placeholder="(11) 98765-4321"
+                value={watch('whatsapp') || ''}
                 onChange={handleWhatsAppChange}
               />
               {errors.whatsapp && (
@@ -218,11 +218,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="aniversario">Data de Aniversário</Label>
+              <Label htmlFor="aniversario" className="font-semibold">Data de Aniversário</Label>
               <Input
                 id="aniversario"
-                {...register('aniversario')}
                 placeholder="DD/MM/AAAA"
+                value={watch('aniversario') || ''}
                 onChange={handleDateChange}
               />
               {errors.aniversario && (
@@ -231,7 +231,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cargo">Cargo</Label>
+              <Label htmlFor="cargo" className="font-semibold">Cargo</Label>
               <Input
                 id="cargo"
                 value={userProfile?.cargo || ''}
@@ -241,7 +241,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="coordenacao">Coordenação</Label>
+              <Label htmlFor="coordenacao" className="font-semibold">Coordenação</Label>
               <Input
                 id="coordenacao"
                 value={userProfile?.coordenacao || ''}

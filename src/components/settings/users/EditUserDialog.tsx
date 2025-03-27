@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,11 +13,13 @@ import DialogFooterActions from './dialog/DialogFooterActions';
 import useUserFormLogic from './dialog/useUserFormLogic';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/components/ui/use-toast';
+import { formatDateToString } from '@/lib/inputFormatting';
 
 interface EditUserDialogProps {
   open: boolean;
@@ -55,13 +57,14 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
       coordenacao_id: '',
       supervisao_tecnica_id: '',
       whatsapp: '',
-      aniversario: undefined,
+      aniversario: '',
       foto_perfil_url: ''
     }
   });
 
   const [photoFile, setPhotoFile] = React.useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
   
   const coordenacao = watch('coordenacao_id') || '';
   const { filterSupervisoesByCoordination } = useUserFormLogic(supervisoesTecnicas);
@@ -71,7 +74,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     [coordenacao, supervisoesTecnicas]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user && open) {
       reset({
         nome_completo: user.nome_completo,
@@ -80,7 +83,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         coordenacao_id: user.coordenacao_id || '',
         supervisao_tecnica_id: user.supervisao_tecnica_id || '',
         whatsapp: user.whatsapp || '',
-        aniversario: user.aniversario ? new Date(user.aniversario) : undefined,
+        aniversario: user.aniversario ? formatDateToString(new Date(user.aniversario)) : '',
         foto_perfil_url: user.foto_perfil_url || ''
       });
       setPhotoPreview(user.foto_perfil_url || null);
@@ -92,16 +95,56 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         coordenacao_id: '',
         supervisao_tecnica_id: '',
         whatsapp: '',
-        aniversario: undefined,
+        aniversario: '',
         foto_perfil_url: ''
       });
       setPhotoPreview(null);
     }
   }, [user, open, reset]);
 
+  // Ensure profile-photos bucket exists
+  const ensureProfilePhotosBucketExists = async () => {
+    try {
+      // Check if 'profile-photos' bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(bucket => bucket.name === 'profile-photos');
+      
+      if (!bucketExists) {
+        console.log('Profile photos bucket does not exist. Creating it...');
+        // Create bucket if it doesn't exist
+        await supabase.storage.createBucket('profile-photos', {
+          public: true
+        });
+        
+        // Optionally add RLS policies if needed
+        console.log('Profile photos bucket created successfully');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error ensuring profile photos bucket exists:', error);
+      return false;
+    }
+  };
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        setUploadError("A imagem não pode exceder 5MB");
+        return;
+      }
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setUploadError("O arquivo deve ser uma imagem");
+        return;
+      }
+      
       setPhotoFile(file);
       
       const reader = new FileReader();
@@ -113,32 +156,53 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
   };
 
   const onFormSubmit = async (data: UserFormData) => {
-    if (photoFile) {
-      try {
-        const fileName = `profile_photos/${user?.id || Date.now()}_${photoFile.name}`;
+    setUploadError(null);
+    
+    try {
+      if (photoFile) {
+        // Ensure bucket exists
+        const bucketExists = await ensureProfilePhotosBucketExists();
+        if (!bucketExists) {
+          throw new Error("Não foi possível configurar o armazenamento para fotos");
+        }
+        
+        // Generate unique file name
+        const fileExt = photoFile.name.split('.').pop();
+        const fileName = `${user?.id || 'temp'}-${uuidv4()}.${fileExt}`;
+        
+        // Upload the file
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('users')
+          .from('profile-photos')
           .upload(fileName, photoFile, {
-            upsert: true
+            upsert: true,
+            cacheControl: '3600'
           });
 
         if (uploadError) {
-          throw uploadError;
+          console.error('Error uploading profile photo:', uploadError);
+          throw new Error("Erro ao fazer upload da foto: " + uploadError.message);
         }
 
+        // Get public URL
         const { data: urlData } = supabase.storage
-          .from('users')
+          .from('profile-photos')
           .getPublicUrl(fileName);
 
         if (urlData?.publicUrl) {
           data.foto_perfil_url = urlData.publicUrl;
         }
-      } catch (error) {
-        console.error('Error uploading profile photo:', error);
       }
+      
+      await onSubmit(data);
+    } catch (error: any) {
+      console.error('Error processing form submission:', error);
+      setUploadError(error.message || "Ocorreu um erro ao processar o formulário");
+      toast({
+        title: "Erro",
+        description: error.message || "Ocorreu um erro ao processar o formulário",
+        variant: "destructive"
+      });
     }
-    
-    await onSubmit(data);
   };
 
   const getInitials = (name: string = '') => {
@@ -152,27 +216,29 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-hidden bg-gray-50">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-xl text-subpi-blue font-semibold">Editar Usuário</DialogTitle>
         </DialogHeader>
         
         <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
           <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-            <div className="flex flex-col items-center space-y-3 py-2">
-              <Avatar className="h-24 w-24">
-                {photoPreview ? (
-                  <AvatarImage src={photoPreview} alt="Preview" />
-                ) : user?.foto_perfil_url ? (
-                  <AvatarImage src={user.foto_perfil_url} alt={user.nome_completo} />
-                ) : (
-                  <AvatarFallback className="text-lg bg-blue-100 text-blue-600">
-                    {user ? getInitials(user.nome_completo) : 'U'}
-                  </AvatarFallback>
-                )}
-              </Avatar>
+            <div className="flex flex-row items-center gap-5 py-2">
+              <div>
+                <Avatar className="h-20 w-20">
+                  {photoPreview ? (
+                    <AvatarImage src={photoPreview} alt="Preview" />
+                  ) : user?.foto_perfil_url ? (
+                    <AvatarImage src={user.foto_perfil_url} alt={user.nome_completo} />
+                  ) : (
+                    <AvatarFallback className="text-lg bg-blue-100 text-blue-600">
+                      {user ? getInitials(user.nome_completo) : 'U'}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="photo-upload" className="cursor-pointer">
                   <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md border border-blue-200 hover:bg-blue-100 transition-colors">
                     <ImageIcon className="h-4 w-4" />
@@ -186,17 +252,23 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
                     className="hidden"
                   />
                 </Label>
+                
+                {uploadError && (
+                  <p className="text-sm text-red-500">{uploadError}</p>
+                )}
+                
+                <p className="text-xs text-gray-500">Tamanho máximo: 5MB</p>
               </div>
             </div>
             
             <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
-              <Input
+              <Label htmlFor="email" className="font-semibold">Email</Label>
+              <input
                 id="email"
                 type="email"
                 {...register('email')}
                 disabled
-                className="bg-gray-100"
+                className="flex h-10 w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
               />
               <p className="text-xs text-gray-500">O email não pode ser alterado</p>
             </div>
