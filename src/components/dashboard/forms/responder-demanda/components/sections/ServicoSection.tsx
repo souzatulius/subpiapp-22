@@ -1,66 +1,45 @@
-
+// ServicoSection.tsx (componente mais completo e inteligente)
 import React from 'react';
-import { FileText } from 'lucide-react';
+import ServicoSelector from './ServicoSelector';
+import { Alert, AlertTriangle } from 'lucide-react';
 
 interface ServicoSectionProps {
   selectedDemanda: any;
+  servicos: any[];
+  servicosLoading: boolean;
+  selectedServicoId: string;
+  onServicoChange: (id: string) => void;
 }
 
-const ServicoSection: React.FC<ServicoSectionProps> = ({ selectedDemanda }) => {
+const ServicoSection: React.FC<ServicoSectionProps> = ({
+  selectedDemanda,
+  servicos,
+  servicosLoading,
+  selectedServicoId,
+  onServicoChange,
+}) => {
+  const servicoNaoInformado = selectedDemanda.nao_sabe_servico && !selectedServicoId;
+
   return (
-    <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
-      <h3 className="font-semibold text-subpi-blue flex items-center gap-2 mb-3">
-        <FileText className="w-5 h-5" /> 
-        Serviço
-      </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {selectedDemanda.tema && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Tema:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.tema.descricao || 'Não definido'}
-            </p>
-          </div>
-        )}
-        
-        {selectedDemanda.servico && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Serviço:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.servico.descricao || 'Não definido'}
-            </p>
-          </div>
-        )}
-        
-        {selectedDemanda.bairro && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Bairro:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.bairro.nome || 'Não informado'}
-            </p>
-          </div>
-        )}
-        
-        {selectedDemanda.distrito && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Distrito:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.distrito?.nome || 'Não informado'}
-            </p>
-          </div>
-        )}
-        
-        {selectedDemanda.protocolo && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Protocolo:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.protocolo || 'Não informado'}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+    <section className="space-y-4">
+      <h2 className="text-lg font-semibold text-subpi-blue">Serviço</h2>
+
+      {servicoNaoInformado && (
+        <div className="bg-orange-100 p-3 rounded-lg flex gap-2 items-center">
+          <AlertTriangle className="w-5 h-5 text-orange-600" />
+          <span className="text-sm text-orange-800">
+            Esta demanda não possui serviço informado. Por favor, selecione um serviço antes de responder.
+          </span>
+        </div>
+      )}
+
+      <ServicoSelector
+        selectedServicoId={selectedServicoId}
+        servicos={servicos}
+        servicosLoading={servicosLoading}
+        onServicoChange={onServicoChange}
+      />
+    </section>
   );
 };
 
