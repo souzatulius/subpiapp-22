@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -153,6 +154,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             filteredServicos={filteredServicos}
             handleServiceSearch={handleServiceSearch}
             nextStep={nextStep}
+            onNavigateToStep={setActiveStep}
           />
           
           <FormActions 

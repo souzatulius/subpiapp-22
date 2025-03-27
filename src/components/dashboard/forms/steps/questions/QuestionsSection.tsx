@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from '../identification/ValidationUtils';
@@ -44,10 +45,11 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         {Array.from({ length: visibleFieldsCount }).map((_, index) => (
           <div key={index} className="flex items-start gap-2">
             <div className="flex-1">
-              <Textarea
+              <Input
                 value={perguntas[index] || ''}
                 onChange={(e) => onPerguntaChange(index, e.target.value)}
-                className="min-h-[80px]"
+                placeholder={`Pergunta ${index + 1}`}
+                className="h-12"
               />
             </div>
           </div>

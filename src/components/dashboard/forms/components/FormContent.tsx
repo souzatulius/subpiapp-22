@@ -52,7 +52,8 @@ interface FormContentProps {
   servicos?: any[];
   filteredServicos?: any[];
   handleServiceSearch?: (value: string) => void;
-  nextStep?: () => void; 
+  nextStep?: () => void;
+  onNavigateToStep?: (step: number) => void; // Added to navigate between steps
 }
 
 const FormContent: React.FC<FormContentProps> = ({
@@ -75,7 +76,8 @@ const FormContent: React.FC<FormContentProps> = ({
   servicos = [],
   filteredServicos = [],
   handleServiceSearch,
-  nextStep
+  nextStep,
+  onNavigateToStep
 }) => {
   switch (activeStep) {
     case 0:
@@ -142,9 +144,11 @@ const FormContent: React.FC<FormContentProps> = ({
           origens={origens}
           tiposMidia={tiposMidia}
           filteredBairros={filteredBairros}
+          distritos={distritos}
           servicos={servicos}
           errors={errors}
           showValidationErrors={true}
+          onNavigateToStep={onNavigateToStep}
         />
       );
     default:

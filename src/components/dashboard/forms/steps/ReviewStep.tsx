@@ -6,6 +6,7 @@ import { ValidationError, getErrorSummary } from '@/lib/formValidationUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, Paperclip, FileText } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 interface ReviewStepProps {
   formData: any;
@@ -14,9 +15,11 @@ interface ReviewStepProps {
   origens: any[];
   tiposMidia: any[];
   filteredBairros: any[];
+  distritos?: any[]; // Added districts
   servicos?: any[];
   errors: ValidationError[];
   showValidationErrors?: boolean;
+  onNavigateToStep?: (step: number) => void; // Added to navigate to specific steps
 }
 
 const ReviewStep: React.FC<ReviewStepProps> = ({
@@ -26,15 +29,48 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   origens,
   tiposMidia,
   filteredBairros,
+  distritos = [],
   servicos = [],
   errors,
-  showValidationErrors = false
+  showValidationErrors = false,
+  onNavigateToStep
 }) => {
   const selectedProblema = problemas.find(p => p.id === formData.problema_id);
   const selectedOrigem = origens.find(o => o.id === formData.origem_id);
   const selectedTipoMidia = tiposMidia.find(t => t.id === formData.tipo_midia_id);
   const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
   const selectedServico = servicos.find(s => s.id === formData.servico_id);
+  const selectedDistrito = distritos.find(d => d.id === 
+    filteredBairros.find(b => b.id === formData.bairro_id)?.distrito_id
+  );
+
+  // Field to step mapping for navigation
+  const fieldToStepMap: Record<string, number> = {
+    'origem_id': 0,
+    'prazo_resposta': 0,
+    'prioridade': 0,
+    'tem_protocolo_156': 0,
+    'numero_protocolo_156': 0,
+    'tipo_midia_id': 1,
+    'veiculo_imprensa': 1,
+    'nome_solicitante': 1,
+    'telefone_solicitante': 1,
+    'email_solicitante': 1,
+    'problema_id': 2,
+    'servico_id': 2,
+    'detalhes_solicitacao': 2,
+    'bairro_id': 2,
+    'endereco': 2,
+    'titulo': 3,
+    'perguntas': 3,
+    'anexos': 3
+  };
+
+  const handleFieldClick = (field: string) => {
+    if (onNavigateToStep && fieldToStepMap[field] !== undefined) {
+      onNavigateToStep(fieldToStepMap[field]);
+    }
+  };
 
   const ReviewSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <div className="mb-4">
@@ -47,7 +83,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     </div>
   );
 
-  const ReviewItem = ({ label, value, error }: { label: string, value: string | undefined, error?: boolean }) => (
+  const ReviewItem = ({ label, value, error, field }: { label: string, value: string | undefined, error?: boolean, field?: string }) => (
     <div className="py-1">
       <span className={`text-sm font-medium ${error ? 'text-orange-500' : 'text-gray-500'}`}>{label}: </span>
       {value ? (
@@ -55,7 +91,16 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       ) : (
         <span className="text-sm text-gray-400 italic">Não informado</span>
       )}
-      {error && <Badge variant="outline" className="ml-2 bg-orange-50 text-orange-800 border-orange-200">Obrigatório</Badge>}
+      {error && field && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => handleFieldClick(field)}
+          className="ml-2 h-6 px-2 py-0 text-xs bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100"
+        >
+          Preencher
+        </Button>
+      )}
     </div>
   );
 
@@ -95,30 +140,37 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           label="Origem da Demanda" 
           value={selectedOrigem?.descricao}
           error={errors.some(e => e.field === 'origem_id')}
+          field="origem_id"
         />
         {formData.tem_protocolo_156 && (
           <ReviewItem 
             label="Protocolo 156" 
             value={formData.numero_protocolo_156}
             error={errors.some(e => e.field === 'numero_protocolo_156')}
+            field="numero_protocolo_156"
           />
         )}
         {selectedTipoMidia && (
           <ReviewItem 
             label="Tipo de Mídia" 
             value={selectedTipoMidia.descricao}
+            error={errors.some(e => e.field === 'tipo_midia_id')}
+            field="tipo_midia_id"
           />
         )}
         {formData.veiculo_imprensa && (
           <ReviewItem 
             label="Veículo de Imprensa" 
             value={formData.veiculo_imprensa}
+            error={errors.some(e => e.field === 'veiculo_imprensa')}
+            field="veiculo_imprensa"
           />
         )}
         <ReviewItem 
           label="Prioridade" 
           value={formData.prioridade ? formData.prioridade.charAt(0).toUpperCase() + formData.prioridade.slice(1) : undefined}
           error={errors.some(e => e.field === 'prioridade')}
+          field="prioridade"
         />
         <ReviewItem 
           label="Prazo para Resposta" 
@@ -130,6 +182,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             minute: '2-digit'
           }) : undefined}
           error={errors.some(e => e.field === 'prazo_resposta')}
+          field="prazo_resposta"
         />
       </ReviewSection>
 
@@ -138,18 +191,34 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           label="Tema/Problema" 
           value={selectedProblema?.descricao}
           error={errors.some(e => e.field === 'problema_id')}
+          field="problema_id"
         />
         {!formData.nao_sabe_servico && (
           <ReviewItem 
             label="Serviço" 
             value={selectedServico?.descricao}
+            error={errors.some(e => e.field === 'servico_id')}
+            field="servico_id"
           />
         )}
         <div className="mt-2">
           <span className="text-sm font-medium text-gray-500">Detalhes da Solicitação: </span>
-          <p className="text-sm mt-1 p-2 bg-gray-50 rounded-md">
-            {formData.detalhes_solicitacao || <span className="text-gray-400 italic">Não informado</span>}
-          </p>
+          <div className="text-sm mt-1 p-2 bg-gray-50 rounded-md relative">
+            {formData.detalhes_solicitacao ? 
+              formData.detalhes_solicitacao : 
+              <span className="text-gray-400 italic">Não informado</span>
+            }
+            {errors.some(e => e.field === 'detalhes_solicitacao') && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => handleFieldClick('detalhes_solicitacao')}
+                className="absolute top-1 right-1 h-6 px-2 py-0 text-xs bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100"
+              >
+                Preencher
+              </Button>
+            )}
+          </div>
         </div>
       </ReviewSection>
 
@@ -158,26 +227,38 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           label="Nome" 
           value={formData.nome_solicitante}
           error={errors.some(e => e.field === 'nome_solicitante')}
+          field="nome_solicitante"
         />
         <ReviewItem 
           label="Telefone" 
           value={formData.telefone_solicitante}
+          error={errors.some(e => e.field === 'telefone_solicitante')}
+          field="telefone_solicitante"
         />
         <ReviewItem 
           label="E-mail" 
           value={formData.email_solicitante}
+          error={errors.some(e => e.field === 'email_solicitante')}
+          field="email_solicitante"
         />
       </ReviewSection>
 
       <ReviewSection title="Localização">
         <ReviewItem 
+          label="Distrito" 
+          value={selectedDistrito?.nome}
+        />
+        <ReviewItem 
           label="Bairro" 
           value={selectedBairro?.nome}
           error={errors.some(e => e.field === 'bairro_id')}
+          field="bairro_id"
         />
         <ReviewItem 
           label="Endereço" 
           value={formData.endereco}
+          error={errors.some(e => e.field === 'endereco')}
+          field="endereco"
         />
       </ReviewSection>
 
@@ -186,6 +267,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           label="Título" 
           value={formData.titulo}
           error={errors.some(e => e.field === 'titulo')}
+          field="titulo"
         />
 
         <Separator className="my-2" />
@@ -209,7 +291,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
         <span className="text-sm font-medium text-gray-500">Anexos:</span>
         <div className="mt-1">
-          {formData.anexos.length > 0 ? (
+          {formData.anexos && formData.anexos.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {formData.anexos.map((anexo: string, index: number) => {
                 const fileName = getFileNameFromUrl(anexo);
@@ -222,6 +304,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                             src={anexo} 
                             alt={fileName} 
                             className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
                           />
                         </div>
                         <p className="text-xs truncate text-gray-600">{fileName}</p>

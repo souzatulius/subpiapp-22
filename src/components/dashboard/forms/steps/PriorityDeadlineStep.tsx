@@ -9,6 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, ClockIcon } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -35,17 +37,12 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     // Initialize time from existing date if available
     if (date) {
       setSelectedHour(date.getHours().toString().padStart(2, '0'));
-      // Only allow 00 or 30 minutes
       setSelectedMinute(date.getMinutes() >= 30 ? "30" : "00");
     }
   }, []);
   
   const hasError = (field: string) => errors.some(err => err.field === field);
-  const getErrorMessage = (field: string) => {
-    const error = errors.find(err => err.field === field);
-    return error ? error.message : '';
-  };
-
+  
   // Generate available hours (6-22)
   const hours = Array.from({ length: 17 }, (_, i) => i + 6);
 
@@ -92,12 +89,54 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Priority selection */}
+      <div>
+        <Label 
+          htmlFor="prioridade" 
+          className={`block mb-2 ${hasFieldError('prioridade', errors) ? 'text-orange-500 font-semibold' : ''}`}
+        >
+          Prioridade {hasFieldError('prioridade', errors) && <span className="text-orange-500">*</span>}
+        </Label>
+        
+        <ToggleGroup 
+          type="single" 
+          variant="outline"
+          value={formData.prioridade} 
+          onValueChange={(value) => value && handleSelectChange('prioridade', value)}
+          className="justify-start"
+        >
+          <ToggleGroupItem 
+            value="baixa" 
+            className={`rounded-xl ${formData.prioridade === 'baixa' ? 'bg-green-100 border-green-500 text-green-700' : ''}`}
+          >
+            Baixa
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="media" 
+            className={`rounded-xl ${formData.prioridade === 'media' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' : ''}`}
+          >
+            Média
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="alta" 
+            className={`rounded-xl ${formData.prioridade === 'alta' ? 'bg-red-100 border-red-500 text-red-700' : ''}`}
+          >
+            Alta
+          </ToggleGroupItem>
+        </ToggleGroup>
+        
+        {hasFieldError('prioridade', errors) && (
+          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('prioridade', errors)}</p>
+        )}
+      </div>
+
+      {/* Deadline selection */}
       <div>
         <Label 
           htmlFor="prazo_resposta" 
-          className={`block mb-2 ${hasError('prazo_resposta') ? 'text-orange-500 font-semibold' : ''}`}
+          className={`block mb-2 ${hasFieldError('prazo_resposta', errors) ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Prazo para Resposta {hasError('prazo_resposta') && <span className="text-orange-500">*</span>}
+          Prazo para Resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
         </Label>
         <div className="flex space-x-2 max-w-xl">
           <Popover>
@@ -105,7 +144,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
               <Button
                 variant="outline"
                 className={`w-56 justify-start text-left font-normal ${
-                  hasError('prazo_resposta') ? 'border-orange-500' : ''
+                  hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''
                 }`}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -162,8 +201,8 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             </Select>
           </div>
         </div>
-        {hasError('prazo_resposta') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prazo_resposta')}</p>
+        {hasFieldError('prazo_resposta', errors) && (
+          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('prazo_resposta', errors)}</p>
         )}
       </div>
     </div>
