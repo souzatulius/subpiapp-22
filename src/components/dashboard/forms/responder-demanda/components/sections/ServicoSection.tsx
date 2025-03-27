@@ -1,4 +1,3 @@
-// ServicoSection.tsx
 import React from 'react';
 import ServicoSelector from './ServicoSelector';
 import { AlertTriangle } from 'lucide-react';
