@@ -17,8 +17,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   resposta,
   onRespostaChange
 }) => {
-  console.log('QuestionsAnswersSection - props perguntas:', perguntas);
-  console.log('QuestionsAnswersSection - props resposta:', resposta);
+  console.log('QuestionsAnswersSection - perguntas raw:', perguntas);
 
   // Use our utility function to normalize questions
   const normalizedQuestions = normalizeQuestions(perguntas);
@@ -27,18 +26,20 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
   // Initialize response fields if they don't exist
   useEffect(() => {
     normalizedQuestions.forEach((_, index) => {
-      if (!resposta[index.toString()]) {
-        onRespostaChange(index.toString(), '');
+      const key = index.toString();
+      if (!resposta[key]) {
+        onRespostaChange(key, '');
       }
     });
-  }, [normalizedQuestions]);
+  }, [normalizedQuestions, resposta, onRespostaChange]);
 
   const getTotalAnswered = () => {
     let answered = 0;
     let total = normalizedQuestions.length;
     
     normalizedQuestions.forEach((_, index) => {
-      if (resposta[index.toString()] && resposta[index.toString()].trim() !== '') {
+      const key = index.toString();
+      if (resposta[key] && resposta[key].trim() !== '') {
         answered++;
       }
     });
@@ -50,18 +51,18 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
 
   if (!perguntas || normalizedQuestions.length === 0) {
     return (
-      <Card className="bg-gray-50 p-6 rounded-xl text-center shadow-sm border border-gray-200 animate-fade-in hover:shadow-md transition-all duration-300">
+      <Card className="bg-gray-50 p-6 rounded-xl text-center shadow-sm border border-gray-200">
         <p className="text-gray-500">Não há perguntas registradas para esta demanda.</p>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-5 transition-all duration-300">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <Badge 
           variant={answered === total ? "default" : "outline"} 
-          className={`${answered === total ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'} transition-colors duration-300`}
+          className={`${answered === total ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'}`}
         >
           <span className="font-medium">{answered}</span> de <span className="font-medium">{total}</span> respondidas
         </Badge>
@@ -69,7 +70,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
 
       <div className="space-y-5">
         {normalizedQuestions.map((pergunta: string, index: number) => (
-          <Card key={index} className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300 animate-fade-in">
+          <Card key={`question-${index}`} className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300">
             <CardContent className="p-0">
               <div className="bg-blue-50 p-4 border-b border-blue-100">
                 <Label className="font-medium text-blue-800">Pergunta {index+1}:</Label>

@@ -14,6 +14,8 @@ const RespostaFormHeader: React.FC<RespostaFormHeaderProps> = ({
   selectedDemanda,
   onBack
 }) => {
+  console.log('RespostaFormHeader - selectedDemanda:', selectedDemanda);
+  
   return (
     <div className="flex items-center gap-4 mb-4">
       <Button 

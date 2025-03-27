@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FileIcon, ExternalLink, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AttachmentItem from './AttachmentItem';
@@ -20,63 +20,48 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
 }) => {
   console.log('AttachmentsSection input:', { arquivo_url, anexos });
   
-  // Enhanced validation to ensure attachments are displayed correctly
-  const hasAttachments = () => {
-    // Check if there's a valid arquivo_url
-    if (arquivo_url && typeof arquivo_url === 'string' && isValidPublicUrl(arquivo_url)) return true;
-    
-    // Check if there are anexos
-    if (!anexos) return false;
-    
-    // If anexos is a string, try to parse it
-    if (typeof anexos === 'string') {
-      try {
-        const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) && parsed.length > 0 && parsed.some(anexo => 
+  // Use useMemo to normalize attachments for better performance
+  const normalizedAttachments = useMemo(() => {
+    const validUrls: string[] = [];
+
+    // Add arquivo_url if valid
+    if (arquivo_url && typeof arquivo_url === 'string' && isValidPublicUrl(arquivo_url)) {
+      validUrls.push(arquivo_url);
+    }
+
+    // Process anexos based on type
+    if (anexos) {
+      if (Array.isArray(anexos)) {
+        validUrls.push(...anexos.filter(anexo => 
           anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)
-        );
-      } catch {
-        return isValidPublicUrl(anexos);
+        ));
+      } else if (typeof anexos === 'string') {
+        try {
+          const parsed = JSON.parse(anexos);
+          if (Array.isArray(parsed)) {
+            validUrls.push(...parsed.filter(anexo => 
+              anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)
+            ));
+          } else if (isValidPublicUrl(anexos)) {
+            validUrls.push(anexos);
+          }
+        } catch (e) {
+          // If not valid JSON but a valid URL, use as single attachment
+          if (isValidPublicUrl(anexos)) {
+            validUrls.push(anexos);
+          }
+        }
       }
     }
     
-    // If anexos is an array, check if it has valid elements
-    if (Array.isArray(anexos)) {
-      return anexos.length > 0 && anexos.some(anexo => 
-        anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)
-      );
-    }
-    
-    return false;
-  };
+    console.log('Normalized attachments:', validUrls);
+    return validUrls;
+  }, [arquivo_url, anexos]);
   
-  // Normalize the anexos to ensure we always have a valid array
-  const normalizeAttachments = () => {
-    if (!anexos) return [];
-    
-    if (typeof anexos === 'string') {
-      try {
-        const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) 
-          ? parsed.filter(anexo => anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)) 
-          : [anexos].filter(anexo => isValidPublicUrl(anexo));
-      } catch {
-        return isValidPublicUrl(anexos) ? [anexos] : [];
-      }
-    }
-    
-    if (Array.isArray(anexos)) {
-      return anexos.filter(anexo => anexo && typeof anexo === 'string' && isValidPublicUrl(anexo));
-    }
-    
-    return [];
-  };
+  // Check if we have any valid attachments
+  const hasAttachments = normalizedAttachments.length > 0;
   
-  const normalizedAttachments = normalizeAttachments();
-  
-  console.log('Normalized attachments:', normalizedAttachments);
-  
-  if (!hasAttachments() && (!arquivo_url || !isValidPublicUrl(arquivo_url))) {
+  if (!hasAttachments) {
     return (
       <div className="bg-gray-50 p-6 rounded-xl text-center shadow-sm border border-gray-200">
         <p className="text-gray-500">Não há anexos para esta demanda.</p>
@@ -87,18 +72,10 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   return (
     <div className="space-y-3 animate-fade-in">
       <div className="space-y-2">
-        {arquivo_url && isValidPublicUrl(arquivo_url) && (
+        {normalizedAttachments.map((url: string, index: number) => (
           <AttachmentItem 
-            url={arquivo_url} 
-            onView={onViewAttachment} 
-            onDownload={onDownloadAttachment} 
-          />
-        )}
-        
-        {normalizedAttachments.map((anexo: string, index: number) => (
-          <AttachmentItem 
-            key={index} 
-            url={anexo} 
+            key={`attachment-${index}`}
+            url={url} 
             onView={onViewAttachment} 
             onDownload={onDownloadAttachment}
             index={index} 

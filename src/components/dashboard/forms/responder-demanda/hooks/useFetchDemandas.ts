@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda } from '../types';
 import { toast } from '@/components/ui/use-toast';
+import { normalizeQuestions } from '@/utils/questionFormatUtils';
 
 export const useFetchDemandas = () => {
   const [demandas, setDemandas] = useState<Demanda[]>([]);
@@ -44,7 +45,8 @@ export const useFetchDemandas = () => {
             origens_demandas:origem_id (id, descricao),
             tipos_midia:tipo_midia_id (id, descricao),
             bairros:bairro_id (id, nome),
-            autor:autor_id (id, nome_completo)
+            autor:autor_id (id, nome_completo),
+            servicos:servico_id (id, descricao)
           `)
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
@@ -58,6 +60,8 @@ export const useFetchDemandas = () => {
           });
           return;
         }
+
+        console.log('Demandas raw data:', data);
 
         // Now fetch all respostas_demandas to filter out answered demands
         const { data: respostasData, error: respostasError } = await supabase
@@ -80,52 +84,10 @@ export const useFetchDemandas = () => {
         // Filter out demands that already have responses
         const filteredData = data.filter(demanda => !respondedDemandIds.has(demanda.id));
         
-        // Get service information separately instead of using direct joins
-        const demandasWithServices = await Promise.all(filteredData.map(async (demanda) => {
-          let servicoInfo = null;
-          
-          if (demanda.servico_id) {
-            const { data: servicoData } = await supabase
-              .from('servicos')
-              .select('id, descricao')
-              .eq('id', demanda.servico_id)
-              .single();
-              
-            if (servicoData) {
-              servicoInfo = servicoData;
-            }
-          }
-          
-          return {
-            ...demanda,
-            servicos: servicoInfo
-          };
-        }));
-        
         // Transform the data to match the Demanda type
-        const transformedData: Demanda[] = (demandasWithServices || []).map(item => {
+        const transformedData: Demanda[] = (filteredData || []).map(item => {
           // Handle perguntas type conversion: ensure it's string[] or null
-          let perguntasArray: string[] | null = null;
-          if (item.perguntas) {
-            // If it's an array already, use it
-            if (Array.isArray(item.perguntas)) {
-              perguntasArray = item.perguntas as string[];
-            }
-            // If it's a string, try to parse it or convert to array with one element
-            else if (typeof item.perguntas === 'string') {
-              try {
-                const parsed = JSON.parse(item.perguntas);
-                perguntasArray = Array.isArray(parsed) ? parsed : [item.perguntas];
-              } catch {
-                perguntasArray = [item.perguntas];
-              }
-            }
-            // For other cases, convert to empty array
-            else {
-              console.warn('Unexpected perguntas format:', item.perguntas);
-              perguntasArray = [];
-            }
-          }
+          let perguntasArray = normalizeQuestions(item.perguntas);
           
           // Process anexos to ensure it's always an array
           let anexosArray: string[] | null = null;
@@ -170,10 +132,12 @@ export const useFetchDemandas = () => {
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia,
             bairros: item.bairros,
+            autor: item.autor,
             servicos: item.servicos
           };
         });
         
+        console.log('Transformed demandas:', transformedData);
         setDemandas(transformedData);
       } catch (error) {
         console.error('Error in fetchDemandas:', error);
