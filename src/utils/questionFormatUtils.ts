@@ -18,7 +18,28 @@ export const normalizeQuestions = (input: any): string[] => {
 
   // If input is an object (like perguntas in jsonb format)
   if (typeof input === 'object' && !Array.isArray(input)) {
-    // Extract values and filter out empty ones
+    // Check if object has keys like "pergunta_1", "pergunta_2"
+    const hasPerguntaKeys = Object.keys(input).some(key => key.startsWith('pergunta_'));
+    
+    if (hasPerguntaKeys) {
+      // Sort keys to ensure correct order (pergunta_1, pergunta_2, etc.)
+      const sortedKeys = Object.keys(input).sort((a, b) => {
+        // Extract numbers from keys
+        const numA = parseInt(a.replace('pergunta_', ''));
+        const numB = parseInt(b.replace('pergunta_', ''));
+        return numA - numB;
+      });
+      
+      // Extract values and filter out empty ones
+      const result = sortedKeys
+        .map(key => input[key])
+        .filter(value => value && typeof value === 'string' && value.trim() !== '');
+      
+      console.log('normalizeQuestions - input has pergunta_X keys, result:', result);
+      return result;
+    }
+    
+    // For other object formats, extract values
     const result = Object.values(input)
       .filter(value => value && typeof value === 'string' && value.trim() !== '')
       .map(String);

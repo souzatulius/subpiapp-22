@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeQuestions } from '@/utils/questionFormatUtils';
 
 interface UseRespostaFormStateProps {
   selectedDemanda: any;
@@ -18,42 +19,6 @@ export const useRespostaFormState = ({
   const [selectedServicoId, setSelectedServicoId] = useState<string>('');
   const [dontKnowService, setDontKnowService] = useState<boolean>(false);
 
-  // Parse perguntas into a normalized format for resposta
-  const normalizePerguntas = (perguntas: any): { key: string, value: string }[] => {
-    if (!perguntas) return [];
-
-    // If it's already an object with key/value pairs
-    if (typeof perguntas === 'object' && !Array.isArray(perguntas)) {
-      return Object.entries(perguntas).map(([key, value]) => ({
-        key: key.startsWith('pergunta_') ? key : `pergunta_${key}`,
-        value: String(value)
-      }));
-    }
-    
-    // If it's an array of strings
-    if (Array.isArray(perguntas)) {
-      return perguntas
-        .filter(p => p && String(p).trim() !== '')
-        .map((pergunta, index) => ({
-          key: `${index}`,
-          value: String(pergunta)
-        }));
-    }
-    
-    // If it's a JSON string, parse it first
-    if (typeof perguntas === 'string') {
-      try {
-        const parsed = JSON.parse(perguntas);
-        return normalizePerguntas(parsed);
-      } catch {
-        // If it can't be parsed, treat as a single question
-        return [{ key: '0', value: perguntas }];
-      }
-    }
-
-    return [];
-  };
-
   // Initialize form state when demanda changes
   useEffect(() => {
     if (selectedDemanda?.problema_id) {
@@ -62,13 +27,15 @@ export const useRespostaFormState = ({
     
     // Initialize perguntas and respostas
     if (selectedDemanda?.perguntas) {
-      const normalizedPerguntas = normalizePerguntas(selectedDemanda.perguntas);
+      // Normalize questions to array format
+      const normalizedPerguntas = normalizeQuestions(selectedDemanda.perguntas);
       
       const initialRespostas: Record<string, string> = { ...resposta };
       
-      normalizedPerguntas.forEach(({ key, value }) => {
-        if (!initialRespostas[key]) {
-          initialRespostas[key] = '';
+      // Create empty response slots for each question
+      normalizedPerguntas.forEach((_, index) => {
+        if (!initialRespostas[index.toString()]) {
+          initialRespostas[index.toString()] = '';
         }
       });
       
@@ -146,13 +113,15 @@ export const useRespostaFormState = ({
   const allQuestionsAnswered = () => {
     if (!selectedDemanda?.perguntas) return true;
     
-    const normalizedPerguntas = normalizePerguntas(selectedDemanda.perguntas);
+    const normalizedPerguntas = normalizeQuestions(selectedDemanda.perguntas);
     
     // If there are no questions, consider everything answered
     if (normalizedPerguntas.length === 0) return true;
     
     // Check if all questions have answers
-    return normalizedPerguntas.every(({ key }) => resposta[key] && resposta[key].trim() !== '');
+    return normalizedPerguntas.every((_, index) => 
+      resposta[index.toString()] && resposta[index.toString()].trim() !== ''
+    );
   };
 
   const handleAttachmentAction = (url: string, action: 'view' | 'download') => {
