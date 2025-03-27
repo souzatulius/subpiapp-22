@@ -25,6 +25,13 @@ const RespostaFormHeader: React.FC<RespostaFormHeaderProps> = ({
         <ChevronLeft className="h-4 w-4" />
         <span>Voltar</span>
       </Button>
+      
+      {selectedDemanda?.autor?.nome_completo && (
+        <div className="text-sm text-gray-600">
+          <span className="font-medium">Autor:</span>{' '}
+          {selectedDemanda.autor.nome_completo}
+        </div>
+      )}
     </div>
   );
 };
