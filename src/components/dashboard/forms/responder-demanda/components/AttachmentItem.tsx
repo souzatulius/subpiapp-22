@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileIcon, ExternalLink, Download, Image, FileText, FilePdf, FileWord, FileSpreadsheet, FileX, Video, Music, Archive } from 'lucide-react';
+import { FileIcon, ExternalLink, Download, Image, FileText, File, FileSpreadsheet as FileSS, Music, Video, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AttachmentItemProps {
@@ -41,11 +41,11 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(extension || '')) {
       return <Image className="h-5 w-5 text-blue-600" />;
     } else if (['pdf'].includes(extension || '')) {
-      return <FilePdf className="h-5 w-5 text-red-600" />;
+      return <File className="h-5 w-5 text-red-600" />; // Changed from FilePdf to File
     } else if (['doc', 'docx', 'txt', 'rtf'].includes(extension || '')) {
-      return <FileText className="h-5 w-5 text-blue-600" />;
+      return <FileText className="h-5 w-5 text-blue-600" />; // Using FileText for doc/docx
     } else if (['xls', 'xlsx', 'csv'].includes(extension || '')) {
-      return <FileSpreadsheet className="h-5 w-5 text-green-600" />;
+      return <FileSS className="h-5 w-5 text-green-600" />; // Using alias FileSS
     } else if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(extension || '')) {
       return <Video className="h-5 w-5 text-purple-600" />;
     } else if (['mp3', 'wav', 'ogg', 'aac', 'flac'].includes(extension || '')) {

@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { FileIcon, ExternalLink, Download, Image, FileText, FilePdf, FileWord, FileSpreadsheet, FileX } from 'lucide-react';
+import { FileIcon, ExternalLink, Download, Image, FileText, File, FileSpreadsheet as FileSS, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AttachmentItem from './AttachmentItem';
 import { isValidPublicUrl } from '@/utils/questionFormatUtils';
