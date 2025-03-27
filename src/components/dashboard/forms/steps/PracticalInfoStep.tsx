@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ValidationError } from '@/lib/formValidationUtils';
+import LocationStep from './LocationStep';
 
 interface PracticalInfoStepProps {
   formData: {
@@ -34,21 +33,19 @@ const PracticalInfoStep: React.FC<PracticalInfoStepProps> = ({
   filteredBairros,
   errors = []
 }) => {
+  const hasError = (field: string) => errors.some(err => err.field === field);
+  const getErrorMessage = (field: string) => {
+    const error = errors.find(err => err.field === field);
+    return error ? error.message : '';
+  };
+
   const [showTelefone, setShowTelefone] = useState(!!formData.nome_solicitante);
   const [showEmail, setShowEmail] = useState(!!formData.telefone_solicitante);
-  const [showPrioridade, setShowPrioridade] = useState(!!formData.email_solicitante);
-  const [showDistrito, setShowDistrito] = useState(!!formData.prioridade);
-  const [showBairro, setShowBairro] = useState(!!selectedDistrito);
-  const [showEndereco, setShowEndereco] = useState(!!formData.bairro_id);
 
   useEffect(() => {
     if (formData.nome_solicitante) setShowTelefone(true);
     if (formData.telefone_solicitante) setShowEmail(true);
-    if (formData.email_solicitante) setShowPrioridade(true);
-    if (formData.prioridade) setShowDistrito(true);
-    if (selectedDistrito) setShowBairro(true);
-    if (formData.bairro_id) setShowEndereco(true);
-  }, [formData, selectedDistrito]);
+  }, [formData.nome_solicitante, formData.telefone_solicitante]);
 
   const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleChange(e);
@@ -65,7 +62,7 @@ const PracticalInfoStep: React.FC<PracticalInfoStepProps> = ({
     } else if (value.length <= 6) {
       formattedValue = `(${value.slice(0, 2)}) ${value.slice(2)}`;
     } else if (value.length <= 10) {
-      formattedValue = `(${value.slice(0, 2)}) ${value.slice(2, 6)}-${value.slice(6)}`;
+      formattedValue = `(${value.slice(0, 2)}) ${value.slice(2, value.length > 10 ? 7 : 6)}-${value.slice(value.length > 10 ? 7 : 6)}`;
     } else {
       formattedValue = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7, 11)}`;
     }
@@ -85,28 +82,6 @@ const PracticalInfoStep: React.FC<PracticalInfoStepProps> = ({
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleChange(e);
-    if (e.target.value) setShowPrioridade(true);
-  };
-
-  const handlePrioridadeChange = (value: string) => {
-    handleSelectChange('prioridade', value);
-    setShowDistrito(true);
-  };
-
-  const handleDistritoChange = (value: string) => {
-    setSelectedDistrito(value);
-    setShowBairro(true);
-  };
-
-  const handleBairroChange = (value: string) => {
-    handleSelectChange('bairro_id', value);
-    setShowEndereco(true);
-  };
-
-  const hasError = (field: string) => errors.some(err => err.field === field);
-  const getErrorMessage = (field: string) => {
-    const error = errors.find(err => err.field === field);
-    return error ? error.message : '';
   };
 
   return (
@@ -177,128 +152,19 @@ const PracticalInfoStep: React.FC<PracticalInfoStepProps> = ({
         </div>
       )}
 
-      {showPrioridade && (
-        <div className="animate-fadeIn">
-          <Label 
-            className={`block mb-2 ${hasError('prioridade') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Prioridade {hasError('prioridade') && <span className="text-orange-500">*</span>}
-          </Label>
-          <div className="flex gap-3">
-            <Button 
-              type="button" 
-              variant={formData.prioridade === 'baixa' ? "default" : "outline"} 
-              onClick={() => handlePrioridadeChange('baixa')}
-              className={`flex-1 bg-green-500 hover:bg-green-600 border-green-500 ${formData.prioridade === 'baixa' ? '' : 'text-green-700 bg-green-50 hover:text-white'}`}
-            >
-              Baixa
-            </Button>
-            <Button 
-              type="button" 
-              variant={formData.prioridade === 'media' ? "default" : "outline"} 
-              onClick={() => handlePrioridadeChange('media')}
-              className={`flex-1 bg-yellow-500 hover:bg-yellow-600 border-yellow-500 ${formData.prioridade === 'media' ? '' : 'text-yellow-700 bg-yellow-50 hover:text-white'}`}
-            >
-              Média
-            </Button>
-            <Button 
-              type="button" 
-              variant={formData.prioridade === 'alta' ? "default" : "outline"} 
-              onClick={() => handlePrioridadeChange('alta')}
-              className={`flex-1 bg-red-500 hover:bg-red-600 border-red-500 ${formData.prioridade === 'alta' ? '' : 'text-red-700 bg-red-50 hover:text-white'}`}
-            >
-              Alta
-            </Button>
-          </div>
-          {hasError('prioridade') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('prioridade')}</p>
-          )}
-        </div>
-      )}
-
-      {showDistrito && (
-        <div className="animate-fadeIn">
-          <Label 
-            htmlFor="distrito" 
-            className={`block mb-2 ${hasError('distrito') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Distrito {hasError('distrito') && <span className="text-orange-500">*</span>}
-          </Label>
-          <Select 
-            value={selectedDistrito} 
-            onValueChange={handleDistritoChange}
-          >
-            <SelectTrigger className={`rounded-xl ${hasError('distrito') ? 'border-orange-500' : ''}`}>
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {distritos.map(distrito => (
-                  <SelectItem key={distrito.id} value={distrito.id}>
-                    {distrito.nome}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {hasError('distrito') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('distrito')}</p>
-          )}
-        </div>
-      )}
-
-      {showBairro && (
-        <div className="animate-fadeIn">
-          <Label 
-            htmlFor="bairro_id" 
-            className={`block mb-2 ${hasError('bairro_id') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Bairro {hasError('bairro_id') && <span className="text-orange-500">*</span>}
-          </Label>
-          <Select 
-            value={formData.bairro_id} 
-            onValueChange={(value) => handleBairroChange(value)}
-          >
-            <SelectTrigger className={`rounded-xl ${hasError('bairro_id') ? 'border-orange-500' : ''}`}>
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {filteredBairros.map(bairro => (
-                  <SelectItem key={bairro.id} value={bairro.id}>
-                    {bairro.nome}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {hasError('bairro_id') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('bairro_id')}</p>
-          )}
-        </div>
-      )}
-
-      {showEndereco && (
-        <div className="animate-fadeIn">
-          <Label 
-            htmlFor="endereco" 
-            className={`block mb-2 ${hasError('endereco') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Endereço {hasError('endereco') && <span className="text-orange-500">*</span>}
-          </Label>
-          <Input 
-            id="endereco" 
-            name="endereco" 
-            value={formData.endereco} 
-            onChange={handleChange} 
-            className={`rounded-xl ${hasError('endereco') ? 'border-orange-500' : ''}`}
-            placeholder="Rua, número, complemento"
-          />
-          {hasError('endereco') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('endereco')}</p>
-          )}
-        </div>
-      )}
+      {/* Removed the Priority field that was duplicated from Step 1 */}
+      
+      {/* Location selection section with the districts and neighborhoods as buttons */}
+      <LocationStep
+        formData={formData}
+        handleChange={handleChange}
+        handleSelectChange={handleSelectChange}
+        distritos={distritos}
+        selectedDistrito={selectedDistrito}
+        setSelectedDistrito={setSelectedDistrito}
+        filteredBairros={filteredBairros}
+        errors={errors}
+      />
     </div>
   );
 };

@@ -4,28 +4,11 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DemandFormData } from './types';
+import { formatQuestionsToObject, isValidPublicUrl } from '@/utils/questionFormatUtils';
 
 export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
-
-  const formatPerguntasToObject = (perguntas: string[]) => {
-    // Filter out empty questions and create a structured object
-    const filteredPerguntas = perguntas.filter(p => p.trim() !== '');
-    
-    // Create a formatted perguntas object
-    const perguntasObj: Record<string, string> = {};
-    
-    filteredPerguntas.forEach((pergunta, index) => {
-      perguntasObj[`pergunta_${index + 1}`] = pergunta;
-    });
-    
-    return perguntasObj;
-  };
-
-  const validateAttachmentUrl = (url: string): boolean => {
-    return url && url.startsWith('http') && !url.startsWith('blob:');
-  };
 
   const submitForm = async (formData: DemandFormData) => {
     if (!user) {
@@ -41,13 +24,13 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
     
     try {
       // Format perguntas as an object with proper structure
-      const formattedPerguntas = formatPerguntasToObject(formData.perguntas);
+      const formattedPerguntas = formatQuestionsToObject(formData.perguntas);
       
       // Make sure anexos has valid URLs
-      const validAnexos = formData.anexos.filter(url => validateAttachmentUrl(url));
+      const validAnexos = formData.anexos.filter(url => isValidPublicUrl(url));
       
       // Validate arquivo_url
-      const arquivo_url = formData.arquivo_url && validateAttachmentUrl(formData.arquivo_url) 
+      const arquivo_url = formData.arquivo_url && isValidPublicUrl(formData.arquivo_url) 
         ? formData.arquivo_url 
         : null;
       
@@ -58,7 +41,9 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         anexos: validAnexos,
         arquivo_url,
         autor_id: user.id,
-        status: 'pendente'
+        status: 'pendente',
+        // Changed 'nao_sabe_informar' to 'nao_sabe_servico'
+        nao_sabe_servico: formData.nao_sabe_servico
       };
       
       console.log('Submitting demand with payload:', payload);
