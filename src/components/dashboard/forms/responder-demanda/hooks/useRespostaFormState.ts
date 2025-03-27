@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { normalizeQuestions } from '@/utils/questionFormatUtils';
 
 interface UseRespostaFormStateProps {
   selectedDemanda: any;
@@ -20,10 +21,10 @@ export const useRespostaFormState = ({
   const [loadingServicos, setLoadingServicos] = useState<boolean>(false);
 
   useEffect(() => {
-    if (selectedProblemId) {
-      fetchServicos(selectedProblemId);
+    if (selectedProblemId && selectedDemanda?.supervisao_tecnica_id) {
+      fetchServicos(selectedDemanda.supervisao_tecnica_id);
     }
-  }, [selectedProblemId]);
+  }, [selectedProblemId, selectedDemanda?.supervisao_tecnica_id]);
 
   useEffect(() => {
     if (selectedDemanda) {
@@ -33,19 +34,13 @@ export const useRespostaFormState = ({
     }
   }, [selectedDemanda]);
 
-  const fetchServicos = async (problemaId: string) => {
-    if (!selectedDemanda?.supervisao_tecnica_id) {
-      console.warn('ID de supervisão técnica não disponível');
-      return;
-    }
-
-    setLoadingServicos(true);
-
+  const fetchServicos = async (supervisaoId: string) => {
     try {
+      setLoadingServicos(true);
       const { data, error } = await supabase
         .from('servicos')
         .select('*')
-        .eq('supervisao_tecnica_id', selectedDemanda.supervisao_tecnica_id)
+        .eq('supervisao_tecnica_id', supervisaoId)
         .order('descricao', { ascending: true });
 
       if (error) throw error;
@@ -54,8 +49,8 @@ export const useRespostaFormState = ({
       console.error('Erro ao carregar serviços:', error);
       toast({
         title: 'Erro ao carregar serviços',
-        description: 'Não foi possível carregar a lista de serviços.',
-        variant: 'destructive',
+        description: 'Não foi possível obter os serviços disponíveis.',
+        variant: 'destructive'
       });
     } finally {
       setLoadingServicos(false);
@@ -70,93 +65,79 @@ export const useRespostaFormState = ({
   };
 
   const handleRespostaChange = (index: string, value: string) => {
-    setResposta(prev => ({
+    setResposta((prev) => ({
       ...prev,
-      [index]: value,
+      [index]: value
     }));
   };
 
   const updateService = async () => {
-    if (!selectedDemanda?.id || !selectedServicoId || selectedDemanda.servico_id === selectedServicoId) {
-      return;
-    }
+    if (!selectedDemanda?.id || (!selectedServicoId && !dontKnowService)) return;
 
     try {
-      const { error } = await supabase
-        .from('demandas')
-        .update({
-          servico_id: selectedServicoId,
-          nao_sabe_servico: false,
-        })
-        .eq('id', selectedDemanda.id);
+      if ((!selectedDemanda.servico_id || selectedDemanda.nao_sabe_servico) && selectedServicoId) {
+        const { error } = await supabase
+          .from('demandas')
+          .update({
+            servico_id: selectedServicoId,
+            nao_sabe_servico: false
+          })
+          .eq('id', selectedDemanda.id);
 
-      if (error) throw error;
-
-      toast({
-        title: 'Serviço atualizado',
-        description: 'O serviço da demanda foi atualizado com sucesso.',
-      });
-
+        if (error) throw error;
+        console.log('Serviço atualizado:', selectedServicoId);
+      }
     } catch (error) {
       console.error('Erro ao atualizar serviço:', error);
       toast({
         title: 'Erro ao atualizar serviço',
-        description: 'Não foi possível atualizar o serviço da demanda.',
-        variant: 'destructive',
+        description: 'Não foi possível salvar o serviço da demanda.',
+        variant: 'destructive'
       });
     }
   };
 
   const allQuestionsAnswered = () => {
-    if (!selectedDemanda?.perguntas) return true;
+    const perguntas = normalizeQuestions(selectedDemanda?.perguntas || []);
+    if (!Array.isArray(perguntas) || perguntas.length === 0) return true;
 
-    const questions = Array.isArray(selectedDemanda.perguntas)
-      ? selectedDemanda.perguntas
-      : Object.values(selectedDemanda.perguntas);
-
-    if (questions.length === 0) return true;
-
-    for (let i = 0; i < questions.length; i++) {
-      const respostaAtual = resposta[i.toString()];
-      if (!respostaAtual || respostaAtual.trim() === '') {
+    for (let i = 0; i < perguntas.length; i++) {
+      if (!resposta[i.toString()]?.trim()) {
         return false;
       }
     }
 
-    if (selectedDemanda.nao_sabe_servico && !selectedServicoId) {
-      return false;
-    }
+    if (selectedDemanda?.nao_sabe_servico && !selectedServicoId) return false;
 
     return true;
   };
 
   const handleViewAttachment = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(url, '_blank');
   };
 
-  const handleDownloadAttachment = (url: string, fileName: string = 'download') => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadAttachment = (url: string, fileName = 'anexo') => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.setAttribute('download', fileName);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return {
     selectedProblemId,
-    setSelectedProblemId,
     selectedServicoId,
-    setSelectedServicoId,
     dontKnowService,
-    setDontKnowService,
     servicos,
     loadingServicos,
+    setSelectedProblemId,
+    setSelectedServicoId,
     handleServiceToggle,
     handleRespostaChange,
     updateService,
     allQuestionsAnswered,
     handleViewAttachment,
-    handleDownloadAttachment,
+    handleDownloadAttachment
   };
 };
