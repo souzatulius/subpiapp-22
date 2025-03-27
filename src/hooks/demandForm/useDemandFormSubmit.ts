@@ -41,9 +41,7 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         anexos: validAnexos,
         arquivo_url,
         autor_id: user.id,
-        status: 'pendente',
-        // Changed 'nao_sabe_informar' to 'nao_sabe_servico'
-        nao_sabe_servico: formData.nao_sabe_servico
+        status: 'pendente'
       };
       
       console.log('Submitting demand with payload:', payload);

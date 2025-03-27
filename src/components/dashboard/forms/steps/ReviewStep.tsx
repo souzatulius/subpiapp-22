@@ -115,6 +115,22 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             value={formData.veiculo_imprensa}
           />
         )}
+        <ReviewItem 
+          label="Prioridade" 
+          value={formData.prioridade ? formData.prioridade.charAt(0).toUpperCase() + formData.prioridade.slice(1) : undefined}
+          error={errors.some(e => e.field === 'prioridade')}
+        />
+        <ReviewItem 
+          label="Prazo para Resposta" 
+          value={formData.prazo_resposta ? new Date(formData.prazo_resposta).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : undefined}
+          error={errors.some(e => e.field === 'prazo_resposta')}
+        />
       </ReviewSection>
 
       <ReviewSection title="Problema e Serviço">
@@ -150,22 +166,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         <ReviewItem 
           label="E-mail" 
           value={formData.email_solicitante}
-        />
-        <ReviewItem 
-          label="Prioridade" 
-          value={formData.prioridade ? formData.prioridade.charAt(0).toUpperCase() + formData.prioridade.slice(1) : undefined}
-          error={errors.some(e => e.field === 'prioridade')}
-        />
-        <ReviewItem 
-          label="Prazo para Resposta" 
-          value={formData.prazo_resposta ? new Date(formData.prazo_resposta).toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }) : undefined}
-          error={errors.some(e => e.field === 'prazo_resposta')}
         />
       </ReviewSection>
 

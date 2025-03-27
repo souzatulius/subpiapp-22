@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,12 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   errors = [],
   nextStep
 }) => {
-  // State to track the form flow
-  const [showProtocolFields, setShowProtocolFields] = useState(false);
-  const [showPriorityFields, setShowPriorityFields] = useState(false);
+  // Initialize state based on formData to preserve values when returning to this step
+  const [showProtocolFields, setShowProtocolFields] = useState(!!formData.origem_id);
+  const [showPriorityFields, setShowPriorityFields] = useState(
+    (formData.tem_protocolo_156 === false) || 
+    (formData.tem_protocolo_156 === true && formData.numero_protocolo_156)
+  );
 
   // Função para obter o ícone com base na descrição da origem
   const getOriginIcon = (descricao: string) => {
@@ -57,8 +60,6 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   const handleOriginSelect = (id: string) => {
     handleSelectChange('origem_id', id);
     setShowProtocolFields(true);
-    // Reset subsequent steps when origin changes
-    setShowPriorityFields(false);
   };
 
   const handleProtocol156Change = (checked: boolean) => {
@@ -68,9 +69,17 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
     if (!checked) {
       setShowPriorityFields(true);
     } else {
-      setShowPriorityFields(false);
+      // Se selecionou "Sim", só mostrar prioridade após preencher o número do protocolo
+      setShowPriorityFields(!!formData.numero_protocolo_156);
     }
   };
+
+  // Update state when protocol number changes
+  useEffect(() => {
+    if (formData.tem_protocolo_156 === true && formData.numero_protocolo_156) {
+      setShowPriorityFields(true);
+    }
+  }, [formData.numero_protocolo_156]);
 
   return (
     <div className="space-y-6">

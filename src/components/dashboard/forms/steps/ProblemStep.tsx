@@ -98,6 +98,18 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
       
       {formData.problema_id && (
         <div className="animate-fadeIn space-y-4">
+          <ServiceSearch
+            serviceSearch={serviceSearch}
+            handleChange={handleLocalServiceSearch}
+            filteredServicesBySearch={filteredServicos}
+            handleServiceSelect={handleServiceSelect}
+            selectedService={selectedService}
+            handleServiceRemove={handleServiceRemove}
+            errors={errors}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
+          />
+          
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="nao-sabe-servico" 
@@ -108,20 +120,6 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
               Não sei qual serviço selecionar
             </Label>
           </div>
-          
-          {!formData.nao_sabe_servico && (
-            <ServiceSearch
-              serviceSearch={serviceSearch}
-              handleChange={handleLocalServiceSearch}
-              filteredServicesBySearch={filteredServicos}
-              handleServiceSelect={handleServiceSelect}
-              selectedService={selectedService}
-              handleServiceRemove={handleServiceRemove}
-              errors={errors}
-              isPopoverOpen={isPopoverOpen}
-              setIsPopoverOpen={setIsPopoverOpen}
-            />
-          )}
         </div>
       )}
     </div>

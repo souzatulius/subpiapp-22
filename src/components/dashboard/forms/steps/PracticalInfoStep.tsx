@@ -124,7 +124,7 @@ const PracticalInfoStep: React.FC<PracticalInfoStepProps> = ({
             maxLength={15}
           />
           {hasError('telefone_solicitante') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('telefone_solicitante')}</p>
+            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante')}</p>
           )}
         </div>
       )}
@@ -151,8 +151,6 @@ const PracticalInfoStep: React.FC<PracticalInfoStepProps> = ({
           )}
         </div>
       )}
-
-      {/* Removed the Priority field that was duplicated from Step 1 */}
       
       {/* Location selection section with the districts and neighborhoods as buttons */}
       <LocationStep
