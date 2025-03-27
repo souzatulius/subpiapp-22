@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
@@ -60,7 +61,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
         <div className="animate-fadeIn">
           <Label 
             htmlFor="tipo_midia_id" 
-            className={`form-question-title ${hasFieldError('tipo_midia_id', errors) ? 'text-orange-500' : ''}`}
+            className={`text-lg font-medium block mb-2 ${hasFieldError('tipo_midia_id', errors) ? 'text-orange-500' : 'text-blue-950'}`}
           >
             Tipo de Mídia {hasFieldError('tipo_midia_id', errors) && <span className="text-orange-500">*</span>}
           </Label>
@@ -74,7 +75,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
                   formData.tipo_midia_id === tipo.id ? "bg-orange-500 text-white" : ""
                 } ${
                   hasFieldError('tipo_midia_id', errors) ? 'border-orange-500' : ''
-                }`} 
+                } hover:bg-orange-500 hover:text-white rounded-xl`} 
                 onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
               >
                 {/* Use icon from useMediaTypeIcon if available */}
@@ -92,7 +93,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
         <div className="animate-fadeIn">
           <Label 
             htmlFor="veiculo_imprensa" 
-            className={`form-question-title ${hasFieldError('veiculo_imprensa', errors) ? 'text-orange-500' : ''}`}
+            className={`text-lg font-medium block mb-2 ${hasFieldError('veiculo_imprensa', errors) ? 'text-orange-500' : 'text-blue-950'}`}
           >
             Veículo de Imprensa {hasFieldError('veiculo_imprensa', errors) && <span className="text-orange-500">*</span>}
           </Label>
@@ -110,7 +111,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
               <div className="animate-fadeIn">
                 <Label 
                   htmlFor="nome_solicitante" 
-                  className={`block text-base font-medium mb-2 ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
+                  className={`block text-lg font-medium mb-2 ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : 'text-blue-950'}`}
                 >
                   Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
                 </Label>
@@ -119,7 +120,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
                   name="nome_solicitante"
                   value={formData.nome_solicitante || ''}
                   onChange={handleChange}
-                  placeholder="Nome completo do solicitante"
+                  placeholder=""
                   className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
                 />
               </div>
@@ -135,7 +136,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
         <div>
           <Label 
             htmlFor="nome_solicitante" 
-            className={`form-question-title ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : ''}`}
+            className={`text-lg font-medium block mb-2 ${hasFieldError('nome_solicitante', errors) ? 'text-orange-500' : 'text-blue-950'}`}
           >
             Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
           </Label>
@@ -144,7 +145,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
             name="nome_solicitante"
             value={formData.nome_solicitante || ''}
             onChange={handleChange}
-            placeholder="Nome completo do solicitante"
+            placeholder=""
             className={hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}
           />
           {hasFieldError('nome_solicitante', errors) && (
@@ -158,7 +159,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
           <div className="animate-fadeIn">
             <Label 
               htmlFor="telefone_solicitante" 
-              className={`block text-base font-medium mb-2 ${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500' : ''}`}
+              className={`block text-lg font-medium mb-2 ${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500' : 'text-blue-950'}`}
             >
               Telefone {hasFieldError('telefone_solicitante', errors) && <span className="text-orange-500">*</span>}
             </Label>
@@ -179,7 +180,7 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
             <div className="animate-fadeIn">
               <Label 
                 htmlFor="email_solicitante" 
-                className={`block text-base font-medium mb-2 ${hasFieldError('email_solicitante', errors) ? 'text-orange-500' : ''}`}
+                className={`block text-lg font-medium mb-2 ${hasFieldError('email_solicitante', errors) ? 'text-orange-500' : 'text-blue-950'}`}
               >
                 E-mail {hasFieldError('email_solicitante', errors) && <span className="text-orange-500">*</span>}
               </Label>

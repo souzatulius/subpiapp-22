@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
@@ -37,6 +36,31 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
       console.error('Error parsing date:', error);
     }
   }
+
+  // Set default date and time to current date and next half hour
+  useEffect(() => {
+    if (!formData.prazo_resposta) {
+      const now = new Date();
+      const currentMinutes = now.getMinutes();
+      // Set to next half hour (30 minutes from now, rounded to nearest 30)
+      const nextMinutes = currentMinutes < 30 ? 30 : 0;
+      const nextHours = currentMinutes < 30 ? now.getHours() : now.getHours() + 1;
+      
+      now.setHours(nextHours, nextMinutes, 0, 0);
+      handleSelectChange('prazo_resposta', now.toISOString());
+    }
+  }, []);
+
+  // Toggle priority selection - allows deselection
+  const togglePriority = (priority: string) => {
+    if (formData.prioridade === priority) {
+      // If already selected, deselect it
+      handleSelectChange('prioridade', '');
+    } else {
+      // Otherwise select it
+      handleSelectChange('prioridade', priority);
+    }
+  };
 
   // Handle date change
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +111,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
       <div>
         <Label 
           htmlFor="prioridade" 
-          className={`form-question-title ${hasFieldError('prioridade', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          className={`text-lg font-medium block mb-2 ${hasFieldError('prioridade', errors) ? 'text-orange-500 font-semibold' : 'text-blue-950'}`}
         >
           Prioridade {hasFieldError('prioridade', errors) && <span className="text-orange-500">*</span>}
         </Label>
@@ -98,7 +122,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             className={`selection-button rounded-xl ${
               formData.prioridade === 'baixa' ? "bg-green-500 text-white hover:bg-green-600" : "hover:bg-green-500 hover:text-white"
             }`}
-            onClick={() => handleSelectChange('prioridade', 'baixa')}
+            onClick={() => togglePriority('baixa')}
           >
             Baixa
           </Button>
@@ -108,7 +132,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             className={`selection-button rounded-xl ${
               formData.prioridade === 'media' ? "bg-yellow-500 text-white hover:bg-yellow-600" : "hover:bg-yellow-500 hover:text-white"
             }`}
-            onClick={() => handleSelectChange('prioridade', 'media')}
+            onClick={() => togglePriority('media')}
           >
             Média
           </Button>
@@ -118,7 +142,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             className={`selection-button rounded-xl ${
               formData.prioridade === 'alta' ? "bg-red-500 text-white hover:bg-red-600" : "hover:bg-red-500 hover:text-white"
             }`}
-            onClick={() => handleSelectChange('prioridade', 'alta')}
+            onClick={() => togglePriority('alta')}
           >
             Alta
           </Button>
@@ -131,7 +155,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
       <div>
         <Label 
           htmlFor="prazo_resposta" 
-          className={`form-question-title ${hasFieldError('prazo_resposta', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          className={`text-lg font-medium block mb-2 ${hasFieldError('prazo_resposta', errors) ? 'text-orange-500 font-semibold' : 'text-blue-950'}`}
         >
           Prazo para resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
         </Label>

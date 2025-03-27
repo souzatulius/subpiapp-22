@@ -26,9 +26,9 @@ const TitleSection: React.FC<TitleSectionProps> = ({
     <div>
       <Label 
         htmlFor="titulo" 
-        className={`block mb-2 ${hasFieldError('titulo', errors) ? 'text-orange-500 font-semibold' : ''}`}
+        className={`text-lg font-medium block mb-2 ${hasFieldError('titulo', errors) ? 'text-orange-500 font-semibold' : 'text-blue-950'}`}
       >
-        Título da Demanda
+        Título da Demanda {hasFieldError('titulo', errors) && <span className="text-orange-500">*</span>}
       </Label>
       <Input 
         id="titulo" 

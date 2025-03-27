@@ -15,7 +15,7 @@ export const useDemandFormState = (
     problema_id: '',
     origem_id: '',
     tipo_midia_id: '',
-    prioridade: 'media',
+    prioridade: '',  // Empty to allow deselection
     prazo_resposta: '',
     nome_solicitante: '',
     telefone_solicitante: '',
@@ -57,6 +57,7 @@ export const useDemandFormState = (
   const [activeStep, setActiveStep] = useState(savedState?.activeStep || 0);
   const [servicos, setServicos] = useState<any[]>([]);
   const [filteredServicos, setFilteredServicos] = useState<any[]>([]);
+  const [shouldUpdateTitle, setShouldUpdateTitle] = useState(true);
 
   // Save form state to localStorage whenever it changes
   useEffect(() => {
@@ -107,17 +108,14 @@ export const useDemandFormState = (
 
   // Update title suggestion based on selected values
   useEffect(() => {
-    // Only update title if problem, service, bairro, or address changes
-    if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
-      // Only auto-generate if title is empty or we're on step 3
-      if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 3) {
-        const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
-        if (suggestedTitle) {
-          setFormData(prev => ({
-            ...prev,
-            titulo: suggestedTitle
-          }));
-        }
+    // Only update title if problem, service, bairro, or address changes and shouldUpdateTitle is true
+    if (shouldUpdateTitle && (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco)) {
+      const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
+      if (suggestedTitle) {
+        setFormData(prev => ({
+          ...prev,
+          titulo: suggestedTitle
+        }));
       }
     }
   }, [
@@ -125,7 +123,7 @@ export const useDemandFormState = (
     formData.servico_id, 
     formData.bairro_id, 
     formData.endereco, 
-    activeStep,
+    shouldUpdateTitle,
     problemas,
     servicos,
     filteredBairros
@@ -173,6 +171,13 @@ export const useDemandFormState = (
         ...prev,
         [name]: formattedValue
       }));
+    } else if (name === 'titulo') {
+      // If user manually changes the title, don't auto-update it anymore
+      setShouldUpdateTitle(false);
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -189,6 +194,8 @@ export const useDemandFormState = (
         servico_id: '',
         nao_sabe_servico: false
       }));
+      // Reset title autoupdate when problem changes
+      setShouldUpdateTitle(true);
     } else if (name === 'nao_sabe_servico') {
       setFormData(prev => ({
         ...prev,
@@ -196,6 +203,11 @@ export const useDemandFormState = (
         servico_id: value ? '' : prev.servico_id
       }));
     } else if (typeof value === 'string') {
+      // If changing a field that affects title, allow auto-update again
+      if (['servico_id', 'bairro_id'].includes(name)) {
+        setShouldUpdateTitle(true);
+      }
+      
       setFormData(prev => ({
         ...prev,
         [name]: value
@@ -254,6 +266,7 @@ export const useDemandFormState = (
     setServiceSearch('');
     setSelectedDistrito('');
     setActiveStep(0);
+    setShouldUpdateTitle(true);
     localStorage.removeItem(FORM_STORAGE_KEY);
   };
 

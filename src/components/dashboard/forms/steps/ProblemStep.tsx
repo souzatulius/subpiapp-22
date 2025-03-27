@@ -55,12 +55,21 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
     setIsPopoverOpen(false);
   };
 
+  // Toggle problema selection - allows deselection
+  const toggleProblem = (problemId: string) => {
+    if (formData.problema_id === problemId) {
+      handleSelectChange('problema_id', '');
+    } else {
+      handleSelectChange('problema_id', problemId);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <Label 
           htmlFor="problema_id" 
-          className={`form-question-title ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}
+          className={`text-lg font-medium block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : 'text-blue-950'}`}
         >
           Qual é o tema do problema? {hasError('problema_id') && <span className="text-orange-500">*</span>}
         </Label>
@@ -74,8 +83,8 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
                 formData.problema_id === problema.id ? "bg-orange-500 text-white" : ""
               } ${
                 hasError('problema_id') ? 'border-orange-500' : ''
-              }`} 
-              onClick={() => handleSelectChange('problema_id', problema.id)}
+              } hover:bg-orange-500 hover:text-white rounded-xl`} 
+              onClick={() => toggleProblem(problema.id)}
             >
               {getProblemIcon(problema)}
               <span className="text-sm font-semibold text-center">{problema.descricao}</span>
