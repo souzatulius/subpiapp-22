@@ -96,9 +96,9 @@ const LocationStep: React.FC<LocationStepProps> = ({
     <div className="space-y-6">
       <div>
         <TemaSelector 
-          problems={problemas}
-          selectedProblemId={formData.problema_id}
-          onChange={(problemId) => handleSelectChange('problema_id', problemId)}
+          problemas={problemas}
+          selectedTemaId={formData.problema_id}
+          handleSelectChange={(problemId) => handleSelectChange('problema_id', problemId)}
           errors={errors}
         />
       </div>

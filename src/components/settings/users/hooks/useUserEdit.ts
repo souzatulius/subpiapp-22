@@ -27,11 +27,9 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
       // Process whatsapp
       cleanData.whatsapp = data.whatsapp || null;
       
-      // Process birthday if it's a string (from input mask)
-      if (typeof data.aniversario === 'string') {
-        const parsedDate = parseFormattedDate(data.aniversario);
-        cleanData.aniversario = parsedDate ? parsedDate.toISOString() : null;
-      } else if (data.aniversario instanceof Date) {
+      // Process birthday
+      if (data.aniversario) {
+        // Convert Date to ISO string for database storage
         cleanData.aniversario = data.aniversario.toISOString();
       } else {
         cleanData.aniversario = null;

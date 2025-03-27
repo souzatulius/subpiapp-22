@@ -60,7 +60,7 @@ export interface UserFormData {
   coordenacao_id?: string;
   supervisao_tecnica_id?: string;
   whatsapp?: string;
-  aniversario?: Date;
+  aniversario?: Date | undefined;
   foto_perfil_url?: string;
   status?: UserStatus;
 }

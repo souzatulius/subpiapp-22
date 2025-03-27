@@ -19,7 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
-import { formatDateToString } from '@/lib/inputFormatting';
+import { formatDateToString, parseFormattedDate } from '@/lib/inputFormatting';
 
 interface EditUserDialogProps {
   open: boolean;
@@ -57,7 +57,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
       coordenacao_id: '',
       supervisao_tecnica_id: '',
       whatsapp: '',
-      aniversario: '',
+      aniversario: undefined,
       foto_perfil_url: ''
     }
   });
@@ -76,6 +76,14 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
   useEffect(() => {
     if (user && open) {
+      // Instead of directly assigning aniversario as a string,
+      // we'll parse it to a Date object if needed
+      const parsedAniversario = user.aniversario 
+        ? (typeof user.aniversario === 'string' 
+            ? parseFormattedDate(formatDateToString(new Date(user.aniversario)))
+            : user.aniversario)
+        : undefined;
+        
       reset({
         nome_completo: user.nome_completo,
         email: user.email,
@@ -83,7 +91,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         coordenacao_id: user.coordenacao_id || '',
         supervisao_tecnica_id: user.supervisao_tecnica_id || '',
         whatsapp: user.whatsapp || '',
-        aniversario: user.aniversario ? formatDateToString(new Date(user.aniversario)) : '',
+        aniversario: parsedAniversario,
         foto_perfil_url: user.foto_perfil_url || ''
       });
       setPhotoPreview(user.foto_perfil_url || null);
@@ -95,7 +103,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         coordenacao_id: '',
         supervisao_tecnica_id: '',
         whatsapp: '',
-        aniversario: '',
+        aniversario: undefined,
         foto_perfil_url: ''
       });
       setPhotoPreview(null);
