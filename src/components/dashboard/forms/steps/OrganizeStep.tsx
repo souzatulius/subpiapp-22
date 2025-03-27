@@ -49,6 +49,10 @@ const OrganizeStep: React.FC<OrganizeStepProps> = ({
         selectedService={selectedService}
         selectedBairro={selectedBairro}
         errors={errors}
+        formData={formData}
+        problemas={problemas}
+        servicos={servicos}
+        filteredBairros={filteredBairros}
       />
 
       {/* Perguntas para Área Técnica */}
