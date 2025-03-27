@@ -1461,16 +1461,19 @@ export type Database = {
         Row: {
           criado_em: string
           descricao: string
+          icone: string | null
           id: string
         }
         Insert: {
           criado_em?: string
           descricao: string
+          icone?: string | null
           id?: string
         }
         Update: {
           criado_em?: string
           descricao?: string
+          icone?: string | null
           id?: string
         }
         Relationships: []

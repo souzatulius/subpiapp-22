@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 export const mediaTypeSchema = z.object({
   descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
+  icone: z.string().optional()
 });
 
 export type MediaType = {
@@ -50,9 +51,6 @@ export function useMediaTypes() {
   const addMediaType = async (data: { descricao: string; icone?: string }) => {
     setIsSubmitting(true);
     try {
-      console.log('Adicionando tipo de mídia:', data);
-      
-      // Insert directly instead of using the function because we now have an icon field
       const { data: newData, error } = await supabase
         .from('tipos_midia')
         .insert({
@@ -63,8 +61,6 @@ export function useMediaTypes() {
         .single();
       
       if (error) throw error;
-      
-      console.log('Tipo de mídia adicionado com sucesso:', newData);
       
       toast({
         title: 'Sucesso',
@@ -89,9 +85,6 @@ export function useMediaTypes() {
   const updateMediaType = async (id: string, data: { descricao: string; icone?: string }) => {
     setIsSubmitting(true);
     try {
-      console.log('Atualizando tipo de mídia:', id, data);
-      
-      // Update directly instead of using the function because we now have an icon field
       const { data: result, error } = await supabase
         .from('tipos_midia')
         .update({
@@ -103,8 +96,6 @@ export function useMediaTypes() {
         .single();
       
       if (error) throw error;
-      
-      console.log('Tipo de mídia atualizado com sucesso:', result);
       
       toast({
         title: 'Sucesso',
@@ -128,9 +119,6 @@ export function useMediaTypes() {
 
   const deleteMediaType = async (mediaType: MediaType) => {
     try {
-      console.log('Excluindo tipo de mídia:', mediaType.id);
-      
-      // Verificar se há registros dependentes
       const { count, error: countError } = await supabase
         .from('demandas')
         .select('*', { count: 'exact', head: true })
