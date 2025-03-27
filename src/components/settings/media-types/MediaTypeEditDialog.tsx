@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import MediaTypeForm from './MediaTypeForm';
 import { MediaType } from '@/hooks/useMediaTypes';
@@ -21,10 +21,11 @@ const MediaTypeEditDialog: React.FC<MediaTypeEditDialogProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Editar Tipo de Mídia</DialogTitle>
         </DialogHeader>
+        
         <MediaTypeForm
           onSubmit={onSubmit}
           onCancel={onClose}

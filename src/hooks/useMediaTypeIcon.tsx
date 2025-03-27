@@ -1,35 +1,44 @@
 
 import React from 'react';
-import { MediaType } from '@/hooks/useMediaTypes';
 import { 
   Newspaper, Radio, Tv, Smartphone, Mail, MessageSquare, Globe, 
   Instagram, Facebook, Twitter, Youtube, Image, FileText,
   LucideIcon
 } from 'lucide-react';
 
-// Map of icon names to icon components
-const iconMap: Record<string, LucideIcon> = {
-  'Newspaper': Newspaper,
-  'Radio': Radio,
-  'Tv': Tv,
-  'Smartphone': Smartphone,
-  'Mail': Mail,
-  'MessageSquare': MessageSquare,
-  'Globe': Globe,
-  'Instagram': Instagram,
-  'Facebook': Facebook,
-  'Twitter': Twitter,
-  'Youtube': Youtube,
-  'Image': Image,
-  'FileText': FileText,
-};
+export interface MediaType {
+  id: string;
+  descricao: string;
+  criado_em: string;
+  icone?: string;
+}
 
-export function useMediaTypeIcon(mediaType: MediaType, className: string = "h-6 w-6") {
-  const IconComponent = mediaType.icone ? iconMap[mediaType.icone] : Newspaper;
+export const useMediaTypeIcon = (mediaType: MediaType | null | undefined, className?: string): React.ReactElement | null => {
+  if (!mediaType) return null;
   
-  if (!IconComponent) {
-    return <Newspaper className={className} />;
+  // Mapeamento de ícones para componentes Lucide
+  const iconMap: Record<string, LucideIcon> = {
+    'Newspaper': Newspaper,
+    'Radio': Radio,
+    'Tv': Tv,
+    'Smartphone': Smartphone,
+    'Mail': Mail,
+    'MessageSquare': MessageSquare,
+    'Globe': Globe,
+    'Instagram': Instagram,
+    'Facebook': Facebook,
+    'Twitter': Twitter,
+    'Youtube': Youtube,
+    'FileText': FileText,
+    'Image': Image,
+  };
+
+  const IconComponent = mediaType.icone ? iconMap[mediaType.icone] : null;
+  
+  if (IconComponent) {
+    return <IconComponent className={className || 'h-5 w-5'} />;
   }
   
-  return <IconComponent className={className} />;
-}
+  // Fallback para um ícone padrão se o ícone não for encontrado
+  return <Globe className={className || 'h-5 w-5'} />;
+};
