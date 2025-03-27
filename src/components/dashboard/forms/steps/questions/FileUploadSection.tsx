@@ -129,7 +129,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           <p className="text-sm text-gray-600 mb-1">
             {uploading ? 'Enviando arquivos...' : 'Arraste arquivos ou clique para fazer upload'}
           </p>
-          <p className="text-xs text-gray-500">Suporta imagens, PDFs e documentos (máximo 5MB)</p>
+          <p className="text-xs text-gray-500">Suporta imagens, PDFs e documentos (máximo 10MB)</p>
           
           <input
             type="file"

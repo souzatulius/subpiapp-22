@@ -3,42 +3,28 @@ import React from 'react';
 import ProtocolStep from '../steps/ProtocolStep';
 import DetailsStep from '../steps/DetailsStep';
 import ProblemStep from '../steps/ProblemStep';
-import PracticalInfoStep from '../steps/PracticalInfoStep';
 import OrganizeStep from '../steps/OrganizeStep';
 import ReviewStep from '../steps/ReviewStep';
 import { ValidationError } from '@/lib/formValidationUtils';
-import OriginStep from '../steps/OriginStep';
 import RequesterInfoStep from '../steps/RequesterInfoStep';
 import LocationStep from '../steps/LocationStep';
 
 export const FORM_STEPS = [
   {
-    title: 'Vamos iniciar agora o cadastro da demanda',
-    description: 'Selecione a origem da demanda, informe se possui protocolo, prioridade e prazo para resposta.',
-  },
-  {
-    title: 'Sobre a origem da demanda',
-    description: 'Informe a origem da demanda.',
-  },
-  {
-    title: 'Vamos entender melhor o que está acontecendo',
-    description: 'Descreva a solicitação com detalhes.',
-  },
-  {
-    title: 'Qual é o problema que precisa ser resolvido?',
-    description: 'Selecione o tema e serviço relacionado à demanda.',
+    title: 'Origem e prazo da demanda',
+    description: 'Informe a origem da demanda, se possui protocolo e prazo para resposta.',
   },
   {
     title: 'Dados do solicitante e mídia',
     description: 'Informações sobre o solicitante e meio de comunicação.',
   },
   {
-    title: 'Localização da demanda',
-    description: 'Dados sobre a localização da demanda.',
+    title: 'Tema, serviço e localização',
+    description: 'Selecione o tema, serviço relacionado e localização da demanda.',
   },
   {
-    title: 'Perguntas e anexos',
-    description: 'Adicione perguntas específicas e anexos se necessário.',
+    title: 'Título, perguntas e anexos',
+    description: 'Defina o título, adicione perguntas específicas e anexos se necessário.',
   },
   {
     title: 'Revise tudo antes de enviar',
@@ -106,41 +92,6 @@ const FormContent: React.FC<FormContentProps> = ({
       );
     case 1:
       return (
-        <OriginStep
-          formData={formData}
-          handleSelectChange={handleSelectChange}
-          handleChange={handleChange}
-          origens={origens}
-          tiposMidia={tiposMidia}
-          errors={errors}
-        />
-      );
-    case 2:
-      return (
-        <DetailsStep
-          formData={formData}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
-          origens={origens}
-          tiposMidia={tiposMidia}
-          errors={errors}
-        />
-      );
-    case 3:
-      return (
-        <ProblemStep
-          formData={formData}
-          problemas={problemas}
-          servicos={servicos}
-          filteredServicos={filteredServicos}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
-          handleServiceSearch={handleServiceSearch}
-          errors={errors}
-        />
-      );
-    case 4:
-      return (
         <RequesterInfoStep
           formData={formData}
           handleChange={handleChange}
@@ -150,7 +101,7 @@ const FormContent: React.FC<FormContentProps> = ({
           origens={origens}
         />
       );
-    case 5:
+    case 2:
       return (
         <LocationStep
           formData={formData}
@@ -161,9 +112,14 @@ const FormContent: React.FC<FormContentProps> = ({
           setSelectedDistrito={setSelectedDistrito}
           filteredBairros={filteredBairros}
           errors={errors}
+          problemas={problemas}
+          servicos={servicos}
+          filteredServicos={filteredServicos}
+          serviceSearch={serviceSearch}
+          handleServiceSearch={handleServiceSearch}
         />
       );
-    case 6:
+    case 3:
       return (
         <OrganizeStep
           formData={formData}
@@ -177,7 +133,7 @@ const FormContent: React.FC<FormContentProps> = ({
           errors={errors}
         />
       );
-    case 7:
+    case 4:
       return (
         <ReviewStep
           formData={formData}

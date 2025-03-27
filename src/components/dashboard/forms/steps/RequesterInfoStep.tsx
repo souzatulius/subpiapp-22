@@ -30,14 +30,6 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
   tiposMidia,
   origens
 }) => {
-  // Verifica se a origem está entre as que devem mostrar tipo de mídia
-  const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
-  const showMediaFields = selectedOrigin?.descricao === "Imprensa" || 
-                         selectedOrigin?.descricao === "SMSUB" ||
-                         selectedOrigin?.descricao === "SECOM";
-                         
-  const showVeiculoImprensa = showMediaFields && formData.tipo_midia_id;
-
   // Get media type icon based on description
   const getMediaTypeIcon = (descricao: string) => {
     const iconMap: {
@@ -56,8 +48,72 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
     return iconMap[descricao] || <HelpCircle className="h-6 w-6" />;
   };
 
+  // Determinar se deve mostrar os campos de mídia
+  const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
+  const showMediaFields = selectedOrigin?.descricao === "Imprensa" || 
+                        selectedOrigin?.descricao === "SMSUB" ||
+                        selectedOrigin?.descricao === "SECOM";
+                         
+  const showVeiculoImprensa = showMediaFields && formData.tipo_midia_id;
+
   return (
     <div className="space-y-4">
+      {/* Tipo de Mídia */}
+      {showMediaFields && (
+        <div className="animate-fadeIn space-y-4">
+          <div>
+            <label 
+              htmlFor="tipo_midia_id" 
+              className={`block mb-2 ${hasFieldError('tipo_midia_id', errors) ? 'text-orange-500 font-semibold' : ''}`}
+            >
+              Tipo de Mídia {hasFieldError('tipo_midia_id', errors) && <span className="text-orange-500">*</span>}
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {tiposMidia.map(tipo => (
+                <Button 
+                  key={tipo.id} 
+                  type="button" 
+                  variant={formData.tipo_midia_id === tipo.id ? "default" : "outline"} 
+                  className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
+                    formData.tipo_midia_id === tipo.id ? "ring-2 ring-[#003570]" : ""
+                  } ${
+                    hasFieldError('tipo_midia_id', errors) ? 'border-orange-500' : ''
+                  }`} 
+                  onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
+                >
+                  {getMediaTypeIcon(tipo.descricao)}
+                  <span className="text-sm font-semibold">{tipo.descricao}</span>
+                </Button>
+              ))}
+            </div>
+            {hasFieldError('tipo_midia_id', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('tipo_midia_id', errors)}</p>
+            )}
+          </div>
+          
+          {showVeiculoImprensa && (
+            <div className="animate-fadeIn">
+              <label 
+                htmlFor="veiculo_imprensa" 
+                className={`block mb-2 ${hasFieldError('veiculo_imprensa', errors) ? 'text-orange-500 font-semibold' : ''}`}
+              >
+                Veículo de Imprensa
+              </label>
+              <Input 
+                id="veiculo_imprensa" 
+                name="veiculo_imprensa" 
+                value={formData.veiculo_imprensa} 
+                onChange={handleChange} 
+                className={hasFieldError('veiculo_imprensa', errors) ? 'border-orange-500' : ''}
+              />
+              {hasFieldError('veiculo_imprensa', errors) && (
+                <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('veiculo_imprensa', errors)}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <div>
         <Label 
           htmlFor="nome_solicitante" 
@@ -115,61 +171,6 @@ const RequesterInfoStep: React.FC<RequesterInfoStepProps> = ({
           <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('email_solicitante', errors)}</p>
         )}
       </div>
-      
-      {showMediaFields && (
-        <div className="animate-fadeIn space-y-4">
-          <div>
-            <label 
-              htmlFor="tipo_midia_id" 
-              className={`block mb-2 ${hasFieldError('tipo_midia_id', errors) ? 'text-orange-500 font-semibold' : ''}`}
-            >
-              Tipo de Mídia {hasFieldError('tipo_midia_id', errors) && <span className="text-orange-500">*</span>}
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {tiposMidia.map(tipo => (
-                <Button 
-                  key={tipo.id} 
-                  type="button" 
-                  variant={formData.tipo_midia_id === tipo.id ? "default" : "outline"} 
-                  className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${
-                    formData.tipo_midia_id === tipo.id ? "ring-2 ring-[#003570]" : ""
-                  } ${
-                    hasFieldError('tipo_midia_id', errors) ? 'border-orange-500' : ''
-                  }`} 
-                  onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
-                >
-                  {getMediaTypeIcon(tipo.descricao)}
-                  <span className="text-sm font-semibold">{tipo.descricao}</span>
-                </Button>
-              ))}
-            </div>
-            {hasFieldError('tipo_midia_id', errors) && (
-              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('tipo_midia_id', errors)}</p>
-            )}
-          </div>
-          
-          {showVeiculoImprensa && (
-            <div className="animate-fadeIn">
-              <label 
-                htmlFor="veiculo_imprensa" 
-                className={`block mb-2 ${hasFieldError('veiculo_imprensa', errors) ? 'text-orange-500 font-semibold' : ''}`}
-              >
-                Veículo de Imprensa
-              </label>
-              <Input 
-                id="veiculo_imprensa" 
-                name="veiculo_imprensa" 
-                value={formData.veiculo_imprensa} 
-                onChange={handleChange} 
-                className={hasFieldError('veiculo_imprensa', errors) ? 'border-orange-500' : ''}
-              />
-              {hasFieldError('veiculo_imprensa', errors) && (
-                <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('veiculo_imprensa', errors)}</p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

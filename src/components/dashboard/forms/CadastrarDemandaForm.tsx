@@ -57,7 +57,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 
   // Validate form on last step or when trying to submit
   const validateFormBeforeSubmit = () => {
-    const errors = validateDemandForm(formData, 7); // Always validate as if on review step
+    const errors = validateDemandForm(formData, 4); // Always validate as if on review step (now index 4)
     setValidationErrors(errors);
     return errors.length === 0;
   };
@@ -68,10 +68,11 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       if (validateFormBeforeSubmit()) {
         handleSubmit(formData);
       } else {
-        // Mostrar os erros de validação
+        // Mostrar os erros de validação com mensagens específicas
+        const missingFieldsMessage = getErrorSummary(validationErrors);
         toast({
           title: "Formulário incompleto",
-          description: getErrorSummary(validationErrors),
+          description: missingFieldsMessage,
           variant: "destructive"
         });
       }
@@ -93,7 +94,8 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       let errorMsg = "Ocorreu um erro ao processar sua solicitação.";
       
       if (error.message && error.message.includes("invalid input syntax")) {
-        errorMsg = "Existem campos obrigatórios não preenchidos. Por favor, verifique todos os campos e tente novamente.";
+        const missingFieldsMessage = getErrorSummary(validationErrors);
+        errorMsg = `Campos obrigatórios não preenchidos: ${missingFieldsMessage}`;
       } else if (error.message) {
         errorMsg = error.message;
       }

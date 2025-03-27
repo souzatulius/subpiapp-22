@@ -141,12 +141,6 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
             </Button>
           </div>
         )}
-        
-        {perguntas.filter(p => p !== '').length === 0 && (
-          <p className="text-sm text-gray-500 italic">
-            Adicione perguntas específicas para a área técnica responder
-          </p>
-        )}
       </div>
     </div>
   );

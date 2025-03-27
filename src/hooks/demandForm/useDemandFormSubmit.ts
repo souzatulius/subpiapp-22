@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DemandFormData } from './types';
 import { formatQuestionsToObject, isValidPublicUrl } from '@/utils/questionFormatUtils';
+import { validateDemandForm, getErrorSummary } from '@/lib/formValidationUtils';
 
 export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,13 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         variant: "destructive"
       });
       return;
+    }
+    
+    // Validate the form before submission
+    const validationErrors = validateDemandForm(formData, 4); // 4 is the index of the review step
+    if (validationErrors.length > 0) {
+      const errorSummary = getErrorSummary(validationErrors);
+      throw new Error(`Campos obrigatórios não preenchidos: ${errorSummary}`);
     }
     
     setIsLoading(true);
@@ -76,11 +84,14 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
       onClose();
     } catch (error: any) {
       console.error("Erro ao submeter formulário:", error);
-      toast({
-        title: "Erro ao cadastrar demanda",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
+      
+      // Check for database constraint error
+      if (error.code === '23502') { // not-null constraint violation
+        const errorMessage = error.message || "Campos obrigatórios não preenchidos";
+        throw new Error(errorMessage);
+      }
+      
+      throw error;
     } finally {
       setIsLoading(false);
     }

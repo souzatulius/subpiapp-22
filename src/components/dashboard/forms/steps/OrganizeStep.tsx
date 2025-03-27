@@ -1,91 +1,67 @@
 
-import React, { useEffect } from 'react';
-import { ValidationError } from '@/lib/formValidationUtils';
+import React from 'react';
 import TitleSection from './organize/TitleSection';
-import QuestionsSection from './organize/QuestionsSection';
-import AttachmentsSection from './organize/AttachmentsSection';
-import { generateTitleSuggestion } from './organize/utils';
+import { ValidationError } from '@/lib/formValidationUtils';
+import QuestionsSection from './questions/QuestionsSection';
+import FileUploadSection from './questions/FileUploadSection';
 
 interface OrganizeStepProps {
   formData: {
     titulo: string;
     perguntas: string[];
     anexos: string[];
-    problema_id: string;
     servico_id: string;
+    problema_id: string;
     bairro_id: string;
-    endereco: string;
   };
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handlePerguntaChange: (index: number, value: string) => void;
+  handleSelectChange: (name: string, value: string) => void;
+  handleAnexosChange: (files: string[]) => void;
   problemas: any[];
   servicos: any[];
   filteredBairros: any[];
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handlePerguntaChange: (index: number, value: string) => void;
-  handleSelectChange: (name: string, value: string | boolean) => void;
-  handleAnexosChange: (files: string[]) => void;
-  errors?: ValidationError[];
+  errors: ValidationError[];
 }
 
 const OrganizeStep: React.FC<OrganizeStepProps> = ({
   formData,
+  handleChange,
+  handlePerguntaChange,
+  handleAnexosChange,
   problemas,
   servicos,
   filteredBairros,
-  handleChange,
-  handlePerguntaChange,
-  handleSelectChange,
-  handleAnexosChange,
-  errors = []
+  errors
 }) => {
-  // Gerar título sugerido com base nos campos já preenchidos
-  useEffect(() => {
-    if (!formData.titulo || formData.titulo.trim() === '') {
-      const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
-      
-      if (suggestedTitle) {
-        // Usar handleSelectChange para evitar perder a referência no handleChange
-        handleSelectChange('titulo', suggestedTitle);
-      }
-    }
-  }, [
-    formData.problema_id, 
-    formData.servico_id, 
-    formData.bairro_id, 
-    formData.endereco,
-    problemas,
-    servicos,
-    filteredBairros
-  ]);
-
-  const onFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      
-      // Here in a real implementation, you'd upload the files to storage
-      // and then store their URLs. For this example, we'll just use the filenames
-      const fileUrls = files.map(file => URL.createObjectURL(file));
-      
-      handleAnexosChange([...formData.anexos, ...fileUrls]);
-    }
-  };
+  // Find the problem and service descriptions
+  const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+  const selectedService = servicos.find(s => s.id === formData.servico_id);
+  const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
 
   return (
     <div className="space-y-6">
+      {/* Título da Demanda */}
       <TitleSection 
-        title={formData.titulo}
-        onChange={handleChange}
+        titulo={formData.titulo} 
+        handleChange={handleChange}
+        selectedProblem={selectedProblem}
+        selectedService={selectedService}
+        selectedBairro={selectedBairro}
         errors={errors}
       />
 
+      {/* Perguntas para Área Técnica */}
       <QuestionsSection 
         perguntas={formData.perguntas}
         onPerguntaChange={handlePerguntaChange}
+        errors={errors}
       />
 
-      <AttachmentsSection 
+      {/* Anexos */}
+      <FileUploadSection 
         anexos={formData.anexos}
         onAnexosChange={handleAnexosChange}
-        onFileUpload={onFileUpload}
       />
     </div>
   );
