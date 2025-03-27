@@ -18,7 +18,6 @@ import { useRespostaFormState } from '../hooks/useRespostaFormState';
 import RespostaFormHeader from './RespostaFormHeader';
 import TabsNavigation from './TabsNavigation';
 import DetailsTab from './DetailsTab';
-import QuestionsTab from './QuestionsTab';
 import CommentsTab from './CommentsTab';
 import FormFooter from './FormFooter';
 
@@ -153,10 +152,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
                 onDontKnowServiceChange={handleServiceToggle}
                 onViewAttachment={handleViewAttachment}
                 onDownloadAttachment={handleDownloadAttachment}
-              />
-              
-              <QuestionsTab 
-                selectedDemanda={selectedDemanda}
                 resposta={resposta}
                 onRespostaChange={handleRespostaChange}
               />

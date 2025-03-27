@@ -20,18 +20,12 @@ const TabsNavigation: React.FC<TabsNavigationProps> = ({
       onValueChange={onTabChange}
       className="mt-4"
     >
-      <TabsList className="grid grid-cols-3 w-full lg:w-auto mb-4 bg-gray-100">
+      <TabsList className="grid grid-cols-2 w-full lg:w-auto mb-4 bg-gray-100">
         <TabsTrigger 
           value="details" 
           className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-subpi-blue transition-all duration-300"
         >
           Detalhes da Demanda
-        </TabsTrigger>
-        <TabsTrigger 
-          value="questions" 
-          className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-subpi-blue transition-all duration-300"
-        >
-          Perguntas e Respostas
         </TabsTrigger>
         <TabsTrigger 
           value="comments" 

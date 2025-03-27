@@ -9,6 +9,7 @@ import DemandaInfoSection from './DemandaInfoSection';
 import DemandaDetailsSection from './DemandaDetailsSection';
 import AttachmentsSection from './AttachmentsSection';
 import { Checkbox } from '@/components/ui/checkbox';
+import QuestionsAnswersSection from './QuestionsAnswersSection';
 
 interface DetailsTabProps {
   selectedDemanda: any;
@@ -25,6 +26,8 @@ interface DetailsTabProps {
   onDontKnowServiceChange: () => void;
   onViewAttachment: (url: string) => void;
   onDownloadAttachment: (url: string) => void;
+  resposta: Record<string, string>;
+  onRespostaChange: (key: string, value: string) => void;
 }
 
 const DetailsTab: React.FC<DetailsTabProps> = ({
@@ -41,8 +44,47 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
   onServicoChange,
   onDontKnowServiceChange,
   onViewAttachment,
-  onDownloadAttachment
+  onDownloadAttachment,
+  resposta,
+  onRespostaChange
 }) => {
+  // Processar as perguntas da demanda (igual ao QuestionsTab)
+  const processPerguntas = () => {
+    if (!selectedDemanda.perguntas) return null;
+    
+    if (typeof selectedDemanda.perguntas !== 'string') {
+      return selectedDemanda.perguntas;
+    }
+    
+    try {
+      return JSON.parse(selectedDemanda.perguntas);
+    } catch (e) {
+      console.error('Erro ao processar perguntas:', e);
+      return selectedDemanda.perguntas;
+    }
+  };
+
+  // Verificar se tem perguntas
+  const hasQuestions = () => {
+    const processedPerguntas = processPerguntas();
+    if (!processedPerguntas) return false;
+    
+    if (Array.isArray(processedPerguntas) && processedPerguntas.length === 0) return false;
+    
+    if (typeof processedPerguntas === 'object' && !Array.isArray(processedPerguntas)) {
+      if (Object.keys(processedPerguntas).length === 0) return false;
+      return Object.values(processedPerguntas).some(pergunta => 
+        pergunta && String(pergunta).trim() !== ''
+      );
+    }
+    
+    if (typeof processedPerguntas === 'string') {
+      return processedPerguntas.trim() !== '';
+    }
+    
+    return true;
+  };
+
   return (
     <TabsContent value="details" className="pt-2 m-0 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -99,7 +141,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
           />
         </div>
         
-        {/* Coluna 2: Detalhes da solicitação (spans 2 cols) */}
+        {/* Coluna 2: Detalhes da solicitação e perguntas (spans 2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="bg-gray-50 border border-gray-200 hover:shadow-md transition-all duration-300">
             <CardContent className="p-4">
@@ -133,6 +175,17 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+          
+          {/* Perguntas e Respostas */}
+          {hasQuestions() && (
+            <div className="mt-6 animate-fade-in">
+              <QuestionsAnswersSection 
+                perguntas={processPerguntas()}
+                resposta={resposta}
+                onRespostaChange={onRespostaChange}
+              />
             </div>
           )}
         </div>
