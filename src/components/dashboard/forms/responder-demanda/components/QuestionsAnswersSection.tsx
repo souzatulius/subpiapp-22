@@ -1,6 +1,3 @@
-// Atualização 1: QuestionsAnswersSection.tsx
-// Caminho sugerido: src/components/responder-demandas/QuestionsAnswersSection.tsx
-
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
