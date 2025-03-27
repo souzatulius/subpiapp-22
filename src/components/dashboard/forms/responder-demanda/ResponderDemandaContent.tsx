@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -57,7 +58,8 @@ const ResponderDemandaContent: React.FC = () => {
   return (
     <div className="animate-fade-in">
       <Card className="border border-gray-200 mb-4 shadow-sm rounded-lg">
-        <div className="flex justify-end p-4 border-b border-gray-100">
+        <div className="flex justify-between items-center p-4 border-b border-gray-100">
+          <h1 className="text-xl font-semibold text-subpi-blue">Responder Demandas</h1>
           <Button
             variant="outline"
             onClick={handleNavigateToConsultar}

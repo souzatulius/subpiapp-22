@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import RespostaFormHeader from './RespostaFormHeader';
@@ -7,7 +8,7 @@ import ServicoSection from './sections/ServicoSection';
 import QuestionsAnswersSection from './QuestionsAnswersSection';
 import CommentsSection from './CommentsSection';
 import AttachmentsSection from './AttachmentsSection';
-import { Paperclip, MessageSquare } from 'lucide-react';
+import { Paperclip, MessageSquare, HelpCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useRespostaFormState } from '../hooks/useRespostaFormState';
 
@@ -74,18 +75,23 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           {selectedDemanda.detalhes_solicitacao && (
             <div className="space-y-2">
               <h3 className="font-semibold text-subpi-blue">Detalhes da Solicitação</h3>
-              <Card className="bg-blue-50 p-4 rounded-lg">
+              <Card className="bg-blue-50 p-4 rounded-xl">
                 <p>{selectedDemanda.detalhes_solicitacao}</p>
               </Card>
             </div>
           )}
 
           {selectedDemanda.perguntas && (
-            <QuestionsAnswersSection
-              perguntas={selectedDemanda.perguntas}
-              resposta={resposta}
-              onRespostaChange={handleRespostaChange} // Corrigido aqui
-            />
+            <div className="space-y-2">
+              <h3 className="font-semibold text-subpi-blue flex items-center gap-2">
+                <HelpCircle className="h-5 w-5" /> Perguntas e Respostas
+              </h3>
+              <QuestionsAnswersSection
+                perguntas={selectedDemanda.perguntas}
+                resposta={resposta}
+                onRespostaChange={handleRespostaChange}
+              />
+            </div>
           )}
 
           {(selectedDemanda.arquivo_url || selectedDemanda.anexos?.length > 0) && (

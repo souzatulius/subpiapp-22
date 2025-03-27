@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
@@ -57,7 +58,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
             answered === total
               ? 'bg-green-100 text-green-800 hover:bg-green-200'
               : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
-          } rounded-md`}
+          } rounded-full`}
         >
           <span className="font-medium">{answered}</span> de{' '}
           <span className="font-medium">{total}</span> respondidas
@@ -68,17 +69,17 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
         {normalizedQuestions.map((pergunta: string, index: number) => (
           <Card
             key={`question-${index}`}
-            className="overflow-hidden border-orange-200 hover:shadow-md transition-all duration-300 rounded-lg"
+            className="overflow-hidden border-orange-200 hover:shadow-md transition-all duration-300 rounded-xl"
           >
             <CardContent className="p-0">
-              <div className="bg-orange-500 p-4 text-white">
+              <div className="bg-orange-500 p-4 text-white rounded-t-xl">
                 <p className="text-base font-semibold">{pergunta}</p>
               </div>
               <div className="p-4">
                 <Textarea
                   id={`resposta-${index}`}
                   placeholder="Digite sua resposta"
-                  className="min-h-[120px] w-full border border-gray-300 focus:border-blue-400 focus:ring-blue-300 rounded-md"
+                  className="min-h-[120px] w-full border border-gray-300 focus:border-blue-400 focus:ring-blue-300 rounded-lg"
                   value={resposta[index.toString()] || ''}
                   onChange={(e) => onRespostaChange(index.toString(), e.target.value)}
                 />

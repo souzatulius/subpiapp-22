@@ -5,12 +5,10 @@ import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare } from 'lucide-r
 
 interface DemandaMetadataSectionProps {
   selectedDemanda: any;
-  currentProblem: any;
 }
 
 const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
   selectedDemanda,
-  currentProblem
 }) => {
   const formattedDateTime = selectedDemanda.prazo_resposta ? 
     new Date(selectedDemanda.prazo_resposta).toLocaleString('pt-BR', {
@@ -23,15 +21,21 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        {currentProblem && (
-          <Badge className="px-3 py-1.5 bg-blue-50 text-subpi-blue border border-blue-100">
-            {currentProblem.descricao}
+      <div className="flex flex-wrap items-center gap-3">
+        {selectedDemanda.tema && (
+          <Badge className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full">
+            {selectedDemanda.tema.descricao || 'Tema não definido'}
+          </Badge>
+        )}
+        
+        {selectedDemanda.problema && (
+          <Badge className="px-3 py-1.5 bg-blue-50 text-subpi-blue border border-blue-100 rounded-full">
+            {selectedDemanda.problema.descricao || selectedDemanda.problema}
           </Badge>
         )}
         
         <Badge 
-          className={`px-3 py-1.5 ${
+          className={`px-3 py-1.5 rounded-full ${
             selectedDemanda.prioridade === 'alta' ? 'bg-red-50 text-red-700 border border-red-200' : 
             selectedDemanda.prioridade === 'media' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' : 
             'bg-green-50 text-green-700 border border-green-200'
@@ -44,7 +48,7 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
         </Badge>
         
         {selectedDemanda.status && (
-          <Badge className="bg-gray-100 text-gray-700 border border-gray-200 px-3 py-1.5">
+          <Badge className="bg-gray-100 text-gray-700 border border-gray-200 px-3 py-1.5 rounded-full">
             Status: {selectedDemanda.status}
           </Badge>
         )}
@@ -58,6 +62,36 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
             <div className="flex items-start gap-2 text-gray-700">
               <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
               <span>{selectedDemanda.endereco}</span>
+            </div>
+          )}
+          
+          {selectedDemanda.bairro && (
+            <div className="flex items-start gap-2 text-gray-700">
+              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-gray-500">Bairro:</span>
+                <p className="font-medium">{selectedDemanda.bairro.nome || selectedDemanda.bairro}</p>
+              </div>
+            </div>
+          )}
+          
+          {selectedDemanda.distrito && (
+            <div className="flex items-start gap-2 text-gray-700">
+              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-gray-500">Distrito:</span>
+                <p className="font-medium">{selectedDemanda.distrito.nome || selectedDemanda.distrito}</p>
+              </div>
+            </div>
+          )}
+          
+          {selectedDemanda.protocolo && (
+            <div className="flex items-start gap-2 text-gray-700">
+              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-gray-500">Protocolo:</span>
+                <p className="font-medium">{selectedDemanda.protocolo}</p>
+              </div>
             </div>
           )}
           
