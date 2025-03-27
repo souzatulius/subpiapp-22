@@ -1,31 +1,40 @@
 
 // Definição dos passos do formulário
-export interface FormStep {
-  title: string;
-  description?: string; // Make description optional
-  fields: string[];
-}
-
-export const FORM_STEPS: FormStep[] = [
+export const FORM_STEPS = [
   {
-    title: "Origem e Prazo",
-    fields: ["origem_id", "tem_protocolo_156", "numero_protocolo_156", "prazo_resposta"]
+    title: "Identificação",
+    description: "Selecione o tema e informe os detalhes da demanda",
+    fields: ["problema_id", "detalhes_solicitacao", "tem_protocolo_156", "numero_protocolo_156"]
   },
   {
-    title: "Problema",
-    fields: ["problema_id", "servico_id", "nao_sabe_servico"]
+    title: "Classificação e Origem",
+    description: "Informe a origem e tipo de mídia da demanda",
+    fields: ["origem_id", "tipo_midia_id"]
+  },
+  {
+    title: "Dados do Solicitante",
+    description: "Preencha os dados de contato do solicitante",
+    fields: ["nome_solicitante", "telefone_solicitante", "email_solicitante", "veiculo_imprensa"]
   },
   {
     title: "Localização",
+    description: "Informe a localização da demanda",
     fields: ["endereco", "bairro_id"]
   },
   {
-    title: "Organização",
-    fields: ["titulo", "perguntas", "anexos"]
+    title: "Perguntas e Anexos",
+    description: "Adicione perguntas para a área técnica e anexos",
+    fields: ["perguntas", "anexos"]
   },
   {
-    title: "Informações do Solicitante",
-    fields: ["tipo_midia_id", "veiculo_imprensa", "nome_solicitante", "telefone_solicitante", "email_solicitante"]
+    title: "Prioridade e Prazo",
+    description: "Defina a prioridade e prazo para resposta",
+    fields: ["prioridade", "prazo_resposta"]
+  },
+  {
+    title: "Revisão",
+    description: "Revise os dados informados antes de cadastrar",
+    fields: ["titulo"]
   }
 ];
 
@@ -49,9 +58,4 @@ export interface FormContentProps {
   distritos: any[];
   filteredBairros: any[];
   errors: ValidationError[];
-  servicos?: any[];
-  filteredServicos?: any[];
-  handleServiceSearch?: (value: string) => void;
-  nextStep?: () => void;
-  onNavigateToStep?: (step: number) => void;
 }

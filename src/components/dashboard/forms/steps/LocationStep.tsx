@@ -1,52 +1,50 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
+import ServiceSearch from './identification/ServiceSearch';
 
 interface LocationStepProps {
-  formData: any;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: string | boolean) => void;
-  distritos: any[];
+  formData: {
+    endereco: string;
+    bairro_id: string;
+  };
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSelectChange: (name: string, value: string) => void;
+  errors: ValidationError[];
   selectedDistrito: string;
-  setSelectedDistrito: (distrito: string) => void;
+  setSelectedDistrito: (value: string) => void;
+  distritos: any[];
   filteredBairros: any[];
-  errors?: ValidationError[];
 }
 
 const LocationStep: React.FC<LocationStepProps> = ({
   formData,
   handleChange,
   handleSelectChange,
-  distritos,
+  errors,
   selectedDistrito,
   setSelectedDistrito,
-  filteredBairros,
-  errors = []
+  distritos,
+  filteredBairros
 }) => {
-  const handleDistritoClick = (distritoId: string) => {
-    // Se o distrito já está selecionado, desmarque-o
+  // Toggle district selection to allow deselection
+  const toggleDistrito = (distritoId: string) => {
     if (selectedDistrito === distritoId) {
       setSelectedDistrito('');
-      // Limpar também o bairro selecionado quando desmarca o distrito
       handleSelectChange('bairro_id', '');
     } else {
       setSelectedDistrito(distritoId);
-      // Limpar também o bairro selecionado quando muda o distrito
       handleSelectChange('bairro_id', '');
     }
   };
 
-  const handleBairroClick = (bairroId: string) => {
-    // Se o bairro já está selecionado, desmarque-o
-    if (formData.bairro_id === bairroId) {
-      handleSelectChange('bairro_id', '');
-    } else {
-      handleSelectChange('bairro_id', bairroId);
-    }
+  // Toggle bairro selection to allow deselection
+  const toggleBairro = (bairroId: string) => {
+    handleSelectChange('bairro_id', formData.bairro_id === bairroId ? '' : bairroId);
   };
 
   return (
@@ -54,17 +52,17 @@ const LocationStep: React.FC<LocationStepProps> = ({
       <div>
         <Label 
           htmlFor="endereco" 
-          className={`font-medium text-lg block mb-2 ${hasFieldError('endereco', errors) ? 'text-orange-500' : 'text-blue-950'}`}
+          className={`text-lg font-medium block mb-2 ${hasFieldError('endereco', errors) ? 'text-orange-500' : 'text-blue-950'}`}
         >
           Endereço {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
         </Label>
         <Input
           id="endereco"
           name="endereco"
-          value={formData.endereco || ''}
+          value={formData.endereco}
           onChange={handleChange}
-          className={`rounded-xl ${hasFieldError('endereco', errors) ? 'border-orange-500' : ''}`}
           placeholder="Rua e Número - Ex: Av. São João, 473"
+          className={hasFieldError('endereco', errors) ? 'border-orange-500' : ''}
         />
         {hasFieldError('endereco', errors) && (
           <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('endereco', errors)}</p>
@@ -73,25 +71,25 @@ const LocationStep: React.FC<LocationStepProps> = ({
 
       <div>
         <Label 
-          className={`font-medium text-lg block mb-2 ${hasFieldError('bairro_id', errors) ? 'text-orange-500' : 'text-blue-950'}`}
+          htmlFor="distrito" 
+          className={`text-lg font-medium block mb-2 ${hasFieldError('bairro_id', errors) ? 'text-orange-500' : 'text-blue-950'}`}
         >
           Distrito {hasFieldError('bairro_id', errors) && <span className="text-orange-500">*</span>}
         </Label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {distritos.map(distrito => (
             <Button
               key={distrito.id}
               type="button"
               variant={selectedDistrito === distrito.id ? "default" : "outline"}
-              className={`h-auto py-2 text-center justify-center rounded-lg
-                ${selectedDistrito === distrito.id 
-                  ? "bg-orange-500 text-white hover:bg-orange-600" 
-                  : "hover:bg-orange-500 hover:text-white"
-                }
-              `}
-              onClick={() => handleDistritoClick(distrito.id)}
+              className={`rounded-xl selection-button ${
+                selectedDistrito === distrito.id ? "bg-orange-500 text-white" : ""
+              } ${
+                hasFieldError('bairro_id', errors) ? 'border-orange-500' : ''
+              } hover:bg-orange-500 hover:text-white`}
+              onClick={() => toggleDistrito(distrito.id)}
             >
-              <span className="text-sm">{distrito.nome}</span>
+              {distrito.nome}
             </Button>
           ))}
         </div>
@@ -100,25 +98,25 @@ const LocationStep: React.FC<LocationStepProps> = ({
       {selectedDistrito && filteredBairros.length > 0 && (
         <div className="animate-fadeIn">
           <Label 
-            className={`font-medium text-lg block mb-2 ${hasFieldError('bairro_id', errors) ? 'text-orange-500' : 'text-blue-950'}`}
+            htmlFor="bairro_id" 
+            className={`text-lg font-medium block mb-2 ${hasFieldError('bairro_id', errors) ? 'text-orange-500' : 'text-blue-950'}`}
           >
             Bairro {hasFieldError('bairro_id', errors) && <span className="text-orange-500">*</span>}
           </Label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {filteredBairros.map(bairro => (
               <Button
                 key={bairro.id}
                 type="button"
                 variant={formData.bairro_id === bairro.id ? "default" : "outline"}
-                className={`h-auto py-2 text-center justify-center rounded-lg
-                  ${formData.bairro_id === bairro.id 
-                    ? "bg-orange-500 text-white hover:bg-orange-600" 
-                    : "hover:bg-orange-500 hover:text-white"
-                  }
-                `}
-                onClick={() => handleBairroClick(bairro.id)}
+                className={`rounded-xl selection-button ${
+                  formData.bairro_id === bairro.id ? "bg-orange-500 text-white" : ""
+                } ${
+                  hasFieldError('bairro_id', errors) ? 'border-orange-500' : ''
+                } hover:bg-orange-500 hover:text-white`}
+                onClick={() => toggleBairro(bairro.id)}
               >
-                <span className="text-sm">{bairro.nome}</span>
+                {bairro.nome}
               </Button>
             ))}
           </div>

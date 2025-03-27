@@ -1,43 +1,59 @@
 
-import { DemandFormData } from '@/hooks/demandForm';
-
 export const generateTitleSuggestion = (
-  formData: DemandFormData,
+  formData: {
+    problema_id: string;
+    servico_id: string;
+    bairro_id: string;
+    endereco: string;
+    titulo: string;
+  },
   problemas: any[],
   servicos: any[],
-  bairros: any[]
+  filteredBairros: any[]
 ): string => {
-  if (!formData) return '';
-
-  // Find the problem and service from their IDs
+  if (!formData.problema_id && !formData.servico_id && !formData.bairro_id && !formData.endereco) {
+    return formData.titulo || '';
+  }
+  
+  let suggestedTitle = '';
+  
   const selectedProblem = problemas.find(p => p.id === formData.problema_id);
   const selectedService = servicos.find(s => s.id === formData.servico_id);
-  const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
-
-  // Array to hold the parts of the title
-  const titleParts: string[] = [];
-
-  // Add problem description if available
-  if (selectedProblem?.descricao) {
-    titleParts.push(selectedProblem.descricao);
+  const selectedBairro = filteredBairros.find(b => b.id === formData.bairro_id);
+  
+  // Start with the problem description if available
+  if (selectedProblem) {
+    suggestedTitle += selectedProblem.descricao;
   }
-
-  // Add service description if available
-  if (selectedService?.descricao) {
-    titleParts.push(`- ${selectedService.descricao}`);
+  
+  // Add service if available
+  if (selectedService) {
+    suggestedTitle += suggestedTitle ? ` - ${selectedService.descricao}` : selectedService.descricao;
   }
-
-  // Add location information if available
-  if (formData.endereco) {
-    const addressPart = formData.endereco.split(',')[0]; // Get the first part of the address before any comma
-    titleParts.push(`- ${addressPart}`);
+  
+  // Add location information (neighborhood and/or address)
+  let locationPart = '';
+  
+  if (selectedBairro) {
+    locationPart += selectedBairro.nome;
   }
-
-  // Add bairro if available
-  if (selectedBairro?.nome) {
-    titleParts.push(`- ${selectedBairro.nome}`);
+  
+  if (formData.endereco && formData.endereco.trim() !== '') {
+    const shortAddress = formData.endereco.length > 30 
+      ? formData.endereco.substring(0, 30) + '...' 
+      : formData.endereco;
+    
+    if (locationPart) {
+      locationPart += ` (${shortAddress})`;
+    } else {
+      locationPart = shortAddress;
+    }
   }
-
-  // Join the parts with spaces
-  return titleParts.join(' ').trim();
+  
+  // Add location part to title if available
+  if (locationPart) {
+    suggestedTitle += suggestedTitle ? ` - ${locationPart}` : locationPart;
+  }
+  
+  return suggestedTitle.trim();
 };
