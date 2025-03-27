@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -51,14 +50,12 @@ export function useMediaTypes() {
   const addMediaType = async (data: { descricao: string; icone?: string }) => {
     setIsSubmitting(true);
     try {
-      const { data: newData, error } = await supabase
+      const { error } = await supabase
         .from('tipos_midia')
         .insert({
           descricao: data.descricao,
           icone: data.icone
-        })
-        .select()
-        .single();
+        });
       
       if (error) throw error;
       
@@ -85,15 +82,13 @@ export function useMediaTypes() {
   const updateMediaType = async (id: string, data: { descricao: string; icone?: string }) => {
     setIsSubmitting(true);
     try {
-      const { data: result, error } = await supabase
+      const { error } = await supabase
         .from('tipos_midia')
         .update({
           descricao: data.descricao,
           icone: data.icone
         })
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
       
       if (error) throw error;
       

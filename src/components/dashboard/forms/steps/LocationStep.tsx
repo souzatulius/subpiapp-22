@@ -122,14 +122,14 @@ const LocationStep: React.FC<LocationStepProps> = ({
             htmlFor="endereco" 
             className={`form-question-title ${hasFieldError('endereco', errors) ? 'text-orange-500 font-semibold' : ''}`}
           >
-            Endereço completo {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
+            Endereço {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
           </Label>
           <Input
             id="endereco"
             name="endereco"
             value={formData.endereco}
             onChange={handleChange}
-            placeholder="Ex: Av. São João, 473 - República"
+            placeholder="Ex: Av. São João, 473"
             className={hasFieldError('endereco', errors) ? 'border-orange-500' : ''}
           />
           {hasFieldError('endereco', errors) && (

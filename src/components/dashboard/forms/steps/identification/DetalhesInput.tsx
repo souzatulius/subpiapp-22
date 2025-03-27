@@ -22,7 +22,7 @@ const DetalhesInput: React.FC<DetalhesInputProps> = ({
         htmlFor="detalhes_solicitacao" 
         className={`block text-base font-semibold ${hasFieldError('detalhes_solicitacao', errors) ? 'text-orange-500' : ''}`}
       >
-        Fale um pouco sobre a solicitação ou cole o e-mail recebido {hasFieldError('detalhes_solicitacao', errors) && <span className="text-orange-500">*</span>}
+        Descreva a situação {hasFieldError('detalhes_solicitacao', errors) && <span className="text-orange-500">*</span>}
       </Label>
       
       <Textarea
@@ -31,7 +31,7 @@ const DetalhesInput: React.FC<DetalhesInputProps> = ({
         value={value}
         onChange={onChange}
         rows={5}
-        placeholder="Descreva com detalhes a solicitação, incluindo contexto e informações importantes"
+        placeholder="Inclua aqui o contexto ou cole o e-mail recebido"
         className={`resize-none ${hasFieldError('detalhes_solicitacao', errors) ? 'border-orange-500' : ''}`}
       />
       

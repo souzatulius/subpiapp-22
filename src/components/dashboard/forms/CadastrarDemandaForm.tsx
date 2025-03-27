@@ -20,6 +20,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [showValidationAlert, setShowValidationAlert] = useState(false);
   
   const {
     formData,
@@ -64,6 +65,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       if (validateFormBeforeSubmit()) {
         handleSubmit(formData);
       } else {
+        setShowValidationAlert(true);
         const missingFieldsMessage = getErrorSummary(validationErrors);
         toast({
           title: "Formulário incompleto",
@@ -124,7 +126,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             />
           </div>
           
-          {validationErrors.length > 0 && activeStep === FORM_STEPS.length - 1 && (
+          {showValidationAlert && validationErrors.length > 0 && activeStep === FORM_STEPS.length - 1 && (
             <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               <AlertTitle>Campos obrigatórios não preenchidos</AlertTitle>
