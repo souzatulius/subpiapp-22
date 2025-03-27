@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 
 export interface FormStep {
   title: string;
-  description: string;
+  description?: string; // Make description optional to match FormStepConfig.ts
 }
 
 interface FormStepsProps {
