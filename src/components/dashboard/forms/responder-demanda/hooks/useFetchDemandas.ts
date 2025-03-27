@@ -44,7 +44,7 @@ export const useFetchDemandas = () => {
             origens_demandas:origem_id (id, descricao),
             tipos_midia:tipo_midia_id (id, descricao),
             bairros:bairro_id (id, nome),
-            servicos:servico_id (id, descricao)
+            autor:autor_id (id, nome_completo)
           `)
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
@@ -80,8 +80,30 @@ export const useFetchDemandas = () => {
         // Filter out demands that already have responses
         const filteredData = data.filter(demanda => !respondedDemandIds.has(demanda.id));
         
+        // Get service information separately instead of using direct joins
+        const demandasWithServices = await Promise.all(filteredData.map(async (demanda) => {
+          let servicoInfo = null;
+          
+          if (demanda.servico_id) {
+            const { data: servicoData } = await supabase
+              .from('servicos')
+              .select('id, descricao')
+              .eq('id', demanda.servico_id)
+              .single();
+              
+            if (servicoData) {
+              servicoInfo = servicoData;
+            }
+          }
+          
+          return {
+            ...demanda,
+            servicos: servicoInfo
+          };
+        }));
+        
         // Transform the data to match the Demanda type
-        const transformedData: Demanda[] = (filteredData || []).map(item => {
+        const transformedData: Demanda[] = (demandasWithServices || []).map(item => {
           // Handle perguntas type conversion: ensure it's string[] or null
           let perguntasArray: string[] | null = null;
           if (item.perguntas) {
@@ -142,13 +164,13 @@ export const useFetchDemandas = () => {
             tipo_midia_id: item.tipos_midia?.id,
             origem_id: item.origens_demandas?.id,
             problema_id: item.problema_id,
-            servico_id: item.servico_id, // Corrigido para usar servico_id fornecido pela API
+            servico_id: item.servico_id,
             protocolo: item.protocolo,
             areas_coordenacao: item.area_coordenacao_id,
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia,
             bairros: item.bairros,
-            servicos: item.servicos // Incluindo dados do serviço
+            servicos: item.servicos
           };
         });
         
