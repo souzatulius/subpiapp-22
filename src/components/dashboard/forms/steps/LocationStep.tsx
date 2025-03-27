@@ -127,7 +127,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="no-servicos" disabled>
                       Nenhum serviço encontrado
                     </SelectItem>
                   )}
@@ -206,11 +206,17 @@ const LocationStep: React.FC<LocationStepProps> = ({
               <SelectValue placeholder="Selecione o bairro" />
             </SelectTrigger>
             <SelectContent>
-              {filteredBairros.map((bairro) => (
-                <SelectItem key={bairro.id} value={bairro.id}>
-                  {bairro.nome}
+              {filteredBairros.length > 0 ? (
+                filteredBairros.map((bairro) => (
+                  <SelectItem key={bairro.id} value={bairro.id}>
+                    {bairro.nome}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no-bairros" disabled>
+                  Nenhum bairro encontrado
                 </SelectItem>
-              ))}
+              )}
             </SelectContent>
           </Select>
           {hasFieldError('bairro_id', errors) && (

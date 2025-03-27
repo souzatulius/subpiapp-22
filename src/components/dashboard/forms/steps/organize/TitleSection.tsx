@@ -6,7 +6,7 @@ import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from '../identification/ValidationUtils';
 
 interface TitleSectionProps {
-  titulo: string;  // Changed from title to titulo to match usage
+  titulo: string;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   selectedProblem?: any;
   selectedService?: any;
@@ -15,7 +15,7 @@ interface TitleSectionProps {
 }
 
 const TitleSection: React.FC<TitleSectionProps> = ({
-  titulo,  // Changed from title to titulo
+  titulo,
   handleChange,
   selectedProblem,
   selectedService,
