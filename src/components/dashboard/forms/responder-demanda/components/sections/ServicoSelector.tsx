@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import {
   Select,
@@ -24,9 +25,11 @@ const ServicoSelector: React.FC<ServicoSelectorProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Proteção contra undefined e fallback para array vazio
+  // Ensure servicos is an array before filtering
   const filteredServicos = useMemo(() => {
-    return (servicos ?? []).filter(servico =>
+    if (!Array.isArray(servicos)) return [];
+    
+    return servicos.filter(servico =>
       servico?.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [servicos, searchTerm]);

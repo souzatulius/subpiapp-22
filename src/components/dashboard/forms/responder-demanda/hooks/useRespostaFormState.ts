@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -19,12 +20,6 @@ export const useRespostaFormState = ({
   const [dontKnowService, setDontKnowService] = useState<boolean>(!!selectedDemanda?.nao_sabe_servico);
   const [servicos, setServicos] = useState<any[]>([]);
   const [loadingServicos, setLoadingServicos] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (selectedProblemId && selectedDemanda?.supervisao_tecnica_id) {
-      fetchServicos(selectedDemanda.supervisao_tecnica_id);
-    }
-  }, [selectedProblemId, selectedDemanda?.supervisao_tecnica_id]);
 
   useEffect(() => {
     if (selectedDemanda) {
@@ -128,11 +123,11 @@ export const useRespostaFormState = ({
   return {
     selectedProblemId,
     selectedServicoId,
+    setSelectedServicoId,
     dontKnowService,
     servicos,
     loadingServicos,
     setSelectedProblemId,
-    setSelectedServicoId,
     handleServiceToggle,
     handleRespostaChange,
     updateService,

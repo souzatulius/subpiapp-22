@@ -1,22 +1,23 @@
+
 import React from 'react';
 import ServicoSelector from './ServicoSelector';
 import { AlertTriangle } from 'lucide-react';
+import { useServicosData } from '@/hooks/demandForm/useServicosData';
 
 interface ServicoSectionProps {
   selectedDemanda: any;
-  servicos: any[];
-  servicosLoading: boolean;
   selectedServicoId: string;
   onServicoChange: (id: string) => void;
 }
 
 const ServicoSection: React.FC<ServicoSectionProps> = ({
   selectedDemanda,
-  servicos,
-  servicosLoading,
   selectedServicoId,
   onServicoChange,
 }) => {
+  // Use our custom hook to fetch services data
+  const { servicos, isLoading: servicosLoading, error } = useServicosData();
+  
   const servicoNaoInformado = selectedDemanda.nao_sabe_servico && !selectedServicoId;
 
   return (
@@ -34,7 +35,7 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
 
       <ServicoSelector
         selectedServicoId={selectedServicoId}
-        servicos={servicos}
+        servicos={servicos || []}
         servicosLoading={servicosLoading}
         onServicoChange={onServicoChange}
       />

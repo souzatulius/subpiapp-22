@@ -37,6 +37,8 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     handleRespostaChange,
     updateService,
     allQuestionsAnswered,
+    selectedServicoId,
+    setSelectedServicoId
   } = useRespostaFormState({
     selectedDemanda,
     resposta,
@@ -62,6 +64,10 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     }
   };
 
+  const handleServicoChange = (id: string) => {
+    setSelectedServicoId(id);
+  };
+
   return (
     <div className="space-y-4 animate-fade-in">
       <RespostaFormHeader selectedDemanda={selectedDemanda} />
@@ -70,7 +76,11 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         <CardContent className="p-4 space-y-4">
           <DemandaMetadataSection selectedDemanda={selectedDemanda} />
 
-          <ServicoSection selectedDemanda={selectedDemanda} />
+          <ServicoSection 
+            selectedDemanda={selectedDemanda} 
+            selectedServicoId={selectedServicoId}
+            onServicoChange={handleServicoChange}
+          />
 
           {selectedDemanda.detalhes_solicitacao && (
             <div className="space-y-2">
@@ -126,6 +136,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             isLoading={isLoading}
             onSubmit={handleSubmitWithExtra}
             allQuestionsAnswered={allQuestionsAnswered()}
+            onBack={onBack}
           />
         </CardFooter>
       </Card>
