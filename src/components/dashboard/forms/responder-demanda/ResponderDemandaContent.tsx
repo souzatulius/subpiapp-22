@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge'; // <-- Apenas UMA importação do Badge
+import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useDemandasData } from './hooks/useDemandasData';
@@ -10,6 +10,7 @@ import DemandasFilter from './components/DemandasFilter';
 import DemandaList from './components/DemandaList';
 import DemandaGrid from './components/DemandaGrid';
 import RespostaForm from './components/RespostaForm';
+import { Paperclip, MessageSquare } from 'lucide-react';
 
 const ResponderDemandaContent: React.FC = () => {
   const navigate = useNavigate();
@@ -90,6 +91,37 @@ const ResponderDemandaContent: React.FC = () => {
                 <Badge className="rounded-full bg-green-100 text-green-800 font-semibold">
                   {selectedDemanda.status}
                 </Badge>
+              </div>
+
+              {/* Exibição de Distrito, Bairro, Protocolo */}
+              <div className="space-y-2">
+                {selectedDemanda.endereco && (
+                  <div className="space-y-1">
+                    <p className="font-medium text-gray-700">Endereço:</p>
+                    <p className="text-sm text-gray-600">{selectedDemanda.endereco}</p>
+                  </div>
+                )}
+
+                {selectedDemanda.distrito && (
+                  <div className="space-y-1">
+                    <p className="font-medium text-gray-700">Distrito:</p>
+                    <p className="text-sm text-gray-600">{selectedDemanda.distrito}</p>
+                  </div>
+                )}
+
+                {selectedDemanda.bairro && (
+                  <div className="space-y-1">
+                    <p className="font-medium text-gray-700">Bairro:</p>
+                    <p className="text-sm text-gray-600">{selectedDemanda.bairro}</p>
+                  </div>
+                )}
+
+                {selectedDemanda.protocolo && (
+                  <div className="space-y-1">
+                    <p className="font-medium text-gray-700">Protocolo 156:</p>
+                    <p className="text-sm text-gray-600">{selectedDemanda.protocolo}</p>
+                  </div>
+                )}
               </div>
 
               <RespostaForm
