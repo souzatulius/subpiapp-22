@@ -10,14 +10,14 @@ export const normalizeQuestions = (perguntas: any): string[] => {
     // Case 1: perguntas is an array already
     if (Array.isArray(perguntas)) {
       console.log('perguntas is an array');
-      result = perguntas.filter(p => p && typeof p === 'string');
+      result = perguntas.filter((p): p is string => p && typeof p === 'string');
     } 
     // Case 2: perguntas is a string that can be parsed as JSON
     else if (typeof perguntas === 'string') {
       console.log('perguntas is a string');
       try {
         const parsed = JSON.parse(perguntas);
-        result = Array.isArray(parsed) ? parsed.filter(p => p && typeof p === 'string') : [];
+        result = Array.isArray(parsed) ? parsed.filter((p): p is string => p && typeof p === 'string') : [];
       } catch (e) {
         console.log('perguntas string could not be parsed as JSON');
         // Not valid JSON, just use as a single question
@@ -39,7 +39,7 @@ export const normalizeQuestions = (perguntas: any): string[] => {
         result = keys
           .sort((a, b) => Number(a) - Number(b))
           .map(k => perguntas[k])
-          .filter(p => p && typeof p === 'string');
+          .filter((p): p is string => p && typeof p === 'string');
       } else if (perguntaFormat) {
         console.log('perguntas has pergunta_X keys');
         // Extract all keys starting with pergunta_ and convert to array
@@ -51,11 +51,11 @@ export const normalizeQuestions = (perguntas: any): string[] => {
             return numA - numB;
           })
           .map(k => perguntas[k])
-          .filter(p => p && typeof p === 'string');
+          .filter((p): p is string => p && typeof p === 'string');
       } else {
         console.log('perguntas has other object format');
         // For any other object format, convert values to array
-        result = Object.values(perguntas).filter(p => p && typeof p === 'string');
+        result = Object.values(perguntas).filter((p): p is string => p && typeof p === 'string');
       }
     }
   } catch (error) {

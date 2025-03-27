@@ -3,6 +3,7 @@ import React from 'react';
 import { FileIcon, ExternalLink, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AttachmentItem from './AttachmentItem';
+import { isValidPublicUrl } from '@/utils/questionFormatUtils';
 
 interface AttachmentsSectionProps {
   arquivo_url: string | null;
@@ -22,7 +23,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   // Enhanced validation to ensure attachments are displayed correctly
   const hasAttachments = () => {
     // Check if there's a valid arquivo_url
-    if (arquivo_url && typeof arquivo_url === 'string' && arquivo_url.startsWith('http')) return true;
+    if (arquivo_url && typeof arquivo_url === 'string' && isValidPublicUrl(arquivo_url)) return true;
     
     // Check if there are anexos
     if (!anexos) return false;
@@ -31,15 +32,19 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
     if (typeof anexos === 'string') {
       try {
         const parsed = JSON.parse(anexos);
-        return Array.isArray(parsed) && parsed.length > 0 && parsed.some(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http'));
+        return Array.isArray(parsed) && parsed.length > 0 && parsed.some(anexo => 
+          anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)
+        );
       } catch {
-        return anexos.startsWith('http');
+        return isValidPublicUrl(anexos);
       }
     }
     
     // If anexos is an array, check if it has valid elements
     if (Array.isArray(anexos)) {
-      return anexos.length > 0 && anexos.some(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http'));
+      return anexos.length > 0 && anexos.some(anexo => 
+        anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)
+      );
     }
     
     return false;
@@ -53,15 +58,15 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
       try {
         const parsed = JSON.parse(anexos);
         return Array.isArray(parsed) 
-          ? parsed.filter(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http')) 
-          : [anexos].filter(anexo => anexo.startsWith('http'));
+          ? parsed.filter(anexo => anexo && typeof anexo === 'string' && isValidPublicUrl(anexo)) 
+          : [anexos].filter(anexo => isValidPublicUrl(anexo));
       } catch {
-        return anexos.startsWith('http') ? [anexos] : [];
+        return isValidPublicUrl(anexos) ? [anexos] : [];
       }
     }
     
     if (Array.isArray(anexos)) {
-      return anexos.filter(anexo => anexo && typeof anexo === 'string' && anexo.startsWith('http'));
+      return anexos.filter(anexo => anexo && typeof anexo === 'string' && isValidPublicUrl(anexo));
     }
     
     return [];
@@ -71,7 +76,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   
   console.log('Normalized attachments:', normalizedAttachments);
   
-  if (!hasAttachments() && (!arquivo_url || !arquivo_url.startsWith('http'))) {
+  if (!hasAttachments() && (!arquivo_url || !isValidPublicUrl(arquivo_url))) {
     return (
       <div className="bg-gray-50 p-6 rounded-xl text-center shadow-sm border border-gray-200">
         <p className="text-gray-500">Não há anexos para esta demanda.</p>
@@ -82,7 +87,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
   return (
     <div className="space-y-3 animate-fade-in">
       <div className="space-y-2">
-        {arquivo_url && arquivo_url.startsWith('http') && (
+        {arquivo_url && isValidPublicUrl(arquivo_url) && (
           <AttachmentItem 
             url={arquivo_url} 
             onView={onViewAttachment} 
