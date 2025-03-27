@@ -1,23 +1,20 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { toast } from '@/components/ui/use-toast';
+import RespostaFormHeader from './RespostaFormHeader';
+import FormFooter from './FormFooter';
+import DemandaMetadataSection from './sections/DemandaMetadataSection';
+import TemaServicoSection from './sections/TemaServicoSection';
+import DemandaDetailsSection from './DemandaDetailsSection';
+import QuestionsAnswersSection from './QuestionsAnswersSection';
+import CommentsSection from './CommentsSection';
+import AttachmentsSection from './AttachmentsSection';
 import { useProblemsData } from '@/hooks/problems';
 import { useServicosData } from '@/hooks/demandForm/useServicosData';
 import { useFormPersistence } from '../hooks/useFormPersistence';
 import { useRespostaFormState } from '../hooks/useRespostaFormState';
-import RespostaFormHeader from './RespostaFormHeader';
-import FormFooter from './FormFooter';
-import { Badge } from '@/components/ui/badge';
-import DemandaDetailsSection from './DemandaDetailsSection';
-import DemandaInfoSection from './DemandaInfoSection';
-import QuestionsAnswersSection from './QuestionsAnswersSection';
-import CommentsSection from './CommentsSection';
 import { normalizeQuestions } from '@/utils/questionFormatUtils';
-import AttachmentsSection from './AttachmentsSection';
-import ServicoSelector from './ServicoSelector';
-import { Separator } from '@/components/ui/separator';
-import { User, MapPin, Calendar, Clock, Flag, BookOpen, MessageSquare, PaperclipIcon, Send } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { MessageSquare, Paperclip } from 'lucide-react';
 
 interface RespostaFormProps {
   selectedDemanda: any;
@@ -40,7 +37,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   comentarios = '',
   setComentarios
 }) => {
-  const [localComentarios, setLocalComentarios] = useState<string>(comentarios);
+  const [localComentarios, setLocalComentarios] = React.useState<string>(comentarios);
   
   const { problems, isLoading: problemsLoading } = useProblemsData();
   const { servicos, isLoading: servicosLoading } = useServicosData();
@@ -74,7 +71,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
     setActiveTab: () => {}
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (setComentarios) {
       setComentarios(localComentarios);
     }
@@ -134,14 +131,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   
   const { answered, total } = getQuestionStats();
   const hasPerguntas = total > 0;
-  const formattedDateTime = selectedDemanda.prazo_resposta ? 
-    new Date(selectedDemanda.prazo_resposta).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }) : 'Não definido';
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -152,151 +141,21 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       
       <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
         <CardContent className="p-6 space-y-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              {currentProblem && (
-                <Badge className="px-3 py-1.5 bg-blue-50 text-subpi-blue border border-blue-100">
-                  {currentProblem.descricao}
-                </Badge>
-              )}
-              
-              <Badge 
-                className={`px-3 py-1.5 ${
-                  selectedDemanda.prioridade === 'alta' ? 'bg-red-50 text-red-700 border border-red-200' : 
-                  selectedDemanda.prioridade === 'media' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' : 
-                  'bg-green-50 text-green-700 border border-green-200'
-                }`}
-              >
-                Prioridade: {
-                  selectedDemanda.prioridade === 'alta' ? 'Alta' : 
-                  selectedDemanda.prioridade === 'media' ? 'Média' : 'Baixa'
-                }
-              </Badge>
-              
-              {selectedDemanda.status && (
-                <Badge className="bg-gray-100 text-gray-700 border border-gray-200 px-3 py-1.5">
-                  Status: {selectedDemanda.status}
-                </Badge>
-              )}
-            </div>
-            
-            <h3 className="text-xl font-semibold text-subpi-blue">{selectedDemanda.titulo || 'Sem título definido'}</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                {selectedDemanda.endereco && (
-                  <div className="flex items-start gap-2 text-gray-700">
-                    <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                    <span>{selectedDemanda.endereco}</span>
-                  </div>
-                )}
-                
-                {selectedDemanda.autor?.nome_completo && (
-                  <div className="flex items-start gap-2 text-gray-700">
-                    <User className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-sm text-gray-500">Autor:</span>
-                      <p className="font-medium">{selectedDemanda.autor.nome_completo}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-start gap-2 text-gray-700">
-                  <Calendar className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-sm text-gray-500">Criado em:</span>
-                    <p className="font-medium">{new Date(selectedDemanda.horario_publicacao).toLocaleDateString('pt-BR')} às {new Date(selectedDemanda.horario_publicacao).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</p>
-                  </div>
-                </div>
-                
-                {selectedDemanda.prazo_resposta && (
-                  <div className="flex items-start gap-2 text-gray-700">
-                    <Clock className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-sm text-gray-500">Prazo para resposta:</span>
-                      <p className="font-medium">{formattedDateTime}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {selectedDemanda.origem && (
-                  <div className="flex items-start gap-2 text-gray-700">
-                    <BookOpen className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-sm text-gray-500">Origem:</span>
-                      <p className="font-medium">{selectedDemanda.origem.descricao || 'Não informado'}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {selectedDemanda.veiculo_imprensa && (
-                  <div className="flex items-start gap-2 text-gray-700">
-                    <MessageSquare className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-sm text-gray-500">Veículo:</span>
-                      <p className="font-medium">{selectedDemanda.veiculo_imprensa}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <DemandaMetadataSection 
+            selectedDemanda={selectedDemanda}
+            currentProblem={currentProblem}
+          />
           
-          <div className="py-6 border-b">
-            <h3 className="text-lg font-semibold text-subpi-blue mb-4">Tema e Serviço</h3>
-            
-            <Card className="bg-blue-50/50 border border-blue-100 p-5 rounded-xl shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Tema:</h4>
-                  <div className="p-3 border rounded-md bg-white">
-                    {currentProblem ? (
-                      <span className="font-medium">{currentProblem.descricao}</span>
-                    ) : (
-                      <span className="text-gray-500">Tema não definido</span>
-                    )}
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Serviço:</h4>
-                  {selectedDemanda.servico?.descricao ? (
-                    <div className="p-3 border rounded-md bg-white">
-                      <span className="font-medium">{selectedDemanda.servico.descricao}</span>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id="dontKnowService"
-                            checked={dontKnowService}
-                            onChange={handleServiceToggle}
-                            className="rounded border-gray-300 text-subpi-blue focus:ring-subpi-blue"
-                          />
-                          <label htmlFor="dontKnowService" className="text-sm text-gray-700">
-                            Não sei informar o serviço
-                          </label>
-                        </div>
-                      </div>
-                      
-                      {!dontKnowService && (
-                        <ServicoSelector
-                          selectedServicoId={selectedServicoId}
-                          servicos={servicos}
-                          servicosLoading={servicosLoading}
-                          onServicoChange={setSelectedServicoId}
-                        />
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          </div>
+          <TemaServicoSection 
+            currentProblem={currentProblem}
+            selectedDemanda={selectedDemanda}
+            selectedServicoId={selectedServicoId}
+            dontKnowService={dontKnowService}
+            servicos={servicos}
+            servicosLoading={servicosLoading}
+            onServicoChange={setSelectedServicoId}
+            onServiceToggle={handleServiceToggle}
+          />
           
           {selectedDemanda.detalhes_solicitacao && (
             <div className="py-6 border-b">
@@ -311,12 +170,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
             <div className="py-6 border-b">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-subpi-blue">Perguntas e Respostas</h3>
-                <Badge 
-                  variant={answered === total ? "default" : "outline"} 
-                  className={`${answered === total ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'} transition-colors duration-300`}
-                >
-                  <span className="font-medium">{answered}</span> de <span className="font-medium">{total}</span> respondidas
-                </Badge>
               </div>
               
               <QuestionsAnswersSection
@@ -330,7 +183,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
           {(selectedDemanda.arquivo_url || (selectedDemanda.anexos && selectedDemanda.anexos.length > 0)) && (
             <div className="py-6 border-b">
               <h3 className="text-lg font-semibold text-subpi-blue mb-4 flex items-center gap-2">
-                <PaperclipIcon className="h-5 w-5" />
+                <Paperclip className="h-5 w-5" />
                 Anexos
               </h3>
               
