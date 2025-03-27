@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, MapPin } from 'lucide-react';
 
 interface ServicoSectionProps {
   selectedDemanda: any;
@@ -33,11 +33,11 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({ selectedDemanda }) => {
           </div>
         )}
         
-        {selectedDemanda.bairro && (
+        {selectedDemanda.bairros && (
           <div className="space-y-1">
             <span className="text-sm text-gray-500">Bairro:</span>
             <p className="font-medium text-gray-900">
-              {selectedDemanda.bairro.nome || 'Não informado'}
+              {selectedDemanda.bairros.nome || 'Não informado'}
             </p>
           </div>
         )}
@@ -46,7 +46,7 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({ selectedDemanda }) => {
           <div className="space-y-1">
             <span className="text-sm text-gray-500">Distrito:</span>
             <p className="font-medium text-gray-900">
-              {selectedDemanda.distrito?.nome || 'Não informado'}
+              {selectedDemanda.distrito.nome || 'Não informado'}
             </p>
           </div>
         )}
@@ -56,6 +56,15 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({ selectedDemanda }) => {
             <span className="text-sm text-gray-500">Protocolo:</span>
             <p className="font-medium text-gray-900">
               {selectedDemanda.protocolo || 'Não informado'}
+            </p>
+          </div>
+        )}
+        
+        {selectedDemanda.endereco && (
+          <div className="space-y-1">
+            <span className="text-sm text-gray-500">Endereço:</span>
+            <p className="font-medium text-gray-900">
+              {selectedDemanda.endereco || 'Não informado'}
             </p>
           </div>
         )}
