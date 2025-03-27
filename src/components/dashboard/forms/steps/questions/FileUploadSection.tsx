@@ -32,6 +32,8 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
       setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
       
       try {
+        console.log('Uploading file to bucket: demandas, path:', filePath);
+        
         // Upload file
         const { error: uploadError } = await supabase.storage
           .from('demandas')
@@ -43,6 +45,8 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         const { data } = supabase.storage
           .from('demandas')
           .getPublicUrl(filePath);
+        
+        console.log('File uploaded successfully, public URL:', data.publicUrl);
           
         urls.push(data.publicUrl);
         

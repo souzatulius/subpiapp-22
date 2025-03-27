@@ -81,6 +81,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
       const fileName = `${uuidv4()}.${fileExt}`;
       const filePath = `uploads/${fileName}`;
       
+      console.log('Uploading file to bucket: demandas, path:', filePath);
+      
       const { error: uploadError } = await supabase.storage
         .from('demandas')
         .upload(filePath, file);
@@ -93,6 +95,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
         .getPublicUrl(filePath);
         
       const publicUrl = data.publicUrl;
+      console.log('File uploaded successfully, public URL:', publicUrl);
       
       // Set the public URL to be saved in the database
       onChange(publicUrl);
