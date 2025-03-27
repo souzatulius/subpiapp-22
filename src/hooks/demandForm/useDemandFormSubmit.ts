@@ -34,12 +34,25 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         ? formData.arquivo_url 
         : null;
       
-      // Prepare the payload
+      // Prepare the payload - remove fields that don't exist in the demandas table
       const payload = {
-        ...formData,
+        titulo: formData.titulo,
+        problema_id: formData.problema_id,
+        origem_id: formData.origem_id,
+        tipo_midia_id: formData.tipo_midia_id,
+        prioridade: formData.prioridade,
+        prazo_resposta: formData.prazo_resposta,
+        nome_solicitante: formData.nome_solicitante,
+        telefone_solicitante: formData.telefone_solicitante,
+        email_solicitante: formData.email_solicitante,
+        veiculo_imprensa: formData.veiculo_imprensa,
+        endereco: formData.endereco,
+        bairro_id: formData.bairro_id,
         perguntas: formattedPerguntas,
-        anexos: validAnexos,
+        detalhes_solicitacao: formData.detalhes_solicitacao,
         arquivo_url,
+        anexos: validAnexos,
+        servico_id: formData.servico_id || null,
         autor_id: user.id,
         status: 'pendente'
       };

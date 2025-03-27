@@ -1,168 +1,240 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ValidationError } from '@/lib/formValidationUtils';
-import LocationStep from './LocationStep';
+import { hasFieldError, getFieldErrorMessage } from '@/components/dashboard/forms/steps/identification/ValidationUtils';
 
 interface PracticalInfoStepProps {
   formData: {
     nome_solicitante: string;
     telefone_solicitante: string;
     email_solicitante: string;
-    prioridade: string;
+    veiculo_imprensa: string;
     endereco: string;
     bairro_id: string;
   };
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
   distritos: any[];
   selectedDistrito: string;
   setSelectedDistrito: (value: string) => void;
   filteredBairros: any[];
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSelectChange: (name: string, value: string) => void;
   errors?: ValidationError[];
 }
 
 const PracticalInfoStep: React.FC<PracticalInfoStepProps> = ({
   formData,
-  handleChange,
-  handleSelectChange,
   distritos,
   selectedDistrito,
   setSelectedDistrito,
   filteredBairros,
+  handleChange,
+  handleSelectChange,
   errors = []
 }) => {
-  const hasError = (field: string) => errors.some(err => err.field === field);
-  const getErrorMessage = (field: string) => {
-    const error = errors.find(err => err.field === field);
-    return error ? error.message : '';
-  };
+  const [showDistrito, setShowDistrito] = useState(false);
+  const [showBairro, setShowBairro] = useState(false);
+  const [showEndereco, setShowEndereco] = useState(false);
 
-  const [showTelefone, setShowTelefone] = useState(!!formData.nome_solicitante);
-  const [showEmail, setShowEmail] = useState(!!formData.telefone_solicitante);
-
+  // Check email to determine if we should show district selection
   useEffect(() => {
-    if (formData.nome_solicitante) setShowTelefone(true);
-    if (formData.telefone_solicitante) setShowEmail(true);
-  }, [formData.nome_solicitante, formData.telefone_solicitante]);
-
-  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleChange(e);
-    if (e.target.value) setShowTelefone(true);
-  };
-
-  const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Formatação do telefone
-    const value = e.target.value.replace(/\D/g, '');
-    let formattedValue = '';
+    const emailIsValid = formData.email_solicitante && formData.email_solicitante.trim() !== '';
+    setShowDistrito(emailIsValid);
     
-    if (value.length <= 2) {
-      formattedValue = value;
-    } else if (value.length <= 6) {
-      formattedValue = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-    } else if (value.length <= 10) {
-      formattedValue = `(${value.slice(0, 2)}) ${value.slice(2, value.length > 10 ? 7 : 6)}-${value.slice(value.length > 10 ? 7 : 6)}`;
-    } else {
-      formattedValue = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7, 11)}`;
+    // If email becomes invalid, hide subsequent fields
+    if (!emailIsValid) {
+      setShowBairro(false);
+      setShowEndereco(false);
     }
-    
-    const syntheticEvent = {
-      ...e,
-      target: {
-        ...e.target,
-        name: 'telefone_solicitante',
-        value: formattedValue
-      }
-    };
-    
-    handleChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
-    if (formattedValue) setShowEmail(true);
-  };
+  }, [formData.email_solicitante]);
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleChange(e);
-  };
+  // Check district to determine if we should show neighborhood selection
+  useEffect(() => {
+    const distritoIsValid = selectedDistrito && selectedDistrito.trim() !== '';
+    setShowBairro(distritoIsValid && showDistrito);
+    
+    // If district becomes invalid, hide address field
+    if (!distritoIsValid) {
+      setShowEndereco(false);
+    }
+  }, [selectedDistrito, showDistrito]);
+
+  // Check bairro_id to determine if we should show address field
+  useEffect(() => {
+    const bairroIsValid = formData.bairro_id && formData.bairro_id.trim() !== '';
+    setShowEndereco(bairroIsValid && showBairro);
+  }, [formData.bairro_id, showBairro]);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label 
-          htmlFor="nome_solicitante" 
-          className={`${hasError('nome_solicitante') ? 'text-orange-500 font-semibold' : ''}`}
-        >
-          Quem enviou a solicitação?
-        </Label>
-        <Input 
-          id="nome_solicitante" 
-          name="nome_solicitante" 
-          value={formData.nome_solicitante} 
-          onChange={handleNomeChange} 
-          className={`rounded-xl ${hasError('nome_solicitante') ? 'border-orange-500' : ''}`}
-          placeholder="Nome do solicitante"
-        />
-        {hasError('nome_solicitante') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('nome_solicitante')}</p>
-        )}
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Informações do Solicitante</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label 
+              htmlFor="nome_solicitante" 
+              className={`${hasFieldError('nome_solicitante', errors) ? 'text-orange-500 font-semibold' : ''}`}
+            >
+              Nome do Solicitante {hasFieldError('nome_solicitante', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <Input
+              id="nome_solicitante"
+              name="nome_solicitante"
+              value={formData.nome_solicitante}
+              onChange={handleChange}
+              className={`${hasFieldError('nome_solicitante', errors) ? 'border-orange-500' : ''}`}
+            />
+            {hasFieldError('nome_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('nome_solicitante', errors)}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label 
+              htmlFor="telefone_solicitante"
+              className={`${hasFieldError('telefone_solicitante', errors) ? 'text-orange-500 font-semibold' : ''}`}
+            >
+              Telefone {hasFieldError('telefone_solicitante', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <Input
+              id="telefone_solicitante"
+              name="telefone_solicitante"
+              value={formData.telefone_solicitante}
+              onChange={handleChange}
+              placeholder="(00) 00000-0000"
+              className={`${hasFieldError('telefone_solicitante', errors) ? 'border-orange-500' : ''}`}
+            />
+            {hasFieldError('telefone_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante', errors)}</p>
+            )}
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label 
+              htmlFor="email_solicitante"
+              className={`${hasFieldError('email_solicitante', errors) ? 'text-orange-500 font-semibold' : ''}`}
+            >
+              Email {hasFieldError('email_solicitante', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <Input
+              id="email_solicitante"
+              name="email_solicitante"
+              type="email"
+              value={formData.email_solicitante}
+              onChange={handleChange}
+              className={`${hasFieldError('email_solicitante', errors) ? 'border-orange-500' : ''}`}
+            />
+            {hasFieldError('email_solicitante', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('email_solicitante', errors)}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label 
+              htmlFor="veiculo_imprensa"
+              className={`${hasFieldError('veiculo_imprensa', errors) ? 'text-orange-500 font-semibold' : ''}`}
+            >
+              Veículo de Imprensa {hasFieldError('veiculo_imprensa', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <Input
+              id="veiculo_imprensa"
+              name="veiculo_imprensa"
+              value={formData.veiculo_imprensa}
+              onChange={handleChange}
+              className={`${hasFieldError('veiculo_imprensa', errors) ? 'border-orange-500' : ''}`}
+            />
+            {hasFieldError('veiculo_imprensa', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('veiculo_imprensa', errors)}</p>
+            )}
+          </div>
+        </div>
       </div>
-
-      {showTelefone && (
-        <div className="animate-fadeIn">
-          <Label 
-            htmlFor="telefone_solicitante" 
-            className={`${hasError('telefone_solicitante') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Qual o telefone?
-          </Label>
-          <Input 
-            id="telefone_solicitante" 
-            name="telefone_solicitante" 
-            value={formData.telefone_solicitante} 
-            onChange={handleTelefoneChange} 
-            className={`rounded-xl ${hasError('telefone_solicitante') ? 'border-orange-500' : ''}`}
-            placeholder="(00) 00000-0000"
-            maxLength={15}
-          />
-          {hasError('telefone_solicitante') && (
-            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('telefone_solicitante')}</p>
-          )}
-        </div>
-      )}
-
-      {showEmail && (
-        <div className="animate-fadeIn">
-          <Label 
-            htmlFor="email_solicitante" 
-            className={`${hasError('email_solicitante') ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            E o e-mail?
-          </Label>
-          <Input 
-            id="email_solicitante" 
-            name="email_solicitante" 
-            type="email"
-            value={formData.email_solicitante} 
-            onChange={handleEmailChange} 
-            className={`rounded-xl ${hasError('email_solicitante') ? 'border-orange-500' : ''}`}
-            placeholder="email@exemplo.com"
-          />
-          {hasError('email_solicitante') && (
-            <p className="text-orange-500 text-sm mt-1">{getErrorMessage('email_solicitante')}</p>
-          )}
-        </div>
-      )}
       
-      {/* Location selection section with the districts and neighborhoods as buttons */}
-      <LocationStep
-        formData={formData}
-        handleChange={handleChange}
-        handleSelectChange={handleSelectChange}
-        distritos={distritos}
-        selectedDistrito={selectedDistrito}
-        setSelectedDistrito={setSelectedDistrito}
-        filteredBairros={filteredBairros}
-        errors={errors}
-      />
+      {showDistrito && (
+        <div className="space-y-4 animate-fadeIn">
+          <h3 className="text-lg font-semibold">Localização</h3>
+          
+          <div>
+            <Label 
+              htmlFor="distrito" 
+              className={`block mb-2 ${hasFieldError('distrito', errors) ? 'text-orange-500 font-semibold' : ''}`}
+            >
+              Distrito {hasFieldError('distrito', errors) && <span className="text-orange-500">*</span>}
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {distritos.map(distrito => (
+                <Button 
+                  key={distrito.id} 
+                  type="button" 
+                  variant={selectedDistrito === distrito.id ? "default" : "outline"} 
+                  className="h-auto py-2 px-3"
+                  onClick={() => setSelectedDistrito(distrito.id)}
+                >
+                  {distrito.nome}
+                </Button>
+              ))}
+            </div>
+            {hasFieldError('distrito', errors) && (
+              <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('distrito', errors)}</p>
+            )}
+          </div>
+          
+          {showBairro && (
+            <div className="animate-fadeIn">
+              <Label 
+                htmlFor="bairro_id" 
+                className={`block mb-2 ${hasFieldError('bairro_id', errors) ? 'text-orange-500 font-semibold' : ''}`}
+              >
+                Bairro {hasFieldError('bairro_id', errors) && <span className="text-orange-500">*</span>}
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {filteredBairros.map(bairro => (
+                  <Button 
+                    key={bairro.id} 
+                    type="button" 
+                    variant={formData.bairro_id === bairro.id ? "default" : "outline"} 
+                    className="h-auto py-2 px-3"
+                    onClick={() => handleSelectChange('bairro_id', bairro.id)}
+                  >
+                    {bairro.nome}
+                  </Button>
+                ))}
+              </div>
+              {hasFieldError('bairro_id', errors) && (
+                <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('bairro_id', errors)}</p>
+              )}
+            </div>
+          )}
+          
+          {showEndereco && (
+            <div className="animate-fadeIn">
+              <Label 
+                htmlFor="endereco"
+                className={`${hasFieldError('endereco', errors) ? 'text-orange-500 font-semibold' : ''}`}
+              >
+                Endereço {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
+              </Label>
+              <Input
+                id="endereco"
+                name="endereco"
+                value={formData.endereco}
+                onChange={handleChange}
+                placeholder="Ex: Rua Example, 123"
+                className={`${hasFieldError('endereco', errors) ? 'border-orange-500' : ''}`}
+              />
+              {hasFieldError('endereco', errors) && (
+                <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('endereco', errors)}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
