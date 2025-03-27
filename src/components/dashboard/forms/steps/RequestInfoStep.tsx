@@ -34,7 +34,7 @@ const RequestInfoStep: React.FC<RequestInfoStepProps> = ({
           name="detalhes_solicitacao"
           value={formData.detalhes_solicitacao || ''}
           onChange={handleChange}
-          placeholder="Descreva com detalhes a situação"
+          placeholder="Digite aqui..."
           className={`min-h-[150px] ${hasError('detalhes_solicitacao') ? 'border-red-500' : ''}`}
         />
         {hasError('detalhes_solicitacao') && (

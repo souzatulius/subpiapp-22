@@ -134,6 +134,20 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
       )}
       
       {hasError('servico_id') && <p className="text-orange-500 text-sm mt-1">{getErrorMessage('servico_id')}</p>}
+
+      {onDontKnow && !selectedService && (
+        <div className="mt-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm" 
+            className="text-orange-600 hover:bg-orange-50 hover:text-orange-700 p-0 h-auto"
+            onClick={onDontKnow}
+          >
+            Não sei o serviço específico
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

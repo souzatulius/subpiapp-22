@@ -32,7 +32,7 @@ const DetalhesInput: React.FC<DetalhesInputProps> = ({
         onChange={handleChange}
         rows={5}
         className={hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}
-        placeholder="Descreva os detalhes da solicitação..."
+        placeholder="Digite aqui..."
       />
       {hasError('detalhes_solicitacao') && (
         <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>

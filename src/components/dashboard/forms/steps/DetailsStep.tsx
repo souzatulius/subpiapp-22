@@ -134,7 +134,7 @@ const DetailsStep: React.FC<DetailsStepProps> = ({
           value={formData.detalhes_solicitacao} 
           onChange={handleChange} 
           className={`min-h-[150px] rounded-xl ${hasError('detalhes_solicitacao') ? 'border-orange-500' : ''}`}
-          placeholder="Descreva detalhadamente a solicitação..."
+          placeholder="Digite aqui..."
         />
         {hasError('detalhes_solicitacao') && (
           <p className="text-orange-500 text-sm mt-1">{getErrorMessage('detalhes_solicitacao')}</p>

@@ -1,6 +1,8 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
+import { generateTitleSuggestion } from '../../components/dashboard/forms/steps/organize/utils';
 
 const FORM_STORAGE_KEY = 'demandForm_state';
 
@@ -103,38 +105,31 @@ export const useDemandFormState = (
     fetchServicos();
   }, [formData.problema_id, problemas]);
 
+  // Update title suggestion based on selected values
   useEffect(() => {
-    if (activeStep === 6) {
-      generateTitleSuggestion();
-    }
-  }, [activeStep, formData.problema_id, formData.bairro_id, formData.servico_id]);
-
-  const generateTitleSuggestion = () => {
-    if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 6) {
-      let suggestedTitle = '';
-      
-      const selectedService = servicos.find(s => s.id === formData.servico_id);
-      const selectedProblem = problemas.find(p => p.id === formData.problema_id);
-      const selectedBairro = bairros.find(b => b.id === formData.bairro_id);
-      
-      if (selectedService && !formData.nao_sabe_servico) {
-        suggestedTitle = selectedService.descricao;
-      } else if (selectedProblem) {
-        suggestedTitle = selectedProblem.descricao;
-      }
-      
-      if (selectedBairro) {
-        suggestedTitle += ` - ${selectedBairro.nome}`;
-      }
-      
-      if (suggestedTitle) {
-        setFormData(prev => ({
-          ...prev,
-          titulo: suggestedTitle
-        }));
+    // Only update title if problem, service, bairro, or address changes
+    if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
+      // Only auto-generate if title is empty or we're on step 3
+      if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 3) {
+        const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
+        if (suggestedTitle) {
+          setFormData(prev => ({
+            ...prev,
+            titulo: suggestedTitle
+          }));
+        }
       }
     }
-  };
+  }, [
+    formData.problema_id, 
+    formData.servico_id, 
+    formData.bairro_id, 
+    formData.endereco, 
+    activeStep,
+    problemas,
+    servicos,
+    filteredBairros
+  ]);
 
   useEffect(() => {
     if (selectedDistrito) {
