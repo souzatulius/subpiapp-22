@@ -1,11 +1,12 @@
-
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+
 import { useDemandasData } from './hooks/useDemandasData';
 import { useRespostaForm } from './hooks/useRespostaForm';
 import { ViewMode } from './types';
+
 import DemandasFilter from './components/DemandasFilter';
 import DemandaList from './components/DemandaList';
 import DemandaGrid from './components/DemandaGrid';
@@ -14,7 +15,7 @@ import RespostaForm from './components/RespostaForm';
 const ResponderDemandaContent: React.FC = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  
+
   const {
     demandas,
     setDemandas,
@@ -30,7 +31,7 @@ const ResponderDemandaContent: React.FC = () => {
     setAreaFilter,
     prioridadeFilter,
     setPrioridadeFilter,
-    handleSelectDemanda
+    handleSelectDemanda,
   } = useDemandasData();
 
   const {
@@ -39,7 +40,7 @@ const ResponderDemandaContent: React.FC = () => {
     comentarios,
     setComentarios,
     isLoading,
-    handleSubmitResposta
+    handleSubmitResposta,
   } = useRespostaForm(
     selectedDemanda,
     setSelectedDemanda,
@@ -55,20 +56,18 @@ const ResponderDemandaContent: React.FC = () => {
 
   return (
     <div className="animate-fade-in">
-      <Card className="border border-gray-200 mb-4">
-        <CardHeader className="pb-2 border-b">
-          <CardTitle className="text-xl font-semibold text-[#003570] flex justify-between items-center">
-            <span>Responder Demandas</span>
-            <Button 
-              variant="outline" 
-              onClick={handleNavigateToConsultar}
-              className="text-sm"
-            >
-              Consultar Outras Demandas
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
+      <Card className="border border-gray-200 mb-4 shadow-sm rounded-lg">
+        <div className="flex justify-end p-4 border-b border-gray-100">
+          <Button
+            variant="outline"
+            onClick={handleNavigateToConsultar}
+            className="text-sm rounded-md"
+          >
+            Consultar Outras Demandas
+          </Button>
+        </div>
+
+        <CardContent className="p-6 space-y-6">
           {!selectedDemanda && (
             <DemandasFilter
               searchTerm={searchTerm}
@@ -82,7 +81,7 @@ const ResponderDemandaContent: React.FC = () => {
               areas={areas}
             />
           )}
-          
+
           {selectedDemanda ? (
             <RespostaForm
               selectedDemanda={selectedDemanda}
@@ -94,22 +93,20 @@ const ResponderDemandaContent: React.FC = () => {
               isLoading={isLoading}
               onSubmit={handleSubmitResposta}
             />
+          ) : viewMode === 'cards' ? (
+            <DemandaGrid
+              demandas={filteredDemandas}
+              selectedDemanda={selectedDemanda}
+              handleSelectDemanda={handleSelectDemanda}
+              isLoading={isLoadingDemandas}
+            />
           ) : (
-            viewMode === 'cards' ? (
-              <DemandaGrid
-                demandas={filteredDemandas}
-                selectedDemanda={selectedDemanda}
-                handleSelectDemanda={handleSelectDemanda}
-                isLoading={isLoadingDemandas}
-              />
-            ) : (
-              <DemandaList
-                demandas={filteredDemandas}
-                selectedDemanda={selectedDemanda}
-                handleSelectDemanda={handleSelectDemanda}
-                isLoading={isLoadingDemandas}
-              />
-            )
+            <DemandaList
+              demandas={filteredDemandas}
+              selectedDemanda={selectedDemanda}
+              handleSelectDemanda={handleSelectDemanda}
+              isLoading={isLoadingDemandas}
+            />
           )}
         </CardContent>
       </Card>
