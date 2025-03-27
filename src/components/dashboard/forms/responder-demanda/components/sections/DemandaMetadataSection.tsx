@@ -2,9 +2,11 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, User, Calendar, Clock, BookOpen, MessageSquare } from 'lucide-react';
 import { renderIcon } from '@/components/settings/problems/renderIcon';
+
 interface DemandaMetadataSectionProps {
   selectedDemanda: any;
 }
+
 const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
   selectedDemanda
 }) => {
@@ -15,7 +17,9 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
     hour: '2-digit',
     minute: '2-digit'
   }) : 'Não definido';
-  return <div className="space-y-4">
+
+  return (
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         {selectedDemanda.tema && <Badge className="px-3 py-1.5 flex items-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full">
             <span className="flex-shrink-0">
@@ -44,42 +48,55 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          {selectedDemanda.endereco && <div className="flex items-start gap-2 text-gray-700">
-              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-              <span className="font-medium">{selectedDemanda.endereco}</span>
-            </div>}
-          
-          {selectedDemanda.bairro && <div className="flex items-start gap-2 text-gray-700">
-              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-              <div>
-                <span className="text-sm text-gray-500">Bairro:</span>
-                <p className="font-medium">{selectedDemanda.bairro.nome || selectedDemanda.bairro}</p>
-              </div>
-            </div>}
-          
-          {selectedDemanda.distrito && <div className="flex items-start gap-2 text-gray-700">
-              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-              <div>
-                <span className="text-sm text-gray-500">Distrito:</span>
-                <p className="font-medium">{selectedDemanda.distrito.nome || selectedDemanda.distrito}</p>
-              </div>
-            </div>}
-          
-          {selectedDemanda.protocolo && <div className="flex items-start gap-2 text-gray-700">
-              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
-              <div>
-                <span className="text-sm text-gray-500">Protocolo:</span>
-                <p className="font-medium">{selectedDemanda.protocolo}</p>
-              </div>
-            </div>}
-          
-          {selectedDemanda.autor?.nome_completo && <div className="flex items-start gap-2 text-gray-700">
+          {selectedDemanda.autor?.nome_completo && (
+            <div className="flex items-start gap-2 text-gray-700">
               <User className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
               <div>
                 <span className="text-sm text-gray-500">Autor:</span>
                 <p className="font-medium">{selectedDemanda.autor.nome_completo}</p>
               </div>
-            </div>}
+            </div>
+          )}
+          
+          {selectedDemanda.bairro && (
+            <div className="flex items-start gap-2 text-gray-700">
+              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-gray-500">Bairro:</span>
+                <p className="font-medium">{selectedDemanda.bairro.nome || selectedDemanda.bairro}</p>
+              </div>
+            </div>
+          )}
+          
+          {selectedDemanda.distrito && (
+            <div className="flex items-start gap-2 text-gray-700">
+              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-gray-500">Distrito:</span>
+                <p className="font-medium">{selectedDemanda.distrito.nome || selectedDemanda.distrito}</p>
+              </div>
+            </div>
+          )}
+          
+          {selectedDemanda.protocolo && (
+            <div className="flex items-start gap-2 text-gray-700">
+              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-gray-500">Protocolo:</span>
+                <p className="font-medium">{selectedDemanda.protocolo}</p>
+              </div>
+            </div>
+          )}
+          
+          {selectedDemanda.endereco && (
+            <div className="flex items-start gap-2 text-gray-700">
+              <MapPin className="h-5 w-5 text-subpi-blue flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-gray-500">Endereço:</span>
+                <p className="font-medium">{selectedDemanda.endereco}</p>
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -119,6 +136,8 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
             </div>}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default DemandaMetadataSection;
