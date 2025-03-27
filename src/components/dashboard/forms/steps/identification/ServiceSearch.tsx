@@ -1,15 +1,13 @@
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Search, X } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
-import { Search, X, ChevronDown } from 'lucide-react';
 import { hasFieldError, getFieldErrorMessage } from './ValidationUtils';
 
-interface ServiceSearchProps {
+export interface ServiceSearchProps {
   servicos: any[];
   filteredServicos: any[];
   selectedServico: string;
@@ -18,7 +16,7 @@ interface ServiceSearchProps {
   onSearchChange: (value: string) => void;
   onServiceSelect: (serviceId: string) => void;
   onToggleNaoSabe: (checked: boolean) => void;
-  errors?: ValidationError[];
+  errors: ValidationError[];
 }
 
 const ServiceSearch: React.FC<ServiceSearchProps> = ({
@@ -30,117 +28,113 @@ const ServiceSearch: React.FC<ServiceSearchProps> = ({
   onSearchChange,
   onServiceSelect,
   onToggleNaoSabe,
-  errors = []
+  errors
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   
+  // Find the selected service
   const selectedServiceObj = servicos.find(s => s.id === selectedServico);
-  
+
+  // Handle outside click to close results
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Handle search input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.target.value);
+    setShowResults(true);
+  };
+
+  // Handle service selection
+  const handleSelectService = (serviceId: string) => {
+    onServiceSelect(serviceId);
+    setShowResults(false);
+    if (naoSabeServico) {
+      onToggleNaoSabe(false);
+    }
+  };
+
+  // Handle removing selected service
+  const handleRemoveService = () => {
+    onServiceSelect('');
+  };
+
   return (
     <div className="space-y-3">
       <Label 
         htmlFor="servico_id" 
-        className={`block text-base font-medium ${hasFieldError('servico_id', errors) ? 'text-orange-500' : ''}`}
+        className={`form-question-title ${hasFieldError('servico_id', errors) ? 'text-orange-500 font-semibold' : ''}`}
       >
-        Serviço {hasFieldError('servico_id', errors) && <span className="text-orange-500">*</span>}
+        Qual serviço está relacionado? {hasFieldError('servico_id', errors) && <span className="text-orange-500">*</span>}
       </Label>
       
-      {selectedServiceObj ? (
-        <div className="flex items-center">
-          <Badge className="px-3 py-2 bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center">
-            {selectedServiceObj.descricao}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-5 w-5 p-0 ml-2 text-blue-700 hover:text-blue-900 hover:bg-transparent"
-              onClick={() => onServiceSelect('')}
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </Badge>
-        </div>
-      ) : (
-        <div className="relative">
-          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <PopoverTrigger asChild>
-              <div className="w-full bg-white border border-gray-300 rounded-xl shadow-sm flex items-center transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-subpi-blue focus-within:ring-offset-1">
-                <Search className="h-5 w-5 text-gray-400 ml-4 mr-2 flex-shrink-0" />
-                <Input 
-                  type="text" 
-                  name="serviceSearch" 
-                  value={searchQuery} 
-                  onChange={(e) => onSearchChange(e.target.value)} 
-                  onClick={() => setIsPopoverOpen(true)}
-                  className={`flex-1 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 ${hasFieldError('servico_id', errors) ? 'placeholder-orange-300' : ''}`} 
-                  placeholder="Pesquisar serviço" 
-                />
-                <Button 
-                  type="button"
-                  variant="ghost" 
-                  className="h-full px-4 border-l border-gray-200"
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                >
-                  <ChevronDown className="h-4 w-4 text-gray-500" />
-                </Button>
-              </div>
-            </PopoverTrigger>
-            <PopoverContent 
-              className="w-[calc(100%-2rem)] p-0 max-w-none bg-white rounded-xl shadow-lg border border-gray-200" 
-              align="center"
-              sideOffset={5}
-            >
-              <div className="max-h-60 overflow-y-auto">
+      <div ref={searchRef} className="relative">
+        {!selectedServiceObj && !naoSabeServico ? (
+          <>
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Pesquisar serviço..."
+                value={searchQuery}
+                onChange={handleInputChange}
+                onFocus={() => setShowResults(true)}
+                className={`pr-10 ${hasFieldError('servico_id', errors) ? 'border-orange-500' : ''}`}
+                disabled={naoSabeServico}
+              />
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            </div>
+            
+            {showResults && searchQuery && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                 {filteredServicos.length > 0 ? (
                   filteredServicos.map(service => (
-                    <Button 
-                      key={service.id} 
-                      variant="ghost" 
-                      className="w-full justify-start px-4 py-3 text-left hover:bg-blue-50 rounded-none"
-                      onClick={() => {
-                        onServiceSelect(service.id);
-                        setIsPopoverOpen(false);
-                      }}
+                    <Button
+                      key={service.id}
+                      variant="ghost"
+                      className="w-full justify-start text-left px-3 py-2 text-sm hover:bg-orange-100"
+                      onClick={() => handleSelectService(service.id)}
                     >
                       {service.descricao}
                     </Button>
                   ))
                 ) : (
-                  <p className="p-4 text-sm text-gray-500">Nenhum serviço encontrado</p>
+                  <div className="px-3 py-2 text-sm text-gray-500">Nenhum serviço encontrado</div>
                 )}
-                
-                <div className="border-t border-gray-200 my-1"></div>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start px-4 py-3 text-left text-orange-600 hover:bg-orange-50 hover:text-orange-700 rounded-none"
-                  onClick={() => {
-                    onToggleNaoSabe(!naoSabeServico);
-                    setIsPopoverOpen(false);
-                  }}
-                >
-                  Não sei informar o serviço
-                </Button>
               </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      )}
+            )}
+          </>
+        ) : (
+          <div className="flex items-center bg-gray-100 p-2 rounded-md">
+            <span className="flex-1 text-gray-800">
+              {selectedServiceObj?.descricao || (naoSabeServico ? "Serviço não especificado" : "")}
+            </span>
+            {!naoSabeServico && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveService}
+                className="text-gray-500 hover:text-red-500"
+              >
+                <X size={16} />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
       
       {hasFieldError('servico_id', errors) && (
         <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('servico_id', errors)}</p>
-      )}
-
-      {!selectedServiceObj && (
-        <div className="mt-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm" 
-            className="text-orange-600 hover:bg-orange-50 hover:text-orange-700 p-0 h-auto"
-            onClick={() => onToggleNaoSabe(!naoSabeServico)}
-          >
-            Não sei o serviço específico
-          </Button>
-        </div>
       )}
     </div>
   );

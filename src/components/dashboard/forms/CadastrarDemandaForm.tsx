@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -107,12 +106,14 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       <Card className="border border-gray-200 rounded-lg">
         <div className="p-6">
           <div className="mb-6">
-            <h3 className="text-lg font-medium">
+            <h3 className="form-step-title">
               {FORM_STEPS[activeStep].title}
             </h3>
-            <p className="text-sm text-gray-500">
-              {FORM_STEPS[activeStep].description}
-            </p>
+            {FORM_STEPS[activeStep].description && (
+              <p className="text-sm text-gray-500">
+                {FORM_STEPS[activeStep].description}
+              </p>
+            )}
           </div>
           
           <div className="mb-6">

@@ -1,16 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ClockIcon } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { hasFieldError, getFieldErrorMessage } from '@/components/dashboard/forms/steps/identification/ValidationUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -18,188 +12,162 @@ interface PriorityDeadlineStepProps {
     prazo_resposta: string;
   };
   handleSelectChange: (name: string, value: string) => void;
-  errors?: ValidationError[];
+  errors: ValidationError[];
 }
 
 const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   formData,
   handleSelectChange,
-  errors = []
+  errors
 }) => {
-  const [date, setDate] = useState<Date | undefined>(
-    formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined
-  );
+  // Format the date for the input value (YYYY-MM-DD format)
+  let dateValue = '';
+  let timeHours = '';
+  let timeMinutes = '';
   
-  const [selectedHour, setSelectedHour] = useState<string>("12");
-  const [selectedMinute, setSelectedMinute] = useState<string>("00");
-  
-  useEffect(() => {
-    // Initialize time from existing date if available
-    if (date) {
-      setSelectedHour(date.getHours().toString().padStart(2, '0'));
-      setSelectedMinute(date.getMinutes() >= 30 ? "30" : "00");
+  if (formData.prazo_resposta) {
+    try {
+      const date = new Date(formData.prazo_resposta);
+      if (!isNaN(date.getTime())) {
+        dateValue = date.toISOString().split('T')[0];
+        timeHours = date.getHours().toString().padStart(2, '0');
+        timeMinutes = date.getMinutes().toString().padStart(2, '0');
+      }
+    } catch (error) {
+      console.error('Error parsing date:', error);
     }
-  }, []);
-  
-  const hasError = (field: string) => errors.some(err => err.field === field);
-  
-  // Generate available hours (6-22)
-  const hours = Array.from({ length: 17 }, (_, i) => i + 6);
+  }
 
-  // Handle date and time selection
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (selectedDate) {
-      const newDate = new Date(selectedDate);
-      
-      // Set the time part
-      newDate.setHours(parseInt(selectedHour));
-      newDate.setMinutes(parseInt(selectedMinute));
-      newDate.setSeconds(0);
-      newDate.setMilliseconds(0);
-      
-      setDate(newDate);
-      handleSelectChange('prazo_resposta', newDate.toISOString());
-    } else {
-      setDate(undefined);
+  // Handle date change
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    if (!newDate) {
       handleSelectChange('prazo_resposta', '');
+      return;
+    }
+    
+    try {
+      // Combine the new date with the existing time or default to midnight
+      const date = new Date(newDate);
+      const hours = timeHours ? parseInt(timeHours) : 0;
+      const minutes = timeMinutes ? parseInt(timeMinutes) : 0;
+      
+      date.setHours(hours, minutes, 0, 0);
+      handleSelectChange('prazo_resposta', date.toISOString());
+    } catch (error) {
+      console.error('Error setting date:', error);
     }
   };
 
   // Handle time change
-  const handleTimeChange = (type: 'hour' | 'minute', value: string) => {
-    if (type === 'hour') {
-      setSelectedHour(value);
-    } else {
-      setSelectedMinute(value);
-    }
+  const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
+    if (!dateValue) return;
     
-    if (date) {
-      const newDate = new Date(date);
+    try {
+      const date = new Date(dateValue);
+      const hours = type === 'hours' ? parseInt(value) : (timeHours ? parseInt(timeHours) : 0);
+      const minutes = type === 'minutes' ? parseInt(value) : (timeMinutes ? parseInt(timeMinutes) : 0);
       
-      if (type === 'hour') {
-        newDate.setHours(parseInt(value));
-      } else {
-        newDate.setMinutes(parseInt(value));
-      }
+      date.setHours(hours, minutes, 0, 0);
+      handleSelectChange('prazo_resposta', date.toISOString());
       
-      setDate(newDate);
-      handleSelectChange('prazo_resposta', newDate.toISOString());
+      if (type === 'hours') timeHours = value;
+      if (type === 'minutes') timeMinutes = value;
+    } catch (error) {
+      console.error('Error setting time:', error);
     }
   };
 
+  // Generate hour and minute options
+  const hourOptions = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+
   return (
-    <div className="space-y-6">
-      {/* Priority selection */}
+    <div className="space-y-4">
       <div>
         <Label 
           htmlFor="prioridade" 
-          className={`block mb-2 ${hasFieldError('prioridade', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          className={`form-question-title ${hasFieldError('prioridade', errors) ? 'text-orange-500 font-semibold' : ''}`}
         >
           Prioridade {hasFieldError('prioridade', errors) && <span className="text-orange-500">*</span>}
         </Label>
-        
-        <ToggleGroup 
-          type="single" 
-          variant="outline"
-          value={formData.prioridade} 
-          onValueChange={(value) => value && handleSelectChange('prioridade', value)}
-          className="justify-start"
-        >
-          <ToggleGroupItem 
-            value="baixa" 
-            className={`rounded-xl ${formData.prioridade === 'baixa' ? 'bg-green-100 border-green-500 text-green-700' : ''}`}
+        <div className="flex gap-3">
+          <Button 
+            type="button" 
+            variant={formData.prioridade === 'baixa' ? "default" : "outline"} 
+            className={`selection-button rounded-xl ${
+              formData.prioridade === 'baixa' ? "bg-green-500 text-white hover:bg-green-600" : "hover:bg-green-500 hover:text-white"
+            }`}
+            onClick={() => handleSelectChange('prioridade', 'baixa')}
           >
             Baixa
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="media" 
-            className={`rounded-xl ${formData.prioridade === 'media' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' : ''}`}
+          </Button>
+          <Button 
+            type="button" 
+            variant={formData.prioridade === 'media' ? "default" : "outline"} 
+            className={`selection-button rounded-xl ${
+              formData.prioridade === 'media' ? "bg-yellow-500 text-white hover:bg-yellow-600" : "hover:bg-yellow-500 hover:text-white"
+            }`}
+            onClick={() => handleSelectChange('prioridade', 'media')}
           >
             Média
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="alta" 
-            className={`rounded-xl ${formData.prioridade === 'alta' ? 'bg-red-100 border-red-500 text-red-700' : ''}`}
+          </Button>
+          <Button 
+            type="button" 
+            variant={formData.prioridade === 'alta' ? "default" : "outline"} 
+            className={`selection-button rounded-xl ${
+              formData.prioridade === 'alta' ? "bg-red-500 text-white hover:bg-red-600" : "hover:bg-red-500 hover:text-white"
+            }`}
+            onClick={() => handleSelectChange('prioridade', 'alta')}
           >
             Alta
-          </ToggleGroupItem>
-        </ToggleGroup>
-        
+          </Button>
+        </div>
         {hasFieldError('prioridade', errors) && (
           <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('prioridade', errors)}</p>
         )}
       </div>
 
-      {/* Deadline selection */}
       <div>
         <Label 
           htmlFor="prazo_resposta" 
-          className={`block mb-2 ${hasFieldError('prazo_resposta', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          className={`form-question-title ${hasFieldError('prazo_resposta', errors) ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Prazo para Resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
+          Prazo para resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
         </Label>
-        <div className="flex space-x-2 max-w-xl">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={`w-56 justify-start text-left font-normal ${
-                  hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''
-                }`}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP", { locale: ptBR }) : (
-                  <span>Selecione uma data</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 pointer-events-auto">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={handleDateSelect}
-                locale={ptBR}
-                initialFocus
-                className="pointer-events-auto"
-                disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))}
-              />
-            </PopoverContent>
-          </Popover>
-
-          <div className="flex items-center space-x-2">
-            <Select 
-              value={selectedHour} 
-              onValueChange={(value) => handleTimeChange('hour', value)}
-              disabled={!date}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue placeholder="Hora" />
-              </SelectTrigger>
-              <SelectContent>
-                {hours.map(hour => (
-                  <SelectItem key={hour} value={hour.toString().padStart(2, '0')}>
-                    {hour.toString().padStart(2, '0')}h
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <span>:</span>
-            
-            <Select 
-              value={selectedMinute} 
-              onValueChange={(value) => handleTimeChange('minute', value)}
-              disabled={!date}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue placeholder="Min" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="00">00min</SelectItem>
-                <SelectItem value="30">30min</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex gap-2 items-center">
+          <input
+            type="date"
+            id="prazo_resposta_date"
+            name="prazo_resposta_date"
+            value={dateValue}
+            onChange={handleDateChange}
+            className={`rounded-xl p-2 border border-gray-300 ${hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}`}
+          />
+          
+          <Select value={timeHours} onValueChange={(value) => handleTimeChange('hours', value)}>
+            <SelectTrigger className="w-[80px] rounded-xl">
+              <SelectValue placeholder="HH" />
+            </SelectTrigger>
+            <SelectContent>
+              {hourOptions.map(hour => (
+                <SelectItem key={hour} value={hour}>{hour}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <span>:</span>
+          
+          <Select value={timeMinutes} onValueChange={(value) => handleTimeChange('minutes', value)}>
+            <SelectTrigger className="w-[80px] rounded-xl">
+              <SelectValue placeholder="MM" />
+            </SelectTrigger>
+            <SelectContent>
+              {minuteOptions.map(minute => (
+                <SelectItem key={minute} value={minute}>{minute}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         {hasFieldError('prazo_resposta', errors) && (
           <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('prazo_resposta', errors)}</p>

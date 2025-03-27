@@ -1,171 +1,127 @@
 
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import DataEntryForm from '../DataEntryForm';
-import { mediaTypeSchema, MediaType } from '@/hooks/useMediaTypes';
-import MediaTypeButton from './MediaTypeButton';
-import { useMediaTypes } from '@/hooks/useMediaTypes';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
-import { Search, Image } from 'lucide-react';
-import IconSelector from '../IconSelector';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Newspaper, Radio, Tv, Smartphone, Mail, MessageSquare, Globe, 
+  Instagram, Facebook, Twitter, Youtube, Image, FileText,
+  LucideIcon
+} from 'lucide-react';
+
+const formSchema = z.object({
+  descricao: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres'),
+  icone: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface MediaTypeFormProps {
-  onSubmit: (data: { descricao: string; icone?: string }) => Promise<void>;
+  onSubmit: (data: FormValues) => Promise<void>;
   onCancel: () => void;
-  defaultValue?: string;
-  defaultIcon?: string;
+  initialValues?: FormValues;
   isSubmitting: boolean;
-  submitText?: string;
 }
 
 const MediaTypeForm: React.FC<MediaTypeFormProps> = ({
   onSubmit,
   onCancel,
-  defaultValue = '',
-  defaultIcon = '',
-  isSubmitting,
-  submitText = 'Salvar'
+  initialValues = { descricao: '', icone: '' },
+  isSubmitting
 }) => {
-  const { mediaTypes } = useMediaTypes();
-  const [selectedType, setSelectedType] = useState<string | null>(defaultValue);
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(defaultIcon);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(defaultValue !== '' && !mediaTypes.some(type => type.descricao === defaultValue));
-  const [showIconSelector, setShowIconSelector] = useState(false);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: initialValues
+  });
 
-  // Filter media types based on search term
-  const filteredMediaTypes = mediaTypes.filter(type => 
-    type.descricao.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const iconOptions = [
+    { name: 'Jornal', value: 'Newspaper', icon: Newspaper },
+    { name: 'Rádio', value: 'Radio', icon: Radio },
+    { name: 'TV', value: 'Tv', icon: Tv },
+    { name: 'Aplicativo', value: 'Smartphone', icon: Smartphone },
+    { name: 'Email', value: 'Mail', icon: Mail },
+    { name: 'Mensagem', value: 'MessageSquare', icon: MessageSquare },
+    { name: 'Site', value: 'Globe', icon: Globe },
+    { name: 'Instagram', value: 'Instagram', icon: Instagram },
+    { name: 'Facebook', value: 'Facebook', icon: Facebook },
+    { name: 'Twitter', value: 'Twitter', icon: Twitter },
+    { name: 'Youtube', value: 'Youtube', icon: Youtube },
+    { name: 'Documento', value: 'FileText', icon: FileText },
+    { name: 'Imagem', value: 'Image', icon: Image },
+  ];
 
-  const handleTypeSelect = (descricao: string) => {
-    setSelectedType(descricao);
-    setShowCustomInput(false);
-  };
-
-  const handleCustomInput = () => {
-    setShowCustomInput(true);
-    setSelectedType('');
-  };
-
-  const handleIconSelect = (iconName: string) => {
-    setSelectedIcon(iconName);
-    setShowIconSelector(false);
-  };
-
-  const handleSubmit = (data: any) => {
-    return onSubmit({
-      ...data,
-      icone: selectedIcon || undefined
-    });
+  const handleSubmit = async (data: FormValues) => {
+    try {
+      await onSubmit(data);
+      form.reset();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
   return (
-    <DataEntryForm
-      schema={mediaTypeSchema}
-      onSubmit={handleSubmit}
-      onCancel={onCancel}
-      defaultValues={{
-        descricao: defaultValue,
-      }}
-      renderFields={(form) => (
-        <div className="space-y-4">
-          {showCustomInput ? (
-            <div className="grid gap-2">
-              <Label htmlFor="descricao">Descrição</Label>
-              <Input
-                id="descricao"
-                name="descricao"
-                placeholder="Nome do tipo de mídia"
-                autoFocus
-                className="rounded-lg"
-                {...form.register('descricao')}
-              />
-              
-              <div className="mt-4">
-                <Label htmlFor="icon">Ícone</Label>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="w-10 h-10 border rounded-md flex items-center justify-center bg-gray-50">
-                    {selectedIcon ? (
-                      <img src={selectedIcon} alt="Selected icon" className="w-6 h-6" />
-                    ) : (
-                      <Image className="w-6 h-6 text-gray-400" />
-                    )}
-                  </div>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setShowIconSelector(true)}
-                  >
-                    Selecionar ícone
-                  </Button>
-                </div>
-              </div>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setShowCustomInput(false)}
-                className="mt-2 rounded-lg"
-              >
-                Voltar para seleção
-              </Button>
-            </div>
-          ) : (
-            <>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Buscar tipos de mídia..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 rounded-lg"
-                />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3 mt-4 max-h-[300px] overflow-y-auto">
-                {filteredMediaTypes.map((type) => (
-                  <MediaTypeButton
-                    key={type.id}
-                    mediaType={type}
-                    isSelected={selectedType === type.descricao}
-                    onClick={() => handleTypeSelect(type.descricao)}
-                  />
-                ))}
-              </div>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleCustomInput}
-                className="mt-4 w-full rounded-lg"
-              >
-                Novo tipo de mídia
-              </Button>
-              
-              {selectedType && (
-                <Input
-                  type="hidden"
-                  {...form.register('descricao')}
-                  value={selectedType}
-                />
-              )}
-            </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="descricao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Input placeholder="Ex: Jornal Online" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-          
-          {showIconSelector && (
-            <IconSelector
-              onSelect={handleIconSelect}
-              onClose={() => setShowIconSelector(false)} 
-            />
+        />
+
+        <FormField
+          control={form.control}
+          name="icone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ícone</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um ícone" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {iconOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <option.icon className="h-4 w-4" />
+                        <span>{option.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
           )}
+        />
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Salvando...' : 'Salvar'}
+          </Button>
         </div>
-      )}
-      isSubmitting={isSubmitting}
-      submitText={submitText}
-    />
+      </form>
+    </Form>
   );
 };
 

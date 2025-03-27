@@ -12,23 +12,23 @@ import LocationStep from '../steps/LocationStep';
 export const FORM_STEPS = [
   {
     title: 'Origem e prazo da demanda',
-    description: 'Informe a origem da demanda, se possui protocolo e prazo para resposta.',
+    description: '', // Removing subtitle as requested
   },
   {
     title: 'Dados do solicitante e mídia',
-    description: 'Informações sobre o solicitante e meio de comunicação.',
+    description: '', // Removing subtitle as requested
   },
   {
     title: 'Tema, serviço e localização',
-    description: 'Selecione o tema, serviço relacionado e localização da demanda.',
+    description: '', // Removing subtitle as requested
   },
   {
     title: 'Título, perguntas e anexos',
-    description: 'Defina o título, adicione perguntas específicas e anexos se necessário.',
+    description: '', // Removing subtitle as requested
   },
   {
     title: 'Revise tudo antes de enviar',
-    description: 'Verifique todas as informações antes de finalizar.',
+    description: '', // Removing subtitle as requested
   },
 ];
 

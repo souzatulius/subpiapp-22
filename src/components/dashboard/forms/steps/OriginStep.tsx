@@ -73,9 +73,9 @@ const OriginStep: React.FC<OriginStepProps> = ({
       <div>
         <label 
           htmlFor="origem_id" 
-          className={`block mb-2 font-medium ${hasError('origem_id') ? 'text-orange-500 font-semibold' : ''}`}
+          className={`form-question-title ${hasFieldError('origem_id', errors) ? 'text-orange-500 font-semibold' : ''}`}
         >
-          De onde vem a sua solicitação? {hasError('origem_id') && <span className="text-orange-500">*</span>}
+          De onde vem a sua solicitação? {hasFieldError('origem_id', errors) && <span className="text-orange-500">*</span>}
         </label>
         <div className="flex flex-wrap gap-3">
           {origens.map(origem => (
@@ -83,10 +83,10 @@ const OriginStep: React.FC<OriginStepProps> = ({
               key={origem.id} 
               type="button" 
               variant={formData.origem_id === origem.id ? "default" : "outline"} 
-              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 rounded-xl ${
-                formData.origem_id === origem.id ? "ring-2 ring-[#003570]" : ""
+              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 selection-button rounded-xl ${
+                formData.origem_id === origem.id ? "bg-orange-500 text-white" : ""
               } ${
-                hasError('origem_id') ? 'border-orange-500' : ''
+                hasFieldError('origem_id', errors) ? 'border-orange-500' : ''
               }`} 
               onClick={() => handleOriginClick(origem.id)}
             >
@@ -95,8 +95,8 @@ const OriginStep: React.FC<OriginStepProps> = ({
             </Button>
           ))}
         </div>
-        {hasError('origem_id') && (
-          <p className="text-orange-500 text-sm mt-1">{getErrorMessage('origem_id')}</p>
+        {hasFieldError('origem_id', errors) && (
+          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('origem_id', errors)}</p>
         )}
       </div>
 

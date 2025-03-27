@@ -1,36 +1,37 @@
 
 import React from 'react';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ValidationError } from '@/lib/formValidationUtils';
+import { hasFieldError, getFieldErrorMessage } from '../identification/ValidationUtils';
 
 interface QuestionsSectionProps {
-  questions: string[];
-  onQuestionChange: (index: number, value: string) => void;
+  perguntas: string[];
+  handlePerguntaChange: (index: number, value: string) => void;
+  errors?: ValidationError[];
 }
 
-const QuestionsSection: React.FC<QuestionsSectionProps> = ({ questions, onQuestionChange }) => {
-  // Only show next question field if the previous one has content
-  const visibleQuestions = questions.reduce((count, question, index) => {
-    if (index === 0 || (index > 0 && questions[index - 1].trim() !== '')) {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-
+const QuestionsSection: React.FC<QuestionsSectionProps> = ({
+  perguntas,
+  handlePerguntaChange,
+  errors = []
+}) => {
   return (
-    <div className="space-y-4">
-      <Label className="font-semibold">Perguntas</Label>
-      <p className="text-sm text-gray-600">
-        Adicione perguntas específicas para ajudar a equipe a entender melhor a solicitação
-      </p>
+    <div className="space-y-6">
+      <Label className="form-question-title">Perguntas principais sobre o caso</Label>
       
-      <div className="space-y-3">
-        {questions.slice(0, visibleQuestions).map((question, index) => (
+      <div className="space-y-4">
+        {perguntas.slice(0, 5).map((pergunta, index) => (
           <div key={index}>
+            <Label htmlFor={`pergunta-${index}`} className="text-sm font-medium text-gray-700 mb-1">
+              Pergunta {index + 1}
+            </Label>
             <Textarea
-              value={question}
-              onChange={(e) => onQuestionChange(index, e.target.value)}
-              className="min-h-24"
+              id={`pergunta-${index}`}
+              value={pergunta}
+              onChange={(e) => handlePerguntaChange(index, e.target.value)}
+              placeholder={`Digite a pergunta ${index + 1}`}
+              className="h-12 py-3" // Match height with title input
             />
           </div>
         ))}

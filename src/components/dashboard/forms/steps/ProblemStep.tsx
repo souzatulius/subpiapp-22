@@ -60,7 +60,7 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
       <div>
         <Label 
           htmlFor="problema_id" 
-          className={`block mb-2 ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}
+          className={`form-question-title ${hasError('problema_id') ? 'text-orange-500 font-semibold' : ''}`}
         >
           Qual é o tema do problema? {hasError('problema_id') && <span className="text-orange-500">*</span>}
         </Label>
@@ -70,8 +70,8 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
               key={problema.id} 
               type="button" 
               variant={formData.problema_id === problema.id ? "default" : "outline"} 
-              className={`h-auto py-3 px-2 flex flex-col items-center justify-center gap-2 ${
-                formData.problema_id === problema.id ? "ring-2 ring-[#003570]" : ""
+              className={`h-auto py-3 px-2 flex flex-col items-center justify-center gap-2 selection-button ${
+                formData.problema_id === problema.id ? "bg-orange-500 text-white" : ""
               } ${
                 hasError('problema_id') ? 'border-orange-500' : ''
               }`} 
