@@ -26,14 +26,15 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     handleAddNewCard,
     handleEditCard,
     handleSaveCard,
+    specialCardsData,
+    departmentName,
+    isLoading,
     newDemandTitle,
     setNewDemandTitle,
     handleQuickDemandSubmit,
     searchQuery,
     setSearchQuery,
-    handleSearchSubmit,
-    specialCardsData,
-    isLoading
+    handleSearchSubmit
   } = useDefaultDashboardState(department);
 
   return (
