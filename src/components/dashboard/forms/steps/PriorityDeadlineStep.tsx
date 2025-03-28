@@ -23,9 +23,19 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   errors
 }) => {
   // Parse date string to Date object for the DatePicker
-  const prazoDate = formData.prazo_resposta 
-    ? new Date(formData.prazo_resposta) 
-    : undefined;
+  let prazoDate: Date | undefined = undefined;
+  
+  try {
+    prazoDate = formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined;
+    
+    // Check if the parsed date is valid
+    if (prazoDate && !isValid(prazoDate)) {
+      prazoDate = undefined;
+    }
+  } catch (error) {
+    console.error("Date parsing error:", error);
+    prazoDate = undefined;
+  }
   
   // Handle date selection from the DatePicker
   const handleDateChange = (date: Date | undefined) => {
@@ -37,12 +47,18 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     if (isValid(date)) {
       // Preservar a hora atual se já existir, ou definir para meio-dia
       const currentDate = formData.prazo_resposta ? new Date(formData.prazo_resposta) : new Date();
-      date.setHours(
-        isValid(currentDate) ? currentDate.getHours() : 12,
-        isValid(currentDate) ? currentDate.getMinutes() : 0,
-        0,
-        0
-      );
+      
+      // Only copy hours and minutes if the current date is valid
+      if (isValid(currentDate)) {
+        date.setHours(
+          currentDate.getHours(),
+          currentDate.getMinutes(),
+          0,
+          0
+        );
+      } else {
+        date.setHours(12, 0, 0, 0);
+      }
       
       handleSelectChange('prazo_resposta', date.toISOString());
     }

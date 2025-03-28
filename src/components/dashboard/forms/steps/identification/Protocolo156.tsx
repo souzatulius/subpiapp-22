@@ -21,6 +21,18 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
   handleChange,
   errors
 }) => {
+  // Function to determine button variant based on selection
+  const getButtonVariant = (isSelected: boolean, currentValue?: boolean) => {
+    if (currentValue === undefined) return "outline";
+    return isSelected === currentValue ? "default" : "outline";
+  };
+
+  // Function to determine button class based on selection
+  const getButtonClass = (isSelected: boolean, currentValue?: boolean) => {
+    if (currentValue === undefined) return "";
+    return isSelected === currentValue ? "bg-orange-500 text-white" : "";
+  };
+
   return (
     <div className="space-y-3">
       <Label
@@ -33,16 +45,16 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
       <div className="flex gap-3">
         <Button
           type="button"
-          variant={temProtocolo156 === true ? "default" : "outline"}
-          className={`selection-button ${temProtocolo156 === true ? "bg-orange-500 text-white" : ""}`}
+          variant={getButtonVariant(true, temProtocolo156)}
+          className={`selection-button ${getButtonClass(true, temProtocolo156)}`}
           onClick={() => handleSelectChange(true)}
         >
           Sim
         </Button>
         <Button
           type="button"
-          variant={temProtocolo156 === false ? "default" : "outline"}
-          className={`selection-button ${temProtocolo156 === false ? "bg-orange-500 text-white" : ""}`}
+          variant={getButtonVariant(false, temProtocolo156)}
+          className={`selection-button ${getButtonClass(false, temProtocolo156)}`}
           onClick={() => handleSelectChange(false)}
         >
           Não

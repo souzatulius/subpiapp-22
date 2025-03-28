@@ -26,6 +26,9 @@ export function DatePicker({
   className,
   locale,
 }: DatePickerProps) {
+  // Ensure date is valid before formatting
+  const isDateValid = date && isValid(date);
+  
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -33,12 +36,12 @@ export function DatePicker({
           variant={"outline"}
           className={cn(
             "w-full justify-start text-left font-normal",
-            !date && "text-muted-foreground",
+            !isDateValid && "text-muted-foreground",
             className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date && isValid(date) ? (
+          {isDateValid ? (
             format(date, "dd/MM/yyyy", { locale })
           ) : (
             <span>{placeholder}</span>
@@ -48,7 +51,7 @@ export function DatePicker({
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={date}
+          selected={isDateValid ? date : undefined}
           onSelect={setDate}
           initialFocus
           locale={locale}
