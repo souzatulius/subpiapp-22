@@ -38,10 +38,13 @@ interface ActionCardItem {
   height?: '1' | '2';
   visible?: boolean;
   category?: 'acao' | 'estatistica' | 'notificacao';
+  value?: string;
+  change?: string;
+  trend?: 'up' | 'down';
+  description?: string;
 }
 
 const ALL_CARDS: ActionCardItem[] = [
-  // Ações
   {
     id: 'nova-demanda',
     title: 'Nova Demanda',
@@ -105,7 +108,6 @@ const ALL_CARDS: ActionCardItem[] = [
     category: 'acao',
     visible: true,
   },
-  // Notificações
   {
     id: 'notas-pendentes',
     title: 'Notas Aguardando Aprovação',
@@ -131,7 +133,6 @@ const ComunicacaoDashboard: React.FC = () => {
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
   const [actionCards, setActionCards] = useState<ActionCardItem[]>(() => {
-    // Try to load saved card configuration from localStorage
     const savedCards = localStorage.getItem('comunicacao-dashboard-cards');
     if (savedCards) {
       try {
@@ -151,7 +152,6 @@ const ComunicacaoDashboard: React.FC = () => {
     return initialFilters;
   });
 
-  // Save card configuration to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('comunicacao-dashboard-cards', JSON.stringify(actionCards));
   }, [actionCards]);
@@ -196,7 +196,7 @@ const ComunicacaoDashboard: React.FC = () => {
     isLoading: notasLoading 
   } = useNotasStats();
 
-  const getStatCards = () => [
+  const getStatCards = (): ActionCardItem[] => [
     {
       id: 'demandas-hoje',
       title: 'Demandas Abertas Hoje',
@@ -315,35 +315,28 @@ const ComunicacaoDashboard: React.FC = () => {
   };
   
   const applyFilters = () => {
-    // Get all selected card IDs
     const selectedCardIds = Object.entries(cardFilters)
       .filter(([_, isSelected]) => isSelected)
       .map(([id]) => id);
     
-    // Create a combined array of all possible cards
     const allPossibleCards = [
       ...ALL_CARDS,
       ...comunicacaoStats
     ];
     
-    // Get cards based on selected IDs
     const filteredActionCards = allPossibleCards
       .filter(card => selectedCardIds.includes(card.id))
-      // Preserve existing card order if possible
       .sort((a, b) => {
         const aIndex = actionCards.findIndex(c => c.id === a.id);
         const bIndex = actionCards.findIndex(c => c.id === b.id);
         
-        // If both cards exist in current list, maintain their relative order
         if (aIndex >= 0 && bIndex >= 0) {
           return aIndex - bIndex;
         }
         
-        // New cards go to the end
         if (aIndex < 0) return 1;
         if (bIndex < 0) return -1;
         
-        // Fallback - shouldn't happen
         return 0;
       });
     
@@ -357,7 +350,7 @@ const ComunicacaoDashboard: React.FC = () => {
     });
   };
 
-  const renderStatCard = (stat: any) => (
+  const renderStatCard = (stat: ActionCardItem) => (
     <Card key={stat.id} className="min-h-[140px] flex flex-col justify-center h-full w-full">
       <CardContent className="pt-6 h-full">
         <div className="flex flex-col justify-between h-full">
