@@ -1,6 +1,8 @@
 
 import React from 'react';
 import OriginStep from './OriginStep';
+import Protocolo156 from './identification/Protocolo156';
+import PriorityDeadlineStep from './PriorityDeadlineStep';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface ProtocolStepProps {
@@ -30,8 +32,13 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   errors,
   nextStep
 }) => {
+  // Determine if we should show the priority section
+  // Show priority when "No" is selected for 156 protocol or when a protocol number is provided
+  const showPrioritySection = formData.tem_protocolo_156 === false || 
+    (formData.tem_protocolo_156 === true && formData.numero_protocolo_156 && formData.numero_protocolo_156.trim() !== '');
+
   return (
-    <div>
+    <div className="space-y-6">
       <OriginStep
         formData={formData}
         handleChange={handleChange}
@@ -39,6 +46,24 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         origens={origens}
         errors={errors}
       />
+      
+      <Protocolo156
+        temProtocolo156={formData.tem_protocolo_156}
+        numeroProtocolo156={formData.numero_protocolo_156}
+        handleSelectChange={(value) => handleSelectChange('tem_protocolo_156', value)}
+        handleChange={handleChange}
+        errors={errors}
+      />
+      
+      {showPrioritySection && (
+        <div className="mt-6 animate-fadeIn">
+          <PriorityDeadlineStep
+            formData={formData}
+            handleSelectChange={handleSelectChange}
+            errors={errors}
+          />
+        </div>
+      )}
     </div>
   );
 };

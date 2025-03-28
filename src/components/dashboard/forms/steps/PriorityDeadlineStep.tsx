@@ -4,9 +4,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from '@/components/dashboard/forms/steps/identification/ValidationUtils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
-import { isValid, parse } from 'date-fns';
+import { isValid } from 'date-fns';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -45,21 +44,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     }
     
     if (isValid(date)) {
-      // Preservar a hora atual se já existir, ou definir para meio-dia
-      const currentDate = formData.prazo_resposta ? new Date(formData.prazo_resposta) : new Date();
-      
-      // Only copy hours and minutes if the current date is valid
-      if (isValid(currentDate)) {
-        date.setHours(
-          currentDate.getHours(),
-          currentDate.getMinutes(),
-          0,
-          0
-        );
-      } else {
-        date.setHours(12, 0, 0, 0);
-      }
-      
+      // Use the Date object directly with its time information
       handleSelectChange('prazo_resposta', date.toISOString());
     }
   };
@@ -118,12 +103,13 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
           >
             Prazo para resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
           </Label>
-          <div className="flex gap-2 items-center">
+          <div className="mt-1">
             <DatePicker
               date={prazoDate}
               setDate={handleDateChange}
               placeholder="Selecione uma data"
               className={hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}
+              showTimeSelect={true}
             />
           </div>
           {hasFieldError('prazo_resposta', errors) && (
