@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChartIcon } from 'lucide-react';
+import { BarChart } from 'lucide-react';
 
 interface RelatorioCardProps {
   title: string;
@@ -11,7 +11,7 @@ interface RelatorioCardProps {
   className?: string;
   badge?: {
     text: string;
-    variant?: "default" | "destructive" | "outline" | "secondary" | "success";
+    variant?: "default" | "destructive" | "outline" | "secondary";
     icon?: ReactNode;
   };
 }

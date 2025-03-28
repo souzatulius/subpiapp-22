@@ -1,376 +1,468 @@
 
-import React, { useState, useEffect } from 'react';
-import { 
-  ChartBarIcon, 
-  ChartPieIcon, 
-  InfoIcon, 
-  FileTextIcon, 
-  TrendingUpIcon, 
-  CalendarIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  FilterIcon
-} from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { PieChart } from './charts/PieChart';
-import { BarChart } from './charts/BarChart';
-import { LineChart } from './charts/LineChart';
-import { AreaChart } from './charts/AreaChart';
-import { StatsCard } from './components/StatsCard';
-import { SectionHeader } from './sections/SectionHeader';
-import { FiltersSection } from './filters/FiltersSection';
+import React from 'react';
 import { useReportsFilter } from './hooks/useReportsFilter';
 import { useReportsData } from './hooks/useReportsData';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { RotateCcw, ChevronDownIcon, BarChart, PieChart, LineChart, Activity, FileText } from "lucide-react";
+import { RelatorioCard } from './components/RelatorioCard';
+import { SectionHeader } from './sections/SectionHeader';
+import { StatsCard } from './components/StatsCard';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { 
+  ResponsiveContainer, 
+  BarChart as RechartsBarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  LineChart as RechartsLineChart,
+  Line
+} from 'recharts';
 
 export const RelatoriosContent: React.FC = () => {
-  const { toast } = useToast();
-  const { 
-    filters, 
-    handleDateRangeChange, 
-    handleCoordenacaoChange, 
-    handleTemaChange, 
-    resetFilters 
-  } = useReportsFilter();
-  
+  const { filters, handleDateRangeChange, handleCoordenacaoChange, handleTemaChange, resetFilters } = useReportsFilter();
   const { reportsData, isLoading, cardStats } = useReportsData(filters);
 
-  // Demo coordenações and temas data - this would typically come from Supabase
-  const coordenacoes = [
-    { id: '1', descricao: 'Zeladoria' },
-    { id: '2', descricao: 'Comunicação' },
-    { id: '3', descricao: 'Gabinete' }
-  ];
-  
-  const temas = [
-    { id: '1', descricao: 'Poda de Árvores' },
-    { id: '2', descricao: 'Drenagem' },
-    { id: '3', descricao: 'Iluminação' },
-    { id: '4', descricao: 'Pavimentação' }
-  ];
+  // Colors for charts
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
-  // Format cardStats data for the cards
-  const formatNumber = (num: number) => new Intl.NumberFormat('pt-BR').format(num);
-  const formatTempo = (dias: number) => {
-    if (dias < 1) {
-      return `${Math.round(dias * 24)} horas`;
-    }
-    return `${dias.toFixed(1)} dias`;
+  // Currency formatter
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
-  
+
   return (
-    <div className="container mx-auto py-4">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Relatórios e Indicadores</h1>
-          <p className="text-muted-foreground">Visualize e analise os dados da sua subprefeitura</p>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h1 className="text-2xl font-bold">Relatórios e Indicadores</h1>
+        
+        <div className="flex flex-wrap items-center gap-2">
+          <DateRangePicker
+            value={filters.dateRange}
+            onValueChange={handleDateRangeChange}
+            className="w-auto"
+            align="end"
+          />
+          
+          <Select value={filters.coordenacao} onValueChange={handleCoordenacaoChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Coordenação" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todas Coordenações</SelectItem>
+              <SelectItem value="zeladoria">Zeladoria</SelectItem>
+              <SelectItem value="comunicacao">Comunicação</SelectItem>
+              <SelectItem value="gabinete">Gabinete</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={filters.tema} onValueChange={handleTemaChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Tema/Serviço" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os Temas</SelectItem>
+              <SelectItem value="poda">Poda</SelectItem>
+              <SelectItem value="zeladoria">Zeladoria</SelectItem>
+              <SelectItem value="pavimentacao">Pavimentação</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button variant="outline" onClick={resetFilters} className="flex items-center gap-1">
+            <RotateCcw className="h-4 w-4" />
+            <span>Limpar</span>
+          </Button>
         </div>
-        <Tabs defaultValue="charts" className="mt-4 md:mt-0">
-          <TabsList>
-            <TabsTrigger value="charts" className="flex items-center gap-1">
-              <ChartBarIcon className="h-4 w-4" /> Gráficos
-            </TabsTrigger>
-            <TabsTrigger value="tables" className="flex items-center gap-1">
-              <FileTextIcon className="h-4 w-4" /> Tabelas
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
       </div>
+      
+      <div className="text-sm text-muted-foreground">
+        <p>
+          Período: {format(filters.dateRange.from || new Date(), 'dd/MM/yyyy', { locale: ptBR })} - {format(filters.dateRange.to || new Date(), 'dd/MM/yyyy', { locale: ptBR })}
+        </p>
+      </div>
+      
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatsCard
+          title="Total de Demandas"
+          value={cardStats.totalDemandas}
+          description="Demandas recebidas no período"
+          icon={<BarChart className="h-4 w-4" />}
+          change={cardStats.demandasVariacao}
+          changeLabel="em relação ao período anterior"
+        />
+        
+        <StatsCard
+          title="Notas Oficiais"
+          value={cardStats.totalNotas}
+          description="Notas publicadas no período"
+          icon={<FileText className="h-4 w-4" />}
+          change={cardStats.notasVariacao}
+          changeLabel="em relação ao período anterior"
+        />
+        
+        <StatsCard
+          title="Tempo Médio de Resposta"
+          value={cardStats.tempoMedioResposta}
+          description="Dias até a resposta"
+          icon={<Activity className="h-4 w-4" />}
+          change={cardStats.tempoRespostaVariacao}
+          changeLabel="em relação ao período anterior"
+          formatter={(val) => `${val} dias`}
+        />
+        
+        <StatsCard
+          title="Taxa de Aprovação"
+          value={cardStats.taxaAprovacao}
+          description="De notas oficiais"
+          icon={<Activity className="h-4 w-4" />}
+          change={cardStats.aprovacaoVariacao}
+          changeLabel="em relação ao período anterior"
+          formatter={(val) => `${val}%`}
+        />
+      </div>
+      
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="technicalThemes">Temas Técnicos</TabsTrigger>
+          <TabsTrigger value="performance">Tempo e Desempenho</TabsTrigger>
+          <TabsTrigger value="notes">Notas Oficiais</TabsTrigger>
+          <TabsTrigger value="trends">Tendências</TabsTrigger>
+        </TabsList>
+        
+        {/* Visão Geral */}
+        <TabsContent value="overview" className="space-y-6">
+          <SectionHeader 
+            title="Visão Geral" 
+            icon={<BarChart className="h-5 w-5 text-blue-600" />}
+            description="Análise das demandas por origem, mídia e localização"
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Demandas por Origem */}
+            <RelatorioCard 
+              title="Demandas por Origem"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={reportsData?.origins || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {reportsData?.origins?.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value} demandas`, 'Quantidade']} />
+                    <Legend />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
 
-      <FiltersSection 
-        dateRange={filters.dateRange}
-        onDateRangeChange={handleDateRangeChange}
-        coordenacao={filters.coordenacao}
-        onCoordenacaoChange={handleCoordenacaoChange}
-        coordenacoes={coordenacoes}
-        tema={filters.tema}
-        onTemaChange={handleTemaChange}
-        temas={temas}
-        onResetFilters={resetFilters}
-      />
+            {/* Tipos de Mídia */}
+            <RelatorioCard 
+              title="Tipos de Mídia"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={reportsData?.mediaTypes || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`${value} demandas`, 'Quantidade']} />
+                    <Bar dataKey="value" fill="#8884d8" />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
 
-      <Tabs defaultValue="charts">
-        <TabsContent value="charts" className="mt-0">
-          {/* Card Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {isLoading ? (
-              <>
-                {[1, 2, 3, 4].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <Skeleton className="h-6 w-1/2 mb-2" />
-                      <Skeleton className="h-10 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-full" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
-            ) : (
-              <>
-                <StatsCard 
-                  title="Total de Demandas"
-                  value={cardStats.totalDemandas}
-                  description="Total de demandas no período"
-                  icon={<InfoIcon className="h-4 w-4" />}
-                  change={cardStats.demandasVariacao}
-                  formatter={formatNumber}
-                />
-                
-                <StatsCard 
-                  title="Notas Oficiais"
-                  value={cardStats.totalNotas}
-                  description="Notas publicadas no período"
-                  icon={<FileTextIcon className="h-4 w-4" />}
-                  change={cardStats.notasVariacao}
-                  formatter={formatNumber}
-                />
-                
-                <StatsCard 
-                  title="Tempo Médio de Resposta"
-                  value={cardStats.tempoMedioResposta}
-                  description="Tempo médio para responder demandas"
-                  icon={<CalendarIcon className="h-4 w-4" />}
-                  change={cardStats.tempoRespostaVariacao}
-                  formatter={formatTempo}
-                />
-                
-                <StatsCard 
-                  title="Taxa de Aprovação"
-                  value={`${cardStats.taxaAprovacao}%`}
-                  description="Taxa de aprovação de notas oficiais"
-                  icon={<TrendingUpIcon className="h-4 w-4" />}
-                  change={cardStats.aprovacaoVariacao}
-                />
-              </>
-            )}
-          </div>
-
-          {/* Visão Geral */}
-          <div className="mb-8">
-            <SectionHeader 
-              title="Visão Geral" 
-              icon={<ChartPieIcon className="h-5 w-5 text-blue-700" />} 
-              description="Distribuição geral das demandas por origem, mídia e localização" 
-            />
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <Skeleton className="h-6 w-1/2 mb-4" />
-                      <Skeleton className="h-[250px] w-full rounded-md" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <PieChart 
-                  data={reportsData?.origins || []}
-                  title="Solicitações por Origem" 
-                  insight="A imprensa representa a maior parte das solicitações"
-                />
-                
-                <PieChart 
-                  data={reportsData?.mediaTypes || []}
-                  title="Tipos de Mídia Mais Frequentes" 
-                  colors={['#1EAEDB', '#0FA0CE', '#6C757D']}
-                />
-                
-                <BarChart 
-                  data={reportsData?.districts || []}
-                  title="Demandas por Distrito" 
-                  xAxisDataKey="name"
-                  bars={[
-                    { dataKey: 'value', name: 'Quantidade', color: '#1EAEDB' }
-                  ]}
-                  horizontal={true}
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Temas Técnicos */}
-          <div className="mb-8">
-            <SectionHeader 
-              title="Temas Técnicos" 
-              icon={<InfoIcon className="h-5 w-5 text-blue-700" />} 
-              description="Análise das demandas por tema e serviço" 
-            />
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[1, 2].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <Skeleton className="h-6 w-1/2 mb-4" />
-                      <Skeleton className="h-[250px] w-full rounded-md" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <BarChart 
-                  data={reportsData?.services || []}
-                  title="Demandas por Tema" 
-                  xAxisDataKey="name"
-                  bars={[
-                    { dataKey: 'value', name: 'Quantidade', color: '#1EAEDB' }
-                  ]}
-                />
-                
-                <PieChart 
-                  data={reportsData?.coordinations || []}
-                  title="Distribuição por Coordenação" 
-                  colors={['#1EAEDB', '#0FA0CE', '#ea384c']}
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Indicadores de Tempo */}
-          <div className="mb-8">
-            <SectionHeader 
-              title="Indicadores de Tempo e Desempenho" 
-              icon={<CalendarIcon className="h-5 w-5 text-blue-700" />} 
-              description="Métricas de tempo e eficiência nas respostas" 
-            />
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[1, 2].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <Skeleton className="h-6 w-1/2 mb-4" />
-                      <Skeleton className="h-[250px] w-full rounded-md" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <LineChart 
-                  data={reportsData?.responseTimes || []}
-                  title="Tempo Médio de Resposta (em horas)" 
-                  xAxisDataKey="name"
-                  lines={[
-                    { dataKey: 'value', name: 'Horas', color: '#1EAEDB' }
-                  ]}
-                  insight="Tempo de resposta diminuiu 15% em relação ao período anterior"
-                />
-                
-                <BarChart 
-                  data={reportsData?.responsibles || []}
-                  title="Demandas Atendidas por Responsável" 
-                  xAxisDataKey="name"
-                  bars={[
-                    { dataKey: 'value', name: 'Quantidade', color: '#1EAEDB' }
-                  ]}
-                  insight="Top 3 responsáveis por demandas"
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Notas Oficiais */}
-          <div className="mb-8">
-            <SectionHeader 
-              title="Notas Oficiais" 
-              icon={<FileTextIcon className="h-5 w-5 text-blue-700" />} 
-              description="Análise das notas oficiais produzidas" 
-            />
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <Skeleton className="h-6 w-1/2 mb-4" />
-                      <Skeleton className="h-[250px] w-full rounded-md" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <PieChart 
-                  data={reportsData?.statuses || []}
-                  title="Status das Demandas" 
-                  colors={['#FFC107', '#1EAEDB', '#198754']}
-                />
-                
-                <PieChart 
-                  data={reportsData?.approvals || []}
-                  title="Aprovação de Notas Oficiais" 
-                  colors={['#198754', '#ea384c', '#1EAEDB']}
-                />
-                
-                <BarChart 
-                  data={reportsData?.neighborhoods || []}
-                  title="Notas por Bairro" 
-                  xAxisDataKey="name"
-                  bars={[
-                    { dataKey: 'value', name: 'Quantidade', color: '#1EAEDB' }
-                  ]}
-                  horizontal={true}
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Tendências */}
-          <div className="mb-8">
-            <SectionHeader 
-              title="Tendências" 
-              icon={<TrendingUpIcon className="h-5 w-5 text-blue-700" />} 
-              description="Análise de tendências e evolução no tempo" 
-            />
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 gap-4">
-                <Card className="overflow-hidden">
-                  <CardContent className="p-6">
-                    <Skeleton className="h-6 w-1/2 mb-4" />
-                    <Skeleton className="h-[250px] w-full rounded-md" />
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                <AreaChart 
-                  data={[
-                    { month: 'Jan', demandas: 28, notas: 12 },
-                    { month: 'Fev', demandas: 35, notas: 15 },
-                    { month: 'Mar', demandas: 42, notas: 20 },
-                    { month: 'Abr', demandas: 38, notas: 17 },
-                    { month: 'Mai', demandas: 50, notas: 25 },
-                    { month: 'Jun', demandas: 45, notas: 22 },
-                  ]}
-                  title="Evolução Mensal" 
-                  xAxisDataKey="month"
-                  areas={[
-                    { dataKey: 'demandas', name: 'Demandas', color: '#1EAEDB' },
-                    { dataKey: 'notas', name: 'Notas Oficiais', color: '#0FA0CE' }
-                  ]}
-                  insight="Crescimento constante nas demandas nos últimos 6 meses"
-                />
-              </div>
-            )}
+            {/* Demandas por Distrito */}
+            <RelatorioCard 
+              title="Demandas por Distrito"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={reportsData?.districts || []} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={150} />
+                    <Tooltip formatter={(value) => [`${value} demandas`, 'Quantidade']} />
+                    <Bar dataKey="value" fill="#82ca9d" />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
           </div>
         </TabsContent>
         
-        <TabsContent value="tables">
-          <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <h2 className="text-xl font-semibold mb-4">Tabelas de Dados</h2>
-            <p className="text-gray-500">
-              As tabelas detalhadas estarão disponíveis em breve. 
-              Por enquanto, você pode visualizar os dados através dos gráficos.
-            </p>
+        {/* Temas Técnicos */}
+        <TabsContent value="technicalThemes" className="space-y-6">
+          <SectionHeader 
+            title="Temas Técnicos" 
+            icon={<PieChart className="h-5 w-5 text-orange-500" />}
+            description="Análise de demandas por tema e serviço"
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Demandas por Tema */}
+            <RelatorioCard 
+              title="Demandas por Tema"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={reportsData?.services || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`${value} demandas`, 'Quantidade']} />
+                    <Bar dataKey="value" fill="#FF9800" />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
+
+            {/* Distribuição de Serviços */}
+            <RelatorioCard 
+              title="Serviços por Coordenação"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={reportsData?.coordinations || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {reportsData?.coordinations?.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value} demandas`, 'Quantidade']} />
+                    <Legend />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
           </div>
+        </TabsContent>
+        
+        {/* Tempo e Desempenho */}
+        <TabsContent value="performance" className="space-y-6">
+          <SectionHeader 
+            title="Tempo e Desempenho" 
+            icon={<LineChart className="h-5 w-5 text-green-600" />}
+            description="Análise de prazos e desempenho por coordenação"
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Tempo Médio de Resposta */}
+            <RelatorioCard 
+              title="Tempo Médio de Resposta"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={reportsData?.responseTimes || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`${value} dias`, 'Tempo Médio']} />
+                    <Bar dataKey="value" fill="#4CAF50" />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
+
+            {/* Status das Demandas */}
+            <RelatorioCard 
+              title="Status das Demandas"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={reportsData?.statuses || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {reportsData?.statuses?.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value} demandas`, 'Quantidade']} />
+                    <Legend />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
+          </div>
+        </TabsContent>
+        
+        {/* Notas Oficiais */}
+        <TabsContent value="notes" className="space-y-6">
+          <SectionHeader 
+            title="Notas Oficiais" 
+            icon={<FileText className="h-5 w-5 text-blue-800" />}
+            description="Análise das notas oficiais publicadas"
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Status de Aprovação */}
+            <RelatorioCard 
+              title="Status de Aprovação"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={reportsData?.approvals || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {reportsData?.approvals?.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value} notas`, 'Quantidade']} />
+                    <Legend />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
+
+            {/* Responsáveis por Notas */}
+            <RelatorioCard 
+              title="Responsáveis por Notas"
+              className="col-span-1"
+            >
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dados...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={reportsData?.responsibles || []} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={100} />
+                    <Tooltip formatter={(value) => [`${value} notas`, 'Quantidade']} />
+                    <Bar dataKey="value" fill="#8884d8" />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              )}
+            </RelatorioCard>
+          </div>
+        </TabsContent>
+        
+        {/* Tendências */}
+        <TabsContent value="trends" className="space-y-6">
+          <SectionHeader 
+            title="Tendências" 
+            icon={<Activity className="h-5 w-5 text-purple-600" />}
+            description="Análise de tendências e histórico"
+          />
+          
+          <RelatorioCard 
+            title="Demandas por Semana"
+            className="col-span-1"
+          >
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <p>Carregando dados...</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsLineChart data={reportsData?.dailyDemands || []}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value} demandas`, 'Quantidade']} />
+                  <Legend />
+                  <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
+                </RechartsLineChart>
+              </ResponsiveContainer>
+            )}
+          </RelatorioCard>
         </TabsContent>
       </Tabs>
     </div>
