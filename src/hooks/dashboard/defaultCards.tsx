@@ -1,3 +1,4 @@
+
 import { ActionCardItem } from './types';
 import { 
   ClipboardList, 
@@ -80,7 +81,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     isSearch: true,
   },
   
-  // Modify the Overdue Demands card to be a standard, mandatory card
+  // Overdue Demands card as a standard, mandatory card
   {
     id: 'overdue-demands',
     title: 'Demandas em Atraso',
@@ -93,7 +94,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     isOverdueDemands: true,
   },
   
-  // After search - PendingActions card 
+  // PendingActions card - Making it standard in the dashboard
   {
     id: 'pending-actions',
     title: 'Você precisa agir',

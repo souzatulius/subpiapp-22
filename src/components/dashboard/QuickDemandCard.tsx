@@ -40,8 +40,8 @@ const QuickDemandCard: React.FC<QuickDemandCardProps> = ({
   };
 
   return (
-    <div className="w-full h-full bg-white border border-gray-200 rounded-xl shadow-md p-6 flex flex-col justify-between transition-all hover:shadow-lg">
-      <div className="space-y-4 w-full">
+    <div className="w-full h-full bg-white border border-gray-200 rounded-xl shadow-md p-6 flex items-center justify-center transition-all hover:shadow-lg">
+      <div className="w-full space-y-4">
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
           <Input
             type="text"
