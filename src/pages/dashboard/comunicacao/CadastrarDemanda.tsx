@@ -1,27 +1,23 @@
 
 import React from 'react';
+import { PlusCircle } from 'lucide-react';
 import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaForm';
-import { useNavigate } from 'react-router-dom';
-import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
+import WelcomeCard from '@/components/shared/WelcomeCard';
 
 const CadastrarDemanda = () => {
-  const navigate = useNavigate();
-
-  const handleClose = () => {
-    // Redirect to dashboard instead of the previous page
-    navigate('/dashboard');
-  };
-
   return (
-    <AdminProtectedRoute>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Cadastrar Nova Demanda</h1>
-          <p className="text-gray-600">Preencha os campos para registrar uma nova demanda de comunicação.</p>
-        </div>
-        <CadastrarDemandaForm onClose={handleClose} />
+    <div className="max-w-7xl mx-auto">
+      <WelcomeCard
+        title="Nova Solicitação"
+        description="Cadastre uma nova solicitação de comunicação"
+        icon={<PlusCircle className="h-6 w-6 mr-2" />}
+        color="bg-gradient-to-r from-indigo-500 to-indigo-700"
+      />
+      
+      <div className="mt-6">
+        <CadastrarDemandaForm />
       </div>
-    </AdminProtectedRoute>
+    </div>
   );
 };
 

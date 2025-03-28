@@ -1,13 +1,24 @@
 
 import React from 'react';
+import { PieChart } from 'lucide-react';
 import { RelatoriosContent } from '@/components/relatorios';
+import WelcomeCard from '@/components/shared/WelcomeCard';
 
-const Relatorios = () => {
+const RelatoriosPage = () => {
   return (
     <div className="max-w-7xl mx-auto">
-      <RelatoriosContent />
+      <WelcomeCard
+        title="Relatórios"
+        description="Visualize estatísticas e relatórios de comunicação"
+        icon={<PieChart className="h-6 w-6 mr-2" />}
+        color="bg-gradient-to-r from-teal-500 to-teal-700"
+      />
+      
+      <div className="mt-6">
+        <RelatoriosContent />
+      </div>
     </div>
   );
 };
 
-export default Relatorios;
+export default RelatoriosPage;

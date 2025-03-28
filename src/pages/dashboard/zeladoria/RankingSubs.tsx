@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { BarChart3 } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
 import { motion } from 'framer-motion';
+import WelcomeCard from '@/components/shared/WelcomeCard';
 
 const RankingSubs = () => {
   return (
@@ -11,12 +13,14 @@ const RankingSubs = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="mb-6 bg-white rounded-lg border border-orange-200 p-5 shadow-sm">
-        <h1 className="text-2xl font-bold text-orange-700 mb-3">Dados SGZ - Ranking das Subs</h1>
-        <p className="text-gray-600 mb-4">
-          Dashboard de análise das ordens de serviço do SGZ (Sistema de Gestão da Zeladoria) para acompanhamento 
-          dos distritos da Subprefeitura de Pinheiros.
-        </p>
+      <WelcomeCard
+        title="Ranking das Subs"
+        description="Dashboard de análise das ordens de serviço do SGZ para acompanhamento dos distritos"
+        icon={<BarChart3 className="h-6 w-6 mr-2" />}
+        color="bg-gradient-to-r from-orange-500 to-orange-700"
+      />
+
+      <div className="mt-6 bg-white rounded-lg border border-orange-200 p-5 shadow-sm">
         <div className="flex justify-between items-center">
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center">
