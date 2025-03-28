@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import StatCard from './StatCard';
-import { useNavigate } from 'react-router-dom';
 
 interface WelcomeCardProps {
   userCount?: number;
@@ -11,7 +10,6 @@ interface WelcomeCardProps {
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 }) => {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   
   const handleSearch = (query: string) => {
@@ -33,13 +31,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 })
               Gerencie todas as configurações do sistema em um só lugar.
             </p>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 w-full md:w-64">
             <StatCard 
-              title="Buscar" 
-              icon={<Settings size={18} />}
-              description="" 
-              section=""
-              highlight={true}
               showSearch={true}
               onSearch={handleSearch}
               searchPlaceholder="Buscar configurações..."
