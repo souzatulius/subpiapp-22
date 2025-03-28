@@ -5,8 +5,7 @@ import {
   MessageCircle, 
   BarChart2, 
   Settings, 
-  TrendingUp,
-  FileText
+  TrendingUp
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
@@ -25,14 +24,6 @@ export const getNavigationSections = () => [
     icon: <MessageCircle size={20} />,
     label: 'Comunicação',
     path: '/dashboard/comunicacao/comunicacao',
-    isSection: false
-  },
-  // Seção 3: Notas para Imprensa
-  {
-    id: 'notas',
-    icon: <FileText size={20} />,
-    label: 'Notas para Imprensa',
-    path: '/dashboard/comunicacao/notas',
     isSection: false
   },
   // Seção 4: Relatórios

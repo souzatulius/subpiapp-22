@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -264,11 +263,7 @@ const ComunicacaoDashboard: React.FC = () => {
     setActionCards(cards => cards.filter(card => card.id !== id));
     setCardFilters(filters => ({ ...filters, [id]: false }));
     
-    toast({
-      title: "Card removido",
-      description: "O card foi removido com sucesso.",
-      variant: "success",
-    });
+    // Toast removed - no success message on card removal
   };
 
   const handleEditCard = (id: string) => {
@@ -380,35 +375,73 @@ const ComunicacaoDashboard: React.FC = () => {
         </SortableContext>
       </DndContext>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {comunicacaoStats
-          .filter(stat => cardFilters[stat.id] !== false)
-          .map((stat) => (
-            <Card key={stat.id} className="min-h-[140px] flex flex-col justify-center">
-              <CardContent className="pt-6 h-full">
-                <div className="flex flex-col justify-between h-full">
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <div className="flex items-baseline justify-between mt-1">
-                    <h3 className="text-2xl font-bold">
-                      {isLoading || notasLoading ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      ) : (
-                        stat.value
-                      )}
-                    </h3>
-                    {stat.change && (
-                      <div className={`flex items-center ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-                        {stat.trend === 'up' ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-                        <span className="text-sm">{stat.change}</span>
+      {/* Make stats cards draggable too */}
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(event) => {
+          const { active, over } = event;
+          
+          if (over && active.id !== over.id) {
+            const oldIndex = comunicacaoStats.findIndex((stat) => stat.id === active.id);
+            const newIndex = comunicacaoStats.findIndex((stat) => stat.id === over.id);
+            
+            if (oldIndex !== -1 && newIndex !== -1) {
+              const newStats = arrayMove(comunicacaoStats, oldIndex, newIndex);
+              // Update localStorage with new order of stats
+              localStorage.setItem('comunicacao-stats-order', JSON.stringify(
+                newStats.map(stat => stat.id)
+              ));
+            }
+          }
+        }}
+      >
+        <SortableContext items={comunicacaoStats.filter(stat => cardFilters[stat.id] !== false).map(stat => stat.id)}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {comunicacaoStats
+              .filter(stat => cardFilters[stat.id] !== false)
+              .map((stat) => (
+                <SortableActionCard 
+                  key={stat.id}
+                  card={{
+                    id: stat.id,
+                    title: stat.title,
+                    icon: stat.trend === 'up' ? <TrendingUp className="h-12 w-12" /> : <TrendingDown className="h-12 w-12" />,
+                    path: '',
+                    color: stat.trend === 'up' ? 'green' : 'orange',
+                    category: 'estatistica'
+                  }}
+                  onEdit={() => {}} 
+                  onDelete={handleDeleteCard}
+                >
+                  <Card key={stat.id} className="min-h-[140px] flex flex-col justify-center h-full w-full">
+                    <CardContent className="pt-6 h-full">
+                      <div className="flex flex-col justify-between h-full">
+                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                        <div className="flex items-baseline justify-between mt-1">
+                          <h3 className="text-2xl font-bold">
+                            {isLoading || notasLoading ? (
+                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            ) : (
+                              stat.value
+                            )}
+                          </h3>
+                          {stat.change && (
+                            <div className={`flex items-center ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
+                              {stat.trend === 'up' ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
+                              <span className="text-sm">{stat.change}</span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
                       </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-      </div>
+                    </CardContent>
+                  </Card>
+                </SortableActionCard>
+              ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Card Customization Modal */}
       <CardCustomizationModal
