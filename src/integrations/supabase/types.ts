@@ -973,6 +973,62 @@ export type Database = {
         }
         Relationships: []
       }
+      painel_zeladoria: {
+        Row: {
+          dados: Json | null
+          data_upload: string | null
+          id: string
+          nome_arquivo: string
+          processado: boolean | null
+          usuario_id: string
+        }
+        Insert: {
+          dados?: Json | null
+          data_upload?: string | null
+          id?: string
+          nome_arquivo: string
+          processado?: boolean | null
+          usuario_id: string
+        }
+        Update: {
+          dados?: Json | null
+          data_upload?: string | null
+          id?: string
+          nome_arquivo?: string
+          processado?: boolean | null
+          usuario_id?: string
+        }
+        Relationships: []
+      }
+      painel_zeladoria_insights: {
+        Row: {
+          data_geracao: string | null
+          id: string
+          indicadores: Json
+          painel_id: string
+        }
+        Insert: {
+          data_geracao?: string | null
+          id?: string
+          indicadores: Json
+          painel_id: string
+        }
+        Update: {
+          data_geracao?: string | null
+          id?: string
+          indicadores?: Json
+          painel_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "painel_zeladoria_insights_painel_id_fkey"
+            columns: ["painel_id"]
+            isOneToOne: false
+            referencedRelation: "painel_zeladoria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permissoes: {
         Row: {
           criado_em: string

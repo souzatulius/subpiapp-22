@@ -11,6 +11,8 @@ import * as XLSX from 'xlsx';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useExportPDF } from '@/hooks/consultar-notas/useExportPDF';
+import { usePainelZeladoriaUpload } from './hooks/usePainelZeladoriaUpload';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
@@ -27,6 +29,7 @@ interface UploadSectionProps {
     errorMessage?: string;
   };
 }
+
 const UploadSection: React.FC<UploadSectionProps> = ({
   onUpload,
   lastUpload,
@@ -41,15 +44,31 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     processingStatus: 'idle'
   }
 }) => {
+  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedPainelFile, setSelectedPainelFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const painelFileInputRef = useRef<HTMLInputElement>(null);
   const { handleExportPDF } = useExportPDF();
+  const { 
+    isLoading: isPainelLoading,
+    uploadProgress: painelUploadProgress,
+    processamentoPainel,
+    handleUploadPainel
+  } = usePainelZeladoriaUpload(user);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
     }
   };
+
+  const handlePainelFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedPainelFile(e.target.files[0]);
+    }
+  };
+
   const handleUploadClick = async () => {
     if (selectedFile) {
       await onUpload(selectedFile);
@@ -59,10 +78,22 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       }
     }
   };
+
+  const handlePainelUploadClick = async () => {
+    if (selectedPainelFile) {
+      await handleUploadPainel(selectedPainelFile);
+      setSelectedPainelFile(null);
+      if (painelFileInputRef.current) {
+        painelFileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleRefreshClick = () => {
     toast.info('Atualizando gráficos com os dados mais recentes...');
     onRefreshCharts();
   };
+
   const handleDownloadTemplate = () => {
     const template = [{
       'Ordem de Serviço': 'OS-1001',
@@ -138,23 +169,38 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     }
   };
   
-  return <Card className="border-orange-200">
+  return (
+    <Card className="border-orange-200">
       <CardHeader className="pb-2">
         <CardTitle className="text-orange-700">Upload de Planilha SGZ</CardTitle>
-        
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Input ref={fileInputRef} type="file" accept=".xls,.xlsx" onChange={handleFileChange} className="max-w-md" disabled={isLoading} />
+            <Input 
+              ref={fileInputRef} 
+              type="file" 
+              accept=".xls,.xlsx" 
+              onChange={handleFileChange} 
+              className="max-w-md" 
+              disabled={isLoading || isPainelLoading} 
+            />
             <div className="flex gap-2">
-              <Button onClick={handleUploadClick} disabled={!selectedFile || isLoading} className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700">
+              <Button 
+                onClick={handleUploadClick} 
+                disabled={!selectedFile || isLoading || isPainelLoading} 
+                className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700"
+              >
                 <UploadCloud className="mr-2 h-4 w-4" />
                 {isLoading ? 'Carregando...' : 'Carregar'}
               </Button>
               
-              <Button variant="secondary" onClick={handleRefreshClick} disabled={isLoading}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <Button 
+                variant="secondary" 
+                onClick={handleRefreshClick} 
+                disabled={isLoading || isPainelLoading}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading || isPainelLoading ? 'animate-spin' : ''}`} />
                 Atualizar gráficos
               </Button>
               
@@ -176,20 +222,79 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
           </div>
           
-          {isLoading && uploadProgress > 0 && <div className="space-y-2">
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Upload do Painel da Zeladoria</h3>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input 
+                ref={painelFileInputRef} 
+                type="file" 
+                accept=".xls,.xlsx" 
+                onChange={handlePainelFileChange} 
+                className="max-w-md" 
+                disabled={isLoading || isPainelLoading} 
+              />
+              <Button 
+                onClick={handlePainelUploadClick} 
+                disabled={!selectedPainelFile || isLoading || isPainelLoading} 
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+              >
+                <UploadCloud className="mr-2 h-4 w-4" />
+                {isPainelLoading ? 'Carregando...' : 'Carregar Painel'}
+              </Button>
+            </div>
+            
+            {isPainelLoading && painelUploadProgress > 0 && (
+              <div className="space-y-2 mt-2">
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>Processando dados do Painel...</span>
+                  <span>{painelUploadProgress}%</span>
+                </div>
+                <Progress value={painelUploadProgress} className="h-2" />
+              </div>
+            )}
+            
+            {processamentoPainel.status === 'success' && (
+              <div className="p-3 mt-2 border rounded-md bg-green-50 border-green-200 flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-green-700">Painel processado com sucesso!</p>
+                  <p className="text-xs text-green-600">
+                    {processamentoPainel.recordCount} registros importados
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {processamentoPainel.status === 'error' && (
+              <div className="p-3 mt-2 border rounded-md bg-red-50 border-red-200 flex items-start gap-2">
+                <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-red-700">Erro ao processar painel</p>
+                  <p className="text-xs text-red-600">{processamentoPainel.message}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {isLoading && uploadProgress > 0 && (
+            <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-500">
                 <span>{getProgressText()}</span>
                 <span>{uploadProgress}%</span>
               </div>
               <Progress value={uploadProgress} className="h-2" />
-            </div>}
+            </div>
+          )}
           
-          {processingStats.processingStatus === 'processing' && <div className="p-3 border rounded-md bg-blue-50 border-blue-200 flex items-center gap-2">
+          {processingStats.processingStatus === 'processing' && (
+            <div className="p-3 border rounded-md bg-blue-50 border-blue-200 flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
               <p className="text-sm text-blue-700">Processando planilha...</p>
-            </div>}
+            </div>
+          )}
           
-          {processingStats.processingStatus === 'success' && processingStats.newOrders + processingStats.updatedOrders > 0 && <div className="p-3 border rounded-md bg-green-50 border-green-200 flex items-start gap-2">
+          {processingStats.processingStatus === 'success' && processingStats.newOrders + processingStats.updatedOrders > 0 && (
+            <div className="p-3 border rounded-md bg-green-50 border-green-200 flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-green-700">Processamento concluído com sucesso!</p>
@@ -197,17 +302,21 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                   {processingStats.newOrders} novas ordens inseridas e {processingStats.updatedOrders} ordens atualizadas
                 </p>
               </div>
-            </div>}
+            </div>
+          )}
           
-          {processingStats.processingStatus === 'error' && <div className="p-3 border rounded-md bg-red-50 border-red-200 flex items-start gap-2">
+          {processingStats.processingStatus === 'error' && (
+            <div className="p-3 border rounded-md bg-red-50 border-red-200 flex items-start gap-2">
               <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-red-700">Erro ao processar planilha</p>
                 <p className="text-xs text-red-600">{processingStats.errorMessage}</p>
               </div>
-            </div>}
+            </div>
+          )}
           
-          {lastUpload && <div className="flex flex-col gap-2">
+          {lastUpload && (
+            <div className="flex flex-col gap-2">
               <div className="flex items-center gap-4 p-3 border rounded-md bg-orange-50 border-orange-200">
                 <div className="flex-1">
                   <p className="font-medium text-sm">{lastUpload.fileName}</p>
@@ -221,9 +330,11 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-            </div>}
+            </div>
+          )}
 
-          {uploads && uploads.length > 1 && <div className="mt-4">
+          {uploads && uploads.length > 1 && (
+            <div className="mt-4">
               <Separator className="my-4" />
               <h3 className="text-sm font-medium mb-2">Histórico de Uploads</h3>
               <div className="max-h-44 overflow-y-auto border rounded-md">
@@ -254,9 +365,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                   </tbody>
                 </table>
               </div>
-            </div>}
+            </div>
+          )}
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default UploadSection;

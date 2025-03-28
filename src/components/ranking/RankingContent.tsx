@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import FilterDialog from './filters/FilterDialog';
+import DashboardCards from './insights/DashboardCards';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -70,6 +71,7 @@ const RankingContent: React.FC<RankingContentProps> = ({ filterDialogOpen, setFi
     refreshData();
     toast.success('Filtros redefinidos e dados atualizados');
   };
+  
   useEffect(() => {
     if (user) {
       fetchLastUpload();
@@ -135,6 +137,14 @@ const RankingContent: React.FC<RankingContentProps> = ({ filterDialogOpen, setFi
         processingStats={processingStats}
       />
       
+      {/* Seção de Indicadores Inteligentes */}
+      {chartData && chartData.occurrences && chartData.occurrences.datasets && (
+        <DashboardCards 
+          dadosPlanilha={chartData.rawData} 
+          uploadId={lastUpload?.id}
+        />
+      )}
+      
       {/* Filter dialog */}
       <FilterDialog 
         open={filterDialogOpen}
@@ -147,8 +157,6 @@ const RankingContent: React.FC<RankingContentProps> = ({ filterDialogOpen, setFi
       />
       
       <ChartsSection chartData={chartData} isLoading={isLoading} chartVisibility={chartVisibility} />
-      
-      {/* ActionsSection removed from here */}
     </div>
   );
 };
