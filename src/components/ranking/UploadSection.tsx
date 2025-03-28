@@ -146,7 +146,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         </CardContent>
       </Card>
 
-      {/* Segundo card para upload do Painel da Zeladoria */}
+      {/* Card para upload do Painel da Zeladoria */}
       <Card className="border-dashed border-gray-300 cursor-pointer transition-colors">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center">

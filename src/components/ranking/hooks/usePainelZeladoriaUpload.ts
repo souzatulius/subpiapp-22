@@ -17,7 +17,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
   const handleUploadPainel = useCallback(async (file: File) => {
     if (!user) {
       toast.error('Você precisa estar logado para fazer upload');
-      return;
+      return null;
     }
 
     try {
@@ -39,7 +39,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
           message: 'Formato de arquivo inválido',
           recordCount: 0
         });
-        return;
+        return null;
       }
       
       // Ler e processar arquivo Excel

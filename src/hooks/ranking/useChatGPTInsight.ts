@@ -78,6 +78,8 @@ export const useChatGPTInsight = (dadosPlanilha: any[], uploadId?: string): Chat
 
         if (data && data.insights) {
           setIndicadores(data.insights as Indicadores);
+        } else if (data && data.error) {
+          throw new Error(data.error);
         } else {
           throw new Error('Formato de resposta inválido da edge function');
         }
