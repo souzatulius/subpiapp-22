@@ -26,7 +26,8 @@ export const useDemandasData = () => {
             detalhes_solicitacao,
             perguntas,
             problema_id,
-            coordenacao_id
+            coordenacao_id,
+            servico_id
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -50,8 +51,8 @@ export const useDemandasData = () => {
         console.log('Demandas with notas:', demandasComNotas.size);
         console.log('Demandas without notas:', demandasSemNotas.length);
         
-        // Processar as demandas para adicionar informações de área
-        const processedDemandas = await Promise.all(
+        // Buscar informações do problema para cada demanda
+        const demandasProcessadas = await Promise.all(
           demandasSemNotas.map(async (demanda) => {
             if (demanda.problema_id) {
               const { data: problemaData } = await supabase
@@ -61,9 +62,8 @@ export const useDemandasData = () => {
                 .single();
               
               // Criar objeto completo da demanda com todas as propriedades necessárias
-              const enhancedDemand = {
+              return {
                 ...demanda,
-                supervisao_tecnica: null, // Mantém compatibilidade
                 area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
                 prioridade: "",
                 horario_publicacao: "",
@@ -78,15 +78,14 @@ export const useDemandasData = () => {
                 bairro: null,
                 autor: null,
                 servico: null,
-              };
-              
-              return enhancedDemand as Demand;
+                arquivo_url: null,
+                anexos: []
+              } as Demand;
             }
             
             // Se não tiver problema, criar objeto com valores padrão
-            const defaultDemand = {
+            return {
               ...demanda,
-              supervisao_tecnica: null,
               area_coordenacao: null,
               prioridade: "",
               horario_publicacao: "",
@@ -101,14 +100,14 @@ export const useDemandasData = () => {
               bairro: null,
               autor: null,
               servico: null,
-            };
-            
-            return defaultDemand as Demand;
+              arquivo_url: null,
+              anexos: []
+            } as Demand;
           })
         );
         
-        setDemandas(processedDemandas);
-        setFilteredDemandas(processedDemandas);
+        setDemandas(demandasProcessadas);
+        setFilteredDemandas(demandasProcessadas);
       } catch (error) {
         console.error('Erro ao carregar demandas:', error);
         toast({

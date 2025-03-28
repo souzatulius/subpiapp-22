@@ -106,7 +106,9 @@ export const useNotaForm = (onClose: () => void) => {
       
       if (!problemaData || problemaData.length === 0) {
         // Se não houver problema cadastrado, criar um padrão
-        const coordenacaoId = selectedDemanda.coordenacao_id;
+        const coordenacaoId = selectedDemanda.problema_id 
+          ? await getCoordinationForProblem(selectedDemanda.problema_id)
+          : null;
         
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
@@ -123,13 +125,18 @@ export const useNotaForm = (onClose: () => void) => {
         problemaId = problemaData[0].id;
       }
       
+      // Get coordination ID from problem
+      const coordenacaoId = selectedDemanda.problema_id 
+        ? await getCoordinationForProblem(selectedDemanda.problema_id)
+        : null;
+      
       // Create the note with existing problema
       const { data, error } = await supabase
         .from('notas_oficiais')
         .insert({
           titulo,
           texto,
-          coordenacao_id: selectedDemanda.coordenacao_id || null,
+          coordenacao_id: coordenacaoId,
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId,
@@ -166,6 +173,23 @@ export const useNotaForm = (onClose: () => void) => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  // Helper function to get coordination ID from a problem
+  const getCoordinationForProblem = async (problemId: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('problemas')
+        .select('coordenacao_id')
+        .eq('id', problemId)
+        .single();
+      
+      if (error) throw error;
+      return data?.coordenacao_id || null;
+    } catch (error) {
+      console.error('Error getting coordination for problem:', error);
+      return null;
     }
   };
 

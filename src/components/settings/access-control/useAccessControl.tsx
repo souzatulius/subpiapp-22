@@ -1,13 +1,14 @@
 
+import { useState } from 'react';
 import { useAccessControlData } from './useAccessControlData';
 import { usePermissionsManagement } from './usePermissionsManagement';
-import { useAccessControlUserInfo } from './hooks/useAccessControlUserInfo';
-import { useAccessControlFilter } from './hooks/useAccessControlFilter';
-import { useAccessControlExport } from './hooks/useAccessControlExport';
-import { useCurrentUser } from './hooks/useCurrentUser';
+import { User } from './types';
 
 export const useAccessControl = () => {
-  // Fetch data including users, permissions, and user permissions
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  
+  // Fetch all data
   const {
     users,
     setUsers,
@@ -16,63 +17,51 @@ export const useAccessControl = () => {
     setUserPermissions,
     loading,
     error,
-    fetchData,
-    totalUsers
+    fetchData
   } = useAccessControlData();
-
-  // Current user information
-  const { currentUserId } = useCurrentUser();
 
   // Permission management (add/remove)
   const {
-    saving: permissionSaving,
+    saving,
     handleAddPermission,
     handleRemovePermission
   } = usePermissionsManagement(userPermissions, setUserPermissions, fetchData);
 
-  // User information management (edit dialog, update)
-  const {
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    currentUser,
-    saving: userInfoSaving,
-    openEditDialog,
-    handleUpdateUserInfo
-  } = useAccessControlUserInfo(users, setUsers, fetchData);
+  // Function to open edit dialog
+  const openEditDialog = (user: User) => {
+    setCurrentUser(user);
+    setIsEditDialogOpen(true);
+  };
 
-  // User filtering
-  const { filter, setFilter, filteredUsers } = useAccessControlFilter(users);
-
-  // Export and print functionality
-  const { handleExportCsv, handlePrint } = useAccessControlExport(
-    users,
-    permissions,
-    userPermissions
-  );
-
-  // Combined saving state from both hooks
-  const saving = permissionSaving || userInfoSaving;
+  // Function to update user info
+  const handleUpdateUserInfo = async (userId: string, data: { whatsapp?: string; aniversario?: string }) => {
+    try {
+      console.log('Updating user info:', userId, data);
+      // In a real implementation, this would save to the database
+      // For now we'll just update the local state
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, ...data } : user
+      ));
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error updating user info:', error);
+      return Promise.reject(error);
+    }
+  };
 
   return {
+    users,
     permissions,
     userPermissions,
     loading,
     error,
     saving,
-    filter,
-    setFilter,
-    filteredUsers,
     isEditDialogOpen,
     setIsEditDialogOpen,
     currentUser,
-    currentUserId,
     openEditDialog,
     handleAddPermission,
     handleRemovePermission,
-    handleUpdateUserInfo,
-    handleExportCsv,
-    handlePrint,
-    fetchData,
-    totalUsers
+    handleUpdateUserInfo
   };
 };
