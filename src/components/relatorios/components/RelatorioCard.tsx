@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface RelatorioCardProps {
   title: string;
@@ -17,6 +18,8 @@ interface RelatorioCardProps {
     icon?: ReactNode;
   };
   analysis?: string;
+  value?: string | number;
+  isLoading?: boolean;
 }
 
 export const RelatorioCard: React.FC<RelatorioCardProps> = ({
@@ -25,7 +28,9 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   children,
   className,
   badge,
-  analysis
+  analysis,
+  value,
+  isLoading = false
 }) => {
   const [isAnalysisExpanded, setIsAnalysisExpanded] = useState(false);
 
@@ -34,10 +39,10 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   };
 
   return (
-    <Card className={`overflow-hidden shadow-sm ${className}`}>
-      <CardHeader className="pb-2">
+    <Card className={`h-full border border-orange-200 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-orange-50 to-white ${className}`}>
+      <CardHeader className="pb-2 border-b border-orange-100">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-medium">{title}</CardTitle>
+          <CardTitle className="text-lg text-orange-800">{title}</CardTitle>
           {badge && (
             <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1">
               {badge.icon}
@@ -45,12 +50,18 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
             </Badge>
           )}
         </div>
-        {description && (
-          <CardDescription>{description}</CardDescription>
-        )}
+        <div className="text-2xl font-bold text-orange-700">
+          {isLoading ? <Skeleton className="h-8 w-24" /> : value || (description && <CardDescription>{description}</CardDescription>)}
+        </div>
       </CardHeader>
-      <CardContent>
-        {children}
+      <CardContent className="p-4">
+        {isLoading ? (
+          <Skeleton className="h-[200px] w-full" />
+        ) : (
+          <div className="h-[200px]">
+            {children}
+          </div>
+        )}
         
         {analysis && (
           <div className="mt-2">
