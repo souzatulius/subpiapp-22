@@ -15,10 +15,10 @@ export const useProblemOperations = (onSuccess: () => Promise<void>) => {
       // Validate data with zod schema
       const validatedData = problemSchema.parse(problemData);
       
-      // Add supervisao_tecnica_id as null or undefined to satisfy the database schema
-      // if it's required by the database but we're moving away from it
+      // Add supervisao_tecnica_id as null to satisfy the database schema
       const dataToInsert = {
         ...validatedData,
+        descricao: validatedData.descricao, // Ensure descricao is not optional
         supervisao_tecnica_id: null  // This ensures it matches the database schema expectation
       };
       
@@ -72,6 +72,7 @@ export const useProblemOperations = (onSuccess: () => Promise<void>) => {
       // Include supervisao_tecnica_id as null to satisfy database requirements
       const dataToUpdate = {
         ...validatedData,
+        descricao: validatedData.descricao, // Ensure descricao is not optional
         supervisao_tecnica_id: null
       };
       

@@ -1,19 +1,26 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutDashboard, Droplet, Trash2, Trees, AlertTriangle, MessageSquare, 
   Briefcase, Book, Users, Mail, Heart, Home, Code, Lightbulb,
   Landmark, Globe, Building, FileText, Phone, Map, Activity, FileCheck,
-  Truck, BusFront, TentTree, Waves, CloudRain, Radiation, LucideIcon
+  Truck, BusFront, TentTree, Waves, CloudRain, Radiation
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface IconSelectorProps {
-  selectedIcon: string;
-  onSelectIcon: (icon: string) => void;
+  field: {
+    value: string;
+    onChange: (value: string) => void;
+  };
 }
 
-const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon, onSelectIcon }) => {
+const IconSelector: React.FC<IconSelectorProps> = ({ field }) => {
+  const selectedIcon = field.value;
+  const onSelectIcon = (icon: string) => {
+    field.onChange(icon);
+  };
+
   const icons: { [key: string]: React.ReactElement } = {
     "LayoutDashboard": <LayoutDashboard className="h-5 w-5" />,
     "Droplet": <Droplet className="h-5 w-5" />,

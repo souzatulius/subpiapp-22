@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -101,10 +102,12 @@ const TemaEditDialog: React.FC<TemaEditDialogProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Coordenação</FormLabel>
-                  <CoordinationSelector
-                    field={field}
-                    areas={areas}
-                  />
+                  <FormControl>
+                    <CoordinationSelector
+                      areas={areas}
+                      field={field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

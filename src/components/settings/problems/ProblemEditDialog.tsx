@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { Area, Problem, problemSchema } from '@/hooks/problems/types';
 import { CoordinationSelector } from '../selectors/CoordinationSelector';
-import { IconSelector } from './IconSelector';
+import IconSelector from './IconSelector';
 
 interface ProblemEditDialogProps {
   isOpen: boolean;
@@ -103,10 +104,12 @@ const ProblemEditDialog: React.FC<ProblemEditDialogProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Coordenação</FormLabel>
-                  <CoordinationSelector
-                    areas={areas}
-                    field={field}
-                  />
+                  <FormControl>
+                    <CoordinationSelector
+                      areas={areas}
+                      field={field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -117,7 +120,9 @@ const ProblemEditDialog: React.FC<ProblemEditDialogProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Ícone</FormLabel>
-                  <IconSelector field={field} />
+                  <FormControl>
+                    <IconSelector field={field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

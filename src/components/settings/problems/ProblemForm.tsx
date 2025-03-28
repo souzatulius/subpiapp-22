@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Area, problemSchema } from '@/hooks/problems/types';
 import { CoordinationSelector } from '../selectors/CoordinationSelector';
-import { IconSelector } from './IconSelector';
+import IconSelector from './IconSelector';
 
 interface ProblemFormProps {
   onSubmit: (data: { descricao: string; coordenacao_id: string; icone?: string }) => Promise<void>;

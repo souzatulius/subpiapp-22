@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,7 +28,7 @@ const TemaForm: React.FC<TemaFormProps> = ({
   areas, 
   isSubmitting 
 }) => {
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
+  const form = useForm({
     defaultValues: {
       descricao: '',
       coordenacao_id: ''
@@ -35,34 +36,51 @@ const TemaForm: React.FC<TemaFormProps> = ({
     resolver: zodResolver(problemSchema)
   });
 
-  const selectedArea = watch('coordenacao_id');
+  const handleSubmit = async (data: any) => {
+    try {
+      await onSubmit(data);
+      form.reset();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="descricao">Descrição</Label>
-          <Input
-            id="descricao"
-            placeholder="Digite a descrição do tema"
-            {...register('descricao', { required: 'Descrição é obrigatória' })}
-            className={errors.descricao ? 'border-red-500' : ''}
-          />
-          {errors.descricao && (
-            <p className="text-sm text-red-500">{errors.descricao.message}</p>
+        <FormField
+          control={form.control}
+          name="descricao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite a descrição do tema"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="coordenacao_id">Coordenação</Label>
-          <CoordinationSelector
-            onValueChange={(value) => setValue('coordenacao_id', value)}
-            value={selectedArea}
-          />
-          {errors.coordenacao_id && (
-            <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
+        <FormField
+          control={form.control}
+          name="coordenacao_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Coordenação</FormLabel>
+              <FormControl>
+                <CoordinationSelector
+                  areas={areas}
+                  field={field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
+        />
 
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>
