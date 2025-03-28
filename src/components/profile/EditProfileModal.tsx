@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import EditModal from '@/components/settings/EditModal';
-import { Loader2, Info } from 'lucide-react';
+import { Loader2, Info, Camera } from 'lucide-react';
 import { 
   formatPhoneNumber, 
   formatDateInput, 
@@ -18,6 +18,8 @@ import {
 } from '@/lib/inputFormatting';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { v4 as uuidv4 } from 'uuid';
 
 const profileSchema = z.object({
   nome_completo: z.string().min(1, "Nome é obrigatório"),
@@ -34,6 +36,7 @@ const profileSchema = z.object({
       message: "Data inválida"
     })
     .optional(),
+  foto_perfil_url: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -48,6 +51,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   const { userProfile, fetchUserProfile, isLoading: profileLoading } = useUserProfile();
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const { 
     register, 
@@ -61,7 +66,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     defaultValues: {
       nome_completo: '',
       whatsapp: '',
-      aniversario: ''
+      aniversario: '',
+      foto_perfil_url: ''
     }
   });
   
@@ -72,8 +78,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         whatsapp: userProfile.whatsapp || '',
         aniversario: userProfile.aniversario 
           ? formatDateToString(new Date(userProfile.aniversario)) 
-          : ''
+          : '',
+        foto_perfil_url: userProfile.foto_perfil_url || ''
       });
+      setPhotoPreview(userProfile.foto_perfil_url || null);
     }
   }, [userProfile, reset]);
 
@@ -91,6 +99,44 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     setValue('aniversario', formattedValue);
   };
 
+  // Handle photo selection
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMessage("A imagem não pode exceder 5MB");
+        return;
+      }
+      
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Ensure profile-photos bucket exists
+  const ensureProfilePhotosBucketExists = async () => {
+    try {
+      // Check if bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(bucket => bucket.name === 'profile-photos');
+      
+      if (!bucketExists) {
+        await supabase.storage.createBucket('profile-photos', {
+          public: true
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error ensuring profile photos bucket exists:', error);
+      return false;
+    }
+  };
+
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) return;
     
@@ -98,6 +144,41 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     setErrorMessage(null);
     
     try {
+      let photoUrl = userProfile?.foto_perfil_url || null;
+      
+      // Upload new photo if selected
+      if (photoFile) {
+        const bucketExists = await ensureProfilePhotosBucketExists();
+        if (!bucketExists) {
+          throw new Error("Não foi possível configurar o armazenamento para fotos");
+        }
+        
+        // Generate unique file name
+        const fileExt = photoFile.name.split('.').pop();
+        const fileName = `${user.id}-${uuidv4()}.${fileExt}`;
+        
+        // Upload the file
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('profile-photos')
+          .upload(fileName, photoFile, {
+            upsert: true,
+            cacheControl: '3600'
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('profile-photos')
+          .getPublicUrl(fileName);
+
+        if (urlData?.publicUrl) {
+          photoUrl = urlData.publicUrl;
+        }
+      }
+      
       // Process date if it exists
       let aniversario: string | null = null;
       if (data.aniversario && data.aniversario.trim() !== '') {
@@ -114,11 +195,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           nome_completo: data.nome_completo,
           whatsapp: data.whatsapp || null,
           aniversario: aniversario,
+          foto_perfil_url: photoUrl,
           // Preserve existing values
           cargo_id: userProfile?.cargo_id,
           coordenacao_id: userProfile?.coordenacao_id,
           supervisao_tecnica_id: userProfile?.supervisao_tecnica_id,
-          foto_perfil_url: userProfile?.foto_perfil_url
         })
         .eq('id', user.id);
       
@@ -130,7 +211,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
       toast({
         title: "Perfil atualizado",
         description: "Suas informações foram atualizadas com sucesso.",
-        variant: "success",
+        variant: "default",
       });
     } catch (error: any) {
       console.error('Erro ao atualizar perfil:', error);
@@ -138,6 +219,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getInitials = (name: string = '') => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   };
 
   const isLoading = profileLoading || submitting;
@@ -178,6 +268,35 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
               <p className="text-xs text-blue-700">
                 Você pode editar suas informações pessoais neste formulário. Para alterações em cargo e área, entre em contato com a administração.
               </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center mb-4">
+            <div className="relative">
+              <Avatar className="h-24 w-24">
+                {photoPreview ? (
+                  <AvatarImage src={photoPreview} alt="Preview" />
+                ) : userProfile?.foto_perfil_url ? (
+                  <AvatarImage src={userProfile.foto_perfil_url} alt={userProfile.nome_completo} />
+                ) : (
+                  <AvatarFallback className="text-lg bg-blue-100 text-blue-600">
+                    {getInitials(userProfile?.nome_completo)}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <label 
+                htmlFor="photo-upload" 
+                className="absolute bottom-0 right-0 p-1 bg-blue-500 text-white rounded-full cursor-pointer hover:bg-blue-600 transition-colors"
+              >
+                <Camera className="h-4 w-4" />
+                <input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                />
+              </label>
             </div>
           </div>
 

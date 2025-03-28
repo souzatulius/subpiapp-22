@@ -33,8 +33,9 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
   const [hasSupervisions, setHasSupervisions] = useState(false);
   const [isCoordinationRole, setIsCoordinationRole] = useState(false);
   const [isTeamRole, setIsTeamRole] = useState(false);
+  const [isManagerRole, setIsManagerRole] = useState(false);
 
-  // Check if the selected role is Coordination or Team
+  // Check if the selected role is Coordination, Team or Manager
   useEffect(() => {
     if (role) {
       // Get the role description
@@ -43,6 +44,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
         const roleDescription = selectedRole.value.toLowerCase();
         setIsCoordinationRole(roleDescription.includes('coordenação') || roleDescription.includes('coordenacao'));
         setIsTeamRole(roleDescription.includes('equipe') || roleDescription.includes('técnico') || roleDescription.includes('tecnico'));
+        setIsManagerRole(roleDescription.includes('gestor') || roleDescription.includes('gestores'));
       }
     }
   }, [role, roles]);
@@ -91,12 +93,12 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
     filterAreas();
   }, [coordenacao]);
 
-  // If user selects a coordination role, clear the area selection
+  // If user selects a coordination or manager role, clear the area selection
   useEffect(() => {
-    if (isCoordinationRole && area) {
+    if ((isCoordinationRole || isManagerRole) && area) {
       handleChange('area', '');
     }
-  }, [isCoordinationRole, area, handleChange]);
+  }, [isCoordinationRole, isManagerRole, area, handleChange]);
 
   return (
     <div className="space-y-4">
@@ -188,9 +190,10 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
       
       {/* Only show the supervision field if:
           1. Not a coordination role AND
-          2. The selected coordination has supervisions AND
-          3. It's a team role OR (any role and there are supervisions) */}
-      {!isCoordinationRole && hasSupervisions && (isTeamRole || hasSupervisions) && (
+          2. Not a manager role AND
+          3. The selected coordination has supervisions AND
+          4. It's a team role OR (any role and there are supervisions) */}
+      {!isCoordinationRole && !isManagerRole && hasSupervisions && (isTeamRole || hasSupervisions) && (
         <div className="animate-fadeIn">
           <label htmlFor="area" className="block text-sm font-medium text-[#111827] mb-1">
             Supervisão Técnica

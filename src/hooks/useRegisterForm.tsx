@@ -83,9 +83,15 @@ export const useRegisterForm = () => {
   };
 
   const isCoordinationRole = () => {
-    // Get the role description
-    const selectedRole = formData.role ? formData.role.toLowerCase() : '';
-    return selectedRole.includes('coordenação') || selectedRole.includes('coordenacao');
+    // Get the role object from its ID
+    const selectedRoleId = formData.role;
+    return selectedRoleId && selectedRoleId.toLowerCase().includes('coordenação');
+  };
+
+  const isManagerRole = () => {
+    // Get the role object from its ID
+    const selectedRoleId = formData.role;
+    return selectedRoleId && selectedRoleId.toLowerCase().includes('gestor');
   };
 
   const coordinationHasSupervisions = async (): Promise<boolean> => {
@@ -115,11 +121,12 @@ export const useRegisterForm = () => {
     if (!formData.role) newErrors.role = true;
     if (!formData.coordenacao) newErrors.coordenacao = true;
     
-    // Check if coordination role is selected - no need for supervision in this case
+    // Check if coordination role or manager role is selected - no need for supervision in this case
     const isCoordination = isCoordinationRole();
+    const isManager = isManagerRole();
     
     // For team roles, check if coordination has supervisions
-    if (!isCoordination && !formData.area) {
+    if (!isCoordination && !isManager && !formData.area) {
       // Only mark area as required if the coordination has supervisions
       const hasSupervisions = await coordinationHasSupervisions();
       if (hasSupervisions) {
@@ -154,15 +161,16 @@ export const useRegisterForm = () => {
     try {
       const completeEmail = completeEmailWithDomain(formData.email);
       
-      // For coordination roles, no supervisao_tecnica_id is needed
+      // For coordination or manager roles, no supervisao_tecnica_id is needed
       const isCoordination = isCoordinationRole();
+      const isManager = isManagerRole();
       
       const { error } = await signUp(completeEmail, password, {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
         cargo_id: formData.role,
-        supervisao_tecnica_id: isCoordination ? null : formData.area || null,
+        supervisao_tecnica_id: (isCoordination || isManager) ? null : formData.area || null,
         coordenacao_id: formData.coordenacao
       });
 
