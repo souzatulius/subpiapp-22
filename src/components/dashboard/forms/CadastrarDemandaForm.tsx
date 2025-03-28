@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -61,20 +62,23 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   };
 
   const handleNextStep = () => {
-    if (activeStep === FORM_STEPS.length - 1) {
-      if (validateFormBeforeSubmit()) {
-        handleSubmit(formData);
+    // Ensure that FORM_STEPS and activeStep are valid before accessing
+    if (FORM_STEPS && activeStep >= 0 && activeStep < FORM_STEPS.length) {
+      if (activeStep === FORM_STEPS.length - 1) {
+        if (validateFormBeforeSubmit()) {
+          handleSubmit(formData);
+        } else {
+          setShowValidationAlert(true);
+          const missingFieldsMessage = getErrorSummary(validationErrors);
+          toast({
+            title: "Formulário incompleto",
+            description: missingFieldsMessage,
+            variant: "destructive"
+          });
+        }
       } else {
-        setShowValidationAlert(true);
-        const missingFieldsMessage = getErrorSummary(validationErrors);
-        toast({
-          title: "Formulário incompleto",
-          description: missingFieldsMessage,
-          variant: "destructive"
-        });
+        nextStep();
       }
-    } else {
-      nextStep();
     }
   };
 
@@ -108,10 +112,17 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
       <Card className="border border-gray-200 rounded-lg">
         <div className="p-6">
           <div className="mb-6">
-            <h3 className="form-step-title">
-              {FORM_STEPS[activeStep].title}
-            </h3>
-            {FORM_STEPS[activeStep].description && (
+            {/* Safe access to FORM_STEPS[activeStep] */}
+            {FORM_STEPS && activeStep >= 0 && activeStep < FORM_STEPS.length && (
+              <h3 className="form-step-title">
+                {FORM_STEPS[activeStep].title}
+              </h3>
+            )}
+            {/* Only render description if it exists */}
+            {FORM_STEPS && 
+             activeStep >= 0 && 
+             activeStep < FORM_STEPS.length && 
+             FORM_STEPS[activeStep].description && (
               <p className="text-sm text-gray-500">
                 {FORM_STEPS[activeStep].description}
               </p>
