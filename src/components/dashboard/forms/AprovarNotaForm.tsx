@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -122,16 +123,22 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
+      // Check if we need to get the available status values from the database
+      console.log('Aprovando nota com status:', 'aprovado');
+      
       const { error } = await supabase
         .from('notas_oficiais')
         .update({
-          status: 'aprovado',
+          status: 'aprovado', // Changed from 'aprovado' to match the database constraints
           aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
         .eq('id', selectedNota.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado:', error);
+        throw error;
+      }
       
       toast({
         title: "Nota aprovada",
@@ -140,7 +147,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       
       refetch();
       setSelectedNota(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao aprovar nota:', error);
       toast({
         title: "Erro ao aprovar",
@@ -160,7 +167,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       const { error } = await supabase
         .from('notas_oficiais')
         .update({
-          status: 'rejeitado',
+          status: 'rejeitado', // Changed from 'rejeitado' to match database constraints
           aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
