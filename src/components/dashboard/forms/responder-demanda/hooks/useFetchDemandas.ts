@@ -54,7 +54,7 @@ export const useFetchDemandas = () => {
               nome, 
               distrito_id
             ),
-            distrito:bairros(distrito_id(id, nome)),
+            distrito:bairros(distrito(id, nome)),
             autor:autor_id (id, nome_completo),
             servico:servico_id (id, descricao)
           `)
@@ -114,6 +114,12 @@ export const useFetchDemandas = () => {
             }
           }
           
+          // Properly extract distrito data from the nested structure
+          let distritoData = null;
+          if (item.distrito && Array.isArray(item.distrito) && item.distrito.length > 0) {
+            distritoData = item.distrito[0];
+          }
+          
           return {
             id: item.id,
             titulo: item.titulo,
@@ -148,7 +154,7 @@ export const useFetchDemandas = () => {
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia,
             bairros: item.bairros,
-            distrito: item.distrito?.[0] || null,  // Access first item from district array
+            distrito: distritoData,
             autor: item.autor,
             servico: item.servico,
             problema: item.problemas

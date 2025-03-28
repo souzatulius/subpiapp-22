@@ -54,9 +54,9 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
       }
     }
     
-    // Fix URLs by replacing any incorrect storage references
+    // Fix URLs by ensuring correct bucket name ('demandas')
     const fixedUrls = validUrls.map(url => {
-      // Replace any storage references that might be incorrect
+      // Replace the incorrect 'demand_attachments' bucket reference with 'demandas'
       return url.replace(
         'demand_attachments',
         'demandas'
