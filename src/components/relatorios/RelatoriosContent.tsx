@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { PieChart } from './charts/PieChart';
 import { LineChart } from './charts/LineChart';
@@ -81,7 +80,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     'distribuicaoPorTemas': (
       <BarChart 
         data={barChartData}
-        title="Distribuição por Temas"
         xAxisDataKey="name"
         bars={[
           { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }
@@ -91,7 +89,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     'complexidadePorTema': (
       <AreaChart 
         data={areaChartData}
-        title="Complexidade por Tema"
         xAxisDataKey="name"
         areas={[
           { dataKey: 'Notas', name: 'Notas', color: '#f97316' }
@@ -101,7 +98,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     'tempoMedioResposta': (
       <LineChart 
         data={lineChartData}
-        title="Tempo Médio de Resposta"
         xAxisDataKey="name"
         lines={[
           { dataKey: 'Demandas', name: 'Tempo (dias)', color: '#f97316' }
@@ -111,7 +107,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     'performanceArea': (
       <BarChart 
         data={barChartData}
-        title="Performance por Área"
         xAxisDataKey="name"
         bars={[
           { dataKey: 'Quantidade', name: 'Eficiência', color: '#f97316' }
@@ -121,7 +116,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     'notasEmitidas': (
       <AreaChart 
         data={areaChartData}
-        title="Notas Emitidas"
         xAxisDataKey="name"
         areas={[
           { dataKey: 'Notas', name: 'Quantidade', color: '#f97316' }
@@ -131,15 +125,12 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     'notasPorTema': (
       <PieChart 
         data={pieChartData}
-        title="Notas por Tema"
-        insight="Distribuição de notas por tema"
         colors={['#fdba74', '#fb923c', '#f97316', '#ea580c']}
       />
     ),
     'evolucaoMensal': (
       <LineChart 
         data={lineChartData}
-        title="Evolução Mensal"
         xAxisDataKey="name"
         lines={[
           { dataKey: 'Demandas', name: 'Demandas', color: '#f97316' }
@@ -149,7 +140,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     'comparativoAnual': (
       <BarChart 
         data={barChartData}
-        title="Comparativo Anual"
         xAxisDataKey="name"
         bars={[
           { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }

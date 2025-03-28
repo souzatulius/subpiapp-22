@@ -53,7 +53,7 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
           {isLoading ? <Skeleton className="h-8 w-24 bg-blue-800" /> : value || (description && <p className="text-blue-100">{description}</p>)}
         </div>
       </div>
-      <div className="p-4">
+      <div className="p-2">
         {isLoading ? (
           <Skeleton className="h-[200px] w-full bg-blue-800" />
         ) : (
