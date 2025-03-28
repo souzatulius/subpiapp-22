@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Table, 
@@ -120,8 +121,13 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
             
             let coordination = 'Não informada';
             
-            const coordDescricao = demand.problema_id?.supervisao_tecnica?.descricao;
-            coordination = coordDescricao || 'Não informada';
+            // Fix the type error by safely accessing the supervisao_tecnica property
+            // Problem: demand.problema_id could be a string or an object with a supervisao_tecnica property
+            if (demand.problema && demand.problema.supervisao_tecnica) {
+              coordination = demand.problema.supervisao_tecnica.descricao || 'Não informada';
+            } else if (demand.supervisao_tecnica) {
+              coordination = demand.supervisao_tecnica.descricao || 'Não informada';
+            }
 
             return (
               <TableRow key={demand.id}>
