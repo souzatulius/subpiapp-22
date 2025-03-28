@@ -260,31 +260,7 @@ const ComunicacaoDashboard = () => {
         </Card>
       </div>
       
-      <div className="mb-6 bg-white rounded-lg border border-gray-200 p-5 shadow-sm mt-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-3">Dashboard de Comunicação</h1>
-        <p className="text-gray-600 mb-4">
-          Acompanhe as principais métricas e atividades da área de comunicação.
-        </p>
-        <div className="flex justify-between items-center">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
-              <span className="text-sm font-medium">Demandas Abertas</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
-              <span className="text-sm font-medium">Notas Publicadas</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
-              <span className="text-sm font-medium">Aprovações Pendentes</span>
-            </div>
-          </div>
-          <div className="text-sm text-gray-500">
-            Atualizado em: <span className="font-bold text-gray-600">15/07/2024</span>
-          </div>
-        </div>
-      </div>
+      {/* Removing this dashboard section as requested */}
     </motion.div>
   );
 };

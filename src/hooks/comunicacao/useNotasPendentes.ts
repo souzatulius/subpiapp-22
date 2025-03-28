@@ -39,7 +39,9 @@ export const useNotasPendentes = () => {
 
         if (error) throw error;
         
-        setNotasPendentes(data || []);
+        if (data) {
+          setNotasPendentes(data as NotaPendente[]);
+        }
       } catch (error) {
         console.error('Erro ao carregar notas pendentes:', error);
       } finally {

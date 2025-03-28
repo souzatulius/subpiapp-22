@@ -30,7 +30,7 @@ export const useQuickDemand = () => {
         prioridade: 'normal',
         origem_id: '00000000-0000-0000-0000-000000000000', // Will be updated in full form
         problema_id: '00000000-0000-0000-0000-000000000000', // Will be updated in full form
-        prazo_resposta: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Default 7 days
+        prazo_resposta: new Date().toISOString() // Default 7 days from now
       });
 
       if (error) throw error;
