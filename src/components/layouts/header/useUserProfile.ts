@@ -43,12 +43,12 @@ export const useUserProfile = () => {
       // Transform the data to match the UserProfile interface
       const transformedData: UserProfile = {
         id: data.id,
-        nome_completo: data.nome_completo,
+        nome_completo: data.nome_completo || '',
         email: data.email,
         cargo_id: data.cargo_id,
         coordenacao_id: data.coordenacao_id,
         supervisao_tecnica_id: data.supervisao_tecnica_id,
-        whatsapp: data.whatsapp,
+        whatsapp: data.whatsapp || '',
         aniversario: data.aniversario,
         foto_perfil_url: data.foto_perfil_url,
         cargo: data.cargos?.descricao,
@@ -69,8 +69,9 @@ export const useUserProfile = () => {
     fetchUserProfile();
   }, [fetchUserProfile]);
 
-  const refreshUserProfile = useCallback(() => {
-    fetchUserProfile();
+  // Update to return Promise<void> instead of void
+  const refreshUserProfile = useCallback((): Promise<void> => {
+    return fetchUserProfile();
   }, [fetchUserProfile]);
 
   return { userProfile, isLoading, error, refreshUserProfile };
