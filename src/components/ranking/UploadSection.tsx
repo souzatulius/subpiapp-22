@@ -49,9 +49,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     const files = e.target.files;
     if (files && files.length > 0) {
       onUploadStart();
-      const result = await handleUpload(files[0]);
-      if (result && result.id && result.data) {
-        onUploadComplete(result.id, result.data);
+      try {
+        const result = await handleUpload(files[0]);
+        if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
+          onUploadComplete(result.id as string, result.data as any[]);
+        }
+      } catch (error) {
+        console.error("Error handling file upload:", error);
+        toast.error("Falha ao processar o arquivo");
       }
     }
   }, [handleUpload, onUploadComplete, onUploadStart]);
@@ -59,9 +64,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const handlePainelFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const result = await handleUploadPainel(files[0]);
-      if (result && result.id && result.data) {
-        // Handle painel upload completion if needed
+      try {
+        const result = await handleUploadPainel(files[0]);
+        if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
+          // Handle painel upload completion if needed
+        }
+      } catch (error) {
+        console.error("Error handling painel file upload:", error);
+        toast.error("Falha ao processar o arquivo do painel");
       }
     }
   }, [handleUploadPainel]);
@@ -72,9 +82,14 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       onUploadStart();
-      const result = await handleUpload(files[0]);
-      if (result && result.id && result.data) {
-        onUploadComplete(result.id, result.data);
+      try {
+        const result = await handleUpload(files[0]);
+        if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
+          onUploadComplete(result.id as string, result.data as any[]);
+        }
+      } catch (error) {
+        console.error("Error handling dropped file:", error);
+        toast.error("Falha ao processar o arquivo arrastado");
       }
     }
   }, [handleUpload, onUploadComplete, onUploadStart]);

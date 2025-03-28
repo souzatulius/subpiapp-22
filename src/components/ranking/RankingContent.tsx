@@ -1,16 +1,15 @@
 
 import React, { useState } from 'react';
 import UploadSection from './UploadSection';
-import FilterSection from './filters/FilterSection';
+import FilterSection from './FilterSection';
 import ActionsSection from './ActionsSection';
 import FilterDialog from './filters/FilterDialog';
 import ChartsSection from './ChartsSection';
 import ChartCategorySection from './ChartCategorySection';
 import DashboardCards from './insights/DashboardCards';
-import { useChartItemsState } from './hooks/useChartItemsState';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { FilterOptions, ChartVisibility } from './types';
+import { ChartVisibility, FilterOptions } from './types';
 import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -25,6 +24,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [dadosSGZ, setDadosSGZ] = useState<any[] | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("all");
 
   const { 
     filters, 
@@ -33,8 +33,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
     handleChartVisibilityChange, 
     resetFilters 
   } = useFilterManagement();
-
-  const { chartItems, setChartItems } = useChartItemsState();
 
   const handleUploadComplete = (id: string, data: any[]) => {
     setUploadId(id);
@@ -67,8 +65,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
       />
       
       <ChartCategorySection 
-        activeCategory="all"
-        onCategoryChange={(category) => {}}
+        activeCategory={activeCategory}
+        onCategoryChange={(category) => setActiveCategory(category)}
         categories={['all', 'trends', 'performance', 'distribution']}
       />
       
