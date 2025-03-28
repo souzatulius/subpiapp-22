@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { PieChart } from './charts/PieChart';
 import { LineChart } from './charts/LineChart';
@@ -10,6 +9,16 @@ import { useRelatorioItemsState } from './hooks/useRelatorioItemsState';
 import { createRelatorioItems } from './utils/relatorioItemsFactory';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
+import ChartSectionWrapper from './components/ChartSectionWrapper';
+import { useChartData } from './hooks/useChartData';
+import { useChartComponents } from './hooks/useChartComponents';
+import ServiceDiversityChart from '../ranking/charts/ServiceDiversityChart';
+import ServicesByDistrictChart from '../ranking/charts/ServicesByDistrictChart';
+import ServiceTypesChart from '../ranking/charts/ServiceTypesChart';
+import StatusDistributionChart from '../ranking/charts/StatusDistributionChart';
+import StatusTransitionChart from '../ranking/charts/StatusTransitionChart';
+import TimeComparisonChart from '../ranking/charts/TimeComparisonChart';
+import TopCompaniesChart from '../ranking/charts/TopCompaniesChart';
 
 interface RelatoriosContentProps {
   filterDialogOpen?: boolean;
@@ -17,7 +26,6 @@ interface RelatoriosContentProps {
 }
 
 export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
-  // Sample state - in a real app, this would come from a hook or context
   const [dateRange] = React.useState<{
     from: Date;
     to: Date;
@@ -26,17 +34,14 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     to: new Date(),
   });
   
-  // Simulating loading state
   const [isLoading, setIsLoading] = useState(true);
   
-  // Set up DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
     })
   );
   
-  // Sample chart data
   const pieChartData = [
     { name: 'Pendentes', value: 30 },
     { name: 'Em Andamento', value: 50 },
@@ -70,7 +75,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     { name: 'Jun', Notas: 3 },
   ];
 
-  // New chart data for additional charts
   const timelineChartData = [
     { name: 'Jan', Respostas: 8 },
     { name: 'Fev', Respostas: 12 },
@@ -102,7 +106,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     { name: 'Jun', Satisfação: 8.7 },
   ];
   
-  // Calcular valores totais para exibição nos cards
   const totalTemasPrincipais = barChartData.slice(0, 2).reduce((sum, item) => sum + item.Quantidade, 0);
   const mediaComplexidade = areaChartData.reduce((sum, item) => sum + item.Notas, 0) / areaChartData.length;
   const tempoMedio = lineChartData.reduce((sum, item) => sum + item.Demandas, 0) / lineChartData.length;
@@ -112,7 +115,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
   const totalImpacto = impactChartData.reduce((sum, item) => sum + item.value, 0);
   const totalOrigem = originChartData.reduce((sum, item) => sum + item.Solicitações, 0);
 
-  // Chart components
   const chartComponents = useMemo(() => ({
     'distribuicaoPorTemas': (
       <BarChart 
@@ -183,7 +185,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         ]}
       />
     ),
-    // New chart components
     'timelineRespostas': (
       <LineChart 
         data={timelineChartData}
@@ -219,7 +220,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     ),
   }), []);
 
-  // Chart data metadata
   const chartData = {
     'distribuicaoPorTemas': {
       title: 'Distribuição por Temas',
@@ -261,7 +261,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
       value: "Crescimento: 23%",
       analysis: "O comparativo anual revela um crescimento de 23% em relação ao mesmo período do ano anterior. Os temas 1 e 2 apresentaram o maior crescimento relativo (35% e 42%, respectivamente), enquanto o tema 5 teve uma redução de 18%. Esta mudança na distribuição sugere uma alteração nas prioridades operacionais."
     },
-    // New charts data
     'timelineRespostas': {
       title: 'Timeline de Respostas',
       value: `Total: ${totalRespostas}`,
@@ -284,7 +283,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     },
   };
 
-  // Create initial items
   const initialItems = useMemo(() => createRelatorioItems({
     chartData,
     chartComponents,
@@ -294,7 +292,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     analysisOnlyItems: []
   }), [chartComponents, chartData, isLoading]);
 
-  // Use the items state hook
   const {
     items,
     hiddenItems,
@@ -306,7 +303,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     handleToggleView
   } = useRelatorioItemsState(initialItems);
 
-  // Simula carregamento
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -314,7 +310,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Organizando os itens em seções
   const temasTecnicosItems = items.filter(item => ['distribuicaoPorTemas', 'complexidadePorTema', 'origemDemandas'].includes(item.id));
   const tempoDesempenhoItems = items.filter(item => ['tempoMedioResposta', 'performanceArea', 'timelineRespostas'].includes(item.id));
   const notasOficiaisItems = items.filter(item => ['notasEmitidas', 'notasPorTema', 'distribuicaoImpacto'].includes(item.id));
@@ -332,7 +327,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Temas Técnicos */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Temas Técnicos</h2>
           <SortableContext items={temasTecnicosItems.map(item => item.id)}>
@@ -359,7 +353,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
           </SortableContext>
         </div>
         
-        {/* Tempo e Desempenho */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Tempo e Desempenho</h2>
           <SortableContext items={tempoDesempenhoItems.map(item => item.id)}>
@@ -386,7 +379,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
           </SortableContext>
         </div>
         
-        {/* Notas Oficiais */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Notas Oficiais</h2>
           <SortableContext items={notasOficiaisItems.map(item => item.id)}>
@@ -413,7 +405,6 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
           </SortableContext>
         </div>
         
-        {/* Tendências */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Tendências</h2>
           <SortableContext items={tendenciasItems.map(item => item.id)}>
@@ -438,6 +429,46 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
               ))}
             </div>
           </SortableContext>
+        </div>
+        
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Ranking de Zeladoria</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StatusDistributionChart 
+              data={rankingChartData.statusDistribution} 
+              isLoading={isLoading} 
+            />
+            
+            <ServiceTypesChart 
+              data={rankingChartData.serviceTypes} 
+              isLoading={isLoading} 
+            />
+            
+            <TimeComparisonChart 
+              data={rankingChartData.timeComparison} 
+              isLoading={isLoading} 
+            />
+            
+            <TopCompaniesChart 
+              data={rankingChartData.topCompanies} 
+              isLoading={isLoading} 
+            />
+            
+            <ServiceDiversityChart 
+              data={rankingChartData.serviceDiversity} 
+              isLoading={isLoading} 
+            />
+            
+            <ServicesByDistrictChart 
+              data={rankingChartData.servicesByDistrict} 
+              isLoading={isLoading} 
+            />
+            
+            <StatusTransitionChart 
+              data={rankingChartData.statusTransition} 
+              isLoading={isLoading} 
+            />
+          </div>
         </div>
       </motion.div>
     </DndContext>

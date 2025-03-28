@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { PieChart } from '../charts/PieChart';
 import { LineChart } from '../charts/LineChart';
@@ -190,8 +189,134 @@ export const useChartComponents = () => {
     ),
   }), []);
 
+  // Add ranking chart data
+  const serviceDiversityData = [
+    { name: 'PAVIMENTAÇÃO', Quantidade: 12 },
+    { name: 'ÁREAS VERDES', Quantidade: 8 },
+    { name: 'ILUMINAÇÃO', Quantidade: 15 },
+    { name: 'ZELADORIA', Quantidade: 10 },
+    { name: 'LIMPEZA', Quantidade: 7 },
+  ];
+  
+  const servicesByDistrictData = [
+    { name: 'ALTO DE PINHEIROS', Quantidade: 18 },
+    { name: 'JARDIM PAULISTA', Quantidade: 12 },
+    { name: 'ITAIM BIBI', Quantidade: 15 },
+    { name: 'PINHEIROS', Quantidade: 22 },
+    { name: 'PERDIZES', Quantidade: 14 },
+  ];
+  
+  const serviceTypesData = [
+    { name: 'TAPA-BURACO', Quantidade: 35 },
+    { name: 'PODA DE ÁRVORE', Quantidade: 28 },
+    { name: 'LIMPEZA', Quantidade: 22 },
+    { name: 'MANUTENÇÃO', Quantidade: 18 },
+    { name: 'INSTALAÇÃO', Quantidade: 12 },
+  ];
+  
+  const statusDistributionData = [
+    { name: 'ABERTO', Quantidade: 45 },
+    { name: 'EM ANDAMENTO', Quantidade: 30 },
+    { name: 'CONCLUÍDO', Quantidade: 65 },
+    { name: 'CANCELADO', Quantidade: 12 },
+  ];
+  
+  const timeComparisonData = [
+    { name: 'Média Geral', Dias: 18 },
+    { name: 'Tapa-buraco', Dias: 12 },
+    { name: 'Poda de Árvore', Dias: 25 },
+    { name: 'Limpeza', Dias: 14 },
+  ];
+  
+  const topCompaniesData = [
+    { name: 'Empresa A', Concluídas: 48 },
+    { name: 'Empresa B', Concluídas: 42 },
+    { name: 'Empresa C', Concluídas: 38 },
+    { name: 'Empresa D', Concluídas: 32 },
+    { name: 'Empresa E', Concluídas: 28 },
+  ];
+  
+  const statusTransitionData = [
+    { name: 'Janeiro', Aberto: 45, EmAndamento: 30, Concluído: 25 },
+    { name: 'Fevereiro', Aberto: 39, EmAndamento: 38, Concluído: 32 },
+    { name: 'Março', Aberto: 28, EmAndamento: 42, Concluído: 38 },
+    { name: 'Abril', Aberto: 35, EmAndamento: 32, Concluído: 42 },
+    { name: 'Maio', Aberto: 42, EmAndamento: 28, Concluído: 48 },
+    { name: 'Junho', Aberto: 38, EmAndamento: 35, Concluído: 55 },
+  ];
+
+  // Add ranking chart components
+  const rankingChartComponents = useMemo(() => ({
+    'serviceDiversity': (
+      <BarChart 
+        data={serviceDiversityData}
+        xAxisDataKey="name"
+        bars={[
+          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'servicesByDistrict': (
+      <BarChart 
+        data={servicesByDistrictData}
+        xAxisDataKey="name"
+        bars={[
+          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'serviceTypes': (
+      <BarChart 
+        data={serviceTypesData}
+        xAxisDataKey="name"
+        bars={[
+          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'statusDistribution': (
+      <BarChart 
+        data={statusDistributionData}
+        xAxisDataKey="name"
+        bars={[
+          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'timeComparison': (
+      <BarChart 
+        data={timeComparisonData}
+        xAxisDataKey="name"
+        bars={[
+          { dataKey: 'Dias', name: 'Dias', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'topCompanies': (
+      <BarChart 
+        data={topCompaniesData}
+        xAxisDataKey="name"
+        bars={[
+          { dataKey: 'Concluídas', name: 'Concluídas', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'statusTransition': (
+      <LineChart 
+        data={statusTransitionData}
+        xAxisDataKey="name"
+        lines={[
+          { dataKey: 'Aberto', name: 'Aberto', color: '#f97316' },
+          { dataKey: 'EmAndamento', name: 'Em Andamento', color: '#fb923c' },
+          { dataKey: 'Concluído', name: 'Concluído', color: '#fdba74' }
+        ]}
+      />
+    ),
+  }), []);
+
   return {
     chartComponents,
+    rankingChartComponents,
     pieChartData,
     lineChartData,
     barChartData,
@@ -199,6 +324,13 @@ export const useChartComponents = () => {
     timelineChartData,
     impactChartData,
     originChartData,
-    satisfactionChartData
+    satisfactionChartData,
+    serviceDiversityData,
+    servicesByDistrictData,
+    serviceTypesData,
+    statusDistributionData,
+    timeComparisonData,
+    topCompaniesData,
+    statusTransitionData
   };
 };

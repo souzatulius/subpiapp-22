@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { useChartComponents } from './useChartComponents';
 
@@ -128,5 +127,125 @@ export const useChartData = () => {
     totalOrigem
   ]);
 
-  return { chartData };
+  // Add ranking chart data
+  const rankingData = useMemo(() => ({
+    serviceDiversity: {
+      labels: ['PAVIMENTAÇÃO', 'ÁREAS VERDES', 'ILUMINAÇÃO', 'ZELADORIA', 'LIMPEZA'],
+      datasets: [
+        {
+          label: 'Tipos de serviço',
+          data: [12, 8, 15, 10, 7],
+          backgroundColor: '#a1a1aa',
+        }
+      ]
+    },
+    servicesByDistrict: {
+      labels: ['ALTO DE PINHEIROS', 'JARDIM PAULISTA', 'ITAIM BIBI', 'PINHEIROS', 'PERDIZES'],
+      datasets: [
+        {
+          label: 'Serviços',
+          data: [18, 12, 15, 22, 14],
+          backgroundColor: '#a1a1aa',
+        }
+      ]
+    },
+    serviceTypes: {
+      labels: ['TAPA-BURACO', 'PODA DE ÁRVORE', 'LIMPEZA', 'MANUTENÇÃO', 'INSTALAÇÃO'],
+      datasets: [
+        {
+          label: 'Quantidade',
+          data: [35, 28, 22, 18, 12],
+          backgroundColor: '#a1a1aa',
+        }
+      ]
+    },
+    statusDistribution: {
+      labels: ['ABERTO', 'EM ANDAMENTO', 'CONCLUÍDO', 'CANCELADO'],
+      datasets: [
+        {
+          label: 'Quantidade',
+          data: [45, 30, 65, 12],
+          backgroundColor: '#a1a1aa',
+        }
+      ]
+    },
+    statusTransition: {
+      labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
+      datasets: [
+        {
+          label: 'Aberto',
+          data: [45, 39, 28, 35, 42, 38],
+        },
+        {
+          label: 'Em andamento',
+          data: [30, 38, 42, 32, 28, 35],
+        },
+        {
+          label: 'Concluído',
+          data: [25, 32, 38, 42, 48, 55],
+        }
+      ]
+    },
+    timeComparison: {
+      labels: ['Média Geral', 'Tapa-buraco', 'Poda de Árvore', 'Limpeza'],
+      datasets: [
+        {
+          label: 'Dias',
+          data: [18, 12, 25, 14],
+          backgroundColor: '#a1a1aa',
+        }
+      ]
+    },
+    topCompanies: {
+      labels: ['Empresa A', 'Empresa B', 'Empresa C', 'Empresa D', 'Empresa E'],
+      datasets: [
+        {
+          label: 'Ordens Concluídas',
+          data: [48, 42, 38, 32, 28],
+          backgroundColor: '#a1a1aa',
+        }
+      ]
+    }
+  }), []);
+  
+  // Add additional metadata for ranking charts
+  const rankingChartData = useMemo(() => ({
+    'statusDistribution': {
+      title: 'Status das ordens de serviço',
+      value: 'Comparação',
+      analysis: "A distribuição de status mostra que 42% das ordens estão concluídas, 29% estão abertas, 20% em andamento e 9% foram canceladas. A taxa de conclusão está dentro das metas estabelecidas, mas o número de ordens canceladas merece atenção especial."
+    },
+    'serviceTypes': {
+      title: 'Serviços mais solicitados',
+      value: 'Comparação',
+      analysis: "Tapa-buraco representa 30% das solicitações, seguido por poda de árvore (24%). A predominância de serviços relacionados à pavimentação indica necessidade de planos preventivos mais eficazes para esta área."
+    },
+    'timeComparison': {
+      title: 'Comparativo de tempo médio',
+      value: '18 dias',
+      analysis: "O tempo médio geral para conclusão de serviços é de 18 dias. O serviço de poda de árvore tem o maior tempo (25 dias), enquanto tapa-buraco apresenta o melhor desempenho (12 dias). Sugerimos revisão dos processos para reduzir o tempo de poda."
+    },
+    'topCompanies': {
+      title: 'Empresas com mais ordens concluídas',
+      value: 'Total: 188',
+      analysis: "A Empresa A lidera com 26% das ordens concluídas, seguida pela Empresa B com 22%. As cinco principais empresas são responsáveis por 80% de todas as conclusões, demonstrando boa distribuição entre os principais prestadores."
+    },
+    'serviceDiversity': {
+      title: 'Diversidade de serviços por departamento',
+      value: 'Total: 52',
+      analysis: "O departamento de iluminação apresenta a maior diversidade de tipos de serviço (15), seguido por pavimentação (12). Áreas verdes, apesar de alto volume, tem menor diversidade de tipos de serviço (8), indicando processos mais padronizados."
+    },
+    'servicesByDistrict': {
+      title: 'Serviços por distrito',
+      value: 'Diversidade',
+      analysis: "Pinheiros é o distrito com maior número de serviços solicitados (22), seguido por Alto de Pinheiros (18). O volume e diversidade de serviços mostram correlação com a densidade populacional e idade da infraestrutura urbana em cada distrito."
+    },
+    'statusTransition': {
+      title: 'Transição de status ao longo dos dias',
+      value: 'Evolução temporal',
+      analysis: "A evolução temporal mostra redução consistente de ordens abertas e aumento de concluídas ao longo do semestre. O mês de junho apresentou o melhor desempenho, com 55 conclusões e apenas 38 aberturas, indicando maior eficiência operacional."
+    },
+  }), []);
+
+  return { chartData, rankingChartData, rankingData };
 };
