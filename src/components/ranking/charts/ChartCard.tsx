@@ -16,11 +16,11 @@ const ChartCard: React.FC<ChartCardProps> = ({
   isLoading, 
   children 
 }) => (
-  <Card className="h-full border border-orange-200 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-orange-50 to-white">
-    <CardHeader className="pb-2 border-b border-orange-100">
+  <Card className="h-full border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-blue-50 to-blue-100">
+    <CardHeader className="pb-2 border-b border-blue-200">
       <div className="flex flex-col">
-        <CardTitle className="text-lg text-orange-800">{title}</CardTitle>
-        <div className="text-2xl font-bold text-orange-700">
+        <CardTitle className="text-lg text-blue-800">{title}</CardTitle>
+        <div className="text-2xl font-bold text-blue-700">
           {isLoading ? <Skeleton className="h-8 w-24" /> : value}
         </div>
       </div>

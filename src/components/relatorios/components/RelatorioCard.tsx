@@ -38,24 +38,24 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   };
 
   return (
-    <div className={`h-full border border-blue-900 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-blue-900 to-blue-950 rounded-xl ${className}`}>
-      <div className="pb-2 border-b border-blue-800 p-4">
+    <div className={`h-full border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl ${className}`}>
+      <div className="pb-2 border-b border-blue-200 p-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg text-white">{title}</h3>
+          <h3 className="text-lg text-blue-800">{title}</h3>
           {badge && (
-            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1 bg-blue-800 text-white">
+            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1 bg-blue-200 text-blue-800">
               {badge.icon}
               {badge.text}
             </Badge>
           )}
         </div>
-        <div className="text-2xl font-bold text-white">
-          {isLoading ? <Skeleton className="h-8 w-24 bg-blue-700" /> : value || (description && <p className="text-blue-100">{description}</p>)}
+        <div className="text-2xl font-bold text-blue-700">
+          {isLoading ? <Skeleton className="h-8 w-24 bg-blue-100" /> : value || (description && <p className="text-blue-600">{description}</p>)}
         </div>
       </div>
       <div className="p-2">
         {isLoading ? (
-          <Skeleton className="h-[200px] w-full bg-gray-700" />
+          <Skeleton className="h-[200px] w-full bg-blue-50" />
         ) : (
           <div className="h-[200px]">
             {children}
@@ -68,7 +68,7 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
               variant="ghost" 
               size="sm" 
               onClick={toggleAnalysis}
-              className="w-full flex justify-between items-center text-sm text-gray-300 hover:bg-gray-700"
+              className="w-full flex justify-between items-center text-sm text-blue-600 hover:bg-blue-100"
             >
               <div className="flex items-center">
                 <Search className="h-4 w-4 mr-2" />
@@ -82,7 +82,7 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
                 initial={{ opacity: 0, height: 0 }} 
                 animate={{ opacity: 1, height: 'auto' }}
                 transition={{ duration: 0.3 }}
-                className="mt-2 p-3 bg-gray-700 rounded-md text-sm text-white"
+                className="mt-2 p-3 bg-blue-100 rounded-md text-sm text-blue-800"
               >
                 {analysis}
               </motion.div>
