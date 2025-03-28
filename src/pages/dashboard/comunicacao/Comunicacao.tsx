@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MessageSquare, MessageSquareReply, FileEdit, CheckCircle } from 'lucide-react';
+import { MessageSquare, MessageSquareReply, FileEdit, CheckCircle, Mail, Newspaper, MessageCircle, Phone, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -32,17 +32,17 @@ const ComunicacaoDashboard = () => {
   const getOrigemIcon = (descricao: string) => {
     const lowerDesc = descricao.toLowerCase();
     if (lowerDesc.includes('email') || lowerDesc.includes('e-mail')) {
-      return 'mail';
+      return <Mail className="h-5 w-5 mr-2 text-blue-600" />;
     } else if (lowerDesc.includes('imprensa') || lowerDesc.includes('jornal')) {
-      return 'newspaper';
+      return <Newspaper className="h-5 w-5 mr-2 text-blue-600" />;
     } else if (lowerDesc.includes('whatsapp')) {
-      return 'message-circle';
+      return <MessageCircle className="h-5 w-5 mr-2 text-blue-600" />;
     } else if (lowerDesc.includes('telefone')) {
-      return 'phone';
+      return <Phone className="h-5 w-5 mr-2 text-blue-600" />;
     } else if (lowerDesc.includes('redes')) {
-      return 'share-2';
+      return <Share2 className="h-5 w-5 mr-2 text-blue-600" />;
     }
-    return 'message-square'; // default
+    return <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />;
   };
   
   return (
@@ -82,27 +82,17 @@ const ComunicacaoDashboard = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {origens?.map((origem) => {
-                  const iconName = getOrigemIcon(origem.descricao);
-                  // Dynamically import the icon
-                  const IconComponent = require(`lucide-react`)[iconName.charAt(0).toUpperCase() + iconName.slice(1)];
-                  
-                  return (
-                    <Button
-                      key={origem.id}
-                      variant="outline"
-                      className="flex items-center justify-start p-3 h-auto text-left"
-                      onClick={() => handleOrigemSelect(origem.id)}
-                    >
-                      {IconComponent ? (
-                        <IconComponent className="h-5 w-5 mr-2 text-blue-600" />
-                      ) : (
-                        <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
-                      )}
-                      <span>{origem.descricao}</span>
-                    </Button>
-                  );
-                })}
+                {origens?.map((origem) => (
+                  <Button
+                    key={origem.id}
+                    variant="outline"
+                    className="flex items-center justify-start p-3 h-auto text-left"
+                    onClick={() => handleOrigemSelect(origem.id)}
+                  >
+                    {getOrigemIcon(origem.descricao)}
+                    <span>{origem.descricao}</span>
+                  </Button>
+                ))}
               </div>
             )}
           </CardContent>
