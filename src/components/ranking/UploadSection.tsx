@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
+import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet, CheckCircle, XCircle, FileText, Printer, Download } from 'lucide-react';
 import { UploadInfo } from './types';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { useExportPDF } from '@/hooks/consultar-notas/useExportPDF';
 
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
@@ -42,6 +43,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { handleExportPDF } = useExportPDF();
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
@@ -85,6 +88,29 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     XLSX.utils.book_append_sheet(wb, ws, 'SGZ Template');
     XLSX.writeFile(wb, 'modelo_sgz.xlsx');
     toast.success('Modelo de planilha SGZ baixado com sucesso!');
+  };
+  
+  const handleExport = () => {
+    if (uploads && uploads.length > 0) {
+      const exportData = uploads.map(upload => ({
+        'Arquivo': upload.nome_arquivo,
+        'Data de Upload': new Date(upload.data_upload).toLocaleString('pt-BR'),
+        'Status': upload.processado ? 'Concluído' : 'Processando'
+      }));
+      
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Histórico de Uploads');
+      XLSX.writeFile(wb, 'historico_uploads_sgz.xlsx');
+      toast.success('Histórico de uploads exportado com sucesso!');
+    } else {
+      toast.error('Não há dados para exportar.');
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+    toast.success('Enviando para impressão...');
   };
 
   const getProgressText = () => {
@@ -130,6 +156,22 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               <Button variant="secondary" onClick={handleRefreshClick} disabled={isLoading}>
                 <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Atualizar gráficos
+              </Button>
+              
+              <Button variant="outline" size="icon" onClick={handleExport} title="Exportar dados">
+                <FileText className="h-4 w-4" />
+              </Button>
+              
+              <Button variant="outline" size="icon" onClick={handlePrint} title="Imprimir relatório">
+                <Printer className="h-4 w-4" />
+              </Button>
+              
+              <Button variant="outline" size="icon" onClick={handleExportPDF} title="Exportar como PDF">
+                <FileText className="h-4 w-4" />
+              </Button>
+              
+              <Button variant="outline" size="icon" onClick={handleDownloadTemplate} title="Baixar modelo SGZ">
+                <Download className="h-4 w-4" />
               </Button>
             </div>
           </div>
