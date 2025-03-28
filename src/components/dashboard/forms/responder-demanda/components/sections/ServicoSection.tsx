@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { FileText, MapPin, Search, X, Tag } from 'lucide-react';
+import { FileText, Search, X, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useServices } from '@/hooks/useServices';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ServicoSectionProps {
@@ -79,67 +78,55 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
         Serviço
       </h3>
       
-      <div className="grid grid-cols-1 gap-4">
-        {selectedDemanda.tema && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Tema:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.tema.descricao || 'Não definido'}
-            </p>
+      <div>
+        {!isEditing && selectedDemanda.servico ? (
+          <div className="w-full bg-blue-100 text-blue-800 rounded-lg px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              <span className="font-medium">{selectedDemanda.servico.descricao}</span>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0 rounded-full hover:bg-blue-200"
+              onClick={handleRemoveService}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="relative">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Buscar serviço..."
+                className="pr-8 w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400" size={15} />
+            </div>
+            
+            {searchTerm.length > 0 && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                {filteredServices.length > 0 ? (
+                  filteredServices.map(service => (
+                    <Button
+                      key={service.id}
+                      variant="ghost"
+                      className="w-full justify-start text-left px-3 py-2 text-sm hover:bg-blue-50"
+                      onClick={() => handleServiceSelect(service.id)}
+                    >
+                      {service.descricao}
+                    </Button>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-sm text-gray-500">Nenhum serviço encontrado</div>
+                )}
+              </div>
+            )}
           </div>
         )}
-        
-        <div className="space-y-1">
-          <span className="text-sm text-gray-500">Serviço:</span>
-          {!isEditing && selectedDemanda.servico ? (
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm flex items-center gap-1.5">
-                <Tag className="h-3.5 w-3.5" />
-                <span>{selectedDemanda.servico.descricao}</span>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-5 w-5 p-0 rounded-full"
-                  onClick={handleRemoveService}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="relative">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Buscar serviço..."
-                  className="pr-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Search className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400" size={15} />
-              </div>
-              
-              {searchTerm.length > 0 && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                  {filteredServices.length > 0 ? (
-                    filteredServices.map(service => (
-                      <Button
-                        key={service.id}
-                        variant="ghost"
-                        className="w-full justify-start text-left px-3 py-2 text-sm hover:bg-blue-50"
-                        onClick={() => handleServiceSelect(service.id)}
-                      >
-                        {service.descricao}
-                      </Button>
-                    ))
-                  ) : (
-                    <div className="px-3 py-2 text-sm text-gray-500">Nenhum serviço encontrado</div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

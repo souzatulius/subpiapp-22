@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Table, 
@@ -118,9 +119,14 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
             const statusInfo = formatStatus(demand.status);
             const priorityInfo = formatPriority(demand.prioridade);
             
-            const coordination = demand.problema_id?.supervisao_tecnica?.coordenacao_id 
-              ? demand.problema_id.supervisao_tecnica.descricao 
-              : 'Não informada';
+            // Get the coordination info from the problema object if available
+            let coordination = 'Não informada';
+            if (demand.problema_id && typeof demand.problema_id === 'object') {
+              if (demand.problema_id.supervisao_tecnica && 
+                  typeof demand.problema_id.supervisao_tecnica === 'object') {
+                coordination = demand.problema_id.supervisao_tecnica.descricao || 'Não informada';
+              }
+            }
 
             return (
               <TableRow key={demand.id}>
