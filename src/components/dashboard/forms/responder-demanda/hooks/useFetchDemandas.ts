@@ -43,7 +43,8 @@ export const useFetchDemandas = () => {
             protocolo,
             problemas:problema_id (
               id, 
-              descricao, 
+              descricao,
+              icone,
               coordenacao_id
             ),
             origens_demandas:origem_id (id, descricao),
@@ -86,6 +87,29 @@ export const useFetchDemandas = () => {
           });
           return;
         }
+        
+        // Fetch the tema data for each demand based on the problema_id
+        const problemIds = data.map(item => item.problema_id).filter(Boolean);
+        const { data: temasData, error: temasError } = await supabase
+          .from('problemas')
+          .select('id, descricao, icone')
+          .in('id', problemIds);
+          
+        if (temasError) {
+          console.error('Error fetching temas:', temasError);
+        }
+        
+        // Create a mapping of problema_id to tema data
+        const temasMap = {};
+        if (temasData) {
+          temasData.forEach(tema => {
+            temasMap[tema.id] = {
+              id: tema.id,
+              descricao: tema.descricao,
+              icone: tema.icone
+            };
+          });
+        }
 
         // Create a set of demand IDs that already have responses
         const respondedDemandIds = new Set(respostasData.map(resposta => resposta.demanda_id));
@@ -113,6 +137,9 @@ export const useFetchDemandas = () => {
             }
           }
           
+          // Add tema data from the mapping
+          const tema = item.problema_id ? temasMap[item.problema_id] : null;
+          
           return {
             id: item.id,
             titulo: item.titulo,
@@ -138,13 +165,15 @@ export const useFetchDemandas = () => {
             problema_id: item.problema_id,
             servico_id: item.servico_id,
             protocolo: item.protocolo,
+            tema: tema,
             areas_coordenacao: null, // Atualizando para usar o relacionamento problema-coordenacao
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia,
             bairros: item.bairros,
             distrito: item.distrito?.[0] || null,  // Access first item from district array
             autor: item.autor,
-            servico: item.servico
+            servico: item.servico,
+            problema: item.problemas
           };
         });
         

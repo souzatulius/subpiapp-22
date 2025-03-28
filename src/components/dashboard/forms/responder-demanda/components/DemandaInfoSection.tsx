@@ -94,12 +94,12 @@ const DemandaInfoSection: React.FC<DemandaInfoSectionProps> = ({ demanda }) => {
       </div>
 
       {/* Localização */}
-      {(demanda.endereco || demanda.bairro_id) && (
+      {(demanda.endereco || demanda.bairro_id || demanda.distrito) && (
         <>
           <Separator className="my-4" />
           <div>
             <h3 className="text-base font-medium mb-3">Localização</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {demanda.endereco && (
                 <div className="flex flex-col space-y-1">
                   <div className="flex items-center text-gray-600">
@@ -110,14 +110,26 @@ const DemandaInfoSection: React.FC<DemandaInfoSectionProps> = ({ demanda }) => {
                 </div>
               )}
               
-              {demanda.bairro_id && (
+              {demanda.bairros?.nome && (
                 <div className="flex flex-col space-y-1">
                   <div className="flex items-center text-gray-600">
                     <MapPin className="w-4 h-4 mr-1" />
                     <span className="text-xs">Bairro</span>
                   </div>
                   <span className="text-sm font-medium">
-                    {demanda.bairros?.nome || demanda.bairro_id}
+                    {demanda.bairros?.nome}
+                  </span>
+                </div>
+              )}
+
+              {demanda.distrito?.nome && (
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center text-gray-600">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    <span className="text-xs">Distrito</span>
+                  </div>
+                  <span className="text-sm font-medium">
+                    {demanda.distrito?.nome}
                   </span>
                 </div>
               )}
