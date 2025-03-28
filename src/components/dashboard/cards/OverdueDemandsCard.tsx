@@ -12,6 +12,12 @@ interface OverdueDemandsProps {
   overdueItems: { title: string; id: string }[];
 }
 
+// Interface para demandas em atraso
+interface OverdueDemand {
+  id: string;
+  title: string;
+}
+
 const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({ 
   id, 
   overdueCount: initialOverdueCount,
@@ -19,7 +25,9 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [overdueItems, setOverdueItems] = useState<{ title: string; id: string }[]>(initialOverdueItems);
+  const [overdueItems, setOverdueItems] = useState<OverdueDemand[]>(
+    initialOverdueItems.map(item => ({ id: item.id, title: item.title }))
+  );
   const [overdueCount, setOverdueCount] = useState<number>(initialOverdueCount);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
@@ -30,26 +38,26 @@ const OverdueDemandsCard: React.FC<OverdueDemandsProps> = ({
       setIsLoading(true);
       
       try {
-        // First, get user's supervisao_tecnica_id
+        // First, get user's problem_id
         const { data: userData, error: userError } = await supabase
           .from('usuarios')
-          .select('supervisao_tecnica_id')
+          .select('problema_id')
           .eq('id', user.id)
           .single();
           
         if (userError) throw userError;
         
-        const userAreaId = userData?.supervisao_tecnica_id;
+        const userProblemId = userData?.problema_id;
         
         // Get current date for comparing with deadlines
         const now = new Date().toISOString();
         
-        // Fetch overdue demands for user's area
+        // Fetch overdue demands for user's coordenacao
         const { data: demandsData, error: demandsError } = await supabase
           .from('demandas')
-          .select('id, titulo')
+          .select('id, titulo, problema_id')
           .lt('prazo_resposta', now) // Less than = past deadline
-          .eq('supervisao_tecnica_id', userAreaId)
+          .eq('problema_id', userProblemId)
           .eq('status', 'pendente')
           .order('prazo_resposta', { ascending: true })
           .limit(5);

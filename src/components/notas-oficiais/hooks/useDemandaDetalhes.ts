@@ -1,152 +1,153 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Json } from '@/integrations/supabase/types';
+import { toast } from '@/components/ui/use-toast';
+import { normalizeQuestions } from '@/utils/questionFormatUtils';
 
-interface DemandaDetalhes {
-  id: string;
-  titulo: string;
-  status: string;
-  area_coordenacao: {
-    id: string;
-    descricao: string;
-  } | null;
-  detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null;
-  respostas: Array<{
-    texto: string;
-    criado_em: string;
-    autor: {
-      nome_completo: string;
-    }
-  }>;
-}
-
-interface FormattedQA {
-  question: string;
-  answer: string;
-}
-
-export const useDemandaDetalhes = (demandaId: string | undefined) => {
-  const [loading, setLoading] = useState(true);
-  const [demanda, setDemanda] = useState<DemandaDetalhes | null>(null);
-  const [formattedResponses, setFormattedResponses] = useState<FormattedQA[]>([]);
-  const [error, setError] = useState<string | null>(null);
+export const useDemandaDetalhes = (demandaId: string) => {
+  const [demanda, setDemanda] = useState<any | null>(null);
+  const [respostas, setRespostas] = useState<any | null>(null);
+  const [perguntas, setPerguntas] = useState<{ pergunta: string; resposta: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDemandaDetalhes = async () => {
-      if (!demandaId) {
-        setLoading(false);
-        return;
-      }
-
+    const fetchDemandaDetails = async () => {
       try {
-        setLoading(true);
-        
-        // Fetch demanda details
-        const { data, error: demandaError } = await supabase
+        setIsLoading(true);
+        if (!demandaId) return;
+
+        // Buscar detalhes da demanda
+        const { data, error } = await supabase
           .from('demandas')
           .select(`
             id,
             titulo,
             status,
+            problema_id,
+            coordenacao_id,
             detalhes_solicitacao,
             perguntas,
-            supervisao_tecnica_id
+            origem_id,
+            origens_demandas:origem_id(id, descricao),
+            tipo_midia_id,
+            tipos_midia:tipo_midia_id(id, descricao),
+            bairro_id,
+            bairros:bairro_id(id, nome),
+            problemas:problema_id(
+              id, 
+              descricao,
+              coordenacao_id
+            ),
+            autor_id,
+            autor:autor_id(id, nome_completo),
+            horario_publicacao,
+            prazo_resposta,
+            prioridade,
+            endereco,
+            nome_solicitante,
+            telefone_solicitante,
+            email_solicitante,
+            veiculo_imprensa,
+            servico_id,
+            servicos:servico_id(id, descricao)
           `)
           .eq('id', demandaId)
           .single();
-          
-        if (demandaError) throw demandaError;
-        
-        // Fetch area_coordenacao separately to avoid relation errors
-        let areaCoordenacao = null;
-        if (data.supervisao_tecnica_id) {
-          const { data: areaData, error: areaError } = await supabase
-            .from('supervisoes_tecnicas')
-            .select('id, descricao')
-            .eq('id', data.supervisao_tecnica_id)
-            .maybeSingle();
-            
-          if (!areaError && areaData) {
-            areaCoordenacao = areaData;
-          }
+
+        if (error) {
+          throw error;
         }
-        
-        // Fetch responses for this demanda
+
+        // Buscar respostas da demanda
         const { data: respostasData, error: respostasError } = await supabase
           .from('respostas_demandas')
-          .select(`
-            texto,
-            criado_em,
-            usuarios (
-              nome_completo
-            )
-          `)
+          .select('*')
           .eq('demanda_id', demandaId)
-          .order('criado_em', { ascending: true });
-          
-        if (respostasError) throw respostasError;
-        
-        // Format responses
-        const respostas: Array<{texto: string; criado_em: string; autor: {nome_completo: string}}> = [];
-        if (respostasData) {
-          for (let i = 0; i < respostasData.length; i++) {
-            const item = respostasData[i];
-            respostas.push({
-              texto: item.texto,
-              criado_em: item.criado_em,
-              autor: {
-                nome_completo: item.usuarios?.nome_completo || 'Usuário'
-              }
-            });
+          .maybeSingle();
+
+        if (respostasError) {
+          throw respostasError;
+        }
+
+        // Buscar o problema relacionado
+        let problema = null;
+        if (data.problema_id) {
+          const { data: problemaData, error: problemaError } = await supabase
+            .from('problemas')
+            .select('id, descricao, coordenacao_id')
+            .eq('id', data.problema_id)
+            .single();
+
+          if (!problemaError) {
+            problema = problemaData;
           }
         }
-        
-        // Combine data
-        const demandaWithRespostas: DemandaDetalhes = {
+
+        // Formatar o resultado final
+        const result = {
           id: data.id,
           titulo: data.titulo,
           status: data.status,
-          area_coordenacao: areaCoordenacao,
+          area_coordenacao: {
+            descricao: problema?.descricao || 'Não informada'
+          },
           detalhes_solicitacao: data.detalhes_solicitacao,
-          perguntas: data.perguntas as Record<string, string> | null,
-          respostas: respostas
+          perguntas: data.perguntas,
+          origem: data.origens_demandas,
+          tipo_midia: data.tipos_midia,
+          bairro: data.bairros,
+          autor: data.autor,
+          horario_publicacao: data.horario_publicacao,
+          prazo_resposta: data.prazo_resposta,
+          prioridade: data.prioridade,
+          endereco: data.endereco,
+          nome_solicitante: data.nome_solicitante,
+          telefone_solicitante: data.telefone_solicitante,
+          email_solicitante: data.email_solicitante,
+          veiculo_imprensa: data.veiculo_imprensa,
+          servico: data.servicos,
+          coordenacao_id: data.coordenacao_id || problema?.coordenacao_id,
+          problema_id: data.problema_id
         };
-        
-        setDemanda(demandaWithRespostas);
-        
-        // Format perguntas as QA pairs
-        if (demandaWithRespostas.perguntas) {
-          const formattedQA = formatarPerguntasRespostas(demandaWithRespostas.perguntas);
-          setFormattedResponses(formattedQA);
+
+        setDemanda(result);
+        setRespostas(respostasData);
+
+        // Processar perguntas e respostas
+        if (data.perguntas && respostasData?.respostas) {
+          const perguntasNormalizadas = normalizeQuestions(data.perguntas);
+          const respostasObj = typeof respostasData.respostas === 'string' 
+            ? JSON.parse(respostasData.respostas) 
+            : respostasData.respostas;
+
+          const perguntasRespostas = perguntasNormalizadas.map((pergunta, index) => {
+            return {
+              pergunta,
+              resposta: respostasObj[index.toString()] || ''
+            };
+          });
+
+          setPerguntas(perguntasRespostas);
         }
-      } catch (err: any) {
-        console.error('Error fetching demanda details:', err);
-        setError(err.message || 'Erro ao carregar detalhes da demanda');
+      } catch (error) {
+        console.error('Erro ao carregar detalhes da demanda:', error);
+        toast({
+          title: "Erro ao carregar detalhes",
+          description: "Não foi possível carregar os detalhes da demanda.",
+          variant: "destructive"
+        });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchDemandaDetalhes();
+    fetchDemandaDetails();
   }, [demandaId]);
 
-  // Function to format perguntas object into QA pairs
-  const formatarPerguntasRespostas = (perguntas: Record<string, string> | null): FormattedQA[] => {
-    if (!perguntas) return [];
-    
-    const formatted: FormattedQA[] = [];
-    
-    for (const key of Object.keys(perguntas)) {
-      formatted.push({
-        question: key,
-        answer: perguntas[key]
-      });
-    }
-    
-    return formatted;
+  return {
+    demanda,
+    respostas,
+    perguntas,
+    isLoading
   };
-
-  return { demanda, formattedResponses, loading, error };
 };

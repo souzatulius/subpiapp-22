@@ -25,7 +25,8 @@ export const useDemandasData = () => {
             status,
             detalhes_solicitacao,
             perguntas,
-            supervisao_tecnica_id
+            problema_id,
+            coordenacao_id
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -51,19 +52,19 @@ export const useDemandasData = () => {
         
         // Processar as demandas para adicionar informações de área
         const processedDemandas = await Promise.all(
-          demandasSemNotas.map(async (demanda: any) => {
-            if (demanda.supervisao_tecnica_id) {
-              const { data: supervisaoData } = await supabase
-                .from('supervisoes_tecnicas')
-                .select('id, descricao')
-                .eq('id', demanda.supervisao_tecnica_id)
+          demandasSemNotas.map(async (demanda) => {
+            if (demanda.problema_id) {
+              const { data: problemaData } = await supabase
+                .from('problemas')
+                .select('id, descricao, coordenacao_id')
+                .eq('id', demanda.problema_id)
                 .single();
               
               // Criar objeto completo da demanda com todas as propriedades necessárias
               const enhancedDemand = {
                 ...demanda,
-                supervisao_tecnica: supervisaoData || null,
-                area_coordenacao: supervisaoData ? { descricao: supervisaoData.descricao } : null,
+                supervisao_tecnica: null, // Mantém compatibilidade
+                area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
                 prioridade: "",
                 horario_publicacao: "",
                 prazo_resposta: "",
@@ -76,13 +77,13 @@ export const useDemandasData = () => {
                 tipo_midia: null,
                 bairro: null,
                 autor: null,
-                servico: null, // Add null servico property
+                servico: null,
               };
               
               return enhancedDemand as Demand;
             }
             
-            // Se não tiver supervisão técnica, criar objeto com valores padrão
+            // Se não tiver problema, criar objeto com valores padrão
             const defaultDemand = {
               ...demanda,
               supervisao_tecnica: null,
@@ -99,7 +100,7 @@ export const useDemandasData = () => {
               tipo_midia: null,
               bairro: null,
               autor: null,
-              servico: null, // Add null servico property
+              servico: null,
             };
             
             return defaultDemand as Demand;
@@ -133,7 +134,7 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.supervisao_tecnica?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);

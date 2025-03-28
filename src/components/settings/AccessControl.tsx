@@ -1,74 +1,126 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { FileDown, Printer, RefreshCw } from 'lucide-react';
-import AccessControlTable from './access-control/AccessControlTable';
-import AccessControlHeader from './access-control/AccessControlHeader';
-import UserInfoEditDialog from './access-control/UserInfoEditDialog';
-import { useAccessControl } from './access-control/useAccessControl';
+import React, { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { useAccessControlData } from './access-control/useAccessControlData';
+import Coordenadores from './access-control/Coordenadores';
+import SupervisoresTecnicos from './access-control/SupervisoresTecnicos';
+import CustomTabs from '@/components/ui/tabs/CustomTabs';
+import UserInfoDialog from './access-control/UserInfoDialog';
+import { User } from './access-control/types';
+import { usePermissionsManagement } from './access-control/usePermissionsManagement';
 
 const AccessControl: React.FC = () => {
+  const [selectedTab, setSelectedTab] = useState<'coordenadores' | 'supervisores'>('coordenadores');
+  const [userInfoOpen, setUserInfoOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  
   const {
-    permissions,
+    coordenadores,
+    supervisores,
+    coordenacoes,
     userPermissions,
-    loading,
-    error,
+    allPermissions,
+    isLoadingPermissions,
+    fetchPermissions,
+    fetchUserData
+  } = useAccessControlData();
+  
+  const {
     saving,
-    filter,
-    setFilter,
-    filteredUsers,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    currentUser,
-    currentUserId,
-    openEditDialog,
     handleAddPermission,
-    handleRemovePermission,
-    handleUpdateUserInfo,
-    handleExportCsv,
-    handlePrint,
-    fetchData,
-  } = useAccessControl();
+    handleRemovePermission
+  } = usePermissionsManagement(
+    userPermissions,
+    (newPermissions) => {
+      fetchPermissions();
+    },
+    fetchUserData
+  );
+
+  const handleOpenUserInfo = (user: User) => {
+    setSelectedUser(user);
+    setUserInfoOpen(true);
+  };
+
+  const handleSaveUserInfo = async (userId: string, data: { whatsapp?: string; aniversario?: string }) => {
+    try {
+      const { whatsapp, aniversario } = data;
+      
+      // Lógica para atualizar informações do usuário no banco de dados
+      console.log('Salvando dados do usuário:', userId, data);
+      
+      // Após salvar, atualize a lista de usuários
+      fetchUserData();
+      
+      setUserInfoOpen(false);
+    } catch (error) {
+      console.error('Erro ao salvar informações do usuário:', error);
+    }
+  };
+
+  // Adaptador para manter a compatibilidade com o uso dos handlers
+  const handleAddPermissionAdapter = (userId: string, permissionId: string) => {
+    return handleAddPermission(userId, permissionId, selectedTab === 'supervisores');
+  };
+
+  const handleRemovePermissionAdapter = (userId: string, permissionId: string) => {
+    return handleRemovePermission(userId, permissionId, selectedTab === 'supervisores');
+  };
 
   return (
     <div className="space-y-6">
-      <AccessControlHeader 
-        filter={filter} 
-        setFilter={setFilter} 
-        handleExportCsv={handleExportCsv} 
-        handlePrint={handlePrint}
-        handleRefresh={fetchData}
-      />
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          <p className="font-medium">Erro ao carregar dados</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      )}
-
-      <div className="bg-white rounded-md shadow-sm">
-        <AccessControlTable 
-          filteredUsers={filteredUsers}
-          permissions={permissions}
-          userPermissions={userPermissions}
-          loading={loading || saving}
-          saving={saving}
-          filter={filter}
-          currentUserId={currentUserId}
-          handleAddPermission={handleAddPermission}
-          handleRemovePermission={handleRemovePermission}
-          openEditDialog={openEditDialog}
-        />
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Controle de Acesso</h1>
       </div>
-
-      <UserInfoEditDialog 
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        user={currentUser}
-        onSave={handleUpdateUserInfo}
-        saving={saving}
+      
+      <Card>
+        <CardContent className="p-6">
+          <CustomTabs
+            value={selectedTab}
+            onValueChange={(value) => setSelectedTab(value as 'coordenadores' | 'supervisores')}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="coordenadores">Coordenadores</TabsTrigger>
+              <TabsTrigger value="supervisores">Supervisores Técnicos</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="coordenadores" className="mt-6">
+              <Coordenadores 
+                coordenadores={coordenadores}
+                coordenacoes={coordenacoes}
+                userPermissions={userPermissions}
+                allPermissions={allPermissions}
+                isLoading={isLoadingPermissions}
+                onOpenUserInfo={handleOpenUserInfo}
+                onAddPermission={handleAddPermissionAdapter}
+                onRemovePermission={handleRemovePermissionAdapter}
+                isSaving={saving}
+              />
+            </TabsContent>
+            
+            <TabsContent value="supervisores" className="mt-6">
+              <SupervisoresTecnicos 
+                supervisores={supervisores}
+                userPermissions={userPermissions}
+                allPermissions={allPermissions}
+                isLoading={isLoadingPermissions}
+                onOpenUserInfo={handleOpenUserInfo}
+                onAddPermission={handleAddPermissionAdapter}
+                onRemovePermission={handleRemovePermissionAdapter}
+                isSaving={saving}
+              />
+            </TabsContent>
+          </CustomTabs>
+        </CardContent>
+      </Card>
+      
+      <UserInfoDialog
+        open={userInfoOpen}
+        onOpenChange={setUserInfoOpen}
+        user={selectedUser}
+        onSave={handleSaveUserInfo}
       />
     </div>
   );

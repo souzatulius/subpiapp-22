@@ -106,13 +106,13 @@ export const useNotaForm = (onClose: () => void) => {
       
       if (!problemaData || problemaData.length === 0) {
         // Se não houver problema cadastrado, criar um padrão
-        const supervisaoTecnicaId = selectedDemanda.supervisao_tecnica?.id;
+        const coordenacaoId = selectedDemanda.coordenacao_id;
         
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
           .insert({ 
             descricao: 'Problema Padrão',
-            supervisao_tecnica_id: supervisaoTecnicaId || null 
+            coordenacao_id: coordenacaoId || null 
           })
           .select();
           
@@ -129,7 +129,7 @@ export const useNotaForm = (onClose: () => void) => {
         .insert({
           titulo,
           texto,
-          supervisao_tecnica_id: selectedDemanda.supervisao_tecnica?.id || null,
+          coordenacao_id: selectedDemanda.coordenacao_id || null,
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId,
