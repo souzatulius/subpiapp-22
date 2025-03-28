@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MessageSquare, MessageSquareReply, FileEdit, CheckCircle, Mail, Newspaper, MessageCircle, Phone, Share2 } from 'lucide-react';
+import { MessageSquare, MessageSquareReply, FileEdit, CheckCircle, Mail, Newspaper, MessageCircle, Phone, Share2, PlusCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -76,6 +76,7 @@ const ComunicacaoDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4">
+            <h4 className="text-sm font-medium mb-3">De onde vem a solicitação?</h4>
             {isLoadingOrigens ? (
               <div className="flex justify-center p-8">
                 <div className="h-8 w-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -99,9 +100,12 @@ const ComunicacaoDashboard = () => {
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200">
             <Link 
               to="/dashboard/comunicacao/cadastrar" 
-              className="text-sm text-blue-700 hover:text-blue-900 w-full text-center"
+              className="w-full"
             >
-              Ir para formulário completo
+              <Button className="w-full bg-blue-50 hover:bg-blue-100 text-blue-800 flex items-center justify-center">
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Ir para formulário completo
+              </Button>
             </Link>
           </CardFooter>
         </Card>
