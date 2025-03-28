@@ -30,7 +30,15 @@ export const useNotasStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch total notes
+        // Get current month start
+        const today = new Date();
+        const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        // Get previous month start/end
+        const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+        
+        // Fetch total notas
         const { data: totalNotasData, error: totalNotasError } = await supabase
           .from('notas_oficiais')
           .select('count', { count: 'exact' });
@@ -38,49 +46,114 @@ export const useNotasStats = () => {
         if (totalNotasError) throw totalNotasError;
         const totalNotas = totalNotasData?.[0]?.count || 0;
         
-        // Fetch pending approval notes
-        const { data: pendingNotasData, error: pendingNotasError } = await supabase
+        // Fetch total notas from previous month for variation
+        const { data: prevMonthNotasData, error: prevMonthNotasError } = await supabase
+          .from('notas_oficiais')
+          .select('count', { count: 'exact' })
+          .gte('created_at', prevMonthStart.toISOString())
+          .lte('created_at', prevMonthEnd.toISOString());
+        
+        if (prevMonthNotasError) throw prevMonthNotasError;
+        const prevMonthNotas = prevMonthNotasData?.[0]?.count || 0;
+        
+        // Calculate variation percentage
+        const totalVariacao = prevMonthNotas > 0 
+          ? Math.round(((totalNotas - prevMonthNotas) / prevMonthNotas) * 100) 
+          : 0;
+        
+        // Fetch aguardando aprovação
+        const { data: aguardandoData, error: aguardandoError } = await supabase
           .from('notas_oficiais')
           .select('count', { count: 'exact' })
           .eq('status', 'pendente');
         
-        if (pendingNotasError) throw pendingNotasError;
-        const aguardandoAprovacao = pendingNotasData?.[0]?.count || 0;
+        if (aguardandoError) throw aguardandoError;
+        const aguardandoAprovacao = aguardandoData?.[0]?.count || 0;
         
-        // Fetch rejected notes
-        const { data: rejectedNotasData, error: rejectedNotasError } = await supabase
+        // Fetch aguardando aprovação previous month
+        const { data: prevAguardandoData, error: prevAguardandoError } = await supabase
+          .from('notas_oficiais')
+          .select('count', { count: 'exact' })
+          .eq('status', 'pendente')
+          .gte('created_at', prevMonthStart.toISOString())
+          .lte('created_at', prevMonthEnd.toISOString());
+        
+        if (prevAguardandoError) throw prevAguardandoError;
+        const prevAguardando = prevAguardandoData?.[0]?.count || 0;
+        
+        // Calculate aguardando variation
+        const aguardandoVariacao = prevAguardando > 0 
+          ? Math.round(((aguardandoAprovacao - prevAguardando) / prevAguardando) * 100) 
+          : 0;
+        
+        // Fetch notas recusadas
+        const { data: recusadasData, error: recusadasError } = await supabase
           .from('notas_oficiais')
           .select('count', { count: 'exact' })
           .eq('status', 'rejeitada');
         
-        if (rejectedNotasError) throw rejectedNotasError;
-        const notasRecusadas = rejectedNotasData?.[0]?.count || 0;
+        if (recusadasError) throw recusadasError;
+        const notasRecusadas = recusadasData?.[0]?.count || 0;
         
-        // Calculate approval rate
-        const { data: approvedNotasData, error: approvedNotasError } = await supabase
+        // Fetch recusadas previous month
+        const { data: prevRecusadasData, error: prevRecusadasError } = await supabase
+          .from('notas_oficiais')
+          .select('count', { count: 'exact' })
+          .eq('status', 'rejeitada')
+          .gte('created_at', prevMonthStart.toISOString())
+          .lte('created_at', prevMonthEnd.toISOString());
+        
+        if (prevRecusadasError) throw prevRecusadasError;
+        const prevRecusadas = prevRecusadasData?.[0]?.count || 0;
+        
+        // Calculate recusadas variation
+        const recusadasVariacao = prevRecusadas > 0 
+          ? Math.round(((notasRecusadas - prevRecusadas) / prevRecusadas) * 100) 
+          : 0;
+        
+        // Calculate taxa de aprovação
+        const { data: notasAprovadasData, error: notasAprovadasError } = await supabase
           .from('notas_oficiais')
           .select('count', { count: 'exact' })
           .eq('status', 'aprovada');
         
-        if (approvedNotasError) throw approvedNotasError;
-        const notasAprovadas = approvedNotasData?.[0]?.count || 0;
+        if (notasAprovadasError) throw notasAprovadasError;
+        const notasAprovadas = notasAprovadasData?.[0]?.count || 0;
         
-        // Calculate approval rate (approved notes / total completed notes)
-        const completedNotas = notasAprovadas + notasRecusadas;
-        const taxaAprovacao = completedNotas > 0 
-          ? Math.round((notasAprovadas / completedNotas) * 100) 
-          : 100; // Default to 100% if no completed notes
+        const taxaAprovacao = totalNotas > 0 
+          ? Math.round((notasAprovadas / totalNotas) * 100) 
+          : 0;
         
-        // Update state with fetched data
+        // Fetch previous month approval rate
+        const { data: prevNotasAprovadasData, error: prevNotasAprovadasError } = await supabase
+          .from('notas_oficiais')
+          .select('count', { count: 'exact' })
+          .eq('status', 'aprovada')
+          .gte('created_at', prevMonthStart.toISOString())
+          .lte('created_at', prevMonthEnd.toISOString());
+        
+        if (prevNotasAprovadasError) throw prevNotasAprovadasError;
+        const prevNotasAprovadas = prevNotasAprovadasData?.[0]?.count || 0;
+        
+        const prevTaxaAprovacao = prevMonthNotas > 0 
+          ? Math.round((prevNotasAprovadas / prevMonthNotas) * 100) 
+          : 0;
+        
+        // Calculate approval rate variation
+        const aprovacaoVariacao = prevTaxaAprovacao > 0 
+          ? taxaAprovacao - prevTaxaAprovacao 
+          : 0;
+        
+        // Update stats
         setStats({
           totalNotas,
-          totalVariacao: 12, // Fixed value for demo
+          totalVariacao,
           aguardandoAprovacao,
-          aguardandoVariacao: 4, // Fixed value for demo
+          aguardandoVariacao,
           notasRecusadas,
-          recusadasVariacao: -15, // Fixed value for demo
+          recusadasVariacao,
           taxaAprovacao,
-          aprovacaoVariacao: 5, // Fixed value for demo
+          aprovacaoVariacao,
           isLoading: false
         });
       } catch (error) {
