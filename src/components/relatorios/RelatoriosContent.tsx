@@ -51,8 +51,8 @@ export const RelatoriosContent: React.FC = () => {
         
         <div className="flex flex-wrap items-center gap-2">
           <DateRangePicker
-            value={filters.dateRange}
-            onValueChange={handleDateRangeChange}
+            dateRange={filters.dateRange}
+            onRangeChange={handleDateRangeChange}
             className="w-auto"
             align="end"
           />
