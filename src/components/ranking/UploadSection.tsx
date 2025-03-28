@@ -51,6 +51,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUpload(files[0]);
+        // Check if result is an object with id and data properties
         if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
           onUploadComplete(result.id as string, result.data as any[]);
         }
@@ -65,7 +66,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     const files = e.target.files;
     if (files && files.length > 0) {
       try {
-        const result = await handleUploadPainel(files[0]);
+        await handleUploadPainel(files[0]);
         // Optional: handle painel completion if needed
       } catch (error) {
         console.error("Error handling painel file upload:", error);
@@ -82,6 +83,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUpload(files[0]);
+        // Check if result is an object with id and data properties
         if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
           onUploadComplete(result.id as string, result.data as any[]);
         }

@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { UploadInfo, SGZUpload } from '@/components/ranking/types';
@@ -25,6 +24,11 @@ const columnMapping: Record<string, string> = {
   'bairro': 'Bairro',
   'distrito': 'Distrito'
 };
+
+interface UploadResult {
+  id: string;
+  data: any[];
+}
 
 export const useUploadManagement = (user: User | null) => {
   const [lastUpload, setLastUpload] = useState<UploadInfo | null>(null);
@@ -227,10 +231,10 @@ export const useUploadManagement = (user: User | null) => {
     };
   };
 
-  const handleUpload = useCallback(async (file: File) => {
+  const handleUpload = useCallback(async (file: File): Promise<UploadResult | null> => {
     if (!user) {
       toast.error('Você precisa estar logado para fazer upload');
-      return;
+      return null;
     }
 
     try {
@@ -248,7 +252,7 @@ export const useUploadManagement = (user: User | null) => {
         setIsLoading(false);
         setUploadProgress(0);
         setProcessingStats(prev => ({...prev, processingStatus: 'error', errorMessage: 'Formato de arquivo inválido'}));
-        return;
+        return null;
       }
       
       // Processar arquivo Excel
@@ -351,6 +355,12 @@ export const useUploadManagement = (user: User | null) => {
       }));
       
       toast.success(`Planilha SGZ processada com sucesso! ${ordensParaInserir.length} novas ordens inseridas e ${ordensAtualizadas} atualizadas.`);
+      
+      // Return the result with proper types
+      return {
+        id: uploadId,
+        data: excelData
+      };
     } catch (error: any) {
       console.error('Error uploading file:', error);
       setUploadProgress(0);
@@ -360,6 +370,7 @@ export const useUploadManagement = (user: User | null) => {
         errorMessage: error.message || 'Falha no processamento'
       }));
       toast.error(`Erro ao processar a planilha SGZ: ${error.message || 'Falha no processamento'}`);
+      return null;
     } finally {
       setIsLoading(false);
     }
