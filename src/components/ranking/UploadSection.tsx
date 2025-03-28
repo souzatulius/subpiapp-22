@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
   lastUpload: UploadInfo | null;
@@ -27,10 +25,9 @@ interface UploadSectionProps {
     errorMessage?: string;
   };
 }
-
-const UploadSection: React.FC<UploadSectionProps> = ({ 
-  onUpload, 
-  lastUpload, 
+const UploadSection: React.FC<UploadSectionProps> = ({
+  onUpload,
+  lastUpload,
   onDelete,
   isLoading,
   onRefreshCharts,
@@ -44,13 +41,11 @@ const UploadSection: React.FC<UploadSectionProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
     }
   };
-
   const handleUploadClick = async () => {
     if (selectedFile) {
       await onUpload(selectedFile);
@@ -60,42 +55,34 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       }
     }
   };
-
   const handleRefreshClick = () => {
     toast.info('Atualizando gráficos com os dados mais recentes...');
     onRefreshCharts();
   };
-
   const handleDownloadTemplate = () => {
-    const template = [
-      {
-        'Ordem de Serviço': 'OS-1001',
-        'Classificação de Serviço': 'Tapa-buraco',
-        'Fornecedor': 'Empresa A',
-        'Criado em': new Date().toISOString(),
-        'Status': 'Em Andamento',
-        'Data do Status': new Date().toISOString(),
-        'Bairro': 'Cerqueira César',
-        'Distrito': 'Pinheiros'
-      },
-      {
-        'Ordem de Serviço': 'OS-1002',
-        'Classificação de Serviço': 'Poda de árvore',
-        'Fornecedor': 'Empresa B',
-        'Criado em': new Date().toISOString(),
-        'Status': 'PREPLAN',
-        'Data do Status': new Date().toISOString(),
-        'Bairro': 'Vila Olímpia',
-        'Distrito': 'Itaim Bibi'
-      }
-    ];
-    
+    const template = [{
+      'Ordem de Serviço': 'OS-1001',
+      'Classificação de Serviço': 'Tapa-buraco',
+      'Fornecedor': 'Empresa A',
+      'Criado em': new Date().toISOString(),
+      'Status': 'Em Andamento',
+      'Data do Status': new Date().toISOString(),
+      'Bairro': 'Cerqueira César',
+      'Distrito': 'Pinheiros'
+    }, {
+      'Ordem de Serviço': 'OS-1002',
+      'Classificação de Serviço': 'Poda de árvore',
+      'Fornecedor': 'Empresa B',
+      'Criado em': new Date().toISOString(),
+      'Status': 'PREPLAN',
+      'Data do Status': new Date().toISOString(),
+      'Bairro': 'Vila Olímpia',
+      'Distrito': 'Itaim Bibi'
+    }];
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(template);
     XLSX.utils.book_append_sheet(wb, ws, 'SGZ Template');
-    
     XLSX.writeFile(wb, 'modelo_sgz.xlsx');
-    
     toast.success('Modelo de planilha SGZ baixado com sucesso!');
   };
 
@@ -112,84 +99,51 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   // Get status badge for uploads history
   const getStatusBadge = (upload: any) => {
     if (!upload.processado && upload === uploads[0]) {
-      return (
-        <Badge className="bg-yellow-500 text-white">
+      return <Badge className="bg-yellow-500 text-white">
           Processando
-        </Badge>
-      );
+        </Badge>;
     } else if (upload.processado) {
-      return (
-        <Badge className="bg-green-500 text-white">
+      return <Badge className="bg-green-500 text-white">
           Concluído
-        </Badge>
-      );
+        </Badge>;
     } else {
-      return (
-        <Badge className="bg-gray-500 text-white">
+      return <Badge className="bg-gray-500 text-white">
           Desconhecido
-        </Badge>
-      );
+        </Badge>;
     }
   };
-
-  return (
-    <Card className="border-orange-200">
+  return <Card className="border-orange-200">
       <CardHeader className="pb-2">
         <CardTitle className="text-orange-700">Upload de Planilha SGZ</CardTitle>
-        <CardDescription>
-          Carregue uma planilha XLS/XLSX com dados das ordens de serviço do SGZ
-        </CardDescription>
+        
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept=".xls,.xlsx"
-              onChange={handleFileChange}
-              className="max-w-md"
-              disabled={isLoading}
-            />
-            <Button 
-              onClick={handleUploadClick} 
-              disabled={!selectedFile || isLoading}
-              className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700"
-            >
+            <Input ref={fileInputRef} type="file" accept=".xls,.xlsx" onChange={handleFileChange} className="max-w-md" disabled={isLoading} />
+            <Button onClick={handleUploadClick} disabled={!selectedFile || isLoading} className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700">
               <UploadCloud className="mr-2 h-4 w-4" />
               {isLoading ? 'Carregando...' : 'Carregar Planilha SGZ'}
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleDownloadTemplate}
-              className="w-full sm:w-auto"
-            >
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Baixar Modelo
-            </Button>
+            
           </div>
           
           {/* New progress indicator with better feedback */}
-          {isLoading && uploadProgress > 0 && (
-            <div className="space-y-2">
+          {isLoading && uploadProgress > 0 && <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-500">
                 <span>{getProgressText()}</span>
                 <span>{uploadProgress}%</span>
               </div>
               <Progress value={uploadProgress} className="h-2" />
-            </div>
-          )}
+            </div>}
           
           {/* Processing stats feedback */}
-          {processingStats.processingStatus === 'processing' && (
-            <div className="p-3 border rounded-md bg-blue-50 border-blue-200 flex items-center gap-2">
+          {processingStats.processingStatus === 'processing' && <div className="p-3 border rounded-md bg-blue-50 border-blue-200 flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
               <p className="text-sm text-blue-700">Processando planilha...</p>
-            </div>
-          )}
+            </div>}
           
-          {processingStats.processingStatus === 'success' && processingStats.newOrders + processingStats.updatedOrders > 0 && (
-            <div className="p-3 border rounded-md bg-green-50 border-green-200 flex items-start gap-2">
+          {processingStats.processingStatus === 'success' && processingStats.newOrders + processingStats.updatedOrders > 0 && <div className="p-3 border rounded-md bg-green-50 border-green-200 flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-green-700">Processamento concluído com sucesso!</p>
@@ -197,57 +151,38 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                   {processingStats.newOrders} novas ordens inseridas e {processingStats.updatedOrders} ordens atualizadas
                 </p>
               </div>
-            </div>
-          )}
+            </div>}
           
-          {processingStats.processingStatus === 'error' && (
-            <div className="p-3 border rounded-md bg-red-50 border-red-200 flex items-start gap-2">
+          {processingStats.processingStatus === 'error' && <div className="p-3 border rounded-md bg-red-50 border-red-200 flex items-start gap-2">
               <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-red-700">Erro ao processar planilha</p>
                 <p className="text-xs text-red-600">{processingStats.errorMessage}</p>
               </div>
-            </div>
-          )}
+            </div>}
           
-          {lastUpload && (
-            <div className="flex flex-col gap-2">
+          {lastUpload && <div className="flex flex-col gap-2">
               <div className="flex items-center gap-4 p-3 border rounded-md bg-orange-50 border-orange-200">
                 <div className="flex-1">
                   <p className="font-medium text-sm">{lastUpload.fileName}</p>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="mr-2 h-3 w-3" />
                     {lastUpload.uploadDate}
-                    {!lastUpload.processed && (
-                      <Badge className="ml-2 bg-yellow-500 text-white text-xs">Processando</Badge>
-                    )}
+                    {!lastUpload.processed && <Badge className="ml-2 bg-yellow-500 text-white text-xs">Processando</Badge>}
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-red-500" 
-                  onClick={() => onDelete(lastUpload.id)}
-                  disabled={isLoading}
-                >
+                <Button variant="outline" size="sm" className="text-red-500" onClick={() => onDelete(lastUpload.id)} disabled={isLoading}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
               
-              <Button 
-                variant="secondary" 
-                className="w-full sm:w-auto"
-                onClick={handleRefreshClick}
-                disabled={isLoading}
-              >
+              <Button variant="secondary" className="w-full sm:w-auto" onClick={handleRefreshClick} disabled={isLoading}>
                 <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Atualizar gráficos
               </Button>
-            </div>
-          )}
+            </div>}
 
-          {uploads && uploads.length > 1 && (
-            <div className="mt-4">
+          {uploads && uploads.length > 1 && <div className="mt-4">
               <Separator className="my-4" />
               <h3 className="text-sm font-medium mb-2">Histórico de Uploads</h3>
               <div className="max-h-44 overflow-y-auto border rounded-md">
@@ -261,8 +196,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {uploads.slice(1).map((upload) => (
-                      <tr key={upload.id}>
+                    {uploads.slice(1).map(upload => <tr key={upload.id}>
                         <td className="px-3 py-2 whitespace-nowrap text-xs">{upload.nome_arquivo}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-xs">
                           {new Date(upload.data_upload).toLocaleString('pt-BR')}
@@ -271,23 +205,15 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                           {getStatusBadge(upload)}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap text-right text-xs">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 text-red-500 hover:text-red-700"
-                            onClick={() => onDelete(upload.id)}
-                            disabled={isLoading}
-                          >
+                          <Button variant="ghost" size="sm" className="h-6 text-red-500 hover:text-red-700" onClick={() => onDelete(upload.id)} disabled={isLoading}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </td>
-                      </tr>
-                    ))}
+                      </tr>)}
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
+            </div>}
 
           <div className="flex items-start gap-2 p-3 border border-orange-200 rounded-md bg-orange-50">
             <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
@@ -302,8 +228,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default UploadSection;

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import UploadSection from './UploadSection';
 import FilterSection from './FilterSection';
@@ -14,9 +13,10 @@ import { CalendarClock, FileSpreadsheet, BarChart3, RefreshCw, AlertCircle } fro
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
 const RankingContent = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const {
     lastUpload,
     isLoading: isUploadLoading,
@@ -27,7 +27,6 @@ const RankingContent = () => {
     handleUpload,
     handleDeleteUpload
   } = useUploadManagement(user);
-  
   const {
     filters,
     chartVisibility,
@@ -36,7 +35,6 @@ const RankingContent = () => {
     resetFilters,
     isModified
   } = useFilterManagement();
-  
   const {
     chartData,
     isLoading: isChartLoading,
@@ -52,26 +50,25 @@ const RankingContent = () => {
 
   // Combined loading state
   const isLoading = isUploadLoading || isChartLoading;
-  
+
   // Custom upload handler that resets filters
   const handleUploadWithReset = async (file: File) => {
     await handleUpload(file);
     setJustUploaded(true);
   };
-  
+
   // Handle refresh with filter reset
   const handleRefreshWithReset = () => {
     resetFilters();
     refreshData();
     toast.success('Filtros redefinidos e dados atualizados');
   };
-  
   useEffect(() => {
     if (user) {
       fetchLastUpload();
     }
   }, [user, fetchLastUpload]);
-  
+
   // After upload completes, refresh chart data and reset filters if needed
   useEffect(() => {
     if (justUploaded && !isUploadLoading) {
@@ -79,123 +76,56 @@ const RankingContent = () => {
       resetFilters(); // Reset filters after upload
       refreshData(); // Refresh chart data
       setJustUploaded(false);
-      
+
       // Show success message based on processing stats
       if (processingStats.processingStatus === 'success') {
         toast.success(`Dados atualizados e filtros redefinidos. ${processingStats.newOrders} ordens inseridas e ${processingStats.updatedOrders} atualizadas.`);
       }
     }
   }, [justUploaded, isUploadLoading, resetFilters, refreshData, processingStats]);
-  
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-orange-100 to-orange-50 p-4 rounded-lg border border-orange-200">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-xl font-semibold text-orange-800 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-orange-600" />
-            Dashboard SGZ - Indicadores de Zeladoria
-          </h2>
-          <p className="text-sm text-orange-700">
-            Análise completa das ordens de serviço do SGZ (Sistema de Gestão da Zeladoria) para acompanhamento 
-            dos distritos da Subprefeitura de Pinheiros.
-          </p>
-        </div>
-        
-        <div className="flex flex-col gap-2">
-          {lastUpdate && (
-            <Badge variant="outline" className="flex items-center gap-1 px-3 py-1 text-orange-700 bg-orange-50 border-orange-200">
-              <CalendarClock className="w-4 h-4" />
-              <span>Última atualização: {lastUpdate}</span>
-            </Badge>
-          )}
-          
-          {lastUpload && (
-            <Badge variant="outline" className="flex items-center gap-1 px-3 py-1 text-orange-700 bg-orange-50 border-orange-200">
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Planilha: {lastUpload.fileName} {lastUpload.processed === false && "(Processando...)"}</span>
-            </Badge>
-          )}
-          
-          {ordensCount > 0 && (
-            <Badge variant="outline" className="flex items-center gap-1 px-3 py-1 text-orange-700 bg-orange-50 border-orange-200">
-              <span>Ordens carregadas: {ordensCount}</span>
-            </Badge>
-          )}
-        </div>
-      </div>
+  return <div className="space-y-6">
+      
       
       {/* Error display */}
-      {fetchError && (
-        <Alert variant="destructive">
+      {fetchError && <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erro ao carregar dados</AlertTitle>
           <AlertDescription>{fetchError}</AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
       
       {/* Reset filters button */}
       <div className="flex justify-end">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleRefreshWithReset}
-          className="text-orange-600"
-          disabled={isLoading}
-        >
+        <Button variant="outline" size="sm" onClick={handleRefreshWithReset} className="text-orange-600" disabled={isLoading}>
           <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           {isModified ? 'Redefinir filtros e atualizar' : 'Atualizar dados'}
         </Button>
       </div>
       
       {/* Upload progress indicator */}
-      {isUploadLoading && uploadProgress > 0 && (
-        <div className="space-y-2">
+      {isUploadLoading && uploadProgress > 0 && <div className="space-y-2">
           <div className="flex justify-between text-sm text-gray-500">
             <span>Carregando planilha...</span>
             <span>{uploadProgress}%</span>
           </div>
           <Progress value={uploadProgress} className="h-2" />
-        </div>
-      )}
+        </div>}
       
       {/* Chart loading progress indicator */}
-      {isChartLoading && chartLoadingProgress > 0 && (
-        <div className="space-y-2">
+      {isChartLoading && chartLoadingProgress > 0 && <div className="space-y-2">
           <div className="flex justify-between text-sm text-gray-500">
             <span>Atualizando gráficos...</span>
             <span>{chartLoadingProgress}%</span>
           </div>
           <Progress value={chartLoadingProgress} className="h-2" />
-        </div>
-      )}
+        </div>}
       
-      <UploadSection 
-        onUpload={handleUploadWithReset}
-        lastUpload={lastUpload} 
-        onDelete={handleDeleteUpload} 
-        isLoading={isLoading}
-        onRefreshCharts={refreshData}
-        uploads={uploads}
-        uploadProgress={uploadProgress}
-        processingStats={processingStats}
-      />
+      <UploadSection onUpload={handleUploadWithReset} lastUpload={lastUpload} onDelete={handleDeleteUpload} isLoading={isLoading} onRefreshCharts={refreshData} uploads={uploads} uploadProgress={uploadProgress} processingStats={processingStats} />
       
-      <FilterSection 
-        filters={filters} 
-        onFiltersChange={handleFiltersChange} 
-        chartVisibility={chartVisibility} 
-        onChartVisibilityChange={handleChartVisibilityChange} 
-      />
+      <FilterSection filters={filters} onFiltersChange={handleFiltersChange} chartVisibility={chartVisibility} onChartVisibilityChange={handleChartVisibilityChange} />
       
-      <ChartsSection 
-        chartData={chartData} 
-        isLoading={isLoading} 
-        chartVisibility={chartVisibility} 
-      />
+      <ChartsSection chartData={chartData} isLoading={isLoading} chartVisibility={chartVisibility} />
       
       <ActionsSection />
-    </div>
-  );
+    </div>;
 };
-
 export default RankingContent;
