@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Search, FileText } from 'lucide-react';
-import { NotasContent } from '@/components/consultar-notas';
 import WelcomeCard from '@/components/shared/WelcomeCard';
+import NotasContent from '@/components/consultar-notas/NotasContent';
 
 const ConsultarNotas = () => {
   return (

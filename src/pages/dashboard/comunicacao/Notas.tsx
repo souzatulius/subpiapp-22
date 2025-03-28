@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -5,7 +6,8 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useNotasStats } from '@/hooks/comunicacao/useNotasStats';
 
 const NotasDashboard = () => {
-  const { stats, isLoading } = useNotasStats();
+  const statsData = useNotasStats();
+  const totalNotas = statsData?.totalNotas || 0;
   
   return (
     <motion.div 
@@ -19,7 +21,7 @@ const NotasDashboard = () => {
         description="Gerencie e acompanhe notas oficiais da comunicação"
         icon={<FileText className="h-6 w-6 mr-2" />}
         statTitle="Notas"
-        statValue={isLoading ? 0 : stats.totalNotas}
+        statValue={totalNotas}
         statDescription="Ver todas notas"
         statSection="notas"
         color="bg-gradient-to-r from-amber-500 to-amber-700"

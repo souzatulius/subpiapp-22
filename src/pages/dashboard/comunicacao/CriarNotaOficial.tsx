@@ -5,6 +5,12 @@ import CriarNotaForm from '@/components/dashboard/forms/CriarNotaForm';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 
 const CriarNotaOficial = () => {
+  // Create a dummy onClose function since we're in a page context
+  const onClose = () => {
+    // This is a dummy function since we're on a page not in a modal
+    console.log('Close action triggered');
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <WelcomeCard
@@ -15,7 +21,7 @@ const CriarNotaOficial = () => {
       />
       
       <div className="mt-6">
-        <CriarNotaForm />
+        <CriarNotaForm onClose={onClose} />
       </div>
     </div>
   );

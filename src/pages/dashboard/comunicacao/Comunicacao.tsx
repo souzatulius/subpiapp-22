@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -5,7 +6,8 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useComunicacaoStats } from '@/hooks/comunicacao/useComunicacaoStats';
 
 const ComunicacaoDashboard = () => {
-  const { stats, isLoading } = useComunicacaoStats();
+  const statsData = useComunicacaoStats();
+  const totalDemandas = statsData?.totalDemandas || 0;
   
   return (
     <motion.div 
@@ -19,7 +21,7 @@ const ComunicacaoDashboard = () => {
         description="Gerencie demandas e solicitações de comunicação"
         icon={<MessageSquare className="h-6 w-6 mr-2" />}
         statTitle="Demandas"
-        statValue={isLoading ? 0 : stats.totalDemandas}
+        statValue={totalDemandas}
         statDescription="Ver todas demandas"
         statSection="demandas"
         color="bg-gradient-to-r from-green-600 to-green-800"

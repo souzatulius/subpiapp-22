@@ -5,6 +5,12 @@ import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaF
 import WelcomeCard from '@/components/shared/WelcomeCard';
 
 const CadastrarDemanda = () => {
+  // Create a dummy onClose function since we're in a page context
+  const onClose = () => {
+    // This is a dummy function since we're on a page not in a modal
+    console.log('Close action triggered');
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <WelcomeCard
@@ -15,7 +21,7 @@ const CadastrarDemanda = () => {
       />
       
       <div className="mt-6">
-        <CadastrarDemandaForm />
+        <CadastrarDemandaForm onClose={onClose} />
       </div>
     </div>
   );

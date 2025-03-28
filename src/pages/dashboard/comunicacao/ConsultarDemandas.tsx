@@ -2,7 +2,7 @@
 import React from 'react';
 import { Search, MessageSquare } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import { DemandasContent } from '@/components/consultar-demandas';
+import ConsultarDemandasContent from '@/components/consultar-demandas/ConsultarDemandasContent';
 
 const ConsultarDemandas = () => {
   return (
@@ -18,7 +18,7 @@ const ConsultarDemandas = () => {
       />
       
       <div className="mt-6">
-        <DemandasContent />
+        <ConsultarDemandasContent />
       </div>
     </div>
   );
