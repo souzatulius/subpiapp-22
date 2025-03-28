@@ -32,18 +32,33 @@ export const useDemandasPendentes = () => {
             titulo,
             prazo_resposta,
             origem_id,
-            origem:origens_demandas!origem_id (descricao)
+            origem:origens_demandas(descricao)
           `)
           .eq('status', 'aberta')
-          .not('id', 'in', `(
-            select demanda_id from respostas_demandas
-          )`)
           .order('prazo_resposta', { ascending: true })
           .limit(10);
 
         if (error) throw error;
         
-        setDemandasPendentes(data || []);
+        if (!data || data.length === 0) {
+          setDemandasPendentes([]);
+          return;
+        }
+
+        // Now get demandas that already have responses to filter them out
+        const { data: respostasData, error: respostasError } = await supabase
+          .from('respostas_demandas')
+          .select('demanda_id');
+
+        if (respostasError) throw respostasError;
+        
+        // Create a set of demand IDs that already have responses
+        const respondedDemandIds = new Set(respostasData?.map(resposta => resposta.demanda_id) || []);
+        
+        // Filter out demands that already have responses
+        const filteredDemandas = data.filter(demanda => !respondedDemandIds.has(demanda.id));
+        
+        setDemandasPendentes(filteredDemandas || []);
       } catch (error) {
         console.error('Erro ao carregar demandas pendentes:', error);
       } finally {

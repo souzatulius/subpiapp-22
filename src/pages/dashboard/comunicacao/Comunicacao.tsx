@@ -1,60 +1,48 @@
 
 import React from 'react';
-import { MessageSquare, PlusCircle, MessageSquareReply, FileEdit, CheckCircle } from 'lucide-react';
+import { MessageSquare, MessageSquareReply, FileEdit, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useComunicacaoStats } from '@/hooks/comunicacao/useComunicacaoStats';
-import { useQuickDemand } from '@/hooks/comunicacao/useQuickDemand';
 import { useNotasPendentes } from '@/hooks/comunicacao/useNotasPendentes';
 import { useDemandasPendentes } from '@/hooks/comunicacao/useDemandasPendentes';
+import { useOrigens } from '@/hooks/comunicacao/useOrigens';
 
 const ComunicacaoDashboard = () => {
   const navigate = useNavigate();
   const statsData = useComunicacaoStats();
   const totalDemandas = statsData?.totalDemandas || 0;
   
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
-    defaultValues: {
-      titulo: '',
-      detalhes: ''
-    }
-  });
-
-  const { isLoading: isLoadingDemand, submitQuickDemand } = useQuickDemand();
   const { notasPendentes, isLoading: isLoadingNotas } = useNotasPendentes();
   const { demandasPendentes, isLoading: isLoadingDemandas } = useDemandasPendentes();
+  const { origens, isLoading: isLoadingOrigens } = useOrigens();
   
-  const onSubmitQuickDemand = async (data) => {
-    try {
-      await submitQuickDemand(data);
-      toast({
-        title: 'Solicitação enviada',
-        description: 'Você será redirecionado para continuar o cadastro',
-        variant: 'success'
-      });
-      reset();
-      
-      // Navigate to the full form with the quick demand data
-      setTimeout(() => {
-        navigate('/dashboard/comunicacao/cadastrar', { 
-          state: { quickDemandData: data } 
-        });
-      }, 1500);
-    } catch (error) {
-      toast({
-        title: 'Erro ao enviar solicitação',
-        description: error.message || 'Tente novamente mais tarde',
-        variant: 'destructive'
-      });
+  const handleOrigemSelect = (origemId: string) => {
+    navigate('/dashboard/comunicacao/cadastrar', { 
+      state: { selectedOrigemId: origemId } 
+    });
+  };
+  
+  // Get icon for origem
+  const getOrigemIcon = (descricao: string) => {
+    const lowerDesc = descricao.toLowerCase();
+    if (lowerDesc.includes('email') || lowerDesc.includes('e-mail')) {
+      return 'mail';
+    } else if (lowerDesc.includes('imprensa') || lowerDesc.includes('jornal')) {
+      return 'newspaper';
+    } else if (lowerDesc.includes('whatsapp')) {
+      return 'message-circle';
+    } else if (lowerDesc.includes('telefone')) {
+      return 'phone';
+    } else if (lowerDesc.includes('redes')) {
+      return 'share-2';
     }
+    return 'message-square'; // default
   };
   
   return (
@@ -79,47 +67,44 @@ const ComunicacaoDashboard = () => {
         {/* Card 1: Nova Solicitação */}
         <Card className="border border-gray-200 overflow-hidden transition-all hover:border-blue-300 hover:shadow-md">
           <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-            <CardTitle className="flex items-center">
-              <PlusCircle className="h-5 w-5 mr-2" />
+            <CardTitle className="flex items-center text-white">
+              <MessageSquare className="h-5 w-5 mr-2 text-white" />
               Nova Solicitação
             </CardTitle>
             <CardDescription className="text-blue-100">
-              Cadastre rapidamente uma solicitação
+              De onde vem a solicitação?
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4">
-            <form onSubmit={handleSubmit(onSubmitQuickDemand)} className="space-y-4">
-              <div>
-                <Input
-                  placeholder="Título da solicitação"
-                  {...register('titulo', { required: 'Título é obrigatório' })}
-                  className="w-full"
-                />
-                {errors.titulo && (
-                  <p className="text-xs text-red-500 mt-1">{errors.titulo.message}</p>
-                )}
+            {isLoadingOrigens ? (
+              <div className="flex justify-center p-8">
+                <div className="h-8 w-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
               </div>
-              <div>
-                <Textarea
-                  placeholder="Detalhes da solicitação"
-                  rows={4}
-                  className="resize-none w-full"
-                  {...register('detalhes', { required: 'Detalhes são obrigatórios' })}
-                />
-                {errors.detalhes && (
-                  <p className="text-xs text-red-500 mt-1">{errors.detalhes.message}</p>
-                )}
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {origens?.map((origem) => {
+                  const iconName = getOrigemIcon(origem.descricao);
+                  // Dynamically import the icon
+                  const IconComponent = require(`lucide-react`)[iconName.charAt(0).toUpperCase() + iconName.slice(1)];
+                  
+                  return (
+                    <Button
+                      key={origem.id}
+                      variant="outline"
+                      className="flex items-center justify-start p-3 h-auto text-left"
+                      onClick={() => handleOrigemSelect(origem.id)}
+                    >
+                      {IconComponent ? (
+                        <IconComponent className="h-5 w-5 mr-2 text-blue-600" />
+                      ) : (
+                        <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+                      )}
+                      <span>{origem.descricao}</span>
+                    </Button>
+                  );
+                })}
               </div>
-              <div className="pt-2">
-                <Button 
-                  type="submit" 
-                  className="w-full bg-blue-700 hover:bg-blue-800 text-white"
-                  disabled={isLoadingDemand}
-                >
-                  {isLoadingDemand ? 'Enviando...' : 'Continuar cadastro'}
-                </Button>
-              </div>
-            </form>
+            )}
           </CardContent>
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200">
             <Link 
@@ -134,8 +119,8 @@ const ComunicacaoDashboard = () => {
         {/* Card 2: Responder Demandas */}
         <Card className="border border-gray-200 overflow-hidden transition-all hover:border-blue-300 hover:shadow-md">
           <CardHeader className="bg-gradient-to-r from-blue-700 to-blue-800 text-white">
-            <CardTitle className="flex items-center">
-              <MessageSquareReply className="h-5 w-5 mr-2" />
+            <CardTitle className="flex items-center text-white">
+              <MessageSquareReply className="h-5 w-5 mr-2 text-white" />
               Responder Demandas
             </CardTitle>
             <CardDescription className="text-blue-100">
@@ -186,8 +171,8 @@ const ComunicacaoDashboard = () => {
         {/* Card 3: Notas Oficiais */}
         <Card className="border border-gray-200 overflow-hidden transition-all hover:border-blue-300 hover:shadow-md">
           <CardHeader className="bg-gradient-to-r from-blue-800 to-blue-900 text-white">
-            <CardTitle className="flex items-center">
-              <FileEdit className="h-5 w-5 mr-2" />
+            <CardTitle className="flex items-center text-white">
+              <FileEdit className="h-5 w-5 mr-2 text-white" />
               Notas Oficiais
             </CardTitle>
             <CardDescription className="text-blue-100">
