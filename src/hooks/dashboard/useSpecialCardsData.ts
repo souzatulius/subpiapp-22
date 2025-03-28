@@ -3,9 +3,14 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
+interface OverdueItem {
+  title: string;
+  id: string;
+}
+
 export const useSpecialCardsData = () => {
   const [overdueCount, setOverdueCount] = useState<number>(0);
-  const [overdueItems, setOverdueItems] = useState<{ title: string; id: string }[]>([]);
+  const [overdueItems, setOverdueItems] = useState<OverdueItem[]>([]);
   const [notesToApprove, setNotesToApprove] = useState<number>(0);
   const [responsesToDo, setResponsesToDo] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -34,7 +39,12 @@ export const useSpecialCardsData = () => {
           console.error('Error fetching overdue demands:', overdueError);
         } else {
           setOverdueCount(overdueData.length);
-          setOverdueItems(overdueData.map(item => ({ title: item.titulo, id: item.id })));
+          setOverdueItems(
+            overdueData.map(item => ({ 
+              title: item.titulo, 
+              id: item.id 
+            }))
+          );
         }
         
         // 2. Fetch notes waiting for approval (if user has permission)
@@ -65,15 +75,15 @@ export const useSpecialCardsData = () => {
         if (user.id) {
           const { data: userData, error: userError } = await supabase
             .from('usuarios')
-            .select('supervisao_tecnica_id')
+            .select('coordenacao_id')  // Changed from supervisao_tecnica_id to coordenacao_id
             .eq('id', user.id)
             .single();
           
-          if (!userError && userData?.supervisao_tecnica_id) {
+          if (!userError && userData?.coordenacao_id) {
             const { data: responsesData, error: responsesError } = await supabase
               .from('demandas')
               .select('id')
-              .eq('supervisao_tecnica_id', userData.supervisao_tecnica_id)
+              .eq('coordenacao_id', userData.coordenacao_id)  // Changed from supervisao_tecnica_id to coordenacao_id
               .eq('status', 'em_analise')
               .limit(10);
               
