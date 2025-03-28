@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Table, 
@@ -21,16 +20,16 @@ interface DemandasTableProps {
   onViewDemand?: (demand: Demand) => void;
   onRespondDemand?: (demand: Demand) => void;
   onDeleteClick?: (demand: Demand) => void;
-  onEdit?: (id: string) => void; // Added missing prop
-  onDelete?: (demand: Demand) => void; // Added missing prop
-  totalCount?: number; // Added missing prop
-  page?: number; // Added missing prop
-  pageSize?: number; // Added missing prop
-  setPage?: React.Dispatch<React.SetStateAction<number>>; // Added missing prop
-  setPageSize?: React.Dispatch<React.SetStateAction<number>>; // Added missing prop
-  isAdmin?: boolean; // Added missing prop
+  onEdit?: (id: string) => void;
+  onDelete?: (demand: Demand) => void;
+  totalCount?: number;
+  page?: number;
+  pageSize?: number;
+  setPage?: React.Dispatch<React.SetStateAction<number>>;
+  setPageSize?: React.Dispatch<React.SetStateAction<number>>;
+  isAdmin?: boolean;
   showDeleteOption?: boolean;
-  isLoading?: boolean; // Added isLoading prop with default
+  isLoading?: boolean;
 }
 
 const DemandasTable: React.FC<DemandasTableProps> = ({
@@ -49,7 +48,6 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   showDeleteOption = false,
   isLoading = false
 }) => {
-  // Use local handler functions that call the appropriate callback based on context
   const handleViewOrEdit = (demand: Demand) => {
     if (onViewDemand) {
       onViewDemand(demand);
@@ -78,7 +76,6 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
     );
   }
 
-  // Helper function to format status
   const formatStatus = (status: string) => {
     const statusMap: Record<string, { label: string, class: string }> = {
       'pendente': { label: 'Pendente', class: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
@@ -92,7 +89,6 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
     return statusMap[status] || { label: status, class: 'bg-gray-100 text-gray-800' };
   };
 
-  // Helper function to format priority
   const formatPriority = (priority: string) => {
     const priorityMap: Record<string, { label: string, class: string }> = {
       'alta': { label: 'Alta', class: 'bg-red-100 text-red-800 border-red-200' },
@@ -122,20 +118,30 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
             const statusInfo = formatStatus(demand.status);
             const priorityInfo = formatPriority(demand.prioridade);
             
+            const coordination = demand.problema_id?.supervisao_tecnica?.coordenacao_id 
+              ? demand.problema_id.supervisao_tecnica.descricao 
+              : 'Não informada';
+
             return (
               <TableRow key={demand.id}>
                 <TableCell className="font-medium">{demand.titulo}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={`${statusInfo.class}`}>
+                  <Badge 
+                    variant="outline" 
+                    className={`${statusInfo.class} rounded-full`}
+                  >
                     {statusInfo.label}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={`${priorityInfo.class}`}>
+                  <Badge 
+                    variant="outline" 
+                    className={`${priorityInfo.class} rounded-full`}
+                  >
                     {priorityInfo.label}
                   </Badge>
                 </TableCell>
-                <TableCell>{demand.area_coordenacao?.descricao || 'Não informada'}</TableCell>
+                <TableCell>{coordination}</TableCell>
                 <TableCell>
                   {demand.horario_publicacao ? 
                     format(new Date(demand.horario_publicacao), 'dd/MM/yyyy', { locale: ptBR }) : 
