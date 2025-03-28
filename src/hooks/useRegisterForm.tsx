@@ -5,7 +5,7 @@ import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { validatePasswordsMatch, formatPhone, formatDate } from '@/lib/formValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 export interface FormData {
   name: string;
@@ -82,7 +82,29 @@ export const useRegisterForm = () => {
     }
   };
 
-  const validate = () => {
+  const isCoordinationRole = () => {
+    // Get the role description
+    const selectedRole = formData.role ? formData.role.toLowerCase() : '';
+    return selectedRole.includes('coordenação') || selectedRole.includes('coordenacao');
+  };
+
+  const coordinationHasSupervisions = async (): Promise<boolean> => {
+    if (!formData.coordenacao) return false;
+    
+    try {
+      const { data, error } = await fetch(
+        `/api/has-supervisions?coordenacao_id=${formData.coordenacao}`
+      ).then(res => res.json());
+      
+      if (error) return false;
+      return !!data && data.hasSupervisions;
+    } catch (error) {
+      console.error('Error checking supervisions:', error);
+      return false;
+    }
+  };
+
+  const validate = async () => {
     const newErrors: Record<string, boolean> = {};
 
     // Check required fields
@@ -92,7 +114,19 @@ export const useRegisterForm = () => {
     if (!formData.whatsapp) newErrors.whatsapp = true;
     if (!formData.role) newErrors.role = true;
     if (!formData.coordenacao) newErrors.coordenacao = true;
-    // Area is optional if the coordenação doesn't have supervisões técnicas
+    
+    // Check if coordination role is selected - no need for supervision in this case
+    const isCoordination = isCoordinationRole();
+    
+    // For team roles, check if coordination has supervisions
+    if (!isCoordination && !formData.area) {
+      // Only mark area as required if the coordination has supervisions
+      const hasSupervisions = await coordinationHasSupervisions();
+      if (hasSupervisions) {
+        newErrors.area = true;
+      }
+    }
+    
     if (!password) newErrors.password = true;
     if (!formData.confirmPassword) newErrors.confirmPassword = true;
 
@@ -110,7 +144,8 @@ export const useRegisterForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) {
+    const isValid = await validate();
+    if (!isValid) {
       return;
     }
 
@@ -118,22 +153,23 @@ export const useRegisterForm = () => {
 
     try {
       const completeEmail = completeEmailWithDomain(formData.email);
+      
+      // For coordination roles, no supervisao_tecnica_id is needed
+      const isCoordination = isCoordinationRole();
+      
       const { error } = await signUp(completeEmail, password, {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
         cargo_id: formData.role,
-        supervisao_tecnica_id: formData.area || null,
+        supervisao_tecnica_id: isCoordination ? null : formData.area || null,
         coordenacao_id: formData.coordenacao
       });
 
       if (error) {
         showAuthError(error);
       } else {
-        toast({
-          title: "Registro enviado com sucesso",
-          description: "Seu acesso será aprovado por um administrador.",
-        });
+        toast.success("Registro enviado com sucesso. Seu acesso será aprovado por um administrador.");
         navigate('/login');
       }
     } catch (error: any) {

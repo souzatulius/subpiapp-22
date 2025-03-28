@@ -31,6 +31,21 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
   const [filteredAreas, setFilteredAreas] = useState<SelectOption[]>([]);
   const [fetchingAreas, setFetchingAreas] = useState(false);
   const [hasSupervisions, setHasSupervisions] = useState(false);
+  const [isCoordinationRole, setIsCoordinationRole] = useState(false);
+  const [isTeamRole, setIsTeamRole] = useState(false);
+
+  // Check if the selected role is Coordination or Team
+  useEffect(() => {
+    if (role) {
+      // Get the role description
+      const selectedRole = roles.find(r => r.id === role);
+      if (selectedRole) {
+        const roleDescription = selectedRole.value.toLowerCase();
+        setIsCoordinationRole(roleDescription.includes('coordenação') || roleDescription.includes('coordenacao'));
+        setIsTeamRole(roleDescription.includes('equipe') || roleDescription.includes('técnico') || roleDescription.includes('tecnico'));
+      }
+    }
+  }, [role, roles]);
 
   // Filter areas based on selected coordenação
   useEffect(() => {
@@ -75,6 +90,13 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
     
     filterAreas();
   }, [coordenacao]);
+
+  // If user selects a coordination role, clear the area selection
+  useEffect(() => {
+    if (isCoordinationRole && area) {
+      handleChange('area', '');
+    }
+  }, [isCoordinationRole, area, handleChange]);
 
   return (
     <div className="space-y-4">
@@ -164,8 +186,11 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
         {errors.coordenacao && <p className="mt-1 text-sm text-[#f57b35]">Coordenação é obrigatória</p>}
       </div>
       
-      {/* Only show the supervision field if the coordination has supervisions */}
-      {hasSupervisions && (
+      {/* Only show the supervision field if:
+          1. Not a coordination role AND
+          2. The selected coordination has supervisions AND
+          3. It's a team role OR (any role and there are supervisions) */}
+      {!isCoordinationRole && hasSupervisions && (isTeamRole || hasSupervisions) && (
         <div className="animate-fadeIn">
           <label htmlFor="area" className="block text-sm font-medium text-[#111827] mb-1">
             Supervisão Técnica
@@ -208,7 +233,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
               </SelectContent>
             </Select>
           )}
-          {errors.area && <p className="mt-1 text-sm text-[#f57b35]">Supervisão Técnica é obrigatória</p>}
+          {errors.area && isTeamRole && hasSupervisions && <p className="mt-1 text-sm text-[#f57b35]">Supervisão Técnica é obrigatória</p>}
         </div>
       )}
     </div>

@@ -45,7 +45,8 @@ const ProfileMenu: React.FC = () => {
   const displayName = userProfile?.nome_completo || 'Usuário';
   const photoUrl = userProfile?.foto_perfil_url || '';
   const coordenacao = userProfile?.coordenacao || '-';
-  const supervisao = userProfile?.supervisao_tecnica || '-';
+  const supervisao = userProfile?.supervisao_tecnica || '';
+  const hasSupervisao = !!supervisao && supervisao !== '-';
 
   return (
     <>
@@ -54,7 +55,10 @@ const ProfileMenu: React.FC = () => {
           <button className="focus:outline-none flex items-center gap-2">
             <div className="hidden md:block text-right mr-2">
               <p className="text-sm font-medium">{displayName}</p>
-              <p className="text-xs text-gray-500">{coordenacao} {supervisao !== '-' ? `/ ${supervisao}` : ''}</p>
+              <p className="text-xs text-gray-500">
+                {coordenacao}
+                {hasSupervisao && ` / ${supervisao}`}
+              </p>
             </div>
             <AvatarDisplay 
               nome={displayName}
@@ -71,9 +75,11 @@ const ProfileMenu: React.FC = () => {
               <p className="text-xs text-gray-500">
                 <span className="font-medium">Coordenação:</span> {coordenacao}
               </p>
-              <p className="text-xs text-gray-500">
-                <span className="font-medium">Supervisão:</span> {supervisao}
-              </p>
+              {hasSupervisao && (
+                <p className="text-xs text-gray-500">
+                  <span className="font-medium">Supervisão:</span> {supervisao}
+                </p>
+              )}
             </div>
           </div>
           <DropdownMenuSeparator />
