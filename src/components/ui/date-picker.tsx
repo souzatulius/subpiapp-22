@@ -38,7 +38,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? (
+          {date && date instanceof Date && !isNaN(date.getTime()) ? (
             format(date, "dd/MM/yyyy", { locale })
           ) : (
             <span>{placeholder}</span>

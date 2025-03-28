@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { format, parse, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -69,8 +69,14 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             dateObj = userData.aniversario;
           }
           
-          setSelectedDate(dateObj);
-          setValue('aniversario', dateObj);
+          // Only set the date if it's valid
+          if (dateObj instanceof Date && !isNaN(dateObj.getTime())) {
+            setSelectedDate(dateObj);
+            setValue('aniversario', dateObj);
+          } else {
+            console.error('Invalid date object:', dateObj);
+            setSelectedDate(undefined);
+          }
         } catch (error) {
           console.error('Error parsing date:', error);
           setSelectedDate(undefined);
@@ -90,7 +96,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       const updateData = {
         nome_completo: data.nome_completo,
         whatsapp: data.whatsapp || null,
-        aniversario: selectedDate ? selectedDate.toISOString() : null
+        aniversario: selectedDate && isValid(selectedDate) ? selectedDate.toISOString() : null
       };
       
       // Update the user profile in the usuarios table
