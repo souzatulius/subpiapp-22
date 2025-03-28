@@ -309,6 +309,7 @@ export type Database = {
           endereco: string | null
           horario_publicacao: string
           id: string
+          nao_sabe_servico: boolean | null
           nome_solicitante: string | null
           origem_id: string
           perguntas: Json | null
@@ -318,7 +319,6 @@ export type Database = {
           protocolo: string | null
           servico_id: string | null
           status: string
-          supervisao_tecnica_id: string | null
           telefone_solicitante: string | null
           tipo_midia_id: string | null
           titulo: string
@@ -336,6 +336,7 @@ export type Database = {
           endereco?: string | null
           horario_publicacao?: string
           id?: string
+          nao_sabe_servico?: boolean | null
           nome_solicitante?: string | null
           origem_id: string
           perguntas?: Json | null
@@ -345,7 +346,6 @@ export type Database = {
           protocolo?: string | null
           servico_id?: string | null
           status: string
-          supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
           tipo_midia_id?: string | null
           titulo: string
@@ -363,6 +363,7 @@ export type Database = {
           endereco?: string | null
           horario_publicacao?: string
           id?: string
+          nao_sabe_servico?: boolean | null
           nome_solicitante?: string | null
           origem_id?: string
           perguntas?: Json | null
@@ -372,7 +373,6 @@ export type Database = {
           protocolo?: string | null
           servico_id?: string | null
           status?: string
-          supervisao_tecnica_id?: string | null
           telefone_solicitante?: string | null
           tipo_midia_id?: string | null
           titulo?: string
@@ -429,13 +429,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "demandas_supervisao_tecnica_id_fkey"
-            columns: ["supervisao_tecnica_id"]
-            isOneToOne: false
-            referencedRelation: "supervisoes_tecnicas"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "demandas_tipo_midia_id_fkey"
             columns: ["tipo_midia_id"]
             isOneToOne: false
@@ -443,6 +436,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      demandas_supervisao_backup: {
+        Row: {
+          id: string | null
+          supervisao_tecnica_id: string | null
+        }
+        Insert: {
+          id?: string | null
+          supervisao_tecnica_id?: string | null
+        }
+        Update: {
+          id?: string | null
+          supervisao_tecnica_id?: string | null
+        }
+        Relationships: []
       }
       distritos: {
         Row: {
