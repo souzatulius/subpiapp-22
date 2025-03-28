@@ -141,6 +141,15 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
           )}
         </div>
         
+        {selectedDemanda.endereco && (
+          <div className="space-y-1">
+            <span className="text-sm text-gray-500">Endereço:</span>
+            <p className="font-medium text-gray-900">
+              {selectedDemanda.endereco || 'Não informado'}
+            </p>
+          </div>
+        )}
+        
         {selectedDemanda.bairros && (
           <div className="space-y-1">
             <span className="text-sm text-gray-500">Bairro:</span>

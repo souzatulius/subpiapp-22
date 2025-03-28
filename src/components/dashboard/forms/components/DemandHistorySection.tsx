@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Clock, User, CalendarClock } from 'lucide-react';
+import { ExternalLink, Clock, User, CalendarClock, Edit, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,15 @@ interface HistoryItem {
   detalhes: any;
 }
 
+interface NotaEditHistory {
+  id: string;
+  editor_nome: string;
+  criado_em: string;
+  titulo_anterior: string;
+  titulo_novo: string;
+  texto_alterado: boolean;
+}
+
 interface DemandHistorySectionProps {
   demandaId: string;
   notaId: string;
@@ -30,6 +39,7 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
   notaCreatedAt 
 }) => {
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [notaEditHistory, setNotaEditHistory] = useState<NotaEditHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
 
@@ -42,7 +52,7 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
       
       setLoading(true);
       try {
-        // Fix the query to properly join with usuarios table
+        // Fetch demand history
         const { data: historyData, error } = await supabase
           .from('historico_demandas')
           .select(`
@@ -82,6 +92,39 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
         }));
         
         setHistoryItems(enhancedHistoryItems);
+        
+        // Fetch nota edit history if nota ID is provided
+        if (notaId) {
+          const { data: notaHistory, error: notaError } = await supabase
+            .from('notas_historico_edicoes')
+            .select(`
+              id,
+              criado_em,
+              editor_id,
+              titulo_anterior,
+              titulo_novo,
+              texto_anterior,
+              texto_novo,
+              editor:editor_id (nome_completo)
+            `)
+            .eq('nota_id', notaId)
+            .order('criado_em', { ascending: false });
+            
+          if (notaError) {
+            console.error('Erro ao carregar histórico de edições da nota:', notaError);
+          } else {
+            const notaEdits: NotaEditHistory[] = (notaHistory || []).map(edit => ({
+              id: edit.id,
+              editor_nome: edit.editor?.nome_completo || 'Editor desconhecido',
+              criado_em: edit.criado_em,
+              titulo_anterior: edit.titulo_anterior || '',
+              titulo_novo: edit.titulo_novo || '',
+              texto_alterado: edit.texto_anterior !== edit.texto_novo
+            }));
+            
+            setNotaEditHistory(notaEdits);
+          }
+        }
       } catch (err) {
         console.error('Erro ao buscar histórico:', err);
       } finally {
@@ -90,7 +133,7 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
     };
 
     fetchHistory();
-  }, [demandaId]);
+  }, [demandaId, notaId]);
 
   const formatEvent = (evento: string): string => {
     const eventMap: Record<string, string> = {
@@ -147,6 +190,9 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
   };
 
   const displayedItems = expanded ? historyItems : historyItems.slice(0, 3);
+  const displayedNotaEdits = expanded ? notaEditHistory : notaEditHistory.slice(0, 2);
+  const totalItems = historyItems.length + notaEditHistory.length;
+  const displayedTotal = displayedItems.length + displayedNotaEdits.length;
 
   if (loading) {
     return (
@@ -158,7 +204,7 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
     );
   }
 
-  if (historyItems.length === 0) {
+  if (historyItems.length === 0 && notaEditHistory.length === 0) {
     return (
       <Card className="p-4 bg-gray-50 border border-gray-200">
         <p className="text-sm text-gray-500">Sem histórico disponível para esta demanda.</p>
@@ -182,7 +228,43 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
       <div className="space-y-2 relative">
         <div className="absolute left-2.5 top-0 bottom-0 w-0.5 bg-gray-200"></div>
         
-        {displayedItems.map((item, index) => {
+        {/* Display nota edit history */}
+        {notaEditHistory.length > 0 && displayedNotaEdits.map((edit) => (
+          <div 
+            key={edit.id} 
+            className="pl-6 py-2 pr-3 relative rounded-md border bg-blue-50 border-blue-200"
+          >
+            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2.5 w-5 h-5 rounded-full bg-white border-2 border-blue-300 flex items-center justify-center">
+              <Edit className="h-2.5 w-2.5 text-blue-600" />
+            </div>
+            
+            <div className="text-xs">
+              <p className="font-medium">Nota editada</p>
+              <div className="flex justify-between items-center mt-1 text-gray-600">
+                <span className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  <span>{edit.editor_nome}</span>
+                </span>
+                <span>{formatTimestamp(edit.criado_em)}</span>
+              </div>
+              
+              <div className="mt-1.5 text-blue-800 text-xs">
+                <div className="flex items-center gap-1">
+                  <FileText className="h-3 w-3" />
+                  <span className="line-through text-blue-400">{edit.titulo_anterior}</span>
+                  <span className="mx-1">→</span>
+                  <span className="font-medium">{edit.titulo_novo}</span>
+                </div>
+                {edit.texto_alterado && (
+                  <p className="mt-0.5 text-xs italic">Conteúdo do texto também foi alterado</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+        
+        {/* Display demand history items */}
+        {displayedItems.map((item) => {
           const isRelated = isRelatedToCurrentNote(item);
           return (
             <div 
@@ -218,14 +300,14 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
         })}
       </div>
 
-      {historyItems.length > 3 && (
+      {totalItems > displayedTotal && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setExpanded(!expanded)}
           className="w-full mt-2 text-gray-600 text-xs"
         >
-          {expanded ? 'Mostrar menos' : `Ver mais (${historyItems.length - 3} itens)`}
+          {expanded ? 'Mostrar menos' : `Ver mais (${totalItems - displayedTotal} itens)`}
         </Button>
       )}
     </Card>
