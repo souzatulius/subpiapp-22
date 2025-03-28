@@ -38,19 +38,19 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   };
 
   return (
-    <div className={`h-full border border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl ${className}`}>
-      <div className="pb-2 border-b border-gray-700 p-4">
+    <div className={`h-full border border-blue-900 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-blue-900 to-blue-950 rounded-xl ${className}`}>
+      <div className="pb-2 border-b border-blue-800 p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg text-white">{title}</h3>
           {badge && (
-            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1 bg-gray-600 text-white">
+            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1 bg-blue-800 text-white">
               {badge.icon}
               {badge.text}
             </Badge>
           )}
         </div>
         <div className="text-2xl font-bold text-white">
-          {isLoading ? <Skeleton className="h-8 w-24 bg-gray-700" /> : value || (description && <p className="text-gray-300">{description}</p>)}
+          {isLoading ? <Skeleton className="h-8 w-24 bg-blue-700" /> : value || (description && <p className="text-blue-100">{description}</p>)}
         </div>
       </div>
       <div className="p-2">

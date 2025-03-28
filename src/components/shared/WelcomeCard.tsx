@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Settings } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,6 +21,7 @@ interface WelcomeCardProps {
   buttonIcon?: React.ReactNode;
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
   onButtonClick?: () => void;
+  color?: string;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
