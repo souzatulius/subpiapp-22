@@ -41,7 +41,7 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
     setPendingProblemId(problemId);
     
     const newProblem = problems.find(p => p.id === problemId);
-    if (!newProblem || !newProblem.supervisao_tecnica) {
+    if (!newProblem) {
       return;
     }
 
@@ -50,38 +50,35 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
       const { data: originalProblemData } = await supabase
         .from('problemas')
         .select(`
-          supervisao_tecnica_id,
-          supervisoes_tecnicas:supervisao_tecnica_id (
-            coordenacao_id,
-            coordenacoes:coordenacao_id (
-              descricao
-            )
+          coordenacao_id,
+          coordenacao:coordenacao_id (
+            descricao
           )
         `)
         .eq('id', selectedProblemId)
         .single();
         
-      if (originalProblemData?.supervisoes_tecnicas?.coordenacoes) {
-        setOriginalCoordination(originalProblemData.supervisoes_tecnicas.coordenacoes.descricao);
+      if (originalProblemData?.coordenacao) {
+        setOriginalCoordination(originalProblemData.coordenacao.descricao);
       }
       
       // Then fetch the new coordination
       const { data, error } = await supabase
-        .from('supervisoes_tecnicas')
+        .from('problemas')
         .select(`
           coordenacao_id,
-          coordenacoes:coordenacao_id (
+          coordenacao:coordenacao_id (
             descricao
           )
         `)
-        .eq('id', newProblem.supervisao_tecnica.id)
+        .eq('id', problemId)
         .single();
         
       if (error) throw error;
       
-      if (data?.coordenacoes?.descricao && 
-          data.coordenacoes.descricao !== originalCoordination) {
-        setNewCoordination(data.coordenacoes.descricao);
+      if (data?.coordenacao?.descricao && 
+          data.coordenacao.descricao !== originalCoordination) {
+        setNewCoordination(data.coordenacao.descricao);
         setShowAlertDialog(true);
       } else {
         await updateProblem(problemId);
@@ -100,9 +97,22 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
     try {
       setChangingProblem(true);
       
+      // First get the coordination_id from the problem
+      const { data: problemData, error: problemError } = await supabase
+        .from('problemas')
+        .select('coordenacao_id')
+        .eq('id', problemId)
+        .single();
+        
+      if (problemError) throw problemError;
+      
+      // Now update the demand with both problem_id and coordenacao_id
       const { error } = await supabase
         .from('demandas')
-        .update({ problema_id: problemId })
+        .update({ 
+          problema_id: problemId,
+          coordenacao_id: problemData?.coordenacao_id 
+        })
         .eq('id', demandaId);
         
       if (error) throw error;

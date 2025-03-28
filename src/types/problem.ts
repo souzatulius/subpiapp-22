@@ -5,7 +5,7 @@ import { SupervisaoTecnica } from './common';
 export interface Problem {
   id: string;
   descricao: string;
-  supervisao_tecnica_id: string;
+  supervisao_tecnica_id?: string;
   coordenacao_id?: string;
   supervisao_tecnica?: SupervisaoTecnica;
   coordenacao?: {

@@ -3,16 +3,16 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SupervisaoTecnica } from '@/types/common';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { Image } from 'lucide-react';
 import IconSelector from '../IconSelector';
+import { Area } from '@/hooks/coordination-areas/types';
 
 interface ProblemFormProps {
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; coordenacao_id: string; icone?: string }) => Promise<void>;
   onCancel: () => void;
-  areas: SupervisaoTecnica[];
+  areas: Area[];
   isSubmitting: boolean;
 }
 
@@ -20,13 +20,13 @@ const ProblemForm: React.FC<ProblemFormProps> = ({ onSubmit, onCancel, areas, is
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
       descricao: '',
-      supervisao_tecnica_id: ''
+      coordenacao_id: ''
     }
   });
   
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [showIconSelector, setShowIconSelector] = useState(false);
-  const selectedArea = watch('supervisao_tecnica_id');
+  const selectedArea = watch('coordenacao_id');
 
   const handleFormSubmit = async (data: any) => {
     await onSubmit({
@@ -56,13 +56,13 @@ const ProblemForm: React.FC<ProblemFormProps> = ({ onSubmit, onCancel, areas, is
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
+        <Label htmlFor="coordenacao_id">Coordenação</Label>
         <Select
-          onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
+          onValueChange={(value) => setValue('coordenacao_id', value)}
           value={selectedArea}
         >
-          <SelectTrigger id="supervisao_tecnica_id" className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}>
-            <SelectValue placeholder="Selecione uma área" />
+          <SelectTrigger id="coordenacao_id" className={errors.coordenacao_id ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Selecione uma coordenação" />
           </SelectTrigger>
           <SelectContent>
             {areas.map((area) => (
@@ -72,8 +72,8 @@ const ProblemForm: React.FC<ProblemFormProps> = ({ onSubmit, onCancel, areas, is
             ))}
           </SelectContent>
         </Select>
-        {errors.supervisao_tecnica_id && (
-          <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
+        {errors.coordenacao_id && (
+          <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
         )}
       </div>
       

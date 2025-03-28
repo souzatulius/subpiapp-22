@@ -6,8 +6,12 @@ export interface Service {
   id: string;
   descricao: string;
   supervisao_tecnica_id?: string;
-  problema_id: string; // Add this to match the hooks version
+  problema_id: string;
   supervisao_tecnica?: SupervisaoTecnica;
+  problema?: {
+    id: string;
+    descricao: string;
+  };
   criado_em?: string;
 }
 

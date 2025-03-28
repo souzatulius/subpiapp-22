@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { Problem } from '@/hooks/problems/types';
-import { SupervisaoTecnica } from '@/types/common';
+import { Area } from '@/hooks/coordination-areas/types';
 import { Image } from 'lucide-react';
 import IconSelector from '../IconSelector';
 
@@ -20,8 +20,8 @@ interface ProblemEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   problem: Problem | null;
-  areas: SupervisaoTecnica[];
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => Promise<void>;
+  areas: Area[];
+  onSubmit: (data: { descricao: string; coordenacao_id: string; icone?: string }) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -29,7 +29,7 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
   const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm({
     defaultValues: {
       descricao: problem?.descricao || '',
-      supervisao_tecnica_id: problem?.supervisao_tecnica_id || ''
+      coordenacao_id: problem?.coordenacao_id || ''
     }
   });
   
@@ -40,13 +40,13 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
     if (problem) {
       reset({
         descricao: problem.descricao,
-        supervisao_tecnica_id: problem.supervisao_tecnica_id
+        coordenacao_id: problem.coordenacao_id || ''
       });
       setSelectedIcon(problem.icone || null);
     }
   }, [problem, reset]);
 
-  const selectedArea = watch('supervisao_tecnica_id');
+  const selectedArea = watch('coordenacao_id');
 
   const handleFormSubmit = async (data: any) => {
     await onSubmit({
@@ -79,13 +79,13 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
+            <Label htmlFor="coordenacao_id">Coordenação</Label>
             <Select
-              onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
+              onValueChange={(value) => setValue('coordenacao_id', value)}
               value={selectedArea}
             >
-              <SelectTrigger id="supervisao_tecnica_id" className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Selecione uma área" />
+              <SelectTrigger id="coordenacao_id" className={errors.coordenacao_id ? 'border-red-500' : ''}>
+                <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
                 {areas.map((area) => (
@@ -95,8 +95,8 @@ const ProblemEditDialog = ({ isOpen, onClose, problem, areas, onSubmit, isSubmit
                 ))}
               </SelectContent>
             </Select>
-            {errors.supervisao_tecnica_id && (
-              <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
+            {errors.coordenacao_id && (
+              <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
             )}
           </div>
           

@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Service } from './types';
@@ -42,7 +42,7 @@ export const useServices = () => {
   });
 
   // Set services when data changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (data) {
       setServices(data);
     }
@@ -130,7 +130,7 @@ export const useServices = () => {
 
   return {
     services,
-    isLoading: isLoading,
+    isLoading,
     error,
     fetchServices: refetch,
     addService,

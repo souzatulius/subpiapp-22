@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Services = () => {
   const { user } = useAuth();
-  const { services, loading, fetchServices, addService, updateService, deleteService } = useServices();
+  const { services, isLoading, fetchServices, addService, updateService, deleteService } = useServices();
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [deletingService, setDeletingService] = useState<Service | null>(null);
@@ -178,7 +178,7 @@ const Services = () => {
         onDelete={handleDeleteClick}
         filterPlaceholder="Filtrar serviços..."
         renderForm={renderForm}
-        isLoading={loading}
+        isLoading={isLoading}
       />
 
       {/* Edit Dialog */}
