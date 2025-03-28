@@ -14,7 +14,7 @@ const RelatoriosPage = () => {
         title="Relatórios"
         description="Visualize estatísticas e relatórios de comunicação"
         icon={<PieChart className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-teal-500 to-teal-700"
+        color="bg-gradient-to-r from-blue-500 to-blue-700"
         showButton={true}
         buttonText="Filtros e Visualização"
         buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
@@ -26,7 +26,6 @@ const RelatoriosPage = () => {
         <RelatoriosContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
       </div>
 
-      {/* Filter Dialog */}
       <FilterDialog 
         open={filterDialogOpen} 
         onOpenChange={setFilterDialogOpen} 
