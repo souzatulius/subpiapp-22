@@ -95,10 +95,7 @@ const RankingContent = () => {
       
       {/* Reset filters button */}
       <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={handleRefreshWithReset} className="text-orange-600" disabled={isLoading}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          {isModified ? 'Redefinir filtros e atualizar' : 'Atualizar dados'}
-        </Button>
+        
       </div>
       
       {/* Upload progress indicator */}

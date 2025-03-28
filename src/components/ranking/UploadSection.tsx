@@ -215,17 +215,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               </div>
             </div>}
 
-          <div className="flex items-start gap-2 p-3 border border-orange-200 rounded-md bg-orange-50">
-            <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
-            <div className="text-sm">
-              <p className="font-medium text-orange-800">Importante:</p>
-              <p className="text-orange-700">
-                A planilha SGZ deve conter as seguintes colunas: "Ordem de Serviço", "Classificação de Serviço",
-                "Fornecedor", "Criado em", "Status", "Data do Status", "Bairro" e "Distrito".
-                O departamento técnico (STM/STLP) será atribuído automaticamente com base no tipo de serviço.
-              </p>
-            </div>
-          </div>
+          
         </div>
       </CardContent>
     </Card>;
