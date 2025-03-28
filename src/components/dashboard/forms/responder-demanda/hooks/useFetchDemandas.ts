@@ -52,9 +52,12 @@ export const useFetchDemandas = () => {
             bairros:bairro_id (
               id, 
               nome, 
-              distrito_id
+              distrito_id,
+              distritos:distrito_id (
+                id,
+                nome
+              )
             ),
-            distrito:bairros(distrito(id, nome)),
             autor:autor_id (id, nome_completo),
             servico:servico_id (id, descricao)
           `)
@@ -114,11 +117,8 @@ export const useFetchDemandas = () => {
             }
           }
           
-          // Properly extract distrito data from the nested structure
-          let distritoData = null;
-          if (item.distrito && Array.isArray(item.distrito) && item.distrito.length > 0) {
-            distritoData = item.distrito[0];
-          }
+          // Extract distrito data from the nested structure
+          const distritoData = item.bairros?.distritos || null;
           
           return {
             id: item.id,

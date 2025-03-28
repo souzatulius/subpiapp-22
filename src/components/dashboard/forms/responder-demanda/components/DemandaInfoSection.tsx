@@ -122,7 +122,7 @@ const DemandaInfoSection: React.FC<DemandaInfoSectionProps> = ({ demanda }) => {
                 </div>
               )}
 
-              {demanda.distrito?.nome && (
+              {demanda.distrito && (
                 <div className="flex flex-col space-y-1">
                   <div className="flex items-center text-gray-600">
                     <MapPin className="w-4 h-4 mr-1" />
