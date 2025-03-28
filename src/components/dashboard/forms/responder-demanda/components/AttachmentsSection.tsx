@@ -54,8 +54,17 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
       }
     }
     
-    console.log('Normalized attachments:', validUrls);
-    return validUrls;
+    // Fix URLs by replacing any incorrect storage references
+    const fixedUrls = validUrls.map(url => {
+      // Replace any storage references that might be incorrect
+      return url.replace(
+        'demand_attachments',
+        'demandas'
+      );
+    });
+    
+    console.log('Normalized attachments:', fixedUrls);
+    return fixedUrls;
   }, [arquivo_url, anexos]);
   
   // Check if we have any valid attachments

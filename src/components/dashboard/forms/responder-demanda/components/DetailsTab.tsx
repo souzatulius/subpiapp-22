@@ -47,7 +47,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
   resposta,
   onRespostaChange
 }) => {
-  // Processar as perguntas da demanda (igual ao QuestionsTab)
+  // Process the questions from the demand (same as in QuestionsTab)
   const processPerguntas = () => {
     if (!selectedDemanda.perguntas) return null;
     
@@ -63,7 +63,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
     }
   };
 
-  // Verificar se tem perguntas
+  // Check if there are questions
   const hasQuestions = () => {
     const processedPerguntas = processPerguntas();
     if (!processedPerguntas) return false;

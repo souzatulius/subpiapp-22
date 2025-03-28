@@ -29,13 +29,6 @@ const DemandaMetadataSection: React.FC<DemandaMetadataSectionProps> = ({
             {selectedDemanda.tema.descricao || 'Tema não definido'}
           </Badge>}
         
-        {selectedDemanda.problema && <Badge className="px-3 py-1.5 flex items-center gap-2 bg-blue-50 text-subpi-blue border border-blue-100 rounded-full">
-            <span className="flex-shrink-0">
-              {renderIcon(selectedDemanda.problema.icone)}
-            </span>
-            {selectedDemanda.problema.descricao || selectedDemanda.problema}
-          </Badge>}
-        
         <Badge className={`px-3 py-1.5 rounded-full ${selectedDemanda.prioridade === 'alta' ? 'bg-red-50 text-red-700 border border-red-200' : selectedDemanda.prioridade === 'media' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
           Prioridade: {selectedDemanda.prioridade === 'alta' ? 'Alta' : selectedDemanda.prioridade === 'media' ? 'Média' : 'Baixa'}
         </Badge>
