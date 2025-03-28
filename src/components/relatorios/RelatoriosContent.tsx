@@ -49,16 +49,6 @@ export const RelatoriosContent: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold">Relatórios e Indicadores</h1>
-        
-        <div className="w-full md:w-auto">
-          <StatCard 
-            showButton={true}
-            buttonText="Filtros e Configurações"
-            buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
-            buttonVariant="outline"
-            onButtonClick={() => setShowFilterDialog(true)}
-          />
-        </div>
       </div>
       
       <div className="flex flex-wrap items-center gap-2">

@@ -175,12 +175,14 @@ const ComunicacaoDashboard = () => {
             )}
           </CardContent>
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200">
-            <Link 
+            <Button 
+              as={Link} 
               to="/dashboard/comunicacao/responder" 
-              className="text-sm text-blue-600 hover:text-blue-800 w-full text-center"
+              variant="secondary"
+              className="w-full"
             >
               Ver todas as demandas
-            </Link>
+            </Button>
           </CardFooter>
         </Card>
 
@@ -197,13 +199,14 @@ const ComunicacaoDashboard = () => {
           </CardHeader>
           <CardContent className="p-4 flex flex-col h-64">
             <div className="mb-4 pb-4 border-b border-gray-200">
-              <Link to="/dashboard/comunicacao/criar-nota" className="flex items-center justify-between p-2 bg-orange-50 hover:bg-orange-100 rounded text-orange-800">
-                <div className="flex items-center">
-                  <FileEdit className="h-4 w-4 mr-2" />
-                  <span>Criar nova nota oficial</span>
-                </div>
-                <PlusCircle className="h-4 w-4" />
-              </Link>
+              <Button 
+                as={Link} 
+                to="/dashboard/comunicacao/criar-nota" 
+                className="w-full bg-orange-50 hover:bg-orange-100 text-orange-800"
+              >
+                <FileEdit className="h-4 w-4 mr-2" />
+                Criar nova nota oficial
+              </Button>
             </div>
             
             <div>
@@ -244,23 +247,25 @@ const ComunicacaoDashboard = () => {
             </div>
           </CardContent>
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200 flex justify-between">
-            <Link 
+            <Button 
+              as={Link} 
               to="/dashboard/comunicacao/aprovar-nota" 
-              className="text-sm text-amber-600 hover:text-amber-800"
+              variant="secondary"
+              className="flex-1 mr-1"
             >
               Aprovar notas
-            </Link>
-            <Link 
+            </Button>
+            <Button 
+              as={Link} 
               to="/dashboard/comunicacao/notas" 
-              className="text-sm text-orange-600 hover:text-orange-800"
+              variant="secondary"
+              className="flex-1 ml-1"
             >
               Ver todas notas
-            </Link>
+            </Button>
           </CardFooter>
         </Card>
       </div>
-      
-      {/* Removing this dashboard section as requested */}
     </motion.div>
   );
 };
