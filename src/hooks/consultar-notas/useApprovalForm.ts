@@ -94,11 +94,19 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   };
 
   const handleAprovarNota = async () => {
-    if (!selectedNota) return;
+    if (!selectedNota || !user) {
+      console.error("Não é possível aprovar: usuário não autenticado ou nota não selecionada");
+      toast({
+        title: "Erro ao aprovar",
+        description: "Usuário não autenticado ou nota não selecionada.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     try {
-      // Use the function from useNotasActions which already handles the aprovador_id update
+      console.log("Aprovando nota:", selectedNota.id, "por usuário:", user.id);
       const result = await updateNotaStatus(selectedNota.id, 'aprovado');
       
       if (result) {
@@ -117,11 +125,19 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   };
 
   const handleRejeitarNota = async () => {
-    if (!selectedNota) return;
+    if (!selectedNota || !user) {
+      console.error("Não é possível rejeitar: usuário não autenticado ou nota não selecionada");
+      toast({
+        title: "Erro ao rejeitar",
+        description: "Usuário não autenticado ou nota não selecionada.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     try {
-      // Use the function from useNotasActions which already handles the aprovador_id update
+      console.log("Rejeitando nota:", selectedNota.id, "por usuário:", user.id);
       const result = await updateNotaStatus(selectedNota.id, 'rejeitado');
       
       if (result) {

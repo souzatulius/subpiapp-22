@@ -15,6 +15,7 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
     setStatusLoading(true);
     try {
       console.log(`Atualizando nota ${notaId} para status: ${newStatus}`);
+      console.log('User ID:', user?.id);
       
       // Map frontend status values to valid database status values
       const statusMapping: Record<string, string> = {
@@ -26,32 +27,29 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
       
       const dbStatus = statusMapping[newStatus] || newStatus;
       
-      // First update the approver if necessary (for approval/rejection actions)
+      // Perform a single update with both the status and aprovador_id changes
+      const updateData: any = { 
+        status: dbStatus,
+        atualizado_em: new Date().toISOString()
+      };
+      
+      // Add approver ID for approval/rejection actions
       if (['aprovado', 'rejeitado'].includes(newStatus) && user) {
-        const { error: approverError } = await supabase
-          .from('notas_oficiais')
-          .update({ 
-            aprovador_id: user.id,
-            atualizado_em: new Date().toISOString()
-          })
-          .eq('id', notaId);
-          
-        if (approverError) {
-          console.error('Erro ao atualizar aprovador:', approverError);
-          throw approverError;
-        }
+        updateData.aprovador_id = user.id;
       }
-
-      // Then update the status
+      
+      console.log('Update data:', updateData);
+      
+      // Execute the update with all changes at once
       const { error } = await supabase
         .from('notas_oficiais')
-        .update({ 
-          status: dbStatus,
-          atualizado_em: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', notaId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado na atualização:', error);
+        throw error;
+      }
 
       const statusDescriptions: Record<string, string> = {
         'aprovada': 'aprovada',
