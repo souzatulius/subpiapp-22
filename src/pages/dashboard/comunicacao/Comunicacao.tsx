@@ -3,8 +3,7 @@ import React from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import CardGrid from '@/components/dashboard/CardGrid';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import { MessageSquareReply, Loader2 } from 'lucide-react';
-import DashboardActions from '@/components/dashboard/DashboardActions';
+import { MessageSquareReply, Loader2, PlusCircle } from 'lucide-react';
 import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
 
 interface ComunicacaoDashboardProps {
@@ -48,12 +47,12 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         }
         icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-500 to-blue-700"
+        showButton={!isPreview}
+        buttonText="Novo Card"
+        buttonIcon={<PlusCircle className="h-4 w-4" />}
+        buttonVariant="action"
+        onButtonClick={handleAddNewCard}
       />
-
-      {/* Show Add New Card button only when not in preview mode */}
-      {!isPreview && (
-        <DashboardActions onAddNewCard={handleAddNewCard} />
-      )}
 
       {/* Loading State */}
       {isLoading ? (
@@ -81,9 +80,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       {!isPreview && (
         <CardCustomizationModal
           isOpen={isCustomizationModalOpen}
-          onOpenChange={setIsCustomizationModalOpen}
-          card={editingCard}
+          onClose={() => setIsCustomizationModalOpen(false)}
           onSave={handleSaveCard}
+          initialData={editingCard}
         />
       )}
     </div>
