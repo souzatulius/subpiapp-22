@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface BarChartProps {
   data: Array<Record<string, any>>;
@@ -35,28 +34,28 @@ export const BarChart: React.FC<BarChartProps> = ({
   // If data or bars are invalid, render placeholder
   if (!isDataValid || !areBarsValid) {
     return (
-      <Card className={className}>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">{title}</CardTitle>
-          {insight && <p className="text-sm text-muted-foreground">{insight}</p>}
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px] w-full flex items-center justify-center">
-            <p className="text-muted-foreground">Dados não disponíveis</p>
+      <div className={`h-full bg-gradient-to-r from-blue-50 to-white border border-blue-200 rounded-lg shadow-sm ${className}`}>
+        <div className="p-4 border-b border-blue-100">
+          <h3 className="text-lg font-medium text-white">{title}</h3>
+          {insight && <p className="text-sm text-blue-100">{insight}</p>}
+        </div>
+        <div className="p-4">
+          <div className="h-[200px] w-full flex items-center justify-center">
+            <p className="text-blue-200">Dados não disponíveis</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
   
   return (
-    <Card className={className}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
-        {insight && <p className="text-sm text-muted-foreground">{insight}</p>}
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px] w-full">
+    <div className={`h-full bg-gradient-to-r from-blue-900 to-blue-800 border border-blue-700 rounded-lg shadow-sm ${className}`}>
+      <div className="p-4 border-b border-blue-700">
+        <h3 className="text-lg font-medium text-white">{title}</h3>
+        {insight && <p className="text-sm text-blue-100">{insight}</p>}
+      </div>
+      <div className="p-4">
+        <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <RechartsBarChart
               data={data}
@@ -68,33 +67,36 @@ export const BarChart: React.FC<BarChartProps> = ({
                 bottom: 5,
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#4a5568" />
               {horizontal ? (
                 <>
-                  <XAxis type="number" />
-                  <YAxis dataKey={xAxisDataKey} type="category" />
+                  <XAxis type="number" stroke="#e2e8f0" />
+                  <YAxis dataKey={xAxisDataKey} type="category" stroke="#e2e8f0" />
                 </>
               ) : (
                 <>
-                  <XAxis dataKey={xAxisDataKey} />
-                  <YAxis />
+                  <XAxis dataKey={xAxisDataKey} stroke="#e2e8f0" />
+                  <YAxis stroke="#e2e8f0" />
                 </>
               )}
-              <Tooltip />
-              <Legend />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#1e3a8a', borderColor: '#2563eb', color: '#ffffff' }} 
+                labelStyle={{ color: '#ffffff' }}
+              />
+              <Legend wrapperStyle={{ color: '#e2e8f0' }} />
               {bars.map((bar, index) => (
                 <Bar 
                   key={index} 
                   dataKey={bar.dataKey} 
                   name={bar.name} 
-                  fill={bar.color} 
+                  fill={bar.color || '#3b82f6'} 
                   stackId={stacked ? "stack" : undefined} 
                 />
               ))}
             </RechartsBarChart>
           </ResponsiveContainer>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
