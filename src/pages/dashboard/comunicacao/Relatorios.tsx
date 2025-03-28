@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PieChart, SlidersHorizontal } from 'lucide-react';
 import { RelatoriosContent } from '@/components/relatorios';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 
 const RelatoriosPage = () => {
-  const [filterDialogOpen, setFilterDialogOpen] = React.useState(false);
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   
   return (
     <div className="max-w-7xl mx-auto">
@@ -22,7 +22,7 @@ const RelatoriosPage = () => {
       />
       
       <div className="mt-6">
-        <RelatoriosContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
+        <RelatoriosContent />
       </div>
     </div>
   );
