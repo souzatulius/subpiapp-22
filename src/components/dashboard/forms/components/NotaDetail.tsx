@@ -32,6 +32,26 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
   // Get coordination name from the problem
   const coordenacao = nota.problema?.coordenacao?.descricao || 'Não informada';
 
+  // Format date for display
+  const formatDateDisplay = (dateStr: string) => {
+    if (!dateStr) return 'Data desconhecida';
+    try {
+      return format(new Date(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    } catch {
+      return 'Data inválida';
+    }
+  };
+
+  // Format time for display
+  const formatTimeDisplay = (dateStr: string) => {
+    if (!dateStr) return 'Horário desconhecido';
+    try {
+      return format(new Date(dateStr), "HH:mm", { locale: ptBR });
+    } catch {
+      return 'Horário inválido';
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
@@ -66,21 +86,13 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2 text-gray-500" />
                   <span className="font-medium mr-1">Data:</span>
-                  <span>{dataCreated ? format(
-                    new Date(dataCreated), 
-                    "dd 'de' MMMM 'de' yyyy", 
-                    { locale: ptBR }
-                  ) : 'Data desconhecida'}</span>
+                  <span>{formatDateDisplay(dataCreated || "")}</span>
                 </div>
                 
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-2 text-gray-500" />
                   <span className="font-medium mr-1">Horário:</span>
-                  <span>{dataCreated ? format(
-                    new Date(dataCreated), 
-                    "HH:mm", 
-                    { locale: ptBR }
-                  ) : 'Horário desconhecido'}</span>
+                  <span>{formatTimeDisplay(dataCreated || "")}</span>
                 </div>
               </div>
             </Card>
@@ -108,6 +120,38 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             <div className="text-sm whitespace-pre-line leading-relaxed">{nota.texto}</div>
           </Card>
         </div>
+
+        {nota.historico_edicoes && nota.historico_edicoes.length > 0 && (
+          <div className="mt-6">
+            <h4 className="text-base font-medium text-gray-700 mb-2">Histórico de Edições</h4>
+            <Card className="p-4 border border-gray-200">
+              <div className="space-y-3">
+                {nota.historico_edicoes.map((edicao) => (
+                  <div key={edicao.id} className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium text-sm">{edicao.editor?.nome_completo || "Editor desconhecido"}</span>
+                      <span className="text-xs text-gray-500">
+                        {formatDateDisplay(edicao.criado_em)} às {formatTimeDisplay(edicao.criado_em)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
+                      <div>
+                        <span className="font-medium">Título alterado:</span> 
+                        <span className="line-through text-gray-400 ml-1">{edicao.titulo_anterior}</span>
+                        <span className="text-blue-600 ml-2">{edicao.titulo_novo}</span>
+                      </div>
+                      {edicao.texto_anterior !== edicao.texto_novo && (
+                        <div>
+                          <span className="font-medium">Texto editado</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
         
         <div className="mt-8 flex justify-end space-x-4">
           <Button 

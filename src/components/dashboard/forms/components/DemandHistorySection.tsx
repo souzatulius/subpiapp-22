@@ -96,7 +96,7 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
     const eventMap: Record<string, string> = {
       'criada': 'Demanda criada',
       'pendente': 'Demanda pendente',
-      'em_andamento': 'Em andamento',
+      'em_andamento': 'Demanda respondida',
       'aguardando_nota': 'Aguardando nota',
       'aguardando_aprovacao': 'Aguardando aprovação',
       'concluida': 'Concluída',

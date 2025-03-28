@@ -31,6 +31,14 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
     exportNotaToPDF(nota);
   };
 
+  const formatStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      'em_andamento': 'Demanda respondida',
+    };
+    
+    return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
   const autorNome = nota.autor?.nome_completo || "Autor desconhecido";
   const areaNome = nota.supervisao_tecnica?.descricao || "Área não especificada";
   const dataCriacao = nota.criado_em || nota.created_at || "";
@@ -66,7 +74,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
         
         <div className="relative border border-gray-200 rounded-md p-4 bg-white">
           <div className="absolute top-2 right-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-            {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
+            {formatStatus(nota.status)}
           </div>
           
           <div className="prose max-w-none mt-4" dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br />') }} />
@@ -90,6 +98,11 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
                     <p className="mb-1"><span className="font-medium">Título anterior:</span> {edicao.titulo_anterior}</p>
                     <p><span className="font-medium">Título novo:</span> {edicao.titulo_novo}</p>
                   </div>
+                  {edicao.texto_anterior !== edicao.texto_novo && (
+                    <div className="text-sm mt-2">
+                      <p className="text-xs text-gray-500">Texto também foi modificado</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
