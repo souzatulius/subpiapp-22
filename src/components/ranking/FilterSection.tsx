@@ -220,7 +220,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           >
             <ChartVisibilityManager
               chartVisibility={chartVisibility}
-              onChartVisibilityToggle={handleChartVisibilityToggle}
+              onChartVisibilityToggle={(chart, isVisible) => handleChartVisibilityToggle(chart)}
             />
           </motion.div>
         )}

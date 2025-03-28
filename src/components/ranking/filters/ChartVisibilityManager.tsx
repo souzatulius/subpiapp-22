@@ -6,7 +6,7 @@ import ChartCategorySection from '../ChartCategorySection';
 
 interface ChartVisibilityManagerProps {
   chartVisibility: ChartVisibility;
-  onChartVisibilityToggle: (chart: keyof ChartVisibility) => void;
+  onChartVisibilityToggle: (chart: keyof ChartVisibility, isVisible: boolean) => void;
 }
 
 const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
@@ -56,7 +56,7 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
           icon={<BarChart className="h-5 w-5 text-orange-600" />}
           color="border-orange-200"
           chartVisibility={chartVisibility}
-          onChartVisibilityToggle={onChartVisibilityToggle}
+          onChartVisibilityToggle={(chartId) => onChartVisibilityToggle(chartId, !chartVisibility[chartId])}
           charts={generalCharts}
         />
         
@@ -66,7 +66,7 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
           icon={<Clock className="h-5 w-5 text-orange-600" />}
           color="border-orange-200"
           chartVisibility={chartVisibility}
-          onChartVisibilityToggle={onChartVisibilityToggle}
+          onChartVisibilityToggle={(chartId) => onChartVisibilityToggle(chartId, !chartVisibility[chartId])}
           charts={timeCharts}
         />
         
@@ -76,7 +76,7 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
           icon={<MapPin className="h-5 w-5 text-orange-600" />}
           color="border-orange-200"
           chartVisibility={chartVisibility}
-          onChartVisibilityToggle={onChartVisibilityToggle}
+          onChartVisibilityToggle={(chartId) => onChartVisibilityToggle(chartId, !chartVisibility[chartId])}
           charts={territoryCharts}
         />
         
@@ -86,7 +86,7 @@ const ChartVisibilityManager: React.FC<ChartVisibilityManagerProps> = ({
           icon={<TrendingUp className="h-5 w-5 text-orange-600" />}
           color="border-orange-200"
           chartVisibility={chartVisibility}
-          onChartVisibilityToggle={onChartVisibilityToggle}
+          onChartVisibilityToggle={(chartId) => onChartVisibilityToggle(chartId, !chartVisibility[chartId])}
           charts={efficiencyCharts}
         />
       </div>

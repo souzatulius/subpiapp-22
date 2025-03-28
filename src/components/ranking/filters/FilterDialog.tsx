@@ -193,7 +193,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
           <TabsContent value="graficos">
             <ChartVisibilityManager
               chartVisibility={chartVisibility}
-              onChartVisibilityToggle={(chart: keyof ChartVisibility, isVisible: boolean) => {
+              onChartVisibilityToggle={(chart, isVisible) => {
                 const update = { [chart]: isVisible } as Partial<ChartVisibility>;
                 onChartVisibilityChange(update);
               }}
