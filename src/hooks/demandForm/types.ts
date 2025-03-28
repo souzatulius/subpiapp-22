@@ -20,4 +20,5 @@ export interface DemandFormData {
   nao_sabe_servico: boolean;
   tem_protocolo_156?: boolean;
   numero_protocolo_156?: string;
+  coordenacao_id?: string;
 }

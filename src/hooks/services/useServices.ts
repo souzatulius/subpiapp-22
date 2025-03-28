@@ -1,133 +1,127 @@
 
+import { useQuery } from '@tanstack/react-query';
 import { useState, useCallback } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Service } from './types';
 
 export const useServices = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
 
-  const fetchServices = useCallback(async () => {
-    if (!user) return;
-
-    setLoading(true);
-    try {
-      console.log('Fetching services...');
-      const { data, error } = await supabase
-        .from('servicos')
-        .select(`
-          *,
-          supervisao_tecnica:supervisao_tecnica_id (
-            id,
-            descricao,
-            coordenacao_id
-          )
-        `)
-        .order('descricao');
-
-      if (error) {
+  const { data, error, refetch } = useQuery({
+    queryKey: ['services'],
+    queryFn: async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('servicos')
+          .select(`
+            *,
+            problema:problema_id (
+              id,
+              descricao
+            )
+          `)
+          .order('descricao');
+        
+        if (error) throw error;
+        return data || [];
+      } catch (error: any) {
         console.error('Error fetching services:', error);
-        throw error;
+        toast({
+          title: 'Erro ao carregar serviços',
+          description: error.message || 'Não foi possível carregar os serviços.',
+          variant: 'destructive'
+        });
+        return [];
+      } finally {
+        setIsLoading(false);
       }
-      
-      console.log('Services fetched:', data);
-      setServices(data || []);
-    } catch (error) {
-      console.error('Error in fetchServices:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os serviços.',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
     }
-  }, [user]);
+  });
 
-  const addService = async (service: Omit<Service, 'id' | 'criado_em'>) => {
-    if (!user) return;
+  // Set services when data changes
+  React.useEffect(() => {
+    if (data) {
+      setServices(data);
+    }
+  }, [data]);
 
+  const addService = async (serviceData: { descricao: string; problema_id: string }) => {
     try {
-      console.log('Adding service:', service);
       const { data, error } = await supabase
         .from('servicos')
-        .insert(service)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      console.log('Service added:', data);
-      setServices(prev => [...prev, data]);
+        .insert({
+          descricao: serviceData.descricao,
+          problema_id: serviceData.problema_id
+        })
+        .select();
       
-      return data;
-    } catch (error) {
+      if (error) throw error;
+      
+      await refetch();
+      
+      return data[0];
+    } catch (error: any) {
       console.error('Error adding service:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível adicionar o serviço.',
+        title: 'Erro ao adicionar serviço',
+        description: error.message || 'Não foi possível adicionar o serviço.',
         variant: 'destructive'
       });
       throw error;
     }
   };
 
-  const updateService = async (serviceId: string, updates: Partial<Service>) => {
-    if (!user) return;
-
+  const updateService = async (id: string, serviceData: { descricao: string; problema_id: string }) => {
     try {
-      console.log('Updating service:', serviceId, updates);
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('servicos')
-        .update(updates)
-        .eq('id', serviceId)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      console.log('Service updated:', data);
-      setServices(prev => prev.map(service => 
-        service.id === serviceId ? data : service
-      ));
+        .update({
+          descricao: serviceData.descricao,
+          problema_id: serviceData.problema_id
+        })
+        .eq('id', id);
       
-      return data;
-    } catch (error) {
+      if (error) throw error;
+      
+      await refetch();
+      
+      return true;
+    } catch (error: any) {
       console.error('Error updating service:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar o serviço.',
+        title: 'Erro ao atualizar serviço',
+        description: error.message || 'Não foi possível atualizar o serviço.',
         variant: 'destructive'
       });
       throw error;
     }
   };
 
-  const deleteService = async (serviceId: string) => {
-    if (!user) return;
-
+  const deleteService = async (id: string) => {
     try {
-      console.log('Deleting service:', serviceId);
       const { error } = await supabase
         .from('servicos')
         .delete()
-        .eq('id', serviceId);
-
+        .eq('id', id);
+      
       if (error) throw error;
-
-      setServices(prev => prev.filter(service => service.id !== serviceId));
+      
+      await refetch();
+      
       toast({
-        title: 'Serviço removido',
+        title: 'Serviço excluído',
         description: 'O serviço foi excluído com sucesso.',
       });
-    } catch (error) {
+      
+      return true;
+    } catch (error: any) {
       console.error('Error deleting service:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível remover o serviço.',
+        title: 'Erro ao excluir serviço',
+        description: error.message || 'Não foi possível excluir o serviço.',
         variant: 'destructive'
       });
       throw error;
@@ -136,8 +130,9 @@ export const useServices = () => {
 
   return {
     services,
-    loading,
-    fetchServices,
+    isLoading: isLoading,
+    error,
+    fetchServices: refetch,
     addService,
     updateService,
     deleteService

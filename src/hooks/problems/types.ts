@@ -18,6 +18,10 @@ export interface Problem {
   supervisao_tecnica_id: string;
   coordenacao_id?: string;
   supervisao_tecnica?: SupervisaoTecnica;
+  coordenacao?: {
+    id: string;
+    descricao: string;
+  };
   icone?: string;
   criado_em?: string;
   atualizado_em?: string;

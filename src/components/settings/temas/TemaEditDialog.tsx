@@ -19,7 +19,7 @@ interface TemaEditDialogProps {
   onClose: () => void;
   tema: Problem | null;
   areas: Area[];
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; coordenacao_id: string }) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -27,7 +27,7 @@ const TemaEditDialog = ({ isOpen, onClose, tema, areas, onSubmit, isSubmitting }
   const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm({
     defaultValues: {
       descricao: tema?.descricao || '',
-      supervisao_tecnica_id: tema?.supervisao_tecnica_id || ''
+      coordenacao_id: tema?.coordenacao_id || ''
     }
   });
 
@@ -35,12 +35,12 @@ const TemaEditDialog = ({ isOpen, onClose, tema, areas, onSubmit, isSubmitting }
     if (tema) {
       reset({
         descricao: tema.descricao,
-        supervisao_tecnica_id: tema.supervisao_tecnica_id
+        coordenacao_id: tema.coordenacao_id || ''
       });
     }
   }, [tema, reset]);
 
-  const selectedArea = watch('supervisao_tecnica_id');
+  const selectedArea = watch('coordenacao_id');
 
   const handleFormSubmit = async (data: any) => {
     await onSubmit(data);
@@ -66,13 +66,13 @@ const TemaEditDialog = ({ isOpen, onClose, tema, areas, onSubmit, isSubmitting }
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
+            <Label htmlFor="coordenacao_id">Coordenação</Label>
             <Select
-              onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
+              onValueChange={(value) => setValue('coordenacao_id', value)}
               value={selectedArea}
             >
-              <SelectTrigger id="supervisao_tecnica_id" className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Selecione uma área" />
+              <SelectTrigger id="coordenacao_id" className={errors.coordenacao_id ? 'border-red-500' : ''}>
+                <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
                 {areas.map((area) => (
@@ -82,8 +82,8 @@ const TemaEditDialog = ({ isOpen, onClose, tema, areas, onSubmit, isSubmitting }
                 ))}
               </SelectContent>
             </Select>
-            {errors.supervisao_tecnica_id && (
-              <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
+            {errors.coordenacao_id && (
+              <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
             )}
           </div>
 

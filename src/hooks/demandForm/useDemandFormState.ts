@@ -33,7 +33,6 @@ export const useDemandFormState = (
     coordenacao_id: ''
   };
 
-  // Restore form state from localStorage on component mount
   const savedState = useMemo(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(FORM_STORAGE_KEY);
@@ -58,7 +57,6 @@ export const useDemandFormState = (
   const [servicos, setServicos] = useState<any[]>([]);
   const [filteredServicos, setFilteredServicos] = useState<any[]>([]);
 
-  // Save form state to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stateToSave = {
@@ -71,7 +69,6 @@ export const useDemandFormState = (
     }
   }, [formData, serviceSearch, selectedDistrito, activeStep]);
 
-  // Update service fetching based on problema_id
   useEffect(() => {
     const fetchServicos = async () => {
       if (!formData.problema_id) {
@@ -99,7 +96,6 @@ export const useDemandFormState = (
     fetchServicos();
   }, [formData.problema_id]);
 
-  // When problema_id changes, update the coordenacao_id in the form data
   useEffect(() => {
     if (formData.problema_id) {
       const selectedProblem = problemas.find(p => p.id === formData.problema_id);
@@ -114,7 +110,6 @@ export const useDemandFormState = (
 
   useEffect(() => {
     if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
-      // Only auto-generate if title is empty or we're on step 3
       if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 3) {
         const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
         if (suggestedTitle) {
@@ -162,7 +157,6 @@ export const useDemandFormState = (
     if (name === 'serviceSearch') {
       setServiceSearch(value);
     } else if (name === 'telefone_solicitante') {
-      // Apply mask for phone number (XX) XXXXX-XXXX
       const digits = value.replace(/\D/g, '');
       let formattedValue = '';
       
