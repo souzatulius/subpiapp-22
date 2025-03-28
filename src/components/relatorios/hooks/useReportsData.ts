@@ -135,7 +135,7 @@ export const useReportsData = (filters: any) => {
       const { data: notasAprovadas, error: aprovacaoError } = await supabase
         .from('notas_oficiais')
         .select('count', { count: 'exact' })
-        .eq('status', 'aprovado');
+        .eq('status', 'aprovada');
       
       if (aprovacaoError) throw aprovacaoError;
       
