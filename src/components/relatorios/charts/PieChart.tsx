@@ -23,8 +23,26 @@ export const PieChart: React.FC<PieChartProps> = ({
   className,
   insight
 }) => {
-  // Calculate total to show percentage in tooltip
-  const total = data.reduce((sum, item) => sum + item.value, 0);
+  // Ensure data is an array before calculating total
+  const isDataArray = Array.isArray(data);
+  const total = isDataArray ? data.reduce((sum, item) => sum + item.value, 0) : 0;
+
+  // If data is not an array, return a placeholder or error message
+  if (!isDataArray || data.length === 0) {
+    return (
+      <Card className={className}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium">{title}</CardTitle>
+          {insight && <p className="text-sm text-muted-foreground">{insight}</p>}
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            <p className="text-muted-foreground">Dados não disponíveis</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className={className}>

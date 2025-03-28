@@ -25,6 +25,27 @@ export const LineChart: React.FC<LineChartProps> = ({
   className,
   insight
 }) => {
+  // Validate input data
+  const isDataValid = Array.isArray(data) && data.length > 0;
+  const areLinesValid = Array.isArray(lines) && lines.length > 0;
+
+  // If data or lines are invalid, render placeholder
+  if (!isDataValid || !areLinesValid) {
+    return (
+      <Card className={className}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium">{title}</CardTitle>
+          {insight && <p className="text-sm text-muted-foreground">{insight}</p>}
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            <p className="text-muted-foreground">Dados não disponíveis</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card className={className}>
       <CardHeader className="pb-2">

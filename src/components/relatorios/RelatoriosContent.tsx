@@ -134,10 +134,21 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <RelatorioCard title="Status das Demandas">
-            <PieChart data={pieChartData} />
+            <PieChart 
+              data={pieChartData} 
+              title="Status das Demandas"
+              insight="Distribuição de demandas por status atual"
+            />
           </RelatorioCard>
           <RelatorioCard title="Evolução de Demandas">
-            <LineChart data={lineChartData} />
+            <LineChart 
+              data={lineChartData}
+              title="Evolução de Demandas"
+              xAxisDataKey="name"
+              lines={[
+                { dataKey: 'Demandas', name: 'Demandas', color: '#1EAEDB' }
+              ]}
+            />
           </RelatorioCard>
         </div>
       </div>
@@ -147,10 +158,24 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
         <h2 className="text-xl font-semibold mb-4">Temas Técnicos</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <RelatorioCard title="Distribuição por Temas">
-            <BarChart data={barChartData} />
+            <BarChart 
+              data={barChartData}
+              title="Distribuição por Temas"
+              xAxisDataKey="name"
+              bars={[
+                { dataKey: 'Quantidade', name: 'Quantidade', color: '#0FA0CE' }
+              ]}
+            />
           </RelatorioCard>
           <RelatorioCard title="Complexidade por Tema">
-            <AreaChart data={areaChartData} />
+            <AreaChart 
+              data={areaChartData}
+              title="Complexidade por Tema"
+              xAxisDataKey="name"
+              areas={[
+                { dataKey: 'Notas', name: 'Notas', color: '#ea384c' }
+              ]}
+            />
           </RelatorioCard>
         </div>
       </div>
@@ -160,10 +185,24 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
         <h2 className="text-xl font-semibold mb-4">Tempo e Desempenho</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <RelatorioCard title="Tempo Médio de Resposta">
-            <LineChart data={lineChartData} />
+            <LineChart 
+              data={lineChartData}
+              title="Tempo Médio de Resposta"
+              xAxisDataKey="name"
+              lines={[
+                { dataKey: 'Demandas', name: 'Tempo (dias)', color: '#198754' }
+              ]}
+            />
           </RelatorioCard>
           <RelatorioCard title="Performance por Área">
-            <BarChart data={barChartData} />
+            <BarChart 
+              data={barChartData}
+              title="Performance por Área"
+              xAxisDataKey="name"
+              bars={[
+                { dataKey: 'Quantidade', name: 'Eficiência', color: '#FFC107' }
+              ]}
+            />
           </RelatorioCard>
         </div>
       </div>
@@ -173,10 +212,21 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
         <h2 className="text-xl font-semibold mb-4">Notas Oficiais</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <RelatorioCard title="Notas Emitidas">
-            <AreaChart data={areaChartData} />
+            <AreaChart 
+              data={areaChartData}
+              title="Notas Emitidas"
+              xAxisDataKey="name"
+              areas={[
+                { dataKey: 'Notas', name: 'Quantidade', color: '#6C757D' }
+              ]}
+            />
           </RelatorioCard>
           <RelatorioCard title="Notas por Tema">
-            <PieChart data={pieChartData} />
+            <PieChart 
+              data={pieChartData}
+              title="Notas por Tema"
+              insight="Distribuição de notas por tema"
+            />
           </RelatorioCard>
         </div>
       </div>
@@ -186,10 +236,24 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
         <h2 className="text-xl font-semibold mb-4">Tendências</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <RelatorioCard title="Evolução Mensal">
-            <LineChart data={lineChartData} />
+            <LineChart 
+              data={lineChartData}
+              title="Evolução Mensal"
+              xAxisDataKey="name"
+              lines={[
+                { dataKey: 'Demandas', name: 'Demandas', color: '#1EAEDB' }
+              ]}
+            />
           </RelatorioCard>
           <RelatorioCard title="Comparativo Anual">
-            <BarChart data={barChartData} />
+            <BarChart 
+              data={barChartData}
+              title="Comparativo Anual"
+              xAxisDataKey="name"
+              bars={[
+                { dataKey: 'Quantidade', name: 'Quantidade', color: '#0FA0CE' }
+              ]}
+            />
           </RelatorioCard>
         </div>
       </div>

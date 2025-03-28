@@ -27,6 +27,27 @@ export const AreaChart: React.FC<AreaChartProps> = ({
   insight,
   stacked = false
 }) => {
+  // Validate input data
+  const isDataValid = Array.isArray(data) && data.length > 0;
+  const areAreasValid = Array.isArray(areas) && areas.length > 0;
+
+  // If data or areas are invalid, render placeholder
+  if (!isDataValid || !areAreasValid) {
+    return (
+      <Card className={className}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium">{title}</CardTitle>
+          {insight && <p className="text-sm text-muted-foreground">{insight}</p>}
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            <p className="text-muted-foreground">Dados não disponíveis</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
