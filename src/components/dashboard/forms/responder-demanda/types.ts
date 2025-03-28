@@ -1,4 +1,3 @@
-
 export interface Demanda {
     id: string;
     titulo: string;
@@ -14,7 +13,7 @@ export interface Demanda {
     detalhes_solicitacao: string | null;
     perguntas: string[] | Record<string, string> | null;
     arquivo_url: string | null;
-    supervisao_tecnica_id: string | null;
+    supervisao_tecnica_id?: string | null;
     origem_id: string | null;
     tipo_midia_id: string | null;
     bairro_id: string | null;
@@ -38,6 +37,8 @@ export interface Demanda {
         id?: string;
         nome: string;
     };
+    coordenacao_id?: string;
+    anexos?: string[] | null;
 }
 
 export interface Resposta {

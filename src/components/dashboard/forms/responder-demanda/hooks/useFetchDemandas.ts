@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda } from '../types';
@@ -125,6 +124,7 @@ export const useFetchDemandas = () => {
             arquivo_url: item.arquivo_url,
             anexos: anexosArray,
             coordenacao_id: item.coordenacao_id,
+            supervisao_tecnica_id: null, // Add this field with null value for backward compatibility
             bairro_id: item.bairro_id,
             autor_id: item.autor_id,
             tipo_midia_id: item.tipos_midia?.id,

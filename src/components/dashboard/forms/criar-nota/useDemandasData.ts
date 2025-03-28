@@ -26,7 +26,10 @@ export const useDemandasData = () => {
             detalhes_solicitacao,
             perguntas,
             problema_id,
-            coordenacao_id
+            coordenacao_id,
+            servico_id,
+            arquivo_url,
+            anexos
           `)
           .in('status', ['pendente', 'em_andamento', 'respondida'])
           .order('horario_publicacao', { ascending: false });
@@ -78,6 +81,9 @@ export const useDemandasData = () => {
                 bairro: null,
                 autor: null,
                 servico: null,
+                // Make sure these properties exist and are set properly
+                arquivo_url: demanda.arquivo_url || null,
+                anexos: demanda.anexos || null
               } as Demand;
             }
             
@@ -99,6 +105,9 @@ export const useDemandasData = () => {
               bairro: null,
               autor: null,
               servico: null,
+              // Make sure these properties exist and are set properly
+              arquivo_url: demanda.arquivo_url || null,
+              anexos: demanda.anexos || null
             } as Demand;
           })
         );

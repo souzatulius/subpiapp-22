@@ -1,3 +1,4 @@
+
 export interface DemandFormData {
   titulo: string;
   problema_id: string;
@@ -43,7 +44,9 @@ export interface Demand {
   prioridade: string;
   horario_publicacao: string;
   prazo_resposta: string;
-  supervisao_tecnica_id?: string;
+  coordenacao_id?: string; // Added
+  problema_id?: string; // Added
+  supervisao_tecnica_id?: string; // Keep for backward compatibility
   supervisao_tecnica?: {
     id?: string;
     descricao: string;

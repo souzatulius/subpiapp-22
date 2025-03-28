@@ -66,7 +66,7 @@ const UserInfoEditDialog: React.FC<UserInfoEditDialogProps> = ({
               <Label htmlFor="parent">Coordenação</Label>
               <Input 
                 id="parent" 
-                value={user.coordenacao || ''} 
+                value={user.coordenacao_id || ''} 
                 disabled 
               />
             </div>

@@ -13,8 +13,8 @@ export const useAccessControlFilter = (users: User[]) => {
     return users.filter(user => 
       user.nome_completo.toLowerCase().includes(lowercasedFilter) ||
       (user.email && user.email.toLowerCase().includes(lowercasedFilter)) ||
-      (user.coordenacao && user.coordenacao.toLowerCase().includes(lowercasedFilter)) ||
-      (user.supervisao_tecnica && user.supervisao_tecnica.toLowerCase().includes(lowercasedFilter))
+      (user.coordenacao_id && String(user.coordenacao_id).toLowerCase().includes(lowercasedFilter)) ||
+      (user.supervisao_tecnica_id && String(user.supervisao_tecnica_id).toLowerCase().includes(lowercasedFilter))
     );
   }, [users, filter]);
   

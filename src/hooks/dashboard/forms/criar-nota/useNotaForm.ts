@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -106,15 +105,14 @@ export const useNotaForm = (onClose: () => void) => {
       
       if (!problemaData || problemaData.length === 0) {
         // Se não houver problema cadastrado, criar um padrão
-        const coordenacaoId = selectedDemanda.problema_id 
-          ? await getCoordinationForProblem(selectedDemanda.problema_id)
-          : null;
+        // Use selectedDemanda.coordenacao_id if available, or use a default
+        const coordenacaoId = selectedDemanda.coordenacao_id || null;
         
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
           .insert({ 
             descricao: 'Problema Padrão',
-            coordenacao_id: coordenacaoId || null 
+            coordenacao_id: coordenacaoId
           })
           .select();
           
@@ -125,10 +123,8 @@ export const useNotaForm = (onClose: () => void) => {
         problemaId = problemaData[0].id;
       }
       
-      // Get coordination ID from problem
-      const coordenacaoId = selectedDemanda.problema_id 
-        ? await getCoordinationForProblem(selectedDemanda.problema_id)
-        : null;
+      // Get coordination ID directly
+      const coordenacaoId = selectedDemanda.coordenacao_id || null;
       
       // Create the note with existing problema
       const { data, error } = await supabase
@@ -176,7 +172,6 @@ export const useNotaForm = (onClose: () => void) => {
     }
   };
   
-  // Helper function to get coordination ID from a problem
   const getCoordinationForProblem = async (problemId: string): Promise<string | null> => {
     try {
       const { data, error } = await supabase
@@ -193,7 +188,6 @@ export const useNotaForm = (onClose: () => void) => {
     }
   };
 
-  // Helper function to format the responses text
   const formatResponses = (responseText: string | null): ResponseQA[] => {
     if (!responseText) return [];
     

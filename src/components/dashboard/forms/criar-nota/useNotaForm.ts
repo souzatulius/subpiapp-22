@@ -104,13 +104,13 @@ export const useNotaForm = (onClose: () => void) => {
       
       if (!problemaData || problemaData.length === 0) {
         // Se não houver problema cadastrado, criar um padrão
-        const coordenacaoId = selectedDemanda.coordenacao_id;
+        const coordenacaoId = selectedDemanda.coordenacao_id || null;
         
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
           .insert({ 
             descricao: 'Problema Padrão',
-            coordenacao_id: coordenacaoId || null 
+            coordenacao_id: coordenacaoId 
           })
           .select();
           

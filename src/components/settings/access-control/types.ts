@@ -8,6 +8,9 @@ export interface User {
   supervisao_tecnica_id?: string;
   whatsapp?: string;
   aniversario?: string;
+  // Added for display purposes in UserInfoEditDialog
+  coordenacao?: string;
+  supervisao_tecnica?: string;
 }
 
 export interface Permission {
