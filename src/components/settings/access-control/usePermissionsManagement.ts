@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// This hook handles adding and removing permissions for users
 export const usePermissionsManagement = (
   userPermissions: Record<string, string[]>,
   setUserPermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>,
@@ -10,49 +11,50 @@ export const usePermissionsManagement = (
 ) => {
   const [saving, setSaving] = useState(false);
 
-  const handleAddPermission = async (userId: string, permissionId: string) => {
+  // Add a permission to a user
+  const handleAddPermission = async (
+    userId: string,
+    permissionId: string,
+    isSupervisaoTecnica: boolean
+  ) => {
     setSaving(true);
     try {
-      console.log(`Adding permission ${permissionId} to user ${userId}`);
-      
-      // Determine if it's a coordenação or supervisão técnica
-      const isCoordination = userId.startsWith('coord_') || !userId.includes('_');
-      
-      const { error } = await supabase
+      // First check if this permission already exists
+      const { data, error } = await supabase
         .from('permissoes_acesso')
-        .insert({
-          coordenacao_id: isCoordination ? userId : null,
-          supervisao_tecnica_id: !isCoordination ? userId : null,
-          pagina_id: permissionId
-        });
-      
-      if (error) {
-        // If there's an error, log it and handle accordingly
-        console.error('Error adding permission:', error);
-        
-        if (error.code === 'PGRST116') {
-          // Table doesn't exist yet - this shouldn't happen now that we've created it
-          toast.error('Erro ao adicionar permissão: tabela não encontrada');
-        } else {
-          throw error;
-        }
-      } else {
-        // Successfully added permission, update local state
-        setUserPermissions(prev => {
-          const updated = { ...prev };
-          if (!updated[userId]) {
-            updated[userId] = [];
-          }
-          
-          if (!updated[userId].includes(permissionId)) {
-            updated[userId].push(permissionId);
-          }
-          
-          return updated;
-        });
-        
-        toast.success('Permissão adicionada com sucesso');
+        .select('*')
+        .eq('pagina_id', permissionId)
+        .eq(isSupervisaoTecnica ? 'supervisao_tecnica_id' : 'coordenacao_id', userId);
+
+      if (error) throw error;
+
+      // If the permission doesn't exist yet, insert it
+      if (!data || data.length === 0) {
+        const { error: insertError } = await supabase
+          .from('permissoes_acesso')
+          .insert({
+            pagina_id: permissionId,
+            ...(isSupervisaoTecnica
+              ? { supervisao_tecnica_id: userId }
+              : { coordenacao_id: userId }),
+          });
+
+        if (insertError) throw insertError;
       }
+
+      // Update the local state with the new permission
+      setUserPermissions(prev => {
+        const updatedPermissions = { ...prev };
+        if (!updatedPermissions[userId]) {
+          updatedPermissions[userId] = [];
+        }
+        if (!updatedPermissions[userId].includes(permissionId)) {
+          updatedPermissions[userId] = [...updatedPermissions[userId], permissionId];
+        }
+        return updatedPermissions;
+      });
+
+      toast.success('Permissão adicionada com sucesso');
     } catch (error: any) {
       console.error('Error adding permission:', error);
       toast.error(`Erro ao adicionar permissão: ${error.message}`);
@@ -61,34 +63,33 @@ export const usePermissionsManagement = (
     }
   };
 
-  const handleRemovePermission = async (userId: string, permissionId: string) => {
+  // Remove a permission from a user
+  const handleRemovePermission = async (
+    userId: string,
+    permissionId: string,
+    isSupervisaoTecnica: boolean
+  ) => {
     setSaving(true);
     try {
-      console.log(`Removing permission ${permissionId} from user ${userId}`);
-      
-      // Determine if it's a coordenação or supervisão técnica
-      const isCoordination = userId.startsWith('coord_') || !userId.includes('_');
-      
       const { error } = await supabase
         .from('permissoes_acesso')
         .delete()
-        .match({
-          coordenacao_id: isCoordination ? userId : null,
-          supervisao_tecnica_id: !isCoordination ? userId : null,
-          pagina_id: permissionId
-        });
-      
+        .eq('pagina_id', permissionId)
+        .eq(isSupervisaoTecnica ? 'supervisao_tecnica_id' : 'coordenacao_id', userId);
+
       if (error) throw error;
-      
-      // Update local state
+
+      // Update the local state by removing the permission
       setUserPermissions(prev => {
-        const updated = { ...prev };
-        if (updated[userId]) {
-          updated[userId] = updated[userId].filter(id => id !== permissionId);
+        const updatedPermissions = { ...prev };
+        if (updatedPermissions[userId]) {
+          updatedPermissions[userId] = updatedPermissions[userId].filter(
+            perm => perm !== permissionId
+          );
         }
-        return updated;
+        return updatedPermissions;
       });
-      
+
       toast.success('Permissão removida com sucesso');
     } catch (error: any) {
       console.error('Error removing permission:', error);

@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { User } from './types';
 import { FormValues } from './UserInfoForm';
-import { parseFormattedDate } from '@/lib/inputFormatting';
 
 interface UseUserInfoDialogProps {
   open: boolean;
@@ -23,7 +22,7 @@ export const useUserInfoDialog = ({
     // convert it to date format when saving to database
     await onSave(user.id, {
       whatsapp: data.whatsapp,
-      aniversario: data.aniversario
+      aniversario: data.birthday
     });
   };
 

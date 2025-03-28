@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,8 +34,11 @@ const formSchema = z.object({
     message: "Email inválido.",
   }),
   whatsapp: z.string().optional(),
-  birthday: z.date().optional(),
+  birthday: z.string().optional(),
 });
+
+// Export the form values type for other components to use
+export type FormValues = z.infer<typeof formSchema>;
 
 const UserInfoForm: React.FC<UserInfoFormProps> = ({
   user,
@@ -43,36 +47,36 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({
   onCancel
 }) => {
   // Initialize the form
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: user?.nome_completo || '',
       email: user?.email || '',
       whatsapp: user?.whatsapp || '',
-      birthday: user?.aniversario ? new Date(user.aniversario) : undefined,
+      birthday: user?.aniversario ? 
+        typeof user.aniversario === 'string' ? 
+          user.aniversario : 
+          format(new Date(user.aniversario), 'yyyy-MM-dd') 
+        : '',
     },
     mode: "onChange",
   });
 
   // Form submission handler
-  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (data: FormValues) => {
     try {
       // Get values from form
       const userData = {
         nome_completo: data.name,
         email: data.email,
         whatsapp: data.whatsapp,
-        aniversario: data.birthday ? format(new Date(data.birthday), 'yyyy-MM-dd') : null,
+        aniversario: data.birthday || null,
       };
 
       // Call onSubmit with the updated user data
       await onSubmit(userData);
     } catch (error) {
-      toast({
-        title: "Erro ao atualizar usuário",
-        description: "Ocorreu um erro ao atualizar as informações do usuário.",
-        variant: "destructive"
-      });
+      toast.error("Ocorreu um erro ao atualizar as informações do usuário.");
     }
   };
 

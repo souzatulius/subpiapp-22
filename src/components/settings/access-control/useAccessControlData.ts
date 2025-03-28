@@ -78,7 +78,7 @@ export const useAccessControlData = () => {
           nome_completo: coord.descricao,
           email: '',
           coordenacao_id: coord.id,
-          type: 'coordenacao'
+          type: 'coordenacao' as const
         })),
         ...supervisoes.map((sup: any) => ({
           id: sup.id,
@@ -86,7 +86,7 @@ export const useAccessControlData = () => {
           email: '',
           supervisao_tecnica_id: sup.id,
           coordenacao_id: sup.coordenacao_id,
-          type: 'supervisao_tecnica'
+          type: 'supervisao_tecnica' as const
         }))
       ];
       
