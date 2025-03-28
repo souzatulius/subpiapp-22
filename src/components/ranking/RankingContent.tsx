@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import UploadSection from './UploadSection';
 import FilterSection from './FilterSection';
 import ChartsSection from './ChartsSection';
-import ActionsSection from './ActionsSection';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useUploadManagement } from '@/hooks/ranking/useUploadManagement';
 import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
@@ -149,7 +148,7 @@ const RankingContent: React.FC<RankingContentProps> = ({ filterDialogOpen, setFi
       
       <ChartsSection chartData={chartData} isLoading={isLoading} chartVisibility={chartVisibility} />
       
-      <ActionsSection />
+      {/* ActionsSection removed from here */}
     </div>
   );
 };

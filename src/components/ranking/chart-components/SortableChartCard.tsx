@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Eye, EyeOff, GripVertical, Search } from 'lucide-react';
+import { Eye, EyeOff, Search } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
@@ -45,36 +45,35 @@ export const SortableChartCard: React.FC<SortableChartCardProps> = ({
     <motion.div
       ref={setNodeRef}
       style={style}
-      className="col-span-1 md:col-span-1 lg:col-span-1 h-full transition-all duration-300"
+      className="col-span-1 md:col-span-1 lg:col-span-1 h-full transition-all duration-300 cursor-move"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
+      {...attributes}
+      {...listeners}
     >
       <div className="relative h-full group">
         <div className="absolute top-0 right-0 p-1.5 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={onToggleView}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering drag when clicking buttons
+              onToggleView();
+            }}
             className="p-1 rounded-full bg-white text-gray-600 hover:text-orange-600 shadow-sm hover:shadow transition-all"
             title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar análise"}
           >
             <Search size={16} />
           </button>
           <button
-            onClick={onToggleVisibility}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering drag when clicking buttons
+              onToggleVisibility();
+            }}
             className="p-1 rounded-full bg-white text-gray-600 hover:text-orange-600 shadow-sm hover:shadow transition-all"
             title={isVisible ? "Ocultar gráfico" : "Mostrar gráfico"}
           >
             {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
-        </div>
-        
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-move"
-          {...attributes}
-          {...listeners}
-        >
-          <div className="p-1 rounded-full bg-white text-gray-400 shadow-sm">
-            <GripVertical size={16} />
-          </div>
         </div>
         
         <div className="h-full">
@@ -95,6 +94,7 @@ export const SortableChartCard: React.FC<SortableChartCardProps> = ({
             animate={{ opacity: 1, height: 'auto' }}
             transition={{ duration: 0.3 }}
             className="mt-2 p-3 bg-gray-50 rounded-md text-sm text-gray-700"
+            onClick={(e) => e.stopPropagation()} // Prevent triggering drag when clicking analysis
           >
             <h4 className="font-medium mb-1">{title} - Análise</h4>
             <p>{analysis}</p>
