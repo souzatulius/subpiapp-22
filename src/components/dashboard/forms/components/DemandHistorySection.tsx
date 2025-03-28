@@ -42,13 +42,14 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
       
       setLoading(true);
       try {
+        // Fix the query to properly join with usuarios table
         const { data: historyData, error } = await supabase
           .from('historico_demandas')
           .select(`
             id,
             timestamp,
             evento,
-            usuario:usuario_id (nome_completo),
+            usuario_id,
             detalhes
           `)
           .eq('demanda_id', demandaId)
@@ -59,7 +60,28 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
           throw error;
         }
         
-        setHistoryItems(historyData || []);
+        // Get the user information separately for each history item
+        const enhancedHistoryItems: HistoryItem[] = await Promise.all((historyData || []).map(async (item) => {
+          let userData = null;
+          if (item.usuario_id) {
+            const { data: user } = await supabase
+              .from('usuarios')
+              .select('nome_completo')
+              .eq('id', item.usuario_id)
+              .maybeSingle();
+            userData = user;
+          }
+          
+          return {
+            id: item.id,
+            timestamp: item.timestamp,
+            evento: item.evento,
+            usuario: userData || { nome_completo: 'Sistema' },
+            detalhes: item.detalhes
+          };
+        }));
+        
+        setHistoryItems(enhancedHistoryItems);
       } catch (err) {
         console.error('Erro ao buscar histórico:', err);
       } finally {

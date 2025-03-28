@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -94,8 +93,9 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
         .from('notas_oficiais')
         .select(`
           *,
-          autor:autor_id (id, nome_completo),
-          aprovador:aprovador_id (id, nome_completo),
+          autor_id,
+          aprovador_id,
+          problema_id,
           problema:problema_id (
             id, 
             descricao,
@@ -105,6 +105,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
               descricao
             )
           ),
+          demanda_id,
           demanda:demanda_id (id, titulo)
         `)
         .order('criado_em', { ascending: false });
@@ -120,16 +121,35 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
       const { data, error } = await query;
 
       if (error) {
+        console.error("Error fetching notes:", error);
         throw error;
       }
 
-      // Type assertion to ensure we get the right format
-      const formattedData = (data || []).map(nota => {
-        // Create the nota with proper typing
+      const formattedData = await Promise.all((data || []).map(async (nota) => {
+        let authorData = null;
+        if (nota.autor_id) {
+          const { data: autor } = await supabase
+            .from('usuarios')
+            .select('id, nome_completo')
+            .eq('id', nota.autor_id)
+            .maybeSingle();
+          authorData = autor;
+        }
+        
+        let approverData = null;
+        if (nota.aprovador_id) {
+          const { data: aprovador } = await supabase
+            .from('usuarios')
+            .select('id, nome_completo')
+            .eq('id', nota.aprovador_id)
+            .maybeSingle();
+          approverData = aprovador;
+        }
+
         return {
           ...nota,
-          autor: nota.autor || { id: '', nome_completo: 'Desconhecido' },
-          aprovador: nota.aprovador || null,
+          autor: authorData || { id: '', nome_completo: 'Desconhecido' },
+          aprovador: approverData || null,
           problema: nota.problema || null,
           demanda: nota.demanda || null,
           area_coordenacao: {
@@ -140,7 +160,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
           atualizado_em: nota.atualizado_em,
           demanda_id: nota.demanda_id || (nota.demanda?.id as string)
         } as NotaOficial;
-      });
+      }));
 
       return formattedData;
     }
