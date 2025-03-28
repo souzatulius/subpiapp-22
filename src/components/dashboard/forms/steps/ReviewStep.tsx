@@ -111,9 +111,9 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   };
 
   // Função para verificar se o arquivo é uma imagem
-  const isImageFile = (filename: string) => {
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-    const ext = getFileExtension(filename);
+  const isImageFile = (url: string) => {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic'];
+    const ext = getFileExtension(url);
     return imageExtensions.includes(ext);
   };
 
@@ -121,6 +121,16 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   const getFileNameFromUrl = (url: string) => {
     if (!url) return '';
     return url.split('/').pop() || url;
+  };
+
+  // Função para obter nome curto do arquivo
+  const getShortenedFileName = (url: string) => {
+    const fileName = url.split('/').pop() || '';
+    const fileExt = fileName.split('.').pop() || '';
+    
+    if (fileName.length <= 12) return fileName;
+    
+    return `${fileName.substring(0, 8)}...${fileExt ? `.${fileExt}` : ''}`;
   };
 
   return (
@@ -303,19 +313,19 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                           <img 
                             src={anexo} 
                             alt={fileName} 
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                             onError={(e) => {
                               e.currentTarget.onerror = null;
                               e.currentTarget.src = '/placeholder.svg';
                             }}
                           />
                         </div>
-                        <p className="text-xs truncate text-gray-600">{fileName}</p>
+                        <p className="text-xs truncate text-gray-600">{getShortenedFileName(anexo)}</p>
                       </div>
                     ) : (
                       <div className="flex items-center space-x-2">
                         <FileText className="h-5 w-5 text-gray-400" />
-                        <span className="text-sm truncate">{fileName}</span>
+                        <span className="text-sm truncate">{getShortenedFileName(fileName)}</span>
                       </div>
                     )}
                   </div>
