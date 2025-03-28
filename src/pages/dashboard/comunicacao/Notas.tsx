@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -9,12 +8,14 @@ import {
   TrendingUp, 
   TrendingDown,
   BarChart2,
+  Loader2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
 import { DndContext, closestCenter, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import SortableActionCard from '@/components/dashboard/SortableActionCard';
+import { useNotasStats } from '@/hooks/comunicacao/useNotasStats';
 
 interface ActionCardItem {
   id: string;
@@ -60,7 +61,6 @@ const NotasDashboard: React.FC = () => {
     }
   ]);
 
-  // Set up DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -70,7 +70,6 @@ const NotasDashboard: React.FC = () => {
     useSensor(KeyboardSensor)
   );
 
-  // Handle drag end event
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
@@ -84,39 +83,49 @@ const NotasDashboard: React.FC = () => {
     }
   };
 
-  // Dados estatísticos das notas (simulados)
+  const { 
+    totalNotas, 
+    totalVariacao, 
+    aguardandoAprovacao, 
+    aguardandoVariacao,
+    notasRecusadas, 
+    recusadasVariacao, 
+    taxaAprovacao, 
+    aprovacaoVariacao,
+    isLoading 
+  } = useNotasStats();
+
   const notasStats = [
     {
       title: 'Total de Notas',
-      value: '1',
-      change: '+12%',
-      trend: 'up',
+      value: isLoading ? '...' : totalNotas.toString(),
+      change: `${totalVariacao > 0 ? '+' : ''}${totalVariacao}%`,
+      trend: totalVariacao >= 0 ? 'up' : 'down',
       description: 'em relação ao mês passado'
     },
     {
       title: 'Aguardando Aprovação',
-      value: '1',
-      change: '+4%',
-      trend: 'up',
+      value: isLoading ? '...' : aguardandoAprovacao.toString(),
+      change: `${aguardandoVariacao > 0 ? '+' : ''}${aguardandoVariacao}%`,
+      trend: aguardandoVariacao >= 0 ? 'up' : 'down',
       description: 'em relação ao mês passado'
     },
     {
       title: 'Notas Recusadas',
-      value: '5',
-      change: '-15%',
-      trend: 'down',
+      value: isLoading ? '...' : notasRecusadas.toString(),
+      change: `${recusadasVariacao > 0 ? '+' : ''}${recusadasVariacao}%`,
+      trend: recusadasVariacao >= 0 ? 'up' : 'down',
       description: 'em relação ao mês passado'
     },
     {
       title: 'Taxa de Aprovação',
-      value: '100%',
-      change: '+5%',
-      trend: 'up',
+      value: isLoading ? '...' : `${taxaAprovacao}%`,
+      change: `${aprovacaoVariacao > 0 ? '+' : ''}${aprovacaoVariacao}%`,
+      trend: aprovacaoVariacao >= 0 ? 'up' : 'down',
       description: 'em relação ao mês passado'
     }
   ];
 
-  // Função para remover um card do dashboard
   const handleDeleteCard = (id: string) => {
     setActionCards(cards => cards.filter(card => card.id !== id));
     toast({
@@ -126,7 +135,6 @@ const NotasDashboard: React.FC = () => {
     });
   };
 
-  // Função para editar um card
   const handleEditCard = (id: string) => {
     const cardToEdit = actionCards.find(card => card.id === id);
     if (cardToEdit) {
@@ -135,10 +143,8 @@ const NotasDashboard: React.FC = () => {
     }
   };
 
-  // Função para salvar alterações em um card
   const handleSaveCard = (cardData: Omit<ActionCardItem, 'id'>) => {
     if (editingCard) {
-      // Edit existing card
       setActionCards(cards => 
         cards.map(card => 
           card.id === editingCard.id 
@@ -188,7 +194,13 @@ const NotasDashboard: React.FC = () => {
               <div className="flex flex-col">
                 <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                 <div className="flex items-baseline justify-between">
-                  <h3 className="text-2xl font-bold">{stat.value}</h3>
+                  <h3 className="text-2xl font-bold">
+                    {isLoading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    ) : (
+                      stat.value
+                    )}
+                  </h3>
                   <div className={`flex items-center ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
                     {stat.trend === 'up' ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
                     <span className="text-sm">{stat.change}</span>
@@ -201,7 +213,6 @@ const NotasDashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Card Customization Modal */}
       <CardCustomizationModal
         isOpen={isCustomizationModalOpen}
         onClose={() => setIsCustomizationModalOpen(false)}
