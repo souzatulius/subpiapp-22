@@ -1,13 +1,15 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   ClipboardList, 
   MessageSquareReply, 
   FileCheck, 
+  FileText,
+  Search,
   BarChart2, 
   TrendingUp, 
   TrendingDown,
-  Search,
   Loader2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -46,11 +48,32 @@ const ComunicacaoDashboard: React.FC = () => {
       color: 'green',
     },
     {
+      id: 'criar-nota',
+      title: 'Criar Nota Oficial',
+      icon: <FileText className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/criar-nota',
+      color: 'orange',
+    },
+    {
+      id: 'aprovar-notas',
+      title: 'Aprovar Notas',
+      icon: <FileCheck className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'blue-dark',
+    },
+    {
       id: 'consultar-demandas',
       title: 'Consultar Demandas',
       icon: <Search className="h-12 w-12" />,
       path: '/dashboard/comunicacao/consultar-demandas',
-      color: 'orange',
+      color: 'orange-light',
+    },
+    {
+      id: 'consultar-notas',
+      title: 'Consultar Notas',
+      icon: <Search className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/consultar-notas',
+      color: 'gray-dark',
     },
     {
       id: 'relatorios',
@@ -97,11 +120,11 @@ const ComunicacaoDashboard: React.FC = () => {
 
   const comunicacaoStats = [
     {
-      title: 'Total de Demandas',
+      title: 'Demandas Abertas Hoje',
       value: isLoading ? '...' : totalDemandas.toString(),
       change: `${demandasVariacao > 0 ? '+' : ''}${demandasVariacao}%`,
       trend: demandasVariacao >= 0 ? 'up' : 'down',
-      description: 'em relação ao mês passado'
+      description: 'em relação a ontem'
     },
     {
       title: 'Aguardando Respostas',
@@ -112,7 +135,7 @@ const ComunicacaoDashboard: React.FC = () => {
     },
     {
       title: 'Tempo Médio de Resposta',
-      value: isLoading ? '...' : `${tempoMedioResposta} dias`,
+      value: isLoading ? '...' : `${tempoMedioResposta} horas`,
       change: `${tempoRespostaVariacao > 0 ? '+' : ''}${tempoRespostaVariacao}%`,
       trend: tempoRespostaVariacao >= 0 ? 'up' : 'down',
       description: 'em relação ao mês passado'

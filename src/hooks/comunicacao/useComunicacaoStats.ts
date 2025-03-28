@@ -30,13 +30,37 @@ export const useComunicacaoStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch total demands
-        const { data: totalDemandasData, error: totalDemandasError } = await supabase
-          .from('demandas')
-          .select('count', { count: 'exact' });
+        // Get today's date at 00:00:00
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
-        if (totalDemandasError) throw totalDemandasError;
-        const totalDemandas = totalDemandasData?.[0]?.count || 0;
+        // Get yesterday's date at 00:00:00
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        // Fetch demandas created today
+        const { data: totalDemandasHojeData, error: totalDemandasHojeError } = await supabase
+          .from('demandas')
+          .select('count', { count: 'exact' })
+          .gte('horario_publicacao', today.toISOString());
+        
+        if (totalDemandasHojeError) throw totalDemandasHojeError;
+        const totalDemandasHoje = totalDemandasHojeData?.[0]?.count || 0;
+        
+        // Fetch demandas created yesterday
+        const { data: totalDemandasOntemData, error: totalDemandasOntemError } = await supabase
+          .from('demandas')
+          .select('count', { count: 'exact' })
+          .gte('horario_publicacao', yesterday.toISOString())
+          .lt('horario_publicacao', today.toISOString());
+        
+        if (totalDemandasOntemError) throw totalDemandasOntemError;
+        const totalDemandasOntem = totalDemandasOntemData?.[0]?.count || 0;
+        
+        // Calculate variation
+        const demandasVariacao = totalDemandasOntem > 0 
+          ? Math.round(((totalDemandasHoje - totalDemandasOntem) / totalDemandasOntem) * 100)
+          : 0;
         
         // Fetch pending responses
         const { data: aguardandoRespostasData, error: aguardandoRespostasError } = await supabase
@@ -47,24 +71,32 @@ export const useComunicacaoStats = () => {
         if (aguardandoRespostasError) throw aguardandoRespostasError;
         const aguardandoRespostas = aguardandoRespostasData?.[0]?.count || 0;
         
-        // Fetch response time (this would typically come from a more complex query)
-        // For now, we'll calculate it based on the available data
+        // For variation in pending responses, we'll need historical data
+        // For now, we'll use a fixed sample value
+        const aguardandoVariacao = 4;
+        
+        // Fetch response time (using horario_publicacao and atualizado_em)
         const { data: respostaTimeData, error: respostaTimeError } = await supabase
           .from('demandas')
-          .select('criado_em, atualizado_em')
+          .select('horario_publicacao, atualizado_em')
           .eq('status', 'respondido')
+          .order('horario_publicacao', { ascending: false })
           .limit(50);
         
         let tempoMedioResposta = 0;
         if (!respostaTimeError && respostaTimeData && respostaTimeData.length > 0) {
-          const totalDias = respostaTimeData.reduce((acc, item) => {
-            const criado = new Date(item.criado_em);
+          const totalHoras = respostaTimeData.reduce((acc, item) => {
+            const criado = new Date(item.horario_publicacao);
             const atualizado = new Date(item.atualizado_em);
-            const dias = (atualizado.getTime() - criado.getTime()) / (1000 * 3600 * 24);
-            return acc + dias;
+            const horas = (atualizado.getTime() - criado.getTime()) / (1000 * 3600);
+            return acc + horas;
           }, 0);
-          tempoMedioResposta = parseFloat((totalDias / respostaTimeData.length).toFixed(1));
+          tempoMedioResposta = parseFloat((totalHoras / respostaTimeData.length).toFixed(1));
         }
+        
+        // For variation in response time, we'll need historical data
+        // For now, we'll use a fixed sample value
+        const tempoRespostaVariacao = -15;
         
         // Fetch approval rate for notes
         const { data: notasData, error: notasError } = await supabase
@@ -84,16 +116,20 @@ export const useComunicacaoStats = () => {
         
         const taxaAprovacao = totalNotas > 0 ? Math.round((notasAprovadas / totalNotas) * 100) : 0;
         
+        // For variation in approval rate, we'll need historical data
+        // For now, we'll use a fixed sample value
+        const aprovacaoVariacao = 5;
+        
         // Update the stats state
         setStats({
-          totalDemandas,
-          demandasVariacao: 12, // We don't have historical data for variation, so using a fixed value
+          totalDemandas: totalDemandasHoje,
+          demandasVariacao,
           aguardandoRespostas,
-          aguardandoVariacao: 4, // Fixed value for demo
+          aguardandoVariacao,
           tempoMedioResposta,
-          tempoRespostaVariacao: -15, // Fixed value for demo
+          tempoRespostaVariacao,
           taxaAprovacao,
-          aprovacaoVariacao: 5, // Fixed value for demo
+          aprovacaoVariacao,
           isLoading: false
         });
       } catch (error) {
