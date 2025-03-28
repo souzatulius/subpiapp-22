@@ -21,5 +21,6 @@ export const problemSchema = z.object({
   id: z.string().optional(),
   descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" }),
   coordenacao_id: z.string({ required_error: "A coordenação é obrigatória" }),
+  supervisao_tecnica_id: z.string().optional(),
   icone: z.string().optional()
 });

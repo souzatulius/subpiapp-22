@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useProblemsData, useProblemOperations } from '@/hooks/problems';
-import { Problem } from '@/types/problem';
+import { Problem, Area } from '@/hooks/problems/types';
 import DataTable from './data-table/DataTable';
 import TemaForm from './temas/TemaForm';
 import TemaEditDialog from './temas/TemaEditDialog';

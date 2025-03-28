@@ -27,6 +27,7 @@ export interface Problem {
   atualizado_em?: string;
 }
 
+// Making this interface aligned with CoordinationArea to fix type errors
 export interface Area {
   id: string;
   descricao: string;
@@ -41,5 +42,6 @@ export interface Area {
 export const problemSchema = z.object({
   descricao: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
   coordenacao_id: z.string().min(1, 'Selecione uma coordenação'),
+  supervisao_tecnica_id: z.string().optional(),
   icone: z.string().optional(),
 });

@@ -50,12 +50,16 @@ export const useServices = () => {
 
   const addService = async (serviceData: { descricao: string; problema_id: string }) => {
     try {
+      // Adding supervisao_tecnica_id as null to satisfy database requirements
+      const dataToInsert = {
+        descricao: serviceData.descricao,
+        problema_id: serviceData.problema_id,
+        supervisao_tecnica_id: null  // This ensures it matches the database schema expectation
+      };
+      
       const { data, error } = await supabase
         .from('servicos')
-        .insert({
-          descricao: serviceData.descricao,
-          problema_id: serviceData.problema_id
-        })
+        .insert(dataToInsert)
         .select();
       
       if (error) throw error;
@@ -76,12 +80,16 @@ export const useServices = () => {
 
   const updateService = async (id: string, serviceData: { descricao: string; problema_id: string }) => {
     try {
+      // Adding supervisao_tecnica_id as null to satisfy database requirements
+      const dataToUpdate = {
+        descricao: serviceData.descricao,
+        problema_id: serviceData.problema_id,
+        supervisao_tecnica_id: null  // This ensures it matches the database schema expectation
+      };
+      
       const { error } = await supabase
         .from('servicos')
-        .update({
-          descricao: serviceData.descricao,
-          problema_id: serviceData.problema_id
-        })
+        .update(dataToUpdate)
         .eq('id', id);
       
       if (error) throw error;

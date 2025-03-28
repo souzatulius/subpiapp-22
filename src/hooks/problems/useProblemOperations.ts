@@ -15,9 +15,16 @@ export const useProblemOperations = (onSuccess: () => Promise<void>) => {
       // Validate data with zod schema
       const validatedData = problemSchema.parse(problemData);
       
+      // Add supervisao_tecnica_id as null or undefined to satisfy the database schema
+      // if it's required by the database but we're moving away from it
+      const dataToInsert = {
+        ...validatedData,
+        supervisao_tecnica_id: null  // This ensures it matches the database schema expectation
+      };
+      
       const { data, error } = await supabase
         .from('problemas')
-        .insert(validatedData)
+        .insert(dataToInsert)
         .select();
       
       if (error) throw error;
@@ -62,9 +69,15 @@ export const useProblemOperations = (onSuccess: () => Promise<void>) => {
       // Validate data with zod schema
       const validatedData = problemSchema.parse(problemData);
       
+      // Include supervisao_tecnica_id as null to satisfy database requirements
+      const dataToUpdate = {
+        ...validatedData,
+        supervisao_tecnica_id: null
+      };
+      
       const { error } = await supabase
         .from('problemas')
-        .update(validatedData)
+        .update(dataToUpdate)
         .eq('id', id);
       
       if (error) throw error;
