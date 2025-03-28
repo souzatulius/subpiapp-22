@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { FileText, MapPin, Search, X, Tag } from 'lucide-react';
-import ServicoSelector from '../../ServicoSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useServices } from '@/hooks/useServices';
