@@ -1,10 +1,9 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import * as z from 'zod';
+import { format } from 'date-fns';
+
 import {
   Form,
   FormControl,
@@ -12,162 +11,139 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { User } from './types';
-import { formatPhoneNumber, formatDateInput, parseFormattedDate, formatDateToString } from '@/lib/inputFormatting';
-
-export const formSchema = z.object({
-  whatsapp: z.string().optional(),
-  aniversario: z.string()
-    .refine(val => !val || /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
-      message: "Data deve estar no formato DD/MM/AAAA"
-    })
-    .refine(val => {
-      if (!val) return true;
-      const date = parseFormattedDate(val);
-      return !!date;
-    }, {
-      message: "Data inválida"
-    })
-    .optional(),
-});
-
-export type FormValues = z.infer<typeof formSchema>;
+import { toast } from 'sonner';
 
 interface UserInfoFormProps {
-  user: User;
-  onSubmit: (data: FormValues) => Promise<void>;
-  saving: boolean;
+  user?: User;
+  onSubmit: (data: any) => Promise<void>;
+  isSubmitting: boolean;
   onCancel: () => void;
 }
+
+// Define the form schema using Zod
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Nome completo deve ter pelo menos 2 caracteres.",
+  }),
+  email: z.string().email({
+    message: "Email inválido.",
+  }),
+  whatsapp: z.string().optional(),
+  birthday: z.date().optional(),
+});
 
 const UserInfoForm: React.FC<UserInfoFormProps> = ({
   user,
   onSubmit,
-  saving,
-  onCancel,
+  isSubmitting,
+  onCancel
 }) => {
-  const form = useForm<FormValues>({
+  // Initialize the form
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: user?.nome_completo || '',
+      email: user?.email || '',
       whatsapp: user?.whatsapp || '',
-      aniversario: user?.aniversario ? formatDateToString(new Date(user.aniversario)) : '',
+      birthday: user?.aniversario ? new Date(user.aniversario) : undefined,
     },
+    mode: "onChange",
   });
-  
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      form.reset({
-        whatsapp: user.whatsapp || '',
-        aniversario: user.aniversario ? formatDateToString(new Date(user.aniversario)) : '',
-      });
-    }
-  }, [user, form]);
-
-  // Format WhatsApp number as the user types
-  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatPhoneNumber(e.target.value);
-    form.setValue('whatsapp', formattedValue);
-  };
-
-  // Format date as the user types
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatDateInput(e.target.value);
-    form.setValue('aniversario', formattedValue);
-  };
-
-  const handleSubmit = async (data: FormValues) => {
-    setErrorMessage(null);
-    
-    // Validate required fields
-    if (!form.formState.isValid) {
-      setErrorMessage("Por favor, corrija os erros nos campos indicados");
-      return;
-    }
-    
+  // Form submission handler
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await onSubmit(data);
-    } catch (error: any) {
-      setErrorMessage(error.message || "Ocorreu um erro ao salvar as informações");
+      // Get values from form
+      const userData = {
+        nome_completo: data.name,
+        email: data.email,
+        whatsapp: data.whatsapp,
+        aniversario: data.birthday ? format(new Date(data.birthday), 'yyyy-MM-dd') : null,
+      };
+
+      // Call onSubmit with the updated user data
+      await onSubmit(userData);
+    } catch (error) {
+      toast({
+        title: "Erro ao atualizar usuário",
+        description: "Ocorreu um erro ao atualizar as informações do usuário.",
+        variant: "destructive"
+      });
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="mb-4">
-          <div className="font-medium">{user.nome_completo}</div>
-          <div className="text-sm text-gray-500">{user.email}</div>
-        </div>
-        
-        {errorMessage && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md mb-4">
-            {errorMessage}
-          </div>
-        )}
-        
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome Completo</FormLabel>
+              <FormControl>
+                <Input placeholder="Nome completo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* WhatsApp field */}
         <FormField
           control={form.control}
           name="whatsapp"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="font-semibold">WhatsApp</FormLabel>
+              <FormLabel>WhatsApp</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="(99) 99999-9999" 
-                  value={field.value}
-                  onChange={(e) => {
-                    handleWhatsAppChange(e);
-                  }}
-                />
+                <Input placeholder="(XX) XXXXX-XXXX" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
+        {/* Birthday field */}
         <FormField
           control={form.control}
-          name="aniversario"
+          name="birthday"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel className="font-semibold">Data de Aniversário</FormLabel>
+            <FormItem>
+              <FormLabel>Aniversário</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="DD/MM/AAAA"
-                  value={field.value}
-                  onChange={(e) => {
-                    handleDateChange(e);
-                  }}
-                />
+                <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <div className="flex justify-end space-x-2 pt-2">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onCancel}
-            disabled={saving}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            type="submit"
-            disabled={saving}
-          >
-            {saving ? 'Salvando...' : 'Salvar'}
+
+        <div className="flex justify-end space-x-2">
+          <Button variant="ghost" onClick={onCancel}>Cancelar</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Salvando..." : "Salvar"}
           </Button>
         </div>
       </form>
     </Form>
   );
 };
-
 export default UserInfoForm;

@@ -914,6 +914,27 @@ export type Database = {
         }
         Relationships: []
       }
+      paginas_sistema: {
+        Row: {
+          description: string
+          id: string
+          name: string
+          nivel_acesso: number
+        }
+        Insert: {
+          description: string
+          id: string
+          name: string
+          nivel_acesso?: number
+        }
+        Update: {
+          description?: string
+          id?: string
+          name?: string
+          nivel_acesso?: number
+        }
+        Relationships: []
+      }
       permissoes: {
         Row: {
           criado_em: string
@@ -934,6 +955,52 @@ export type Database = {
           nivel_acesso?: number
         }
         Relationships: []
+      }
+      permissoes_acesso: {
+        Row: {
+          coordenacao_id: string | null
+          criado_em: string | null
+          id: string
+          pagina_id: string | null
+          supervisao_tecnica_id: string | null
+        }
+        Insert: {
+          coordenacao_id?: string | null
+          criado_em?: string | null
+          id?: string
+          pagina_id?: string | null
+          supervisao_tecnica_id?: string | null
+        }
+        Update: {
+          coordenacao_id?: string | null
+          criado_em?: string | null
+          id?: string
+          pagina_id?: string | null
+          supervisao_tecnica_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissoes_acesso_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "coordenacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permissoes_acesso_pagina_id_fkey"
+            columns: ["pagina_id"]
+            isOneToOne: false
+            referencedRelation: "paginas_sistema"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permissoes_acesso_supervisao_tecnica_id_fkey"
+            columns: ["supervisao_tecnica_id"]
+            isOneToOne: false
+            referencedRelation: "supervisoes_tecnicas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       planilhas_upload: {
         Row: {
@@ -1889,6 +1956,10 @@ export type Database = {
         Returns: boolean
       }
       create_default_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_permissions_table: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
