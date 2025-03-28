@@ -196,74 +196,86 @@ const ComunicacaoDashboard: React.FC = () => {
     isLoading: notasLoading 
   } = useNotasStats();
 
-  const comunicacaoStats = [
+  const getStatCards = () => [
     {
       id: 'demandas-hoje',
       title: 'Demandas Abertas Hoje',
+      icon: demandasVariacao >= 0 ? <TrendingUp className="h-12 w-12" /> : <TrendingDown className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/consultar-demandas',
+      color: demandasVariacao >= 0 ? 'green' : 'orange',
       value: isLoading ? '...' : totalDemandas.toString(),
       change: `${demandasVariacao > 0 ? '+' : ''}${demandasVariacao}%`,
       trend: demandasVariacao >= 0 ? 'up' : 'down',
       description: 'em relação a ontem',
       category: 'estatistica',
-      visible: true
     },
     {
       id: 'aguardando-respostas',
       title: 'Aguardando Respostas',
+      icon: aguardandoVariacao >= 0 ? <TrendingUp className="h-12 w-12" /> : <TrendingDown className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/responder',
+      color: aguardandoVariacao >= 0 ? 'orange' : 'green',
       value: isLoading ? '...' : aguardandoRespostas.toString(),
       change: `${aguardandoVariacao > 0 ? '+' : ''}${aguardandoVariacao}%`,
       trend: aguardandoVariacao >= 0 ? 'up' : 'down',
       description: 'em relação ao mês passado',
       category: 'estatistica',
-      visible: true
     },
     {
       id: 'tempo-resposta',
       title: 'Tempo Médio de Resposta',
+      icon: tempoRespostaVariacao <= 0 ? <TrendingDown className="h-12 w-12" /> : <TrendingUp className="h-12 w-12" />,
+      path: '',
+      color: tempoRespostaVariacao <= 0 ? 'green' : 'orange',
       value: isLoading ? '...' : `${tempoMedioResposta} horas`,
       change: `${tempoRespostaVariacao > 0 ? '+' : ''}${tempoRespostaVariacao}%`,
-      trend: tempoRespostaVariacao >= 0 ? 'up' : 'down',
+      trend: tempoRespostaVariacao <= 0 ? 'down' : 'up',
       description: 'em relação ao mês passado',
       category: 'estatistica',
-      visible: true
     },
     {
       id: 'taxa-aprovacao',
       title: 'Taxa de Aprovação',
+      icon: aprovacaoVariacao >= 0 ? <TrendingUp className="h-12 w-12" /> : <TrendingDown className="h-12 w-12" />,
+      path: '',
+      color: aprovacaoVariacao >= 0 ? 'green' : 'orange',
       value: isLoading ? '...' : `${taxaAprovacao}%`,
       change: `${aprovacaoVariacao > 0 ? '+' : ''}${aprovacaoVariacao}%`,
       trend: aprovacaoVariacao >= 0 ? 'up' : 'down',
       description: 'em relação ao mês passado',
       category: 'estatistica',
-      visible: true
     },
     {
       id: 'aguardando-aprovacao',
       title: 'Notas Aguardando Aprovação',
+      icon: <AlertTriangle className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'orange',
       value: notasLoading ? '...' : aguardandoAprovacao.toString(),
       change: '',
       trend: 'up',
       description: 'notas pendentes de aprovação',
       category: 'estatistica',
-      visible: true
     },
     {
       id: 'notas-recusadas',
       title: 'Notas Recusadas',
+      icon: <TrendingDown className="h-12 w-12" />,
+      path: '/dashboard/comunicacao/consultar-notas',
+      color: 'orange-600',
       value: notasLoading ? '...' : notasRecusadas.toString(),
       change: '',
       trend: 'down',
       description: 'total de notas recusadas',
       category: 'estatistica',
-      visible: true
     }
   ];
+
+  const comunicacaoStats = getStatCards();
 
   const handleDeleteCard = (id: string) => {
     setActionCards(cards => cards.filter(card => card.id !== id));
     setCardFilters(filters => ({ ...filters, [id]: false }));
-    
-    // Toast removed - no success message on card removal
   };
 
   const handleEditCard = (id: string) => {
@@ -308,8 +320,14 @@ const ComunicacaoDashboard: React.FC = () => {
       .filter(([_, isSelected]) => isSelected)
       .map(([id]) => id);
     
-    // Get cards from ALL_CARDS based on selected IDs
-    const filteredActionCards = ALL_CARDS
+    // Create a combined array of all possible cards
+    const allPossibleCards = [
+      ...ALL_CARDS,
+      ...comunicacaoStats
+    ];
+    
+    // Get cards based on selected IDs
+    const filteredActionCards = allPossibleCards
       .filter(card => selectedCardIds.includes(card.id))
       // Preserve existing card order if possible
       .sort((a, b) => {
@@ -339,6 +357,32 @@ const ComunicacaoDashboard: React.FC = () => {
     });
   };
 
+  const renderStatCard = (stat: any) => (
+    <Card key={stat.id} className="min-h-[140px] flex flex-col justify-center h-full w-full">
+      <CardContent className="pt-6 h-full">
+        <div className="flex flex-col justify-between h-full">
+          <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+          <div className="flex items-baseline justify-between mt-1">
+            <h3 className="text-2xl font-bold">
+              {isLoading || notasLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                stat.value
+              )}
+            </h3>
+            {stat.change && (
+              <div className={`flex items-center ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
+                {stat.trend === 'up' ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
+                <span className="text-sm">{stat.change}</span>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -361,89 +405,20 @@ const ComunicacaoDashboard: React.FC = () => {
       >
         <SortableContext items={actionCards.map(card => card.id)}>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            {actionCards
-              .filter(card => card.category === 'acao' || card.category === 'notificacao')
-              .map((card) => (
-                <SortableActionCard 
-                  key={card.id}
-                  card={card} 
-                  onEdit={(c) => handleEditCard(c.id)}
-                  onDelete={handleDeleteCard}
-                />
-              ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-      
-      {/* Make stats cards draggable too */}
-      <DndContext 
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={(event) => {
-          const { active, over } = event;
-          
-          if (over && active.id !== over.id) {
-            const oldIndex = comunicacaoStats.findIndex((stat) => stat.id === active.id);
-            const newIndex = comunicacaoStats.findIndex((stat) => stat.id === over.id);
-            
-            if (oldIndex !== -1 && newIndex !== -1) {
-              const newStats = arrayMove(comunicacaoStats, oldIndex, newIndex);
-              // Update localStorage with new order of stats
-              localStorage.setItem('comunicacao-stats-order', JSON.stringify(
-                newStats.map(stat => stat.id)
-              ));
-            }
-          }
-        }}
-      >
-        <SortableContext items={comunicacaoStats.filter(stat => cardFilters[stat.id] !== false).map(stat => stat.id)}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {comunicacaoStats
-              .filter(stat => cardFilters[stat.id] !== false)
-              .map((stat) => (
-                <SortableActionCard 
-                  key={stat.id}
-                  card={{
-                    id: stat.id,
-                    title: stat.title,
-                    icon: stat.trend === 'up' ? <TrendingUp className="h-12 w-12" /> : <TrendingDown className="h-12 w-12" />,
-                    path: '',
-                    color: stat.trend === 'up' ? 'green' : 'orange',
-                    category: 'estatistica'
-                  }}
-                  onEdit={() => {}} 
-                  onDelete={handleDeleteCard}
-                >
-                  <Card key={stat.id} className="min-h-[140px] flex flex-col justify-center h-full w-full">
-                    <CardContent className="pt-6 h-full">
-                      <div className="flex flex-col justify-between h-full">
-                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                        <div className="flex items-baseline justify-between mt-1">
-                          <h3 className="text-2xl font-bold">
-                            {isLoading || notasLoading ? (
-                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                            ) : (
-                              stat.value
-                            )}
-                          </h3>
-                          {stat.change && (
-                            <div className={`flex items-center ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-                              {stat.trend === 'up' ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-                              <span className="text-sm">{stat.change}</span>
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </SortableActionCard>
-              ))}
+            {actionCards.map((card) => (
+              <SortableActionCard 
+                key={card.id}
+                card={card} 
+                onEdit={(c) => handleEditCard(c.id)}
+                onDelete={handleDeleteCard}
+              >
+                {card.category === 'estatistica' && renderStatCard(card)}
+              </SortableActionCard>
+            ))}
           </div>
         </SortableContext>
       </DndContext>
 
-      {/* Card Customization Modal */}
       <CardCustomizationModal
         isOpen={isCustomizationModalOpen}
         onClose={() => setIsCustomizationModalOpen(false)}
@@ -451,7 +426,6 @@ const ComunicacaoDashboard: React.FC = () => {
         initialData={editingCard || undefined}
       />
       
-      {/* Filter Dialog */}
       <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
