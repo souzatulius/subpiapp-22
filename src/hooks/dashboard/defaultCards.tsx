@@ -1,4 +1,3 @@
-
 import { ActionCardItem } from './types';
 import { 
   ClipboardList, 
@@ -81,6 +80,19 @@ export const getDefaultCards = (): ActionCardItem[] => [
     isSearch: true,
   },
   
+  // Modify the Overdue Demands card to be a standard, mandatory card
+  {
+    id: 'overdue-demands',
+    title: 'Demandas em Atraso',
+    icon: <Clock className="h-12 w-12" />,
+    path: '/dashboard/comunicacao/consultar-demandas', // Add a path to view all overdue demands
+    color: 'orange', // Keeping the existing orange color
+    width: '25',
+    height: '2',
+    isCustom: false,
+    isOverdueDemands: true,
+  },
+  
   // After search - PendingActions card 
   {
     id: 'pending-actions',
@@ -92,19 +104,6 @@ export const getDefaultCards = (): ActionCardItem[] => [
     height: '1',
     isCustom: false,
     isPendingActions: true,
-  },
-  
-  // OverdueDemands card
-  {
-    id: 'overdue-demands',
-    title: 'Demandas em Atraso',
-    icon: <Clock className="h-12 w-12" />,
-    path: '',
-    color: 'orange',
-    width: '25',
-    height: '2',
-    isCustom: false,
-    isOverdueDemands: true,
   },
   
   // Standard operational cards - Configuring the requested cards
