@@ -16,20 +16,39 @@ serve(async (req) => {
   }
 
   try {
+    if (!openAIApiKey) {
+      throw new Error("OPENAI_API_KEY environment variable is not set");
+    }
+
     const { demandInfo, responses } = await req.json();
     
-    // Format the prompt with the specific structure requested
-    let promptContent = `Como assessor de imprensa da Subprefeitura de Pinheiros, crie uma nota de imprensa que utilize as informações abaixo e organize as ideias iniciando com:
+    // Format the prompt with the more complete instructions
+    let promptContent = `Você é assessor de imprensa da Subprefeitura de Pinheiros.
 
-"A Subprefeitura de Pinheiros informa/esclarece/avalia/alerta/ou outros verbos que..."
+Com base nas informações da demanda exibida nesta página (incluindo o contexto do pedido da imprensa, as perguntas feitas pela coordenação de comunicação e as respostas fornecidas pelas áreas técnicas da Subprefeitura), redija uma **nota oficial clara, objetiva e institucional**, seguindo rigorosamente os critérios abaixo:
 
-Desenvolva um, dois ou três parágrafos com tom institucional, informativo e claro.
-
-Finalize com:
+1. Crie um **título curto, informativo e direto ao ponto**, que resuma o tema principal da nota (por exemplo: "Limpeza de galhos na Rua X", "Responsabilidade por poda de árvore", "Demolição de imóvel na região Y").
+2. Inicie o texto com uma **frase institucional**, usando verbos como **"informa", "esclarece", "reforça" ou "confirma"**.
+3. Desenvolva **de um a três parágrafos objetivos**, com:
+   - Contexto da demanda recebida (ex: denúncia, dúvida, reclamação)
+   - Ação realizada ou posicionamento da Subprefeitura
+   - **Local exato**, **data da ocorrência**, **tipo de serviço envolvido**
+   - Indicação do **órgão responsável**, quando não for a Subprefeitura
+   - **Prazos**, **números**, ou **exemplos concretos**, se aplicáveis
+4. Finalize com uma **mensagem institucional de reforço**, como orientações à população (ex: uso do canal 156) ou reafirmação do compromisso da gestão local.
+5. Sempre conclua com a assinatura oficial:
 
 Subprefeitura de Pinheiros  
 Prefeitura de São Paulo  
 Data: ${demandInfo.currentDate}
+
+> Use **tom técnico, institucional e direto**, com frases curtas. Evite termos vagos, generalizações ou repetições.
+
+Retorne apenas um objeto JSON com os campos separados:
+{
+  "titulo": "...",
+  "nota": "..."
+}
 
 INFORMAÇÕES SOBRE A DEMANDA:
 `;
@@ -55,7 +74,7 @@ INFORMAÇÕES SOBRE A DEMANDA:
       });
     }
     
-    console.log("Sending prompt to OpenAI:", promptContent);
+    console.log("Sending prompt to OpenAI");
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -83,15 +102,39 @@ INFORMAÇÕES SOBRE A DEMANDA:
       throw new Error(data.error.message || "Erro na API do OpenAI");
     }
     
-    const suggestion = data.choices[0].message.content;
-    console.log("Received suggestion from OpenAI");
+    const assistantResponse = data.choices[0].message.content;
+    console.log("Received response from OpenAI");
 
-    return new Response(JSON.stringify({ suggestion }), {
+    // Parse the response as JSON to extract titulo and nota
+    let parsedResponse;
+    try {
+      // Extract JSON object from the response if it's wrapped in markdown or other text
+      const jsonMatch = assistantResponse.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[0] : assistantResponse;
+      parsedResponse = JSON.parse(jsonString);
+      
+      if (!parsedResponse.titulo || !parsedResponse.nota) {
+        throw new Error("Response doesn't contain required fields");
+      }
+    } catch (parseError) {
+      console.error("Error parsing JSON response:", parseError);
+      // Fallback: If can't parse JSON, create a structured response with default title
+      parsedResponse = {
+        titulo: demandInfo.problemSummary || "Nota da Subprefeitura de Pinheiros",
+        nota: assistantResponse
+      };
+    }
+
+    return new Response(JSON.stringify(parsedResponse), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in generate-note-suggestion function:', error);
-    return new Response(JSON.stringify({ error: error.message || "Ocorreu um erro ao gerar a sugestão" }), {
+    return new Response(JSON.stringify({ 
+      error: error.message || "Ocorreu um erro ao gerar a sugestão",
+      titulo: "Erro na geração da nota",
+      nota: "Não foi possível gerar a nota devido a um erro técnico. Por favor, tente novamente mais tarde."
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

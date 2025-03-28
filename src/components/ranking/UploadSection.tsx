@@ -66,9 +66,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     if (files && files.length > 0) {
       try {
         const result = await handleUploadPainel(files[0]);
-        if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
-          // Handle painel upload completion if needed
-        }
+        // Optional: handle painel completion if needed
       } catch (error) {
         console.error("Error handling painel file upload:", error);
         toast.error("Falha ao processar o arquivo do painel");

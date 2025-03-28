@@ -89,19 +89,32 @@ const NotaForm: React.FC<NotaFormProps> = ({
         throw new Error(data.error);
       }
 
-      if (data.suggestion) {
-        // Set title based on the problem summary
-        if (!titulo && problemSummary) {
-          setTitulo(problemSummary);
-        }
-        
-        // Set content from the generated suggestion
-        setTexto(data.suggestion);
+      // Handle the new response format with separate titulo and nota fields
+      if (data.titulo && data.nota) {
+        // Set title and note content from the response
+        setTitulo(data.titulo);
+        setTexto(data.nota);
         
         toast({
           title: "Sugestão gerada com sucesso!",
           description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
         });
+      } else {
+        // Handle legacy format or unexpected response format
+        if (data.suggestion) {
+          // Legacy format - set content from the generated suggestion
+          if (!titulo && problemSummary) {
+            setTitulo(problemSummary);
+          }
+          setTexto(data.suggestion);
+          
+          toast({
+            title: "Sugestão gerada com sucesso!",
+            description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
+          });
+        } else {
+          throw new Error("Formato de resposta inválido");
+        }
       }
     } catch (error) {
       console.error('Erro ao gerar sugestão:', error);
