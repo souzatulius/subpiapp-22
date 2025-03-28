@@ -17,7 +17,7 @@ const CadastrarDemanda = () => {
         title="Nova Solicitação"
         description="Cadastre uma nova solicitação de comunicação"
         icon={<PlusCircle className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-indigo-500 to-indigo-700"
+        color="bg-gradient-to-r from-blue-600 to-blue-800"
       />
       
       <div className="mt-6">

@@ -11,7 +11,7 @@ const AprovarNotaOficial = () => {
         title="Aprovar Nota Oficial"
         description="Revise e aprove notas oficiais pendentes"
         icon={<CheckCircle className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-red-500 to-red-700"
+        color="bg-gradient-to-r from-blue-800 to-blue-950"
       />
       
       <div className="mt-6">

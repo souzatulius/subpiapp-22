@@ -11,7 +11,7 @@ const ResponderDemandas = () => {
         title="Responder Demandas"
         description="Atenda às solicitações pendentes de comunicação"
         icon={<MessageCircle className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-blue-600 to-blue-800"
+        color="bg-gradient-to-r from-blue-700 to-blue-800"
       />
       
       <div className="mt-6">

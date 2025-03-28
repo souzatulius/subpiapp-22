@@ -36,7 +36,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   statHighlight = true,
   statUnreadCount = 0,
   statOnClick,
-  color = "bg-gradient-to-r from-blue-500 to-blue-700",
+  color = "bg-gradient-to-r from-blue-800 to-blue-950",
   showButton = false,
   buttonText = "Filtros e Configurações",
   buttonIcon,

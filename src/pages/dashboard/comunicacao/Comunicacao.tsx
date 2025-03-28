@@ -72,18 +72,18 @@ const ComunicacaoDashboard = () => {
         statValue={totalDemandas}
         statDescription="Ver todas demandas"
         statSection="demandas"
-        color="bg-gradient-to-r from-green-600 to-green-800"
+        color="bg-gradient-to-r from-blue-800 to-blue-950"
       />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {/* Card 1: Nova Solicitação */}
-        <Card className="border border-gray-200 overflow-hidden transition-all hover:border-green-300 hover:shadow-md">
-          <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+        <Card className="border border-gray-200 overflow-hidden transition-all hover:border-blue-300 hover:shadow-md">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
             <CardTitle className="flex items-center">
               <PlusCircle className="h-5 w-5 mr-2" />
               Nova Solicitação
             </CardTitle>
-            <CardDescription className="text-green-100">
+            <CardDescription className="text-blue-100">
               Cadastre rapidamente uma solicitação
             </CardDescription>
           </CardHeader>
@@ -113,7 +113,7 @@ const ComunicacaoDashboard = () => {
               <div className="pt-2">
                 <Button 
                   type="submit" 
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full bg-blue-700 hover:bg-blue-800 text-white"
                   disabled={isLoadingDemand}
                 >
                   {isLoadingDemand ? 'Enviando...' : 'Continuar cadastro'}
@@ -124,7 +124,7 @@ const ComunicacaoDashboard = () => {
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200">
             <Link 
               to="/dashboard/comunicacao/cadastrar" 
-              className="text-sm text-green-600 hover:text-green-800 w-full text-center"
+              className="text-sm text-blue-700 hover:text-blue-900 w-full text-center"
             >
               Ir para formulário completo
             </Link>
@@ -133,7 +133,7 @@ const ComunicacaoDashboard = () => {
 
         {/* Card 2: Responder Demandas */}
         <Card className="border border-gray-200 overflow-hidden transition-all hover:border-blue-300 hover:shadow-md">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <CardHeader className="bg-gradient-to-r from-blue-700 to-blue-800 text-white">
             <CardTitle className="flex items-center">
               <MessageSquareReply className="h-5 w-5 mr-2" />
               Responder Demandas
@@ -176,7 +176,7 @@ const ComunicacaoDashboard = () => {
           </CardContent>
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200">
             <Link to="/dashboard/comunicacao/responder" className="w-full">
-              <Button variant="secondary" className="w-full">
+              <Button variant="secondary" className="w-full text-blue-700">
                 Ver todas as demandas
               </Button>
             </Link>
@@ -184,20 +184,20 @@ const ComunicacaoDashboard = () => {
         </Card>
 
         {/* Card 3: Notas Oficiais */}
-        <Card className="border border-gray-200 overflow-hidden transition-all hover:border-orange-300 hover:shadow-md">
-          <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+        <Card className="border border-gray-200 overflow-hidden transition-all hover:border-blue-300 hover:shadow-md">
+          <CardHeader className="bg-gradient-to-r from-blue-800 to-blue-900 text-white">
             <CardTitle className="flex items-center">
               <FileEdit className="h-5 w-5 mr-2" />
               Notas Oficiais
             </CardTitle>
-            <CardDescription className="text-orange-100">
+            <CardDescription className="text-blue-100">
               Gerenciamento de notas oficiais
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 flex flex-col h-64">
             <div className="mb-4 pb-4 border-b border-gray-200">
               <Link to="/dashboard/comunicacao/criar-nota" className="w-full">
-                <Button className="w-full bg-orange-50 hover:bg-orange-100 text-orange-800">
+                <Button className="w-full bg-blue-50 hover:bg-blue-100 text-blue-800">
                   <FileEdit className="h-4 w-4 mr-2" />
                   Criar nova nota oficial
                 </Button>
@@ -206,18 +206,18 @@ const ComunicacaoDashboard = () => {
             
             <div>
               <h4 className="text-sm font-medium mb-2 flex items-center">
-                <CheckCircle className="h-4 w-4 mr-1 text-amber-500" />
+                <CheckCircle className="h-4 w-4 mr-1 text-blue-500" />
                 Notas pendentes de aprovação
               </h4>
               
               {isLoadingNotas ? (
                 <div className="flex justify-center p-4">
-                  <div className="h-6 w-6 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin"></div>
+                  <div className="h-6 w-6 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
                 </div>
               ) : notasPendentes?.length > 0 ? (
                 <ul className="space-y-2">
                   {notasPendentes.slice(0, 3).map((nota) => (
-                    <li key={nota.id} className="p-2 hover:bg-amber-50 rounded flex justify-between items-center">
+                    <li key={nota.id} className="p-2 hover:bg-blue-50 rounded flex justify-between items-center">
                       <div className="overflow-hidden">
                         <p className="font-medium text-sm truncate">{nota.titulo}</p>
                         <p className="text-xs text-gray-500">
@@ -226,7 +226,7 @@ const ComunicacaoDashboard = () => {
                       </div>
                       <div className="flex-shrink-0">
                         <Link to={`/dashboard/comunicacao/aprovar-nota/${nota.id}`}>
-                          <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 p-1 h-auto">
+                          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-1 h-auto">
                             Revisar
                           </Button>
                         </Link>
@@ -243,12 +243,12 @@ const ComunicacaoDashboard = () => {
           </CardContent>
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200 flex justify-between">
             <Link to="/dashboard/comunicacao/aprovar-nota" className="flex-1 mr-1">
-              <Button variant="secondary" className="w-full">
+              <Button variant="secondary" className="w-full text-blue-700">
                 Aprovar notas
               </Button>
             </Link>
             <Link to="/dashboard/comunicacao/notas" className="flex-1 ml-1">
-              <Button variant="secondary" className="w-full">
+              <Button variant="secondary" className="w-full text-blue-700">
                 Ver todas notas
               </Button>
             </Link>

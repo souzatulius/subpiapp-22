@@ -61,7 +61,7 @@ const Dashboard = () => {
               buttonIcon={<PlusCircle className="h-4 w-4" />}
               buttonVariant="outline"
               onButtonClick={() => setSheetOpen(true)}
-              color="bg-gradient-to-r from-blue-500 to-blue-700"
+              color="bg-gradient-to-r from-blue-800 to-blue-950"
             />
             
             <div className="mt-6">
@@ -160,11 +160,11 @@ const CardOption = ({
     onClick={onClick}
     className={`p-4 text-left rounded-lg border ${
       isPrimary 
-        ? 'bg-orange-50 border-orange-300 hover:bg-orange-100' 
+        ? 'bg-blue-50 border-blue-300 hover:bg-blue-100' 
         : 'bg-white border-gray-200 hover:bg-gray-50'
     } transition-colors duration-200`}
   >
-    <h3 className={`font-medium ${isPrimary ? 'text-orange-600' : 'text-gray-800'}`}>
+    <h3 className={`font-medium ${isPrimary ? 'text-blue-600' : 'text-gray-800'}`}>
       {title}
     </h3>
     <p className="text-sm text-gray-500 mt-1">{description}</p>
