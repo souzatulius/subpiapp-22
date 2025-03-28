@@ -1,3 +1,4 @@
+
 export interface Demanda {
     id: string;
     titulo: string;
@@ -36,9 +37,22 @@ export interface Demanda {
     bairros?: {
         id?: string;
         nome: string;
+        distrito_id?: string;
+    };
+    distrito?: {
+        id?: string;
+        nome: string;
     };
     coordenacao_id?: string;
     anexos?: string[] | null;
+    autor?: {
+        id: string;
+        nome_completo: string;
+    };
+    servico?: {
+        id: string;
+        descricao: string;
+    };
 }
 
 export interface Resposta {

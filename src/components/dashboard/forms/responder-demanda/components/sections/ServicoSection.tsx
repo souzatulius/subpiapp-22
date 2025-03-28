@@ -79,7 +79,7 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
         Serviço
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {selectedDemanda.tema && (
           <div className="space-y-1">
             <span className="text-sm text-gray-500">Tema:</span>
@@ -140,43 +140,6 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
             </div>
           )}
         </div>
-        
-        {/* Changed order: Endereço first, then Bairro, then added Distrito */}
-        {selectedDemanda.endereco && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Endereço:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.endereco || 'Não informado'}
-            </p>
-          </div>
-        )}
-        
-        {selectedDemanda.bairros && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Bairro:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.bairros.nome || 'Não informado'}
-            </p>
-          </div>
-        )}
-        
-        {selectedDemanda.distrito && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Distrito:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.distrito.nome || 'Não informado'}
-            </p>
-          </div>
-        )}
-        
-        {selectedDemanda.protocolo && (
-          <div className="space-y-1">
-            <span className="text-sm text-gray-500">Protocolo:</span>
-            <p className="font-medium text-gray-900">
-              {selectedDemanda.protocolo || 'Não informado'}
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

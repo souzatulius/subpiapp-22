@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Demanda } from '../types';
@@ -47,9 +48,14 @@ export const useFetchDemandas = () => {
             ),
             origens_demandas:origem_id (id, descricao),
             tipos_midia:tipo_midia_id (id, descricao),
-            bairros:bairro_id (id, nome),
+            bairros:bairro_id (
+              id, 
+              nome, 
+              distrito_id
+            ),
+            distrito:bairros(distrito_id(id, nome)),
             autor:autor_id (id, nome_completo),
-            servicos:servico_id (id, descricao)
+            servico:servico_id (id, descricao)
           `)
           .in('status', ['pendente', 'em_andamento'])
           .order('horario_publicacao', { ascending: false });
@@ -136,8 +142,9 @@ export const useFetchDemandas = () => {
             origens_demandas: item.origens_demandas,
             tipos_midia: item.tipos_midia,
             bairros: item.bairros,
+            distrito: item.distrito?.[0] || null,  // Access first item from district array
             autor: item.autor,
-            servicos: item.servicos
+            servico: item.servico
           };
         });
         
