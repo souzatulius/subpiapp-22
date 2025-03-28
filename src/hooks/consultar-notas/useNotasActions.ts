@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useNotaStatusValues } from './useNotaStatusValues';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export const useNotasActions = (refetch: () => Promise<any>) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const { statusValues } = useNotaStatusValues();
+  const { user } = useAuth();
 
   const updateNotaStatus = async (notaId: string, newStatus: string) => {
     setStatusLoading(true);
@@ -24,6 +26,23 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
       
       const dbStatus = statusMapping[newStatus] || newStatus;
       
+      // First update the approver if necessary (for approval/rejection actions)
+      if (['aprovado', 'rejeitado'].includes(newStatus) && user) {
+        const { error: approverError } = await supabase
+          .from('notas_oficiais')
+          .update({ 
+            aprovador_id: user.id,
+            atualizado_em: new Date().toISOString()
+          })
+          .eq('id', notaId);
+          
+        if (approverError) {
+          console.error('Erro ao atualizar aprovador:', approverError);
+          throw approverError;
+        }
+      }
+
+      // Then update the status
       const { error } = await supabase
         .from('notas_oficiais')
         .update({ 

@@ -94,22 +94,11 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   };
 
   const handleAprovarNota = async () => {
-    if (!selectedNota || !user) return;
+    if (!selectedNota) return;
     
     setIsSubmitting(true);
     try {
-      // Atualizar aprovador antes de mudar status
-      const { error: updateError } = await supabase
-        .from('notas_oficiais')
-        .update({
-          aprovador_id: user.id,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', selectedNota.id);
-        
-      if (updateError) throw updateError;
-      
-      // Usar função do hook para atualizar status
+      // Use the function from useNotasActions which already handles the aprovador_id update
       const result = await updateNotaStatus(selectedNota.id, 'aprovado');
       
       if (result) {
@@ -128,22 +117,11 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   };
 
   const handleRejeitarNota = async () => {
-    if (!selectedNota || !user) return;
+    if (!selectedNota) return;
     
     setIsSubmitting(true);
     try {
-      // Atualizar aprovador antes de mudar status
-      const { error: updateError } = await supabase
-        .from('notas_oficiais')
-        .update({
-          aprovador_id: user.id,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', selectedNota.id);
-        
-      if (updateError) throw updateError;
-      
-      // Usar função do hook para atualizar status
+      // Use the function from useNotasActions which already handles the aprovador_id update
       const result = await updateNotaStatus(selectedNota.id, 'rejeitado');
       
       if (result) {
