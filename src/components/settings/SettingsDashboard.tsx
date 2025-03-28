@@ -20,10 +20,7 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({ searchQuery }) =>
       <WelcomeCard userCount={totalUsers} />
       
       <div className="space-y-8">
-        <div>
-          <h3 className="text-lg font-medium mb-4">Estatísticas do Sistema</h3>
-          <UserServiceStats stats={stats} loading={loading} />
-        </div>
+        <UserServiceStats stats={stats} loading={loading} />
       </div>
     </div>
   );
