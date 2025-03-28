@@ -127,7 +127,7 @@ export const useChartData = () => {
     totalOrigem
   ]);
 
-  // Add ranking chart data
+  // Add ranking chart data with safe fallbacks
   const rankingData = useMemo(() => ({
     serviceDiversity: {
       labels: ['PAVIMENTAÇÃO', 'ÁREAS VERDES', 'ILUMINAÇÃO', 'ZELADORIA', 'LIMPEZA'],
@@ -175,14 +175,17 @@ export const useChartData = () => {
         {
           label: 'Aberto',
           data: [45, 39, 28, 35, 42, 38],
+          backgroundColor: '#f97316',
         },
         {
           label: 'Em andamento',
           data: [30, 38, 42, 32, 28, 35],
+          backgroundColor: '#fb923c',
         },
         {
           label: 'Concluído',
           data: [25, 32, 38, 42, 48, 55],
+          backgroundColor: '#fdba74',
         }
       ]
     },
@@ -247,5 +250,9 @@ export const useChartData = () => {
     },
   }), []);
 
-  return { chartData, rankingChartData, rankingData };
+  return { 
+    chartData, 
+    rankingChartData, 
+    rankingData 
+  };
 };

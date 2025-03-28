@@ -9,35 +9,31 @@ interface ServicesByDistrictChartProps {
 }
 
 const ServicesByDistrictChart: React.FC<ServicesByDistrictChartProps> = ({ data, isLoading }) => {
+  // Safely check if data exists and has the required properties
+  const hasValidData = !isLoading && data && data.datasets && Array.isArray(data.datasets);
+  
   return (
     <ChartCard
       title="Serviços por distrito"
       value={isLoading ? '' : 'Diversidade'}
       isLoading={isLoading}
     >
-      {!isLoading && (
+      {hasValidData && (
         <Bar 
-          data={data} 
+          data={{
+            labels: data.labels || [],
+            datasets: data.datasets
+          }}
           options={{
             maintainAspectRatio: false,
             plugins: {
               legend: {
-                display: false,
+                position: 'top' as const,
               },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return `Tipos de serviço: ${context.parsed.y}`;
-                  }
-                }
-              }
             },
             scales: {
               y: {
                 beginAtZero: true,
-                ticks: {
-                  precision: 0
-                }
               },
             },
           }}

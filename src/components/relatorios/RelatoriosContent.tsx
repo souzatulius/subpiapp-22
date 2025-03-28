@@ -1,25 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
-import { PieChart } from './charts/PieChart';
-import { LineChart } from './charts/LineChart';
-import { BarChart } from './charts/BarChart';
-import { AreaChart } from './charts/AreaChart';
 import { motion } from 'framer-motion';
 import SortableRelatorioCard from './components/SortableRelatorioCard';
 import { useRelatorioItemsState } from './hooks/useRelatorioItemsState';
 import { createRelatorioItems } from './utils/relatorioItemsFactory';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
-import ChartSectionWrapper from './components/ChartSectionWrapper';
 import { useChartData } from './hooks/useChartData';
 import { useChartComponents } from './hooks/useChartComponents';
-import ServiceDiversityChart from '../ranking/charts/ServiceDiversityChart';
-import ServicesByDistrictChart from '../ranking/charts/ServicesByDistrictChart';
-import ServiceTypesChart from '../ranking/charts/ServiceTypesChart';
 import StatusDistributionChart from '../ranking/charts/StatusDistributionChart';
-import StatusTransitionChart from '../ranking/charts/StatusTransitionChart';
+import ServiceTypesChart from '../ranking/charts/ServiceTypesChart';
 import TimeComparisonChart from '../ranking/charts/TimeComparisonChart';
 import TopCompaniesChart from '../ranking/charts/TopCompaniesChart';
+import ServiceDiversityChart from '../ranking/charts/ServiceDiversityChart';
+import ServicesByDistrictChart from '../ranking/charts/ServicesByDistrictChart';
+import StatusTransitionChart from '../ranking/charts/StatusTransitionChart';
 
 interface RelatoriosContentProps {
   filterDialogOpen?: boolean;
@@ -43,10 +37,8 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     })
   );
   
-  // Get chart data from the hook
   const { chartData, rankingChartData, rankingData } = useChartData();
   
-  // Get chart components from the hook
   const {
     chartComponents
   } = useChartComponents();
@@ -202,40 +194,44 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Ranking de Zeladoria</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <StatusDistributionChart 
-              data={rankingChartData.statusDistribution} 
-              isLoading={isLoading} 
-            />
-            
-            <ServiceTypesChart 
-              data={rankingChartData.serviceTypes} 
-              isLoading={isLoading} 
-            />
-            
-            <TimeComparisonChart 
-              data={rankingChartData.timeComparison} 
-              isLoading={isLoading} 
-            />
-            
-            <TopCompaniesChart 
-              data={rankingChartData.topCompanies} 
-              isLoading={isLoading} 
-            />
-            
-            <ServiceDiversityChart 
-              data={rankingChartData.serviceDiversity} 
-              isLoading={isLoading} 
-            />
-            
-            <ServicesByDistrictChart 
-              data={rankingChartData.servicesByDistrict} 
-              isLoading={isLoading} 
-            />
-            
-            <StatusTransitionChart 
-              data={rankingChartData.statusTransition} 
-              isLoading={isLoading} 
-            />
+            {rankingData && (
+              <>
+                <StatusDistributionChart 
+                  data={rankingData.statusDistribution} 
+                  isLoading={isLoading} 
+                />
+                
+                <ServiceTypesChart 
+                  data={rankingData.serviceTypes} 
+                  isLoading={isLoading} 
+                />
+                
+                <TimeComparisonChart 
+                  data={rankingData.timeComparison} 
+                  isLoading={isLoading} 
+                />
+                
+                <TopCompaniesChart 
+                  data={rankingData.topCompanies} 
+                  isLoading={isLoading} 
+                />
+                
+                <ServiceDiversityChart 
+                  data={rankingData.serviceDiversity} 
+                  isLoading={isLoading} 
+                />
+                
+                <ServicesByDistrictChart 
+                  data={rankingData.servicesByDistrict} 
+                  isLoading={isLoading} 
+                />
+                
+                <StatusTransitionChart 
+                  data={rankingData.statusTransition} 
+                  isLoading={isLoading} 
+                />
+              </>
+            )}
           </div>
         </div>
       </motion.div>

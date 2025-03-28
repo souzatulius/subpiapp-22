@@ -9,15 +9,21 @@ interface StatusDistributionChartProps {
 }
 
 const StatusDistributionChart: React.FC<StatusDistributionChartProps> = ({ data, isLoading }) => {
+  // Safely check if data exists and has the required properties
+  const hasValidData = !isLoading && data && data.datasets && Array.isArray(data.datasets);
+  
   return (
     <ChartCard
       title="Status das ordens de serviço"
       value={isLoading ? '' : 'Comparação'}
       isLoading={isLoading}
     >
-      {!isLoading && (
+      {hasValidData && (
         <Bar 
-          data={data} 
+          data={{
+            labels: data.labels || [],
+            datasets: data.datasets
+          }}
           options={{
             maintainAspectRatio: false,
             plugins: {
