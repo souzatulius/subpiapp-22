@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +15,7 @@ export const useDemandFormState = (
     problema_id: '',
     origem_id: '',
     tipo_midia_id: '',
-    prioridade: 'media',
+    prioridade: '',  // Inicializar como string vazia para que não tenha valor default
     prazo_resposta: '',
     nome_solicitante: '',
     telefone_solicitante: '',
@@ -28,7 +29,7 @@ export const useDemandFormState = (
     anexos: [],
     servico_id: '',
     nao_sabe_servico: false,
-    tem_protocolo_156: false,
+    tem_protocolo_156: undefined, // Inicializar como undefined para que nenhuma opção esteja selecionada
     numero_protocolo_156: '',
     coordenacao_id: ''
   };

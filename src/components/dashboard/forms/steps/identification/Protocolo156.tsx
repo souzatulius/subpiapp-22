@@ -15,7 +15,7 @@ interface Protocolo156Props {
 }
 
 const Protocolo156: React.FC<Protocolo156Props> = ({
-  temProtocolo156 = false,
+  temProtocolo156,
   numeroProtocolo156 = '',
   handleSelectChange,
   handleChange,
@@ -41,8 +41,8 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
         </Button>
         <Button
           type="button"
-          variant={temProtocolo156 === false && temProtocolo156 !== undefined ? "default" : "outline"}
-          className={`selection-button ${temProtocolo156 === false && temProtocolo156 !== undefined ? "bg-orange-500 text-white" : ""}`}
+          variant={temProtocolo156 === false ? "default" : "outline"}
+          className={`selection-button ${temProtocolo156 === false ? "bg-orange-500 text-white" : ""}`}
           onClick={() => handleSelectChange(false)}
         >
           Não

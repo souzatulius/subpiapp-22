@@ -54,6 +54,9 @@ const OriginStep: React.FC<OriginStepProps> = ({
 
   // Protocol selection and deadline fields
   const showProtocolField = formData.origem_id !== '';
+  
+  // Mostrar o campo de prioridade apenas quando o usuário seleciona "Não" para o protocolo 156
+  // ou quando começa a digitar o número do protocolo
   const showDeadlineField = 
     formData.origem_id !== '' && 
     (formData.tem_protocolo_156 === false || 

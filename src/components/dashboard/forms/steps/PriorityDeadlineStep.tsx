@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from '@/components/dashboard/forms/steps/identification/ValidationUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
+import { isValid, parse } from 'date-fns';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -20,67 +22,31 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   handleSelectChange,
   errors
 }) => {
-  // Format the date for the input value (YYYY-MM-DD format)
-  let dateValue = '';
-  let timeHours = '';
-  let timeMinutes = '';
+  // Parse date string to Date object for the DatePicker
+  const prazoDate = formData.prazo_resposta 
+    ? new Date(formData.prazo_resposta) 
+    : undefined;
   
-  if (formData.prazo_resposta) {
-    try {
-      const date = new Date(formData.prazo_resposta);
-      if (!isNaN(date.getTime())) {
-        dateValue = date.toISOString().split('T')[0];
-        timeHours = date.getHours().toString().padStart(2, '0');
-        timeMinutes = date.getMinutes().toString().padStart(2, '0');
-      }
-    } catch (error) {
-      console.error('Error parsing date:', error);
-    }
-  }
-
-  // Handle date change
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value;
-    if (!newDate) {
+  // Handle date selection from the DatePicker
+  const handleDateChange = (date: Date | undefined) => {
+    if (!date) {
       handleSelectChange('prazo_resposta', '');
       return;
     }
     
-    try {
-      // Combine the new date with the existing time or default to midnight
-      const date = new Date(newDate);
-      const hours = timeHours ? parseInt(timeHours) : 0;
-      const minutes = timeMinutes ? parseInt(timeMinutes) : 0;
+    if (isValid(date)) {
+      // Preservar a hora atual se já existir, ou definir para meio-dia
+      const currentDate = formData.prazo_resposta ? new Date(formData.prazo_resposta) : new Date();
+      date.setHours(
+        isValid(currentDate) ? currentDate.getHours() : 12,
+        isValid(currentDate) ? currentDate.getMinutes() : 0,
+        0,
+        0
+      );
       
-      date.setHours(hours, minutes, 0, 0);
       handleSelectChange('prazo_resposta', date.toISOString());
-    } catch (error) {
-      console.error('Error setting date:', error);
     }
   };
-
-  // Handle time change
-  const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
-    if (!dateValue) return;
-    
-    try {
-      const date = new Date(dateValue);
-      const hours = type === 'hours' ? parseInt(value) : (timeHours ? parseInt(timeHours) : 0);
-      const minutes = type === 'minutes' ? parseInt(value) : (timeMinutes ? parseInt(timeMinutes) : 0);
-      
-      date.setHours(hours, minutes, 0, 0);
-      handleSelectChange('prazo_resposta', date.toISOString());
-      
-      if (type === 'hours') timeHours = value;
-      if (type === 'minutes') timeMinutes = value;
-    } catch (error) {
-      console.error('Error setting time:', error);
-    }
-  };
-
-  // Generate hour and minute options
-  const hourOptions = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-  const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
   return (
     <div className="space-y-4">
@@ -128,51 +94,27 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
         )}
       </div>
 
-      <div>
-        <Label 
-          htmlFor="prazo_resposta" 
-          className={`form-question-title ${hasFieldError('prazo_resposta', errors) ? 'text-orange-500 font-semibold' : ''}`}
-        >
-          Prazo para resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
-        </Label>
-        <div className="flex gap-2 items-center">
-          <input
-            type="date"
-            id="prazo_resposta_date"
-            name="prazo_resposta_date"
-            value={dateValue}
-            onChange={handleDateChange}
-            className={`rounded-xl p-2 border border-gray-300 ${hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}`}
-          />
-          
-          <Select value={timeHours} onValueChange={(value) => handleTimeChange('hours', value)}>
-            <SelectTrigger className="w-[80px] rounded-xl">
-              <SelectValue placeholder="HH" />
-            </SelectTrigger>
-            <SelectContent>
-              {hourOptions.map(hour => (
-                <SelectItem key={hour} value={hour}>{hour}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <span>:</span>
-          
-          <Select value={timeMinutes} onValueChange={(value) => handleTimeChange('minutes', value)}>
-            <SelectTrigger className="w-[80px] rounded-xl">
-              <SelectValue placeholder="MM" />
-            </SelectTrigger>
-            <SelectContent>
-              {minuteOptions.map(minute => (
-                <SelectItem key={minute} value={minute}>{minute}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {formData.prioridade && (
+        <div className="animate-fadeIn">
+          <Label 
+            htmlFor="prazo_resposta" 
+            className={`form-question-title ${hasFieldError('prazo_resposta', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Prazo para resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
+          </Label>
+          <div className="flex gap-2 items-center">
+            <DatePicker
+              date={prazoDate}
+              setDate={handleDateChange}
+              placeholder="Selecione uma data"
+              className={hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}
+            />
+          </div>
+          {hasFieldError('prazo_resposta', errors) && (
+            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('prazo_resposta', errors)}</p>
+          )}
         </div>
-        {hasFieldError('prazo_resposta', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('prazo_resposta', errors)}</p>
-        )}
-      </div>
+      )}
     </div>
   );
 };
