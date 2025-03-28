@@ -32,7 +32,7 @@ export const useDemandasPendentes = () => {
             titulo,
             prazo_resposta,
             origem_id,
-            origem:origem_id (descricao)
+            origem:origens_demandas!origem_id (descricao)
           `)
           .eq('status', 'aberta')
           .not('id', 'in', `(

@@ -31,7 +31,7 @@ export const useNotasPendentes = () => {
             titulo,
             criado_em,
             autor_id,
-            autor:autor_id (nome_completo)
+            autor:usuarios!autor_id (nome_completo)
           `)
           .eq('status', 'pendente')
           .order('criado_em', { ascending: false })
@@ -40,7 +40,7 @@ export const useNotasPendentes = () => {
         if (error) throw error;
         
         if (data) {
-          setNotasPendentes(data as NotaPendente[]);
+          setNotasPendentes(data as unknown as NotaPendente[]);
         }
       } catch (error) {
         console.error('Erro ao carregar notas pendentes:', error);
