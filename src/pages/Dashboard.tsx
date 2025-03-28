@@ -8,11 +8,13 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import CardGrid from '@/components/dashboard/CardGrid';
 import { useDashboardState } from '@/hooks/useDashboardState';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import { Home } from 'lucide-react';
+import { Home, PlusCircle } from 'lucide-react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 const Dashboard = () => {
   // Start with sidebar collapsed
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const { user } = useAuth();
   
   const {
@@ -51,13 +53,14 @@ const Dashboard = () => {
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-7xl mx-auto">
             <WelcomeCard
-              title="Dashboard Principal"
-              description="Visualize e gerencie suas atividades e tarefas prioritárias"
+              title="Olá, Usuário!"
+              description="Organize esta área do seu jeito, movendo ou ocultando os cards."
               icon={<Home className="h-6 w-6 mr-2" />}
-              statTitle="Pendentes"
-              statValue={specialCardsData.responsesToDo + specialCardsData.notesToApprove}
-              statDescription="Ver todas pendências"
-              statSection="pendencias"
+              showButton={true}
+              buttonText="+ Card"
+              buttonIcon={<PlusCircle className="h-4 w-4" />}
+              buttonVariant="outline"
+              onButtonClick={() => setSheetOpen(true)}
               color="bg-gradient-to-r from-blue-500 to-blue-700"
             />
             
@@ -81,6 +84,55 @@ const Dashboard = () => {
         </main>
       </div>
       
+      {/* Card Selection Sheet */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent className="overflow-y-auto">
+          <SheetHeader className="mb-4">
+            <SheetTitle>Adicionar Novo Card</SheetTitle>
+            <SheetDescription>
+              Escolha o tipo de card que deseja adicionar ao seu dashboard.
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Card options */}
+            <CardOption 
+              title="Demandas Pendentes" 
+              description="Visualize suas demandas aguardando resposta"
+              onClick={() => {
+                handleAddNewCard();
+                setSheetOpen(false);
+              }}
+            />
+            <CardOption 
+              title="Notas Oficiais" 
+              description="Gerencie notas oficiais e aprovações"
+              onClick={() => {
+                handleAddNewCard();
+                setSheetOpen(false);
+              }}
+            />
+            <CardOption 
+              title="Card Personalizado" 
+              description="Crie um card totalmente personalizado"
+              onClick={() => {
+                handleAddNewCard();
+                setSheetOpen(false);
+              }}
+              isPrimary
+            />
+            <CardOption 
+              title="Relatórios" 
+              description="Acesse relatórios e estatísticas"
+              onClick={() => {
+                handleAddNewCard();
+                setSheetOpen(false);
+              }}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+      
       {/* Card Customization Modal */}
       <CardCustomizationModal
         isOpen={isCustomizationModalOpen}
@@ -91,5 +143,32 @@ const Dashboard = () => {
     </div>
   );
 };
+
+// Helper component for the sheet card options
+const CardOption = ({ 
+  title, 
+  description, 
+  onClick, 
+  isPrimary = false 
+}: { 
+  title: string, 
+  description: string, 
+  onClick: () => void, 
+  isPrimary?: boolean 
+}) => (
+  <button
+    onClick={onClick}
+    className={`p-4 text-left rounded-lg border ${
+      isPrimary 
+        ? 'bg-orange-50 border-orange-300 hover:bg-orange-100' 
+        : 'bg-white border-gray-200 hover:bg-gray-50'
+    } transition-colors duration-200`}
+  >
+    <h3 className={`font-medium ${isPrimary ? 'text-orange-600' : 'text-gray-800'}`}>
+      {title}
+    </h3>
+    <p className="text-sm text-gray-500 mt-1">{description}</p>
+  </button>
+);
 
 export default Dashboard;
