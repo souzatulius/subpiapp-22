@@ -1,21 +1,16 @@
 
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import UserInfoForm from './UserInfoForm';
-import { useUserInfoDialog } from './useUserInfoDialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { User } from './types';
-import { toast } from '@/components/ui/use-toast';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface UserInfoEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User | null;
-  onSave: (userId: string, data: { whatsapp?: string; aniversario?: string }) => Promise<void>;
+  onSave: (user: User) => Promise<void>;
   saving: boolean;
 }
 
@@ -24,30 +19,69 @@ const UserInfoEditDialog: React.FC<UserInfoEditDialogProps> = ({
   onOpenChange,
   user,
   onSave,
-  saving,
+  saving
 }) => {
-  const { handleSubmit, handleCancel } = useUserInfoDialog({
-    open,
-    onOpenChange,
-    user,
-    onSave,
-  });
-
   if (!user) return null;
-
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (user) {
+      onSave(user);
+    }
+  };
+  
+  // Determine entity type
+  const entityType = user.supervisao_tecnica_id 
+    ? 'Supervisão Técnica' 
+    : 'Coordenação';
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar Informações do Usuário</DialogTitle>
+          <DialogTitle>Detalhes da Entidade</DialogTitle>
         </DialogHeader>
         
-        <UserInfoForm
-          user={user}
-          onSubmit={handleSubmit}
-          saving={saving}
-          onCancel={handleCancel}
-        />
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="entityType">Tipo</Label>
+            <Input 
+              id="entityType" 
+              value={entityType} 
+              disabled 
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input 
+              id="name" 
+              value={user.nome_completo} 
+              disabled 
+            />
+          </div>
+          
+          {user.coordenacao_id && user.supervisao_tecnica_id && (
+            <div className="space-y-2">
+              <Label htmlFor="parent">Coordenação</Label>
+              <Input 
+                id="parent" 
+                value={user.coordenacao || ''} 
+                disabled 
+              />
+            </div>
+          )}
+          
+          <DialogFooter className="pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -4,7 +4,7 @@ import {
   Users, Shield, Briefcase, Building, Layers, 
   Globe, AlertTriangle, Image, FileText, MapPin,
   Settings, MessageSquare, Bell, Send, Map,
-  FolderTree
+  FolderTree, Lock
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
@@ -27,6 +27,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
       color: 'text-amber-600',
       subcategories: [
         { id: 'usuarios', label: 'Usuários e Permissões', icon: Users },
+        { id: 'permissoes', label: 'Permissões de Acesso', icon: Lock },
         { id: 'cargos', label: 'Cargos', icon: Briefcase }
       ]
     },

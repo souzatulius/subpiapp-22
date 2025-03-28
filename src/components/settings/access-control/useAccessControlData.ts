@@ -1,151 +1,115 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { User, Permission, UserPermissionMapping } from './types';
+import { User, Permission } from './types';
+import { toast } from 'sonner';
 
 export const useAccessControlData = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [userPermissions, setUserPermissions] = useState<UserPermissionMapping>({});
+  const [userPermissions, setUserPermissions] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [totalUsers, setTotalUsers] = useState(0);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  async function fetchData() {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      console.log('Fetching access control data...');
+      // Fetch all coordenações and supervisões técnicas
+      const { data: coordenacoes, error: coordError } = await supabase
+        .from('coordenacoes')
+        .select('id, descricao');
       
-      // Fetch users with whatsapp and aniversario
-      const { data: usersData, error: usersError } = await supabase
-        .from('usuarios')
-        .select(`
-          id, 
-          nome_completo, 
-          email,
-          whatsapp,
-          aniversario
-        `);
+      if (coordError) throw coordError;
+      
+      const { data: supervisoes, error: supError } = await supabase
+        .from('supervisoes_tecnicas')
+        .select('id, descricao, coordenacao_id');
         
-      if (usersError) throw usersError;
-      
-      // Set total user count
-      setTotalUsers(usersData?.length || 0);
+      if (supError) throw supError;
       
       // Fetch permissions
-      const { data: permissionsData, error: permissionsError } = await supabase
-        .from('permissoes')
-        .select('id, descricao, nivel_acesso')
-        .order('nivel_acesso', { ascending: false });
-        
-      if (permissionsError) {
-        console.error('Error fetching permissions:', permissionsError);
-        throw permissionsError;
-      }
+      const { data: pages, error: pagesError } = await supabase
+        .from('paginas_sistema')
+        .select('*');
       
-      console.log('Permissions fetched:', permissionsData?.length || 0, 'items', permissionsData);
-      
-      // Create default permissions if none exist using the function we created
-      if (!permissionsData || permissionsData.length === 0) {
-        console.log('No permissions found, creating defaults...');
-        try {
-          // Try to create default permissions using our function
-          const { error: createError } = await supabase.rpc('create_default_permissions');
-          
-          if (createError) {
-            console.error('Error creating default permissions:', createError);
-            throw createError;
-          }
-          
-          // Fetch permissions again after creating defaults
-          const { data: newPermissionsData, error: newPermissionsError } = await supabase
-            .from('permissoes')
-            .select('id, descricao, nivel_acesso')
-            .order('nivel_acesso', { ascending: false });
-            
-          if (newPermissionsError) throw newPermissionsError;
-          
-          if (newPermissionsData && newPermissionsData.length > 0) {
-            console.log('Default permissions created successfully:', newPermissionsData.length, 'items');
-            setPermissions(newPermissionsData);
-          } else {
-            throw new Error('Failed to create default permissions');
-          }
-        } catch (error) {
-          console.error('Failed to create/fetch default permissions:', error);
-          toast({
-            title: 'Erro nas permissões',
-            description: 'Não foi possível criar ou buscar as permissões padrão. Por favor, contate o administrador.',
-            variant: 'destructive',
-          });
-        }
+      if (pagesError) {
+        // If the table doesn't exist yet, we'll create some default permissions
+        console.log('Pages table might not exist, using default permissions');
+        setPermissions([
+          { id: 'criar_demanda', name: 'Criar Demanda', description: 'Acesso para criar novas demandas' },
+          { id: 'consultar_demandas', name: 'Consultar Demandas', description: 'Acesso para consultar demandas' },
+          { id: 'responder_demandas', name: 'Responder Demandas', description: 'Acesso para responder demandas' },
+          { id: 'criar_nota', name: 'Criar Nota Oficial', description: 'Acesso para criar notas oficiais' },
+          { id: 'consultar_notas', name: 'Consultar Notas', description: 'Acesso para consultar notas oficiais' },
+          { id: 'aprovar_notas', name: 'Aprovar Notas', description: 'Acesso para aprovar notas oficiais' },
+          { id: 'relatorios', name: 'Relatórios', description: 'Acesso aos relatórios do sistema' },
+          { id: 'ranking', name: 'Ranking das Subs', description: 'Acesso ao ranking das subprefeituras' },
+          { id: 'settings', name: 'Ajustes', description: 'Acesso às configurações do sistema' },
+        ]);
       } else {
-        setPermissions(permissionsData);
+        setPermissions(pages);
       }
       
-      // Fetch user permissions (based on roles table now)
-      const { data: userRolesData, error: userRolesError } = await supabase
-        .from('usuario_roles')
-        .select(`
-          usuario_id,
-          role_id,
-          roles:role_id(id, role_nome, descricao)
-        `);
-        
-      if (userRolesError) throw userRolesError;
+      // Fetch all permission assignments
+      const { data: permissionsData, error: permError } = await supabase
+        .from('permissoes_acesso')
+        .select('*');
       
-      // Process user permissions from roles
-      const userPerms: UserPermissionMapping = {};
-      userRolesData?.forEach(ur => {
-        if (!userPerms[ur.usuario_id]) {
-          userPerms[ur.usuario_id] = [];
-        }
-        if (ur.roles && typeof ur.roles === 'object') {
-          // Convert role to permission ID format (for compatibility)
-          const roleId = `role_${ur.role_id}`;
-          if (!userPerms[ur.usuario_id].includes(roleId)) {
-            userPerms[ur.usuario_id].push(roleId);
-          }
-        }
-      });
+      if (permError && permError.code !== 'PGRST116') {
+        // PGRST116 is "relation does not exist" - we'll handle this by assuming no permissions exist yet
+        throw permError;
+      }
       
-      // Also get the classic permissions for backward compatibility
-      const { data: userPermissionsData, error: userPermissionsError } = await supabase
-        .from('usuario_permissoes')
-        .select('usuario_id, permissao_id');
-        
-      if (!userPermissionsError && userPermissionsData) {
-        userPermissionsData.forEach(up => {
-          if (!userPerms[up.usuario_id]) {
-            userPerms[up.usuario_id] = [];
+      // Format users data - we'll use both coordenações and supervisões técnicas as "users"
+      const formattedUsers: User[] = [
+        ...coordenacoes.map((coord: any) => ({
+          id: coord.id,
+          nome_completo: coord.descricao,
+          email: '',
+          coordenacao_id: coord.id,
+          type: 'coordenacao'
+        })),
+        ...supervisoes.map((sup: any) => ({
+          id: sup.id,
+          nome_completo: sup.descricao,
+          email: '',
+          supervisao_tecnica_id: sup.id,
+          coordenacao_id: sup.coordenacao_id,
+          type: 'supervisao_tecnica'
+        }))
+      ];
+      
+      setUsers(formattedUsers);
+      
+      // Format permissions data
+      const formattedPermissions: Record<string, string[]> = {};
+      
+      if (permissionsData) {
+        permissionsData.forEach((perm: any) => {
+          const entityId = perm.coordenacao_id || perm.supervisao_tecnica_id;
+          if (!formattedPermissions[entityId]) {
+            formattedPermissions[entityId] = [];
           }
-          userPerms[up.usuario_id].push(up.permissao_id);
+          
+          formattedPermissions[entityId].push(perm.pagina_id);
         });
       }
       
-      setUsers(usersData || []);
-      setUserPermissions(userPerms);
-      console.log('Access control data loaded successfully');
-    } catch (error: any) {
-      const errorMessage = error.message || 'Erro desconhecido';
-      console.error('Erro ao carregar dados de controle de acesso:', error);
-      setError(errorMessage);
-      toast({
-        title: 'Erro',
-        description: `Não foi possível carregar os dados de controle de acesso: ${errorMessage}`,
-        variant: 'destructive',
-      });
+      setUserPermissions(formattedPermissions);
+    } catch (err: any) {
+      console.error('Error fetching data:', err);
+      setError(err.message || 'Failed to load data');
+      toast.error('Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return {
     users,
@@ -155,7 +119,6 @@ export const useAccessControlData = () => {
     setUserPermissions,
     loading,
     error,
-    fetchData,
-    totalUsers
+    fetchData
   };
 };

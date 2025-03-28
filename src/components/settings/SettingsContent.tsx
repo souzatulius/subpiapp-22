@@ -10,6 +10,7 @@ import MediaTypes from './MediaTypes';
 import DistrictsAndNeighborhoods from './DistrictsAndNeighborhoods';
 import Notifications from './Notifications';
 import Announcements from './Announcements';
+import AccessControl from './AccessControl';
 
 interface SettingsContentProps {
   activeSection: string;
@@ -18,6 +19,8 @@ interface SettingsContentProps {
 const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
   if (activeSection === 'usuarios') {
     return <UsersManagement />;
+  } else if (activeSection === 'permissoes') {
+    return <AccessControl />;
   } else if (activeSection === 'cargos') {
     return <Positions />;
   } else if (activeSection === 'coordenacoes_lista' || activeSection === 'areas') {

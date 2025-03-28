@@ -1,12 +1,9 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
-import { Button } from '@/components/ui/button';
-import { Edit, Shield, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { User, Permission } from './types';
-import PermissionSelect from './PermissionSelect';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Edit } from 'lucide-react';
 
 interface UserRowProps {
   user: User;
@@ -27,73 +24,50 @@ const UserRow: React.FC<UserRowProps> = ({
   currentUserId,
   handleAddPermission,
   handleRemovePermission,
-  openEditDialog,
+  openEditDialog
 }) => {
-  const isCurrentUser = user.id === currentUserId;
+  // Determine type of entity (coordenação or supervisão técnica)
+  const entityType = user.supervisao_tecnica_id ? 'Supervisão Técnica' : 'Coordenação';
+  
+  // Handle permission toggle
+  const handlePermissionToggle = async (permissionId: string, checked: boolean) => {
+    if (checked) {
+      await handleAddPermission(user.id, permissionId);
+    } else {
+      await handleRemovePermission(user.id, permissionId);
+    }
+  };
   
   return (
-    <tr key={user.id}>
-      <td className="px-4 py-3 text-sm">
-        <div>
-          <p className="font-medium">{user.nome_completo} {isCurrentUser && "(Você)"}</p>
-          <p className="text-xs text-gray-500">{user.email}</p>
-        </div>
-      </td>
-      <td className="px-4 py-3 text-sm">
-        <div>
-          <p>WhatsApp: {user.whatsapp || '-'}</p>
-          <p>Aniversário: {user.aniversario ? format(new Date(user.aniversario), 'dd/MM/yyyy', { locale: pt }) : '-'}</p>
+    <tr className="hover:bg-gray-50 transition-colors">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex flex-col">
+          <span className="font-medium text-gray-900">{user.nome_completo}</span>
+          <span className="text-xs text-gray-500">{entityType}</span>
         </div>
       </td>
       
-      <td className="px-4 py-3">
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-            {userPermissions && userPermissions.length > 0 ? (
-              permissions
-                .filter(p => userPermissions.includes(p.id))
-                .map(permission => (
-                  <Badge 
-                    key={permission.id} 
-                    className="flex items-center gap-1 bg-blue-100 text-blue-800 hover:bg-blue-200"
-                  >
-                    <Shield className="h-3 w-3" />
-                    {permission.descricao}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-4 w-4 p-0 ml-1 text-blue-800 hover:bg-blue-200 hover:text-blue-900"
-                      onClick={() => handleRemovePermission(user.id, permission.id)}
-                      disabled={saving}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
-                ))
-            ) : (
-              <span className="text-gray-500 text-sm">Sem permissões</span>
-            )}
-          </div>
-          
-          <PermissionSelect
-            permissions={permissions}
-            userPermissions={userPermissions || []}
-            userId={user.id}
-            onAddPermission={handleAddPermission}
+      {permissions.map(permission => (
+        <td key={permission.id} className="px-6 py-4 whitespace-nowrap text-center">
+          <Checkbox
+            checked={userPermissions.includes(permission.id)}
+            onCheckedChange={(checked) => 
+              handlePermissionToggle(permission.id, checked as boolean)
+            }
             disabled={saving}
+            className="mx-auto"
           />
-        </div>
-      </td>
+        </td>
+      ))}
       
-      <td className="px-4 py-3 text-center">
-        <Button 
-          variant="outline" 
-          size="sm" 
+      <td className="px-6 py-4 whitespace-nowrap text-center">
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => openEditDialog(user)}
-          className="inline-flex items-center"
+          className="text-gray-500 hover:text-blue-600"
         >
-          <Edit className="h-4 w-4 mr-2" />
-          Editar
+          <Edit size={16} />
         </Button>
       </td>
     </tr>

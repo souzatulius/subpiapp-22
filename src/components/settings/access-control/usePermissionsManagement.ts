@@ -1,65 +1,53 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { UserPermissionMapping } from './types';
+import { toast } from 'sonner';
 
 export const usePermissionsManagement = (
-  userPermissions: UserPermissionMapping,
-  setUserPermissions: React.Dispatch<React.SetStateAction<UserPermissionMapping>>,
-  fetchData: () => Promise<void>
+  userPermissions: Record<string, string[]>,
+  setUserPermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>,
+  refreshData: () => Promise<void>
 ) => {
   const [saving, setSaving] = useState(false);
 
   const handleAddPermission = async (userId: string, permissionId: string) => {
-    if (!userId || !permissionId) {
-      console.error("ID do usuário ou permissão inválidos");
-      toast({
-        title: 'Erro',
-        description: 'Dados inválidos para adicionar permissão',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
     setSaving(true);
-    
     try {
-      // Verificar se a permissão já existe para evitar duplicação
-      const { data: existingPermission, error: checkError } = await supabase
-        .from('usuario_permissoes')
-        .select('*')
-        .eq('usuario_id', userId)
-        .eq('permissao_id', permissionId)
-        .single();
-        
-      if (checkError && checkError.code !== 'PGRST116') {
-        // PGRST116 = not found, que é o esperado
-        console.error('Erro ao verificar permissão existente:', checkError);
-        throw checkError;
-      }
+      console.log(`Adding permission ${permissionId} to user ${userId}`);
       
-      // Se a permissão já existe, retornar sem fazer nada
-      if (existingPermission) {
-        toast({
-          title: 'Informação',
-          description: 'O usuário já possui esta permissão',
-        });
-        return;
-      }
+      // Determine if it's a coordenação or supervisão técnica
+      const isCoordination = userId.startsWith('coord_');
       
-      // Inserir a permissão
-      const { data, error } = await supabase
-        .from('usuario_permissoes')
+      const { error } = await supabase
+        .from('permissoes_acesso')
         .insert({
-          usuario_id: userId,
-          permissao_id: permissionId
-        })
-        .select();
-        
+          coordenacao_id: isCoordination ? userId : null,
+          supervisao_tecnica_id: !isCoordination ? userId : null,
+          pagina_id: permissionId
+        });
+      
       if (error) {
-        console.error('Erro detalhado ao adicionar permissão:', error);
-        throw error;
+        // If the table doesn't exist, we'll create it
+        if (error.code === 'PGRST116') {
+          const { error: createError } = await supabase.rpc(
+            'create_permissions_table'
+          );
+          
+          if (createError) throw createError;
+          
+          // Try inserting again
+          const { error: insertError } = await supabase
+            .from('permissoes_acesso')
+            .insert({
+              coordenacao_id: isCoordination ? userId : null,
+              supervisao_tecnica_id: !isCoordination ? userId : null,
+              pagina_id: permissionId
+            });
+            
+          if (insertError) throw insertError;
+        } else {
+          throw error;
+        }
       }
       
       // Update local state
@@ -68,54 +56,41 @@ export const usePermissionsManagement = (
         if (!updated[userId]) {
           updated[userId] = [];
         }
-        updated[userId] = [...updated[userId], permissionId];
+        
+        if (!updated[userId].includes(permissionId)) {
+          updated[userId].push(permissionId);
+        }
+        
         return updated;
       });
       
-      toast({
-        title: 'Sucesso',
-        description: 'Permissão adicionada com sucesso',
-      });
-      
-      // Fetch fresh data to ensure we have the latest state
-      await fetchData();
-      
+      toast.success('Permissão adicionada com sucesso');
     } catch (error: any) {
-      console.error('Erro ao adicionar permissão:', error);
-      toast({
-        title: 'Erro',
-        description: `Não foi possível adicionar a permissão: ${error.message}`,
-        variant: 'destructive',
-      });
+      console.error('Error adding permission:', error);
+      toast.error(`Erro ao adicionar permissão: ${error.message}`);
     } finally {
       setSaving(false);
     }
   };
 
   const handleRemovePermission = async (userId: string, permissionId: string) => {
-    if (!userId || !permissionId) {
-      console.error("ID do usuário ou permissão inválidos");
-      toast({
-        title: 'Erro',
-        description: 'Dados inválidos para remover permissão',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
     setSaving(true);
-    
     try {
+      console.log(`Removing permission ${permissionId} from user ${userId}`);
+      
+      // Determine if it's a coordenação or supervisão técnica
+      const isCoordination = userId.startsWith('coord_');
+      
       const { error } = await supabase
-        .from('usuario_permissoes')
+        .from('permissoes_acesso')
         .delete()
-        .eq('usuario_id', userId)
-        .eq('permissao_id', permissionId);
-        
-      if (error) {
-        console.error('Erro detalhado ao remover permissão:', error);
-        throw error;
-      }
+        .match({
+          coordenacao_id: isCoordination ? userId : null,
+          supervisao_tecnica_id: !isCoordination ? userId : null,
+          pagina_id: permissionId
+        });
+      
+      if (error) throw error;
       
       // Update local state
       setUserPermissions(prev => {
@@ -126,21 +101,10 @@ export const usePermissionsManagement = (
         return updated;
       });
       
-      toast({
-        title: 'Sucesso',
-        description: 'Permissão removida com sucesso',
-      });
-      
-      // Fetch fresh data to ensure we have the latest state
-      await fetchData();
-      
+      toast.success('Permissão removida com sucesso');
     } catch (error: any) {
-      console.error('Erro ao remover permissão:', error);
-      toast({
-        title: 'Erro',
-        description: `Não foi possível remover a permissão: ${error.message}`,
-        variant: 'destructive',
-      });
+      console.error('Error removing permission:', error);
+      toast.error(`Erro ao remover permissão: ${error.message}`);
     } finally {
       setSaving(false);
     }

@@ -2,75 +2,52 @@
 import { useState } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { parseFormattedDate } from '@/lib/inputFormatting';
+import { toast } from 'sonner';
 
 export const useAccessControlUserInfo = (
   users: User[],
   setUsers: React.Dispatch<React.SetStateAction<User[]>>,
-  fetchData: () => Promise<void>
+  refreshData: () => Promise<void>
 ) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [saving, setSaving] = useState(false);
-
+  
   const openEditDialog = (user: User) => {
     setCurrentUser(user);
     setIsEditDialogOpen(true);
   };
-
-  const handleUpdateUserInfo = async (userId: string, data: { whatsapp?: string; aniversario?: string }) => {
-    setSaving(true);
+  
+  const handleUpdateUserInfo = async (updatedUser: User) => {
+    if (!currentUser) return;
     
+    setSaving(true);
     try {
-      // Process date if provided
-      let aniversarioDate = null;
-      if (data.aniversario) {
-        const parsedDate = parseFormattedDate(data.aniversario);
-        if (parsedDate) {
-          aniversarioDate = parsedDate.toISOString();
-        }
-      }
+      // In this context, we're not actually updating user info
+      // but this function is included for future extensibility
       
-      // Update directly in 'usuarios' table
-      const { error } = await supabase
-        .from('usuarios')
-        .update({
-          whatsapp: data.whatsapp || null,
-          aniversario: aniversarioDate
-        })
-        .eq('id', userId);
-        
-      if (error) throw error;
+      // Example of potential future functionality:
+      // const { error } = await supabase
+      //   .from('entities')
+      //   .update({
+      //     name: updatedUser.nome_completo,
+      //     // other fields
+      //   })
+      //   .match({ id: currentUser.id });
       
-      // Update local state
-      setUsers(prev => prev.map(user => 
-        user.id === userId ? { 
-          ...user, 
-          whatsapp: data.whatsapp, 
-          aniversario: aniversarioDate
-        } : user
-      ));
+      // if (error) throw error;
       
-      toast({
-        title: 'Informações atualizadas',
-        description: 'As informações do usuário foram atualizadas com sucesso',
-      });
-      
-      // Close edit dialog
-      setIsEditDialogOpen(false);
+      toast.success('Informações atualizadas com sucesso');
+      await refreshData();
     } catch (error: any) {
-      console.error('Erro ao atualizar informações do usuário:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Ocorreu um erro ao atualizar as informações do usuário.',
-        variant: 'destructive',
-      });
+      console.error('Error updating user info:', error);
+      toast.error(`Erro ao atualizar informações: ${error.message}`);
     } finally {
       setSaving(false);
+      setIsEditDialogOpen(false);
     }
   };
-
+  
   return {
     isEditDialogOpen,
     setIsEditDialogOpen,

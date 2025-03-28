@@ -1,22 +1,25 @@
 
-export interface User {
-  id: string;
-  nome_completo: string;
-  email: string;
-  whatsapp?: string;
-  aniversario?: string;
-  foto_perfil_url?: string;
-  cargo_id?: string;
-  coordenacao_id?: string;
-  supervisao_tecnica_id?: string;
-}
-
 export interface Permission {
   id: string;
-  descricao: string;
-  nivel_acesso: number;
+  name: string;
+  description: string;
 }
 
-export interface UserPermissionMapping {
-  [userId: string]: string[];
+export interface User {
+  id: string;
+  email: string;
+  nome_completo: string;
+  cargo_id?: string;
+  supervisao_tecnica_id?: string;
+  coordenacao_id?: string;
+  cargo?: string;
+  supervisao_tecnica?: string;
+  coordenacao?: string;
+}
+
+export interface AccessControlEntity {
+  id: string;
+  name: string;
+  type: 'coordenacao' | 'supervisao_tecnica';
+  parentId?: string; // For supervisões técnicas, points to coordenação
 }

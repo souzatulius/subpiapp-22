@@ -31,6 +31,9 @@ import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
 import NotasDashboard from './pages/dashboard/comunicacao/Notas';
 
+// Admin Pages
+import UserPermissionsList from './pages/admin/UserPermissionsList';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -60,6 +63,9 @@ function App() {
               {/* Dashboard route */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+
+              {/* Admin routes */}
+              <Route path="/admin/users-permissions" element={<ProtectedRoute><UserPermissionsList /></ProtectedRoute>} />
 
               {/* Dashboard with shared layout */}
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
