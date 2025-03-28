@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -45,7 +46,7 @@ export const useRespostaFormState = ({
       const { data, error } = await supabase
         .from('servicos')
         .select('*')
-        .eq('supervisao_tecnica_id', selectedDemanda.supervisao_tecnica_id)
+        .eq('problema_id', problemaId)
         .order('descricao', { ascending: true });
 
       if (error) throw error;
