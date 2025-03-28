@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUsersList } from '@/hooks/admin/useUsersList';
 import { 
   Table, 
@@ -11,11 +11,70 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const UserPermissionsList = () => {
   const { users, loading, error } = useUsersList();
+  const [allUsers, setAllUsers] = useState([]);
+  const [fetchingAllUsers, setFetchingAllUsers] = useState(false);
   
-  if (loading) {
+  useEffect(() => {
+    const fetchAllUsers = async () => {
+      setFetchingAllUsers(true);
+      try {
+        // Fetch all users with their permissions
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select(`
+            id,
+            nome_completo,
+            email,
+            cargo_id,
+            coordenacao_id,
+            supervisao_tecnica_id,
+            usuario_permissoes (
+              permissao_id,
+              permissoes:permissao_id (
+                id,
+                descricao,
+                nivel_acesso
+              )
+            )
+          `);
+        
+        if (error) throw error;
+        
+        // Transform data to include highest permission level
+        const usersWithPermissions = data.map(user => {
+          // Get highest permission level
+          const permissions = user.usuario_permissoes || [];
+          const highestPermission = permissions.reduce(
+            (highest, current) => {
+              const nivel = current.permissoes?.nivel_acesso || 0;
+              return nivel > highest ? nivel : highest;
+            }, 
+            0
+          );
+          
+          return {
+            ...user,
+            nivel_acesso: highestPermission,
+            permissoes: permissions.map(p => p.permissoes?.descricao || '').filter(Boolean)
+          };
+        });
+        
+        setAllUsers(usersWithPermissions);
+      } catch (error) {
+        console.error('Error fetching all users:', error);
+      } finally {
+        setFetchingAllUsers(false);
+      }
+    };
+    
+    fetchAllUsers();
+  }, []);
+  
+  if (loading || fetchingAllUsers) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -32,6 +91,9 @@ const UserPermissionsList = () => {
       </div>
     );
   }
+  
+  // Use allUsers if available, fallback to users from the hook
+  const displayUsers = allUsers.length > 0 ? allUsers : users;
   
   return (
     <div className="container mx-auto py-8">
@@ -51,14 +113,14 @@ const UserPermissionsList = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.length === 0 ? (
+            {displayUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   Nenhum usuário encontrado
                 </TableCell>
               </TableRow>
             ) : (
-              users.map(user => (
+              displayUsers.map(user => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.nome_completo}</TableCell>
                   <TableCell>{user.email}</TableCell>
