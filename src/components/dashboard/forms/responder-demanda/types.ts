@@ -22,6 +22,11 @@ export interface Demanda {
     problema_id: string;
     servico_id?: string | null;
     protocolo?: string | null;
+    tema?: {
+        id: string;
+        descricao: string;
+        icone?: string;
+    } | null;
     areas_coordenacao?: {
         id: string;
         descricao: string;
@@ -52,6 +57,11 @@ export interface Demanda {
     servico?: {
         id: string;
         descricao: string;
+    };
+    problema?: {
+        id: string;
+        descricao: string;
+        icone?: string;
     };
 }
 
