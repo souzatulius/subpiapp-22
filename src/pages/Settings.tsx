@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -19,7 +18,6 @@ const Settings = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Get tab from URL query parameter
     const searchParams = new URLSearchParams(location.search);
     const tab = searchParams.get('tab');
     if (tab) {
@@ -34,12 +32,10 @@ const Settings = () => {
   };
 
   const handleBackClick = () => {
-    // Navigate back to the main settings dashboard
     navigate('/settings');
     setActiveSection('dashboard');
   };
 
-  // Functions to get section details
   const getSectionCategory = (section: string) => {
     if (section === 'dashboard') return 'Dashboard';
     if (['usuarios', 'permissoes', 'cargos'].includes(section)) return 'Gestão de Usuários e Permissões';
@@ -74,7 +70,6 @@ const Settings = () => {
     return 'text-gray-800';
   };
 
-  // Function to handle search
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -89,7 +84,6 @@ const Settings = () => {
           
           <main className="flex-1 overflow-hidden">
             <div className="w-full h-full">
-              {/* Main content area */}
               <div className="overflow-y-auto p-6">
                 <div className="max-w-7xl mx-auto">
                   {activeSection === 'dashboard' ? (
@@ -98,7 +92,6 @@ const Settings = () => {
                     </div>
                   ) : (
                     <div>
-                      {/* Local breadcrumbs for settings sections */}
                       <div className="flex items-center mb-2 text-sm">
                         <span className="cursor-pointer hover:underline" onClick={handleBackClick}>Configurações</span>
                         <span className="mx-2">/</span>
