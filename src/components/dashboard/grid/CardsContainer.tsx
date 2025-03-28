@@ -4,7 +4,6 @@ import { SortableContext } from '@dnd-kit/sortable';
 import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
 import ActionCardWrapper from './ActionCardWrapper';
 import { ActionCardItem } from '@/hooks/dashboard/types';
-import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 
 interface CardsContainerProps {
   cards: ActionCardItem[];
@@ -41,8 +40,7 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   return (
     <SortableContext items={allCardIds}>
       <div className="grid grid-cols-4 gap-6 auto-rows-auto">
-        {/* Mensagem de boas-vindas no primeiro acesso */}
-        <WelcomeMessage />
+        {/* WelcomeMessage component has been removed */}
         
         {/* First show the search card */}
         {cards.filter(card => card.isSearch).map((card) => (
