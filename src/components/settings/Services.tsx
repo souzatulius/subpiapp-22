@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useServices } from '@/hooks/services/useServices';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -26,7 +25,6 @@ const Services = () => {
   }, [fetchServices]);
 
   useEffect(() => {
-    // Log services data to debug
     console.log('Services data:', services);
   }, [services]);
 
@@ -49,11 +47,9 @@ const Services = () => {
     try {
       setIsSubmitting(true);
       
-      // Track success and failure counts
       let successCount = 0;
       let failureCount = 0;
       
-      // Submit each service one by one
       for (const serviceItem of data.services) {
         if (serviceItem.descricao.trim()) {
           try {
@@ -71,7 +67,6 @@ const Services = () => {
       
       setIsAddFormOpen(false);
       
-      // Show appropriate toast message based on results
       if (successCount > 0 && failureCount === 0) {
         toast({
           title: "Serviços adicionados",
@@ -91,7 +86,6 @@ const Services = () => {
         });
       }
       
-      // Refresh the services list after adding
       fetchServices();
     } catch (error) {
       console.error('Error in batch service add:', error);
@@ -121,7 +115,6 @@ const Services = () => {
         title: "Serviço atualizado",
         description: "O serviço foi atualizado com sucesso.",
       });
-      // Refresh the services list after updating
       fetchServices();
     } catch (error) {
       console.error('Error updating service:', error);
@@ -145,7 +138,7 @@ const Services = () => {
     try {
       setIsDeleting(true);
       await deleteService(deletingService.id);
-      await fetchServices(); // Refresh the services list after deletion
+      await fetchServices();
     } catch (error) {
       console.error('Error deleting service:', error);
       toast({
@@ -181,7 +174,6 @@ const Services = () => {
         isLoading={isLoading}
       />
 
-      {/* Edit Dialog */}
       <ServiceEditDialog
         isOpen={!!editingService}
         onClose={() => setEditingService(null)}
@@ -190,7 +182,6 @@ const Services = () => {
         isSubmitting={isSubmitting}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteServiceDialog
         isOpen={!!deletingService}
         onOpenChange={(open) => !open && setDeletingService(null)}

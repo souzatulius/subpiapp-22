@@ -37,7 +37,7 @@ export const addService = async (serviceData: { descricao: string; problema_id: 
     const dataToInsert = {
       descricao: serviceData.descricao,
       problema_id: serviceData.problema_id,
-      supervisao_tecnica_id: null
+      supervisao_tecnica_id: null  // This ensures it matches the database schema expectation
     };
     
     const { data, error } = await supabase

@@ -1018,7 +1018,7 @@ export type Database = {
           descricao: string
           icone: string | null
           id: string
-          supervisao_tecnica_id: string
+          supervisao_tecnica_id: string | null
         }
         Insert: {
           atualizado_em?: string | null
@@ -1027,7 +1027,7 @@ export type Database = {
           descricao: string
           icone?: string | null
           id?: string
-          supervisao_tecnica_id: string
+          supervisao_tecnica_id?: string | null
         }
         Update: {
           atualizado_em?: string | null
@@ -1036,7 +1036,7 @@ export type Database = {
           descricao?: string
           icone?: string | null
           id?: string
-          supervisao_tecnica_id?: string
+          supervisao_tecnica_id?: string | null
         }
         Relationships: [
           {
@@ -1218,21 +1218,21 @@ export type Database = {
           descricao: string
           id: string
           problema_id: string | null
-          supervisao_tecnica_id: string
+          supervisao_tecnica_id: string | null
         }
         Insert: {
           criado_em?: string
           descricao: string
           id?: string
           problema_id?: string | null
-          supervisao_tecnica_id: string
+          supervisao_tecnica_id?: string | null
         }
         Update: {
           criado_em?: string
           descricao?: string
           id?: string
           problema_id?: string | null
-          supervisao_tecnica_id?: string
+          supervisao_tecnica_id?: string | null
         }
         Relationships: [
           {
