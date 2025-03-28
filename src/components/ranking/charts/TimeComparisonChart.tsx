@@ -9,41 +9,40 @@ interface TimeComparisonChartProps {
 }
 
 const TimeComparisonChart: React.FC<TimeComparisonChartProps> = ({ data, isLoading }) => {
-  // Safely check if data exists and has the required properties before accessing them
-  const concluido = isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data
-    ? '0 dias'
-    : `${data.datasets[0].data[0]} dias`;
+  // Create a fallback empty data structure when data is not available
+  const safeData = React.useMemo(() => {
+    if (!data || !data.datasets) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'No data',
+          data: [],
+          backgroundColor: '#ccc',
+        }]
+      };
+    }
+    return data;
+  }, [data]);
   
   return (
     <ChartCard
       title="Comparativo de tempo médio"
-      value={concluido}
+      value={isLoading ? '' : 'Comparação'}
       isLoading={isLoading}
     >
-      {!isLoading && data && (
+      {!isLoading && (
         <Bar 
-          data={data} 
+          data={safeData} 
           options={{
             maintainAspectRatio: false,
             plugins: {
               legend: {
-                display: false,
+                position: 'top' as const,
               },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return `Tempo médio: ${context.parsed.y} dias`;
-                  }
-                }
-              }
             },
             scales: {
               y: {
                 beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Dias'
-                }
               },
             },
           }}

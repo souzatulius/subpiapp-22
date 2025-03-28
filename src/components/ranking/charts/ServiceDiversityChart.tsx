@@ -9,20 +9,46 @@ interface ServiceDiversityChartProps {
 }
 
 const ServiceDiversityChart: React.FC<ServiceDiversityChartProps> = ({ data, isLoading }) => {
-  // Add null checks to avoid "Cannot read properties of undefined" error
-  const totalServices = isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data
-    ? 0 
-    : data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+  // Create a fallback empty data structure when data is not available
+  const safeData = React.useMemo(() => {
+    if (!data || !data.datasets) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'No data',
+          data: [],
+          backgroundColor: '#ccc',
+        }]
+      };
+    }
+    return data;
+  }, [data]);
+  
+  // Calculate total services safely
+  const totalServices = React.useMemo(() => {
+    if (isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data) {
+      return 0;
+    }
+    return data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+  }, [data, isLoading]);
+  
+  // Calculate average index safely
+  const averageIndex = React.useMemo(() => {
+    if (totalServices === 0 || !data || !data.labels) {
+      return 0;
+    }
+    return (totalServices / (data.labels.length || 1)).toFixed(1);
+  }, [totalServices, data]);
   
   return (
     <ChartCard
       title="Diversidade de Serviços por Região"
-      value={isLoading ? '' : `Índice médio: ${(totalServices / (data.labels?.length || 1)).toFixed(1)}`}
+      value={isLoading ? '' : `Índice médio: ${averageIndex}`}
       isLoading={isLoading}
     >
-      {!isLoading && data && data.datasets && data.datasets[0] && (
+      {!isLoading && (
         <Bar 
-          data={data} 
+          data={safeData} 
           options={{
             maintainAspectRatio: false,
             plugins: {

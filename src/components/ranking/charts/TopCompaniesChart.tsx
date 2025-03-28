@@ -9,10 +9,28 @@ interface TopCompaniesChartProps {
 }
 
 const TopCompaniesChart: React.FC<TopCompaniesChartProps> = ({ data, isLoading }) => {
-  // Add null checks to avoid "Cannot read properties of undefined" error
-  const totalOrders = isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data 
-    ? 0 
-    : data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+  // Create a fallback empty data structure when data is not available
+  const safeData = React.useMemo(() => {
+    if (!data || !data.datasets) {
+      return {
+        labels: [],
+        datasets: [{
+          label: 'No data',
+          data: [],
+          backgroundColor: '#ccc',
+        }]
+      };
+    }
+    return data;
+  }, [data]);
+  
+  // Calculate total orders safely
+  const totalOrders = React.useMemo(() => {
+    if (isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data) {
+      return 0;
+    }
+    return data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+  }, [data, isLoading]);
   
   return (
     <ChartCard
@@ -20,9 +38,9 @@ const TopCompaniesChart: React.FC<TopCompaniesChartProps> = ({ data, isLoading }
       value={isLoading ? '' : `Total: ${totalOrders}`}
       isLoading={isLoading}
     >
-      {!isLoading && data && data.datasets && data.datasets[0] && (
+      {!isLoading && (
         <Bar 
-          data={data} 
+          data={safeData}
           options={{
             maintainAspectRatio: false,
             indexAxis: 'y' as const,

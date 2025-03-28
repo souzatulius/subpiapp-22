@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Table, 
@@ -119,15 +118,10 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
             const statusInfo = formatStatus(demand.status);
             const priorityInfo = formatPriority(demand.prioridade);
             
-            // Get the coordination info from the problema object if available
             let coordination = 'Não informada';
             
-            // Safe access to nested properties using optional chaining
-            // This will safely handle null or undefined values at any level
-            const supervisaoTecnica = demand.problema_id?.supervisao_tecnica;
-            if (supervisaoTecnica && typeof supervisaoTecnica === 'object') {
-              coordination = supervisaoTecnica.descricao || 'Não informada';
-            }
+            const coordDescricao = demand.problema_id?.supervisao_tecnica?.descricao;
+            coordination = coordDescricao || 'Não informada';
 
             return (
               <TableRow key={demand.id}>
