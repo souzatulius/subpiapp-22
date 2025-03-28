@@ -193,7 +193,10 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
           <TabsContent value="graficos">
             <ChartVisibilityManager
               chartVisibility={chartVisibility}
-              onChartVisibilityToggle={onChartVisibilityChange}
+              onChartVisibilityToggle={(chart: keyof ChartVisibility, isVisible: boolean) => {
+                const update = { [chart]: isVisible } as Partial<ChartVisibility>;
+                onChartVisibilityChange(update);
+              }}
             />
             
             <div className="mt-6 flex justify-end">
