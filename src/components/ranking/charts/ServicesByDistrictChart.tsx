@@ -10,7 +10,17 @@ interface ServicesByDistrictChartProps {
 
 const ServicesByDistrictChart: React.FC<ServicesByDistrictChartProps> = ({ data, isLoading }) => {
   // Safely check if data exists and has the required properties
-  const hasValidData = !isLoading && data && data.datasets && Array.isArray(data.datasets);
+  const hasValidData = !isLoading && 
+                       data && 
+                       data.datasets && 
+                       Array.isArray(data.datasets) &&
+                       data.datasets.length > 0;
+  
+  // Create default empty arrays for labels and datasets to prevent "map of undefined" errors
+  const chartData = {
+    labels: (hasValidData && data.labels) ? data.labels : [],
+    datasets: (hasValidData && data.datasets) ? data.datasets : []
+  };
   
   return (
     <ChartCard
@@ -20,10 +30,7 @@ const ServicesByDistrictChart: React.FC<ServicesByDistrictChartProps> = ({ data,
     >
       {hasValidData && (
         <Bar 
-          data={{
-            labels: data.labels || [],
-            datasets: data.datasets
-          }}
+          data={chartData}
           options={{
             maintainAspectRatio: false,
             plugins: {

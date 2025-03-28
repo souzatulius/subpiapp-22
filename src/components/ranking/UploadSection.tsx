@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,9 +50,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUpload(files[0]);
-        // Check if result is an object with id and data properties
-        if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
-          onUploadComplete(result.id as string, result.data as any[]);
+        if (result) {
+          onUploadComplete(result.id, result.data);
         }
       } catch (error) {
         console.error("Error handling file upload:", error);
@@ -83,9 +81,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUpload(files[0]);
-        // Check if result is an object with id and data properties
-        if (result && typeof result === 'object' && 'id' in result && 'data' in result) {
-          onUploadComplete(result.id as string, result.data as any[]);
+        if (result) {
+          onUploadComplete(result.id, result.data);
         }
       } catch (error) {
         console.error("Error handling dropped file:", error);
@@ -146,7 +143,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         </CardContent>
       </Card>
 
-      {/* Card para upload do Painel da Zeladoria */}
       <Card className="border-dashed border-gray-300 cursor-pointer transition-colors">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center">

@@ -59,7 +59,43 @@ export const useChartData = (filters: ChartFilter) => {
       }
       
       if (!data || data.length === 0) {
-        setChartData(null);
+        // Create empty chart data structure with empty arrays to prevent "map of undefined" errors
+        const emptyChartData = {
+          occurrences: {
+            labels: [],
+            datasets: [{
+              label: 'Ordens de Serviço por Distrito',
+              data: [],
+              backgroundColor: []
+            }]
+          },
+          status: {
+            labels: [],
+            datasets: [{
+              label: 'Distribuição por Status',
+              data: [],
+              backgroundColor: []
+            }]
+          },
+          services: {
+            labels: [],
+            datasets: [{
+              label: 'Tipos de Serviço',
+              data: [],
+              backgroundColor: '#36A2EB'
+            }]
+          },
+          resolutionTime: {
+            labels: [],
+            datasets: [{
+              label: 'Tempo Médio de Resolução (dias)',
+              data: [],
+              backgroundColor: '#FFCE56'
+            }]
+          }
+        };
+        
+        setChartData(emptyChartData);
         setRawData([]);
         setIsLoading(false);
         setLastUpdate(new Date());
@@ -87,7 +123,44 @@ export const useChartData = (filters: ChartFilter) => {
     } catch (error: any) {
       console.error('Error fetching chart data:', error);
       setFetchError(error.message || 'Erro ao carregar dados dos gráficos');
-      setChartData(null);
+      
+      // Create empty chart data structure with empty arrays to prevent "map of undefined" errors
+      const emptyChartData = {
+        occurrences: {
+          labels: [],
+          datasets: [{
+            label: 'Ordens de Serviço por Distrito',
+            data: [],
+            backgroundColor: []
+          }]
+        },
+        status: {
+          labels: [],
+          datasets: [{
+            label: 'Distribuição por Status',
+            data: [],
+            backgroundColor: []
+          }]
+        },
+        services: {
+          labels: [],
+          datasets: [{
+            label: 'Tipos de Serviço',
+            data: [],
+            backgroundColor: '#36A2EB'
+          }]
+        },
+        resolutionTime: {
+          labels: [],
+          datasets: [{
+            label: 'Tempo Médio de Resolução (dias)',
+            data: [],
+            backgroundColor: '#FFCE56'
+          }]
+        }
+      };
+      
+      setChartData(emptyChartData);
       setRawData([]);
     } finally {
       setIsLoading(false);
