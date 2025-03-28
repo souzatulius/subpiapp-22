@@ -18,8 +18,8 @@ export const PieChart: React.FC<PieChartProps> = ({
   data, 
   colors 
 }) => {
-  // Default blue color palette if colors are not provided
-  const defaultColors = ['#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8'];
+  // Default gray color palette if colors are not provided
+  const defaultColors = ['#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
   const chartColors = colors || defaultColors;
 
   // Validate input data
@@ -29,7 +29,7 @@ export const PieChart: React.FC<PieChartProps> = ({
   if (!isDataValid) {
     return (
       <div className="h-full flex items-center justify-center">
-        <p className="text-blue-200">Dados não disponíveis</p>
+        <p className="text-gray-400">Dados não disponíveis</p>
       </div>
     );
   }
@@ -56,14 +56,14 @@ export const PieChart: React.FC<PieChartProps> = ({
           <Tooltip
             formatter={(value: number) => [`${value}`, 'Quantidade']}
             labelFormatter={(label) => `${label}`}
-            contentStyle={{ backgroundColor: '#1e3a8a', borderColor: '#2563eb', color: '#ffffff' }}
+            contentStyle={{ backgroundColor: '#27272a', borderColor: '#3f3f46', color: '#ffffff' }}
             labelStyle={{ color: '#ffffff' }}
           />
           <Legend 
             layout="vertical" 
             verticalAlign="middle" 
             align="right"
-            wrapperStyle={{ color: '#e2e8f0' }}
+            wrapperStyle={{ color: '#d4d4d8' }}
           />
         </RechartsBarChart>
       </ResponsiveContainer>

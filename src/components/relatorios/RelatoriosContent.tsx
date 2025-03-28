@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { PieChart } from './charts/PieChart';
 import { LineChart } from './charts/LineChart';
@@ -68,12 +69,48 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     { name: 'Mai', Notas: 2 },
     { name: 'Jun', Notas: 3 },
   ];
+
+  // New chart data for additional charts
+  const timelineChartData = [
+    { name: 'Jan', Respostas: 8 },
+    { name: 'Fev', Respostas: 12 },
+    { name: 'Mar', Respostas: 15 },
+    { name: 'Abr', Respostas: 10 },
+    { name: 'Mai', Respostas: 16 },
+    { name: 'Jun', Respostas: 18 },
+  ];
+
+  const impactChartData = [
+    { name: 'Baixo', value: 45 },
+    { name: 'Médio', value: 35 },
+    { name: 'Alto', value: 20 },
+  ];
+
+  const originChartData = [
+    { name: 'Imprensa', Solicitações: 25 },
+    { name: 'Órgãos', Solicitações: 18 },
+    { name: 'Cidadãos', Solicitações: 32 },
+    { name: 'Interno', Solicitações: 15 },
+  ];
+
+  const satisfactionChartData = [
+    { name: 'Jan', Satisfação: 7.5 },
+    { name: 'Fev', Satisfação: 7.8 },
+    { name: 'Mar', Satisfação: 8.2 },
+    { name: 'Abr', Satisfação: 8.0 },
+    { name: 'Mai', Satisfação: 8.5 },
+    { name: 'Jun', Satisfação: 8.7 },
+  ];
   
   // Calcular valores totais para exibição nos cards
   const totalTemasPrincipais = barChartData.slice(0, 2).reduce((sum, item) => sum + item.Quantidade, 0);
   const mediaComplexidade = areaChartData.reduce((sum, item) => sum + item.Notas, 0) / areaChartData.length;
   const tempoMedio = lineChartData.reduce((sum, item) => sum + item.Demandas, 0) / lineChartData.length;
   const totalNotas = pieChartData.reduce((sum, item) => sum + item.value, 0);
+  const mediaSatisfacao = satisfactionChartData.reduce((sum, item) => sum + item.Satisfação, 0) / satisfactionChartData.length;
+  const totalRespostas = timelineChartData.reduce((sum, item) => sum + item.Respostas, 0);
+  const totalImpacto = impactChartData.reduce((sum, item) => sum + item.value, 0);
+  const totalOrigem = originChartData.reduce((sum, item) => sum + item.Solicitações, 0);
 
   // Chart components
   const chartComponents = useMemo(() => ({
@@ -82,7 +119,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         data={barChartData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
         ]}
       />
     ),
@@ -91,7 +128,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         data={areaChartData}
         xAxisDataKey="name"
         areas={[
-          { dataKey: 'Notas', name: 'Notas', color: '#f97316' }
+          { dataKey: 'Notas', name: 'Notas', color: '#a1a1aa' }
         ]}
       />
     ),
@@ -100,7 +137,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         data={lineChartData}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Demandas', name: 'Tempo (dias)', color: '#f97316' }
+          { dataKey: 'Demandas', name: 'Tempo (dias)', color: '#a1a1aa' }
         ]}
       />
     ),
@@ -109,7 +146,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         data={barChartData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Eficiência', color: '#f97316' }
+          { dataKey: 'Quantidade', name: 'Eficiência', color: '#a1a1aa' }
         ]}
       />
     ),
@@ -118,14 +155,14 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         data={areaChartData}
         xAxisDataKey="name"
         areas={[
-          { dataKey: 'Notas', name: 'Quantidade', color: '#f97316' }
+          { dataKey: 'Notas', name: 'Quantidade', color: '#a1a1aa' }
         ]}
       />
     ),
     'notasPorTema': (
       <PieChart 
         data={pieChartData}
-        colors={['#fdba74', '#fb923c', '#f97316', '#ea580c']}
+        colors={['#d4d4d8', '#a1a1aa', '#71717a', '#52525b']}
       />
     ),
     'evolucaoMensal': (
@@ -133,7 +170,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         data={lineChartData}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Demandas', name: 'Demandas', color: '#f97316' }
+          { dataKey: 'Demandas', name: 'Demandas', color: '#a1a1aa' }
         ]}
       />
     ),
@@ -142,7 +179,41 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         data={barChartData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    // New chart components
+    'timelineRespostas': (
+      <LineChart 
+        data={timelineChartData}
+        xAxisDataKey="name"
+        lines={[
+          { dataKey: 'Respostas', name: 'Respostas', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'distribuicaoImpacto': (
+      <PieChart 
+        data={impactChartData}
+        colors={['#d4d4d8', '#a1a1aa', '#71717a', '#52525b']}
+      />
+    ),
+    'origemDemandas': (
+      <BarChart 
+        data={originChartData}
+        xAxisDataKey="name"
+        bars={[
+          { dataKey: 'Solicitações', name: 'Solicitações', color: '#a1a1aa' }
+        ]}
+      />
+    ),
+    'indiceSatisfacao': (
+      <LineChart 
+        data={satisfactionChartData}
+        xAxisDataKey="name"
+        lines={[
+          { dataKey: 'Satisfação', name: 'Índice', color: '#a1a1aa' }
         ]}
       />
     ),
@@ -190,6 +261,27 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
       value: "Crescimento: 23%",
       analysis: "O comparativo anual revela um crescimento de 23% em relação ao mesmo período do ano anterior. Os temas 1 e 2 apresentaram o maior crescimento relativo (35% e 42%, respectivamente), enquanto o tema 5 teve uma redução de 18%. Esta mudança na distribuição sugere uma alteração nas prioridades operacionais."
     },
+    // New charts data
+    'timelineRespostas': {
+      title: 'Timeline de Respostas',
+      value: `Total: ${totalRespostas}`,
+      analysis: "A timeline de respostas mostra uma tendência de crescimento constante ao longo do semestre, com uma leve queda em abril. O total de 79 respostas representa uma média de 13,2 respostas mensais. Comparado ao semestre anterior, houve um aumento de 18% no volume total de respostas processadas."
+    },
+    'distribuicaoImpacto': {
+      title: 'Distribuição por Impacto',
+      value: `Total: ${totalImpacto}`,
+      analysis: "A distribuição por nível de impacto mostra que 45% das demandas têm impacto baixo, 35% têm impacto médio e 20% têm impacto alto. Esta distribuição é considerada saudável, mas deve-se monitorar o crescimento de demandas de alto impacto, que apresentaram aumento de 5% em comparação com o trimestre anterior."
+    },
+    'origemDemandas': {
+      title: 'Origem das Demandas',
+      value: `Total: ${totalOrigem}`,
+      analysis: "As origens das demandas indicam que a maioria (36%) provém de cidadãos, seguido pela imprensa (28%), órgãos públicos (20%) e demandas internas (16%). A alta participação cidadã demonstra eficácia nos canais de comunicação direta com a população, mas requer atenção especial para gestão do volume crescente."
+    },
+    'indiceSatisfacao': {
+      title: 'Índice de Satisfação',
+      value: `Média: ${mediaSatisfacao.toFixed(1)}`,
+      analysis: "O índice de satisfação apresenta crescimento constante ao longo do semestre, atingindo 8,7 em junho. A média de 8,1 pontos está acima da meta estabelecida de 7,5, indicando bom desempenho da equipe. A tendência positiva sugere que as melhorias implementadas no atendimento estão sendo bem recebidas."
+    },
   };
 
   // Create initial items
@@ -223,10 +315,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
   }, []);
 
   // Organizando os itens em seções
-  const temasTecnicosItems = items.filter(item => ['distribuicaoPorTemas', 'complexidadePorTema'].includes(item.id));
-  const tempoDesempenhoItems = items.filter(item => ['tempoMedioResposta', 'performanceArea'].includes(item.id));
-  const notasOficiaisItems = items.filter(item => ['notasEmitidas', 'notasPorTema'].includes(item.id));
-  const tendenciasItems = items.filter(item => ['evolucaoMensal', 'comparativoAnual'].includes(item.id));
+  const temasTecnicosItems = items.filter(item => ['distribuicaoPorTemas', 'complexidadePorTema', 'origemDemandas'].includes(item.id));
+  const tempoDesempenhoItems = items.filter(item => ['tempoMedioResposta', 'performanceArea', 'timelineRespostas'].includes(item.id));
+  const notasOficiaisItems = items.filter(item => ['notasEmitidas', 'notasPorTema', 'distribuicaoImpacto'].includes(item.id));
+  const tendenciasItems = items.filter(item => ['evolucaoMensal', 'comparativoAnual', 'indiceSatisfacao'].includes(item.id));
 
   return (
     <DndContext 
@@ -242,7 +334,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
       >
         {/* Temas Técnicos */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-orange-800">Temas Técnicos</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Temas Técnicos</h2>
           <SortableContext items={temasTecnicosItems.map(item => item.id)}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {temasTecnicosItems.map((item) => (
@@ -269,7 +361,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         
         {/* Tempo e Desempenho */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-orange-800">Tempo e Desempenho</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Tempo e Desempenho</h2>
           <SortableContext items={tempoDesempenhoItems.map(item => item.id)}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tempoDesempenhoItems.map((item) => (
@@ -296,7 +388,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         
         {/* Notas Oficiais */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-orange-800">Notas Oficiais</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Notas Oficiais</h2>
           <SortableContext items={notasOficiaisItems.map(item => item.id)}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {notasOficiaisItems.map((item) => (
@@ -323,7 +415,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         
         {/* Tendências */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-orange-800">Tendências</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Tendências</h2>
           <SortableContext items={tendenciasItems.map(item => item.id)}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tendenciasItems.map((item) => (
