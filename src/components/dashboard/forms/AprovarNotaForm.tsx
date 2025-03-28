@@ -9,6 +9,7 @@ import NotasList from './components/NotasList';
 import NotaDetail from './components/NotaDetail';
 import { NotaOficial } from '@/types/nota';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNotaStatusValues } from '@/hooks/consultar-notas/useNotaStatusValues';
 
 interface AprovarNotaFormProps {}
 
@@ -19,6 +20,9 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
   const [editMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedText, setEditedText] = useState('');
+  
+  // Get valid status values from the hook
+  const { statusValues } = useNotaStatusValues();
 
   const { data: notas, isLoading, refetch } = useQuery({
     queryKey: ['notas-pendentes'],
@@ -123,13 +127,14 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
-      // Check if we need to get the available status values from the database
-      console.log('Aprovando nota com status:', 'aprovado');
+      // Find the correct status value for approval from valid options
+      const approveStatus = statusValues.find(s => s === 'aprovada') || 'aprovada';
+      console.log('Aprovando nota com status:', approveStatus);
       
       const { error } = await supabase
         .from('notas_oficiais')
         .update({
-          status: 'aprovado', // Changed from 'aprovado' to match the database constraints
+          status: approveStatus,
           aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
@@ -164,10 +169,13 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
+      // Find the correct status value for rejection from valid options
+      const rejectStatus = statusValues.find(s => s === 'rejeitada') || 'rejeitada';
+      
       const { error } = await supabase
         .from('notas_oficiais')
         .update({
-          status: 'rejeitado', // Changed from 'rejeitado' to match database constraints
+          status: rejectStatus,
           aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
@@ -194,6 +202,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     }
   };
 
+  // Render edit mode UI
   if (editMode && selectedNota) {
     return (
       <Card className="p-6">
@@ -247,6 +256,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     );
   }
 
+  // Render detail view UI
   if (selectedNota) {
     return (
       <NotaDetail 
@@ -260,6 +270,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     );
   }
 
+  // Render list view UI
   return (
     <Card className="p-6">
       <div className="mb-6">
