@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ interface HistoryItem {
   detalhes: any;
 }
 
-interface NotaEditHistory {
+interface NotaEditHistoryItem {
   id: string;
   editor_nome: string;
   criado_em: string;
@@ -39,7 +38,7 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
   notaCreatedAt 
 }) => {
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
-  const [notaEditHistory, setNotaEditHistory] = useState<NotaEditHistory[]>([]);
+  const [notaEditHistory, setNotaEditHistory] = useState<NotaEditHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
 
@@ -97,32 +96,39 @@ const DemandHistorySection: React.FC<DemandHistorySectionProps> = ({
         if (notaId) {
           const { data: notaHistory, error: notaError } = await supabase
             .from('notas_historico_edicoes')
-            .select(`
-              id,
-              criado_em,
-              editor_id,
-              titulo_anterior,
-              titulo_novo,
-              texto_anterior,
-              texto_novo,
-              editor:editor_id (nome_completo)
-            `)
-            .eq('nota_id', notaId)
-            .order('criado_em', { ascending: false });
+            .select('id, criado_em, editor_id, titulo_anterior, titulo_novo, texto_anterior, texto_novo');
             
           if (notaError) {
             console.error('Erro ao carregar histórico de edições da nota:', notaError);
-          } else {
-            const notaEdits: NotaEditHistory[] = (notaHistory || []).map(edit => ({
-              id: edit.id,
-              editor_nome: edit.editor?.nome_completo || 'Editor desconhecido',
-              criado_em: edit.criado_em,
-              titulo_anterior: edit.titulo_anterior || '',
-              titulo_novo: edit.titulo_novo || '',
-              texto_alterado: edit.texto_anterior !== edit.texto_novo
-            }));
+          } else if (notaHistory && notaHistory.length > 0) {
+            // For each edit history entry, get the editor name
+            const notaEditsWithEditors = await Promise.all(
+              notaHistory.map(async (edit) => {
+                let editorName = 'Editor desconhecido';
+                if (edit.editor_id) {
+                  const { data: editor } = await supabase
+                    .from('usuarios')
+                    .select('nome_completo')
+                    .eq('id', edit.editor_id)
+                    .maybeSingle();
+                  
+                  if (editor) {
+                    editorName = editor.nome_completo;
+                  }
+                }
+                
+                return {
+                  id: edit.id,
+                  editor_nome: editorName,
+                  criado_em: edit.criado_em,
+                  titulo_anterior: edit.titulo_anterior || '',
+                  titulo_novo: edit.titulo_novo || '',
+                  texto_alterado: edit.texto_anterior !== edit.texto_novo
+                };
+              })
+            );
             
-            setNotaEditHistory(notaEdits);
+            setNotaEditHistory(notaEditsWithEditors);
           }
         }
       } catch (err) {

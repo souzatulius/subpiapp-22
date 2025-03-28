@@ -141,6 +141,7 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
           )}
         </div>
         
+        {/* Changed order: Endereço first, then Bairro, then added Distrito */}
         {selectedDemanda.endereco && (
           <div className="space-y-1">
             <span className="text-sm text-gray-500">Endereço:</span>
