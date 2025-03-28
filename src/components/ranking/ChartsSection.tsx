@@ -1,10 +1,10 @@
+
 import React from 'react';
 import { ChartVisibility } from './types';
 import NoDataMessage from './charts/NoDataMessage';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
-import { useChartItemsState } from './hooks/useChartItemsState';
-import { createChartItems } from './utils/chartItemsFactory';
+import { useChartItemsState, ChartItem } from './hooks/useChartItemsState';
 import SortableChartCard from './chart-components/SortableChartCard';
 
 // Import chart registration
@@ -28,40 +28,86 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     })
   );
   
-  // Create chart items based on current state
-  const initialChartItems = React.useMemo(() => createChartItems({
-    chartData,
-    isLoading,
-    chartVisibility,
-    hiddenCharts: [],
-    expandedAnalyses: [],
-    analysisOnlyCharts: []
-  }), [chartData, isLoading, chartVisibility]);
-
-  // Use the chart items state hook
-  const {
-    chartItems,
-    hiddenCharts,
-    expandedAnalyses,
-    analysisOnlyCharts,
-    handleDragEnd,
-    handleToggleVisibility,
-    handleToggleAnalysis,
-    handleToggleView
-  } = useChartItemsState(initialChartItems);
+  // State for chart items
+  const [chartItems, setChartItems] = React.useState<ChartItem[]>([]);
+  const [hiddenCharts, setHiddenCharts] = React.useState<string[]>([]);
+  const [expandedAnalyses, setExpandedAnalyses] = React.useState<string[]>([]);
+  const [analysisOnlyCharts, setAnalysisOnlyCharts] = React.useState<string[]>([]);
   
-  // Update chart items when data or visibility changes
-  React.useEffect(() => {
-    const updatedItems = createChartItems({
-      chartData,
-      isLoading,
-      chartVisibility,
-      hiddenCharts,
-      expandedAnalyses,
-      analysisOnlyCharts
+  // Handle drag end
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setChartItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        
+        const newItems = [...items];
+        const [removed] = newItems.splice(oldIndex, 1);
+        newItems.splice(newIndex, 0, removed);
+        
+        return newItems;
+      });
+    }
+  };
+  
+  // Handle chart visibility toggle
+  const handleToggleVisibility = (id: string) => {
+    setHiddenCharts(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(chartId => chartId !== id);
+      } else {
+        return [...prev, id];
+      }
     });
-    // The hook will update the state
-  }, [chartData, isLoading, chartVisibility, hiddenCharts, expandedAnalyses, analysisOnlyCharts]);
+  };
+  
+  // Handle analysis expansion toggle
+  const handleToggleAnalysis = (id: string) => {
+    setExpandedAnalyses(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(chartId => chartId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+  
+  // Handle toggle between chart and analysis text
+  const handleToggleView = (id: string) => {
+    setAnalysisOnlyCharts(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(chartId => chartId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+  
+  // Generate sample chart items for demo
+  React.useEffect(() => {
+    setChartItems([
+      {
+        id: 'chart1',
+        title: 'Sample Chart 1',
+        component: <div>Chart Component 1</div>,
+        isVisible: true,
+        analysis: 'Sample analysis text for chart 1',
+        isAnalysisExpanded: false,
+        showAnalysisOnly: false
+      },
+      {
+        id: 'chart2',
+        title: 'Sample Chart 2',
+        component: <div>Chart Component 2</div>,
+        isVisible: true,
+        analysis: 'Sample analysis text for chart 2',
+        isAnalysisExpanded: false,
+        showAnalysisOnly: false
+      }
+    ]);
+  }, [chartData]);
   
   if (!chartData && !isLoading) {
     return <NoDataMessage />;
@@ -80,9 +126,9 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
               key={item.id}
               id={item.id}
               component={item.component}
-              isVisible={item.isVisible}
-              isAnalysisExpanded={item.isAnalysisExpanded}
-              showAnalysisOnly={item.showAnalysisOnly}
+              isVisible={!hiddenCharts.includes(item.id)}
+              isAnalysisExpanded={expandedAnalyses.includes(item.id)}
+              showAnalysisOnly={analysisOnlyCharts.includes(item.id)}
               title={item.title}
               analysis={item.analysis}
               onToggleVisibility={() => handleToggleVisibility(item.id)}

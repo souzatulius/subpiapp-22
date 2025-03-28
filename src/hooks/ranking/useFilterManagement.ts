@@ -41,17 +41,17 @@ export const useFilterManagement = () => {
   // Track if filters have been modified from default
   const [isModified, setIsModified] = useState(false);
 
-  const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
+  const handleFiltersChange = useCallback((newFilters: Partial<FilterOptions>) => {
     setFilters(prev => {
       const updated = { ...prev, ...newFilters };
       setIsModified(true);
       return updated;
     });
-  };
+  }, []);
 
-  const handleChartVisibilityChange = (newVisibility: Partial<ChartVisibility>) => {
+  const handleChartVisibilityChange = useCallback((newVisibility: Partial<ChartVisibility>) => {
     setChartVisibility(prev => ({ ...prev, ...newVisibility }));
-  };
+  }, []);
 
   // Reset filters to defaults
   const resetFilters = useCallback(() => {

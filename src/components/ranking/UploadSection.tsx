@@ -23,7 +23,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   user
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const { handleUpload, processamento } = useUploadManagement(user);
+  const { handleUpload, processingStats } = useUploadManagement(user);
   const { 
     handleUploadPainel, 
     uploadProgress, 
@@ -50,7 +50,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     if (files && files.length > 0) {
       onUploadStart();
       const result = await handleUpload(files[0]);
-      if (result) {
+      if (result && result.id && result.data) {
         onUploadComplete(result.id, result.data);
       }
     }
@@ -59,7 +59,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const handlePainelFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      await handleUploadPainel(files[0]);
+      const result = await handleUploadPainel(files[0]);
+      if (result && result.id && result.data) {
+        // Handle painel upload completion if needed
+      }
     }
   }, [handleUploadPainel]);
 
@@ -70,7 +73,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     if (files && files.length > 0) {
       onUploadStart();
       const result = await handleUpload(files[0]);
-      if (result) {
+      if (result && result.id && result.data) {
         onUploadComplete(result.id, result.data);
       }
     }
@@ -116,11 +119,11 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
             {isUploading && (
               <div className="w-full space-y-2">
-                <Progress value={processamento.percentComplete} />
+                <Progress value={processingStats.processingStatus === 'processing' ? 50 : 100} />
                 <p className="text-center text-sm">
-                  {processamento.status === 'processing' 
-                    ? `Processando ${processamento.recordsProcessed || 0} de ${processamento.totalRecords || '?'} registros...` 
-                    : processamento.message}
+                  {processingStats.processingStatus === 'processing' 
+                    ? `Processando ${processingStats.newOrders || 0} registros...` 
+                    : processingStats.errorMessage || "Processamento concluído"}
                 </p>
               </div>
             )}

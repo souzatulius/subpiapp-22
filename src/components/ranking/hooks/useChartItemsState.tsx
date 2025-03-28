@@ -13,15 +13,29 @@ export interface ChartItem {
   showAnalysisOnly?: boolean;
 }
 
-export const useChartItemsState = (initialItems: ChartItem[]) => {
+export const useChartItemsState = (initialItems: ChartItem[] = []) => {
   const [chartItems, setChartItems] = useState<ChartItem[]>(initialItems);
   const [hiddenCharts, setHiddenCharts] = useState<string[]>([]);
   const [expandedAnalyses, setExpandedAnalyses] = useState<string[]>([]);
   const [analysisOnlyCharts, setAnalysisOnlyCharts] = useState<string[]>([]);
+  const [visibleChartIds, setVisibleChartIds] = useState<string[]>(
+    initialItems.map(item => item.id)
+  );
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [categories] = useState<string[]>(['all', 'trends', 'performance', 'distribution']);
+  
+  // Calculate visible chart items based on hiddenCharts and activeCategory
+  const visibleChartItems = chartItems.filter(
+    item => !hiddenCharts.includes(item.id) && 
+    (activeCategory === 'all' || item.id.includes(activeCategory))
+  );
   
   // Update chart items when initial items change
   useEffect(() => {
-    setChartItems(initialItems);
+    if (initialItems.length > 0) {
+      setChartItems(initialItems);
+      setVisibleChartIds(initialItems.map(item => item.id));
+    }
   }, [initialItems]);
   
   // Handle drag end
@@ -40,6 +54,14 @@ export const useChartItemsState = (initialItems: ChartItem[]) => {
   // Handle chart visibility toggle
   const handleToggleVisibility = useCallback((id: string) => {
     setHiddenCharts(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(chartId => chartId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+    
+    setVisibleChartIds(prev => {
       if (prev.includes(id)) {
         return prev.filter(chartId => chartId !== id);
       } else {
@@ -72,9 +94,16 @@ export const useChartItemsState = (initialItems: ChartItem[]) => {
   
   return {
     chartItems,
+    setChartItems,
     hiddenCharts,
     expandedAnalyses,
     analysisOnlyCharts,
+    visibleChartIds,
+    setVisibleChartIds,
+    activeCategory,
+    setActiveCategory,
+    categories,
+    visibleChartItems,
     handleDragEnd,
     handleToggleVisibility,
     handleToggleAnalysis,

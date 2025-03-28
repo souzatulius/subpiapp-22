@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import UploadSection from './UploadSection';
-import FilterSection from './FilterSection';
+import FilterSection from './filters/FilterSection';
 import ActionsSection from './ActionsSection';
 import FilterDialog from './filters/FilterDialog';
 import ChartsSection from './ChartsSection';
@@ -9,6 +9,8 @@ import ChartCategorySection from './ChartCategorySection';
 import DashboardCards from './insights/DashboardCards';
 import { useChartItemsState } from './hooks/useChartItemsState';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { FilterOptions, ChartVisibility } from './types';
+import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -24,16 +26,15 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const [dadosSGZ, setDadosSGZ] = useState<any[] | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const {
-    chartItems,
-    setChartItems,
-    visibleChartIds,
-    setVisibleChartIds,
-    activeCategory,
-    setActiveCategory,
-    categories,
-    visibleChartItems
-  } = useChartItemsState();
+  const { 
+    filters, 
+    chartVisibility, 
+    handleFiltersChange, 
+    handleChartVisibilityChange, 
+    resetFilters 
+  } = useFilterManagement();
+
+  const { chartItems, setChartItems } = useChartItemsState();
 
   const handleUploadComplete = (id: string, data: any[]) => {
     setUploadId(id);
@@ -59,32 +60,34 @@ const RankingContent: React.FC<RankingContentProps> = ({
       )}
 
       <FilterSection 
-        setFilterDialogOpen={setFilterDialogOpen} 
-        visibleChartIds={visibleChartIds}
-        chartItems={chartItems}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        chartVisibility={chartVisibility}
+        onChartVisibilityChange={handleChartVisibilityChange}
       />
       
       <ChartCategorySection 
-        categories={categories}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
+        activeCategory="all"
+        onCategoryChange={(category) => {}}
+        categories={['all', 'trends', 'performance', 'distribution']}
       />
       
       <ChartsSection 
-        chartItems={visibleChartItems} 
-        setChartItems={setChartItems} 
-        uploadId={uploadId}
-        dadosSGZ={dadosSGZ}
+        chartData={{}}
+        isLoading={false}
+        chartVisibility={chartVisibility}
       />
       
       <ActionsSection />
       
       <FilterDialog 
         open={filterDialogOpen} 
-        setOpen={setFilterDialogOpen}
-        chartItems={chartItems}
-        visibleChartIds={visibleChartIds}
-        setVisibleChartIds={setVisibleChartIds}
+        onOpenChange={setFilterDialogOpen}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        chartVisibility={chartVisibility}
+        onChartVisibilityChange={handleChartVisibilityChange}
+        onResetFilters={resetFilters}
       />
     </div>
   );

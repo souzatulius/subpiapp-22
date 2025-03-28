@@ -29,6 +29,14 @@ export interface FilterOptions {
   districts: string[];
 }
 
+export interface ChartFilter {
+  dataInicio?: string;
+  dataFim?: string;
+  distritos?: string[];
+  tiposServico?: string[];
+  status?: string[];
+}
+
 export interface UploadInfo {
   id: string;
   fileName: string;
