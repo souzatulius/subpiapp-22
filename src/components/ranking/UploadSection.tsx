@@ -1,8 +1,9 @@
+
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
+import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet, CheckCircle, XCircle, SlidersHorizontal } from 'lucide-react';
 import { UploadInfo } from './types';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
@@ -10,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+
 interface UploadSectionProps {
   onUpload: (file: File) => Promise<void>;
   lastUpload: UploadInfo | null;
@@ -24,6 +26,8 @@ interface UploadSectionProps {
     processingStatus: 'idle' | 'processing' | 'success' | 'error';
     errorMessage?: string;
   };
+  onOpenFilters?: () => void;
+  isFiltersModified?: boolean;
 }
 const UploadSection: React.FC<UploadSectionProps> = ({
   onUpload,
@@ -37,7 +41,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     newOrders: 0,
     updatedOrders: 0,
     processingStatus: 'idle'
-  }
+  },
+  onOpenFilters,
+  isFiltersModified = false
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -128,6 +134,30 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             
           </div>
           
+          {/* New Filter Button */}
+          <div className="flex items-center justify-between">
+            {onOpenFilters && (
+              <Button 
+                onClick={onOpenFilters} 
+                variant="outline" 
+                className={`flex items-center gap-2 ${isFiltersModified ? 'border-orange-400 text-orange-700' : ''}`}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filtros e Visualização
+                {isFiltersModified && (
+                  <Badge className="bg-orange-500 ml-2 h-5 w-5 p-0 flex items-center justify-center rounded-full text-xs text-white">!</Badge>
+                )}
+              </Button>
+            )}
+            
+            {lastUpload && (
+              <Button variant="secondary" className="w-auto" onClick={handleRefreshClick} disabled={isLoading}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Atualizar gráficos
+              </Button>
+            )}
+          </div>
+          
           {/* New progress indicator with better feedback */}
           {isLoading && uploadProgress > 0 && <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-500">
@@ -175,11 +205,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-              
-              <Button variant="secondary" className="w-full sm:w-auto" onClick={handleRefreshClick} disabled={isLoading}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Atualizar gráficos
-              </Button>
             </div>}
 
           {uploads && uploads.length > 1 && <div className="mt-4">

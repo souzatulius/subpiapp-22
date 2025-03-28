@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import UploadSection from './UploadSection';
 import FilterSection from './FilterSection';
@@ -13,6 +14,8 @@ import { CalendarClock, FileSpreadsheet, BarChart3, RefreshCw, AlertCircle } fro
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import FilterDialog from './filters/FilterDialog';
+
 const RankingContent = () => {
   const {
     user
@@ -47,6 +50,9 @@ const RankingContent = () => {
 
   // Track if an upload just happened to trigger filter reset
   const [justUploaded, setJustUploaded] = useState(false);
+  
+  // State for filter dialog visibility
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
 
   // Combined loading state
   const isLoading = isUploadLoading || isChartLoading;
@@ -83,6 +89,7 @@ const RankingContent = () => {
       }
     }
   }, [justUploaded, isUploadLoading, resetFilters, refreshData, processingStats]);
+  
   return <div className="space-y-6">
       
       
@@ -92,11 +99,6 @@ const RankingContent = () => {
           <AlertTitle>Erro ao carregar dados</AlertTitle>
           <AlertDescription>{fetchError}</AlertDescription>
         </Alert>}
-      
-      {/* Reset filters button */}
-      <div className="flex justify-end">
-        
-      </div>
       
       {/* Upload progress indicator */}
       {isUploadLoading && uploadProgress > 0 && <div className="space-y-2">
@@ -116,9 +118,29 @@ const RankingContent = () => {
           <Progress value={chartLoadingProgress} className="h-2" />
         </div>}
       
-      <UploadSection onUpload={handleUploadWithReset} lastUpload={lastUpload} onDelete={handleDeleteUpload} isLoading={isLoading} onRefreshCharts={refreshData} uploads={uploads} uploadProgress={uploadProgress} processingStats={processingStats} />
+      <UploadSection 
+        onUpload={handleUploadWithReset} 
+        lastUpload={lastUpload} 
+        onDelete={handleDeleteUpload} 
+        isLoading={isLoading} 
+        onRefreshCharts={refreshData} 
+        uploads={uploads} 
+        uploadProgress={uploadProgress} 
+        processingStats={processingStats}
+        onOpenFilters={() => setFilterDialogOpen(true)}
+        isFiltersModified={isModified}
+      />
       
-      <FilterSection filters={filters} onFiltersChange={handleFiltersChange} chartVisibility={chartVisibility} onChartVisibilityChange={handleChartVisibilityChange} />
+      {/* Filter dialog */}
+      <FilterDialog 
+        open={filterDialogOpen}
+        onOpenChange={setFilterDialogOpen}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        chartVisibility={chartVisibility}
+        onChartVisibilityChange={handleChartVisibilityChange}
+        onResetFilters={resetFilters}
+      />
       
       <ChartsSection chartData={chartData} isLoading={isLoading} chartVisibility={chartVisibility} />
       
