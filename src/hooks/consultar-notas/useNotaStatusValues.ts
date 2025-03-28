@@ -1,43 +1,58 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useNotaStatusValues = () => {
-  const [statusValues, setStatusValues] = useState<string[]>(['pendente', 'aprovada', 'rejeitada']);
-  const [loading, setLoading] = useState(true);
+interface UseNotaStatusValuesResult {
+  statusValues: string[];
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export const useNotaStatusValues = (): UseNotaStatusValuesResult => {
+  const [statusValues, setStatusValues] = useState<string[]>([
+    'pendente', 
+    'aprovado', 
+    'rejeitado', 
+    'excluido', 
+    'concluido'
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchStatusValues = async () => {
+      setIsLoading(true);
       try {
-        setLoading(true);
-        
-        // Try to get a list of notes with different statuses
         const { data, error } = await supabase
           .from('notas_oficiais')
           .select('status')
-          .limit(100);
-        
+          .limit(1000);
+
         if (error) throw error;
-        
-        // Extract unique status values
+
         if (data && data.length > 0) {
+          // Extract unique status values
           const uniqueStatuses = [...new Set(data.map(item => item.status))];
+          
+          // Only update if we got statuses back
           if (uniqueStatuses.length > 0) {
             setStatusValues(uniqueStatuses);
           }
-          // If no statuses found, we'll keep the default values
         }
       } catch (err: any) {
         console.error('Error fetching nota status values:', err);
         setError(err);
-        // Keep the default values we set in the state initialization
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchStatusValues();
   }, []);
 
-  return { statusValues, loading, error };
+  return {
+    statusValues,
+    isLoading,
+    error
+  };
 };

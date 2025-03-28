@@ -28,10 +28,10 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         if (demandaError) throw demandaError;
       }
 
-      // Atualizar status para 'excluida' em vez de excluir o registro
+      // Atualizar status para 'excluido' em vez de 'excluida'
       const { error } = await supabase
         .from('notas_oficiais')
-        .update({ status: 'excluida' })
+        .update({ status: 'excluido' })
         .eq('id', notaId);
 
       if (error) throw error;

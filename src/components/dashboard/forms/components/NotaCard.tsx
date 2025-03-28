@@ -28,18 +28,17 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   // Garantir que temos nome do autor mesmo quando opcional
   const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
   const areaNome = nota.supervisao_tecnica?.descricao || 'Área não informada';
-  // Use either criado_em or created_at, whichever is available
-  const dataCreated = nota.criado_em || nota.created_at;
+  // Use criado_em consistently
+  const dataCreated = nota.criado_em;
 
-  // Mapear status para descrições mais amigáveis
+  // Mapear status para descrições mais amigáveis e para os valores esperados pelo RLS
   const getStatusDescription = (status: string) => {
     const statusMap: Record<string, string> = {
       'pendente': 'Aguardando aprovação',
       'aprovado': 'Aprovada',
-      'concluida': 'Concluída',
-      'concluida_editada': 'Editada após aprovação',
-      'concluida_recusada': 'Recusada',
-      'rejeitado': 'Recusada'
+      'concluido': 'Concluída',
+      'concluido_editado': 'Editada após aprovação',
+      'rejeitado': 'Recusada',
     };
     return statusMap[status] || status;
   };
@@ -49,10 +48,9 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
     const statusColorMap: Record<string, string> = {
       'pendente': 'bg-blue-50 text-blue-700',
       'aprovado': 'bg-green-50 text-green-700',
-      'concluida': 'bg-green-50 text-green-700',
-      'concluida_editada': 'bg-purple-50 text-purple-700',
-      'concluida_recusada': 'bg-red-50 text-red-700',
-      'rejeitado': 'bg-red-50 text-red-700'
+      'concluido': 'bg-green-50 text-green-700',
+      'concluido_editado': 'bg-purple-50 text-purple-700',
+      'rejeitado': 'bg-red-50 text-red-700',
     };
     return statusColorMap[status] || 'bg-gray-50 text-gray-700';
   };

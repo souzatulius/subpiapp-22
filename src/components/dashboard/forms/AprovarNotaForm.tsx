@@ -127,8 +127,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
-      // Find the correct status value for approval from valid options
-      const approveStatus = statusValues.find(s => s === 'aprovada') || 'aprovada';
+      // Using 'aprovado' instead of 'aprovada' to match RLS policy expectations
+      const approveStatus = 'aprovado';
       console.log('Aprovando nota com status:', approveStatus);
       
       const { error } = await supabase
@@ -169,8 +169,8 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
-      // Find the correct status value for rejection from valid options
-      const rejectStatus = statusValues.find(s => s === 'rejeitada') || 'rejeitada';
+      // Using 'rejeitado' instead of 'rejeitada' to match RLS policy expectations
+      const rejectStatus = 'rejeitado';
       
       const { error } = await supabase
         .from('notas_oficiais')
