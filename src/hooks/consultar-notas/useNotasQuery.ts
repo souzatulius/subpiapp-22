@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -95,9 +96,16 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
           *,
           autor:autor_id (id, nome_completo),
           aprovador:aprovador_id (id, nome_completo),
-          supervisao_tecnica:supervisao_tecnica_id (id, descricao),
-          demanda:demanda_id (id, titulo),
-          problema:problema_id (id, descricao)
+          problema:problema_id (
+            id, 
+            descricao,
+            coordenacao_id,
+            coordenacao:coordenacao_id (
+              id,
+              descricao
+            )
+          ),
+          demanda:demanda_id (id, titulo)
         `)
         .order('criado_em', { ascending: false });
 
@@ -115,21 +123,22 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
         throw error;
       }
 
+      // Type assertion to ensure we get the right format
       const formattedData = (data || []).map(nota => {
+        // Create the nota with proper typing
         return {
           ...nota,
-          autor: nota.autor || null,
+          autor: nota.autor || { id: '', nome_completo: 'Desconhecido' },
           aprovador: nota.aprovador || null,
-          supervisao_tecnica: nota.supervisao_tecnica || null,
-          demanda: nota.demanda || null,
           problema: nota.problema || null,
+          demanda: nota.demanda || null,
           area_coordenacao: {
-            id: nota.supervisao_tecnica_id || '',
-            descricao: nota.supervisao_tecnica?.descricao || 'Não informada'
+            id: nota.problema?.coordenacao_id || '',
+            descricao: nota.problema?.coordenacao?.descricao || 'Não informada'
           },
           criado_em: nota.criado_em || new Date().toISOString(),
           atualizado_em: nota.atualizado_em,
-          demanda_id: nota.demanda_id || nota.demanda?.id
+          demanda_id: nota.demanda_id || (nota.demanda?.id as string)
         } as NotaOficial;
       });
 
@@ -285,7 +294,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
       author: nota.autor?.nome_completo || "Usuário Desconhecido",
       approver: nota.aprovador?.nome_completo || "Não aprovado",
       problem: nota.problema?.descricao || "Não especificado",
-      supervision: nota.supervisao_tecnica?.descricao || "Não especificada",
+      coordination: nota.problema?.coordenacao?.descricao || "Não informada",
       demand: nota.demanda?.titulo || "Não associada a demanda",
       history: formatNotaHistory(nota)
     };

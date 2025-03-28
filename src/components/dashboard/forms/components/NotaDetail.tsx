@@ -6,6 +6,7 @@ import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText, Edit,
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotaOficial } from '@/types/nota';
+import DemandHistorySection from './DemandHistorySection';
 
 interface NotaDetailProps {
   nota: NotaOficial;
@@ -84,11 +85,17 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
               </div>
             </Card>
             
-            {temDemanda && (
+            {temDemanda ? (
+              <DemandHistorySection 
+                demandaId={nota.demanda_id || nota.demanda?.id || ''} 
+                notaId={nota.id}
+                notaCreatedAt={nota.criado_em}
+              />
+            ) : (
               <Card className="p-4 bg-gray-50 border border-gray-200">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Vinculada à Demanda</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Não vinculada à demanda</h4>
                 <p className="text-sm text-gray-600">
-                  Esta nota oficial foi criada a partir de uma demanda da imprensa.
+                  Esta nota oficial não está associada a uma demanda específica.
                 </p>
               </Card>
             )}
