@@ -17,6 +17,11 @@ interface WelcomeCardProps {
   statUnreadCount?: number;
   statOnClick?: () => void;
   color?: string;
+  showButton?: boolean;
+  buttonText?: string;
+  buttonIcon?: React.ReactNode;
+  buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
+  onButtonClick?: () => void;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -31,7 +36,12 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   statHighlight = true,
   statUnreadCount = 0,
   statOnClick,
-  color = "bg-gradient-to-r from-blue-500 to-blue-700"
+  color = "bg-gradient-to-r from-blue-500 to-blue-700",
+  showButton = false,
+  buttonText = "Filtros e Configurações",
+  buttonIcon,
+  buttonVariant = "outline",
+  onButtonClick
 }) => {
   return (
     <Card className={`${color} text-white shadow-lg overflow-hidden`}>
@@ -46,8 +56,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               {description}
             </p>
           </div>
-          {statTitle && (
-            <div className="flex space-x-4">
+          <div className="flex space-x-4 w-full md:w-auto">
+            {statTitle && !showButton && (
               <StatCard 
                 title={statTitle} 
                 value={statValue || 0} 
@@ -58,8 +68,17 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                 unreadCount={statUnreadCount}
                 onClick={statOnClick}
               />
-            </div>
-          )}
+            )}
+            {showButton && (
+              <StatCard 
+                showButton={true}
+                buttonText={buttonText}
+                buttonIcon={buttonIcon}
+                buttonVariant={buttonVariant}
+                onButtonClick={onButtonClick}
+              />
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
