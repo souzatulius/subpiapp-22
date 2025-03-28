@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { 
   Users, Briefcase, Building, Layers, 
   Globe, AlertTriangle, Image, FileText, MapPin,
-  MessageSquare, Bell, Settings, Shield, UserCheck
+  MessageSquare, Bell, Settings, Shield, UserCheck,
+  LayoutDashboard
 } from 'lucide-react';
 import MiniBarChart from '../components/MiniBarChart';
 import MiniDonutChart from '../components/MiniDonutChart';
@@ -93,6 +93,14 @@ export const organizationalCards = [
     count: 24,
     category: "Gestão Organizacional",
     chart: <MiniBarChart data={getServicesByAreaData()} color="#2563eb" />
+  },
+  {
+    title: "Gerenciamento de Dashboards",
+    description: "Configure os dashboards padrão para cada coordenação.",
+    icon: <LayoutDashboard className="h-5 w-5" />,
+    link: "/settings/dashboard-management",
+    color: "bg-blue-600",
+    category: "Gestão Organizacional"
   }
 ];
 

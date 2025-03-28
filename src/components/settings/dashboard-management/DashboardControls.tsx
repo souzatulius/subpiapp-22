@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -10,6 +10,14 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface Coordination {
+  id: string;
+  descricao: string;
+  sigla?: string;
+}
 
 interface DashboardControlsProps {
   selectedDepartment: string;
@@ -24,6 +32,37 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
   selectedViewType,
   setSelectedViewType
 }) => {
+  const [coordinations, setCoordinations] = useState<Coordination[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    async function fetchCoordinations() {
+      try {
+        setIsLoading(true);
+        
+        // Fetch coordinations from areas_coordenacao where is_supervision is false
+        const { data, error } = await supabase
+          .from('areas_coordenacao')
+          .select('id, descricao, sigla')
+          .eq('is_supervision', false)
+          .order('descricao');
+        
+        if (error) {
+          console.error('Error fetching coordinations:', error);
+          return;
+        }
+        
+        setCoordinations(data || []);
+      } catch (error) {
+        console.error('Failed to fetch coordinations:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchCoordinations();
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -33,22 +72,30 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <Label>Visualizar como</Label>
-          <Select 
-            value={selectedDepartment} 
-            onValueChange={(value) => setSelectedDepartment(value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione uma coordenação" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">Padrão (Todos)</SelectItem>
-              <SelectItem value="comunicacao">Coordenação de Comunicação</SelectItem>
-              <SelectItem value="zeladoria">Coordenação de Zeladoria</SelectItem>
-              <SelectItem value="tecnologia">Coordenação de Tecnologia</SelectItem>
-              <SelectItem value="administracao">Coordenação Administrativa</SelectItem>
-              <SelectItem value="financeira">Coordenação Financeira</SelectItem>
-            </SelectContent>
-          </Select>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <Select 
+              value={selectedDepartment} 
+              onValueChange={(value) => setSelectedDepartment(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione uma coordenação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Padrão (Todos)</SelectItem>
+                {coordinations.map((coordination) => (
+                  <SelectItem key={coordination.id} value={coordination.id}>
+                    {coordination.descricao}
+                    {coordination.sigla ? ` (${coordination.sigla})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <div className="space-y-3">

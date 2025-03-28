@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardPreview from './DashboardPreview';
 import DashboardControls from './DashboardControls';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const DashboardManagementContent: React.FC = () => {
   const {
@@ -19,6 +19,37 @@ const DashboardManagementContent: React.FC = () => {
     isSaving,
     saveDefaultDashboard,
   } = useDefaultDashboardConfig();
+  
+  const [departmentName, setDepartmentName] = useState('');
+  
+  useEffect(() => {
+    const fetchDepartmentName = async () => {
+      if (selectedDepartment && selectedDepartment !== 'default') {
+        try {
+          const { data, error } = await supabase
+            .from('areas_coordenacao')
+            .select('descricao')
+            .eq('id', selectedDepartment)
+            .single();
+          
+          if (error) {
+            console.error('Error fetching department name:', error);
+            return;
+          }
+          
+          if (data) {
+            setDepartmentName(data.descricao);
+          }
+        } catch (error) {
+          console.error('Failed to fetch department name:', error);
+        }
+      } else {
+        setDepartmentName(selectedDepartment === 'default' ? 'Padrão (Todos)' : '');
+      }
+    };
+    
+    fetchDepartmentName();
+  }, [selectedDepartment]);
 
   return (
     <div className="space-y-8">
@@ -36,7 +67,7 @@ const DashboardManagementContent: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-medium">
               Visualização: {selectedViewType === 'dashboard' ? 'Dashboard' : 'Comunicação'}
-              {selectedDepartment !== 'default' ? ` - ${selectedDepartment}` : ''}
+              {departmentName ? ` - ${departmentName}` : ''}
             </h2>
             <Button 
               onClick={saveDefaultDashboard} 

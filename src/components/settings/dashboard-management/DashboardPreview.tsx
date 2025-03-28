@@ -20,14 +20,15 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
     handleAddNewCard,
     handleEditCard,
     handleSaveCard,
-    specialCardsData
+    specialCardsData,
+    departmentName
   } = useDefaultDashboardState(department);
 
   if (dashboardType === 'communication') {
     return (
       <div className="bg-gray-50 p-6">
         <h3 className="text-lg font-medium mb-4 text-gray-700">
-          Visualização da página de Comunicação {department !== 'default' ? `- ${department}` : ''}
+          Visualização da página de Comunicação {departmentName ? `- ${departmentName}` : ''}
         </h3>
         <div className="border rounded-lg overflow-hidden">
           <ComunicacaoDashboard isPreview={true} department={department} />
@@ -39,7 +40,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
   return (
     <div className="bg-gray-50 p-6">
       <h3 className="text-lg font-medium mb-4 text-gray-700">
-        Visualização do Dashboard {department !== 'default' ? `- ${department}` : ''}
+        Visualização do Dashboard {departmentName ? `- ${departmentName}` : ''}
       </h3>
       
       <CardGrid
