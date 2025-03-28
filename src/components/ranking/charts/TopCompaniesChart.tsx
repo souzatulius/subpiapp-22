@@ -9,7 +9,10 @@ interface TopCompaniesChartProps {
 }
 
 const TopCompaniesChart: React.FC<TopCompaniesChartProps> = ({ data, isLoading }) => {
-  const totalOrders = isLoading ? 0 : data?.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+  // Add null checks to avoid "Cannot read properties of undefined" error
+  const totalOrders = isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data 
+    ? 0 
+    : data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
   
   return (
     <ChartCard
@@ -17,7 +20,7 @@ const TopCompaniesChart: React.FC<TopCompaniesChartProps> = ({ data, isLoading }
       value={isLoading ? '' : `Total: ${totalOrders}`}
       isLoading={isLoading}
     >
-      {!isLoading && data && (
+      {!isLoading && data && data.datasets && data.datasets[0] && (
         <Bar 
           data={data} 
           options={{

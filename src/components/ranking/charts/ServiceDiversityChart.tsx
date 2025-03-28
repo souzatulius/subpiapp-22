@@ -9,39 +9,48 @@ interface ServiceDiversityChartProps {
 }
 
 const ServiceDiversityChart: React.FC<ServiceDiversityChartProps> = ({ data, isLoading }) => {
-  const totalServices = isLoading ? '' : 
-    `Total: ${data.datasets[0].data.reduce((a: number, b: number) => a + b, 0)}`;
+  // Add null checks to avoid "Cannot read properties of undefined" error
+  const totalServices = isLoading || !data || !data.datasets || !data.datasets[0] || !data.datasets[0].data
+    ? 0 
+    : data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
   
   return (
     <ChartCard
-      title="Diversidade de serviços por departamento"
-      value={totalServices}
+      title="Diversidade de Serviços por Região"
+      value={isLoading ? '' : `Índice médio: ${(totalServices / (data.labels?.length || 1)).toFixed(1)}`}
       isLoading={isLoading}
     >
-      {!isLoading && (
-        <Bar
+      {!isLoading && data && data.datasets && data.datasets[0] && (
+        <Bar 
           data={data} 
           options={{
             maintainAspectRatio: false,
             plugins: {
               legend: {
-                display: false,
+                position: 'bottom' as const,
               },
               tooltip: {
                 callbacks: {
                   label: function(context) {
-                    return `Tipos de serviço: ${context.parsed.y}`;
+                    const label = context.dataset.label || '';
+                    return `${label}: ${context.parsed.y}`;
                   }
                 }
               }
             },
             scales: {
+              x: {
+                ticks: {
+                  maxRotation: 45,
+                  minRotation: 45
+                }
+              },
               y: {
                 beginAtZero: true,
                 ticks: {
-                  precision: 0
+                  precision: 1
                 }
-              },
+              }
             },
           }}
         />
