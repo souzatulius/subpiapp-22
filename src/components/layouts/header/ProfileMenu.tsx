@@ -14,10 +14,11 @@ import { useUserProfile } from './useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
+import { ProfileData } from '@/components/profile/types';
 
 const ProfileMenu: React.FC = () => {
   const navigate = useNavigate();
-  const { userProfile, isLoading } = useUserProfile();
+  const { userProfile, isLoading, refreshUserProfile } = useUserProfile();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isAccountSettingsModalOpen, setIsAccountSettingsModalOpen] = useState(false);
@@ -37,6 +38,13 @@ const ProfileMenu: React.FC = () => {
   const goToProfile = () => {
     navigate('/settings');
   };
+
+  // Convert userProfile to ProfileData format
+  const profileData: ProfileData | null = userProfile ? {
+    nome_completo: userProfile.nome_completo || '',
+    whatsapp: userProfile.whatsapp || '',
+    aniversario: userProfile.aniversario
+  } : null;
 
   if (isLoading) {
     return <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />;
@@ -110,6 +118,8 @@ const ProfileMenu: React.FC = () => {
       <EditProfileModal 
         isOpen={isEditProfileModalOpen} 
         onClose={() => setIsEditProfileModalOpen(false)} 
+        userData={profileData}
+        refreshUserData={refreshUserProfile}
       />
       
       <AccountSettingsModal

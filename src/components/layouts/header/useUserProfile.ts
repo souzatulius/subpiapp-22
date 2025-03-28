@@ -1,120 +1,77 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { UserProfile } from '@/types/common';
 
 export const useUserProfile = () => {
   const { user } = useAuth();
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    nome_completo: '',
-  });
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const fetchUserProfile = async () => {
-    if (!user?.id) return;
-    
+  const fetchUserProfile = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      // Fetch user profile
-      const { data: userData, error: userError } = await supabase
+      
+      const { data, error } = await supabase
         .from('usuarios')
         .select(`
+          id,
           nome_completo,
+          email,
           cargo_id,
-          supervisao_tecnica_id,
           coordenacao_id,
-          foto_perfil_url,
+          supervisao_tecnica_id,
           whatsapp,
           aniversario,
-          email
+          foto_perfil_url,
+          cargos:cargo_id (descricao),
+          coordenacao:coordenacao_id (descricao),
+          supervisao_tecnica:supervisao_tecnica_id (descricao, coordenacao_id)
         `)
         .eq('id', user.id)
         .single();
       
-      if (userError) throw userError;
+      if (error) throw error;
       
-      // Fetch position and area separately to avoid relation errors
-      let cargoInfo = { descricao: '' };
-      if (userData.cargo_id) {
-        const { data: cargoData, error: cargoError } = await supabase
-          .from('cargos')
-          .select('descricao')
-          .eq('id', userData.cargo_id)
-          .single();
-          
-        if (!cargoError && cargoData) {
-          cargoInfo = { descricao: cargoData.descricao };
-        }
-      }
-      
-      let supervisaoTecnicaInfo = { 
-        descricao: '',
-        coordenacao_id: ''
+      // Transform the data to match the UserProfile interface
+      const transformedData: UserProfile = {
+        id: data.id,
+        nome_completo: data.nome_completo,
+        email: data.email,
+        cargo_id: data.cargo_id,
+        coordenacao_id: data.coordenacao_id,
+        supervisao_tecnica_id: data.supervisao_tecnica_id,
+        whatsapp: data.whatsapp,
+        aniversario: data.aniversario,
+        foto_perfil_url: data.foto_perfil_url,
+        cargo: data.cargos?.descricao,
+        coordenacao: data.coordenacao?.descricao,
+        supervisao_tecnica: data.supervisao_tecnica?.descricao,
       };
       
-      if (userData.supervisao_tecnica_id) {
-        const { data: supervisaoData, error: supervisaoError } = await supabase
-          .from('supervisoes_tecnicas')
-          .select('descricao, coordenacao_id')
-          .eq('id', userData.supervisao_tecnica_id)
-          .single();
-          
-        if (!supervisaoError && supervisaoData) {
-          supervisaoTecnicaInfo = { 
-            descricao: supervisaoData.descricao,
-            coordenacao_id: supervisaoData.coordenacao_id || ''
-          };
-        }
-      }
-      
-      // Fetch coordination
-      let coordenacaoInfo = { descricao: '' };
-      if (userData.coordenacao_id) {
-        const { data: coordenacaoData, error: coordenacaoError } = await supabase
-          .from('coordenacoes')
-          .select('descricao')
-          .eq('id', userData.coordenacao_id)
-          .single();
-          
-        if (!coordenacaoError && coordenacaoData) {
-          coordenacaoInfo = { descricao: coordenacaoData.descricao };
-        }
-      }
-      
-      setUserProfile({
-        id: user.id,
-        nome_completo: userData.nome_completo,
-        cargo: cargoInfo.descricao,
-        supervisao_tecnica: supervisaoTecnicaInfo.descricao,
-        coordenacao: coordenacaoInfo.descricao,
-        foto_perfil_url: userData.foto_perfil_url,
-        avatar_url: userData.foto_perfil_url, // Adicionando avatar_url como alias
-        whatsapp: userData.whatsapp,
-        aniversario: userData.aniversario,
-        email: userData.email,
-        cargo_id: userData.cargo_id,
-        supervisao_tecnica_id: userData.supervisao_tecnica_id,
-        coordenacao_id: userData.coordenacao_id,
-        cargos: cargoInfo,
-        supervisao_tecnica_info: supervisaoTecnicaInfo
-      });
-    } catch (error) {
-      console.error('Erro ao buscar perfil do usuário:', error);
-      toast({
-        title: "Erro ao carregar perfil",
-        description: "Não foi possível carregar os dados do perfil.",
-        variant: "destructive"
-      });
+      setUserProfile(transformedData);
+    } catch (err) {
+      console.error('Error fetching user profile:', err);
+      setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchUserProfile();
-  }, [user]);
+  }, [fetchUserProfile]);
 
-  return { userProfile, isLoading, fetchUserProfile };
+  const refreshUserProfile = useCallback(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+
+  return { userProfile, isLoading, error, refreshUserProfile };
 };

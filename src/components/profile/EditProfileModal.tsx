@@ -24,15 +24,15 @@ import { ProfileData } from './types';
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userData: ProfileData | null;
-  refreshUserData: () => void;
+  userData?: ProfileData | null;
+  refreshUserData?: () => void;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,
   userData,
-  refreshUserData
+  refreshUserData = () => {} // Provide default empty function
 }) => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,7 +106,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         description: "Suas informações foram atualizadas com sucesso."
       });
       
-      refreshUserData();
+      if (refreshUserData) refreshUserData();
       onClose();
       
     } catch (error: any) {
@@ -160,13 +160,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           <div className="space-y-2">
             <Label>Data de aniversário</Label>
             <DatePicker
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              mode="single"
+              date={selectedDate}
+              setDate={setSelectedDate}
               locale={ptBR}
-              captionLayout="dropdown-buttons"
-              fromYear={1940}
-              toYear={2030}
+              className="w-full"
             />
           </div>
           
