@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useProblemsData, useProblemOperations } from '@/hooks/problems';
 import { Problem } from '@/types/problem';
-import { SupervisaoTecnica } from '@/types/common';
 import DataTable from './data-table/DataTable';
 import ProblemForm from './problems/ProblemForm';
 import ProblemEditDialog from './problems/ProblemEditDialog';
@@ -38,7 +37,7 @@ const Problems = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
+  const handleEdit = async (data: { descricao: string; coordenacao_id: string; icone?: string }) => {
     if (!editingProblem) return Promise.reject(new Error('Nenhum problema selecionado'));
     
     try {
@@ -51,7 +50,7 @@ const Problems = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
+  const handleAdd = async (data: { descricao: string; coordenacao_id: string; icone?: string }) => {
     try {
       await addProblem(data);
       closeAddForm();
@@ -78,9 +77,9 @@ const Problems = () => {
       header: 'Descrição',
     },
     {
-      key: 'supervisao_tecnica',
-      header: 'Supervisão Técnica',
-      render: (row: Problem) => row.supervisao_tecnica?.descricao || '-',
+      key: 'coordenacao',
+      header: 'Coordenação',
+      render: (row: Problem) => row.coordenacao?.descricao || '-',
     }
   ];
 
@@ -89,7 +88,7 @@ const Problems = () => {
       <ProblemForm
         onSubmit={handleAdd}
         onCancel={onClose}
-        areas={areas as SupervisaoTecnica[]}
+        areas={areas}
         isSubmitting={isSubmitting}
       />
     );
@@ -113,7 +112,7 @@ const Problems = () => {
         isOpen={isEditFormOpen}
         onClose={closeEditForm}
         problem={editingProblem}
-        areas={areas as SupervisaoTecnica[]}
+        areas={areas}
         onSubmit={handleEdit}
         isSubmitting={isSubmitting}
       />

@@ -303,6 +303,7 @@ export type Database = {
           atualizado_em: string
           autor_id: string
           bairro_id: string | null
+          coordenacao_id: string | null
           detalhes_solicitacao: string | null
           email_solicitante: string | null
           endereco: string | null
@@ -329,6 +330,7 @@ export type Database = {
           atualizado_em?: string
           autor_id: string
           bairro_id?: string | null
+          coordenacao_id?: string | null
           detalhes_solicitacao?: string | null
           email_solicitante?: string | null
           endereco?: string | null
@@ -355,6 +357,7 @@ export type Database = {
           atualizado_em?: string
           autor_id?: string
           bairro_id?: string | null
+          coordenacao_id?: string | null
           detalhes_solicitacao?: string | null
           email_solicitante?: string | null
           endereco?: string | null
@@ -402,6 +405,13 @@ export type Database = {
             columns: ["bairro_id"]
             isOneToOne: false
             referencedRelation: "bairros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "coordenacoes"
             referencedColumns: ["id"]
           },
           {
@@ -1003,6 +1013,7 @@ export type Database = {
       problemas: {
         Row: {
           atualizado_em: string | null
+          coordenacao_id: string | null
           criado_em: string
           descricao: string
           icone: string | null
@@ -1011,6 +1022,7 @@ export type Database = {
         }
         Insert: {
           atualizado_em?: string | null
+          coordenacao_id?: string | null
           criado_em?: string
           descricao: string
           icone?: string | null
@@ -1019,6 +1031,7 @@ export type Database = {
         }
         Update: {
           atualizado_em?: string | null
+          coordenacao_id?: string | null
           criado_em?: string
           descricao?: string
           icone?: string | null
@@ -1031,6 +1044,13 @@ export type Database = {
             columns: ["supervisao_tecnica_id"]
             isOneToOne: false
             referencedRelation: "areas_coordenacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "problemas_coordenacao_id_fkey"
+            columns: ["coordenacao_id"]
+            isOneToOne: false
+            referencedRelation: "coordenacoes"
             referencedColumns: ["id"]
           },
         ]
@@ -1197,21 +1217,31 @@ export type Database = {
           criado_em: string
           descricao: string
           id: string
+          problema_id: string | null
           supervisao_tecnica_id: string
         }
         Insert: {
           criado_em?: string
           descricao: string
           id?: string
+          problema_id?: string | null
           supervisao_tecnica_id: string
         }
         Update: {
           criado_em?: string
           descricao?: string
           id?: string
+          problema_id?: string | null
           supervisao_tecnica_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "servicos_problema_id_fkey"
+            columns: ["problema_id"]
+            isOneToOne: false
+            referencedRelation: "problemas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "servicos_supervisao_tecnica_id_fkey"
             columns: ["supervisao_tecnica_id"]

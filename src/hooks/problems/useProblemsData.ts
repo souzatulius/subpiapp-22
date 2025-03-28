@@ -13,24 +13,25 @@ export const useProblemsData = () => {
   } = useQuery({
     queryKey: ['problems'],
     queryFn: async () => {
-      // Fetch problems with supervisao_tecnica information
+      // Fetch problems with coordenacao information
       const { data, error } = await supabase
         .from('problemas')
         .select(`
           id,
           descricao,
           supervisao_tecnica_id,
+          coordenacao_id,
           criado_em,
           atualizado_em,
           icone,
           supervisao_tecnica:supervisao_tecnica_id (
             id,
             descricao,
-            coordenacao_id,
-            coordenacao:coordenacao_id (
-              id,
-              descricao
-            )
+            coordenacao_id
+          ),
+          coordenacao:coordenacao_id (
+            id,
+            descricao
           )
         `)
         .order('descricao');
@@ -42,7 +43,9 @@ export const useProblemsData = () => {
         id: item.id,
         descricao: item.descricao,
         supervisao_tecnica_id: item.supervisao_tecnica_id,
+        coordenacao_id: item.coordenacao_id,
         supervisao_tecnica: item.supervisao_tecnica,
+        coordenacao: item.coordenacao,
         icone: item.icone || undefined,
         criado_em: item.criado_em,
         atualizado_em: item.atualizado_em
@@ -60,19 +63,14 @@ export const useProblemsData = () => {
     isLoading: areasLoading,
     error: areasError
   } = useQuery({
-    queryKey: ['areas'],
+    queryKey: ['coordenacoes'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('supervisoes_tecnicas')
+        .from('coordenacoes')
         .select(`
           id,
           descricao,
-          sigla,
-          coordenacao_id,
-          coordenacao:coordenacao_id (
-            id, 
-            descricao
-          )
+          sigla
         `)
         .order('descricao');
 

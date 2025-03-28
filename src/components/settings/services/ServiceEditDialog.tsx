@@ -1,130 +1,141 @@
 
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Service, Area } from '@/hooks/services/types';
-import { serviceSchema } from '@/types/service';
+import { Service } from '@/hooks/services/types';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Problem {
+  id: string;
+  descricao: string;
+}
 
 interface ServiceEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   service: Service | null;
-  areas: Area[];
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; problema_id: string }) => Promise<void>;
   isSubmitting: boolean;
 }
 
-const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
-  isOpen,
-  onClose,
-  service,
-  areas,
-  onSubmit,
-  isSubmitting
-}) => {
-  const form = useForm<z.infer<typeof serviceSchema>>({
-    resolver: zodResolver(serviceSchema),
+const ServiceEditDialog = ({ 
+  isOpen, 
+  onClose, 
+  service, 
+  onSubmit, 
+  isSubmitting 
+}: ServiceEditDialogProps) => {
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm({
     defaultValues: {
-      descricao: service?.descricao || '',
-      supervisao_tecnica_id: service?.supervisao_tecnica_id || ''
+      descricao: '',
+      problema_id: ''
     }
   });
 
+  // Reset form when service changes
   useEffect(() => {
     if (service) {
-      form.reset({
-        descricao: service.descricao || '',
-        supervisao_tecnica_id: service.supervisao_tecnica_id || ''
+      reset({
+        descricao: service.descricao,
+        problema_id: service.problema_id
       });
     }
-  }, [service, form]);
+  }, [service, reset]);
 
-  const handleSubmit = async (data: z.infer<typeof serviceSchema>) => {
-    // Ensure both required fields are non-empty strings before submitting
-    if (data.descricao && data.supervisao_tecnica_id) {
-      await onSubmit({
-        descricao: data.descricao,
-        supervisao_tecnica_id: data.supervisao_tecnica_id
-      });
-      onClose();
-    }
+  // Fetch problems
+  useEffect(() => {
+    const fetchProblems = async () => {
+      if (!isOpen) return;
+      
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('problemas')
+          .select('id, descricao')
+          .order('descricao');
+
+        if (error) throw error;
+        setProblems(data || []);
+      } catch (error) {
+        console.error('Error fetching problems:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProblems();
+  }, [isOpen]);
+
+  const handleFormSubmit = async (data: { descricao: string; problema_id: string }) => {
+    await onSubmit(data);
+    onClose();
   };
-
-  // Filter out areas with empty IDs to prevent Radix UI Select error
-  const validAreas = areas.filter(area => area.id && area.id.trim() !== '');
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px] rounded-xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Editar Serviço</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="descricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição do Serviço</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite a descrição do serviço" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="descricao">Descrição</Label>
+            <Input
+              id="descricao"
+              placeholder="Digite a descrição do serviço"
+              {...register('descricao', { required: 'Descrição é obrigatória' })}
+              className={errors.descricao ? 'border-red-500' : ''}
             />
+            {errors.descricao && (
+              <p className="text-sm text-red-500">{errors.descricao.message}</p>
+            )}
+          </div>
 
-            <FormField
-              control={form.control}
-              name="supervisao_tecnica_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Supervisão Técnica</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || "select-area"}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {validAreas.length === 0 ? (
-                        <SelectItem value="no-areas">
-                          Nenhuma área disponível
-                        </SelectItem>
-                      ) : (
-                        validAreas.map((area) => (
-                          <SelectItem key={area.id} value={area.id}>
-                            {area.descricao}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="space-y-2">
+            <Label htmlFor="problema_id">Problema/Tema</Label>
+            <Select
+              onValueChange={(value) => setValue('problema_id', value)}
+              defaultValue={service?.problema_id}
+            >
+              <SelectTrigger id="problema_id" className={errors.problema_id ? 'border-red-500' : ''}>
+                <SelectValue placeholder={isLoading ? 'Carregando...' : 'Selecione um problema/tema'} />
+              </SelectTrigger>
+              <SelectContent>
+                {problems.map((problem) => (
+                  <SelectItem key={problem.id} value={problem.id}>
+                    {problem.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.problema_id && (
+              <p className="text-sm text-red-500">{errors.problema_id.message}</p>
+            )}
+          </div>
 
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Salvando...' : 'Salvar'}
-              </Button>
-            </div>
-          </form>
-        </Form>
+          <DialogFooter className="pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isSubmitting || isLoading}>
+              {isSubmitting ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

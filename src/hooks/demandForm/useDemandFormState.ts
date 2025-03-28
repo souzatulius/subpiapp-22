@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +30,7 @@ export const useDemandFormState = (
     nao_sabe_servico: false,
     tem_protocolo_156: false,
     numero_protocolo_156: '',
+    coordenacao_id: ''
   };
 
   // Restore form state from localStorage on component mount
@@ -71,6 +71,7 @@ export const useDemandFormState = (
     }
   }, [formData, serviceSearch, selectedDistrito, activeStep]);
 
+  // Update service fetching based on problema_id
   useEffect(() => {
     const fetchServicos = async () => {
       if (!formData.problema_id) {
@@ -80,17 +81,10 @@ export const useDemandFormState = (
       }
 
       try {
-        const selectedProblem = problemas.find(p => p.id === formData.problema_id);
-        if (!selectedProblem || !selectedProblem.supervisao_tecnica_id) {
-          setServicos([]);
-          setFilteredServicos([]);
-          return;
-        }
-
         const { data, error } = await supabase
           .from('servicos')
           .select('*')
-          .eq('supervisao_tecnica_id', selectedProblem.supervisao_tecnica_id);
+          .eq('problema_id', formData.problema_id);
 
         if (error) throw error;
         setServicos(data || []);
@@ -103,11 +97,22 @@ export const useDemandFormState = (
     };
 
     fetchServicos();
+  }, [formData.problema_id]);
+
+  // When problema_id changes, update the coordenacao_id in the form data
+  useEffect(() => {
+    if (formData.problema_id) {
+      const selectedProblem = problemas.find(p => p.id === formData.problema_id);
+      if (selectedProblem && selectedProblem.coordenacao_id) {
+        setFormData(prev => ({
+          ...prev,
+          coordenacao_id: selectedProblem.coordenacao_id
+        }));
+      }
+    }
   }, [formData.problema_id, problemas]);
 
-  // Update title suggestion based on selected values
   useEffect(() => {
-    // Only update title if problem, service, bairro, or address changes
     if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
       // Only auto-generate if title is empty or we're on step 3
       if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 3) {

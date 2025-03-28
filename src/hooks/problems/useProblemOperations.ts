@@ -1,139 +1,176 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { problemSchema } from './types';
 
-export const useProblemOperations = (refreshCallback: () => Promise<void>) => {
+export const useProblemOperations = (onSuccess: () => Promise<void>) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const addProblem = async (data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
-    if (!data.descricao || !data.supervisao_tecnica_id) {
-      toast({
-        title: "Erro",
-        description: "A descrição e a supervisão técnica são obrigatórias.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
+  
+  const addProblem = useCallback(async (problemData: { descricao: string; coordenacao_id: string; icone?: string }) => {
     try {
       setIsSubmitting(true);
       
-      const { error } = await supabase
+      // Validate data with zod schema
+      const validatedData = problemSchema.parse(problemData);
+      
+      const { data, error } = await supabase
         .from('problemas')
-        .insert({
-          descricao: data.descricao,
-          supervisao_tecnica_id: data.supervisao_tecnica_id,
-          icone: data.icone
-        });
-        
+        .insert(validatedData)
+        .select();
+      
       if (error) throw error;
       
       toast({
         title: "Problema adicionado",
-        description: "Problema adicionado com sucesso.",
+        description: "O problema foi adicionado com sucesso.",
       });
       
-      await refreshCallback();
-      return true;
+      await onSuccess();
+      
+      return data[0];
     } catch (error: any) {
-      console.error('Erro ao adicionar problema:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o problema: " + (error.message || "erro desconhecido"),
-        variant: "destructive",
-      });
-      return false;
+      console.error('Error adding problem:', error);
+      
+      // Check if it's a validation error from zod
+      if (error.errors) {
+        const errorMessage = error.errors.map((e: any) => e.message).join(', ');
+        toast({
+          title: "Erro de validação",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erro ao adicionar problema",
+          description: error.message || "Não foi possível adicionar o problema.",
+          variant: "destructive"
+        });
+      }
+      
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const updateProblem = async (id: string, data: { descricao: string; supervisao_tecnica_id: string; icone?: string }) => {
-    if (!id || !data.descricao || !data.supervisao_tecnica_id) {
-      toast({
-        title: "Erro",
-        description: "Dados inválidos para atualização do problema.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
+  }, [onSuccess]);
+  
+  const updateProblem = useCallback(async (id: string, problemData: { descricao: string; coordenacao_id: string; icone?: string }) => {
     try {
       setIsSubmitting(true);
       
+      // Validate data with zod schema
+      const validatedData = problemSchema.parse(problemData);
+      
       const { error } = await supabase
         .from('problemas')
-        .update({
-          descricao: data.descricao,
-          supervisao_tecnica_id: data.supervisao_tecnica_id,
-          icone: data.icone
-        })
+        .update(validatedData)
         .eq('id', id);
-        
+      
       if (error) throw error;
       
       toast({
         title: "Problema atualizado",
-        description: "Problema atualizado com sucesso.",
+        description: "O problema foi atualizado com sucesso.",
       });
       
-      await refreshCallback();
+      await onSuccess();
+      
       return true;
     } catch (error: any) {
-      console.error('Erro ao atualizar problema:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o problema: " + (error.message || "erro desconhecido"),
-        variant: "destructive",
-      });
-      return false;
+      console.error('Error updating problem:', error);
+      
+      // Check if it's a validation error from zod
+      if (error.errors) {
+        const errorMessage = error.errors.map((e: any) => e.message).join(', ');
+        toast({
+          title: "Erro de validação",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erro ao atualizar problema",
+          description: error.message || "Não foi possível atualizar o problema.",
+          variant: "destructive"
+        });
+      }
+      
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const deleteProblem = async (id: string) => {
-    if (!id) {
-      toast({
-        title: "Erro",
-        description: "ID do problema inválido.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
+  }, [onSuccess]);
+  
+  const deleteProblem = useCallback(async (id: string) => {
     try {
       setIsDeleting(true);
       
+      // First check if this problem is used by any services
+      const { data: relatedServices, error: servicesError } = await supabase
+        .from('servicos')
+        .select('id')
+        .eq('problema_id', id)
+        .limit(1);
+      
+      if (servicesError) throw servicesError;
+      
+      if (relatedServices && relatedServices.length > 0) {
+        toast({
+          title: "Não foi possível excluir",
+          description: "Este problema está sendo usado por um ou mais serviços.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      // Check if this problem is used by any demands
+      const { data: relatedDemands, error: demandsError } = await supabase
+        .from('demandas')
+        .select('id')
+        .eq('problema_id', id)
+        .limit(1);
+      
+      if (demandsError) throw demandsError;
+      
+      if (relatedDemands && relatedDemands.length > 0) {
+        toast({
+          title: "Não foi possível excluir",
+          description: "Este problema está sendo usado por uma ou mais demandas.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      // Now delete the problem
       const { error } = await supabase
         .from('problemas')
         .delete()
         .eq('id', id);
-
+      
       if (error) throw error;
       
       toast({
         title: "Problema excluído",
-        description: "Problema excluído com sucesso.",
+        description: "O problema foi excluído com sucesso.",
       });
       
-      await refreshCallback();
+      await onSuccess();
+      
       return true;
     } catch (error: any) {
-      console.error('Erro ao excluir problema:', error);
+      console.error('Error deleting problem:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível excluir o problema: " + (error.message || "erro desconhecido"),
-        variant: "destructive",
+        title: "Erro ao excluir problema",
+        description: error.message || "Não foi possível excluir o problema.",
+        variant: "destructive"
       });
-      return false;
+      throw error;
     } finally {
       setIsDeleting(false);
     }
-  };
-
+  }, [onSuccess]);
+  
   return {
     isSubmitting,
     isDeleting,

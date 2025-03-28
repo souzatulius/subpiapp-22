@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Area } from '@/hooks/coordination-areas/types';
 
 interface TemaFormProps {
-  onSubmit: (data: { descricao: string; supervisao_tecnica_id: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string; coordenacao_id: string }) => Promise<void>;
   onCancel: () => void;
   areas: Area[];
   isSubmitting: boolean;
@@ -18,11 +18,11 @@ const TemaForm = ({ onSubmit, onCancel, areas, isSubmitting }: TemaFormProps) =>
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
       descricao: '',
-      supervisao_tecnica_id: ''
+      coordenacao_id: ''
     }
   });
 
-  const selectedArea = watch('supervisao_tecnica_id');
+  const selectedArea = watch('coordenacao_id');
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -40,13 +40,13 @@ const TemaForm = ({ onSubmit, onCancel, areas, isSubmitting }: TemaFormProps) =>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="supervisao_tecnica_id">Supervisão Técnica</Label>
+        <Label htmlFor="coordenacao_id">Coordenação</Label>
         <Select
-          onValueChange={(value) => setValue('supervisao_tecnica_id', value)}
+          onValueChange={(value) => setValue('coordenacao_id', value)}
           value={selectedArea}
         >
-          <SelectTrigger id="supervisao_tecnica_id" className={errors.supervisao_tecnica_id ? 'border-red-500' : ''}>
-            <SelectValue placeholder="Selecione uma área" />
+          <SelectTrigger id="coordenacao_id" className={errors.coordenacao_id ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Selecione uma coordenação" />
           </SelectTrigger>
           <SelectContent>
             {areas.map((area) => (
@@ -56,8 +56,8 @@ const TemaForm = ({ onSubmit, onCancel, areas, isSubmitting }: TemaFormProps) =>
             ))}
           </SelectContent>
         </Select>
-        {errors.supervisao_tecnica_id && (
-          <p className="text-sm text-red-500">{errors.supervisao_tecnica_id.message}</p>
+        {errors.coordenacao_id && (
+          <p className="text-sm text-red-500">{errors.coordenacao_id.message}</p>
         )}
       </div>
 

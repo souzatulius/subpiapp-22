@@ -2,15 +2,12 @@
 import React, { useState } from 'react';
 import { useProblemsData, useProblemOperations } from '@/hooks/problems';
 import { Problem } from '@/types/problem';
-import { useCoordinationAreas } from '@/hooks/coordination-areas/useCoordinationAreas';
-import { SupervisaoTecnica } from '@/types/common';
 import DataTable from './data-table/DataTable';
 import TemaForm from './temas/TemaForm';
 import TemaEditDialog from './temas/TemaEditDialog';
 
 const Temas = () => {
-  const { problems, isLoading, fetchProblems } = useProblemsData();
-  const { areas } = useCoordinationAreas();
+  const { problems, areas, isLoading, fetchProblems } = useProblemsData();
   const { isSubmitting, isDeleting, addProblem, updateProblem, deleteProblem } = useProblemOperations(fetchProblems);
   
   const [editingTema, setEditingTema] = useState<Problem | null>(null);
@@ -35,7 +32,7 @@ const Temas = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const handleEdit = async (data: { descricao: string; coordenacao_id: string }) => {
     if (!editingTema) return Promise.reject(new Error('Nenhum tema selecionado'));
     
     try {
@@ -48,7 +45,7 @@ const Temas = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const handleAdd = async (data: { descricao: string; coordenacao_id: string }) => {
     try {
       await addProblem(data);
       closeAddForm();
@@ -69,21 +66,9 @@ const Temas = () => {
       header: 'Descrição',
     },
     {
-      key: 'supervisao_tecnica',
-      header: 'Supervisão Técnica',
-      render: (row: Problem) => row.supervisao_tecnica?.descricao || '-',
-    },
-    {
       key: 'coordenacao',
       header: 'Coordenação',
-      render: (row: Problem) => {
-        const area = row.supervisao_tecnica;
-        if (area && area.coordenacao_id) {
-          const coord = areas.find(a => a.id === area.coordenacao_id);
-          return coord ? coord.descricao : '-';
-        }
-        return '-';
-      }
+      render: (row: Problem) => row.coordenacao?.descricao || '-',
     },
     {
       key: 'criado_em',

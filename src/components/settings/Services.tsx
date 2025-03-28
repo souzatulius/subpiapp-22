@@ -9,7 +9,7 @@ import DeleteServiceDialog from './services/DeleteServiceDialog';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { Service, Area } from '@/hooks/services/types';
+import { Service } from '@/hooks/services/types';
 import { supabase } from "@/integrations/supabase/client";
 
 const Services = () => {
@@ -19,12 +19,10 @@ const Services = () => {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [deletingService, setDeletingService] = useState<Service | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [areas, setAreas] = useState<Area[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchServices();
-    fetchAreas();
   }, [fetchServices]);
 
   useEffect(() => {
@@ -32,44 +30,20 @@ const Services = () => {
     console.log('Services data:', services);
   }, [services]);
 
-  const fetchAreas = async () => {
-    try {
-      console.log('Fetching areas for services component...');
-      const { data, error } = await supabase
-        .from('supervisoes_tecnicas')
-        .select('id, descricao, sigla, coordenacao_id')
-        .order('descricao');
-
-      if (error) throw error;
-      
-      // Filter out areas with empty IDs
-      const validAreas = (data || []).filter(area => area.id && area.id.trim() !== '');
-      console.log('Areas fetched for services:', validAreas);
-      setAreas(validAreas);
-    } catch (error) {
-      console.error('Error fetching areas:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar as supervisões técnicas.',
-        variant: 'destructive'
-      });
-    }
-  };
-
   const columns = [
     {
       key: 'descricao',
       header: 'Descrição do Serviço',
     },
     {
-      key: 'supervisao_tecnica',
-      header: 'Supervisão Técnica',
-      render: (row: any) => row.supervisao_tecnica?.descricao || '-',
+      key: 'problema',
+      header: 'Problema/Tema',
+      render: (row: any) => row.problema?.descricao || '-',
     }
   ];
 
   const handleAdd = async (data: { 
-    supervisao_tecnica_id: string; 
+    problema_id: string; 
     services: { descricao: string }[] 
   }) => {
     try {
@@ -85,7 +59,7 @@ const Services = () => {
           try {
             await addService({
               descricao: serviceItem.descricao,
-              supervisao_tecnica_id: data.supervisao_tecnica_id
+              problema_id: data.problema_id
             });
             successCount++;
           } catch (error) {
@@ -136,7 +110,7 @@ const Services = () => {
     setEditingService(service);
   };
 
-  const handleUpdate = async (data: { descricao: string; supervisao_tecnica_id: string }) => {
+  const handleUpdate = async (data: { descricao: string; problema_id: string }) => {
     if (!editingService?.id) return;
     
     try {
@@ -212,7 +186,6 @@ const Services = () => {
         isOpen={!!editingService}
         onClose={() => setEditingService(null)}
         service={editingService}
-        areas={areas}
         onSubmit={handleUpdate}
         isSubmitting={isSubmitting}
       />

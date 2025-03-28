@@ -1,18 +1,18 @@
 
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from "@/components/ui/checkbox";
 import { ValidationError } from '@/lib/formValidationUtils';
 import { getProblemIcon } from '@/components/settings/problems/renderIcon';
 import ServiceSearch from './identification/ServiceSearch';
+import { Button } from '@/components/ui/button';
 
 interface ProblemStepProps {
   formData: {
     problema_id: string;
     servico_id: string;
     nao_sabe_servico?: boolean;
+    coordenacao_id?: string;
   };
   problemas: any[];
   servicos: any[];

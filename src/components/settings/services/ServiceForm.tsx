@@ -1,185 +1,148 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { supabase } from "@/integrations/supabase/client";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
-// Define the schema for multiple services
-const serviceItemSchema = z.object({
-  descricao: z.string().min(3, { message: "A descrição deve ter pelo menos 3 caracteres" }),
-});
-
-const multiServiceSchema = z.object({
-  supervisao_tecnica_id: z.string({ required_error: "A supervisão técnica é obrigatória" }),
-  services: z.array(serviceItemSchema).min(1, { message: "Adicione pelo menos um serviço" }),
-});
+interface Problem {
+  id: string;
+  descricao: string;
+}
 
 interface ServiceFormProps {
-  onSubmit: (data: z.infer<typeof multiServiceSchema>) => Promise<void>;
+  onSubmit: (data: { problema_id: string; services: { descricao: string }[] }) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
 }
 
-const ServiceForm: React.FC<ServiceFormProps> = ({
-  onSubmit,
-  onCancel,
-  isSubmitting,
-}) => {
-  const [areas, setAreas] = useState<{ id: string; descricao: string }[]>([]);
-  const [loading, setLoading] = useState(true);
+const ServiceForm = ({ onSubmit, onCancel, isSubmitting }: ServiceFormProps) => {
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const form = useForm<z.infer<typeof multiServiceSchema>>({
-    resolver: zodResolver(multiServiceSchema),
+  const { register, handleSubmit, control, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
-      supervisao_tecnica_id: '',
-      services: [{ descricao: '' }],
+      problema_id: '',
+      services: [{ descricao: '' }]
     }
   });
 
-  // Use fieldArray to handle dynamic fields
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "services",
+    control,
+    name: 'services'
   });
 
+  const selectedProblemId = watch('problema_id');
+
+  // Fetch problems
   useEffect(() => {
-    const fetchAreas = async () => {
+    const fetchProblems = async () => {
       try {
-        console.log('Fetching supervision areas...');
+        setIsLoading(true);
         const { data, error } = await supabase
-          .from('supervisoes_tecnicas')
-          .select('id, descricao, coordenacao_id')
+          .from('problemas')
+          .select('id, descricao')
           .order('descricao');
 
         if (error) throw error;
-        
-        // Filter out areas with empty IDs
-        const validAreas = (data || []).filter(area => area.id && area.id.trim() !== '');
-        console.log('Areas fetched:', validAreas);
-        setAreas(validAreas);
+        setProblems(data || []);
       } catch (error) {
-        console.error('Error fetching areas:', error);
+        console.error('Error fetching problems:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchAreas();
+    fetchProblems();
   }, []);
 
-  const handleSubmit = async (data: z.infer<typeof multiServiceSchema>) => {
-    await onSubmit(data);
-    form.reset({
-      supervisao_tecnica_id: '',
-      services: [{ descricao: '' }],
-    });
-  };
-
-  // Auto-add a new field when user starts typing in the last field
-  const handleInputChange = (index: number, value: string) => {
-    if (index === fields.length - 1 && value.length > 0) {
-      append({ descricao: '' });
-    }
+  // Add a new service input
+  const handleAddService = () => {
+    append({ descricao: '' });
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="supervisao_tecnica_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Supervisão Técnica</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                disabled={loading}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {areas.map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="problema_id">Problema/Tema</Label>
+        <Select
+          onValueChange={(value) => setValue('problema_id', value)}
+          value={selectedProblemId}
+        >
+          <SelectTrigger id="problema_id" className={errors.problema_id ? 'border-red-500' : ''}>
+            <SelectValue placeholder={isLoading ? 'Carregando...' : 'Selecione um problema/tema'} />
+          </SelectTrigger>
+          <SelectContent>
+            {problems.map((problem) => (
+              <SelectItem key={problem.id} value={problem.id}>
+                {problem.descricao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.problema_id && (
+          <p className="text-sm text-red-500">{errors.problema_id?.message?.toString()}</p>
+        )}
+      </div>
 
-        <div className="space-y-4">
-          <FormLabel>Descrição dos Serviços</FormLabel>
-          
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <FormField
-                control={form.control}
-                name={`services.${index}.descricao`}
-                render={({ field }) => (
-                  <FormItem className="flex-grow">
-                    <FormControl>
-                      <Input 
-                        placeholder="Digite a descrição do serviço" 
-                        {...field} 
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleInputChange(index, e.target.value);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>Serviços</Label>
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={handleAddService}
+            className="flex items-center gap-1"
+          >
+            <Plus className="h-4 w-4" />
+            Adicionar Serviço
+          </Button>
+        </div>
+
+        {fields.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-2">
+            <div className="flex-1">
+              <Input
+                placeholder={`Descrição do serviço ${index + 1}`}
+                {...register(`services.${index}.descricao`, { 
+                  required: 'Descrição é obrigatória' 
+                })}
+                className={errors.services?.[index]?.descricao ? 'border-red-500' : ''}
               />
-              
-              {fields.length > 1 && (
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => remove(index)}
-                  className="h-10 w-10 rounded-full"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+              {errors.services?.[index]?.descricao && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.services[index]?.descricao?.message?.toString()}
+                </p>
               )}
             </div>
-          ))}
-          
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => append({ descricao: '' })}
-            className="mt-2"
-          >
-            <Plus className="h-4 w-4 mr-2" /> Adicionar serviço
-          </Button>
-        </div>
+            {fields.length > 1 && (
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => remove(index)}
+                className="h-9 w-9"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
 
-        <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isSubmitting || isLoading}>
+          {isSubmitting ? 'Salvando...' : 'Salvar'}
+        </Button>
+      </div>
+    </form>
   );
 };
 
