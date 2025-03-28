@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useReportsFilter } from './hooks/useReportsFilter';
 import { useReportsData } from './hooks/useReportsData';
@@ -7,12 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, ChevronDownIcon, BarChart, PieChart, LineChart, Activity, FileText } from "lucide-react";
+import { RotateCcw, ChevronDownIcon, BarChart, PieChart, LineChart, Activity, FileText, SlidersHorizontal } from "lucide-react";
 import { RelatorioCard } from './components/RelatorioCard';
 import { SectionHeader } from './sections/SectionHeader';
 import { StatsCard } from './components/StatsCard';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import StatCard from '@/components/settings/components/StatCard';
 import { 
   ResponsiveContainer, 
   BarChart as RechartsBarChart, 
@@ -32,6 +32,7 @@ import {
 export const RelatoriosContent: React.FC = () => {
   const { filters, handleDateRangeChange, handleCoordenacaoChange, handleTemaChange, resetFilters } = useReportsFilter();
   const { reportsData, isLoading, cardStats } = useReportsData(filters);
+  const [showFilterDialog, setShowFilterDialog] = React.useState(false);
 
   // Colors for charts
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -49,43 +50,53 @@ export const RelatoriosContent: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold">Relatórios e Indicadores</h1>
         
-        <div className="flex flex-wrap items-center gap-2">
-          <DateRangePicker
-            dateRange={filters.dateRange}
-            onRangeChange={handleDateRangeChange}
-            className="w-auto"
-            align="end"
+        <div className="w-full md:w-auto">
+          <StatCard 
+            showButton={true}
+            buttonText="Filtros e Configurações"
+            buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
+            buttonVariant="outline"
+            onButtonClick={() => setShowFilterDialog(true)}
           />
-          
-          <Select value={filters.coordenacao} onValueChange={handleCoordenacaoChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Coordenação" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todas Coordenações</SelectItem>
-              <SelectItem value="zeladoria">Zeladoria</SelectItem>
-              <SelectItem value="comunicacao">Comunicação</SelectItem>
-              <SelectItem value="gabinete">Gabinete</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={filters.tema} onValueChange={handleTemaChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Tema/Serviço" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos os Temas</SelectItem>
-              <SelectItem value="poda">Poda</SelectItem>
-              <SelectItem value="zeladoria">Zeladoria</SelectItem>
-              <SelectItem value="pavimentacao">Pavimentação</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button variant="outline" onClick={resetFilters} className="flex items-center gap-1">
-            <RotateCcw className="h-4 w-4" />
-            <span>Limpar</span>
-          </Button>
         </div>
+      </div>
+      
+      <div className="flex flex-wrap items-center gap-2">
+        <DateRangePicker
+          dateRange={filters.dateRange}
+          onRangeChange={handleDateRangeChange}
+          className="w-auto"
+          align="end"
+        />
+        
+        <Select value={filters.coordenacao} onValueChange={handleCoordenacaoChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Coordenação" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todas Coordenações</SelectItem>
+            <SelectItem value="zeladoria">Zeladoria</SelectItem>
+            <SelectItem value="comunicacao">Comunicação</SelectItem>
+            <SelectItem value="gabinete">Gabinete</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select value={filters.tema} onValueChange={handleTemaChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Tema/Serviço" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos os Temas</SelectItem>
+            <SelectItem value="poda">Poda</SelectItem>
+            <SelectItem value="zeladoria">Zeladoria</SelectItem>
+            <SelectItem value="pavimentacao">Pavimentação</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Button variant="outline" onClick={resetFilters} className="flex items-center gap-1">
+          <RotateCcw className="h-4 w-4" />
+          <span>Limpar</span>
+        </Button>
       </div>
       
       <div className="text-sm text-muted-foreground">
@@ -94,7 +105,6 @@ export const RelatoriosContent: React.FC = () => {
         </p>
       </div>
       
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total de Demandas"
@@ -144,7 +154,6 @@ export const RelatoriosContent: React.FC = () => {
           <TabsTrigger value="trends">Tendências</TabsTrigger>
         </TabsList>
         
-        {/* Visão Geral */}
         <TabsContent value="overview" className="space-y-6">
           <SectionHeader 
             title="Visão Geral" 
@@ -153,7 +162,6 @@ export const RelatoriosContent: React.FC = () => {
           />
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Demandas por Origem */}
             <RelatorioCard 
               title="Demandas por Origem"
               className="col-span-1"
@@ -187,7 +195,6 @@ export const RelatoriosContent: React.FC = () => {
               )}
             </RelatorioCard>
 
-            {/* Tipos de Mídia */}
             <RelatorioCard 
               title="Tipos de Mídia"
               className="col-span-1"
@@ -209,7 +216,6 @@ export const RelatoriosContent: React.FC = () => {
               )}
             </RelatorioCard>
 
-            {/* Demandas por Distrito */}
             <RelatorioCard 
               title="Demandas por Distrito"
               className="col-span-1"
@@ -233,7 +239,6 @@ export const RelatoriosContent: React.FC = () => {
           </div>
         </TabsContent>
         
-        {/* Temas Técnicos */}
         <TabsContent value="technicalThemes" className="space-y-6">
           <SectionHeader 
             title="Temas Técnicos" 
@@ -242,7 +247,6 @@ export const RelatoriosContent: React.FC = () => {
           />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Demandas por Tema */}
             <RelatorioCard 
               title="Demandas por Tema"
               className="col-span-1"
@@ -264,7 +268,6 @@ export const RelatoriosContent: React.FC = () => {
               )}
             </RelatorioCard>
 
-            {/* Distribuição de Serviços */}
             <RelatorioCard 
               title="Serviços por Coordenação"
               className="col-span-1"
@@ -300,7 +303,6 @@ export const RelatoriosContent: React.FC = () => {
           </div>
         </TabsContent>
         
-        {/* Tempo e Desempenho */}
         <TabsContent value="performance" className="space-y-6">
           <SectionHeader 
             title="Tempo e Desempenho" 
@@ -309,7 +311,6 @@ export const RelatoriosContent: React.FC = () => {
           />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Tempo Médio de Resposta */}
             <RelatorioCard 
               title="Tempo Médio de Resposta"
               className="col-span-1"
@@ -331,7 +332,6 @@ export const RelatoriosContent: React.FC = () => {
               )}
             </RelatorioCard>
 
-            {/* Status das Demandas */}
             <RelatorioCard 
               title="Status das Demandas"
               className="col-span-1"
@@ -367,7 +367,6 @@ export const RelatoriosContent: React.FC = () => {
           </div>
         </TabsContent>
         
-        {/* Notas Oficiais */}
         <TabsContent value="notes" className="space-y-6">
           <SectionHeader 
             title="Notas Oficiais" 
@@ -376,7 +375,6 @@ export const RelatoriosContent: React.FC = () => {
           />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Status de Aprovação */}
             <RelatorioCard 
               title="Status de Aprovação"
               className="col-span-1"
@@ -410,7 +408,6 @@ export const RelatoriosContent: React.FC = () => {
               )}
             </RelatorioCard>
 
-            {/* Responsáveis por Notas */}
             <RelatorioCard 
               title="Responsáveis por Notas"
               className="col-span-1"
@@ -434,7 +431,6 @@ export const RelatoriosContent: React.FC = () => {
           </div>
         </TabsContent>
         
-        {/* Tendências */}
         <TabsContent value="trends" className="space-y-6">
           <SectionHeader 
             title="Tendências" 

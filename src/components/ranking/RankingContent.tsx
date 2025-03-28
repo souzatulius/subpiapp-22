@@ -10,11 +10,12 @@ import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 import { useChartData } from '@/hooks/ranking/useChartData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarClock, FileSpreadsheet, BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
+import { CalendarClock, FileSpreadsheet, BarChart3, RefreshCw, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import FilterDialog from './filters/FilterDialog';
+import StatCard from '@/components/settings/components/StatCard';
 
 const RankingContent = () => {
   const {
@@ -89,34 +90,56 @@ const RankingContent = () => {
       }
     }
   }, [justUploaded, isUploadLoading, resetFilters, refreshData, processingStats]);
+
+  // Add StatCard with filter button
+  const handleFilterButtonClick = () => {
+    setFilterDialogOpen(true);
+  };
   
-  return <div className="space-y-6">
-      
-      
+  return (
+    <div className="space-y-6">
       {/* Error display */}
-      {fetchError && <Alert variant="destructive">
+      {fetchError && (
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erro ao carregar dados</AlertTitle>
           <AlertDescription>{fetchError}</AlertDescription>
-        </Alert>}
+        </Alert>
+      )}
       
       {/* Upload progress indicator */}
-      {isUploadLoading && uploadProgress > 0 && <div className="space-y-2">
+      {isUploadLoading && uploadProgress > 0 && (
+        <div className="space-y-2">
           <div className="flex justify-between text-sm text-gray-500">
             <span>Carregando planilha...</span>
             <span>{uploadProgress}%</span>
           </div>
           <Progress value={uploadProgress} className="h-2" />
-        </div>}
+        </div>
+      )}
       
       {/* Chart loading progress indicator */}
-      {isChartLoading && chartLoadingProgress > 0 && <div className="space-y-2">
+      {isChartLoading && chartLoadingProgress > 0 && (
+        <div className="space-y-2">
           <div className="flex justify-between text-sm text-gray-500">
             <span>Atualizando gráficos...</span>
             <span>{chartLoadingProgress}%</span>
           </div>
           <Progress value={chartLoadingProgress} className="h-2" />
-        </div>}
+        </div>
+      )}
+      
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div className="w-full md:w-auto">
+          <StatCard 
+            showButton={true}
+            buttonText="Filtros e Configurações"
+            buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
+            buttonVariant="outline"
+            onButtonClick={handleFilterButtonClick}
+          />
+        </div>
+      </div>
       
       <UploadSection 
         onUpload={handleUploadWithReset} 
@@ -145,6 +168,8 @@ const RankingContent = () => {
       <ChartsSection chartData={chartData} isLoading={isLoading} chartVisibility={chartVisibility} />
       
       <ActionsSection />
-    </div>;
+    </div>
+  );
 };
+
 export default RankingContent;

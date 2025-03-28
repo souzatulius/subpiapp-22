@@ -3,9 +3,15 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface StatCardProps {
   showSearch?: boolean;
+  showButton?: boolean;
+  buttonText?: string;
+  buttonIcon?: React.ReactNode;
+  onButtonClick?: () => void;
+  buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
   onSearch?: (query: string) => void;
   searchPlaceholder?: string;
   title?: string;
@@ -20,6 +26,11 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({
   showSearch = false,
+  showButton = false,
+  buttonText = "Ação",
+  buttonIcon,
+  onButtonClick,
+  buttonVariant = "default",
   onSearch,
   searchPlaceholder = "Buscar configurações...",
   title,
@@ -34,7 +45,7 @@ const StatCard: React.FC<StatCardProps> = ({
   return (
     <Card 
       className={`${highlight ? 'border-blue-400' : ''} w-full cursor-pointer hover:shadow-md transition-shadow`}
-      onClick={showSearch ? undefined : onClick}
+      onClick={showSearch || showButton ? undefined : onClick}
     >
       <CardContent className="p-4">
         {showSearch ? (
@@ -47,6 +58,18 @@ const StatCard: React.FC<StatCardProps> = ({
               onClick={(e) => e.stopPropagation()}
             />
           </div>
+        ) : showButton ? (
+          <Button 
+            variant={buttonVariant} 
+            onClick={(e) => {
+              e.stopPropagation();
+              onButtonClick && onButtonClick();
+            }}
+            className="w-full"
+          >
+            {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
+            {buttonText}
+          </Button>
         ) : (
           <>
             {title && icon && (
