@@ -101,7 +101,7 @@ export const signOut = async () => {
 // Update profile
 export const updateProfile = async (data: any, userId: string) => {
   try {
-    // Atualiza metadados do usuário no auth
+    // Update user metadata in auth
     const { error: authError } = await supabase.auth.updateUser({
       data: {
         name: data.nome_completo,
@@ -117,7 +117,7 @@ export const updateProfile = async (data: any, userId: string) => {
       return { error: authError };
     }
 
-    // Atualiza informações na tabela usuarios
+    // Update profile information in the usuarios table only
     if (userId) {
       const { error: profileError } = await supabase
         .from('usuarios')
