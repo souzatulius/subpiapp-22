@@ -11,16 +11,7 @@ export const useNotaStatusValues = () => {
       try {
         setLoading(true);
         
-        // Try to execute direct SQL to get the check constraint values
-        const { data: checkData, error: checkError } = await supabase
-          .rpc('get_nota_status_values');
-          
-        if (!checkError && checkData && checkData.length > 0) {
-          setStatusValues(checkData);
-          return;
-        }
-        
-        // Fallback: use this approach to get a list of notes with different statuses
+        // Try to get a list of notes with different statuses
         const { data, error } = await supabase
           .from('notas_oficiais')
           .select('status')
@@ -31,7 +22,10 @@ export const useNotaStatusValues = () => {
         // Extract unique status values
         if (data && data.length > 0) {
           const uniqueStatuses = [...new Set(data.map(item => item.status))];
-          setStatusValues(uniqueStatuses);
+          if (uniqueStatuses.length > 0) {
+            setStatusValues(uniqueStatuses);
+          }
+          // If no statuses found, we'll keep the default values
         }
       } catch (err: any) {
         console.error('Error fetching nota status values:', err);
