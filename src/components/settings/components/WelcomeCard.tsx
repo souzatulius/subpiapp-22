@@ -1,15 +1,25 @@
 
-import React from 'react';
-import { Settings, UserCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import StatCard from './StatCard';
+import { useNavigate } from 'react-router-dom';
 
 interface WelcomeCardProps {
-  userCount: number;
+  userCount?: number;
   unreadCount?: number;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 }) => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // You could implement searching functionality here
+    console.log("Searching for:", query);
+  };
+  
   return (
     <Card className="bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg overflow-hidden">
       <CardContent className="p-6">
@@ -25,14 +35,14 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 })
           </div>
           <div className="flex space-x-4">
             <StatCard 
-              title="Usuários" 
-              value={userCount} 
-              icon={<UserCheck size={18} />}
-              description="Gerenciar usuários" 
-              section="usuarios"
+              title="Buscar" 
+              icon={<Settings size={18} />}
+              description="" 
+              section=""
               highlight={true}
-              unreadCount={unreadCount}
-              onClick={() => window.location.href = '/settings?tab=usuarios'}
+              showSearch={true}
+              onSearch={handleSearch}
+              searchPlaceholder="Buscar configurações..."
             />
           </div>
         </div>
