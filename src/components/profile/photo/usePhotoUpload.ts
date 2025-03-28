@@ -12,7 +12,7 @@ const PROFILE_PHOTOS_BUCKET = 'profile-photos';
 
 export const usePhotoUpload = (
   userProfile: UserProfile | null, 
-  fetchUserProfile: () => Promise<void>,
+  refreshUserProfile: () => Promise<void>,
   onClose: () => void
 ) => {
   const { user } = useAuth();
@@ -108,7 +108,7 @@ export const usePhotoUpload = (
           
         if (updateError) throw updateError;
         
-        await fetchUserProfile();
+        await refreshUserProfile();
         onClose();
         
         toast({
@@ -154,7 +154,7 @@ export const usePhotoUpload = (
           
         if (updateError) throw updateError;
         
-        await fetchUserProfile();
+        await refreshUserProfile();
         onClose();
         
         toast({

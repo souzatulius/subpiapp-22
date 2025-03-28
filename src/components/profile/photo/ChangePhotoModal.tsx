@@ -14,7 +14,7 @@ interface ChangePhotoModalProps {
 }
 
 const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) => {
-  const { userProfile, fetchUserProfile, isLoading: profileLoading } = useUserProfile();
+  const { userProfile, refreshUserProfile, isLoading: profileLoading } = useUserProfile();
   
   const {
     loading,
@@ -27,7 +27,7 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     handleSavePhoto,
     photoRemoved,
     error
-  } = usePhotoUpload(userProfile, fetchUserProfile, onClose);
+  } = usePhotoUpload(userProfile, refreshUserProfile, onClose);
 
   const footerContent = (
     <>
