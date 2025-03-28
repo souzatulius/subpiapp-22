@@ -14,10 +14,20 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
     try {
       console.log(`Atualizando nota ${notaId} para status: ${newStatus}`);
       
+      // Map frontend status values to valid database status values
+      const statusMapping: Record<string, string> = {
+        'aprovado': 'aprovada',
+        'rejeitado': 'rejeitada',
+        'excluido': 'excluida',
+        'pendente': 'pendente'
+      };
+      
+      const dbStatus = statusMapping[newStatus] || newStatus;
+      
       const { error } = await supabase
         .from('notas_oficiais')
         .update({ 
-          status: newStatus,
+          status: dbStatus,
           atualizado_em: new Date().toISOString()
         })
         .eq('id', notaId);
@@ -25,15 +35,15 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
       if (error) throw error;
 
       const statusDescriptions: Record<string, string> = {
-        'aprovado': 'aprovada',
-        'rejeitado': 'rejeitada',
-        'excluido': 'excluída',
+        'aprovada': 'aprovada',
+        'rejeitada': 'rejeitada',
+        'excluida': 'excluída',
         'pendente': 'marcada como pendente'
       };
 
       toast({
-        title: `Nota ${statusDescriptions[newStatus] || newStatus}`,
-        description: `A nota foi ${statusDescriptions[newStatus] || newStatus} com sucesso.`,
+        title: `Nota ${statusDescriptions[dbStatus] || dbStatus}`,
+        description: `A nota foi ${statusDescriptions[dbStatus] || dbStatus} com sucesso.`,
         variant: 'default',
       });
       
@@ -76,23 +86,8 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         if (demandaError) throw demandaError;
       }
 
-      // Atualizar status para 'excluido'
-      const { error } = await supabase
-        .from('notas_oficiais')
-        .update({ status: 'excluido' })
-        .eq('id', notaId);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Nota excluída',
-        description: 'A nota foi excluída com sucesso.',
-        variant: 'default',
-      });
-      
-      // Atualizar lista de notas
-      await refetch();
-      
+      // Atualizar status para 'excluida' (feminino)
+      return await updateNotaStatus(notaId, 'excluido');
     } catch (error: any) {
       console.error('Erro ao excluir nota:', error);
       toast({
@@ -100,6 +95,7 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         description: 'Não foi possível excluir a nota',
         variant: 'destructive',
       });
+      return false;
     } finally {
       setDeleteLoading(false);
     }
