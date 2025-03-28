@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -82,6 +83,21 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ anexos, onAnexo
     handleFileUpload(e.dataTransfer.files);
   };
 
+  // Helper function to get shortened file name
+  const getShortenedFileName = (url: string) => {
+    const fileName = url.split('/').pop() || '';
+    const fileExt = fileName.split('.').pop() || '';
+    
+    if (fileName.length <= 12) return fileName;
+    
+    return `${fileName.substring(0, 8)}...${fileExt ? `.${fileExt}` : ''}`;
+  };
+
+  // Determine if file is an image
+  const isImageFile = (url: string) => {
+    return /\.(jpg|jpeg|png|gif|bmp|webp|heic)$/i.test(url);
+  };
+
   return (
     <div>
       <Label className="block mb-2">Anexos</Label>
@@ -108,22 +124,36 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ anexos, onAnexo
       </div>
 
       {anexos.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
           {anexos.map((anexo, index) => (
-            <div key={index} className="flex items-center p-2 border rounded-xl bg-gray-50 gap-2">
-              {anexo.match(/\.(png|jpe?g|heic)$/i) ? (
-                <img src={anexo} alt="thumbnail" className="w-10 h-10 object-cover rounded-md" />
-              ) : (
-                <FileText className="w-8 h-8 text-gray-500" />
-              )}
-              <div className="truncate flex-1">{anexo.split('/').pop()}</div>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => removeAnexo(index)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
+            <div 
+              key={index} 
+              className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition"
+            >
+              <div className="relative h-24 bg-gray-100 flex items-center justify-center p-2">
+                {isImageFile(anexo) ? (
+                  <img 
+                    src={anexo} 
+                    alt="thumbnail" 
+                    className="h-full object-contain max-w-full rounded-t-md"
+                  />
+                ) : (
+                  <FileText className="h-10 w-10 text-blue-500" />
+                )}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => removeAnexo(index)}
+                  className="absolute top-0 right-0 text-red-500 hover:text-red-700 p-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="p-2 text-center">
+                <p className="text-xs font-medium text-gray-700 truncate" title={anexo.split('/').pop()}>
+                  {getShortenedFileName(anexo)}
+                </p>
+              </div>
             </div>
           ))}
         </div>

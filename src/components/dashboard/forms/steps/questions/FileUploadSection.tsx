@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, Trash2, X } from 'lucide-react';
+import { Upload, FileText, Trash2, X, ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
@@ -69,8 +69,10 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         const { data } = supabase.storage
           .from('demandas')
           .getPublicUrl(filePath);
-          
-        newUrls.push(data.publicUrl);
+        
+        // Store original filename with the URL
+        const urlWithMeta = data.publicUrl;
+        newUrls.push(urlWithMeta);
       }
       
       if (newUrls.length > 0) {
@@ -110,11 +112,28 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     });
   };
 
+  // Helper function to get shortened file name
+  const getShortenedFileName = (url: string) => {
+    const fileName = url.split('/').pop() || '';
+    const fileExt = fileName.split('.').pop() || '';
+    
+    if (fileName.length <= 12) return fileName;
+    
+    return `${fileName.substring(0, 8)}...${fileExt ? `.${fileExt}` : ''}`;
+  };
+
+  // Determine if it's an image file
+  const isImageFile = (url: string) => {
+    return /\.(jpg|jpeg|png|gif|bmp|webp|heic)$/i.test(url);
+  };
+
   return (
     <div>
       <Label className="block mb-2">Anexos</Label>
+      
+      {/* Upload Area */}
       <div 
-        className={`border-2 border-dashed rounded-xl p-6 transition ${
+        className={`border-2 border-dashed rounded-xl transition ${
           isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
         }`}
         onDragOver={(e) => {
@@ -124,7 +143,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
       >
-        <div className="text-center mb-4">
+        <div className="text-center p-6">
           <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
           <p className="text-sm text-gray-600 mb-1">
             {uploading ? 'Enviando arquivos...' : 'Arraste arquivos ou clique para fazer upload'}
@@ -150,31 +169,47 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             Selecionar Arquivos
           </Button>
         </div>
+      </div>
 
-        {anexos.length > 0 && (
-          <div className="mt-4">
-            <div className="flex flex-col gap-2">
-              {anexos.map((fileUrl, index) => (
-                <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-blue-500" />
-                    <span className="text-sm truncate max-w-[200px]">{fileUrl.split('/').pop()}</span>
-                  </div>
+      {/* Files Preview */}
+      {anexos.length > 0 && (
+        <div className="mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {anexos.map((fileUrl, index) => (
+              <div 
+                key={index} 
+                className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition"
+              >
+                <div className="relative h-28 bg-gray-100 flex items-center justify-center p-2">
+                  {isImageFile(fileUrl) ? (
+                    <img 
+                      src={fileUrl} 
+                      alt="thumbnail" 
+                      className="h-full object-contain max-w-full rounded-t-md"
+                    />
+                  ) : (
+                    <FileText className="h-12 w-12 text-blue-500" />
+                  )}
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => removeFile(index)}
-                    className="text-red-500 hover:text-red-700 p-1"
+                    className="absolute top-0 right-0 text-red-500 hover:text-red-700 p-1"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              ))}
-            </div>
+                <div className="p-2 text-center">
+                  <p className="text-xs font-medium text-gray-700 truncate" title={fileUrl.split('/').pop()}>
+                    {getShortenedFileName(fileUrl)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
