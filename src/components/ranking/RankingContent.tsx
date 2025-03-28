@@ -16,7 +16,12 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import FilterDialog from './filters/FilterDialog';
 
-const RankingContent = () => {
+interface RankingContentProps {
+  filterDialogOpen: boolean;
+  setFilterDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const RankingContent: React.FC<RankingContentProps> = ({ filterDialogOpen, setFilterDialogOpen }) => {
   const {
     user
   } = useAuth();
@@ -51,9 +56,6 @@ const RankingContent = () => {
   // Track if an upload just happened to trigger filter reset
   const [justUploaded, setJustUploaded] = useState(false);
   
-  // State for filter dialog visibility
-  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-
   // Combined loading state
   const isLoading = isUploadLoading || isChartLoading;
 
@@ -132,8 +134,6 @@ const RankingContent = () => {
         uploads={uploads} 
         uploadProgress={uploadProgress} 
         processingStats={processingStats}
-        onOpenFilters={() => setFilterDialogOpen(true)}
-        isFiltersModified={isModified}
       />
       
       {/* Filter dialog */}

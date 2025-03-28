@@ -1,9 +1,8 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet, CheckCircle, XCircle, SlidersHorizontal } from 'lucide-react';
+import { UploadCloud, Trash2, RefreshCw, Clock, AlertCircle, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
 import { UploadInfo } from './types';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
@@ -26,8 +25,6 @@ interface UploadSectionProps {
     processingStatus: 'idle' | 'processing' | 'success' | 'error';
     errorMessage?: string;
   };
-  onOpenFilters?: () => void;
-  isFiltersModified?: boolean;
 }
 const UploadSection: React.FC<UploadSectionProps> = ({
   onUpload,
@@ -41,9 +38,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     newOrders: 0,
     updatedOrders: 0,
     processingStatus: 'idle'
-  },
-  onOpenFilters,
-  isFiltersModified = false
+  }
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +87,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     toast.success('Modelo de planilha SGZ baixado com sucesso!');
   };
 
-  // Progress UI helper
   const getProgressText = () => {
     if (uploadProgress === 0) return "";
     if (uploadProgress < 25) return "Validando arquivo...";
@@ -102,7 +96,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     return "Concluído!";
   };
 
-  // Get status badge for uploads history
   const getStatusBadge = (upload: any) => {
     if (!upload.processado && upload === uploads[0]) {
       return <Badge className="bg-yellow-500 text-white">
@@ -118,6 +111,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         </Badge>;
     }
   };
+  
   return <Card className="border-orange-200">
       <CardHeader className="pb-2">
         <CardTitle className="text-orange-700">Upload de Planilha SGZ</CardTitle>
@@ -127,38 +121,19 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <Input ref={fileInputRef} type="file" accept=".xls,.xlsx" onChange={handleFileChange} className="max-w-md" disabled={isLoading} />
-            <Button onClick={handleUploadClick} disabled={!selectedFile || isLoading} className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700">
-              <UploadCloud className="mr-2 h-4 w-4" />
-              {isLoading ? 'Carregando...' : 'Carregar Planilha SGZ'}
-            </Button>
-            
-          </div>
-          
-          {/* New Filter Button */}
-          <div className="flex items-center justify-between">
-            {onOpenFilters && (
-              <Button 
-                onClick={onOpenFilters} 
-                variant="outline" 
-                className={`flex items-center gap-2 ${isFiltersModified ? 'border-orange-400 text-orange-700' : ''}`}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                Filtros e Visualização
-                {isFiltersModified && (
-                  <Badge className="bg-orange-500 ml-2 h-5 w-5 p-0 flex items-center justify-center rounded-full text-xs text-white">!</Badge>
-                )}
+            <div className="flex gap-2">
+              <Button onClick={handleUploadClick} disabled={!selectedFile || isLoading} className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700">
+                <UploadCloud className="mr-2 h-4 w-4" />
+                {isLoading ? 'Carregando...' : 'Carregar'}
               </Button>
-            )}
-            
-            {lastUpload && (
-              <Button variant="secondary" className="w-auto" onClick={handleRefreshClick} disabled={isLoading}>
+              
+              <Button variant="secondary" onClick={handleRefreshClick} disabled={isLoading}>
                 <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Atualizar gráficos
               </Button>
-            )}
+            </div>
           </div>
           
-          {/* New progress indicator with better feedback */}
           {isLoading && uploadProgress > 0 && <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-500">
                 <span>{getProgressText()}</span>
@@ -167,7 +142,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               <Progress value={uploadProgress} className="h-2" />
             </div>}
           
-          {/* Processing stats feedback */}
           {processingStats.processingStatus === 'processing' && <div className="p-3 border rounded-md bg-blue-50 border-blue-200 flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
               <p className="text-sm text-blue-700">Processando planilha...</p>
@@ -239,8 +213,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
                 </table>
               </div>
             </div>}
-
-          
         </div>
       </CardContent>
     </Card>;

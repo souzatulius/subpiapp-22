@@ -21,14 +21,14 @@ const RankingSubs = () => {
         icon={<BarChart3 className="h-6 w-6 mr-2" />} 
         color="bg-gradient-to-r from-orange-500 to-orange-700"
         showButton={true}
-        buttonText="Filtros e Configurações"
+        buttonText="Filtros e Visualização"
         buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
         buttonVariant="outline"
         onButtonClick={() => setFilterDialogOpen(true)}
       />
       
       <div className="mt-6">
-        <RankingContent />
+        <RankingContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
       </div>
     </motion.div>
   );
