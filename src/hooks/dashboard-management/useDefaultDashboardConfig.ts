@@ -13,7 +13,7 @@ export const useDefaultDashboardConfig = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
 
-  // Carregar todas as configurações de dashboard
+  // Load all dashboard configurations
   useEffect(() => {
     const fetchDashboardConfigs = async () => {
       setIsLoading(true);
@@ -24,7 +24,7 @@ export const useDefaultDashboardConfig = () => {
           .select('*');
 
         if (error) {
-          console.error('Erro ao buscar configurações de dashboard:', error);
+          console.error('Error fetching dashboard configurations:', error);
           return;
         }
 
@@ -35,13 +35,13 @@ export const useDefaultDashboardConfig = () => {
             const cards = JSON.parse(item.cards_config);
             dashboardConfigs[item.department] = cards;
           } catch (e) {
-            console.error(`Erro ao processar configuração para ${item.department}:`, e);
+            console.error(`Error processing configuration for ${item.department}:`, e);
           }
         });
 
         setDefaultDashboards(dashboardConfigs);
       } catch (error) {
-        console.error('Erro ao buscar configurações de dashboard:', error);
+        console.error('Error fetching dashboard configurations:', error);
       } finally {
         setIsLoading(false);
       }
@@ -50,7 +50,7 @@ export const useDefaultDashboardConfig = () => {
     fetchDashboardConfigs();
   }, []);
 
-  // Função para salvar a configuração atual como padrão
+  // Function to save the current configuration as default
   const saveDefaultDashboard = async () => {
     if (!user) {
       toast({
@@ -64,24 +64,24 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      // Obter a configuração atual
+      // Check if the configuration already exists
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
         .select('id')
         .eq('department', selectedDepartment)
         .single();
 
-      // Obter os cards da visualização atual
+      // Get the current cards from the current view
       const currentCards = document.querySelectorAll('[data-card-id]');
       const cards = Array.from(currentCards).map((card) => {
         const cardId = card.getAttribute('data-card-id');
-        // Aqui você teria que implementar a lógica para recuperar todos os detalhes do card
-        // Esta é uma simplificação
+        // Here you would have to implement the logic to retrieve all the details of the card
+        // This is a simplification
         return { id: cardId };
       });
 
       if (fetchError || !existingConfig) {
-        // Criar nova configuração se não existir
+        // Create new configuration if it doesn't exist
         const { error: insertError } = await supabase
           .from('department_dashboards')
           .insert({
@@ -93,7 +93,7 @@ export const useDefaultDashboardConfig = () => {
 
         if (insertError) throw insertError;
       } else {
-        // Atualizar configuração existente
+        // Update existing configuration
         const { error: updateError } = await supabase
           .from('department_dashboards')
           .update({
@@ -113,7 +113,7 @@ export const useDefaultDashboardConfig = () => {
         variant: 'success'
       });
     } catch (error) {
-      console.error('Erro ao salvar configuração:', error);
+      console.error('Error saving configuration:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar a configuração. Tente novamente.',

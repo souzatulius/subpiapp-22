@@ -452,6 +452,36 @@ export type Database = {
         }
         Relationships: []
       }
+      department_dashboards: {
+        Row: {
+          cards_config: string
+          created_at: string | null
+          department: string
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+          view_type: string
+        }
+        Insert: {
+          cards_config: string
+          created_at?: string | null
+          department: string
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string
+        }
+        Update: {
+          cards_config?: string
+          created_at?: string | null
+          department?: string
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          view_type?: string
+        }
+        Relationships: []
+      }
       distritos: {
         Row: {
           criado_em: string

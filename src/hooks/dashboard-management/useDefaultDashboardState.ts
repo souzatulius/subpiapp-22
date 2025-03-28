@@ -8,7 +8,7 @@ import { getDefaultCards } from '../dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useDefaultDashboardState = (department: string = 'default') => {
-  // Estado para cartões específicos do departamento
+  // State for department specific cards
   const [cards, setCards] = useState<ActionCardItem[]>(getDefaultCards());
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,8 +25,8 @@ export const useDefaultDashboardState = (department: string = 'default') => {
           .single();
 
         if (error) {
-          console.error('Erro ao buscar configuração de dashboard:', error);
-          // Se não houver configuração específica, use o padrão
+          console.error('Error fetching dashboard configuration:', error);
+          // If there's no specific configuration, use the default
           setCards(getDefaultCards());
           return;
         }
@@ -40,15 +40,15 @@ export const useDefaultDashboardState = (department: string = 'default') => {
               setCards(getDefaultCards());
             }
           } catch (parseError) {
-            console.error('Erro ao processar configuração de cards:', parseError);
+            console.error('Error processing card configuration:', parseError);
             setCards(getDefaultCards());
           }
         } else {
-          // Se não houver configuração específica, use o padrão
+          // If there's no specific configuration, use the default
           setCards(getDefaultCards());
         }
       } catch (error) {
-        console.error('Erro desconhecido:', error);
+        console.error('Unknown error:', error);
         setCards(getDefaultCards());
       } finally {
         setIsLoading(false);
