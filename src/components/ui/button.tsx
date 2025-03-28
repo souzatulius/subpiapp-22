@@ -39,6 +39,8 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  // Note: The Button component doesn't support an 'as' prop
+  // For navigation buttons, wrap a Button inside a Link component instead
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

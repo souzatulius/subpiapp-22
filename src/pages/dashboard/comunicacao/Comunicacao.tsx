@@ -175,14 +175,11 @@ const ComunicacaoDashboard = () => {
             )}
           </CardContent>
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200">
-            <Button 
-              as={Link} 
-              to="/dashboard/comunicacao/responder" 
-              variant="secondary"
-              className="w-full"
-            >
-              Ver todas as demandas
-            </Button>
+            <Link to="/dashboard/comunicacao/responder" className="w-full">
+              <Button variant="secondary" className="w-full">
+                Ver todas as demandas
+              </Button>
+            </Link>
           </CardFooter>
         </Card>
 
@@ -199,14 +196,12 @@ const ComunicacaoDashboard = () => {
           </CardHeader>
           <CardContent className="p-4 flex flex-col h-64">
             <div className="mb-4 pb-4 border-b border-gray-200">
-              <Button 
-                as={Link} 
-                to="/dashboard/comunicacao/criar-nota" 
-                className="w-full bg-orange-50 hover:bg-orange-100 text-orange-800"
-              >
-                <FileEdit className="h-4 w-4 mr-2" />
-                Criar nova nota oficial
-              </Button>
+              <Link to="/dashboard/comunicacao/criar-nota" className="w-full">
+                <Button className="w-full bg-orange-50 hover:bg-orange-100 text-orange-800">
+                  <FileEdit className="h-4 w-4 mr-2" />
+                  Criar nova nota oficial
+                </Button>
+              </Link>
             </div>
             
             <div>
@@ -247,22 +242,16 @@ const ComunicacaoDashboard = () => {
             </div>
           </CardContent>
           <CardFooter className="bg-gray-50 p-3 border-t border-gray-200 flex justify-between">
-            <Button 
-              as={Link} 
-              to="/dashboard/comunicacao/aprovar-nota" 
-              variant="secondary"
-              className="flex-1 mr-1"
-            >
-              Aprovar notas
-            </Button>
-            <Button 
-              as={Link} 
-              to="/dashboard/comunicacao/notas" 
-              variant="secondary"
-              className="flex-1 ml-1"
-            >
-              Ver todas notas
-            </Button>
+            <Link to="/dashboard/comunicacao/aprovar-nota" className="flex-1 mr-1">
+              <Button variant="secondary" className="w-full">
+                Aprovar notas
+              </Button>
+            </Link>
+            <Link to="/dashboard/comunicacao/notas" className="flex-1 ml-1">
+              <Button variant="secondary" className="w-full">
+                Ver todas notas
+              </Button>
+            </Link>
           </CardFooter>
         </Card>
       </div>
