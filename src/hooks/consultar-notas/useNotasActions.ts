@@ -9,13 +9,20 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const { statusValues } = useNotaStatusValues();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
 
   const updateNotaStatus = async (notaId: string, newStatus: string) => {
     setStatusLoading(true);
     try {
+      // Verify user authentication
+      if (!user || !session) {
+        console.error("Usuário não autenticado ao tentar atualizar nota:", notaId);
+        throw new Error("Usuário não autenticado");
+      }
+      
       console.log(`Atualizando nota ${notaId} para status: ${newStatus}`);
-      console.log('User ID:', user?.id);
+      console.log('User ID:', user.id);
+      console.log('Session:', session ? 'Valid' : 'Invalid');
       
       // Map frontend status values to valid database status values
       const statusMapping: Record<string, string> = {
@@ -27,7 +34,7 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
       
       const dbStatus = statusMapping[newStatus] || newStatus;
       
-      // Perform a single update with both the status and aprovador_id changes
+      // Prepare update data with all necessary fields
       const updateData: any = { 
         status: dbStatus,
         atualizado_em: new Date().toISOString()
@@ -40,7 +47,7 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
       
       console.log('Update data:', updateData);
       
-      // Execute the update with all changes at once
+      // Make sure we're using the authenticated client
       const { error } = await supabase
         .from('notas_oficiais')
         .update(updateData)
@@ -84,6 +91,12 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
   const deleteNota = async (notaId: string) => {
     setDeleteLoading(true);
     try {
+      // Verify user authentication
+      if (!user || !session) {
+        console.error("Usuário não autenticado ao tentar excluir nota:", notaId);
+        throw new Error("Usuário não autenticado");
+      }
+      
       const { data: nota, error: notaError } = await supabase
         .from('notas_oficiais')
         .select('demanda_id')

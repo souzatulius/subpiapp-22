@@ -6,3 +6,4 @@ import { AuthProvider } from '@/providers/AuthProvider';
 import { useAuth } from '@/contexts/AuthContext';
 
 export { AuthProvider, useAuth };
+

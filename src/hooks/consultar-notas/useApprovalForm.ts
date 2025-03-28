@@ -13,7 +13,7 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   const [editedTitle, setEditedTitle] = useState('');
   const [editedText, setEditedText] = useState('');
   
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { updateNotaStatus, statusLoading } = useNotasActions(refetch);
 
   const handleSelectNota = (nota: NotaOficial) => {
@@ -36,10 +36,19 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   };
 
   const handleSaveEdit = async () => {
-    if (!selectedNota || !user) return;
+    if (!selectedNota || !user || !session) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Usuário não autenticado ou nota não selecionada.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     try {
+      console.log("Editando nota:", selectedNota.id, "por usuário:", user.id);
+      
       const { error: historyError } = await supabase
         .from('notas_historico_edicoes')
         .insert({
@@ -51,7 +60,10 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
           titulo_novo: editedTitle
         });
       
-      if (historyError) throw historyError;
+      if (historyError) {
+        console.error('Erro ao salvar histórico de edição:', historyError);
+        throw historyError;
+      }
       
       const { error: updateError } = await supabase
         .from('notas_oficiais')
@@ -62,7 +74,10 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
         })
         .eq('id', selectedNota.id);
       
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Erro ao atualizar nota:', updateError);
+        throw updateError;
+      }
       
       toast({
         title: "Nota atualizada",
@@ -81,11 +96,11 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
           updated_at: new Date().toISOString()
         }));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar edições:', error);
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar as alterações.",
+        description: `Não foi possível salvar as alterações: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive"
       });
     } finally {
@@ -94,7 +109,7 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   };
 
   const handleAprovarNota = async () => {
-    if (!selectedNota || !user) {
+    if (!selectedNota || !user || !session) {
       console.error("Não é possível aprovar: usuário não autenticado ou nota não selecionada");
       toast({
         title: "Erro ao aprovar",
@@ -107,16 +122,18 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
     setIsSubmitting(true);
     try {
       console.log("Aprovando nota:", selectedNota.id, "por usuário:", user.id);
+      console.log("Session válida:", !!session);
+      
       const result = await updateNotaStatus(selectedNota.id, 'aprovado');
       
       if (result) {
         setSelectedNota(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao aprovar nota:', error);
       toast({
         title: "Erro ao aprovar",
-        description: "Não foi possível aprovar a nota oficial.",
+        description: `Não foi possível aprovar a nota oficial: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive"
       });
     } finally {
@@ -125,7 +142,7 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
   };
 
   const handleRejeitarNota = async () => {
-    if (!selectedNota || !user) {
+    if (!selectedNota || !user || !session) {
       console.error("Não é possível rejeitar: usuário não autenticado ou nota não selecionada");
       toast({
         title: "Erro ao rejeitar",
@@ -138,16 +155,18 @@ export const useApprovalForm = (refetch: () => Promise<any>) => {
     setIsSubmitting(true);
     try {
       console.log("Rejeitando nota:", selectedNota.id, "por usuário:", user.id);
+      console.log("Session válida:", !!session);
+      
       const result = await updateNotaStatus(selectedNota.id, 'rejeitado');
       
       if (result) {
         setSelectedNota(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao rejeitar nota:', error);
       toast({
         title: "Erro ao rejeitar",
-        description: "Não foi possível rejeitar a nota oficial.",
+        description: `Não foi possível rejeitar a nota oficial: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive"
       });
     } finally {

@@ -8,13 +8,23 @@ import NotaEditForm from './components/NotaEditForm';
 import NotasListView from './components/NotasListView';
 import { NotaOficial } from '@/types/nota';
 import { useApprovalForm } from '@/hooks/consultar-notas/useApprovalForm';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface AprovarNotaFormProps {}
 
 const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
+  const { session, user } = useAuth();
+
   const { data: notas, isLoading, refetch } = useQuery({
     queryKey: ['notas-pendentes'],
     queryFn: async () => {
+      if (!session || !user) {
+        console.log("Usuário não autenticado ao tentar carregar notas");
+        return [];
+      }
+
+      console.log("Carregando notas como usuário:", user.id);
+
       const { data, error } = await supabase
         .from('notas_oficiais')
         .select(`
@@ -28,9 +38,15 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
         .eq('status', 'pendente')
         .order('criado_em', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao carregar notas:", error);
+        throw error;
+      }
+
+      console.log(`${data?.length || 0} notas carregadas`);
       return data as unknown as NotaOficial[];
-    }
+    },
+    enabled: !!session && !!user
   });
 
   const {
@@ -49,6 +65,14 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     setEditedTitle,
     setEditedText
   } = useApprovalForm(refetch);
+
+  if (!session || !user) {
+    return (
+      <div className="p-6 text-center">
+        <p>Você precisa estar autenticado para acessar esta página.</p>
+      </div>
+    );
+  }
 
   // Render edit mode UI
   if (editMode && selectedNota) {
