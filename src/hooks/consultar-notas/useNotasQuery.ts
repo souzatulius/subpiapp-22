@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { NotaOficial, NotaEdicao } from '@/types/nota';
+import { useNotasActions } from './useNotasActions';
 
 export interface UseNotasQueryResult {
   notas: NotaOficial[] | null;
@@ -77,7 +78,8 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
   const [isAdmin, setIsAdmin] = useState(true);
   const [filteredNotas, setFilteredNotas] = useState<NotaOficial[]>([]);
 
-  const { updateNotaStatus } = useNotasActions(() => refetch());
+  const refetchFunction = () => refetch();
+  const { updateNotaStatus } = useNotasActions(refetchFunction);
 
   const {
     data: notas,

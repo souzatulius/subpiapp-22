@@ -1,30 +1,17 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Card } from '@/components/ui/card';
-import { toast } from '@/components/ui/use-toast';
 import NotasList from './components/NotasList';
 import NotaDetail from './components/NotaDetail';
+import NotaEditForm from './components/NotaEditForm';
+import NotasListView from './components/NotasListView';
 import { NotaOficial } from '@/types/nota';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNotaStatusValues } from '@/hooks/consultar-notas/useNotaStatusValues';
-import { useNotasActions } from '@/hooks/consultar-notas/useNotasActions';
+import { useApprovalForm } from '@/hooks/consultar-notas/useApprovalForm';
 
 interface AprovarNotaFormProps {}
 
 const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
-  const { user } = useAuth();
-  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [editedTitle, setEditedTitle] = useState('');
-  const [editedText, setEditedText] = useState('');
-  
-  // Get valid status values from the hook
-  const { statusValues } = useNotaStatusValues();
-
   const { data: notas, isLoading, refetch } = useQuery({
     queryKey: ['notas-pendentes'],
     queryFn: async () => {
@@ -46,205 +33,35 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     }
   });
 
-  // Use o hook actions para manipulação de notas
-  const { updateNotaStatus, statusLoading } = useNotasActions(refetch);
-
-  const handleSelectNota = (nota: NotaOficial) => {
-    setSelectedNota(nota);
-    setEditedTitle(nota.titulo);
-    setEditedText(nota.texto);
-    setEditMode(false);
-  };
-
-  const handleBackToList = () => {
-    setSelectedNota(null);
-    setEditMode(false);
-  };
-
-  const handleEditMode = () => {
-    if (!selectedNota) return;
-    setEditedTitle(selectedNota.titulo);
-    setEditedText(selectedNota.texto);
-    setEditMode(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedNota || !user) return;
-    
-    setIsSubmitting(true);
-    try {
-      const { error: historyError } = await supabase
-        .from('notas_historico_edicoes')
-        .insert({
-          nota_id: selectedNota.id,
-          editor_id: user.id,
-          texto_anterior: selectedNota.texto,
-          texto_novo: editedText,
-          titulo_anterior: selectedNota.titulo,
-          titulo_novo: editedTitle
-        });
-      
-      if (historyError) throw historyError;
-      
-      const { error: updateError } = await supabase
-        .from('notas_oficiais')
-        .update({
-          titulo: editedTitle,
-          texto: editedText,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', selectedNota.id);
-      
-      if (updateError) throw updateError;
-      
-      toast({
-        title: "Nota atualizada",
-        description: "As alterações foram salvas com sucesso.",
-      });
-      
-      await refetch();
-      setEditMode(false);
-      
-      if (selectedNota) {
-        setSelectedNota(prevNota => ({
-          ...prevNota,
-          titulo: editedTitle,
-          texto: editedText,
-          atualizado_em: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }));
-      }
-    } catch (error) {
-      console.error('Erro ao salvar edições:', error);
-      toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar as alterações.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleAprovarNota = async () => {
-    if (!selectedNota || !user) return;
-    
-    setIsSubmitting(true);
-    try {
-      // Atualizar aprovador antes de mudar status
-      const { error: updateError } = await supabase
-        .from('notas_oficiais')
-        .update({
-          aprovador_id: user.id,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', selectedNota.id);
-        
-      if (updateError) throw updateError;
-      
-      // Usar função do hook para atualizar status
-      const result = await updateNotaStatus(selectedNota.id, 'aprovado');
-      
-      if (result) {
-        setSelectedNota(null);
-      }
-    } catch (error) {
-      console.error('Erro ao aprovar nota:', error);
-      toast({
-        title: "Erro ao aprovar",
-        description: "Não foi possível aprovar a nota oficial.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRejeitarNota = async () => {
-    if (!selectedNota || !user) return;
-    
-    setIsSubmitting(true);
-    try {
-      // Atualizar aprovador antes de mudar status
-      const { error: updateError } = await supabase
-        .from('notas_oficiais')
-        .update({
-          aprovador_id: user.id,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', selectedNota.id);
-        
-      if (updateError) throw updateError;
-      
-      // Usar função do hook para atualizar status
-      const result = await updateNotaStatus(selectedNota.id, 'rejeitado');
-      
-      if (result) {
-        setSelectedNota(null);
-      }
-    } catch (error) {
-      console.error('Erro ao rejeitar nota:', error);
-      toast({
-        title: "Erro ao rejeitar",
-        description: "Não foi possível rejeitar a nota oficial.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    selectedNota,
+    isSubmitting,
+    editMode,
+    editedTitle,
+    editedText,
+    statusLoading,
+    handleSelectNota,
+    handleBackToList,
+    handleEditMode,
+    handleSaveEdit,
+    handleAprovarNota,
+    handleRejeitarNota,
+    setEditedTitle,
+    setEditedText
+  } = useApprovalForm(refetch);
 
   // Render edit mode UI
   if (editMode && selectedNota) {
     return (
-      <Card className="p-6">
-        <div>
-          <button 
-            onClick={() => setEditMode(false)} 
-            className="mb-4 text-blue-600 hover:text-blue-800"
-          >
-            ← Voltar para visualização
-          </button>
-          
-          <h3 className="text-lg font-medium mb-4">Editar Nota Oficial</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Título
-              </label>
-              <input
-                type="text"
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Conteúdo
-              </label>
-              <textarea
-                value={editedText}
-                onChange={(e) => setEditedText(e.target.value)}
-                rows={10}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <div className="flex justify-end pt-4">
-              <button
-                onClick={handleSaveEdit}
-                disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-              >
-                {isSubmitting ? "Salvando..." : "Salvar alterações"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <NotaEditForm
+        title={editedTitle}
+        text={editedText}
+        onTitleChange={setEditedTitle}
+        onTextChange={setEditedText}
+        onSave={handleSaveEdit}
+        onCancel={() => handleBackToList()}
+        isSubmitting={isSubmitting}
+      />
     );
   }
 
@@ -264,29 +81,12 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
 
   // Render list view UI
   return (
-    <Card className="p-6">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold">Aprovar Notas Oficiais</h2>
-        <p className="text-sm text-gray-600">
-          Revise e aprove notas oficiais criadas pela equipe.
-        </p>
-      </div>
-      
-      <Tabs defaultValue="pendentes">
-        <TabsList className="mb-4">
-          <TabsTrigger value="pendentes">Pendentes de Aprovação</TabsTrigger>
-        </TabsList>
-        <TabsContent value="pendentes">
-          <NotasList 
-            notas={notas || []}
-            isLoading={isLoading}
-            onSelectNota={handleSelectNota}
-            selectedNota={selectedNota}
-            emptyMessage="Nenhuma nota pendente de aprovação no momento."
-          />
-        </TabsContent>
-      </Tabs>
-    </Card>
+    <NotasListView 
+      notas={notas || []} 
+      isLoading={isLoading}
+      onSelectNota={handleSelectNota}
+      selectedNota={selectedNota}
+    />
   );
 };
 
