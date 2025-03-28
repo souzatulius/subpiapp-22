@@ -22,7 +22,7 @@ import ChartAnalysis from './charts/ChartAnalysis';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Eye, EyeOff, X, GripVertical } from 'lucide-react';
+import { Eye, EyeOff, GripVertical, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Import chart registration
@@ -35,10 +35,11 @@ interface ChartItem {
   isVisible: boolean;
   title: string;
   analysis: string;
+  isAnalysisExpanded?: boolean;
 }
 
 // Create a SortableChartCard component
-const SortableChartCard = ({ id, isVisible, component, title, analysis, onToggleVisibility, onRemove }) => {
+const SortableChartCard = ({ id, isVisible, component, title, analysis, isAnalysisExpanded, onToggleVisibility, onToggleAnalysis }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   
   const style = {
@@ -62,18 +63,18 @@ const SortableChartCard = ({ id, isVisible, component, title, analysis, onToggle
       <div className="relative h-full group">
         <div className="absolute top-0 right-0 p-1.5 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
+            onClick={onToggleAnalysis}
+            className="p-1 rounded-full bg-white text-gray-600 hover:text-orange-600 shadow-sm hover:shadow transition-all"
+            title="Ver análise detalhada"
+          >
+            <Search size={16} />
+          </button>
+          <button
             onClick={onToggleVisibility}
             className="p-1 rounded-full bg-white text-gray-600 hover:text-orange-600 shadow-sm hover:shadow transition-all"
             title={isVisible ? "Ocultar gráfico" : "Mostrar gráfico"}
           >
             {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
-          <button
-            onClick={onRemove}
-            className="p-1 rounded-full bg-white text-gray-600 hover:text-red-600 shadow-sm hover:shadow transition-all"
-            title="Remover temporariamente"
-          >
-            <X size={16} />
           </button>
         </div>
         
@@ -90,8 +91,18 @@ const SortableChartCard = ({ id, isVisible, component, title, analysis, onToggle
           {component}
         </div>
         
-        {/* Analysis text */}
-        <ChartAnalysis title={title} analysis={analysis} />
+        {/* Analysis text - conditionally shown based on isAnalysisExpanded flag */}
+        {isAnalysisExpanded && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }} 
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+            className="mt-2 p-3 bg-gray-50 rounded-md text-sm text-gray-700"
+          >
+            <h4 className="font-medium mb-1">{title} - Análise</h4>
+            <p>{analysis}</p>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
@@ -117,6 +128,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   
   // Initialize chart order state
   const [hiddenCharts, setHiddenCharts] = useState<string[]>([]);
+  const [expandedAnalyses, setExpandedAnalyses] = useState<string[]>([]);
   
   // Helper function to prepare chart data
   const prepareChartData = (rawData: any) => {
@@ -146,6 +158,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
           isLoading={isLoading} 
         />,
         isVisible: !hiddenCharts.includes('statusDistribution'),
+        isAnalysisExpanded: expandedAnalyses.includes('statusDistribution'),
         title: "Distribuição por Status",
         analysis: "Este gráfico mostra a proporção atual de ordens em cada status, permitindo identificar gargalos operacionais e tendências de conclusão."
       });
@@ -347,7 +360,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     }
     
     return items;
-  }, [chartData, isLoading, chartVisibility, hiddenCharts]);
+  }, [chartData, isLoading, chartVisibility, hiddenCharts, expandedAnalyses]);
   
   // Initialize charts
   const [chartItems, setChartItems] = useState<ChartItem[]>(createChartItems());
@@ -355,7 +368,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   // Update charts when data or visibility changes
   React.useEffect(() => {
     setChartItems(createChartItems());
-  }, [chartData, isLoading, chartVisibility, hiddenCharts, createChartItems]);
+  }, [chartData, isLoading, chartVisibility, hiddenCharts, expandedAnalyses, createChartItems]);
   
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
@@ -381,9 +394,15 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     });
   };
   
-  // Handle chart removal (same as toggling visibility, but semantically different)
-  const handleRemove = (id: string) => {
-    handleToggleVisibility(id);
+  // Handle analysis expansion toggle
+  const handleToggleAnalysis = (id: string) => {
+    setExpandedAnalyses(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(chartId => chartId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
   };
   
   if (!chartData && !isLoading) {
@@ -404,10 +423,11 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
               id={item.id}
               component={item.component}
               isVisible={item.isVisible}
+              isAnalysisExpanded={item.isAnalysisExpanded}
               title={item.title}
               analysis={item.analysis}
               onToggleVisibility={() => handleToggleVisibility(item.id)}
-              onRemove={() => handleRemove(item.id)}
+              onToggleAnalysis={() => handleToggleAnalysis(item.id)}
             />
           ))}
         </div>
