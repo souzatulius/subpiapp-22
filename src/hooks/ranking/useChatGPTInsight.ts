@@ -38,24 +38,6 @@ export const useChatGPTInsight = (dadosPlanilha: any[], uploadId?: string): Chat
         setIsLoading(true);
         setError(null);
 
-        // Primeiro verifica se já temos insights salvos para este upload
-        if (uploadId) {
-          const { data: existingInsights, error: fetchError } = await supabase
-            .from('painel_zeladoria_insights')
-            .select('indicadores')
-            .eq('painel_id', uploadId)
-            .order('data_geracao', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (!fetchError && existingInsights) {
-            setIndicadores(existingInsights.indicadores as Indicadores);
-            setIsLoading(false);
-            return;
-          }
-        }
-
-        // Se não tiver dados salvos, gera novos insights usando a função invoke do Supabase
         const total = dadosPlanilha.length;
         const statusCount = dadosPlanilha.reduce(
           (acc, item) => {
@@ -96,17 +78,6 @@ export const useChatGPTInsight = (dadosPlanilha: any[], uploadId?: string): Chat
 
         if (data && data.insights) {
           setIndicadores(data.insights as Indicadores);
-          
-          // Salvar os insights no banco de dados se tivermos um uploadId
-          if (uploadId) {
-            await supabase
-              .from('painel_zeladoria_insights')
-              .insert({
-                painel_id: uploadId,
-                indicadores: data.insights,
-                data_geracao: new Date().toISOString()
-              });
-          }
         } else {
           throw new Error('Formato de resposta inválido da edge function');
         }
@@ -163,7 +134,7 @@ export const useChatGPTInsight = (dadosPlanilha: any[], uploadId?: string): Chat
     };
 
     gerarInsights();
-  }, [dadosPlanilha, uploadId]);
+  }, [dadosPlanilha]);
 
   return { indicadores, isLoading, error };
 };
