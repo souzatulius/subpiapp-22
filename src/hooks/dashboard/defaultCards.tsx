@@ -122,7 +122,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     title: 'Criar Nota Oficial',
     icon: <FileText className="h-12 w-12" />,
     path: '/dashboard/comunicacao/criar-nota',
-    color: 'purple',
+    color: 'blue-dark', // Changed from 'purple' to 'blue-dark'
     width: '25',
     height: '1',
   },
@@ -140,7 +140,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     title: 'Consultar Notas',
     icon: <FileText className="h-12 w-12" />,
     path: '/dashboard/comunicacao/consultar-notas',
-    color: 'cyan',
+    color: 'orange-light', // Changed from 'cyan' to 'orange-light'
     width: '25',
     height: '1',
   },
