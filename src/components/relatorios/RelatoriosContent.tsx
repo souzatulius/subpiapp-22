@@ -41,50 +41,39 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
     { id: '3', descricao: 'Tema 3' },
   ];
   
-  // Sample chart data - in a real app, this would come from an API or database
-  const pieChartData = {
-    labels: ['Pendentes', 'Em Andamento', 'Concluídas', 'Canceladas'],
-    datasets: [
-      {
-        data: [30, 50, 100, 20],
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-      },
-    ],
-  };
+  // Sample chart data - fixed types to match chart components' expectations
+  const pieChartData = [
+    { name: 'Pendentes', value: 30 },
+    { name: 'Em Andamento', value: 50 },
+    { name: 'Concluídas', value: 100 },
+    { name: 'Canceladas', value: 20 },
+  ];
   
-  const lineChartData = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-    datasets: [
-      {
-        label: 'Demandas',
-        data: [12, 19, 3, 5, 2, 3],
-        borderColor: '#4BC0C0',
-      },
-    ],
-  };
+  const lineChartData = [
+    { name: 'Jan', Demandas: 12 },
+    { name: 'Fev', Demandas: 19 },
+    { name: 'Mar', Demandas: 3 },
+    { name: 'Abr', Demandas: 5 },
+    { name: 'Mai', Demandas: 2 },
+    { name: 'Jun', Demandas: 3 },
+  ];
   
-  const barChartData = {
-    labels: ['Tema 1', 'Tema 2', 'Tema 3', 'Tema 4', 'Tema 5'],
-    datasets: [
-      {
-        label: 'Quantidade',
-        data: [12, 19, 3, 5, 2],
-        backgroundColor: '#36A2EB',
-      },
-    ],
-  };
+  const barChartData = [
+    { name: 'Tema 1', Quantidade: 12 },
+    { name: 'Tema 2', Quantidade: 19 },
+    { name: 'Tema 3', Quantidade: 3 },
+    { name: 'Tema 4', Quantidade: 5 },
+    { name: 'Tema 5', Quantidade: 2 },
+  ];
   
-  const areaChartData = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-    datasets: [
-      {
-        label: 'Notas Oficiais',
-        data: [12, 19, 3, 5, 2, 3],
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-      },
-    ],
-  };
+  const areaChartData = [
+    { name: 'Jan', Notas: 12 },
+    { name: 'Fev', Notas: 19 },
+    { name: 'Mar', Notas: 3 },
+    { name: 'Abr', Notas: 5 },
+    { name: 'Mai', Notas: 2 },
+    { name: 'Jun', Notas: 3 },
+  ];
   
   const handleResetFilters = () => {
     setDateRange({

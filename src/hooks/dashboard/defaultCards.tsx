@@ -9,7 +9,9 @@ import {
   Search,
   Clock,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  FileText,
+  ListFilter
 } from 'lucide-react';
 import React from 'react';
 
@@ -34,6 +36,10 @@ export const getIconComponentFromId = (iconId: string) => {
       return <AlertTriangle className="h-12 w-12" />;
     case 'check-circle':
       return <CheckCircle className="h-12 w-12" />;
+    case 'file-text':
+      return <FileText className="h-12 w-12" />;
+    case 'list-filter':
+      return <ListFilter className="h-12 w-12" />;
     default:
       return <ClipboardList className="h-12 w-12" />;
   }
@@ -54,6 +60,8 @@ export const getIconIdFromComponent = (component: React.ReactNode): string => {
   if (componentStr.includes('Clock')) return 'clock';
   if (componentStr.includes('AlertTriangle')) return 'alert-triangle';
   if (componentStr.includes('CheckCircle')) return 'check-circle';
+  if (componentStr.includes('FileText')) return 'file-text';
+  if (componentStr.includes('ListFilter')) return 'list-filter';
   
   return 'clipboard-list'; // Default
 };
@@ -99,7 +107,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     isOverdueDemands: true,
   },
   
-  // Second Row - Standard operational cards
+  // Standard operational cards - Configuring the requested cards
   {
     id: '1',
     title: 'Nova Demanda',
@@ -107,44 +115,53 @@ export const getDefaultCards = (): ActionCardItem[] => [
     path: '/dashboard/comunicacao/cadastrar',
     color: 'blue',
     width: '25',
-    height: '1'
+    height: '1', // Keeping it at height 1 as requested
   },
   {
     id: '2',
-    title: 'Aprovar Nota',
-    icon: <FileCheck className="h-12 w-12" />,
-    path: '/dashboard/comunicacao/aprovar-nota',
-    color: 'green',
+    title: 'Criar Nota Oficial',
+    icon: <FileText className="h-12 w-12" />,
+    path: '/dashboard/comunicacao/criar-nota',
+    color: 'purple',
     width: '25',
-    height: '1'
+    height: '1',
   },
   {
     id: '3',
-    title: 'Responder Demandas',
-    icon: <MessageSquareReply className="h-12 w-12" />,
-    path: '/dashboard/comunicacao/responder',
-    color: 'orange',
+    title: 'Consultar Demandas',
+    icon: <ListFilter className="h-12 w-12" />,
+    path: '/dashboard/comunicacao/consultar-demandas',
+    color: 'green',
     width: '25',
-    height: '1'
+    height: '1',
   },
   {
     id: '4',
-    title: 'Números da Comunicação',
-    icon: <BarChart2 className="h-12 w-12" />,
-    path: '/dashboard/comunicacao/relatorios',
-    color: 'gray-light',
+    title: 'Consultar Notas',
+    icon: <FileText className="h-12 w-12" />,
+    path: '/dashboard/comunicacao/consultar-notas',
+    color: 'cyan',
     width: '25',
-    height: '1'
+    height: '1',
+  },
+  {
+    id: '5',
+    title: 'Ranking de Zeladoria',
+    icon: <BarChart2 className="h-12 w-12" />,
+    path: '/dashboard/zeladoria/ranking-subs',
+    color: 'orange',
+    width: '25',
+    height: '1',
   },
   
   // Last row - Quick demand and New card
   {
     id: 'quick-demand',
-    title: '', // Removed title as requested
+    title: '',
     icon: <PlusCircle className="h-12 w-12" />,
     path: '/dashboard/comunicacao/cadastrar',
     color: 'blue-dark',
-    width: '50', // Set to 50% width
+    width: '50',
     height: '1',
     isCustom: false,
     isQuickDemand: true,
