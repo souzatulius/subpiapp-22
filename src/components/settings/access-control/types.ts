@@ -3,6 +3,7 @@ export interface Permission {
   id: string;
   name: string;
   description: string;
+  nivel_acesso: number;
 }
 
 export interface User {
@@ -15,6 +16,9 @@ export interface User {
   cargo?: string;
   supervisao_tecnica?: string;
   coordenacao?: string;
+  whatsapp?: string;
+  aniversario?: string | Date;
+  type?: 'coordenacao' | 'supervisao_tecnica';
 }
 
 export interface AccessControlEntity {

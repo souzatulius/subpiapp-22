@@ -95,7 +95,7 @@ const PermissionSelect: React.FC<PermissionSelectProps> = ({
           {sortedAvailablePermissions.length > 0 ? (
             sortedAvailablePermissions.map((permission) => (
               <SelectItem key={permission.id} value={permission.id}>
-                {permission.descricao} (Nível {permission.nivel_acesso})
+                {permission.name} (Nível {permission.nivel_acesso})
               </SelectItem>
             ))
           ) : (

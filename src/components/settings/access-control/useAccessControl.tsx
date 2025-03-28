@@ -17,6 +17,7 @@ export const useAccessControl = () => {
     loading,
     error,
     fetchData,
+    totalUsers
   } = useAccessControlData();
 
   // Current user information
@@ -72,5 +73,6 @@ export const useAccessControl = () => {
     handleExportCsv,
     handlePrint,
     fetchData,
+    totalUsers
   };
 };

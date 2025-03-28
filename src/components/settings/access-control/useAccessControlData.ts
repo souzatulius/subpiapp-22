@@ -10,6 +10,7 @@ export const useAccessControlData = () => {
   const [userPermissions, setUserPermissions] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
 
   const fetchData = async () => {
     setLoading(true);
@@ -29,27 +30,35 @@ export const useAccessControlData = () => {
         
       if (supError) throw supError;
       
-      // Fetch permissions
-      const { data: pages, error: pagesError } = await supabase
+      // Fetch permissions from paginas_sistema table
+      const { data: pagesData, error: pagesError } = await supabase
         .from('paginas_sistema')
         .select('*');
       
       if (pagesError) {
-        // If the table doesn't exist yet, we'll create some default permissions
-        console.log('Pages table might not exist, using default permissions');
+        console.error('Error fetching pages:', pagesError);
+        // If error, use default permissions
         setPermissions([
-          { id: 'criar_demanda', name: 'Criar Demanda', description: 'Acesso para criar novas demandas' },
-          { id: 'consultar_demandas', name: 'Consultar Demandas', description: 'Acesso para consultar demandas' },
-          { id: 'responder_demandas', name: 'Responder Demandas', description: 'Acesso para responder demandas' },
-          { id: 'criar_nota', name: 'Criar Nota Oficial', description: 'Acesso para criar notas oficiais' },
-          { id: 'consultar_notas', name: 'Consultar Notas', description: 'Acesso para consultar notas oficiais' },
-          { id: 'aprovar_notas', name: 'Aprovar Notas', description: 'Acesso para aprovar notas oficiais' },
-          { id: 'relatorios', name: 'Relatórios', description: 'Acesso aos relatórios do sistema' },
-          { id: 'ranking', name: 'Ranking das Subs', description: 'Acesso ao ranking das subprefeituras' },
-          { id: 'settings', name: 'Ajustes', description: 'Acesso às configurações do sistema' },
+          { id: 'criar_demanda', name: 'Criar Demanda', description: 'Acesso para criar novas demandas', nivel_acesso: 50 },
+          { id: 'consultar_demandas', name: 'Consultar Demandas', description: 'Acesso para consultar demandas', nivel_acesso: 10 },
+          { id: 'responder_demandas', name: 'Responder Demandas', description: 'Acesso para responder demandas', nivel_acesso: 50 },
+          { id: 'criar_nota', name: 'Criar Nota Oficial', description: 'Acesso para criar notas oficiais', nivel_acesso: 50 },
+          { id: 'consultar_notas', name: 'Consultar Notas', description: 'Acesso para consultar notas oficiais', nivel_acesso: 10 },
+          { id: 'aprovar_notas', name: 'Aprovar Notas', description: 'Acesso para aprovar notas oficiais', nivel_acesso: 80 },
+          { id: 'relatorios', name: 'Relatórios', description: 'Acesso aos relatórios do sistema', nivel_acesso: 70 },
+          { id: 'ranking', name: 'Ranking das Subs', description: 'Acesso ao ranking das subprefeituras', nivel_acesso: 70 },
+          { id: 'settings', name: 'Ajustes', description: 'Acesso às configurações do sistema', nivel_acesso: 90 },
         ]);
       } else {
-        setPermissions(pages);
+        // Convert database columns to match our Permission interface
+        const formattedPermissions: Permission[] = pagesData.map(page => ({
+          id: page.id,
+          name: page.name,
+          description: page.description,
+          nivel_acesso: page.nivel_acesso
+        }));
+        
+        setPermissions(formattedPermissions);
       }
       
       // Fetch all permission assignments
@@ -82,6 +91,7 @@ export const useAccessControlData = () => {
       ];
       
       setUsers(formattedUsers);
+      setTotalUsers(formattedUsers.length);
       
       // Format permissions data
       const formattedPermissions: Record<string, string[]> = {};
@@ -119,6 +129,7 @@ export const useAccessControlData = () => {
     setUserPermissions,
     loading,
     error,
-    fetchData
+    fetchData,
+    totalUsers
   };
 };

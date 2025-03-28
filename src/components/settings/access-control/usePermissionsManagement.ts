@@ -16,7 +16,7 @@ export const usePermissionsManagement = (
       console.log(`Adding permission ${permissionId} to user ${userId}`);
       
       // Determine if it's a coordenação or supervisão técnica
-      const isCoordination = userId.startsWith('coord_');
+      const isCoordination = userId.startsWith('coord_') || !userId.includes('_');
       
       const { error } = await supabase
         .from('permissoes_acesso')
@@ -27,44 +27,32 @@ export const usePermissionsManagement = (
         });
       
       if (error) {
-        // If the table doesn't exist, we'll create it
+        // If there's an error, log it and handle accordingly
+        console.error('Error adding permission:', error);
+        
         if (error.code === 'PGRST116') {
-          const { error: createError } = await supabase.rpc(
-            'create_permissions_table'
-          );
-          
-          if (createError) throw createError;
-          
-          // Try inserting again
-          const { error: insertError } = await supabase
-            .from('permissoes_acesso')
-            .insert({
-              coordenacao_id: isCoordination ? userId : null,
-              supervisao_tecnica_id: !isCoordination ? userId : null,
-              pagina_id: permissionId
-            });
-            
-          if (insertError) throw insertError;
+          // Table doesn't exist yet - this shouldn't happen now that we've created it
+          toast.error('Erro ao adicionar permissão: tabela não encontrada');
         } else {
           throw error;
         }
+      } else {
+        // Successfully added permission, update local state
+        setUserPermissions(prev => {
+          const updated = { ...prev };
+          if (!updated[userId]) {
+            updated[userId] = [];
+          }
+          
+          if (!updated[userId].includes(permissionId)) {
+            updated[userId].push(permissionId);
+          }
+          
+          return updated;
+        });
+        
+        toast.success('Permissão adicionada com sucesso');
       }
-      
-      // Update local state
-      setUserPermissions(prev => {
-        const updated = { ...prev };
-        if (!updated[userId]) {
-          updated[userId] = [];
-        }
-        
-        if (!updated[userId].includes(permissionId)) {
-          updated[userId].push(permissionId);
-        }
-        
-        return updated;
-      });
-      
-      toast.success('Permissão adicionada com sucesso');
     } catch (error: any) {
       console.error('Error adding permission:', error);
       toast.error(`Erro ao adicionar permissão: ${error.message}`);
@@ -79,7 +67,7 @@ export const usePermissionsManagement = (
       console.log(`Removing permission ${permissionId} from user ${userId}`);
       
       // Determine if it's a coordenação or supervisão técnica
-      const isCoordination = userId.startsWith('coord_');
+      const isCoordination = userId.startsWith('coord_') || !userId.includes('_');
       
       const { error } = await supabase
         .from('permissoes_acesso')

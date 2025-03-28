@@ -9,7 +9,7 @@ export const filterUsers = (users: User[], filter: string): User[] => {
   
   return users.filter(user => 
     user.nome_completo.toLowerCase().includes(searchTerm) ||
-    user.email.toLowerCase().includes(searchTerm) ||
+    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
     (user.whatsapp && user.whatsapp.toLowerCase().includes(searchTerm))
   );
 };
@@ -28,7 +28,7 @@ export const exportToCsv = (
     const userPerms = userPermissions[user.id] || [];
     const permissionsText = permissions
       .filter(p => userPerms.includes(p.id))
-      .map(p => p.descricao)
+      .map(p => p.name)
       .join(', ');
     
     return [
