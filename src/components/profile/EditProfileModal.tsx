@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -85,21 +84,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     }
   }, [userProfile, reset]);
 
-  // Format WhatsApp as user types
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const formattedValue = formatPhoneNumber(value);
     setValue('whatsapp', formattedValue);
   };
 
-  // Format date as user types
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const formattedValue = formatDateInput(value);
     setValue('aniversario', formattedValue);
   };
 
-  // Handle photo selection
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -117,10 +113,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  // Ensure profile-photos bucket exists
   const ensureProfilePhotosBucketExists = async () => {
     try {
-      // Check if bucket exists
       const { data: buckets } = await supabase.storage.listBuckets();
       const bucketExists = buckets?.some(bucket => bucket.name === 'profile-photos');
       
@@ -146,18 +140,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     try {
       let photoUrl = userProfile?.foto_perfil_url || null;
       
-      // Upload new photo if selected
       if (photoFile) {
         const bucketExists = await ensureProfilePhotosBucketExists();
         if (!bucketExists) {
           throw new Error("Não foi possível configurar o armazenamento para fotos");
         }
         
-        // Generate unique file name
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `${user.id}-${uuidv4()}.${fileExt}`;
         
-        // Upload the file
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('profile-photos')
           .upload(fileName, photoFile, {
@@ -169,7 +160,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           throw uploadError;
         }
 
-        // Get public URL
         const { data: urlData } = supabase.storage
           .from('profile-photos')
           .getPublicUrl(fileName);
@@ -179,7 +169,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         }
       }
       
-      // Process date if it exists
       let aniversario: string | null = null;
       if (data.aniversario && data.aniversario.trim() !== '') {
         const parsedDate = parseFormattedDate(data.aniversario);
@@ -188,7 +177,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
         }
       }
       
-      // Update directly in the usuarios table
       const { error } = await supabase
         .from('usuarios')
         .update({
@@ -196,7 +184,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
           whatsapp: data.whatsapp || null,
           aniversario: aniversario,
           foto_perfil_url: photoUrl,
-          // Preserve existing values
           cargo_id: userProfile?.cargo_id,
           coordenacao_id: userProfile?.coordenacao_id,
           supervisao_tecnica_id: userProfile?.supervisao_tecnica_id,

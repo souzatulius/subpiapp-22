@@ -1,8 +1,8 @@
 
 import React from 'react';
 import EmailSuffix from '@/components/EmailSuffix';
-import { formatPhone, formatDate } from '@/lib/formValidation';
 import { Input } from '@/components/ui/input';
+import { formatPhoneNumber, formatDateInput } from '@/lib/inputFormatting';
 
 interface PersonalInfoFieldsProps {
   name: string;
@@ -21,6 +21,32 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
   errors,
   handleChange
 }) => {
+  // Função para formatar o WhatsApp enquanto o usuário digita
+  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatPhoneNumber(value);
+    
+    handleChange({
+      target: {
+        name: e.target.name,
+        value: formattedValue
+      }
+    } as React.ChangeEvent<HTMLInputElement>);
+  };
+  
+  // Função para formatar a data enquanto o usuário digita
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatDateInput(value);
+    
+    handleChange({
+      target: {
+        name: e.target.name,
+        value: formattedValue
+      }
+    } as React.ChangeEvent<HTMLInputElement>);
+  };
+
   return (
     <>
       <div>
@@ -70,7 +96,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
             name="birthday" 
             type="text" 
             value={birthday} 
-            onChange={handleChange} 
+            onChange={handleDateChange} 
             placeholder="DD/MM/AAAA" 
             maxLength={10} 
             className={errors.birthday ? 'border-[#f57b35] ring-[#f57b35]' : ''}
@@ -87,7 +113,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
             name="whatsapp" 
             type="text" 
             value={whatsapp} 
-            onChange={handleChange} 
+            onChange={handleWhatsAppChange} 
             placeholder="(XX) XXXXX-XXXX" 
             maxLength={15} 
             className={errors.whatsapp ? 'border-[#f57b35] ring-[#f57b35]' : ''}
