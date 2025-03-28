@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { User, Calendar, FileText } from 'lucide-react';
+import { User, Calendar, Building } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotaOficial } from '@/types/nota';
@@ -27,7 +27,10 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
 
   // Garantir que temos nome do autor mesmo quando opcional
   const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
-  const areaNome = nota.supervisao_tecnica?.descricao || 'Área não informada';
+  
+  // Get coordination name from the problem
+  const coordenacao = nota.problema?.coordenacao?.descricao || 'Coordenação não informada';
+  
   // Use criado_em consistently
   const dataCreated = nota.criado_em;
 
@@ -35,11 +38,11 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   const getStatusDescription = (status: string) => {
     const statusMap: Record<string, string> = {
       'pendente': 'Aguardando aprovação',
-      'aprovado': 'Aprovada',
+      'aprovada': 'Aprovada',
       'concluido': 'Concluída',
       'concluido_editado': 'Editada após aprovação',
-      'rejeitado': 'Recusada',
-      'excluido': 'Excluída'
+      'rejeitada': 'Recusada',
+      'excluida': 'Excluída'
     };
     return statusMap[status] || status;
   };
@@ -48,11 +51,11 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   const getStatusColor = (status: string) => {
     const statusColorMap: Record<string, string> = {
       'pendente': 'bg-blue-50 text-blue-700',
-      'aprovado': 'bg-green-50 text-green-700',
+      'aprovada': 'bg-green-50 text-green-700',
       'concluido': 'bg-green-50 text-green-700',
       'concluido_editado': 'bg-purple-50 text-purple-700',
-      'rejeitado': 'bg-red-50 text-red-700',
-      'excluido': 'bg-gray-50 text-gray-700'
+      'rejeitada': 'bg-red-50 text-red-700',
+      'excluida': 'bg-gray-50 text-gray-700'
     };
     return statusColorMap[status] || 'bg-gray-50 text-gray-700';
   };
@@ -77,8 +80,8 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
               </div>
               
               <div className="flex items-center text-sm text-gray-600">
-                <FileText className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-                <span>{areaNome}</span>
+                <Building className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+                <span>{coordenacao}</span>
               </div>
             </div>
           </div>

@@ -2,7 +2,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import NotasList from './components/NotasList';
 import NotaDetail from './components/NotaDetail';
 import NotaEditForm from './components/NotaEditForm';
 import NotasListView from './components/NotasListView';
@@ -31,8 +30,14 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
           *,
           autor:autor_id (id, nome_completo),
           aprovador:aprovador_id (id, nome_completo),
-          problema:problema_id (id, descricao),
-          supervisao_tecnica:supervisao_tecnica_id (id, descricao),
+          problema:problema_id (
+            id, 
+            descricao,
+            coordenacao:coordenacao_id (
+              id, 
+              descricao
+            )
+          ),
           demanda:demanda_id (id, titulo)
         `)
         .eq('status', 'pendente')

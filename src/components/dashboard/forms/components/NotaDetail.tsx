@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText, Edit } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText, Edit, Building } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotaOficial } from '@/types/nota';
@@ -26,6 +27,9 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
   // Use either criado_em or created_at, whichever is available
   const dataCreated = nota.criado_em || nota.created_at;
   const temDemanda = !!(nota.demanda_id || nota.demanda?.id);
+  
+  // Get coordination name from the problem
+  const coordenacao = nota.problema?.coordenacao?.descricao || 'Não informada';
 
   return (
     <div className="animate-fade-in">
@@ -53,9 +57,9 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
                 </div>
                 
                 <div className="flex items-center">
-                  <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                  <span className="font-medium mr-1">Área:</span>
-                  <span>{nota.supervisao_tecnica?.descricao || 'Não informada'}</span>
+                  <Building className="h-4 w-4 mr-2 text-gray-500" />
+                  <span className="font-medium mr-1">Coordenação:</span>
+                  <span>{coordenacao}</span>
                 </div>
                 
                 <div className="flex items-center">

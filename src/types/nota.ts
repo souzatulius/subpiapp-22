@@ -1,60 +1,64 @@
-
 export interface NotaOficial {
   id: string;
   titulo: string;
   texto: string;
-  autor?: {
-    id?: string;
-    nome_completo?: string;
-  };
-  area_coordenacao?: {
-    id?: string;
-    descricao?: string;
-  };
-  demanda?: {
-    id?: string;
-    titulo?: string;
-  };
-  supervisao_tecnica?: {
-    id?: string;
-    descricao?: string;
-  };
   status: string;
-  created_at?: string;
-  updated_at?: string;
-  problema?: {
-    id?: string;
-    descricao?: string;
-    icone?: string;
-  };
-  revisado_por?: {
-    id?: string;
-    nome_completo?: string;
-  };
-  revisado_em?: string;
-  
-  // Campos adicionais necessários para a aplicação
-  criado_em: string;        // Duplicado de created_at para compatibilidade
-  atualizado_em?: string;   // Duplicado de updated_at para compatibilidade
-  demanda_id?: string;      // ID direto da demanda para facilitar relações
-  aprovador?: {
-    id?: string;
-    nome_completo?: string;
-  };
-  historico_edicoes?: Array<{
+  autor_id: string;
+  autor?: {
     id: string;
-    criado_em: string;
-    editor?: {
-      nome_completo?: string;
-    };
-    titulo_anterior: string;
-    titulo_novo: string;
-    texto_anterior: string;
-    texto_novo: string;
-  }>;
+    nome_completo: string;
+  } | null;
+  aprovador_id?: string;
+  aprovador?: {
+    id: string;
+    nome_completo: string;
+  } | null;
+  problema_id: string;
+  problema?: {
+    id: string;
+    descricao: string;
+    coordenacao_id?: string;
+    coordenacao?: {
+      id: string;
+      descricao: string;
+    } | null;
+  } | null;
+  supervisao_tecnica_id?: string;
+  supervisao_tecnica?: {
+    id: string;
+    descricao: string;
+  } | null;
+  demanda_id?: string;
+  demanda?: {
+    id: string;
+    titulo: string;
+  } | null;
+  criado_em: string;
+  atualizado_em?: string;
+  created_at?: string; // For backward compatibility
+  updated_at?: string; // For backward compatibility
+  historico_edicoes?: NotaEdicao[];
+  area_coordenacao?: {
+    id: string;
+    descricao: string;
+  } | null;
 }
 
-// Interface para dados de retorno do hook useNotasData
+export interface NotaEdicao {
+  id: string;
+  nota_id: string;
+  editor_id: string;
+  editor?: {
+    id: string;
+    nome_completo: string;
+  } | null;
+  texto_anterior: string;
+  texto_novo: string;
+  titulo_anterior: string;
+  titulo_novo: string;
+  criado_em: string;
+}
+
 export interface UseNotasDataReturn {
   notas: NotaOficial[] | null;
   filteredNotas: NotaOficial[];
@@ -71,23 +75,7 @@ export interface UseNotasDataReturn {
   setDataFimFilter: (date: Date | undefined) => void;
   formatDate: (dateStr: string) => string;
   refetch: () => Promise<any>;
-  deleteNota: (notaId: string) => Promise<void>;
+  deleteNota: (id: string) => Promise<void>;
   deleteLoading: boolean;
   isAdmin: boolean;
-}
-
-// Interface para histórico de edição de notas
-export interface NotaEdicao {
-  id: string;
-  nota_id: string;
-  editor_id: string;
-  criado_em: string;
-  texto_anterior: string;
-  texto_novo: string;
-  titulo_anterior: string;
-  titulo_novo: string;
-  editor?: {
-    id?: string;
-    nome_completo?: string;
-  };
 }
