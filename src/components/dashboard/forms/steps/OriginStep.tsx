@@ -3,11 +3,6 @@ import React from 'react';
 import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
 import { Button } from '@/components/ui/button';
 import { Building, Phone, Mail, MessageSquare, Newspaper, Users, Flag } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Protocolo156 from './identification/Protocolo156';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import PriorityDeadlineStep from './PriorityDeadlineStep';
 
 interface OriginStepProps {
   formData: {
@@ -52,16 +47,6 @@ const OriginStep: React.FC<OriginStepProps> = ({
     return iconMap[descricao] || <Flag className="h-5 w-5" />;
   };
 
-  // Protocol selection and deadline fields
-  const showProtocolField = formData.origem_id !== '';
-  
-  // Mostrar o campo de prioridade apenas quando o usuário seleciona "Não" para o protocolo 156
-  // ou quando começa a digitar o número do protocolo
-  const showDeadlineField = 
-    formData.origem_id !== '' && 
-    (formData.tem_protocolo_156 === false || 
-     (formData.tem_protocolo_156 === true && formData.numero_protocolo_156 && formData.numero_protocolo_156.length > 0));
-
   // Allow deselection of origin
   const handleOriginClick = (originId: string) => {
     if (formData.origem_id === originId) {
@@ -102,31 +87,6 @@ const OriginStep: React.FC<OriginStepProps> = ({
           <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('origem_id', errors)}</p>
         )}
       </div>
-
-      {showProtocolField && (
-        <div className="animate-fadeIn">
-          <Protocolo156
-            temProtocolo156={formData.tem_protocolo_156}
-            numeroProtocolo156={formData.numero_protocolo_156}
-            handleSelectChange={(checked: boolean) => handleSelectChange('tem_protocolo_156', checked)}
-            handleChange={(e) => handleChange(e)}
-            errors={errors}
-          />
-        </div>
-      )}
-
-      {showDeadlineField && (
-        <div className="animate-fadeIn">
-          <PriorityDeadlineStep
-            formData={{
-              prioridade: formData.prioridade,
-              prazo_resposta: formData.prazo_resposta
-            }}
-            handleSelectChange={handleSelectChange}
-            errors={errors}
-          />
-        </div>
-      )}
     </div>
   );
 };

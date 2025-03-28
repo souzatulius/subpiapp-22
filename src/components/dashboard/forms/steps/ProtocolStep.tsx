@@ -32,10 +32,14 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
   errors,
   nextStep
 }) => {
-  // Determine if we should show the priority section
+  // Determine if we should show the protocol section
+  const showProtocolField = formData.origem_id !== '';
+  
   // Show priority when "No" is selected for 156 protocol or when a protocol number is provided
-  const showPrioritySection = formData.tem_protocolo_156 === false || 
-    (formData.tem_protocolo_156 === true && formData.numero_protocolo_156 && formData.numero_protocolo_156.trim() !== '');
+  const showPrioritySection = showProtocolField && (
+    formData.tem_protocolo_156 === false || 
+    (formData.tem_protocolo_156 === true && formData.numero_protocolo_156 && formData.numero_protocolo_156.trim() !== '')
+  );
 
   return (
     <div className="space-y-6">
@@ -47,13 +51,17 @@ const ProtocolStep: React.FC<ProtocolStepProps> = ({
         errors={errors}
       />
       
-      <Protocolo156
-        temProtocolo156={formData.tem_protocolo_156}
-        numeroProtocolo156={formData.numero_protocolo_156}
-        handleSelectChange={(value) => handleSelectChange('tem_protocolo_156', value)}
-        handleChange={handleChange}
-        errors={errors}
-      />
+      {showProtocolField && (
+        <div className="animate-fadeIn">
+          <Protocolo156
+            temProtocolo156={formData.tem_protocolo_156}
+            numeroProtocolo156={formData.numero_protocolo_156}
+            handleSelectChange={(value) => handleSelectChange('tem_protocolo_156', value)}
+            handleChange={handleChange}
+            errors={errors}
+          />
+        </div>
+      )}
       
       {showPrioritySection && (
         <div className="mt-6 animate-fadeIn">
