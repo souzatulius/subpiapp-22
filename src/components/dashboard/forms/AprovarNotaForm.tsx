@@ -10,6 +10,7 @@ import NotaDetail from './components/NotaDetail';
 import { NotaOficial } from '@/types/nota';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNotaStatusValues } from '@/hooks/consultar-notas/useNotaStatusValues';
+import { useNotasActions } from '@/hooks/consultar-notas/useNotasActions';
 
 interface AprovarNotaFormProps {}
 
@@ -44,6 +45,9 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       return data as unknown as NotaOficial[];
     }
   });
+
+  // Use o hook actions para manipulação de notas
+  const { updateNotaStatus, statusLoading } = useNotasActions(refetch);
 
   const handleSelectNota = (nota: NotaOficial) => {
     setSelectedNota(nota);
@@ -98,7 +102,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
         description: "As alterações foram salvas com sucesso.",
       });
       
-      refetch();
+      await refetch();
       setEditMode(false);
       
       if (selectedNota) {
@@ -127,32 +131,24 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
-      // Using 'aprovado' instead of 'aprovada' to match RLS policy expectations
-      const approveStatus = 'aprovado';
-      console.log('Aprovando nota com status:', approveStatus);
-      
-      const { error } = await supabase
+      // Atualizar aprovador antes de mudar status
+      const { error: updateError } = await supabase
         .from('notas_oficiais')
         .update({
-          status: approveStatus,
           aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
         .eq('id', selectedNota.id);
+        
+      if (updateError) throw updateError;
       
-      if (error) {
-        console.error('Erro detalhado:', error);
-        throw error;
+      // Usar função do hook para atualizar status
+      const result = await updateNotaStatus(selectedNota.id, 'aprovado');
+      
+      if (result) {
+        setSelectedNota(null);
       }
-      
-      toast({
-        title: "Nota aprovada",
-        description: "A nota oficial foi aprovada com sucesso.",
-      });
-      
-      refetch();
-      setSelectedNota(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao aprovar nota:', error);
       toast({
         title: "Erro ao aprovar",
@@ -169,27 +165,23 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     
     setIsSubmitting(true);
     try {
-      // Using 'rejeitado' instead of 'rejeitada' to match RLS policy expectations
-      const rejectStatus = 'rejeitado';
-      
-      const { error } = await supabase
+      // Atualizar aprovador antes de mudar status
+      const { error: updateError } = await supabase
         .from('notas_oficiais')
         .update({
-          status: rejectStatus,
           aprovador_id: user.id,
           atualizado_em: new Date().toISOString()
         })
         .eq('id', selectedNota.id);
+        
+      if (updateError) throw updateError;
       
-      if (error) throw error;
+      // Usar função do hook para atualizar status
+      const result = await updateNotaStatus(selectedNota.id, 'rejeitado');
       
-      toast({
-        title: "Nota rejeitada",
-        description: "A nota oficial foi rejeitada.",
-      });
-      
-      refetch();
-      setSelectedNota(null);
+      if (result) {
+        setSelectedNota(null);
+      }
     } catch (error) {
       console.error('Erro ao rejeitar nota:', error);
       toast({
@@ -265,7 +257,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
         onAprovar={handleAprovarNota}
         onRejeitar={handleRejeitarNota}
         onEditar={handleEditMode}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSubmitting || statusLoading}
       />
     );
   }

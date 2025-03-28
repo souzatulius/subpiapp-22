@@ -31,7 +31,7 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   // Use criado_em consistently
   const dataCreated = nota.criado_em;
 
-  // Mapear status para descrições mais amigáveis e para os valores esperados pelo RLS
+  // Mapear status técnico do banco para descrições amigáveis ao usuário
   const getStatusDescription = (status: string) => {
     const statusMap: Record<string, string> = {
       'pendente': 'Aguardando aprovação',
@@ -39,6 +39,7 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
       'concluido': 'Concluída',
       'concluido_editado': 'Editada após aprovação',
       'rejeitado': 'Recusada',
+      'excluido': 'Excluída'
     };
     return statusMap[status] || status;
   };
@@ -51,6 +52,7 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
       'concluido': 'bg-green-50 text-green-700',
       'concluido_editado': 'bg-purple-50 text-purple-700',
       'rejeitado': 'bg-red-50 text-red-700',
+      'excluido': 'bg-gray-50 text-gray-700'
     };
     return statusColorMap[status] || 'bg-gray-50 text-gray-700';
   };

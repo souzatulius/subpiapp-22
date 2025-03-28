@@ -2,9 +2,57 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useNotaStatusValues } from './useNotaStatusValues';
 
 export const useNotasActions = (refetch: () => Promise<any>) => {
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const { statusValues } = useNotaStatusValues();
+
+  const updateNotaStatus = async (notaId: string, newStatus: string) => {
+    setStatusLoading(true);
+    try {
+      console.log(`Atualizando nota ${notaId} para status: ${newStatus}`);
+      
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .update({ 
+          status: newStatus,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', notaId);
+
+      if (error) throw error;
+
+      const statusDescriptions: Record<string, string> = {
+        'aprovado': 'aprovada',
+        'rejeitado': 'rejeitada',
+        'excluido': 'excluída',
+        'pendente': 'marcada como pendente'
+      };
+
+      toast({
+        title: `Nota ${statusDescriptions[newStatus] || newStatus}`,
+        description: `A nota foi ${statusDescriptions[newStatus] || newStatus} com sucesso.`,
+        variant: 'default',
+      });
+      
+      // Atualizar lista de notas
+      await refetch();
+      
+      return true;
+    } catch (error: any) {
+      console.error(`Erro ao atualizar status da nota para ${newStatus}:`, error);
+      toast({
+        title: 'Erro',
+        description: `Não foi possível atualizar a nota: ${error.message || 'Erro desconhecido'}`,
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setStatusLoading(false);
+    }
+  };
 
   const deleteNota = async (notaId: string) => {
     setDeleteLoading(true);
@@ -28,7 +76,7 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
         if (demandaError) throw demandaError;
       }
 
-      // Atualizar status para 'excluido' em vez de 'excluida'
+      // Atualizar status para 'excluido'
       const { error } = await supabase
         .from('notas_oficiais')
         .update({ status: 'excluido' })
@@ -43,7 +91,7 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
       });
       
       // Atualizar lista de notas
-      refetch();
+      await refetch();
       
     } catch (error: any) {
       console.error('Erro ao excluir nota:', error);
@@ -59,6 +107,8 @@ export const useNotasActions = (refetch: () => Promise<any>) => {
 
   return {
     deleteNota,
-    deleteLoading
+    deleteLoading,
+    updateNotaStatus,
+    statusLoading
   };
 };

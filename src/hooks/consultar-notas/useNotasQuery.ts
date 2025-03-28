@@ -77,6 +77,8 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
   const [isAdmin, setIsAdmin] = useState(true);
   const [filteredNotas, setFilteredNotas] = useState<NotaOficial[]>([]);
 
+  const { updateNotaStatus } = useNotasActions(() => refetch());
+
   const {
     data: notas,
     isLoading: loading,
@@ -141,14 +143,7 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
 
   const deleteNotaMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('notas_oficiais')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        throw error;
-      }
+      return await updateNotaStatus(id, 'excluido');
     },
     onSuccess: () => {
       toast({
@@ -169,17 +164,14 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
 
   const approveNotaMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('notas_oficiais')
-        .update({ status: 'aprovado', aprovador_id: user?.id })
-        .eq('id', id)
-        .select();
-  
-      if (error) {
-        throw error;
-      }
-  
-      return data ? data[0] : null;
+        .update({ aprovador_id: user?.id })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      return await updateNotaStatus(id, 'aprovado');
     },
     onSuccess: () => {
       toast({
@@ -200,17 +192,14 @@ export const useNotasQuery = (status?: string, searchTerm?: string): UseNotasQue
 
   const rejectNotaMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('notas_oficiais')
-        .update({ status: 'rejeitado', aprovador_id: user?.id })
-        .eq('id', id)
-        .select();
-  
-      if (error) {
-        throw error;
-      }
-  
-      return data ? data[0] : null;
+        .update({ aprovador_id: user?.id })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      return await updateNotaStatus(id, 'rejeitado');
     },
     onSuccess: () => {
       toast({
