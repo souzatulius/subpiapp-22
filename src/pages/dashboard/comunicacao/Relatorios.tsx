@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { PieChart, SlidersHorizontal } from 'lucide-react';
 import { RelatoriosContent } from '@/components/relatorios';
 import WelcomeCard from '@/components/shared/WelcomeCard';
+import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 
 const RelatoriosPage = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -22,8 +23,14 @@ const RelatoriosPage = () => {
       />
       
       <div className="mt-6">
-        <RelatoriosContent />
+        <RelatoriosContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
       </div>
+
+      {/* Filter Dialog */}
+      <FilterDialog 
+        open={filterDialogOpen} 
+        onOpenChange={setFilterDialogOpen} 
+      />
     </div>
   );
 };
