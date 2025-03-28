@@ -4,7 +4,7 @@ import {
   Users, Shield, Briefcase, Building, Layers, 
   Globe, AlertTriangle, Image, FileText, MapPin,
   Settings, MessageSquare, Bell, Send, Map,
-  FolderTree, Lock
+  FolderTree, Lock, LayoutDashboard
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
@@ -39,7 +39,8 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
       subcategories: [
         { id: 'coordenacoes_lista', label: 'Coordenações', icon: Building },
         { id: 'areas', label: 'Supervisões Técnicas', icon: Layers },
-        { id: 'servicos', label: 'Serviços', icon: FileText }
+        { id: 'servicos', label: 'Serviços', icon: FileText },
+        { id: 'dashboard_management', label: 'Gerenciamento de Dashboards', icon: LayoutDashboard }
       ]
     },
     {

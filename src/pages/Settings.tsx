@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -39,7 +40,7 @@ const Settings = () => {
   const getSectionCategory = (section: string) => {
     if (section === 'dashboard') return 'Dashboard';
     if (['usuarios', 'permissoes', 'cargos'].includes(section)) return 'Gestão de Usuários e Permissões';
-    if (['coordenacoes_lista', 'areas', 'servicos'].includes(section)) return 'Gestão Organizacional';
+    if (['coordenacoes_lista', 'areas', 'servicos', 'dashboard_management'].includes(section)) return 'Gestão Organizacional';
     if (['origens_demanda', 'problemas', 'tipos_midia', 'distritos_bairros', 'notificacoes', 'comunicados'].includes(section)) return 'Gestão Operacional';
     return '';
   };
@@ -58,6 +59,7 @@ const Settings = () => {
       case 'distritos_bairros': return 'Distritos e Bairros';
       case 'notificacoes': return 'Notificações';
       case 'comunicados': return 'Avisos e Comunicados';
+      case 'dashboard_management': return 'Gerenciamento de Dashboards';
       default: return '';
     }
   };

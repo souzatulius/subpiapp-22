@@ -11,6 +11,7 @@ import DistrictsAndNeighborhoods from './DistrictsAndNeighborhoods';
 import Notifications from './Notifications';
 import Announcements from './Announcements';
 import AccessControl from './AccessControl';
+import { Navigate } from 'react-router-dom';
 
 interface SettingsContentProps {
   activeSection: string;
@@ -41,6 +42,8 @@ const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection }) => {
     return <Notifications />;
   } else if (activeSection === 'comunicados') {
     return <Announcements />;
+  } else if (activeSection === 'dashboard_management') {
+    return <Navigate to="/settings/dashboard-management" />;
   }
 
   return <div>Selecione uma seção para configurar</div>;
