@@ -78,7 +78,7 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
         Serviço
       </h3>
       
-      <div>
+      <div className="w-full">
         {!isEditing && selectedDemanda.servico ? (
           <div className="w-full bg-blue-100 text-blue-800 rounded-lg px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ const ServicoSection: React.FC<ServicoSectionProps> = ({
             </Button>
           </div>
         ) : (
-          <div className="relative">
+          <div className="relative w-full">
             <div className="relative">
               <Input
                 type="text"
