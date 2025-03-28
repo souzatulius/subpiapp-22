@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { DateRange } from '@/components/ui/date-range-picker';
 import { PieChart } from './charts/PieChart';
 import { LineChart } from './charts/LineChart';
 import { BarChart } from './charts/BarChart';
@@ -15,7 +13,10 @@ interface RelatoriosContentProps {
 
 export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
   // Sample state - in a real app, this would come from a hook or context
-  const [dateRange] = React.useState<DateRange>({
+  const [dateRange] = React.useState<{
+    from: Date;
+    to: Date;
+  }>({
     from: new Date(2023, 0, 1),
     to: new Date(),
   });
@@ -60,7 +61,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
       <div>
         <h2 className="text-xl font-semibold mb-4">Temas Técnicos</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <RelatorioCard title="Distribuição por Temas">
+          <RelatorioCard 
+            title="Distribuição por Temas" 
+            analysis="A análise mostra que o Tema 2 tem a maior concentração de demandas (46%), seguido pelo Tema 1 (29%). Os Temas 3, 4 e 5 representam juntos apenas 25% do total, indicando uma concentração significativa nos dois temas principais. Recomenda-se alocar recursos proporcionalmente a esta distribuição."
+          >
             <BarChart 
               data={barChartData}
               title="Distribuição por Temas"
@@ -70,7 +74,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
               ]}
             />
           </RelatorioCard>
-          <RelatorioCard title="Complexidade por Tema">
+          <RelatorioCard 
+            title="Complexidade por Tema"
+            analysis="Os dados de complexidade mostram uma tendência sazonal, com picos em fevereiro e queda significativa em março. A complexidade média é de 7,3 pontos, com desvio padrão de 6,4, indicando grande variabilidade. É recomendável investigar os fatores que causaram o pico de fevereiro para melhor planejamento futuro."
+          >
             <AreaChart 
               data={areaChartData}
               title="Complexidade por Tema"
@@ -87,7 +94,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
       <div>
         <h2 className="text-xl font-semibold mb-4">Tempo e Desempenho</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <RelatorioCard title="Tempo Médio de Resposta">
+          <RelatorioCard 
+            title="Tempo Médio de Resposta"
+            analysis="O tempo médio de resposta mostra uma tendência de melhora constante desde janeiro, com exceção de março que apresentou um pequeno aumento. A média anual é de 7,3 dias, o que está dentro da meta estabelecida de 10 dias. Destaque para junho, que apresentou o menor tempo médio do semestre (3 dias)."
+          >
             <LineChart 
               data={lineChartData}
               title="Tempo Médio de Resposta"
@@ -97,7 +107,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
               ]}
             />
           </RelatorioCard>
-          <RelatorioCard title="Performance por Área">
+          <RelatorioCard 
+            title="Performance por Área"
+            analysis="A análise de performance por área demonstra que as áreas 1 e 2 são responsáveis por 75% de toda a eficiência operacional. A área 3 apresenta o maior potencial de melhoria, com apenas 7% do índice de eficiência atual. Recomenda-se um plano específico de capacitação e otimização de processos para as áreas com menor desempenho."
+          >
             <BarChart 
               data={barChartData}
               title="Performance por Área"
@@ -114,7 +127,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
       <div>
         <h2 className="text-xl font-semibold mb-4">Notas Oficiais</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <RelatorioCard title="Notas Emitidas">
+          <RelatorioCard 
+            title="Notas Emitidas"
+            analysis="O volume de notas emitidas apresenta uma sazonalidade clara, com picos nos meses de janeiro e fevereiro e queda acentuada no segundo trimestre. O total de 44 notas no semestre representa uma média de 7,3 notas mensais. Comparado ao mesmo período do ano anterior, houve uma redução de 12% no volume total."
+          >
             <AreaChart 
               data={areaChartData}
               title="Notas Emitidas"
@@ -124,7 +140,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
               ]}
             />
           </RelatorioCard>
-          <RelatorioCard title="Notas por Tema">
+          <RelatorioCard 
+            title="Notas por Tema"
+            analysis="A distribuição de notas por tema mostra uma predominância clara de notas concluídas (50%), seguidas pelas em andamento (25%). Notas pendentes (15%) e canceladas (10%) somam 25% do total. Este perfil indica uma boa taxa de conclusão, mas sugere a necessidade de melhorias no processo para reduzir o percentual de notas canceladas."
+          >
             <PieChart 
               data={pieChartData}
               title="Notas por Tema"
@@ -138,7 +157,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
       <div>
         <h2 className="text-xl font-semibold mb-4">Tendências</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <RelatorioCard title="Evolução Mensal">
+          <RelatorioCard 
+            title="Evolução Mensal"
+            analysis="A evolução mensal das demandas mostra uma tendência de queda após o pico em fevereiro. A média móvel de 3 meses indica uma estabilização próxima a 3,3 demandas mensais no segundo trimestre. Projetando esta tendência, espera-se um aumento gradual no próximo trimestre, com pico estimado em outubro."
+          >
             <LineChart 
               data={lineChartData}
               title="Evolução Mensal"
@@ -148,7 +170,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
               ]}
             />
           </RelatorioCard>
-          <RelatorioCard title="Comparativo Anual">
+          <RelatorioCard 
+            title="Comparativo Anual"
+            analysis="O comparativo anual revela um crescimento de 23% em relação ao mesmo período do ano anterior. Os temas 1 e 2 apresentaram o maior crescimento relativo (35% e 42%, respectivamente), enquanto o tema 5 teve uma redução de 18%. Esta mudança na distribuição sugere uma alteração nas prioridades operacionais."
+          >
             <BarChart 
               data={barChartData}
               title="Comparativo Anual"
@@ -163,4 +188,3 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     </div>
   );
 };
-

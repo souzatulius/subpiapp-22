@@ -1,8 +1,10 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
 
 interface RelatorioCardProps {
   title: string;
@@ -14,6 +16,7 @@ interface RelatorioCardProps {
     variant?: "default" | "destructive" | "outline" | "secondary";
     icon?: ReactNode;
   };
+  analysis?: string;
 }
 
 export const RelatorioCard: React.FC<RelatorioCardProps> = ({
@@ -21,8 +24,15 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   description,
   children,
   className,
-  badge
+  badge,
+  analysis
 }) => {
+  const [isAnalysisExpanded, setIsAnalysisExpanded] = useState(false);
+
+  const toggleAnalysis = () => {
+    setIsAnalysisExpanded(!isAnalysisExpanded);
+  };
+
   return (
     <Card className={`overflow-hidden shadow-sm ${className}`}>
       <CardHeader className="pb-2">
@@ -41,6 +51,34 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
       </CardHeader>
       <CardContent>
         {children}
+        
+        {analysis && (
+          <div className="mt-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleAnalysis}
+              className="w-full flex justify-between items-center text-sm text-gray-600 hover:bg-gray-100"
+            >
+              <div className="flex items-center">
+                <Search className="h-4 w-4 mr-2" />
+                <span>Análise detalhada</span>
+              </div>
+              {isAnalysisExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+            
+            {isAnalysisExpanded && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.3 }}
+                className="mt-2 p-3 bg-gray-50 rounded-md text-sm text-gray-700"
+              >
+                {analysis}
+              </motion.div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
