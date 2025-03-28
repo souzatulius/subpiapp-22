@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Settings } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +16,6 @@ interface WelcomeCardProps {
   statHighlight?: boolean;
   statUnreadCount?: number;
   statOnClick?: () => void;
-  color?: string;
   showButton?: boolean;
   buttonText?: string;
   buttonIcon?: React.ReactNode;
