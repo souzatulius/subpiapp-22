@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Eye, EyeOff, Search } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
@@ -94,7 +95,7 @@ export const SortableRelatorioCard: React.FC<SortableRelatorioCardProps> = ({
         
         <div className="h-full">
           {showAnalysisOnly && analysis ? (
-            <div className="p-4 bg-gradient-to-r from-blue-700 to-blue-800 rounded-lg border border-blue-700 shadow-sm h-full flex flex-col">
+            <div className="p-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-lg border border-blue-700 shadow-sm h-full flex flex-col">
               <h3 className="text-lg font-medium text-white mb-2">{title} - Análise</h3>
               <p className="text-blue-100 flex-1 overflow-auto">{analysis}</p>
             </div>
@@ -102,12 +103,11 @@ export const SortableRelatorioCard: React.FC<SortableRelatorioCardProps> = ({
             <RelatorioCard 
               title={title} 
               description={description}
-              className={className}
+              className={`bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 ${className || ''}`}
               badge={badge}
               analysis={isAnalysisExpanded ? analysis : undefined}
               value={value}
               isLoading={isLoading}
-              className="bg-gradient-to-r from-blue-900 to-blue-950"
             >
               {children}
             </RelatorioCard>
