@@ -42,6 +42,13 @@ export const useRespostaForm = (
     }
   });
 
+  const handleRespostaChange = (key: string, value: string) => {
+    setResposta(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
   const handleSubmitResposta = async (): Promise<void> => {
     console.log("handleSubmitResposta chamado", { selectedDemanda, resposta, comentarios });
     
@@ -88,6 +95,7 @@ export const useRespostaForm = (
     comentarios,
     setComentarios,
     isLoading: isSubmitting,
-    handleSubmitResposta
+    handleSubmitResposta,
+    handleRespostaChange
   };
 };

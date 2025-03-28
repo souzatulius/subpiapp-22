@@ -21,6 +21,7 @@ interface RespostaFormProps {
   onSubmit: () => Promise<void>;
   comentarios?: string;
   setComentarios?: React.Dispatch<React.SetStateAction<string>>;
+  handleRespostaChange?: (key: string, value: string) => void;
 }
 
 const RespostaForm: React.FC<RespostaFormProps> = ({
@@ -31,16 +32,24 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   isLoading,
   onSubmit,
   comentarios = '',
-  setComentarios
+  setComentarios,
+  handleRespostaChange
 }) => {
   const {
-    handleRespostaChange,
     updateService,
     allQuestionsAnswered,
   } = useRespostaFormState({
     selectedDemanda,
     resposta,
     setResposta,
+  });
+
+  // Use the passed handleRespostaChange function or create a default one
+  const onRespostaChange = handleRespostaChange || ((key: string, value: string) => {
+    setResposta(prev => ({
+      ...prev,
+      [key]: value
+    }));
   });
 
   const handleSubmitWithExtra = async () => {
@@ -89,7 +98,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
               <QuestionsAnswersSection
                 perguntas={selectedDemanda.perguntas}
                 resposta={resposta}
-                onRespostaChange={handleRespostaChange}
+                onRespostaChange={onRespostaChange}
               />
             </div>
           )}
