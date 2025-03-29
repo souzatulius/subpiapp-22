@@ -7,7 +7,7 @@ import { DashboardStateReturn } from './dashboard/types';
 
 export const useDashboardState = (userId?: string): DashboardStateReturn => {
   // Get dashboard data and cards
-  const { firstName, actionCards, setActionCards } = useDashboardData(userId);
+  const { firstName, actionCards, setActionCards } = useDashboardData(userId || '');
   
   // Card manipulation actions
   const {

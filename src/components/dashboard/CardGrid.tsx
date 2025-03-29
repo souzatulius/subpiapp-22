@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   DndContext,
@@ -20,22 +21,31 @@ interface CardGridProps {
   onAddNewCard: () => void;
   isMobileView?: boolean;
   specialCardsData?: any;
-  usuarioId: string;
-  coordenacaoId: string;
+  usuarioId?: string;
+  coordenacaoId?: string;
   modoAdmin?: boolean;
+  // Add these props to match usage in Dashboard and Comunicacao components
+  quickDemandTitle?: string;
+  onQuickDemandTitleChange?: (value: string) => void;
+  onQuickDemandSubmit?: () => void;
+  onSearchSubmit?: (query: string) => void;
 }
 
 const CardGrid: React.FC<CardGridProps> = ({
-  cards,
+  cards = [], // Add default empty array to prevent undefined errors
   onCardsChange,
   onEditCard,
   onDeleteCard,
   onAddNewCard,
   isMobileView = false,
   specialCardsData,
-  usuarioId,
-  coordenacaoId,
-  modoAdmin = true
+  usuarioId = '',
+  coordenacaoId = '',
+  modoAdmin = true,
+  quickDemandTitle,
+  onQuickDemandTitleChange,
+  onQuickDemandSubmit,
+  onSearchSubmit
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -54,11 +64,21 @@ const CardGrid: React.FC<CardGridProps> = ({
     }
   };
 
-  const displayedCards = isMobileView
+  // Add safe check before filtering to prevent "map of undefined" errors
+  const displayedCards = isMobileView && cards
     ? cards
         .filter((card) => card.displayMobile !== false)
-        .sort((a, b) => (a.mobileOrder ?? 0) - (b.mobileOrder ?? 0))
+        .sort((a, b) => ((a.mobileOrder ?? 0) - (b.mobileOrder ?? 0)))
     : cards;
+
+  // If cards is undefined or empty, render nothing or a placeholder
+  if (!displayedCards || displayedCards.length === 0) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        No cards available to display.
+      </div>
+    );
+  }
 
   return (
     <DndContext
@@ -72,7 +92,7 @@ const CardGrid: React.FC<CardGridProps> = ({
             <DynamicDataCard
               key={card.id}
               title={card.title}
-              icon={<div className="text-xl">{card.iconId}</div>}
+              icon={card.icon}
               color={card.color}
               dataSourceKey={card.dataSourceKey}
               coordenacaoId={coordenacaoId}
@@ -86,6 +106,10 @@ const CardGrid: React.FC<CardGridProps> = ({
               onDeleteCard={onDeleteCard}
               onAddNewCard={onAddNewCard}
               specialCardsData={specialCardsData}
+              quickDemandTitle={quickDemandTitle}
+              onQuickDemandTitleChange={onQuickDemandTitleChange}
+              onQuickDemandSubmit={onQuickDemandSubmit}
+              onSearchSubmit={onSearchSubmit}
             />
           )
         )}

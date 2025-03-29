@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 
 // Dados do Supabase - Tabela user_dashboard
@@ -36,6 +37,12 @@ export interface SerializableCard {
 export interface ActionCardItem extends Omit<SerializableCard, 'iconId'> {
   icon: ReactNode;
   iconId: string; // ainda necessário para edição
+  // Make sure all properties from SerializableCard are included here as well
+  // Adding explicit definitions for properties used in CardGrid component
+  displayMobile?: boolean;
+  mobileOrder?: number;
+  type?: 'standard' | 'data_dynamic';
+  dataSourceKey?: string;
 }
 
 // Esquema do formulário com todos os campos que aparecem no CardFormFields

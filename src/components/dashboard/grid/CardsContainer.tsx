@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SortableContext } from '@dnd-kit/sortable';
 import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
@@ -16,6 +17,10 @@ interface CardsContainerProps {
     responsesToDo: number;
     isLoading: boolean;
   };
+  quickDemandTitle?: string;
+  onQuickDemandTitleChange?: (value: string) => void;
+  onQuickDemandSubmit?: () => void;
+  onSearchSubmit?: (query: string) => void;
 }
 
 const CardsContainer: React.FC<CardsContainerProps> = ({
@@ -23,7 +28,11 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   onEditCard,
   onDeleteCard,
   onAddNewCard,
-  specialCardsData
+  specialCardsData,
+  quickDemandTitle = "",
+  onQuickDemandTitleChange = () => {},
+  onQuickDemandSubmit = () => {},
+  onSearchSubmit = () => {}
 }) => {
   const allCardIds = cards.map(card => card.id);
 
@@ -38,6 +47,10 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
             onDelete={onDeleteCard}
             onAddNewCard={onAddNewCard}
             specialCardsData={specialCardsData}
+            quickDemandTitle={quickDemandTitle}
+            onQuickDemandTitleChange={onQuickDemandTitleChange}
+            onQuickDemandSubmit={onQuickDemandSubmit}
+            onSearchSubmit={onSearchSubmit}
           />
         ))}
 
@@ -51,6 +64,10 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
             onDelete={onDeleteCard}
             onAddNewCard={onAddNewCard}
             specialCardsData={specialCardsData}
+            quickDemandTitle={quickDemandTitle}
+            onQuickDemandTitleChange={onQuickDemandTitleChange}
+            onQuickDemandSubmit={onQuickDemandSubmit}
+            onSearchSubmit={onSearchSubmit}
           />
         ))}
       </div>

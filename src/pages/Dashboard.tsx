@@ -33,6 +33,8 @@ const Dashboard = () => {
     setNewDemandTitle,
     handleQuickDemandSubmit,
     // Search functionality
+    searchQuery,
+    setSearchQuery,
     handleSearchSubmit,
     // Special cards data
     specialCardsData
@@ -73,11 +75,13 @@ const Dashboard = () => {
                 onEditCard={handleEditCard}
                 onDeleteCard={handleDeleteCard}
                 onAddNewCard={handleAddNewCard}
+                specialCardsData={specialCardsData}
+                // Add the missing props
                 quickDemandTitle={newDemandTitle}
                 onQuickDemandTitleChange={setNewDemandTitle}
                 onQuickDemandSubmit={handleQuickDemandSubmit}
                 onSearchSubmit={handleSearchSubmit}
-                specialCardsData={specialCardsData}
+                usuarioId={user?.id || ''}
               />
             </div>
           </div>

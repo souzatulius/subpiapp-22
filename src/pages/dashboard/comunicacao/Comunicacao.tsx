@@ -5,6 +5,7 @@ import CardGrid from '@/components/dashboard/CardGrid';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { MessageSquareReply, Loader2, PlusCircle } from 'lucide-react';
 import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -15,6 +16,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   isPreview = false, 
   department = 'comunicacao' 
 }) => {
+  const { user } = useAuth();
+  
   // Get dashboard state and card actions from the hook
   const {
     cards,
@@ -69,11 +72,14 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           onEditCard={handleEditCard}
           onDeleteCard={handleDeleteCard}
           onAddNewCard={handleAddNewCard}
+          specialCardsData={specialCardsData}
+          // Add the missing props
           quickDemandTitle={newDemandTitle}
           onQuickDemandTitleChange={setNewDemandTitle}
           onQuickDemandSubmit={handleQuickDemandSubmit}
           onSearchSubmit={handleSearchSubmit}
-          specialCardsData={specialCardsData}
+          usuarioId={user?.id || ''}
+          coordenacaoId={department || ''}
         />
       )}
 
