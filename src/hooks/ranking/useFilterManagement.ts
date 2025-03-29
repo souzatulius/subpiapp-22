@@ -29,7 +29,13 @@ export const useFilterManagement = () => {
     criticalStatus: true,
     externalDistricts: true,
     serviceDiversity: true,
-    closureTime: true
+    closureTime: true,
+    responsibility: true,
+    evolution: true,
+    departmentComparison: true,
+    serviceTypes: true,
+    districtPerformance: true,
+    oldestPendingList: true
   };
 
   // State for filters

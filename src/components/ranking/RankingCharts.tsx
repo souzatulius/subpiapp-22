@@ -32,6 +32,9 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("performance");
 
+  // Sample empty data object for charts
+  const emptyData = {};
+
   return (
     <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
       <div className="flex justify-between items-center mb-6">
@@ -76,62 +79,76 @@ const RankingCharts: React.FC<RankingChartsProps> = ({
 
         <TabsContent value="performance" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <DistrictPerformanceChart 
-              data={{}} 
-              sgzData={sgzData} 
-              isLoading={isLoading} 
-              isSimulationActive={isSimulationActive} 
-            />
-            <EvolutionChart 
-              data={{}} 
-              sgzData={sgzData} 
-              painelData={painelData} 
-              isLoading={isLoading} 
-              isSimulationActive={isSimulationActive} 
-            />
+            {chartVisibility.districtPerformance && (
+              <DistrictPerformanceChart 
+                data={emptyData} 
+                sgzData={sgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+              />
+            )}
+            {chartVisibility.evolution && (
+              <EvolutionChart 
+                data={emptyData} 
+                sgzData={sgzData} 
+                painelData={painelData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+              />
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ResolutionTimeChart 
-              data={{}} 
-              sgzData={sgzData} 
-              isLoading={isLoading} 
-              isSimulationActive={isSimulationActive} 
-            />
-            <OldestPendingList 
-              data={{}} 
-              sgzData={sgzData} 
-              isLoading={isLoading} 
-              isSimulationActive={isSimulationActive} 
-            />
+            {chartVisibility.resolutionTime && (
+              <ResolutionTimeChart 
+                data={emptyData} 
+                sgzData={sgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+              />
+            )}
+            {chartVisibility.oldestPendingList && (
+              <OldestPendingList 
+                data={emptyData} 
+                sgzData={sgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+              />
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="distribution" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ServiceTypesChart 
-              data={{}} 
-              sgzData={sgzData} 
-              isLoading={isLoading} 
-              isSimulationActive={isSimulationActive} 
-            />
-            <ResponsibilityChart 
-              data={{}} 
-              sgzData={sgzData} 
-              painelData={painelData} 
-              isLoading={isLoading} 
-              isSimulationActive={isSimulationActive} 
-            />
+            {chartVisibility.serviceTypes && (
+              <ServiceTypesChart 
+                data={emptyData} 
+                sgzData={sgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+              />
+            )}
+            {chartVisibility.responsibility && (
+              <ResponsibilityChart 
+                data={emptyData} 
+                sgzData={sgzData} 
+                painelData={painelData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+              />
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="departments" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <DepartmentComparisonChart 
-              data={{}} 
-              sgzData={sgzData} 
-              isLoading={isLoading} 
-              isSimulationActive={isSimulationActive} 
-            />
+            {chartVisibility.departmentComparison && (
+              <DepartmentComparisonChart 
+                data={emptyData} 
+                sgzData={sgzData} 
+                isLoading={isLoading} 
+                isSimulationActive={isSimulationActive} 
+              />
+            )}
             {/* We can add more department-specific charts here */}
           </div>
         </TabsContent>

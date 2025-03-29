@@ -6,6 +6,14 @@ export interface FilterOptions {
   districts: string[];
 }
 
+export interface ChartFilter {
+  dataInicio?: Date;
+  dataFim?: Date;
+  distritos?: string[];
+  tiposServico?: string[];
+  status?: string[];
+}
+
 export interface ChartVisibility {
   statusDistribution: boolean;
   resolutionTime: boolean;

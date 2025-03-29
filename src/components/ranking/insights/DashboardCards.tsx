@@ -17,7 +17,15 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
   uploadId,
   isSimulationActive = false
 }) => {
+  console.log("DashboardCards rendering with data:", { 
+    planilhaLength: dadosPlanilha?.length, 
+    painelLength: dadosPainel?.length, 
+    uploadId 
+  });
+  
   const { indicadores, isLoading } = useChatGPTInsight(dadosPlanilha, uploadId);
+  
+  console.log("Loaded indicators:", indicadores, "isLoading:", isLoading);
   
   // Apply simulation adjustments to indicators if simulation is active
   const simulatedIndicadores = React.useMemo(() => {

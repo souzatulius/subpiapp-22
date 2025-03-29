@@ -23,7 +23,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const [dadosSGZ, setDadosSGZ] = useState<any[] | null>(null);
   const [dadosPainel, setDadosPainel] = useState<any[] | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("all");
   const [isSimulationActive, setIsSimulationActive] = useState(false);
 
   const { 
@@ -35,12 +34,14 @@ const RankingContent: React.FC<RankingContentProps> = ({
   } = useFilterManagement();
 
   const handleUploadComplete = (id: string, data: any[]) => {
+    console.log('SGZ Upload complete', id, data.length);
     setUploadId(id);
     setDadosSGZ(data);
     setIsUploading(false);
   };
 
   const handlePainelUploadComplete = (id: string, data: any[]) => {
+    console.log('Painel Upload complete', id, data.length);
     setDadosPainel(data);
     setIsUploading(false);
   };
