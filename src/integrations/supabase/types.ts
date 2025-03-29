@@ -980,6 +980,7 @@ export type Database = {
           id: string
           nome_arquivo: string
           processado: boolean | null
+          upload_id: string | null
           usuario_id: string
         }
         Insert: {
@@ -988,6 +989,7 @@ export type Database = {
           id?: string
           nome_arquivo: string
           processado?: boolean | null
+          upload_id?: string | null
           usuario_id: string
         }
         Update: {
@@ -996,9 +998,68 @@ export type Database = {
           id?: string
           nome_arquivo?: string
           processado?: boolean | null
+          upload_id?: string | null
           usuario_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_upload_id"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "painel_zeladoria_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      painel_zeladoria_dados: {
+        Row: {
+          created_at: string | null
+          data_abertura: string | null
+          data_fechamento: string | null
+          departamento: string | null
+          distrito: string | null
+          id: string
+          id_os: string
+          responsavel_real: string | null
+          status: string | null
+          tipo_servico: string | null
+          upload_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_abertura?: string | null
+          data_fechamento?: string | null
+          departamento?: string | null
+          distrito?: string | null
+          id?: string
+          id_os: string
+          responsavel_real?: string | null
+          status?: string | null
+          tipo_servico?: string | null
+          upload_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_abertura?: string | null
+          data_fechamento?: string | null
+          departamento?: string | null
+          distrito?: string | null
+          id?: string
+          id_os?: string
+          responsavel_real?: string | null
+          status?: string | null
+          tipo_servico?: string | null
+          upload_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "painel_zeladoria_dados_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "painel_zeladoria"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       painel_zeladoria_insights: {
         Row: {

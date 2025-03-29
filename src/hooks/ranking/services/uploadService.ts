@@ -1,15 +1,14 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { processExcelFile, mapExcelRowToSGZOrdem } from '../utils/excelUtils';
 import { UploadResult } from '../types/uploadTypes';
 import { toast } from 'sonner';
+import { compararBases, salvarComparacaoNaBase } from '../utils/compararBases';
 
 export const fetchLastUpload = async (user: User | null) => {
   if (!user) return { lastUpload: null, uploads: [] };
   
   try {
-    // Buscar o upload mais recente no Supabase
     const { data, error } = await supabase
       .from('sgz_uploads')
       .select('*')
@@ -25,7 +24,6 @@ export const fetchLastUpload = async (user: User | null) => {
       processed: data[0].processado
     } : null;
     
-    // Buscar todos os uploads para histórico
     const { data: allUploads, error: uploadsError } = await supabase
       .from('sgz_uploads')
       .select('*')
@@ -37,7 +35,6 @@ export const fetchLastUpload = async (user: User | null) => {
       lastUpload,
       uploads: allUploads || []
     };
-    
   } catch (error) {
     console.error('Error fetching last upload:', error);
     toast.error('Erro ao buscar o último upload');
@@ -64,7 +61,6 @@ export const handleFileUpload = async (
       processingStatus: 'processing'
     });
     
-    // Verificar tipo de arquivo
     if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
       toast.error('Formato de arquivo inválido. Por favor, carregue um arquivo Excel (.xlsx ou .xls)');
       onProgress(0);
@@ -72,12 +68,10 @@ export const handleFileUpload = async (
       return null;
     }
     
-    // Processar arquivo Excel
     onProgress(25);
     const excelData = await processExcelFile(file);
     console.log(`Processed ${excelData.length} rows from Excel file`);
     
-    // Criar o registro de upload
     const { data: uploadData, error: uploadError } = await supabase
       .from('sgz_uploads')
       .insert({
@@ -93,7 +87,6 @@ export const handleFileUpload = async (
     const uploadId = uploadData.id;
     console.log(`Created upload record with ID: ${uploadId}`);
     
-    // Processar e inserir cada linha da planilha
     const ordens = [];
     const ordensParaInserir = [];
     let ordensAtualizadas = 0;
@@ -104,7 +97,6 @@ export const handleFileUpload = async (
       const ordem = mapExcelRowToSGZOrdem(row, uploadId);
       ordens.push(ordem);
       
-      // Verificar se esta ordem já existe
       const { data: existingOrdem, error: checkError } = await supabase
         .from('sgz_ordens_servico')
         .select('id, sgz_status')
@@ -114,7 +106,6 @@ export const handleFileUpload = async (
       if (checkError) throw checkError;
       
       if (existingOrdem) {
-        // Se existir e o status mudou, atualizar
         if (existingOrdem.sgz_status !== ordem.sgz_status) {
           const { error: updateError } = await supabase
             .from('sgz_ordens_servico')
@@ -129,12 +120,10 @@ export const handleFileUpload = async (
           ordensAtualizadas++;
         }
       } else {
-        // Se não existir, adicionar à lista para inserção
         ordensParaInserir.push(ordem);
       }
     }
     
-    // Update progress based on processing status
     onProgress(85); 
     onProcessingStats({
       newOrders: ordensParaInserir.length,
@@ -142,7 +131,6 @@ export const handleFileUpload = async (
       processingStatus: 'processing'
     });
     
-    // Inserir novas ordens em lote
     if (ordensParaInserir.length > 0) {
       const { error: insertError } = await supabase
         .from('sgz_ordens_servico')
@@ -153,7 +141,6 @@ export const handleFileUpload = async (
       console.log(`Inserted ${ordensParaInserir.length} new orders`);
     }
     
-    // Marcar upload como processado
     const { error: updateUploadError } = await supabase
       .from('sgz_uploads')
       .update({ processado: true })
@@ -171,7 +158,6 @@ export const handleFileUpload = async (
     
     toast.success(`Planilha SGZ processada com sucesso! ${ordensParaInserir.length} novas ordens inseridas e ${ordensAtualizadas} atualizadas.`);
     
-    // Return the result with proper types
     return {
       id: uploadId,
       data: excelData
@@ -194,7 +180,6 @@ export const handleDeleteUpload = async (uploadId: string, user: User | null) =>
   if (!user) return;
 
   try {
-    // Primeiro excluir as ordens associadas a este upload
     const { error: deleteOrdensError } = await supabase
       .from('sgz_ordens_servico')
       .delete()
@@ -202,7 +187,6 @@ export const handleDeleteUpload = async (uploadId: string, user: User | null) =>
     
     if (deleteOrdensError) throw deleteOrdensError;
     
-    // Depois excluir o upload
     const { error: deleteUploadError } = await supabase
       .from('sgz_uploads')
       .delete()
@@ -216,5 +200,96 @@ export const handleDeleteUpload = async (uploadId: string, user: User | null) =>
     console.error('Error deleting upload:', error);
     toast.error('Erro ao excluir o upload');
     return false;
+  }
+};
+
+export const handlePainelZeladoriaUpload = async (
+  file: File, 
+  user: User | null,
+  onProgress: (progress: number) => void,
+  onProcessingStats: (stats: any) => void
+): Promise<UploadResult | null> => {
+  if (!user) {
+    toast.error('Você precisa estar logado para fazer upload');
+    return null;
+  }
+
+  try {
+    onProgress(10);
+    onProcessingStats({
+      processingStatus: 'processing',
+      message: 'Processando dados do Painel da Zeladoria...',
+      recordCount: 0
+    });
+    
+    const dadosPainel = await processExcelFile(file);
+    onProgress(50);
+    
+    const { data: sgzData, error: sgzError } = await supabase
+      .from('sgz_ordens_servico')
+      .select('*');
+    
+    if (sgzError) throw sgzError;
+    
+    const { data: uploadData, error: uploadError } = await supabase
+      .from('painel_zeladoria_uploads')
+      .insert({
+        nome_arquivo: file.name,
+        usuario_email: user.email || '',
+      })
+      .select()
+      .single();
+    
+    if (uploadError) throw uploadError;
+    
+    const uploadId = uploadData.id;
+    
+    const resultadoComparacao = compararBases(sgzData, dadosPainel);
+    const comparacaoSalva = await salvarComparacaoNaBase(resultadoComparacao, uploadId);
+    
+    const dadosParaInserir = dadosPainel.map(row => ({
+      id_os: row.id_os,
+      status: row.status,
+      tipo_servico: row.tipo_servico,
+      data_abertura: row.data_abertura,
+      data_fechamento: row.data_fechamento,
+      distrito: row.distrito,
+      departamento: row.departamento,
+      responsavel_real: row.responsavel_real,
+      upload_id: uploadId
+    }));
+    
+    const { error: insertError } = await supabase
+      .from('painel_zeladoria_dados')
+      .insert(dadosParaInserir);
+    
+    if (insertError) throw insertError;
+    
+    onProgress(100);
+    onProcessingStats({
+      processingStatus: 'success',
+      message: 'Dados do Painel processados com sucesso!',
+      recordCount: dadosParaInserir.length,
+      comparacaoStats: comparacaoSalva
+    });
+    
+    toast.success(
+      `Planilha do Painel processada com ${comparacaoSalva.totalDivergencias} divergências encontradas.`
+    );
+    
+    return {
+      id: uploadId,
+      data: dadosParaInserir
+    };
+  } catch (error: any) {
+    console.error('Erro ao processar planilha do Painel:', error);
+    onProgress(0);
+    onProcessingStats({
+      processingStatus: 'error',
+      message: error.message || 'Falha no processamento',
+      recordCount: 0
+    });
+    toast.error(`Erro ao processar planilha do Painel: ${error.message || 'Falha no processamento'}`);
+    return null;
   }
 };
