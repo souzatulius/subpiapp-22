@@ -29,4 +29,10 @@ ChartJS.register(
   Filler
 );
 
+// Ensure all scales are properly registered
+ChartJS.defaults.scale.grid = { 
+  color: 'rgba(200, 200, 200, 0.2)' 
+};
+
 // This is just a registration file, not a component
+export default ChartJS;

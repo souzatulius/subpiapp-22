@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart3, SlidersHorizontal } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
 import { motion } from 'framer-motion';
 import WelcomeCard from '@/components/shared/WelcomeCard';
+// Import Chart registration to ensure scales are registered
+import '@/components/ranking/charts/ChartRegistration';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);

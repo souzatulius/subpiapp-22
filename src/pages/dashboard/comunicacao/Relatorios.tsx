@@ -4,6 +4,8 @@ import { PieChart, SlidersHorizontal, PlusCircle } from 'lucide-react';
 import { RelatoriosContent } from '@/components/relatorios';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import FilterDialog from '@/components/relatorios/filters/FilterDialog';
+// Import Chart registration to ensure scales are registered
+import '@/components/ranking/charts/ChartRegistration';
 
 const RelatoriosPage = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import { RelatoriosContent } from '@/components/relatorios';
@@ -7,6 +7,8 @@ import { PieChart, SlidersHorizontal, PlusCircle } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 import { motion } from 'framer-motion';
+// Import Chart registration to ensure scales are registered
+import '@/components/ranking/charts/ChartRegistration';
 
 const Relatorios = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
