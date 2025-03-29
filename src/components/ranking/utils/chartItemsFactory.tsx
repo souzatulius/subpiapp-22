@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChartVisibility } from '../types';
-import { ChartItem } from '../hooks/useChartItemsState';
+import { ChartItem } from '../types';
 
 interface CreateChartItemsProps {
   chartData: any;
@@ -18,14 +18,16 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
   
   const items: ChartItem[] = [];
   
-  // Status Distribution Chart
-  if (chartVisibility.statusDistribution) {
+  // District Performance Chart
+  if (chartVisibility.districtPerformance) {
     items.push({
-      id: 'statusDistribution',
-      title: 'Distribuição de Status',
-      component: <div>Status Distribution Chart</div>,
-      isVisible: !hiddenCharts.includes('statusDistribution'),
-      analysis: 'Análise da distribuição de status',
+      id: 'districtPerformance',
+      title: 'Performance por Distrito',
+      component: <div>District Performance Chart</div>,
+      isVisible: !hiddenCharts.includes('districtPerformance'),
+      analysis: 'Análise da performance por distrito',
+      isAnalysisExpanded: false,
+      showAnalysisOnly: false
     });
   }
   
@@ -37,17 +39,21 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
       component: <div>Resolution Time Chart</div>,
       isVisible: !hiddenCharts.includes('resolutionTime'),
       analysis: 'Análise do tempo de resolução',
+      isAnalysisExpanded: false,
+      showAnalysisOnly: false
     });
   }
   
-  // Companies Chart
-  if (chartVisibility.topCompanies) {
+  // Responsibility Chart
+  if (chartVisibility.responsibility) {
     items.push({
-      id: 'topCompanies',
-      title: 'Principais Empresas',
-      component: <div>Top Companies Chart</div>,
-      isVisible: !hiddenCharts.includes('topCompanies'),
-      analysis: 'Análise das principais empresas',
+      id: 'responsibility',
+      title: 'Responsabilidade',
+      component: <div>Responsibility Chart</div>,
+      isVisible: !hiddenCharts.includes('responsibility'),
+      analysis: 'Análise da responsabilidade',
+      isAnalysisExpanded: false,
+      showAnalysisOnly: false
     });
   }
   

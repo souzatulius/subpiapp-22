@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -98,7 +99,7 @@ export const useDefaultDashboardConfig = () => {
 
       // Reset: Apagar customizações antigas dos usuários
       await supabase
-        .from('user_dashboards')
+        .from('user_dashboard')  // Changed from user_dashboards to user_dashboard
         .delete()
         .eq('department', selectedDepartment)
         .eq('view_type', selectedViewType);

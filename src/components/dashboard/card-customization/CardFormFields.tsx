@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   FormField,
@@ -41,7 +42,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
   selectedIconId,
   setSelectedIconId
 }) => {
-  const watchType = form.watch('type');
+  const watchType = form.watch("type");
 
   return (
     <div className="space-y-4">
@@ -84,7 +85,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
       />
 
       {/* Fonte de Dados */}
-      {watchType === 'data_dynamic' && (
+      {watchType === "data_dynamic" && (
         <FormField
           control={form.control}
           name="dataSourceKey"
@@ -92,7 +93,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
             <FormItem>
               <FormLabel>Fonte de Dados</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a fonte de dados" />
                   </SelectTrigger>
@@ -112,7 +113,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
       )}
 
       {/* Direcionamento (opcional para data_dynamic) */}
-      {watchType !== 'data_dynamic' && (
+      {watchType !== "data_dynamic" && (
         <FormField
           control={form.control}
           name="path"
@@ -120,7 +121,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
             <FormItem>
               <FormLabel>Direcionamento do Card</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma página" />
                   </SelectTrigger>
@@ -188,7 +189,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
             <FormControl>
               <MultiSelect
                 selected={field.value || []}
-                onChange={field.onChange}
+                onChange={(values) => field.onChange(values)}
                 placeholder="Selecione departamentos"
                 options={[
                   { label: 'Comunicação', value: 'ae3f06da-5cbe-4f23-8ad7-c019d31be124' }
@@ -209,7 +210,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
             <FormControl>
               <MultiSelect
                 selected={field.value || []}
-                onChange={field.onChange}
+                onChange={(values) => field.onChange(values)}
                 placeholder="Selecione cargos"
                 options={[
                   { label: 'Coordenador', value: 'coordenador' },

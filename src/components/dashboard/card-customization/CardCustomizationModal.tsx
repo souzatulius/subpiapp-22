@@ -21,11 +21,16 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
+      type: 'standard',
       path: '',
       color: 'blue',
       iconId: 'clipboard-list',
       width: '25',
-      height: '1'
+      height: '1',
+      allowedDepartments: [],
+      allowedRoles: [],
+      displayMobile: true,
+      mobileOrder: 0
     }
   });
 
@@ -36,21 +41,32 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       const iconId = identifyIconComponent(initialData.icon);
       form.reset({
         title: initialData.title,
+        type: initialData.type || 'standard',
         path: initialData.path,
         color: initialData.color,
         iconId: iconId,
         width: initialData.width || '25',
-        height: initialData.height || '1'
+        height: initialData.height || '1',
+        dataSourceKey: initialData.dataSourceKey,
+        allowedDepartments: initialData.allowedDepartments || [],
+        allowedRoles: initialData.allowedRoles || [],
+        displayMobile: initialData.displayMobile ?? true,
+        mobileOrder: initialData.mobileOrder || 0
       });
       setSelectedIconId(iconId);
     } else {
       form.reset({
         title: '',
+        type: 'standard',
         path: '',
         color: 'blue',
         iconId: 'clipboard-list',
         width: '25',
-        height: '1'
+        height: '1',
+        allowedDepartments: [],
+        allowedRoles: [],
+        displayMobile: true,
+        mobileOrder: 0
       });
       setSelectedIconId('clipboard-list');
     }
@@ -59,12 +75,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   const handleSubmit = (data: FormSchema) => {
     const iconComponent = getIconComponentById(data.iconId);
     onSave({
-      title: data.title,
-      path: data.path,
-      color: data.color,
+      ...data,
       icon: iconComponent,
-      width: data.width,
-      height: data.height
     });
   };
 

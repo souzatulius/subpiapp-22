@@ -10,6 +10,7 @@ import { useDashboardState } from '@/hooks/useDashboardState';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Home, PlusCircle } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ActionCardItem } from '@/hooks/dashboard/types';
 
 const Dashboard = () => {
   // Start with sidebar collapsed
@@ -42,6 +43,31 @@ const Dashboard = () => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  // Adapt the handler to match CardCustomizationModal's expected format
+  const handleSaveCardAdapter = (data: { 
+    title: string; 
+    icon: React.ReactNode; 
+    path: string;
+    color: ActionCardItem['color'];
+    width?: ActionCardItem['width'];
+    height?: ActionCardItem['height'];
+    type?: ActionCardItem['type'];
+    dataSourceKey?: string;
+    allowedDepartments?: string[];
+    allowedRoles?: string[];
+    displayMobile?: boolean;
+    mobileOrder?: number;
+  }) => {
+    // Extract iconId from the icon component
+    const iconComponent = data.icon;
+    
+    // Pass the full data to the original handler
+    handleSaveCard({
+      ...data,
+      iconId: editingCard?.iconId || 'clipboard-list', // Use existing or default
+    });
   };
 
   return (
@@ -141,7 +167,7 @@ const Dashboard = () => {
       <CardCustomizationModal
         isOpen={isCustomizationModalOpen}
         onClose={() => setIsCustomizationModalOpen(false)}
-        onSave={handleSaveCard}
+        onSave={handleSaveCardAdapter}
         initialData={editingCard || undefined}
       />
     </div>

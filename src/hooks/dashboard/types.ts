@@ -15,7 +15,7 @@ export interface SerializableCard {
   id: string;
   title: string;
   path: string;
-  color: string;
+  color: "blue" | "green" | "orange" | "gray-light" | "gray-dark" | "blue-dark" | "orange-light" | "gray-ultra-light" | "lime" | "orange-600";
   iconId: string;
   width?: '25' | '50' | '75' | '100';
   height?: '1' | '2';
@@ -43,6 +43,7 @@ export interface ActionCardItem extends Omit<SerializableCard, 'iconId'> {
   mobileOrder?: number;
   type?: 'standard' | 'data_dynamic';
   dataSourceKey?: string;
+  color: "blue" | "green" | "orange" | "gray-light" | "gray-dark" | "blue-dark" | "orange-light" | "gray-ultra-light" | "lime" | "orange-600";
 }
 
 // Esquema do formulário com todos os campos que aparecem no CardFormFields
@@ -51,7 +52,7 @@ export interface FormSchema {
   type?: 'standard' | 'data_dynamic';
   dataSourceKey?: string;
   path?: string;
-  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light' | 'lime' | 'orange-600';
+  color: "blue" | "green" | "orange" | "gray-light" | "gray-dark" | "blue-dark" | "orange-light" | "gray-ultra-light" | "lime" | "orange-600";
   iconId: string;
   width?: '25' | '50' | '75' | '100';
   height?: '1' | '2';

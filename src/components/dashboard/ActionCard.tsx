@@ -8,7 +8,7 @@ export interface ActionCardProps {
   title: string;
   icon: ReactNode;
   path: string;
-  color: 'blue' | 'green' | 'orange' | 'gray-light' | 'gray-dark' | 'blue-dark' | 'orange-light' | 'gray-ultra-light' | 'lime' | 'orange-600';
+  color: "blue" | "green" | "orange" | "gray-light" | "gray-dark" | "blue-dark" | "orange-light" | "gray-ultra-light" | "lime" | "orange-600";
   isDraggable?: boolean;
   width?: '25' | '50' | '75' | '100';
   height?: '1' | '2'; 
