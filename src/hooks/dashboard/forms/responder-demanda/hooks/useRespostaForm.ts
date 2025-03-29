@@ -1,9 +1,8 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { toast } from '@/components/ui/use-toast';
 import { Demanda } from '../types';
+import { useRespostaSubmission } from './useRespostaSubmission';
+import { toast } from '@/components/ui/use-toast';
 
 export const useRespostaForm = (
   selectedDemanda: Demanda | null,
@@ -13,91 +12,90 @@ export const useRespostaForm = (
   filteredDemandas: Demanda[],
   setFilteredDemandas: (demandas: Demanda[]) => void
 ) => {
-  const { user } = useAuth();
   const [resposta, setResposta] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmitResposta = async () => {
-    if (!selectedDemanda || Object.keys(resposta).length === 0) {
+  const [comentarios, setComentarios] = useState<string>('');
+  
+  const { isSubmitting, submitResposta } = useRespostaSubmission({
+    onSuccess: () => {
+      // Update local state to remove the answered demand
+      if (selectedDemanda) {
+        console.log("Resposta enviada com sucesso. Atualizando listas locais.");
+        setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
+        setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
+        setSelectedDemanda(null);
+        setResposta({});
+        setComentarios('');
+        
+        toast({
+          title: "Resposta enviada",
+          description: "A demanda foi respondida com sucesso."
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("Erro ao enviar resposta:", error);
       toast({
-        title: "Resposta não pode ser vazia",
-        description: "Por favor, responda todas as perguntas da demanda.",
+        title: "Erro ao enviar resposta",
+        description: "Ocorreu um erro ao enviar a resposta. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleRespostaChange = (key: string, value: string) => {
+    setResposta(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleSubmitResposta = async (): Promise<void> => {
+    console.log("handleSubmitResposta chamado", { selectedDemanda, resposta, comentarios });
+    
+    if (!selectedDemanda) {
+      console.error("Nenhuma demanda selecionada");
+      toast({
+        title: "Erro",
+        description: "Nenhuma demanda selecionada para resposta.",
         variant: "destructive"
       });
       return;
     }
     
-    try {
-      setIsLoading(true);
-
-      // Update the demand status to "in progress"
-      const { error: updateError } = await supabase
-        .from('demandas')
-        .update({
-          status: 'em_andamento'  // Update status to show it's being processed
-        })
-        .eq('id', selectedDemanda.id);
-        
-      if (updateError) throw updateError;
-
-      // Generate a text summary of responses
-      const respostasText = Object.entries(resposta)
-        .map(([key, value]) => {
-          const perguntaText = Array.isArray(selectedDemanda.perguntas) 
-            ? selectedDemanda.perguntas[parseInt(key)]
-            : selectedDemanda.perguntas?.[key] || '';
-          return `Pergunta: ${perguntaText}\nResposta: ${value}`;
-        })
-        .join('\n\n');
-
-      // Then create the response with both text and JSON format
-      const { error: respostaError } = await supabase
-        .from('respostas_demandas')
-        .insert({
-          demanda_id: selectedDemanda.id,
-          usuario_id: user?.id,
-          respostas: resposta,
-          texto: respostasText // Add required texto field
-        });
-        
-      if (respostaError) throw respostaError;
-
-      // Finally update status to responded
-      const { error: statusError } = await supabase
-        .from('demandas')
-        .update({
-          status: 'respondida'
-        })
-        .eq('id', selectedDemanda.id);
-        
-      if (statusError) throw statusError;
-      
+    if (Object.keys(resposta).length === 0) {
+      console.error("Nenhuma resposta fornecida");
       toast({
-        title: "Resposta enviada com sucesso!",
-        description: "A demanda foi respondida e seu status foi atualizado."
-      });
-
-      // Update local state
-      setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
-      setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
-      setSelectedDemanda(null);
-      setResposta({});
-    } catch (error: any) {
-      console.error('Erro ao enviar resposta:', error);
-      toast({
-        title: "Erro ao enviar resposta",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        title: "Erro",
+        description: "Por favor, forneça respostas para todas as perguntas.",
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
+    
+    // Verificar se todas as perguntas foram respondidas
+    const hasEmptyAnswers = Object.values(resposta).some(r => !r || r.trim() === '');
+    if (hasEmptyAnswers) {
+      console.error("Algumas respostas estão vazias");
+      toast({
+        title: "Validação",
+        description: "Por favor, responda a todas as perguntas antes de enviar.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Chamamos a função submitResposta do hook useRespostaSubmission
+    const result = await submitResposta(selectedDemanda, resposta, comentarios);
+    console.log("Resultado do submitResposta:", result);
   };
 
   return {
     resposta,
     setResposta,
-    isLoading,
-    handleSubmitResposta
+    comentarios,
+    setComentarios,
+    isLoading: isSubmitting,
+    handleSubmitResposta,
+    handleRespostaChange
   };
 };

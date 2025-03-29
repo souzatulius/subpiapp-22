@@ -19,18 +19,6 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
   const { validateResposta } = useRespostaValidation();
 
   /**
-   * Updates the demand status
-   */
-  const updateDemandaStatus = async (demandaId: string, status: string) => {
-    const { error } = await supabase
-      .from('demandas')
-      .update({ status })
-      .eq('id', demandaId);
-    
-    if (error) throw error;
-  };
-
-  /**
    * Submits the response to the database
    */
   const submitResposta = async (
@@ -60,9 +48,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
       setIsSubmitting(true);
       console.log("Setting status to em_andamento");
 
-      // Set status to "in progress" to indicate we're handling it
-      await updateDemandaStatus(selectedDemanda.id, 'em_andamento');
-
+      // First, save the response without changing the status
       // Generate text summary of responses
       const respostasText = formatRespostaText(selectedDemanda, resposta);
       console.log("Generated respostasText", respostasText);
@@ -83,13 +69,25 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
         throw respostaError;
       }
 
-      console.log("Response inserted, updating status to respondida");
-      // Update status to "responded"
-      await updateDemandaStatus(selectedDemanda.id, 'respondida');
+      console.log("Response inserted successfully");
+      
+      // Now try to update the status to "em_andamento"
+      // This is safer since the response is already saved
+      try {
+        await supabase
+          .from('demandas')
+          .update({ status: 'em_andamento' })
+          .eq('id', selectedDemanda.id);
+          
+        console.log("Status updated to em_andamento");
+      } catch (statusError) {
+        console.warn("Could not update status to em_andamento, continuing anyway", statusError);
+        // We continue anyway since the response is saved
+      }
       
       toast({
         title: "Resposta enviada com sucesso!",
-        description: "A demanda foi respondida e seu status foi atualizado."
+        description: "A demanda foi respondida."
       });
 
       if (options?.onSuccess) {
