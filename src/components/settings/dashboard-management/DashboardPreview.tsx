@@ -3,6 +3,7 @@ import React from 'react';
 import CardGrid from '@/components/dashboard/CardGrid';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
+import DashboardActions from '@/components/dashboard/DashboardActions';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -42,6 +43,8 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
       <h3 className="text-lg font-medium mb-4 text-gray-700">
         Visualização do Dashboard {departmentName ? `- ${departmentName}` : ''}
       </h3>
+      
+      <DashboardActions onAddNewCard={handleAddNewCard} />
       
       <CardGrid
         cards={cards}

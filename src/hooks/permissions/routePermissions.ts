@@ -1,3 +1,4 @@
+
 /**
  * Funções utilitárias para checar permissões de rota
  */
@@ -24,7 +25,8 @@ export const canAccessProtectedRoute = (route: string, isAdmin: boolean): boolea
     '/cadastrar-demanda',
     '/consultar-demandas',
     '/criar-nota-oficial',
-    '/consultar-notas'
+    '/consultar-notas',
+    '/settings/dashboard-management'
   ];
 
   // Permitir rotas públicas
