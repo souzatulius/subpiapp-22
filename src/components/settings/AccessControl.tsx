@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,9 +8,7 @@ import { Loader2 } from 'lucide-react';
 
 const AccessControl: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'coordenadores' | 'supervisores'>('coordenadores');
-  const [userInfoOpen, setUserInfoOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  
+
   const {
     users,
     permissions,
@@ -19,34 +16,12 @@ const AccessControl: React.FC = () => {
     loading,
     saving,
     handleAddPermission,
-    handleRemovePermission,
-    openEditDialog,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    currentUser,
-    handleUpdateUserInfo
+    handleRemovePermission
   } = useAccessControl();
   
-  // Filter users based on tab
   const coordenadores = users.filter(user => user.type === 'coordenacao');
   const supervisores = users.filter(user => user.type === 'supervisao_tecnica');
 
-  const handleOpenUserInfo = (user: User) => {
-    setSelectedUser(user);
-    setUserInfoOpen(true);
-  };
-
-  const handleSaveUserInfo = async (userId: string, data: { whatsapp?: string; aniversario?: string }) => {
-    try {
-      // Update user info and refresh data
-      await handleUpdateUserInfo(userId, data);
-      setUserInfoOpen(false);
-    } catch (error) {
-      console.error('Erro ao salvar informações do usuário:', error);
-    }
-  };
-
-  // Adaptadores para manter a compatibilidade com o uso dos handlers
   const handleAddPermissionAdapter = (userId: string, permissionId: string) => {
     return handleAddPermission(userId, permissionId, selectedTab === 'supervisores');
   };
@@ -66,9 +41,7 @@ const AccessControl: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Controle de Acesso</h1>
-      </div>
+      <h1 className="text-2xl font-bold tracking-tight">Controle de Acesso</h1>
       
       <Card>
         <CardContent className="p-6">
@@ -88,7 +61,6 @@ const AccessControl: React.FC = () => {
                 permissions={permissions}
                 userPermissions={userPermissions}
                 isLoading={loading}
-                onOpenUserInfo={handleOpenUserInfo}
                 onAddPermission={handleAddPermissionAdapter}
                 onRemovePermission={handleRemovePermissionAdapter}
                 isSaving={saving}
@@ -101,7 +73,6 @@ const AccessControl: React.FC = () => {
                 permissions={permissions}
                 userPermissions={userPermissions}
                 isLoading={loading}
-                onOpenUserInfo={handleOpenUserInfo}
                 onAddPermission={handleAddPermissionAdapter}
                 onRemovePermission={handleRemovePermissionAdapter}
                 isSaving={saving}
@@ -110,13 +81,6 @@ const AccessControl: React.FC = () => {
           </Tabs>
         </CardContent>
       </Card>
-      
-      <UserInfoDialog
-        open={userInfoOpen}
-        onOpenChange={setUserInfoOpen}
-        user={selectedUser}
-        onSave={handleSaveUserInfo}
-      />
     </div>
   );
 };
@@ -128,31 +92,19 @@ interface AccessControlTableProps {
   permissions: any[];
   userPermissions: Record<string, string[]>;
   isLoading: boolean;
-  onOpenUserInfo: (user: User) => void;
   onAddPermission: (userId: string, permissionId: string) => Promise<void>;
   onRemovePermission: (userId: string, permissionId: string) => Promise<void>;
   isSaving: boolean;
 }
 
-// Common table component for both tabs
 const AccessControlTable: React.FC<AccessControlTableProps> = ({
   users,
   permissions,
   userPermissions,
-  isLoading,
-  onOpenUserInfo,
   onAddPermission,
   onRemovePermission,
   isSaving
 }) => {
-  if (users.length === 0) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-muted-foreground">Nenhum registro encontrado.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <table className="w-full border-collapse">
@@ -160,15 +112,12 @@ const AccessControlTable: React.FC<AccessControlTableProps> = ({
           <tr className="bg-muted">
             <th className="text-left p-2 border-b">Nome</th>
             <th className="text-left p-2 border-b">Permissões</th>
-            <th className="text-right p-2 border-b">Ações</th>
           </tr>
         </thead>
         <tbody>
           {users.map(user => (
             <tr key={user.id} className="border-b">
-              <td className="p-2">
-                <div className="font-medium">{user.nome_completo}</div>
-              </td>
+              <td className="p-2 font-medium">{user.nome_completo}</td>
               <td className="p-2">
                 <div className="flex flex-wrap gap-1">
                   {permissions.map(permission => {
@@ -195,104 +144,10 @@ const AccessControlTable: React.FC<AccessControlTableProps> = ({
                   })}
                 </div>
               </td>
-              <td className="p-2 text-right">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onOpenUserInfo(user)}
-                >
-                  Detalhes
-                </Button>
-              </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
-  );
-};
-
-// Define a simple UserInfoDialog component
-const UserInfoDialog: React.FC<{
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  user: User | null;
-  onSave: (userId: string, data: { whatsapp?: string; aniversario?: string }) => Promise<void>;
-}> = ({ open, onOpenChange, user, onSave }) => {
-  const [whatsapp, setWhatsapp] = useState('');
-  const [aniversario, setAniversario] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Set initial values when user changes
-  React.useEffect(() => {
-    if (user) {
-      setWhatsapp(user.whatsapp || '');
-      setAniversario(user.aniversario || '');
-    }
-  }, [user]);
-
-  const handleSave = async () => {
-    if (!user) return;
-    
-    setIsSaving(true);
-    try {
-      await onSave(user.id, {
-        whatsapp,
-        aniversario
-      });
-    } catch (error) {
-      console.error('Erro ao salvar:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">{user?.nome_completo}</h2>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">WhatsApp</label>
-            <input 
-              type="text"
-              className="w-full p-2 border rounded"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="(99) 99999-9999"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">Aniversário</label>
-            <input 
-              type="date"
-              className="w-full p-2 border rounded"
-              value={aniversario}
-              onChange={(e) => setAniversario(e.target.value)}
-            />
-          </div>
-        </div>
-        
-        <div className="mt-6 flex justify-end space-x-2">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-            disabled={isSaving}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            {isSaving ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 };
