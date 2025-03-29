@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,14 +20,12 @@ export const useDefaultDashboardState = (departmentId: string) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    // Default cards will be loaded initially
     const loadInitialCards = () => {
       setCards(getDefaultCards());
     };
 
     loadInitialCards();
-    
-    // If we have a specific department, load its name
+
     const fetchDepartmentName = async () => {
       if (departmentId && departmentId !== 'default') {
         try {
@@ -37,12 +34,12 @@ export const useDefaultDashboardState = (departmentId: string) => {
             .select('descricao')
             .eq('id', departmentId)
             .single();
-          
+
           if (error) {
             console.error('Error fetching department name:', error);
             return;
           }
-          
+
           if (data) {
             setDepartmentName(data.descricao);
           }
@@ -53,7 +50,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
         setDepartmentName(departmentId === 'default' ? 'Padrão (Todos)' : '');
       }
     };
-    
+
     fetchDepartmentName();
   }, [departmentId]);
 
@@ -72,26 +69,36 @@ export const useDefaultDashboardState = (departmentId: string) => {
   };
 
   const handleSaveCard = (cardData: Partial<ActionCardItem>) => {
+    const newCardDefaults = {
+      displayMobile: true,
+      mobileOrder: cards.length
+    };
+
     if (editingCard) {
       // Edit existing card
-      setCards(cards.map(card => 
+      setCards(cards.map(card =>
         card.id === editingCard.id ? { ...card, ...cardData } : card
       ));
     } else {
       // Add new card
-      setCards([...cards, { id: `card-${Date.now()}`, ...cardData } as ActionCardItem]);
+      setCards([
+        ...cards,
+        {
+          id: `card-${Date.now()}`,
+          ...newCardDefaults,
+          ...cardData
+        } as ActionCardItem
+      ]);
     }
     setIsCustomizationModalOpen(false);
   };
 
   const handleQuickDemandSubmit = () => {
-    // Placeholder function for quick demand submission
     console.log('Submitting quick demand:', newDemandTitle);
     setNewDemandTitle('');
   };
 
   const handleSearchSubmit = (query: string) => {
-    // Placeholder function for search submission
     console.log('Searching for:', query);
   };
 
