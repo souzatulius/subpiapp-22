@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDashboardData } from '@/hooks/dashboard-management/useDashboardData';
+import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 
 interface DynamicDataCardProps {
   title: string;
