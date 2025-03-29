@@ -1,6 +1,13 @@
-
 import React from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
 import CardsContainer from './grid/CardsContainer';
 import { ActionCardItem } from '@/hooks/dashboard/types';
 
@@ -10,12 +17,7 @@ interface CardGridProps {
   onEditCard: (card: ActionCardItem) => void;
   onDeleteCard: (id: string) => void;
   onAddNewCard: () => void;
-  // New props for special cards
-  quickDemandTitle?: string;
-  onQuickDemandTitleChange?: (value: string) => void;
-  onQuickDemandSubmit?: () => void;
-  onSearchSubmit?: (query: string) => void;
-  // Special cards data
+  isMobileView?: boolean;
   specialCardsData?: {
     overdueCount: number;
     overdueItems: { title: string; id: string }[];
@@ -25,16 +27,13 @@ interface CardGridProps {
   };
 }
 
-const CardGrid: React.FC<CardGridProps> = ({ 
-  cards, 
-  onCardsChange, 
-  onEditCard, 
+const CardGrid: React.FC<CardGridProps> = ({
+  cards,
+  onCardsChange,
+  onEditCard,
   onDeleteCard,
   onAddNewCard,
-  quickDemandTitle = "",
-  onQuickDemandTitleChange = () => {},
-  onQuickDemandSubmit = () => {},
-  onSearchSubmit = () => {},
+  isMobileView = false,
   specialCardsData = {
     overdueCount: 0,
     overdueItems: [],
@@ -43,49 +42,41 @@ const CardGrid: React.FC<CardGridProps> = ({
     isLoading: false
   }
 }) => {
-  // Set up DnD sensors
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
     if (over && active.id !== over.id) {
       const oldIndex = cards.findIndex((item) => item.id === active.id);
       const newIndex = cards.findIndex((item) => item.id === over.id);
-      
-      // Create new array with the item moved
       const newCards = [...cards];
       const [movedItem] = newCards.splice(oldIndex, 1);
       newCards.splice(newIndex, 0, movedItem);
-      
       onCardsChange(newCards);
-      
-      // Toast message removed from here - no success message on card reorder
     }
   };
 
+  // Filtro e ordenação para mobile
+  const displayedCards = isMobileView
+    ? cards
+        .filter((card) => card.displayMobile !== false)
+        .sort((a, b) => (a.mobileOrder || 0) - (b.mobileOrder || 0))
+    : cards;
+
   return (
-    <DndContext 
+    <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <CardsContainer 
-        cards={cards}
+      <CardsContainer
+        cards={displayedCards}
         onEditCard={onEditCard}
         onDeleteCard={onDeleteCard}
         onAddNewCard={onAddNewCard}
-        quickDemandTitle={quickDemandTitle}
-        onQuickDemandTitleChange={onQuickDemandTitleChange}
-        onQuickDemandSubmit={onQuickDemandSubmit}
-        onSearchSubmit={onSearchSubmit}
         specialCardsData={specialCardsData}
       />
     </DndContext>
