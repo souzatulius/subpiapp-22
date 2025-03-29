@@ -14,12 +14,12 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import { dashboardPages } from './utils';
 import ColorOptions from './ColorOptions';
 import IconSelector from './IconSelector';
-import { Checkbox } from '@/components/ui/checkbox';
+import { MultiSelect } from '@/components/ui/multiselect'; // componente personalizado, caso você já tenha
 
 interface CardFormFieldsProps {
   form: UseFormReturn<FormSchema>;
@@ -27,13 +27,25 @@ interface CardFormFieldsProps {
   setSelectedIconId: (id: string) => void;
 }
 
+const dataSourceOptions = [
+  { label: 'Pendências da Coordenação', value: 'pendencias_por_coordenacao' },
+  { label: 'Notas aguardando aprovação', value: 'notas_aguardando_aprovacao' },
+  { label: 'Respostas atrasadas', value: 'respostas_atrasadas' },
+  { label: 'Demandas aguardando nota', value: 'demandas_aguardando_nota' },
+  { label: 'Últimas ações da coordenação', value: 'ultimas_acoes_coordenacao' },
+  { label: 'Comunicados por cargo', value: 'comunicados_por_cargo' }
+];
+
 const CardFormFields: React.FC<CardFormFieldsProps> = ({
   form,
   selectedIconId,
   setSelectedIconId
 }) => {
+  const watchType = form.watch('type');
+
   return (
     <div className="space-y-4">
+      {/* Título */}
       <FormField
         control={form.control}
         name="title"
@@ -48,23 +60,21 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         )}
       />
 
+      {/* Tipo de Card */}
       <FormField
         control={form.control}
-        name="path"
+        name="type"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Direcionamento do Card</FormLabel>
+            <FormLabel>Tipo do Card</FormLabel>
             <FormControl>
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma página" />
+                  <SelectValue placeholder="Selecione o tipo de card" />
                 </SelectTrigger>
                 <SelectContent>
-                  {dashboardPages.map((page) => (
-                    <SelectItem key={page.value} value={page.value}>
-                      {page.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="standard">Card padrão</SelectItem>
+                  <SelectItem value="data_dynamic">Card com dados</SelectItem>
                 </SelectContent>
               </Select>
             </FormControl>
@@ -73,6 +83,63 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         )}
       />
 
+      {/* Fonte de Dados */}
+      {watchType === 'data_dynamic' && (
+        <FormField
+          control={form.control}
+          name="dataSourceKey"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fonte de Dados</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a fonte de dados" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dataSourceOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {/* Direcionamento (opcional para data_dynamic) */}
+      {watchType !== 'data_dynamic' && (
+        <FormField
+          control={form.control}
+          name="path"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Direcionamento do Card</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma página" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dashboardPages.map((page) => (
+                      <SelectItem key={page.value} value={page.value}>
+                        {page.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {/* Cor */}
       <FormField
         control={form.control}
         name="color"
@@ -90,6 +157,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         )}
       />
 
+      {/* Ícone */}
       <FormField
         control={form.control}
         name="iconId"
@@ -110,38 +178,49 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({
         )}
       />
 
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="displayMobile"
-          render={({ field }) => (
-            <FormItem className="flex items-center space-x-2">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormLabel>Exibir no mobile</FormLabel>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Permissões */}
+      <FormField
+        control={form.control}
+        name="allowedDepartments"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Departamentos Permitidos</FormLabel>
+            <FormControl>
+              <MultiSelect
+                selected={field.value || []}
+                onChange={field.onChange}
+                placeholder="Selecione departamentos"
+                options={[
+                  { label: 'Comunicação', value: 'ae3f06da-5cbe-4f23-8ad7-c019d31be124' }
+                  // ...outros se necessário
+                ]}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={form.control}
-          name="mobileOrder"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ordem no mobile</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} min={0} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={form.control}
+        name="allowedRoles"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cargos Permitidos</FormLabel>
+            <FormControl>
+              <MultiSelect
+                selected={field.value || []}
+                onChange={field.onChange}
+                placeholder="Selecione cargos"
+                options={[
+                  { label: 'Coordenador', value: 'coordenador' },
+                  { label: 'Analista', value: 'analista' }
+                  // etc.
+                ]}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
     </div>
   );
 };
