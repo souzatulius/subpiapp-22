@@ -31,6 +31,19 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
     });
   }
   
+  // Status Distribution Chart
+  if (chartVisibility.statusDistribution) {
+    items.push({
+      id: 'statusDistribution',
+      title: 'Distribuição por Status',
+      component: <div>Status Distribution Chart</div>,
+      isVisible: !hiddenCharts.includes('statusDistribution'),
+      analysis: 'Análise da distribuição de status',
+      isAnalysisExpanded: false,
+      showAnalysisOnly: false
+    });
+  }
+  
   // Resolution Time Chart
   if (chartVisibility.resolutionTime) {
     items.push({
@@ -39,6 +52,19 @@ export function createChartItems(props: CreateChartItemsProps): ChartItem[] {
       component: <div>Resolution Time Chart</div>,
       isVisible: !hiddenCharts.includes('resolutionTime'),
       analysis: 'Análise do tempo de resolução',
+      isAnalysisExpanded: false,
+      showAnalysisOnly: false
+    });
+  }
+  
+  // Top Companies Chart
+  if (chartVisibility.topCompanies) {
+    items.push({
+      id: 'topCompanies',
+      title: 'Top Empresas',
+      component: <div>Top Companies Chart</div>,
+      isVisible: !hiddenCharts.includes('topCompanies'),
+      analysis: 'Análise das principais empresas',
       isAnalysisExpanded: false,
       showAnalysisOnly: false
     });

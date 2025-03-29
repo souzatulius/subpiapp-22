@@ -13,7 +13,12 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
   const [firstName, setFirstName] = useState('Usuário');
   
   // Try to load data if userId is provided
-  useDashboardData(userId || '');
+  // Pass empty callbacks as the second and third arguments to satisfy the function's signature
+  useDashboardData(
+    userId || '',
+    () => {}, // onSuccess callback
+    () => {}  // onError callback
+  );
   
   // Card manipulation actions
   const {

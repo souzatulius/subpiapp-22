@@ -13,6 +13,21 @@ export const useFilterManagement = () => {
     evolution: true,
     departmentComparison: true,
     oldestPendingList: true,
+    statusDistribution: true,
+    topCompanies: true,
+    districtDistribution: true,
+    servicesByDepartment: true,
+    servicesByDistrict: true,
+    timeComparison: true,
+    dailyDemands: true,
+    statusTransition: true,
+    closureTime: true,
+    neighborhoodComparison: true,
+    districtEfficiencyRadar: true,
+    externalDistricts: true,
+    efficiencyImpact: true,
+    criticalStatus: true,
+    serviceDiversity: true
   });
 
   // Estado para filtros
@@ -23,6 +38,9 @@ export const useFilterManagement = () => {
     distritos: [],
     tiposServico: [],
     departamento: [],
+    statuses: [],
+    serviceTypes: [],
+    districts: []
   });
 
   // Manipular alterações de filtros
@@ -50,6 +68,9 @@ export const useFilterManagement = () => {
       distritos: [],
       tiposServico: [],
       departamento: [],
+      statuses: [],
+      serviceTypes: [],
+      districts: []
     });
   };
 

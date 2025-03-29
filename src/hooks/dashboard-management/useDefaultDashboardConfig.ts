@@ -98,8 +98,9 @@ export const useDefaultDashboardConfig = () => {
       }
 
       // Reset: Apagar customizações antigas dos usuários
+      // Changed from user_dashboards to user_dashboard to match the table name
       await supabase
-        .from('user_dashboard')  // Changed from user_dashboards to user_dashboard
+        .from('user_dashboard')
         .delete()
         .eq('department', selectedDepartment)
         .eq('view_type', selectedViewType);

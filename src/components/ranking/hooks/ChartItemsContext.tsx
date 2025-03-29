@@ -27,9 +27,46 @@ export const ChartItemsProvider: React.FC<{
   children: React.ReactNode;
   initialItems?: ChartItem[];
 }> = ({ children, initialItems = [] }) => {
-  const chartItemsState = useChartItemsState(initialItems);
+  const {
+    items,
+    setItems,
+    hiddenCharts,
+    expandedAnalyses,
+    analysisOnlyCharts,
+    handleDragEnd,
+    handleToggleVisibility,
+    handleToggleAnalysis,
+    handleToggleView
+  } = useChartItemsState(initialItems);
+
+  // Add the missing properties required by the interface
+  const [visibleChartIds, setVisibleChartIds] = React.useState<string[]>(
+    items.map(item => item.id)
+  );
+  const [activeCategory, setActiveCategory] = React.useState<string>("all");
+  const categories = ["all", "performance", "distribution", "efficiency"];
+  const visibleChartItems = items.filter(item => !hiddenCharts.includes(item.id));
+
+  const contextValue: ChartItemsContextType = {
+    chartItems: items,
+    setChartItems: setItems,
+    hiddenCharts,
+    expandedAnalyses,
+    analysisOnlyCharts,
+    visibleChartIds,
+    setVisibleChartIds,
+    activeCategory,
+    setActiveCategory,
+    categories,
+    visibleChartItems,
+    handleDragEnd,
+    handleToggleVisibility,
+    handleToggleAnalysis,
+    handleToggleView
+  };
+  
   return (
-    <ChartItemsContext.Provider value={chartItemsState}>
+    <ChartItemsContext.Provider value={contextValue}>
       {children}
     </ChartItemsContext.Provider>
   );
