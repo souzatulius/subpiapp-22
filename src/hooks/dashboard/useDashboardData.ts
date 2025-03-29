@@ -1,123 +1,95 @@
-
-import { useState, useEffect } from 'react';
-import { ActionCardItem } from './types';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Default cards as a fallback when no custom cards are available
-const defaultActionCards: ActionCardItem[] = [
-  {
-    id: "card-1",
-    title: "Cadastrar Demanda",
-    path: "/dashboard/comunicacao/cadastrar-demanda",
-    icon: "ClipboardList",
-    color: "blue",
-    isCustom: false
-  },
-  {
-    id: "card-2",
-    title: "Responder Demanda",
-    path: "/dashboard/comunicacao/responder-demandas",
-    icon: "MessageSquare",
-    color: "green",
-    isCustom: false
-  },
-  {
-    id: "card-3",
-    title: "Criar Nota Oficial",
-    path: "/dashboard/comunicacao/criar-nota-oficial",
-    icon: "FileText",
-    color: "orange",
-    isCustom: false
-  },
-  {
-    id: "card-4",
-    title: "Aprovar Nota Oficial",
-    path: "/dashboard/comunicacao/aprovar-nota-oficial",
-    icon: "CheckCircle",
-    color: "blue-dark",
-    isCustom: false
-  },
-  {
-    id: "card-5",
-    title: "Consultar Notas",
-    path: "/dashboard/comunicacao/consultar-notas",
-    icon: "Search",
-    color: "orange-light",
-    isCustom: false
-  },
-  {
-    id: "card-6",
-    title: "Consultar Demandas",
-    path: "/dashboard/comunicacao/consultar-demandas",
-    icon: "List",
-    color: "gray-dark",
-    isCustom: false
-  }
-];
+type DataSourceKey =
+  | 'pendencias_por_coordenacao'
+  | 'tarefas_por_status'
+  | 'notas_aguardando_aprovacao'
+  | 'respostas_atrasadas'
+  | 'demandas_aguardando_nota'
+  | 'ultimas_acoes_coordenacao'
+  | 'comunicados_por_cargo';
 
-export const useDashboardData = (userId?: string) => {
-  const [firstName, setFirstName] = useState('');
-  const [actionCards, setActionCards] = useState<ActionCardItem[]>(defaultActionCards);
+export const useDashboardData = (
+  dataSourceKey: DataSourceKey,
+  coordenacaoId: string,
+  usuarioId: string
+) => {
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user dashboard data and cards
   useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) {
-        setLoading(false);
-        return;
+    const fetch = async () => {
+      setLoading(true);
+      let query;
+
+      switch (dataSourceKey) {
+        case 'pendencias_por_coordenacao':
+          query = supabase
+            .from('demandas')
+            .select('id, titulo, prazo_resposta')
+            .eq('status', 'pendente')
+            .eq('coordenacao_id', coordenacaoId);
+          break;
+
+        case 'notas_aguardando_aprovacao':
+          query = supabase
+            .from('notas_oficiais')
+            .select('id, titulo, criado_em')
+            .eq('status', 'pendente')
+            .eq('aprovador_id', usuarioId);
+          break;
+
+        case 'respostas_atrasadas':
+          query = supabase
+            .rpc('respostas_atrasadas_por_coordenacao', { p_coordenacao_id: coordenacaoId });
+          break;
+
+        case 'demandas_aguardando_nota':
+          query = supabase
+            .from('demandas')
+            .select('id, titulo')
+            .eq('status', 'aguardando_nota')
+            .eq('coordenacao_id', coordenacaoId);
+          break;
+
+        case 'ultimas_acoes_coordenacao':
+          query = supabase
+            .from('historico_demandas')
+            .select('id, evento, timestamp')
+            .eq('coordenacao_id', coordenacaoId)
+            .order('timestamp', { ascending: false })
+            .limit(5);
+          break;
+
+        case 'comunicados_por_cargo':
+          query = supabase
+            .from('comunicados')
+            .select('id, titulo, data_envio')
+            .ilike('destinatarios', `%${coordenacaoId}%`);
+          break;
+
+        default:
+          break;
       }
 
-      try {
-        setLoading(true);
-        
-        // Fetch user info for first name
-        const { data: userData, error: userError } = await supabase
-          .from('usuarios')
-          .select('nome_completo')
-          .eq('id', userId)
-          .single();
-        
-        if (userError) throw userError;
-        
-        if (userData?.nome_completo) {
-          // Extract first name
-          const names = userData.nome_completo.split(' ');
-          setFirstName(names[0]);
-        }
-        
-        // Fetch user dashboard settings
-        const { data: dashboardData, error: dashboardError } = await supabase
-          .from('user_dashboard')
-          .select('cards_config')
-          .eq('user_id', userId);
-        
-        if (dashboardError) throw dashboardError;
-        
-        if (dashboardData && dashboardData.length > 0 && dashboardData[0].cards_config) {
-          try {
-            const customCards = JSON.parse(dashboardData[0].cards_config);
-            if (Array.isArray(customCards) && customCards.length > 0) {
-              setActionCards(customCards);
-            }
-          } catch (parseError) {
-            console.error('Erro ao processar configuração de cards:', parseError);
-          }
-        }
-      } catch (error) {
+      if (!query) return;
+
+      const { data, error } = await query;
+
+      if (error) {
         console.error('Erro ao buscar dados do dashboard:', error);
-      } finally {
-        setLoading(false);
+      } else {
+        setData(data);
       }
+
+      setLoading(false);
     };
 
-    fetchData();
-  }, [userId]);
+    if (coordenacaoId) {
+      fetch();
+    }
+  }, [dataSourceKey, coordenacaoId, usuarioId]);
 
-  return {
-    firstName,
-    actionCards,
-    setActionCards,
-    loading
-  };
+  return { data, loading };
 };
