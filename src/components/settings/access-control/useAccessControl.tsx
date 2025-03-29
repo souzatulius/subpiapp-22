@@ -6,11 +6,9 @@ import { User } from './types';
 export const useAccessControl = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  
-  // Carregamento dos dados de usuários, permissões e relações
+
   const {
     users,
-    setUsers,
     permissions,
     userPermissions,
     setUserPermissions,
@@ -19,14 +17,12 @@ export const useAccessControl = () => {
     fetchData
   } = useAccessControlData();
 
-  // Gerenciamento de permissões (adicionar/remover)
   const {
     saving,
     handleAddPermission,
     handleRemovePermission
   } = usePermissionsManagement(userPermissions, setUserPermissions, fetchData);
 
-  // Abrir modal de edição (se necessário futuramente)
   const openEditDialog = (user: User) => {
     setCurrentUser(user);
     setIsEditDialogOpen(true);
