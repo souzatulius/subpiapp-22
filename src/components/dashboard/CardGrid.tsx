@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -24,7 +23,6 @@ interface CardGridProps {
   usuarioId?: string;
   coordenacaoId?: string;
   modoAdmin?: boolean;
-  // Add these props to match usage in Dashboard and Comunicacao components
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
@@ -32,7 +30,7 @@ interface CardGridProps {
 }
 
 const CardGrid: React.FC<CardGridProps> = ({
-  cards = [], // Add default empty array to prevent undefined errors
+  cards = [],
   onCardsChange,
   onEditCard,
   onDeleteCard,
@@ -64,18 +62,16 @@ const CardGrid: React.FC<CardGridProps> = ({
     }
   };
 
-  // Add safe check before filtering to prevent "map of undefined" errors
-  const displayedCards = isMobileView && cards
+  const displayedCards = isMobileView
     ? cards
         .filter((card) => card.displayMobile !== false)
-        .sort((a, b) => ((a.mobileOrder ?? 0) - (b.mobileOrder ?? 0)))
+        .sort((a, b) => (a.mobileOrder ?? 0) - (b.mobileOrder ?? 0))
     : cards;
 
-  // If cards is undefined or empty, render nothing or a placeholder
   if (!displayedCards || displayedCards.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
-        No cards available to display.
+        Nenhum card disponível para exibir.
       </div>
     );
   }
@@ -86,7 +82,7 @@ const CardGrid: React.FC<CardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={modoAdmin ? handleDragEnd : undefined}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-auto">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-min">
         {displayedCards.map((card) =>
           card.type === 'data_dynamic' && card.dataSourceKey ? (
             <DynamicDataCard
