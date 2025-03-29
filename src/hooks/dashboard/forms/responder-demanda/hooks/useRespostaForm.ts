@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Demanda } from '../types';
-import { useRespostaSubmission } from './useRespostaSubmission';
+import { useRespostaSubmission } from '@/components/dashboard/forms/responder-demanda/hooks/useRespostaSubmission';
 import { toast } from '@/components/ui/use-toast';
 
 export const useRespostaForm = (
