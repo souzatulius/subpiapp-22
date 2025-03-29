@@ -1,19 +1,21 @@
-
 /**
- * Utility functions for checking route access permissions
+ * Funções utilitárias para checar permissões de rota
  */
 
 /**
- * Checks if user can access a protected route
+ * Verifica se o usuário pode acessar uma rota protegida
  */
 export const canAccessProtectedRoute = (route: string, isAdmin: boolean): boolean => {
-  // Admin can access all routes
+  // Admin pode tudo
   if (isAdmin) {
-    console.log(`User has admin status, allowing access to route: ${route}`);
+    console.log(`Usuário é admin, acesso liberado à rota: ${route}`);
     return true;
   }
-  
-  // Protected routes that only admins can access
+
+  // Rota base do dashboard deve ser liberada para todos os usuários autenticados
+  const publicRoutes = ['/dashboard'];
+
+  // Rotas restritas a admins
   const adminOnlyRoutes = [
     '/dashboard/comunicacao/cadastrar-demanda',
     '/dashboard/comunicacao/consultar-demandas',
@@ -24,16 +26,24 @@ export const canAccessProtectedRoute = (route: string, isAdmin: boolean): boolea
     '/criar-nota-oficial',
     '/consultar-notas'
   ];
-  
-  // Removemos '/settings' da lista de rotas administrativas
-  
-  // Check if the route starts with any of the admin-only routes
-  const isAdminRoute = adminOnlyRoutes.some(adminRoute => 
-    route === adminRoute || 
-    route.startsWith(`${adminRoute}/`)
+
+  // Permitir rotas públicas
+  if (publicRoutes.includes(route)) {
+    console.log(`Rota pública: ${route}, acesso liberado`);
+    return true;
+  }
+
+  // Se a rota for admin-only, negar acesso
+  const isAdminOnly = adminOnlyRoutes.some(adminRoute =>
+    route === adminRoute || route.startsWith(`${adminRoute}/`)
   );
-  
-  const canAccess = !isAdminRoute;
-  console.log(`Route "${route}" is ${isAdminRoute ? 'admin-only' : 'accessible to all'}, access granted: ${canAccess}`);
-  return canAccess;
+
+  if (isAdminOnly) {
+    console.log(`Rota ${route} é restrita para admins. Acesso negado.`);
+    return false;
+  }
+
+  // Por padrão, liberar outras rotas
+  console.log(`Rota ${route} não é restrita. Acesso liberado.`);
+  return true;
 };
