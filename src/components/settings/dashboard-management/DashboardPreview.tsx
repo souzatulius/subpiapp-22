@@ -5,6 +5,7 @@ import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
 import DashboardActions from '@/components/dashboard/DashboardActions';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -26,7 +27,9 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
     departmentName
   } = useDefaultDashboardState(department);
 
+  const { user } = useAuth();
   const [isMobilePreview, setIsMobilePreview] = useState(false);
+  const [modoAdmin, setModoAdmin] = useState(true);
 
   if (dashboardType === 'communication') {
     return (
@@ -48,17 +51,25 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
           Visualização do Dashboard {departmentName ? `- ${departmentName}` : ''}
         </h3>
 
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="mobile-preview" className="text-sm text-gray-600">Modo Mobile</Label>
-          <Switch
-            id="mobile-preview"
-            checked={isMobilePreview}
-            onCheckedChange={setIsMobilePreview}
-          />
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="mobile-preview" className="text-sm text-gray-600">Modo Mobile</Label>
+            <Switch
+              id="mobile-preview"
+              checked={isMobilePreview}
+              onCheckedChange={setIsMobilePreview}
+            />
+          </div>
+          <button
+            className="text-sm text-blue-600 underline"
+            onClick={() => setModoAdmin((prev) => !prev)}
+          >
+            {modoAdmin ? '👁 Visualizar como usuário' : '⚙️ Modo admin'}
+          </button>
         </div>
       </div>
 
-      <DashboardActions onAddNewCard={handleAddNewCard} />
+      {modoAdmin && <DashboardActions onAddNewCard={handleAddNewCard} />}
 
       <CardGrid
         cards={cards}
@@ -68,6 +79,9 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
         onAddNewCard={handleAddNewCard}
         specialCardsData={specialCardsData}
         isMobileView={isMobilePreview}
+        modoAdmin={modoAdmin}
+        coordenacaoId={department}
+        usuarioId={user?.id ?? ''}
       />
     </div>
   );
