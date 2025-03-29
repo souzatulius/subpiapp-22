@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // <-- import necessário
 import EmailSuffix from '@/components/EmailSuffix';
 import PasswordRequirements from '@/components/PasswordRequirements';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
@@ -10,7 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import AttentionBox from '@/components/ui/attention-box';
 
 const LoginForm = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // <-- hook do react-router-dom
 
   const {
     password,
@@ -29,12 +29,10 @@ const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setEmailError(false);
 
     if (!email.trim()) {
@@ -43,41 +41,27 @@ const LoginForm = () => {
     }
 
     setLoading(true);
+
     try {
       const completeEmail = completeEmailWithDomain(email);
       const { error } = await signIn(completeEmail, password);
 
       if (error) {
-        setError(null);
-        if (
-          error.message.includes('Email already') ||
-          error.message.includes('already registered')
-        ) {
-          toast({
-            title: "Usuário já cadastrado",
-            description: "Este e-mail já está cadastrado na plataforma. Por favor, tente fazer login ou recuperar sua senha.",
-            variant: "warning"
-          });
-        } else {
-          showAuthError(error);
-        }
+        showAuthError(error);
       } else {
         toast({
-          title: "Login efetuado",
-          description: "Você foi autenticado com sucesso.",
-          variant: "success"
+          title: 'Login efetuado',
+          description: 'Você foi autenticado com sucesso.',
+          variant: 'success'
         });
 
-        // ✅ Redireciona manualmente para o dashboard
-        navigate('/dashboard');
+        navigate('/dashboard'); // <-- redireciona ao sucesso
       }
     } catch (err: any) {
-      console.error('Erro ao fazer login:', err);
-      setError(null);
       toast({
-        title: "Erro de login",
+        title: 'Erro de login',
         description: err.message || 'Erro ao tentar fazer login',
-        variant: "destructive"
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
@@ -89,14 +73,13 @@ const LoginForm = () => {
       setLoading(true);
       toast({
         title: "Redirecionando para o Google",
-        description: "Você será redirecionado para autenticação com Google. Use uma conta @smsub.prefeitura.sp.gov.br."
+        description: "Use uma conta @smsub.prefeitura.sp.gov.br"
       });
       await signInWithGoogle();
     } catch (error) {
-      console.error('Erro no login com Google:', error);
       toast({
-        title: "Erro de autenticação",
-        description: "Falha ao conectar com o Google. Tente novamente.",
+        title: "Erro no login com Google",
+        description: "Falha ao conectar com o Google",
         variant: "destructive"
       });
     } finally {
@@ -107,7 +90,7 @@ const LoginForm = () => {
   if (loading || authLoading) {
     return (
       <div className="h-full flex items-center justify-center p-8">
-        <div className="loading-spinner animate-spin w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -129,15 +112,11 @@ const LoginForm = () => {
               error={emailError}
               placeholder="seu.email"
             />
-            {emailError && (
-              <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>
-            )}
+            {emailError && <p className="text-sm text-[#f57b35]">E-mail é obrigatório</p>}
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="password" className="block text-sm font-medium text-[#111827]">Senha</label>
-            </div>
+            <label htmlFor="password" className="block text-sm font-medium text-[#111827] mb-1">Senha</label>
             <div className="relative">
               <input
                 id="password"
@@ -145,7 +124,7 @@ const LoginForm = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 onFocus={() => setShowRequirements(true)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003570] focus:border-transparent transition-all duration-200 pr-10"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003570]"
                 placeholder="••••••••"
               />
               <button
@@ -156,23 +135,16 @@ const LoginForm = () => {
                 {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
               </button>
             </div>
-
-            <PasswordRequirements
-              requirements={requirements}
-              visible={showRequirements && password.length > 0}
-            />
-
+            <PasswordRequirements requirements={requirements} visible={showRequirements && password.length > 0} />
             <div className="mt-2">
-              <Link to="/forgot-password" className="text-[#f57c35] font-semibold hover:underline">
-                Esqueceu sua senha?
-              </Link>
+              <Link to="/forgot-password" className="text-[#f57c35] font-semibold hover:underline">Esqueceu sua senha?</Link>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#003570] text-white py-3 px-4 hover:bg-blue-900 transition-all duration-200 flex items-center justify-center font-medium rounded-xl shadow-sm hover:shadow-md"
+            className="w-full bg-[#003570] text-white py-3 px-4 hover:bg-blue-900 flex items-center justify-center rounded-xl"
           >
             <LogIn className="mr-2 h-5 w-5" /> Entrar
           </button>
@@ -185,19 +157,19 @@ const LoginForm = () => {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full bg-white border border-gray-300 text-[#111827] py-3 px-4 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center rounded-xl shadow-sm hover:shadow-md"
+            className="w-full border border-gray-300 py-3 rounded-xl flex justify-center items-center"
           >
-            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="mr-2">
-              <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-              <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-              <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-              <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+            <svg className="mr-2" width="18" height="18" viewBox="0 0 48 48">
+              <path fill="#FFC107" d="..."></path>
+              <path fill="#FF3D00" d="..."></path>
+              <path fill="#4CAF50" d="..."></path>
+              <path fill="#1976D2" d="..."></path>
             </svg>
             Entrar com Google (@smsub.prefeitura.sp.gov.br)
           </button>
 
           <AttentionBox title="Importante:">
-            <p>Você precisa usar uma conta do domínio @smsub.prefeitura.sp.gov.br para acessar o sistema.</p>
+            <p>Use uma conta do domínio @smsub.prefeitura.sp.gov.br</p>
           </AttentionBox>
         </div>
       </form>
