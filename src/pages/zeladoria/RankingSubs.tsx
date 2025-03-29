@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import RankingContent from '@/components/ranking/RankingContent';
+// Import Chart registration to ensure scales are registered
+import '@/components/ranking/charts/ChartRegistration';
 
 const RankingSubs = () => {
   // Start with sidebar collapsed

@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Card } from '@/components/ui/card';
 import RankingCharts from './RankingCharts';
 import DashboardCards from './insights/DashboardCards';
+import ChartsSection from './ChartsSection';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -87,14 +88,26 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
       {/* Charts Section */}
       {dadosSGZ && dadosSGZ.length > 0 && (
-        <RankingCharts 
-          sgzData={dadosSGZ}
-          painelData={dadosPainel}
-          isLoading={isUploading}
-          chartVisibility={chartVisibility}
-          isSimulationActive={isSimulationActive}
-          onSimulateIdealRanking={handleSimulateIdealRanking}
-        />
+        <>
+          <RankingCharts 
+            sgzData={dadosSGZ}
+            painelData={dadosPainel}
+            isLoading={isUploading}
+            chartVisibility={chartVisibility}
+            isSimulationActive={isSimulationActive}
+            onSimulateIdealRanking={handleSimulateIdealRanking}
+          />
+          
+          <ChartsSection
+            chartData={{}}
+            isLoading={isUploading}
+            chartVisibility={chartVisibility}
+            sgzData={dadosSGZ}
+            painelData={dadosPainel}
+            onSimulateIdealRanking={handleSimulateIdealRanking}
+            isSimulationActive={isSimulationActive}
+          />
+        </>
       )}
       
       <FilterDialog 
