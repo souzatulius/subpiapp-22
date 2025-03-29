@@ -1,6 +1,4 @@
 
-import { User } from '@supabase/supabase-js';
-
 export interface UploadInfo {
   id: string;
   fileName: string;
@@ -16,14 +14,17 @@ export interface SGZUpload {
   usuario_id: string;
 }
 
+export interface ProcessingStats {
+  newOrders?: number;
+  updatedOrders?: number;
+  processingStatus: 'idle' | 'processing' | 'success' | 'error';
+  errorMessage?: string;
+  message?: string;
+  recordCount?: number;
+  comparacaoStats?: any;
+}
+
 export interface UploadResult {
   id: string;
   data: any[];
-}
-
-export interface ProcessingStats {
-  newOrders: number;
-  updatedOrders: number;
-  processingStatus: 'idle' | 'processing' | 'success' | 'error';
-  errorMessage?: string;
 }

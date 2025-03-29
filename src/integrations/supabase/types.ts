@@ -1011,6 +1011,44 @@ export type Database = {
           },
         ]
       }
+      painel_zeladoria_comparacoes: {
+        Row: {
+          created_at: string | null
+          id: string
+          id_os: string
+          motivo: string | null
+          status_painel: string | null
+          status_sgz: string | null
+          upload_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          id_os: string
+          motivo?: string | null
+          status_painel?: string | null
+          status_sgz?: string | null
+          upload_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          id_os?: string
+          motivo?: string | null
+          status_painel?: string | null
+          status_sgz?: string | null
+          upload_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "painel_zeladoria_comparacoes_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "painel_zeladoria_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       painel_zeladoria_dados: {
         Row: {
           created_at: string | null
