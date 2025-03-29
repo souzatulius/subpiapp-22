@@ -6,10 +6,11 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
+  DragEndEvent
 } from '@dnd-kit/core';
 import CardsContainer from './grid/CardsContainer';
 import { ActionCardItem } from '@/hooks/dashboard/types';
+import DynamicDataCard from './DynamicDataCard';
 
 interface CardGridProps {
   cards: ActionCardItem[];
@@ -18,13 +19,10 @@ interface CardGridProps {
   onDeleteCard: (id: string) => void;
   onAddNewCard: () => void;
   isMobileView?: boolean;
-  specialCardsData?: {
-    overdueCount: number;
-    overdueItems: { title: string; id: string }[];
-    notesToApprove: number;
-    responsesToDo: number;
-    isLoading: boolean;
-  };
+  specialCardsData?: any;
+  usuarioId: string;
+  coordenacaoId: string;
+  modoAdmin?: boolean;
 }
 
 const CardGrid: React.FC<CardGridProps> = ({
@@ -34,13 +32,10 @@ const CardGrid: React.FC<CardGridProps> = ({
   onDeleteCard,
   onAddNewCard,
   isMobileView = false,
-  specialCardsData = {
-    overdueCount: 0,
-    overdueItems: [],
-    notesToApprove: 0,
-    responsesToDo: 0,
-    isLoading: false
-  }
+  specialCardsData,
+  usuarioId,
+  coordenacaoId,
+  modoAdmin = true
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -59,26 +54,42 @@ const CardGrid: React.FC<CardGridProps> = ({
     }
   };
 
-  // Filtro e ordenação para mobile
   const displayedCards = isMobileView
     ? cards
         .filter((card) => card.displayMobile !== false)
-        .sort((a, b) => (a.mobileOrder || 0) - (b.mobileOrder || 0))
+        .sort((a, b) => (a.mobileOrder ?? 0) - (b.mobileOrder ?? 0))
     : cards;
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
+      onDragEnd={modoAdmin ? handleDragEnd : undefined}
     >
-      <CardsContainer
-        cards={displayedCards}
-        onEditCard={onEditCard}
-        onDeleteCard={onDeleteCard}
-        onAddNewCard={onAddNewCard}
-        specialCardsData={specialCardsData}
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-auto">
+        {displayedCards.map((card) =>
+          card.type === 'data_dynamic' && card.dataSourceKey ? (
+            <DynamicDataCard
+              key={card.id}
+              title={card.title}
+              icon={<div className="text-xl">{card.iconId}</div>}
+              color={card.color}
+              dataSourceKey={card.dataSourceKey}
+              coordenacaoId={coordenacaoId}
+              usuarioId={usuarioId}
+            />
+          ) : (
+            <CardsContainer
+              key={card.id}
+              cards={[card]}
+              onEditCard={onEditCard}
+              onDeleteCard={onDeleteCard}
+              onAddNewCard={onAddNewCard}
+              specialCardsData={specialCardsData}
+            />
+          )
+        )}
+      </div>
     </DndContext>
   );
 };
