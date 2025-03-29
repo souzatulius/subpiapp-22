@@ -4,6 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
 
 export const usePainelZeladoriaUpload = (user: User | null) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +15,7 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     recordCount: 0
   });
 
-  const handleUploadPainel = useCallback(async (file: File) => {
+  const handleUploadPainel = useCallback(async (file: File): Promise<UploadResult | null> => {
     if (!user) {
       toast.error('Você precisa estar logado para fazer upload');
       return null;
@@ -48,35 +49,50 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       
       // Criar registro de upload
       const { data: uploadData, error: uploadError } = await supabase
-        .from('painel_zeladoria')
+        .from('painel_zeladoria_uploads')
         .insert({
           nome_arquivo: file.name,
-          usuario_id: user.id,
-          processado: false,
-          dados: dadosPainel
+          usuario_email: user.email || '',
         })
         .select()
         .single();
       
       if (uploadError) throw uploadError;
       
-      // Atualizar registro como processado
-      const { error: updateError } = await supabase
-        .from('painel_zeladoria')
-        .update({ processado: true })
-        .eq('id', uploadData.id);
-        
-      if (updateError) throw updateError;
+      const uploadId = uploadData.id;
+      
+      // Inserir dados na tabela painel_zeladoria_dados
+      const dadosParaInserir = dadosPainel.map(row => ({
+        id_os: row.id_os || row.Protocolo || '',
+        status: row.status || row.Status || '',
+        tipo_servico: row.tipo_servico || row['Tipo'] || '',
+        data_abertura: row.data_abertura || row['Data de entrada'] || null,
+        data_fechamento: row.data_fechamento || row['Data de fechamento'] || null,
+        distrito: row.distrito || row.Distrito || '',
+        departamento: row.departamento || row.Departamento || '',
+        responsavel_real: row.responsavel_real || row['Responsável'] || '',
+        upload_id: uploadId
+      }));
+      
+      const { error: insertError } = await supabase
+        .from('painel_zeladoria_dados')
+        .insert(dadosParaInserir);
+      
+      if (insertError) throw insertError;
       
       setUploadProgress(100);
       setProcessamentoPainel({
         status: 'success',
         message: 'Dados do Painel processados com sucesso!',
-        recordCount: dadosPainel.length
+        recordCount: dadosParaInserir.length
       });
       
-      toast.success(`Planilha do Painel da Zeladoria processada com sucesso! ${dadosPainel.length} registros importados.`);
-      return uploadData.id;
+      toast.success(`Planilha do Painel da Zeladoria processada com sucesso! ${dadosParaInserir.length} registros importados.`);
+      
+      return {
+        id: uploadId,
+        data: dadosParaInserir
+      };
     } catch (error: any) {
       console.error('Erro ao processar planilha do Painel:', error);
       setUploadProgress(0);

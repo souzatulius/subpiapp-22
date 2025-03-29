@@ -70,8 +70,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUploadPainel(files[0]);
-        if (result && typeof result !== 'string' && result.id) {
-          onPainelUploadComplete(result.id, result.data || []);
+        if (result) {
+          onPainelUploadComplete(result.id, result.data);
           toast.success("Planilha do Painel da Zeladoria processada com sucesso!");
         }
       } catch (error) {
