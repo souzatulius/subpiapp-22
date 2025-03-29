@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
+import { chartTheme } from './ChartRegistration';
 
 interface DepartmentComparisonChartProps {
   data: any;
@@ -12,164 +13,128 @@ interface DepartmentComparisonChartProps {
 
 const DepartmentComparisonChart: React.FC<DepartmentComparisonChartProps> = ({ 
   data, 
-  sgzData, 
-  isLoading, 
-  isSimulationActive 
+  sgzData,
+  isLoading,
+  isSimulationActive
 }) => {
-  const [chartData, setChartData] = React.useState<any>({
-    labels: [],
-    datasets: []
-  });
-  
-  React.useEffect(() => {
-    if (sgzData && sgzData.length > 0) {
-      // Group data by technical department
-      const departments = ['STLP', 'STM', 'STPO']; // Add other departments if needed
-      const statusCategories = ['Fechada', 'Pendente', 'Cancelada'];
-      
-      // Initialize data structure
-      const deptData: Record<string, Record<string, number>> = {};
-      departments.forEach(dept => {
-        deptData[dept] = {
-          Fechada: 0,
-          Pendente: 0,
-          Cancelada: 0,
-          Total: 0
-        };
-      });
-      
-      // Count orders by department and status
-      sgzData.forEach((order: any) => {
-        const dept = order.sgz_departamento_tecnico || 'Outro';
-        if (!departments.includes(dept)) return;
-        
-        const status = order.sgz_status?.toLowerCase() || '';
-        let statusCategory;
-        
-        if (status.includes('fecha') || status.includes('conclu')) {
-          statusCategory = 'Fechada';
-        } else if (status.includes('cancel')) {
-          statusCategory = 'Cancelada';
-        } else {
-          statusCategory = 'Pendente';
-        }
-        
-        deptData[dept][statusCategory] += 1;
-        deptData[dept].Total += 1;
-      });
-      
-      // Apply simulation if active
-      if (isSimulationActive) {
-        departments.forEach(dept => {
-          // In simulation: move some pending to closed, some canceled to closed
-          const pendingToClose = Math.round(deptData[dept].Pendente * 0.3); // 30% of pending become closed
-          const canceledToClose = Math.round(deptData[dept].Cancelada * 0.2); // 20% of canceled become closed
-          
-          deptData[dept].Fechada += pendingToClose + canceledToClose;
-          deptData[dept].Pendente -= pendingToClose;
-          deptData[dept].Cancelada -= canceledToClose;
-        });
+  const chartData = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return null;
+    
+    // Agrupar por departamento técnico
+    const departments = {
+      'STLP': { total: 0, concluido: 0, pendente: 0, cancelado: 0 },
+      'STM': { total: 0, concluido: 0, pendente: 0, cancelado: 0 },
+      'STPO': { total: 0, concluido: 0, pendente: 0, cancelado: 0 }
+    };
+    
+    sgzData.forEach(order => {
+      const dept = order.sgz_departamento_tecnico || 'Não informado';
+      if (!departments[dept]) {
+        departments[dept] = { total: 0, concluido: 0, pendente: 0, cancelado: 0 };
       }
       
-      // Prepare chart data
-      setChartData({
-        labels: departments,
-        datasets: statusCategories.map((status, index) => ({
-          label: status,
-          data: departments.map(dept => deptData[dept][status]),
-          backgroundColor: 
-            status === 'Fechada' ? 'rgba(34, 197, 94, 0.8)' : // Green for closed
-            status === 'Pendente' ? 'rgba(249, 115, 22, 0.8)' : // Orange for pending
-            'rgba(239, 68, 68, 0.8)', // Red for canceled
-          borderColor:
-            status === 'Fechada' ? 'rgba(34, 197, 94, 1)' :
-            status === 'Pendente' ? 'rgba(249, 115, 22, 1)' :
-            'rgba(239, 68, 68, 1)',
-          borderWidth: 1
-        }))
+      departments[dept].total++;
+      
+      const status = (order.sgz_status || '').toUpperCase();
+      if (status.includes('CONC') || status.includes('FECHA')) {
+        departments[dept].concluido++;
+      } else if (status.includes('CANC')) {
+        departments[dept].cancelado++;
+      } else {
+        departments[dept].pendente++;
+      }
+    });
+    
+    // Aplicar simulação se ativa
+    if (isSimulationActive) {
+      Object.values(departments).forEach(dept => {
+        // Em um cenário ideal, reduzimos pendências e aumentamos conclusões
+        const pendentesReducao = Math.floor(dept.pendente * 0.3); // 30% das pendências viram concluídas
+        dept.concluido += pendentesReducao;
+        dept.pendente -= pendentesReducao;
       });
     }
+    
+    return {
+      labels: Object.keys(departments),
+      datasets: [
+        {
+          label: 'Concluídas',
+          data: Object.values(departments).map(d => d.concluido),
+          backgroundColor: '#22c55e', // green-500
+        },
+        {
+          label: 'Pendentes',
+          data: Object.values(departments).map(d => d.pendente),
+          backgroundColor: '#f97316', // orange-500
+        },
+        {
+          label: 'Canceladas',
+          data: Object.values(departments).map(d => d.cancelado),
+          backgroundColor: '#ef4444', // red-500
+        }
+      ]
+    };
   }, [sgzData, isSimulationActive]);
   
-  const chartOptions = {
+  const options = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: {
-      duration: 1000
-    },
     plugins: {
       legend: {
         position: 'top' as const,
-        labels: {
-          boxWidth: 12,
-          font: { size: 11 }
-        }
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleFont: { size: 13 },
-        bodyFont: { size: 12 },
-        padding: 10,
-        cornerRadius: 4,
         callbacks: {
           label: function(context: any) {
-            const value = context.parsed.y || 0;
-            const datasetIndex = context.datasetIndex;
-            const label = context.dataset.label;
-            
-            // Calculate percentage
-            const totalForDept = sgzData
-              ?.filter(o => o.sgz_departamento_tecnico === context.label)
-              .length || 0;
-            
-            const percentage = totalForDept > 0 
-              ? ((value / totalForDept) * 100).toFixed(1) + '%'
-              : '0%';
-            
-            return `${label}: ${value} (${percentage})`;
+            return `${context.dataset.label}: ${context.raw} OS`;
           }
         }
       }
     },
     scales: {
       x: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          font: { size: 11 }
-        }
+        stacked: true,
       },
       y: {
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)'
-        },
         stacked: true,
-        ticks: {
-          font: { size: 10 }
-        },
-        beginAtZero: true
+        beginAtZero: true,
       }
     }
   };
   
-  // Department acronym meanings for card value
-  const deptMeanings = {
-    'STLP': 'Supervisão Técnica de Limpeza Pública',
-    'STM': 'Supervisão Técnica de Manutenção',
-    'STPO': 'Supervisão Técnica de Projetos e Obras'
-  };
-  
-  const cardValue = isSimulationActive ? 'Simulação Ativa' : 'Comparativo por Departamento';
-  
+  // Calcular estatísticas
+  const stats = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return '0 OS';
+    
+    const departments: Record<string, number> = {};
+    
+    sgzData.forEach(order => {
+      const dept = order.sgz_departamento_tecnico || 'Não informado';
+      if (!departments[dept]) {
+        departments[dept] = 0;
+      }
+      departments[dept]++;
+    });
+    
+    // Ordenar departamentos por volume
+    const sortedDepts = Object.entries(departments).sort((a, b) => b[1] - a[1]);
+    
+    if (sortedDepts.length > 0) {
+      return `${sortedDepts[0][0]}: ${sortedDepts[0][1]} OS`;
+    }
+    
+    return '0 OS';
+  }, [sgzData]);
+
   return (
     <ChartCard
-      title="Comparação STLP / STM / STPO"
-      value={cardValue}
+      title="Comparação por Departamento"
+      value={stats}
       isLoading={isLoading}
     >
-      {chartData.labels.length > 0 && (
-        <Bar data={chartData} options={chartOptions} />
+      {chartData && (
+        <Bar data={chartData} options={options} />
       )}
     </ChartCard>
   );

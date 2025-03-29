@@ -1,6 +1,8 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
+import { chartTheme } from './ChartRegistration';
 
 interface ResponsibilityChartProps {
   data: any;
@@ -11,132 +13,204 @@ interface ResponsibilityChartProps {
 }
 
 const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({ 
-  data, 
-  sgzData, 
-  painelData, 
-  isLoading, 
-  isSimulationActive 
+  data,
+  sgzData,
+  painelData,
+  isLoading,
+  isSimulationActive
 }) => {
-  const [chartData, setChartData] = React.useState<any>({
-    labels: [],
-    datasets: []
-  });
-  
-  const externalKeywords = [
-    'ENEL', 'SABESP', 'COMGAS', 'CPFL', 'TELECOM', 'VIVO', 'CLARO', 'TIM',
-    'OI', 'NEXTEL', 'GÁS', 'ILUME', 'SPDA'
-  ];
-  
-  React.useEffect(() => {
-    if (sgzData && sgzData.length > 0) {
-      let internalCount = 0;
-      let externalCount = 0;
-      let externalDetails: Record<string, number> = {};
+  const chartData = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return null;
+    
+    // Por padrão, consideramos todas as OS como responsabilidade da subprefeitura
+    let subTotal = sgzData.length;
+    let externalTotal = 0;
+    let externalCompanies: Record<string, number> = {};
+    
+    // Se tivermos dados do painel, podemos identificar as responsabilidades reais
+    if (painelData && painelData.length > 0) {
+      // Criar mapa de IDs de OS para fácil busca
+      const painelMap = new Map();
       
-      sgzData.forEach((order: any) => {
-        const serviceType = (order.sgz_tipo_servico || '').toUpperCase();
-        
-        const isExternal = externalKeywords.some(keyword => 
-          serviceType.includes(keyword)
-        );
-        
-        if (isExternal) {
-          externalCount++;
-          const matchedKeyword = externalKeywords.find(keyword => serviceType.includes(keyword)) || 'OUTRO';
-          externalDetails[matchedKeyword] = (externalDetails[matchedKeyword] || 0) + 1;
-        } else {
-          internalCount++;
+      painelData.forEach(item => {
+        if (item.id_os) {
+          painelMap.set(item.id_os.toString().trim(), item);
         }
       });
       
-      if (isSimulationActive) {
-        const totalExternal = externalCount;
-        externalCount = 0;
-        internalCount = sgzData.length - totalExternal;
-      }
+      // Identificar responsáveis externos
+      subTotal = 0;
+      externalTotal = 0;
       
-      setChartData({
-        labels: ['Subprefeitura', 'Entidades Externas'],
-        datasets: [
-          {
-            data: [internalCount, externalCount],
-            backgroundColor: [
-              'rgba(249, 115, 22, 0.8)',
-              'rgba(156, 163, 175, 0.8)'
-            ],
-            borderColor: [
-              'rgba(249, 115, 22, 1)',
-              'rgba(156, 163, 175, 1)'
-            ],
-            borderWidth: 1,
-            hoverOffset: 4
+      sgzData.forEach(order => {
+        const orderNumber = order.ordem_servico?.toString().trim();
+        if (!orderNumber) return;
+        
+        const painelItem = painelMap.get(orderNumber);
+        
+        if (painelItem && painelItem.responsavel_real) {
+          const responsavel = painelItem.responsavel_real.toUpperCase();
+          
+          // Verificar se é um responsável externo
+          if (responsavel.includes('SABESP') || 
+              responsavel.includes('ENEL') || 
+              responsavel.includes('EXTERNO') || 
+              responsavel.includes('COMGAS')) {
+            
+            externalTotal++;
+            
+            // Agrupar por empresa
+            const empresa = responsavel.includes('SABESP') ? 'SABESP' : 
+                           responsavel.includes('ENEL') ? 'ENEL' : 
+                           responsavel.includes('COMGAS') ? 'COMGÁS' : 'OUTROS';
+                           
+            externalCompanies[empresa] = (externalCompanies[empresa] || 0) + 1;
+          } else {
+            subTotal++;
           }
-        ]
+        } else {
+          subTotal++;
+        }
       });
     }
-  }, [sgzData, isSimulationActive]);
+    
+    // Aplicar simulação se ativa
+    if (isSimulationActive) {
+      // Em um cenário ideal, as OS externas seriam identificadas e tratadas adequadamente
+      // Aqui apenas ajustamos os percentuais para refletir uma distribuição mais ideal
+      
+      // Na simulação, consideramos que 20% mais OS seriam identificadas como externas
+      // Essas OS viriam do grupo de "subprefeitura" atual
+      if (painelData && painelData.length > 0) {
+        const additionalExternal = Math.floor(subTotal * 0.2);
+        subTotal -= additionalExternal;
+        externalTotal += additionalExternal;
+        
+        // Distribuir as novas OS externas entre as empresas
+        Object.keys(externalCompanies).forEach(empresa => {
+          const adicional = Math.floor(additionalExternal / Object.keys(externalCompanies).length);
+          externalCompanies[empresa] += adicional;
+        });
+      } else {
+        // Se não tivermos dados do painel, criar uma simulação simples
+        externalTotal = Math.floor(sgzData.length * 0.3); // 30% externas
+        subTotal = sgzData.length - externalTotal;
+        
+        externalCompanies = {
+          'SABESP': Math.floor(externalTotal * 0.4),
+          'ENEL': Math.floor(externalTotal * 0.3),
+          'COMGÁS': Math.floor(externalTotal * 0.1),
+          'OUTROS': Math.floor(externalTotal * 0.2)
+        };
+      }
+    }
+    
+    return {
+      labels: ['Subprefeitura', 'Entidades Externas'],
+      datasets: [
+        {
+          data: [subTotal, externalTotal],
+          backgroundColor: ['#f97316', '#71717a'], // orange-500, gray-500
+          borderColor: 'white',
+          borderWidth: 2,
+        }
+      ]
+    };
+  }, [sgzData, painelData, isSimulationActive]);
   
-  const chartOptions = {
+  const options = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: {
-      duration: 1000
-    },
+    cutout: '65%',
     plugins: {
       legend: {
-        position: 'right' as const,
-        labels: {
-          boxWidth: 12,
-          font: { size: 11 }
-        }
+        position: 'bottom' as const,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleFont: { size: 13 },
-        bodyFont: { size: 12 },
-        padding: 10,
-        cornerRadius: 4,
         callbacks: {
           label: function(context: any) {
+            const label = context.label || '';
             const value = context.parsed || 0;
             const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-            const percentage = ((value / total) * 100).toFixed(1);
-            return `${context.label}: ${value} (${percentage}%)`;
-          },
-          afterLabel: function(context: any) {
-            if (context.label === 'Entidades Externas' && !isSimulationActive) {
-              return Object.entries({})
-                .filter(([_, count]) => typeof count === 'number' && count > 0)
-                .map(([entity, count]) => `${entity}: ${count}`);
-            }
-            return null;
+            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${label}: ${value} (${percentage}%)`;
           }
         }
       }
     }
   };
   
-  const total = sgzData?.length || 0;
-  const internalCount = sgzData?.filter(order => {
-    const serviceType = (order.sgz_tipo_servico || '').toUpperCase();
-    return !externalKeywords.some(keyword => serviceType.includes(keyword));
-  }).length || 0;
-  
-  const internalPercentage = total > 0 ? ((internalCount / total) * 100).toFixed(1) : 0;
-  const simulatedPercentage = isSimulationActive ? "100.0" : internalPercentage;
-  
-  const cardValue = sgzData 
-    ? `${isSimulationActive ? 'Simulação: ' : ''}Subprefeitura: ${simulatedPercentage}%`
-    : '';
-  
+  // Calcular estatísticas
+  const stats = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return '0%';
+    
+    let subTotal = sgzData.length;
+    let externalTotal = 0;
+    
+    if (painelData && painelData.length > 0) {
+      // Usar painelData para calcular responsabilidade real
+      const painelMap = new Map();
+      
+      painelData.forEach(item => {
+        if (item.id_os) {
+          painelMap.set(item.id_os.toString().trim(), item);
+        }
+      });
+      
+      subTotal = 0;
+      externalTotal = 0;
+      
+      sgzData.forEach(order => {
+        const orderNumber = order.ordem_servico?.toString().trim();
+        if (!orderNumber) return;
+        
+        const painelItem = painelMap.get(orderNumber);
+        
+        if (painelItem && painelItem.responsavel_real) {
+          const responsavel = painelItem.responsavel_real.toUpperCase();
+          
+          if (responsavel.includes('SABESP') || 
+              responsavel.includes('ENEL') || 
+              responsavel.includes('EXTERNO') || 
+              responsavel.includes('COMGAS')) {
+            externalTotal++;
+          } else {
+            subTotal++;
+          }
+        } else {
+          subTotal++;
+        }
+      });
+    }
+    
+    if (isSimulationActive) {
+      // Ajustar os percentuais para cenário simulado
+      if (painelData && painelData.length > 0) {
+        const additionalExternal = Math.floor(subTotal * 0.2);
+        subTotal -= additionalExternal;
+        externalTotal += additionalExternal;
+      } else {
+        externalTotal = Math.floor(sgzData.length * 0.3); // 30% externas
+        subTotal = sgzData.length - externalTotal;
+      }
+    }
+    
+    const total = subTotal + externalTotal;
+    const percentage = total > 0 ? Math.round((externalTotal / total) * 100) : 0;
+    
+    return `${percentage}% externas`;
+  }, [sgzData, painelData, isSimulationActive]);
+
   return (
     <ChartCard
-      title="Responsabilidade Real (Sub vs Externo)"
-      value={cardValue}
+      title="Responsabilidade Real"
+      value={stats}
       isLoading={isLoading}
     >
-      {chartData.labels.length > 0 && (
-        <Doughnut data={chartData} options={chartOptions} />
+      {chartData && (
+        <div className="flex items-center justify-center h-full">
+          <Doughnut data={chartData} options={options} />
+        </div>
       )}
     </ChartCard>
   );

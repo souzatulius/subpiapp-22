@@ -158,6 +158,7 @@ export type Database = {
       comunicados: {
         Row: {
           autor_id: string
+          coordenacao_id: string | null
           data_envio: string
           destinatarios: string
           id: string
@@ -166,6 +167,7 @@ export type Database = {
         }
         Insert: {
           autor_id: string
+          coordenacao_id?: string | null
           data_envio?: string
           destinatarios: string
           id?: string
@@ -174,6 +176,7 @@ export type Database = {
         }
         Update: {
           autor_id?: string
+          coordenacao_id?: string | null
           data_envio?: string
           destinatarios?: string
           id?: string
@@ -502,6 +505,7 @@ export type Database = {
       }
       historico_demandas: {
         Row: {
+          coordenacao_id: string | null
           demanda_id: string
           detalhes: Json | null
           evento: string
@@ -510,6 +514,7 @@ export type Database = {
           usuario_id: string
         }
         Insert: {
+          coordenacao_id?: string | null
           demanda_id: string
           detalhes?: Json | null
           evento: string
@@ -518,6 +523,7 @@ export type Database = {
           usuario_id: string
         }
         Update: {
+          coordenacao_id?: string | null
           demanda_id?: string
           detalhes?: Json | null
           evento?: string
@@ -588,6 +594,7 @@ export type Database = {
           aprovador_id: string | null
           atualizado_em: string
           autor_id: string
+          coordenacao_id: string | null
           criado_em: string
           demanda_id: string | null
           id: string
@@ -601,6 +608,7 @@ export type Database = {
           aprovador_id?: string | null
           atualizado_em?: string
           autor_id: string
+          coordenacao_id?: string | null
           criado_em?: string
           demanda_id?: string | null
           id?: string
@@ -614,6 +622,7 @@ export type Database = {
           aprovador_id?: string | null
           atualizado_em?: string
           autor_id?: string
+          coordenacao_id?: string | null
           criado_em?: string
           demanda_id?: string | null
           id?: string
@@ -2314,6 +2323,16 @@ export type Database = {
           upload_id: string
         }
         Returns: undefined
+      }
+      respostas_atrasadas_por_coordenacao: {
+        Args: {
+          p_coordenacao_id: string
+        }
+        Returns: {
+          id: string
+          titulo: string
+          prazo_resposta: string
+        }[]
       }
       sgz_map_service_to_area: {
         Args: {

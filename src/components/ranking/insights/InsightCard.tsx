@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface InsightCardProps {
@@ -11,26 +12,34 @@ interface InsightCardProps {
   isSimulated?: boolean;
 }
 
-const InsightCard: React.FC<InsightCardProps> = ({ title, value, comment, isLoading, isSimulated = false }) => {
+const InsightCard: React.FC<InsightCardProps> = ({
+  title,
+  value,
+  comment,
+  isLoading,
+  isSimulated = false
+}) => {
   return (
-    <Card className={`border ${isSimulated ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} hover:shadow-md transition-all`}>
-      <CardHeader className="pb-1 pt-3">
-        <CardTitle className="text-sm font-medium text-gray-700">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        {isLoading ? (
-          <Skeleton className="h-8 w-24 mb-2" />
-        ) : (
-          <div className={`text-2xl font-bold ${isSimulated ? 'text-orange-600' : 'text-gray-900'}`}>
-            {value}
-          </div>
-        )}
-        {isLoading ? (
-          <Skeleton className="h-4 w-full mb-1" />
-        ) : (
-          <p className="text-xs text-gray-500 mt-1">{comment}</p>
-        )}
-      </CardContent>
+    <Card className={`p-4 border ${isSimulated ? 'border-orange-300 bg-orange-50/50' : 'border-gray-200'} hover:shadow-md transition-all`}>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-medium text-gray-700">{title}</h3>
+        {isSimulated && <Sparkles className="h-4 w-4 text-orange-500" />}
+      </div>
+      
+      {isLoading ? (
+        <>
+          <Skeleton className="h-7 w-24 bg-gray-200 mb-2" />
+          <Skeleton className="h-4 w-full bg-gray-100 mb-1" />
+          <Skeleton className="h-4 w-3/4 bg-gray-100" />
+        </>
+      ) : (
+        <>
+          <p className="text-2xl font-bold text-gray-900 mb-2">{value}</p>
+          <p className="text-xs text-gray-600 line-clamp-2" title={comment}>
+            {comment}
+          </p>
+        </>
+      )}
     </Card>
   );
 };

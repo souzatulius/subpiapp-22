@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DynamicDataCardProps {
   title: string;
@@ -8,6 +10,8 @@ interface DynamicDataCardProps {
   dataSourceKey: string;
   coordenacaoId: string;
   usuarioId: string;
+  highlight?: boolean;
+  valueFormatter?: (value: number) => string;
 }
 
 const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
@@ -16,24 +20,37 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
   color,
   dataSourceKey,
   coordenacaoId,
-  usuarioId
+  usuarioId,
+  highlight = false,
+  valueFormatter = (value) => `${value} itens`
 }) => {
   const { data, loading } = useDashboardData(
     dataSourceKey as any,
     coordenacaoId,
     usuarioId
   );
+  
+  const borderClass = highlight ? 'border-2 border-orange-500' : 'border border-gray-200';
+  const shadowClass = highlight ? 'shadow-lg' : 'shadow-md';
 
   return (
-    <div className={`rounded-md shadow-md p-4 text-white`} style={{ backgroundColor: color }}>
+    <div 
+      className={`rounded-md ${shadowClass} p-4 transition-all hover:shadow-lg ${borderClass}`} 
+      style={{ backgroundColor: color }}
+    >
       <div className="flex items-center gap-2 mb-2">
-        <div>{icon}</div>
-        <h4 className="text-md font-semibold">{title}</h4>
+        <div className="text-white">{icon}</div>
+        <h4 className="text-md font-semibold text-white">{title}</h4>
       </div>
+      
       {loading ? (
-        <p className="text-sm">Carregando...</p>
+        <div className="mt-2">
+          <Skeleton className="h-6 w-24 bg-white/30" />
+        </div>
       ) : (
-        <p className="text-sm">{data?.length ?? 0} itens</p>
+        <p className="text-xl font-bold text-white">
+          {valueFormatter(data?.length ?? 0)}
+        </p>
       )}
     </div>
   );

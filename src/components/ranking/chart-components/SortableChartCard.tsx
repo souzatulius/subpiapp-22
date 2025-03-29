@@ -1,107 +1,136 @@
 
 import React from 'react';
-import { Eye, EyeOff, Search } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { motion } from 'framer-motion';
+import { EyeOff, Eye, GripVertical, ChevronDown, ChevronUp, LineChart, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-export interface SortableChartCardProps {
+interface SortableChartCardProps {
   id: string;
-  isVisible: boolean;
-  component: React.ReactNode;
   title: string;
+  component: React.ReactNode;
+  isVisible: boolean;
+  isAnalysisExpanded: boolean;
+  showAnalysisOnly: boolean;
   analysis: string;
-  isAnalysisExpanded?: boolean;
-  showAnalysisOnly?: boolean;
   onToggleVisibility: () => void;
   onToggleAnalysis: () => void;
   onToggleView: () => void;
 }
 
-export const SortableChartCard: React.FC<SortableChartCardProps> = ({
+const SortableChartCard: React.FC<SortableChartCardProps> = ({
   id,
-  isVisible,
-  component,
   title,
-  analysis,
+  component,
+  isVisible,
   isAnalysisExpanded,
   showAnalysisOnly,
+  analysis,
   onToggleVisibility,
   onToggleAnalysis,
   onToggleView
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 1000 : 1,
   };
-  
-  if (!isVisible) return null;
-  
+
   return (
-    <motion.div
+    <Card
       ref={setNodeRef}
       style={style}
-      className="col-span-1 md:col-span-1 lg:col-span-1 h-full transition-all duration-300 cursor-move"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      {...attributes}
-      {...listeners}
+      className={cn(
+        "border border-orange-200 shadow-sm overflow-hidden transition-all hover:shadow",
+        !isVisible && "opacity-60"
+      )}
     >
-      <div className="relative h-full group">
-        <div className="absolute top-0 right-0 p-1.5 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent triggering drag when clicking buttons
-              onToggleView();
-            }}
-            className="p-1 rounded-full bg-white text-gray-600 hover:text-blue-600 shadow-sm hover:shadow transition-all"
-            title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar análise"}
+      <div className="p-3 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-white flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1"
           >
-            <Search size={16} />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent triggering drag when clicking buttons
-              onToggleVisibility();
-            }}
-            className="p-1 rounded-full bg-white text-gray-600 hover:text-blue-600 shadow-sm hover:shadow transition-all"
+            <GripVertical className="h-4 w-4" />
+          </div>
+          <h3 className="text-sm font-medium text-gray-700">{title}</h3>
+        </div>
+        
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={onToggleView}
+            title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar apenas análise"}
+          >
+            {showAnalysisOnly ? (
+              <LineChart className="h-4 w-4 text-orange-500" />
+            ) : (
+              <FileText className="h-4 w-4 text-gray-500" />
+            )}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={onToggleAnalysis}
+            title={isAnalysisExpanded ? "Ocultar análise" : "Mostrar análise"}
+          >
+            {isAnalysisExpanded ? (
+              <ChevronUp className="h-4 w-4 text-orange-500" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            )}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={onToggleVisibility}
             title={isVisible ? "Ocultar gráfico" : "Mostrar gráfico"}
           >
-            {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
+            {isVisible ? (
+              <Eye className="h-4 w-4 text-gray-500" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-orange-500" />
+            )}
+          </Button>
         </div>
-        
-        <div className="h-full">
-          {showAnalysisOnly ? (
-            <div className="p-4 bg-white rounded-lg border border-blue-200 shadow-sm h-full flex flex-col">
-              <h3 className="text-lg font-medium text-blue-800 mb-2">{title} - Análise</h3>
-              <p className="text-gray-700 flex-1 overflow-auto">{analysis}</p>
-            </div>
-          ) : (
-            component
-          )}
-        </div>
-        
-        {/* Analysis text - conditionally shown based on isAnalysisExpanded flag */}
-        {isAnalysisExpanded && !showAnalysisOnly && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }} 
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
-            className="mt-2 p-3 bg-blue-50 rounded-md text-sm text-gray-700"
-            onClick={(e) => e.stopPropagation()} // Prevent triggering drag when clicking analysis
-          >
-            <h4 className="font-medium mb-1 text-blue-700">{title} - Análise</h4>
-            <p>{analysis}</p>
-          </motion.div>
-        )}
       </div>
-    </motion.div>
+      
+      {isAnalysisExpanded && (
+        <div className="p-3 bg-orange-50 border-b border-orange-100 text-sm text-orange-800">
+          {analysis}
+        </div>
+      )}
+      
+      {isVisible && !showAnalysisOnly && (
+        <CardContent className="p-0">
+          <div className="p-4 h-[250px]">
+            {component}
+          </div>
+        </CardContent>
+      )}
+      
+      {(!isVisible || showAnalysisOnly) && !isAnalysisExpanded && (
+        <div className="p-6 text-center text-gray-500 text-sm italic">
+          {showAnalysisOnly ? "Apenas análise visível. Clique em 📊 para mostrar o gráfico." : "Gráfico oculto. Clique no ícone 👁️ para visualizar."}
+        </div>
+      )}
+    </Card>
   );
 };
 

@@ -1,6 +1,8 @@
-import React from 'react';
-import { Bar } from 'react-chartjs-2';
+
+import React, { useMemo } from 'react';
+import { Pie } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
+import { chartTheme } from './ChartRegistration';
 
 interface ServiceTypesChartProps {
   data: any;
@@ -10,147 +12,119 @@ interface ServiceTypesChartProps {
 }
 
 const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({ 
-  data, 
-  sgzData, 
-  isLoading, 
-  isSimulationActive 
+  data,
+  sgzData,
+  isLoading,
+  isSimulationActive
 }) => {
-  const [chartData, setChartData] = React.useState<any>({
-    labels: [],
-    datasets: []
-  });
-  
-  React.useEffect(() => {
-    if (sgzData && sgzData.length > 0) {
-      const serviceTypeCounts: Record<string, number> = {};
-      
-      sgzData.forEach((order: any) => {
-        const serviceType = order.sgz_tipo_servico || 'Não informado';
-        
-        if (isSimulationActive && 
-           (serviceType.toUpperCase().includes('ENEL') || 
-            serviceType.toUpperCase().includes('SABESP') || 
-            serviceType.toUpperCase().includes('COMGAS'))) {
-          return;
-        }
-        
-        if (!serviceTypeCounts[serviceType]) {
-          serviceTypeCounts[serviceType] = 0;
-        }
-        serviceTypeCounts[serviceType] += 1;
-      });
-      
-      const sortedServiceTypes = Object.entries(serviceTypeCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-      
-      setChartData({
-        labels: sortedServiceTypes.map(([type]) => type.length > 25 ? type.substring(0, 22) + '...' : type),
-        datasets: [
-          {
-            label: 'Quantidade de OS',
-            data: sortedServiceTypes.map(([, count]) => count),
-            backgroundColor: [
-              'rgba(249, 115, 22, 0.8)',
-              'rgba(249, 115, 22, 0.7)',
-              'rgba(249, 115, 22, 0.6)',
-              'rgba(251, 146, 60, 0.8)',
-              'rgba(251, 146, 60, 0.7)',
-              'rgba(251, 146, 60, 0.6)',
-              'rgba(254, 215, 170, 0.8)',
-              'rgba(254, 215, 170, 0.7)',
-              'rgba(254, 215, 170, 0.6)',
-              'rgba(255, 237, 213, 0.8)',
-            ],
-            borderColor: [
-              'rgba(249, 115, 22, 1)',
-              'rgba(249, 115, 22, 0.9)',
-              'rgba(249, 115, 22, 0.8)',
-              'rgba(251, 146, 60, 1)',
-              'rgba(251, 146, 60, 0.9)',
-              'rgba(251, 146, 60, 0.8)',
-              'rgba(254, 215, 170, 1)',
-              'rgba(254, 215, 170, 0.9)',
-              'rgba(254, 215, 170, 0.8)',
-              'rgba(255, 237, 213, 1)',
-            ],
-            borderWidth: 1
-          }
-        ]
-      });
+  const chartData = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return null;
+    
+    // Agrupar por tipo de serviço
+    const serviceTypes: Record<string, number> = {};
+    
+    sgzData.forEach(order => {
+      const serviceType = order.sgz_tipo_servico || 'Não informado';
+      if (!serviceTypes[serviceType]) {
+        serviceTypes[serviceType] = 0;
+      }
+      serviceTypes[serviceType]++;
+    });
+    
+    // Ordenar e pegar os 10 mais frequentes
+    const sortedServices = Object.entries(serviceTypes)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+    
+    // Aplicar simulação se ativa
+    if (isSimulationActive) {
+      // Em uma simulação ideal, redistribuiríamos algumas OS de tipos externos
+      // Para simplificar, não alteraremos a distribuição de tipos neste gráfico específico
     }
+    
+    return {
+      labels: sortedServices.map(([name]) => name),
+      datasets: [
+        {
+          label: 'Quantidade',
+          data: sortedServices.map(([_, count]) => count),
+          backgroundColor: chartTheme.orange.backgroundColor,
+          borderColor: 'rgba(255, 255, 255, 0.5)',
+          borderWidth: 1,
+        }
+      ]
+    };
   }, [sgzData, isSimulationActive]);
   
-  const chartOptions = {
+  const options = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: {
-      duration: 1000
-    },
     plugins: {
       legend: {
-        display: false
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleFont: { size: 13 },
-        bodyFont: { size: 12 },
-        padding: 10,
-        cornerRadius: 4,
-        callbacks: {
-          title: function(tooltipItems: any) {
-            const index = tooltipItems[0].dataIndex;
-            const originalLabels = Object.keys(sgzData?.reduce((acc: any, order: any) => {
-              acc[order.sgz_tipo_servico || 'Não informado'] = true;
-              return acc;
-            }, {}) || {});
-            
-            const sortedLabels = originalLabels.sort((a, b) => {
-              const countA = sgzData?.filter(o => o.sgz_tipo_servico === a).length || 0;
-              const countB = sgzData?.filter(o => o.sgz_tipo_servico === b).length || 0;
-              return countB - countA;
-            }).slice(0, 10);
-            
-            return sortedLabels[index] || tooltipItems[0].label;
+        position: 'right' as const,
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 10
+          },
+          generateLabels: (chart: any) => {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label: string, i: number) => {
+                const value = data.datasets[0].data[i];
+                const text = label.length > 23 ? label.substr(0, 20) + '...' : label;
+                return {
+                  text: `${text} (${value})`,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  hidden: false,
+                  lineCap: 'round',
+                  lineDash: [],
+                  lineDashOffset: 0,
+                  lineJoin: 'round',
+                  lineWidth: 0,
+                  strokeStyle: '#fff',
+                  pointStyle: 'circle',
+                  rotation: 0
+                };
+              });
+            }
+            return [];
           }
         }
-      }
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          font: { size: 10 },
-          maxRotation: 45,
-          minRotation: 45
-        }
       },
-      y: {
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)'
-        },
-        ticks: {
-          font: { size: 10 }
-        },
-        beginAtZero: true
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            return `${context.label}: ${context.raw} OS`;
+          }
+        }
       }
     }
   };
   
-  const cardValue = sgzData 
-    ? `${isSimulationActive ? 'Simulação: ' : ''}Total: ${chartData.datasets[0]?.data.reduce((a: number, b: number) => a + b, 0) || 0} OS`
-    : '';
-  
+  // Calcular estatísticas
+  const stats = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return '0 tipos';
+    
+    const uniqueTypes = new Set<string>();
+    sgzData.forEach(order => {
+      if (order.sgz_tipo_servico) {
+        uniqueTypes.add(order.sgz_tipo_servico);
+      }
+    });
+    
+    return `${uniqueTypes.size} tipos`;
+  }, [sgzData]);
+
   return (
     <ChartCard
       title="Distribuição por Tipo de Serviço"
-      value={cardValue}
+      value={stats}
       isLoading={isLoading}
     >
-      {chartData.labels.length > 0 && (
-        <Bar data={chartData} options={chartOptions} />
+      {chartData && (
+        <Pie data={chartData} options={options} />
       )}
     </ChartCard>
   );

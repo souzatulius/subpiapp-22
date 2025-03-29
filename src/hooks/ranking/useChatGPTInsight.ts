@@ -1,154 +1,204 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
-interface Indicador {
-  valor: string;
-  comentario: string;
-}
-
-interface Indicadores {
-  fechadas: Indicador;
-  pendentes: Indicador;
-  canceladas: Indicador;
-  prazo_medio: Indicador;
-  fora_do_prazo: Indicador;
-}
-
-interface ChatGPTInsightResult {
-  indicadores: Indicadores | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export const useChatGPTInsight = (dadosPlanilha: any[], uploadId?: string): ChatGPTInsightResult => {
-  const [indicadores, setIndicadores] = useState<Indicadores | null>(null);
+export const useChatGPTInsight = (dadosPlanilha: any[] | null, uploadId?: string) => {
+  const [indicadores, setIndicadores] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!dadosPlanilha || dadosPlanilha.length === 0) {
-      setIsLoading(false);
-      return;
-    }
+    const fetchOrGenerateInsights = async () => {
+      if (!dadosPlanilha || dadosPlanilha.length === 0) {
+        setIsLoading(false);
+        return;
+      }
 
-    const gerarInsights = async () => {
+      setIsLoading(true);
+      
       try {
-        setIsLoading(true);
-        setError(null);
+        // Verificar se existem insights previamente gerados para este upload
+        if (uploadId) {
+          const { data: existingInsights } = await supabase
+            .from('painel_zeladoria_insights')
+            .select('*')
+            .eq('painel_id', uploadId)
+            .single();
 
-        const total = dadosPlanilha.length;
-        const statusCount = dadosPlanilha.reduce(
-          (acc, item) => {
-            const status = item.status?.toUpperCase();
-            if (!status) return acc;
-            if (status.includes('FECHAD')) acc.fechadas++;
-            else if (status.includes('PENDEN')) acc.pendentes++;
-            else if (status.includes('CANCEL')) acc.canceladas++;
-            else if (status.includes('CONC')) acc.conc++;
-            return acc;
-          },
-          { fechadas: 0, pendentes: 0, canceladas: 0, conc: 0 }
-        );
-
-        const prazoMedio = calcularPrazoMedio(dadosPlanilha);
-        const foraDoPrazo = dadosPlanilha.filter(
-          (d) => d.status?.toUpperCase().includes('PENDEN') && d.prazo === 'FORA DO PRAZO'
-        ).length;
-
-        const dados = {
-          total,
-          fechadas: statusCount.fechadas,
-          pendentes: statusCount.pendentes,
-          canceladas: statusCount.canceladas,
-          conc: statusCount.conc,
-          prazoMedio,
-          foraDoPrazo
-        };
-
-        // Chamar a edge function via SDK do Supabase
-        const { data, error: invokeError } = await supabase.functions.invoke('generate-ranking-insights', {
-          body: { tipo: 'indicadores', dados }
-        });
-
-        if (invokeError) {
-          throw new Error(`Falha ao chamar a edge function: ${invokeError.message}`);
-        }
-
-        if (data && data.insights) {
-          setIndicadores(data.insights as Indicadores);
-        } else if (data && data.error) {
-          throw new Error(data.error);
-        } else {
-          throw new Error('Formato de resposta inválido da edge function');
-        }
-      } catch (err: any) {
-        console.error('Erro ao gerar insights:', err);
-        setError(err.message || 'Erro ao gerar insights');
-        toast.error('Não foi possível gerar análises de IA: ' + (err.message || 'Erro desconhecido'));
-        
-        // Fallback para valores padrão em caso de erro
-        const total = dadosPlanilha.length;
-        const statusCount = dadosPlanilha.reduce(
-          (acc, item) => {
-            const status = item.status?.toUpperCase();
-            if (!status) return acc;
-            if (status.includes('FECHAD')) acc.fechadas++;
-            else if (status.includes('PENDEN')) acc.pendentes++;
-            else if (status.includes('CANCEL')) acc.canceladas++;
-            else if (status.includes('CONC')) acc.conc++;
-            return acc;
-          },
-          { fechadas: 0, pendentes: 0, canceladas: 0, conc: 0 }
-        );
-
-        const prazoMedio = calcularPrazoMedio(dadosPlanilha);
-        const foraDoPrazo = dadosPlanilha.filter(
-          (d) => d.status?.toUpperCase().includes('PENDEN') && d.prazo === 'FORA DO PRAZO'
-        ).length;
-        
-        setIndicadores({
-          fechadas: { 
-            valor: `${Math.round((statusCount.fechadas / total) * 100)}%`, 
-            comentario: "Taxa de conclusão de ordens de serviço." 
-          },
-          pendentes: { 
-            valor: `${Math.round((statusCount.pendentes / total) * 100)}%`, 
-            comentario: "Ordens de serviço ainda não concluídas." 
-          },
-          canceladas: { 
-            valor: `${Math.round((statusCount.canceladas / total) * 100)}%`, 
-            comentario: "Ordens de serviço canceladas." 
-          },
-          prazo_medio: { 
-            valor: `${prazoMedio.toFixed(1)} dias`, 
-            comentario: "Tempo médio para conclusão das ordens de serviço." 
-          },
-          fora_do_prazo: { 
-            valor: `${foraDoPrazo} OS`, 
-            comentario: "Ordens de serviço que ultrapassaram o prazo estabelecido." 
+          if (existingInsights) {
+            setIndicadores(existingInsights.indicadores);
+            setIsLoading(false);
+            return;
           }
-        });
+        }
+
+        // Se não houver insights salvos, gerar novos (sem usar IA por enquanto)
+        const insightsGerados = gerarInsightsEstatisticos(dadosPlanilha);
+        
+        // Salvar insights gerados no banco de dados se houver uploadId
+        if (uploadId) {
+          const { error: saveError } = await supabase
+            .from('painel_zeladoria_insights')
+            .insert({
+              painel_id: uploadId,
+              indicadores: insightsGerados
+            });
+            
+          if (saveError) {
+            console.error('Erro ao salvar insights:', saveError);
+          }
+        }
+        
+        setIndicadores(insightsGerados);
+      } catch (err) {
+        console.error('Erro ao buscar ou gerar insights:', err);
+        setError('Falha ao gerar indicadores');
+        // Fallback para indicadores gerados estatisticamente
+        setIndicadores(gerarInsightsEstatisticos(dadosPlanilha));
       } finally {
         setIsLoading(false);
       }
     };
 
-    gerarInsights();
-  }, [dadosPlanilha]);
+    fetchOrGenerateInsights();
+  }, [dadosPlanilha, uploadId]);
 
   return { indicadores, isLoading, error };
 };
 
-function calcularPrazoMedio(planilha: any[]) {
-  const concluidas = planilha.filter((d) => d.status?.toUpperCase().includes('FECHAD'));
-  const dias = concluidas.map((d) => {
-    const abertura = new Date(d.data_abertura);
-    const fechamento = new Date(d.data_fechamento);
-    return (fechamento.getTime() - abertura.getTime()) / (1000 * 60 * 60 * 24);
-  }).filter((n) => !isNaN(n));
-
-  if (dias.length === 0) return 0;
-  return dias.reduce((a, b) => a + b, 0) / dias.length;
+// Função para gerar insights estatísticos sem depender de IA
+function gerarInsightsEstatisticos(dados: any[]) {
+  if (!dados || dados.length === 0) {
+    return null;
+  }
+  
+  // Contadores para cálculo de porcentagens
+  let totalOS = dados.length;
+  let osFechadas = 0;
+  let osPendentes = 0;
+  let osCanceladas = 0;
+  let somaTempoAtendimento = 0;
+  let osForaPrazo = 0;
+  
+  // Contar status
+  dados.forEach(os => {
+    const status = (os.sgz_status || '').toUpperCase();
+    const diasAteStatus = parseInt(os.sgz_dias_ate_status_atual) || 0;
+    
+    somaTempoAtendimento += diasAteStatus;
+    
+    if (status.includes('CONC') || status.includes('FECHA')) {
+      osFechadas++;
+    } else if (status.includes('CANC')) {
+      osCanceladas++;
+    } else {
+      osPendentes++;
+      
+      // Considerar fora do prazo se pendente por mais de 30 dias
+      if (diasAteStatus > 30) {
+        osForaPrazo++;
+      }
+    }
+  });
+  
+  // Calcular porcentagens e médias
+  const porcentagemFechadas = (osFechadas / totalOS) * 100;
+  const porcentagemPendentes = (osPendentes / totalOS) * 100;
+  const porcentagemCanceladas = (osCanceladas / totalOS) * 100;
+  const tempoMedioAtendimento = somaTempoAtendimento / totalOS;
+  
+  // Analisar os tipos de serviços mais frequentes
+  const tiposServico: Record<string, number> = {};
+  dados.forEach(os => {
+    const tipo = os.sgz_tipo_servico || 'Não especificado';
+    tiposServico[tipo] = (tiposServico[tipo] || 0) + 1;
+  });
+  
+  // Ordenar tipos por frequência
+  const tiposOrdenados = Object.entries(tiposServico)
+    .sort((a, b) => b[1] - a[1])
+    .map(([tipo, qtd]) => ({ tipo, qtd }));
+  
+  const tipoMaisFrequente = tiposOrdenados[0]?.tipo || 'Não disponível';
+  const qtdTipoMaisFrequente = tiposOrdenados[0]?.qtd || 0;
+  
+  // Distritos com mais OS
+  const distritos: Record<string, number> = {};
+  dados.forEach(os => {
+    const distrito = os.sgz_distrito || 'Não especificado';
+    distritos[distrito] = (distritos[distrito] || 0) + 1;
+  });
+  
+  const distritosOrdenados = Object.entries(distritos)
+    .sort((a, b) => b[1] - a[1])
+    .map(([distrito, qtd]) => ({ distrito, qtd }));
+  
+  const distritoMaisOS = distritosOrdenados[0]?.distrito || 'Não disponível';
+  const qtdDistritoMaisOS = distritosOrdenados[0]?.qtd || 0;
+  
+  // Retornar insights estruturados
+  return {
+    fechadas: {
+      valor: `${porcentagemFechadas.toFixed(1)}%`,
+      comentario: `${osFechadas} de ${totalOS} OS foram concluídas. ${
+        porcentagemFechadas > 70 
+          ? "Excelente taxa de conclusão!"
+          : porcentagemFechadas > 50 
+            ? "Taxa de conclusão moderada."
+            : "Há oportunidade para melhorar a taxa de conclusão."
+      }`
+    },
+    pendentes: {
+      valor: `${porcentagemPendentes.toFixed(1)}%`,
+      comentario: `${osPendentes} OS ainda estão pendentes de atendimento. ${
+        porcentagemPendentes < 20 
+          ? "Baixa quantidade de pendências!"
+          : porcentagemPendentes < 40 
+            ? "Volume moderado de pendências."
+            : "Alto volume de pendências a resolver."
+      }`
+    },
+    canceladas: {
+      valor: `${porcentagemCanceladas.toFixed(1)}%`,
+      comentario: `${osCanceladas} OS foram canceladas. ${
+        porcentagemCanceladas < 10 
+          ? "Baixa taxa de cancelamento."
+          : porcentagemCanceladas < 20 
+            ? "Taxa de cancelamento dentro do esperado."
+            : "Taxa de cancelamento elevada, verificar causas."
+      }`
+    },
+    prazo_medio: {
+      valor: `${tempoMedioAtendimento.toFixed(1)} dias`,
+      comentario: `Tempo médio para atendimento das OS. ${
+        tempoMedioAtendimento < 15 
+          ? "Prazo bastante satisfatório!"
+          : tempoMedioAtendimento < 30 
+            ? "Prazo de atendimento adequado."
+            : "Prazo médio elevado, verificar gargalos."
+      }`
+    },
+    fora_do_prazo: {
+      valor: `${osForaPrazo} OS`,
+      comentario: `OS pendentes há mais de 30 dias. ${
+        osForaPrazo === 0 
+          ? "Não há OS fora do prazo!"
+          : osForaPrazo < 10 
+            ? "Poucos casos fora do prazo."
+            : "Quantidade significativa de OS fora do prazo."
+      }`
+    },
+    tipo_frequente: {
+      valor: tipoMaisFrequente,
+      comentario: `O tipo de serviço mais frequente representa ${
+        (qtdTipoMaisFrequente / totalOS * 100).toFixed(1)
+      }% do total.`
+    },
+    distrito_destaque: {
+      valor: distritoMaisOS,
+      comentario: `O distrito com mais demandas representa ${
+        (qtdDistritoMaisOS / totalOS * 100).toFixed(1)
+      }% do total.`
+    }
+  };
 }

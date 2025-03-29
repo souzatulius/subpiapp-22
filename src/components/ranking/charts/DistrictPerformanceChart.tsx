@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
+import { chartTheme, formatDays } from './ChartRegistration';
 
 interface DistrictPerformanceChartProps {
   data: any;
@@ -12,158 +13,116 @@ interface DistrictPerformanceChartProps {
 
 const DistrictPerformanceChart: React.FC<DistrictPerformanceChartProps> = ({ 
   data, 
-  sgzData, 
-  isLoading, 
-  isSimulationActive 
+  sgzData,
+  isLoading,
+  isSimulationActive
 }) => {
-  const [chartData, setChartData] = React.useState<any>({
-    labels: [],
-    datasets: []
-  });
-  
-  React.useEffect(() => {
-    if (sgzData && sgzData.length > 0) {
-      // Group data by district
-      const districtData: Record<string, { total: number, closed: number, pending: number }> = {};
+  const chartData = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return null;
+    
+    // Agrupar por distrito
+    const districts: Record<string, { count: number, totalDays: number, fechados: number }> = {};
+    
+    sgzData.forEach(order => {
+      const district = order.sgz_distrito || 'Não informado';
+      if (!districts[district]) {
+        districts[district] = { count: 0, totalDays: 0, fechados: 0 };
+      }
       
-      sgzData.forEach((order: any) => {
-        const district = order.sgz_distrito || 'Não informado';
-        
-        if (!districtData[district]) {
-          districtData[district] = { total: 0, closed: 0, pending: 0 };
-        }
-        
-        districtData[district].total += 1;
-        
-        const status = order.sgz_status?.toLowerCase();
-        if (status?.includes('fecha') || status?.includes('conclu')) {
-          districtData[district].closed += 1;
-        } else if (!(status?.includes('cancel'))) {
-          districtData[district].pending += 1;
-        }
-      });
+      districts[district].count += 1;
+      districts[district].totalDays += parseInt(order.sgz_dias_ate_status_atual) || 0;
       
-      // Calculate resolution rates and sort
-      const districtPerformance = Object.entries(districtData)
-        .map(([district, { total, closed }]) => ({
-          district,
-          resolutionRate: total > 0 ? (closed / total) * 100 : 0,
-          total
-        }))
-        .filter(item => item.total > 10) // Filter out districts with too few orders
-        .sort((a, b) => b.resolutionRate - a.resolutionRate);
-      
-      // Apply simulation if active
-      const simulatedData = isSimulationActive
-        ? districtPerformance.map(item => ({
-            ...item,
-            resolutionRate: Math.min(item.resolutionRate + 15, 100) // Increase by 15% in simulation, max 100%
-          }))
-        : districtPerformance;
-      
-      setChartData({
-        labels: simulatedData.map(item => item.district),
-        datasets: [
-          {
-            label: 'Taxa de Resolução (%)',
-            data: simulatedData.map(item => item.resolutionRate.toFixed(1)),
-            backgroundColor: simulatedData.map(item => 
-              item.resolutionRate >= 80 ? 'rgba(34, 197, 94, 0.8)' : // Green for high performance
-              item.resolutionRate >= 60 ? 'rgba(249, 115, 22, 0.8)' : // Orange for medium
-              'rgba(239, 68, 68, 0.8)' // Red for low
-            ),
-            borderColor: simulatedData.map(item => 
-              item.resolutionRate >= 80 ? 'rgba(34, 197, 94, 1)' : 
-              item.resolutionRate >= 60 ? 'rgba(249, 115, 22, 1)' : 
-              'rgba(239, 68, 68, 1)'
-            ),
-            borderWidth: 1
-          }
-        ]
+      if (order.sgz_status && (order.sgz_status.toUpperCase().includes('CONC') || order.sgz_status.toUpperCase().includes('FECHAD'))) {
+        districts[district].fechados += 1;
+      }
+    });
+    
+    // Calcular médias e ordenar por taxa de conclusão
+    const sortedDistricts = Object.entries(districts)
+      .filter(([_, stats]) => stats.count >= 5) // Apenas distritos com pelo menos 5 ordens
+      .map(([name, stats]) => ({
+        name,
+        count: stats.count,
+        avgDays: stats.totalDays / stats.count,
+        completionRate: (stats.fechados / stats.count) * 100
+      }))
+      .sort((a, b) => b.completionRate - a.completionRate);
+    
+    // Aplicar simulação se ativa
+    if (isSimulationActive) {
+      sortedDistricts.forEach(district => {
+        district.avgDays = Math.max(district.avgDays * 0.7, 1); // Reduz tempo médio em 30%
+        district.completionRate = Math.min(district.completionRate + 15, 100); // Aumenta taxa de conclusão
       });
     }
+    
+    // Limitar a 10 distritos para melhor visualização
+    const topDistricts = sortedDistricts.slice(0, 10);
+    
+    return {
+      labels: topDistricts.map(d => d.name),
+      datasets: [
+        {
+          label: 'Taxa de Conclusão (%)',
+          data: topDistricts.map(d => d.completionRate.toFixed(1)),
+          backgroundColor: chartTheme.orange.backgroundColor,
+          borderColor: 'rgba(255, 255, 255, 0.5)',
+          borderWidth: 1,
+        }
+      ]
+    };
   }, [sgzData, isSimulationActive]);
   
-  const chartOptions = {
+  const options = {
+    indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
-    animation: {
-      duration: 1000
-    },
     plugins: {
       legend: {
-        display: false
+        display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleFont: { size: 13 },
-        bodyFont: { size: 12 },
-        padding: 10,
-        cornerRadius: 4,
         callbacks: {
           label: function(context: any) {
-            return `Taxa de Resolução: ${context.parsed.y}%`;
-          },
-          afterLabel: function(context: any) {
-            const districtName = context.label;
-            const districtOrders = sgzData?.filter(o => o.sgz_distrito === districtName) || [];
-            return `Total OS: ${districtOrders.length}`;
+            return `Taxa de Conclusão: ${context.raw}%`;
           }
         }
       }
     },
     scales: {
       x: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          font: { size: 10 },
-          maxRotation: 45,
-          minRotation: 45
+        beginAtZero: true,
+        max: 100,
+        title: {
+          display: true,
+          text: 'Taxa de Conclusão (%)'
         }
       },
-      y: {
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)'
-        },
-        ticks: {
-          font: { size: 10 },
-          callback: function(value: any) {
-            return value + '%';
-          }
-        },
-        beginAtZero: true,
-        max: 100
-      }
     }
   };
   
-  // Calculate average resolution rate across all districts
-  const averageResolutionRate = sgzData && sgzData.length > 0
-    ? (sgzData.filter(order => {
-        const status = order.sgz_status?.toLowerCase();
-        return status?.includes('fecha') || status?.includes('conclu');
-      }).length / sgzData.length) * 100
-    : 0;
-  
-  // Apply simulation to the average if active
-  const displayedAverage = isSimulationActive 
-    ? Math.min(averageResolutionRate + 15, 100) 
-    : averageResolutionRate;
-  
-  const cardValue = sgzData 
-    ? `${isSimulationActive ? 'Simulação: ' : ''}Média Geral: ${displayedAverage.toFixed(1)}%`
-    : '';
-  
+  // Calcular estatísticas
+  const stats = useMemo(() => {
+    if (!sgzData || sgzData.length === 0) return '0 distritos';
+    
+    const uniqueDistricts = new Set<string>();
+    sgzData.forEach(order => {
+      if (order.sgz_distrito) {
+        uniqueDistricts.add(order.sgz_distrito);
+      }
+    });
+    
+    return `${uniqueDistricts.size} distritos`;
+  }, [sgzData]);
+
   return (
     <ChartCard
       title="Performance por Distrito"
-      value={cardValue}
+      value={stats}
       isLoading={isLoading}
     >
-      {chartData.labels.length > 0 && (
-        <Bar data={chartData} options={chartOptions} />
+      {chartData && (
+        <Bar data={chartData} options={options} />
       )}
     </ChartCard>
   );
