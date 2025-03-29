@@ -46,35 +46,60 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
   return (
     <div className="space-y-6">
-      <UploadSection 
-        onUploadStart={handleUploadStart}
-        onUploadComplete={handleUploadComplete}
-        isUploading={isUploading}
-        user={user}
-      />
+      {/* Upload Section with themed border */}
+      <div className="p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          Upload de Planilhas
+        </h2>
+        <UploadSection 
+          onUploadStart={handleUploadStart}
+          onUploadComplete={handleUploadComplete}
+          isUploading={isUploading}
+          user={user}
+        />
+      </div>
       
+      {/* AI Insights Cards Section */}
       {dadosSGZ && dadosSGZ.length > 0 && (
-        <DashboardCards dadosPlanilha={dadosSGZ} uploadId={uploadId || undefined} />
+        <div className="p-4 bg-white border border-orange-200 rounded-lg shadow-sm">
+          <DashboardCards dadosPlanilha={dadosSGZ} uploadId={uploadId || undefined} />
+        </div>
       )}
 
-      <FilterSection 
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        chartVisibility={chartVisibility}
-        onChartVisibilityChange={handleChartVisibilityChange}
-      />
+      {/* Filters Section */}
+      <div className="p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
+        <FilterSection 
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          chartVisibility={chartVisibility}
+          onChartVisibilityChange={handleChartVisibilityChange}
+        />
+      </div>
       
-      <ChartCategorySection 
-        activeCategory={activeCategory}
-        onCategoryChange={(category) => setActiveCategory(category)}
-        categories={['all', 'trends', 'performance', 'distribution']}
-      />
+      {/* Chart Categories Section */}
+      <div className="p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
+        <ChartCategorySection 
+          activeCategory={activeCategory}
+          onCategoryChange={(category) => setActiveCategory(category)}
+          categories={['all', 'trends', 'performance', 'distribution']}
+        />
+      </div>
       
-      <ChartsSection 
-        chartData={{}}
-        isLoading={false}
-        chartVisibility={chartVisibility}
-      />
+      {/* Charts Section */}
+      <div className="p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+          <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
+          Gráficos e Comparações
+        </h2>
+        <ChartsSection 
+          chartData={{}}
+          isLoading={false}
+          chartVisibility={chartVisibility}
+        />
+      </div>
       
       <ActionsSection />
       

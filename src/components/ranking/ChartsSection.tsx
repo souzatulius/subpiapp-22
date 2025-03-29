@@ -90,19 +90,28 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     setChartItems([
       {
         id: 'chart1',
-        title: 'Sample Chart 1',
+        title: 'Comparativo de Status',
         component: <div>Chart Component 1</div>,
         isVisible: true,
-        analysis: 'Sample analysis text for chart 1',
+        analysis: 'Análise do comparativo de status entre ordens de serviço em diferentes estados.',
         isAnalysisExpanded: false,
         showAnalysisOnly: false
       },
       {
         id: 'chart2',
-        title: 'Sample Chart 2',
+        title: 'Serviços por Região',
         component: <div>Chart Component 2</div>,
         isVisible: true,
-        analysis: 'Sample analysis text for chart 2',
+        analysis: 'Distribuição de serviços solicitados por região administrativa.',
+        isAnalysisExpanded: false,
+        showAnalysisOnly: false
+      },
+      {
+        id: 'chart3',
+        title: 'Tempo Médio por Tipo',
+        component: <div>Chart Component 3</div>,
+        isVisible: true,
+        analysis: 'Análise do tempo médio de atendimento por tipo de serviço.',
         isAnalysisExpanded: false,
         showAnalysisOnly: false
       }

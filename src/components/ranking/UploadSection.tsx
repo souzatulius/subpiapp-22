@@ -1,3 +1,4 @@
+
 import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -95,17 +96,17 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     <div className="space-y-4">
       <Card
         className={`border-dashed ${
-          isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
+          isDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300'
         } cursor-pointer transition-colors`}
         {...dragEvents}
         onDrop={handleDrop}
       >
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center">
-            <FileUp className="h-5 w-5 mr-2 text-orange-500" />
+          <CardTitle className="flex items-center text-blue-800">
+            <FileUp className="h-5 w-5 mr-2 text-blue-600" />
             Upload da Planilha SGZ
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-blue-600">
             Arraste e solte sua planilha SGZ aqui ou clique para fazer upload
           </CardDescription>
         </CardHeader>
@@ -122,7 +123,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               />
               <Button 
                 variant="outline" 
-                className="gap-2"
+                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-orange-600"
                 disabled={isUploading}
               >
                 <Upload className="h-4 w-4" />
@@ -131,8 +132,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
             {isUploading && (
               <div className="w-full space-y-2">
-                <Progress value={processingStats.processingStatus === 'processing' ? 50 : 100} />
-                <p className="text-center text-sm">
+                <Progress value={processingStats.processingStatus === 'processing' ? 50 : 100} className="bg-blue-100" />
+                <p className="text-center text-sm text-blue-700">
                   {processingStats.processingStatus === 'processing' 
                     ? `Processando ${processingStats.newOrders || 0} registros...` 
                     : processingStats.errorMessage || "Processamento concluído"}
@@ -143,13 +144,13 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="border-dashed border-gray-300 cursor-pointer transition-colors">
+      <Card className="border-dashed border-blue-300 cursor-pointer transition-colors">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center">
-            <FileUp className="h-5 w-5 mr-2 text-orange-500" />
+          <CardTitle className="flex items-center text-blue-800">
+            <FileUp className="h-5 w-5 mr-2 text-blue-600" />
             Upload do Painel da Zeladoria
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-blue-600">
             Faça upload da planilha do Painel da Zeladoria para análises inteligentes
           </CardDescription>
         </CardHeader>
@@ -166,7 +167,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
               />
               <Button 
                 variant="outline" 
-                className="gap-2"
+                className="gap-2 bg-orange-500 hover:bg-orange-600 text-white border-orange-600"
                 disabled={isLoadingPainel}
               >
                 <Upload className="h-4 w-4" />
@@ -175,8 +176,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
             {isLoadingPainel && (
               <div className="w-full space-y-2">
-                <Progress value={uploadProgress} />
-                <p className="text-center text-sm">
+                <Progress value={uploadProgress} className="bg-blue-100" />
+                <p className="text-center text-sm text-blue-700">
                   {processamentoPainel.status === 'processing' 
                     ? processamentoPainel.message 
                     : (processamentoPainel.status === 'success' 

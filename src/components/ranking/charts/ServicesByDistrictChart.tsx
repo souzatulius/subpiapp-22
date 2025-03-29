@@ -36,12 +36,47 @@ const ServicesByDistrictChart: React.FC<ServicesByDistrictChartProps> = ({ data,
             plugins: {
               legend: {
                 position: 'top' as const,
+                labels: {
+                  font: {
+                    size: 11
+                  }
+                },
+                title: {
+                  display: true,
+                  text: 'Distribuição por distrito',
+                  font: {
+                    size: 12,
+                    weight: 'bold'
+                  }
+                }
               },
+              tooltip: {
+                callbacks: {
+                  title: function(tooltipItem) {
+                    return `Distrito: ${tooltipItem[0].label}`;
+                  },
+                  label: function(context) {
+                    return `Número de serviços: ${context.parsed.y}`;
+                  }
+                }
+              }
             },
             scales: {
               y: {
                 beginAtZero: true,
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
               },
+              x: {
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
+              }
             },
           }}
         />

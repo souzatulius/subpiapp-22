@@ -36,12 +36,47 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({ data, isLoading }
             plugins: {
               legend: {
                 position: 'top' as const,
+                labels: {
+                  font: {
+                    size: 11
+                  }
+                },
+                title: {
+                  display: true,
+                  text: 'Tipos de serviço',
+                  font: {
+                    size: 12,
+                    weight: 'bold'
+                  }
+                }
               },
+              tooltip: {
+                callbacks: {
+                  title: function(tooltipItem) {
+                    return `Serviço: ${tooltipItem[0].label}`;
+                  },
+                  label: function(context) {
+                    return `Quantidade: ${context.parsed.y}`;
+                  }
+                }
+              }
             },
             scales: {
               y: {
                 beginAtZero: true,
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
               },
+              x: {
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
+              }
             },
           }}
         />
