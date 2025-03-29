@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SortableContext } from '@dnd-kit/sortable';
 import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
@@ -10,10 +9,6 @@ interface CardsContainerProps {
   onEditCard: (card: ActionCardItem) => void;
   onDeleteCard: (id: string) => void;
   onAddNewCard: () => void;
-  quickDemandTitle?: string;
-  onQuickDemandTitleChange?: (value: string) => void;
-  onQuickDemandSubmit?: () => void;
-  onSearchSubmit?: (query: string) => void;
   specialCardsData: {
     overdueCount: number;
     overdueItems: { title: string; id: string }[];
@@ -28,51 +23,33 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   onEditCard,
   onDeleteCard,
   onAddNewCard,
-  quickDemandTitle,
-  onQuickDemandTitleChange,
-  onQuickDemandSubmit,
-  onSearchSubmit,
   specialCardsData
 }) => {
-  // Include all cards in the sortable context, not just the regular ones
   const allCardIds = cards.map(card => card.id);
-  
+
   return (
     <SortableContext items={allCardIds}>
-      <div className="grid grid-cols-4 gap-6 auto-rows-auto">
-        {/* WelcomeMessage component has been removed */}
-        
-        {/* First show the search card */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-auto">
         {cards.filter(card => card.isSearch).map((card) => (
-          <ActionCardWrapper 
+          <ActionCardWrapper
             key={card.id}
-            card={card} 
+            card={card}
             onEdit={onEditCard}
             onDelete={onDeleteCard}
             onAddNewCard={onAddNewCard}
-            quickDemandTitle={quickDemandTitle}
-            onQuickDemandTitleChange={onQuickDemandTitleChange}
-            onQuickDemandSubmit={onQuickDemandSubmit}
-            onSearchSubmit={onSearchSubmit}
             specialCardsData={specialCardsData}
           />
         ))}
-        
-        {/* Add NotificationsEnabler after the search card */}
+
         <NotificationsEnabler />
-        
-        {/* Show all other cards */}
+
         {cards.filter(card => !card.isSearch).map((card) => (
-          <ActionCardWrapper 
+          <ActionCardWrapper
             key={card.id}
-            card={card} 
+            card={card}
             onEdit={onEditCard}
             onDelete={onDeleteCard}
             onAddNewCard={onAddNewCard}
-            quickDemandTitle={quickDemandTitle}
-            onQuickDemandTitleChange={onQuickDemandTitleChange}
-            onQuickDemandSubmit={onQuickDemandSubmit}
-            onSearchSubmit={onSearchSubmit}
             specialCardsData={specialCardsData}
           />
         ))}
