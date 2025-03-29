@@ -8,6 +8,7 @@ import { useUploadManagement } from '@/hooks/ranking/useUploadManagement';
 import { usePainelZeladoriaUpload } from './hooks/usePainelZeladoriaUpload';
 import { User } from '@supabase/supabase-js';
 import { Progress } from '@/components/ui/progress';
+import { UploadResult } from '@/hooks/ranking/types/uploadTypes';
 
 interface UploadSectionProps {
   onUploadStart: () => void;
@@ -53,7 +54,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUpload(files[0]);
-        if (result) {
+        if (result && typeof result !== 'string') {
           onUploadComplete(result.id, result.data);
         }
       } catch (error) {
@@ -69,7 +70,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUploadPainel(files[0]);
-        if (result && result.id) {
+        if (result && typeof result !== 'string' && result.id) {
           onPainelUploadComplete(result.id, result.data || []);
           toast.success("Planilha do Painel da Zeladoria processada com sucesso!");
         }
@@ -88,7 +89,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       onUploadStart();
       try {
         const result = await handleUpload(files[0]);
-        if (result) {
+        if (result && typeof result !== 'string') {
           onUploadComplete(result.id, result.data);
         }
       } catch (error) {

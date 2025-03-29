@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
@@ -23,13 +22,11 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
   
   React.useEffect(() => {
     if (sgzData && sgzData.length > 0) {
-      // Group data by service type
       const serviceTypeCounts: Record<string, number> = {};
       
       sgzData.forEach((order: any) => {
         const serviceType = order.sgz_tipo_servico || 'Não informado';
         
-        // Skip if we're in simulation mode and this is an external service
         if (isSimulationActive && 
            (serviceType.toUpperCase().includes('ENEL') || 
             serviceType.toUpperCase().includes('SABESP') || 
@@ -43,10 +40,9 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
         serviceTypeCounts[serviceType] += 1;
       });
       
-      // Sort service types by count in descending order
       const sortedServiceTypes = Object.entries(serviceTypeCounts)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 10); // Take top 10
+        .slice(0, 10);
       
       setChartData({
         labels: sortedServiceTypes.map(([type]) => type.length > 25 ? type.substring(0, 22) + '...' : type),
@@ -55,28 +51,28 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
             label: 'Quantidade de OS',
             data: sortedServiceTypes.map(([, count]) => count),
             backgroundColor: [
-              'rgba(249, 115, 22, 0.8)', // orange-500
+              'rgba(249, 115, 22, 0.8)',
               'rgba(249, 115, 22, 0.7)',
               'rgba(249, 115, 22, 0.6)',
-              'rgba(251, 146, 60, 0.8)', // orange-400
+              'rgba(251, 146, 60, 0.8)',
               'rgba(251, 146, 60, 0.7)',
               'rgba(251, 146, 60, 0.6)',
-              'rgba(254, 215, 170, 0.8)', // orange-200
+              'rgba(254, 215, 170, 0.8)',
               'rgba(254, 215, 170, 0.7)',
               'rgba(254, 215, 170, 0.6)',
-              'rgba(255, 237, 213, 0.8)', // orange-100
+              'rgba(255, 237, 213, 0.8)',
             ],
             borderColor: [
-              'rgba(249, 115, 22, 1)', // orange-500
+              'rgba(249, 115, 22, 1)',
               'rgba(249, 115, 22, 0.9)',
               'rgba(249, 115, 22, 0.8)',
-              'rgba(251, 146, 60, 1)', // orange-400
+              'rgba(251, 146, 60, 1)',
               'rgba(251, 146, 60, 0.9)',
               'rgba(251, 146, 60, 0.8)',
-              'rgba(254, 215, 170, 1)', // orange-200
+              'rgba(254, 215, 170, 1)',
               'rgba(254, 215, 170, 0.9)',
               'rgba(254, 215, 170, 0.8)',
-              'rgba(255, 237, 213, 1)', // orange-100
+              'rgba(255, 237, 213, 1)',
             ],
             borderWidth: 1
           }
@@ -89,8 +85,7 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
     responsive: true,
     maintainAspectRatio: false,
     animation: {
-      duration: 1000,
-      easing: 'easeInOutQuart'
+      duration: 1000
     },
     plugins: {
       legend: {
@@ -104,7 +99,6 @@ const ServiceTypesChart: React.FC<ServiceTypesChartProps> = ({
         cornerRadius: 4,
         callbacks: {
           title: function(tooltipItems: any) {
-            // Get the full service type name from original data
             const index = tooltipItems[0].dataIndex;
             const originalLabels = Object.keys(sgzData?.reduce((acc: any, order: any) => {
               acc[order.sgz_tipo_servico || 'Não informado'] = true;

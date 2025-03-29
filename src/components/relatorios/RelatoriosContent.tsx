@@ -203,7 +203,9 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
                 
                 <ServiceTypesChart 
                   data={rankingData.serviceTypes} 
-                  isLoading={isLoading} 
+                  sgzData={[]} 
+                  isLoading={isLoading}
+                  isSimulationActive={false}
                 />
                 
                 <TimeComparisonChart 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
@@ -23,7 +22,6 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
     datasets: []
   });
   
-  // External service keywords to identify non-subprefeitura responsibilities
   const externalKeywords = [
     'ENEL', 'SABESP', 'COMGAS', 'CPFL', 'TELECOM', 'VIVO', 'CLARO', 'TIM',
     'OI', 'NEXTEL', 'GÁS', 'ILUME', 'SPDA'
@@ -31,7 +29,6 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
   
   React.useEffect(() => {
     if (sgzData && sgzData.length > 0) {
-      // Count internal vs external orders
       let internalCount = 0;
       let externalCount = 0;
       let externalDetails: Record<string, number> = {};
@@ -39,15 +36,12 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
       sgzData.forEach((order: any) => {
         const serviceType = (order.sgz_tipo_servico || '').toUpperCase();
         
-        // Check if any external keyword is found in the service type
         const isExternal = externalKeywords.some(keyword => 
           serviceType.includes(keyword)
         );
         
         if (isExternal) {
           externalCount++;
-          
-          // Track which external entity
           const matchedKeyword = externalKeywords.find(keyword => serviceType.includes(keyword)) || 'OUTRO';
           externalDetails[matchedKeyword] = (externalDetails[matchedKeyword] || 0) + 1;
         } else {
@@ -55,23 +49,20 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
         }
       });
       
-      // For simulation, treat external as canceled/resolved
       if (isSimulationActive) {
-        // In the ideal scenario, we would reassign all external orders
         const totalExternal = externalCount;
-        externalCount = 0; // All external treated as canceled or reassigned
+        externalCount = 0;
         internalCount = sgzData.length - totalExternal;
       }
       
-      // Prepare chart data
       setChartData({
         labels: ['Subprefeitura', 'Entidades Externas'],
         datasets: [
           {
             data: [internalCount, externalCount],
             backgroundColor: [
-              'rgba(249, 115, 22, 0.8)', // orange for subprefeitura
-              'rgba(156, 163, 175, 0.8)' // gray for external
+              'rgba(249, 115, 22, 0.8)',
+              'rgba(156, 163, 175, 0.8)'
             ],
             borderColor: [
               'rgba(249, 115, 22, 1)',
@@ -89,9 +80,7 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
     responsive: true,
     maintainAspectRatio: false,
     animation: {
-      duration: 1000,
-      animateRotate: true,
-      animateScale: true
+      duration: 1000
     },
     plugins: {
       legend: {
@@ -116,10 +105,8 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
           },
           afterLabel: function(context: any) {
             if (context.label === 'Entidades Externas' && !isSimulationActive) {
-              // Show breakdown of external entities
-              // Here you would need to calculate the breakdown of external orders
               return Object.entries({})
-                .filter(([_, count]) => count > 0)
+                .filter(([_, count]) => typeof count === 'number' && count > 0)
                 .map(([entity, count]) => `${entity}: ${count}`);
             }
             return null;
@@ -129,7 +116,6 @@ const ResponsibilityChart: React.FC<ResponsibilityChartProps> = ({
     }
   };
   
-  // Calculate percentage for the card value
   const total = sgzData?.length || 0;
   const internalCount = sgzData?.filter(order => {
     const serviceType = (order.sgz_tipo_servico || '').toUpperCase();

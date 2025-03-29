@@ -1029,6 +1029,27 @@ export type Database = {
           },
         ]
       }
+      painel_zeladoria_uploads: {
+        Row: {
+          data_upload: string | null
+          id: string
+          nome_arquivo: string | null
+          usuario_email: string | null
+        }
+        Insert: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo?: string | null
+          usuario_email?: string | null
+        }
+        Update: {
+          data_upload?: string | null
+          id?: string
+          nome_arquivo?: string | null
+          usuario_email?: string | null
+        }
+        Relationships: []
+      }
       permissoes: {
         Row: {
           criado_em: string

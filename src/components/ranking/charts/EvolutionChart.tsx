@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import ChartCard from './ChartCard';
@@ -121,8 +120,7 @@ const EvolutionChart: React.FC<EvolutionChartProps> = ({
     responsive: true,
     maintainAspectRatio: false,
     animation: {
-      duration: 1000,
-      easing: 'easeOutQuart'
+      duration: 1000
     },
     plugins: {
       legend: {
