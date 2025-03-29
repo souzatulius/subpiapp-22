@@ -24,8 +24,10 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const { user } = useAuth();
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [dadosSGZ, setDadosSGZ] = useState<any[] | null>(null);
+  const [dadosPainel, setDadosPainel] = useState<any[] | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [isSimulationActive, setIsSimulationActive] = useState(false);
 
   const { 
     filters, 
@@ -41,8 +43,17 @@ const RankingContent: React.FC<RankingContentProps> = ({
     setIsUploading(false);
   };
 
+  const handlePainelUploadComplete = (id: string, data: any[]) => {
+    setDadosPainel(data);
+    setIsUploading(false);
+  };
+
   const handleUploadStart = () => {
     setIsUploading(true);
+  };
+  
+  const handleSimulateIdealRanking = () => {
+    setIsSimulationActive(!isSimulationActive);
   };
 
   return (
@@ -58,6 +69,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
         <UploadSection 
           onUploadStart={handleUploadStart}
           onUploadComplete={handleUploadComplete}
+          onPainelUploadComplete={handlePainelUploadComplete}
           isUploading={isUploading}
           user={user}
         />
@@ -66,7 +78,12 @@ const RankingContent: React.FC<RankingContentProps> = ({
       {/* AI Insights Cards Section */}
       {dadosSGZ && dadosSGZ.length > 0 && (
         <div className="p-4 bg-white border border-orange-200 rounded-lg shadow-sm">
-          <DashboardCards dadosPlanilha={dadosSGZ} uploadId={uploadId || undefined} />
+          <DashboardCards 
+            dadosPlanilha={dadosSGZ} 
+            dadosPainel={dadosPainel}
+            uploadId={uploadId || undefined} 
+            isSimulationActive={isSimulationActive}
+          />
         </div>
       )}
 
@@ -97,8 +114,12 @@ const RankingContent: React.FC<RankingContentProps> = ({
         </h2>
         <ChartsSection 
           chartData={{}}
-          isLoading={false}
+          isLoading={isUploading}
           chartVisibility={chartVisibility}
+          sgzData={dadosSGZ}
+          painelData={dadosPainel}
+          onSimulateIdealRanking={handleSimulateIdealRanking}
+          isSimulationActive={isSimulationActive}
         />
       </div>
       

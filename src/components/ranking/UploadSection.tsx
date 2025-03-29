@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 interface UploadSectionProps {
   onUploadStart: () => void;
   onUploadComplete: (id: string, data: any[]) => void;
+  onPainelUploadComplete: (id: string, data: any[]) => void;
   isUploading: boolean;
   user: User | null;
 }
@@ -19,6 +20,7 @@ interface UploadSectionProps {
 const UploadSection: React.FC<UploadSectionProps> = ({
   onUploadStart,
   onUploadComplete,
+  onPainelUploadComplete,
   isUploading,
   user
 }) => {
@@ -64,15 +66,19 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   const handlePainelFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
+      onUploadStart();
       try {
-        await handleUploadPainel(files[0]);
-        // Optional: handle painel completion if needed
+        const result = await handleUploadPainel(files[0]);
+        if (result && result.id) {
+          onPainelUploadComplete(result.id, result.data || []);
+          toast.success("Planilha do Painel da Zeladoria processada com sucesso!");
+        }
       } catch (error) {
         console.error("Error handling painel file upload:", error);
         toast.error("Falha ao processar o arquivo do painel");
       }
     }
-  }, [handleUploadPainel]);
+  }, [handleUploadPainel, onPainelUploadComplete, onUploadStart]);
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -151,7 +157,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             Upload do Painel da Zeladoria
           </CardTitle>
           <CardDescription className="text-blue-600">
-            Faça upload da planilha do Painel da Zeladoria para análises inteligentes
+            Faça upload da planilha do Painel da Zeladoria para análises comparativas
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">

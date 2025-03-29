@@ -2,39 +2,33 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Lightbulb } from 'lucide-react';
 
 interface InsightCardProps {
   title: string;
   value: string;
   comment: string;
-  isLoading?: boolean;
+  isLoading: boolean;
+  isSimulated?: boolean;
 }
 
-const InsightCard: React.FC<InsightCardProps> = ({ 
-  title, 
-  value, 
-  comment, 
-  isLoading = false 
-}) => {
+const InsightCard: React.FC<InsightCardProps> = ({ title, value, comment, isLoading, isSimulated = false }) => {
   return (
-    <Card className="h-full border border-orange-200 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-white to-orange-50">
-      <CardHeader className="pb-2 border-b border-orange-200">
-        <CardTitle className="text-base text-gray-800 font-semibold flex items-center">
-          {title}
-        </CardTitle>
-        <div className="text-2xl font-bold text-orange-600">
-          {isLoading ? <Skeleton className="h-8 w-24" /> : value}
-        </div>
+    <Card className={`border ${isSimulated ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} hover:shadow-md transition-all`}>
+      <CardHeader className="pb-1 pt-3">
+        <CardTitle className="text-sm font-medium text-gray-700">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="pt-0">
         {isLoading ? (
-          <Skeleton className="h-[60px] w-full" />
+          <Skeleton className="h-8 w-24 mb-2" />
         ) : (
-          <div className="flex items-start gap-2 text-gray-500 text-sm">
-            <Lightbulb className="h-4 w-4 text-orange-400 mt-0.5 flex-shrink-0" />
-            <p>{comment}</p>
+          <div className={`text-2xl font-bold ${isSimulated ? 'text-orange-600' : 'text-gray-900'}`}>
+            {value}
           </div>
+        )}
+        {isLoading ? (
+          <Skeleton className="h-4 w-full mb-1" />
+        ) : (
+          <p className="text-xs text-gray-500 mt-1">{comment}</p>
         )}
       </CardContent>
     </Card>

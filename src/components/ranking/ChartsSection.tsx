@@ -6,6 +6,15 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { SortableContext } from '@dnd-kit/sortable';
 import { useChartItemsState, ChartItem } from './hooks/useChartItemsState';
 import SortableChartCard from './chart-components/SortableChartCard';
+import { Button } from '@/components/ui/button';
+import { Sparkles } from 'lucide-react';
+import EvolutionChart from './charts/EvolutionChart';
+import ServiceTypesChart from './charts/ServiceTypesChart';
+import ResolutionTimeChart from './charts/ResolutionTimeChart';
+import DistrictPerformanceChart from './charts/DistrictPerformanceChart';
+import DepartmentComparisonChart from './charts/DepartmentComparisonChart';
+import OldestPendingList from './charts/OldestPendingList';
+import ResponsibilityChart from './charts/ResponsibilityChart';
 
 // Import chart registration
 import './charts/ChartRegistration';
@@ -14,12 +23,20 @@ interface ChartsSectionProps {
   chartData: any;
   isLoading: boolean;
   chartVisibility: ChartVisibility;
+  sgzData: any[] | null;
+  painelData: any[] | null;
+  onSimulateIdealRanking: () => void;
+  isSimulationActive: boolean;
 }
 
 const ChartsSection: React.FC<ChartsSectionProps> = ({
   chartData,
   isLoading,
-  chartVisibility
+  chartVisibility,
+  sgzData,
+  painelData,
+  onSimulateIdealRanking,
+  isSimulationActive
 }) => {
   // Set up DnD sensors
   const sensors = useSensors(
@@ -28,126 +45,138 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     })
   );
   
+  // Check if we have data to display
+  const hasData = Boolean((sgzData && sgzData.length > 0) || (painelData && painelData.length > 0));
+  
   // State for chart items
   const [chartItems, setChartItems] = React.useState<ChartItem[]>([]);
-  const [hiddenCharts, setHiddenCharts] = React.useState<string[]>([]);
-  const [expandedAnalyses, setExpandedAnalyses] = React.useState<string[]>([]);
-  const [analysisOnlyCharts, setAnalysisOnlyCharts] = React.useState<string[]>([]);
+  const {
+    hiddenCharts,
+    expandedAnalyses,
+    analysisOnlyCharts,
+    handleDragEnd,
+    handleToggleVisibility,
+    handleToggleAnalysis,
+    handleToggleView
+  } = useChartItemsState(chartItems);
   
-  // Handle drag end
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setChartItems((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        
-        const newItems = [...items];
-        const [removed] = newItems.splice(oldIndex, 1);
-        newItems.splice(newIndex, 0, removed);
-        
-        return newItems;
-      });
-    }
-  };
-  
-  // Handle chart visibility toggle
-  const handleToggleVisibility = (id: string) => {
-    setHiddenCharts(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(chartId => chartId !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
-  };
-  
-  // Handle analysis expansion toggle
-  const handleToggleAnalysis = (id: string) => {
-    setExpandedAnalyses(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(chartId => chartId !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
-  };
-  
-  // Handle toggle between chart and analysis text
-  const handleToggleView = (id: string) => {
-    setAnalysisOnlyCharts(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(chartId => chartId !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
-  };
-  
-  // Generate sample chart items for demo
+  // Generate chart items based on available data
   React.useEffect(() => {
-    setChartItems([
-      {
-        id: 'chart1',
-        title: 'Comparativo de Status',
-        component: <div>Chart Component 1</div>,
-        isVisible: true,
-        analysis: 'Análise do comparativo de status entre ordens de serviço em diferentes estados.',
-        isAnalysisExpanded: false,
-        showAnalysisOnly: false
-      },
-      {
-        id: 'chart2',
-        title: 'Serviços por Região',
-        component: <div>Chart Component 2</div>,
-        isVisible: true,
-        analysis: 'Distribuição de serviços solicitados por região administrativa.',
-        isAnalysisExpanded: false,
-        showAnalysisOnly: false
-      },
-      {
-        id: 'chart3',
-        title: 'Tempo Médio por Tipo',
-        component: <div>Chart Component 3</div>,
-        isVisible: true,
-        analysis: 'Análise do tempo médio de atendimento por tipo de serviço.',
-        isAnalysisExpanded: false,
-        showAnalysisOnly: false
-      }
-    ]);
-  }, [chartData]);
+    if (hasData) {
+      const items: ChartItem[] = [
+        {
+          id: 'evolution-chart',
+          title: 'Evolução % Status (Dia/Semana)',
+          component: <EvolutionChart data={chartData.evolution || {}} sgzData={sgzData} painelData={painelData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Análise da evolução diária e semanal das porcentagens de OS Fechadas, Pendentes e Canceladas.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'service-types-chart',
+          title: 'Distribuição por Tipo de Serviço',
+          component: <ServiceTypesChart data={chartData.serviceTypes || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Distribuição de ordens de serviço por tipo/categoria de serviço.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'resolution-time-chart',
+          title: 'Tempo Médio de Execução',
+          component: <ResolutionTimeChart data={chartData.resolutionTime || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Análise do tempo médio de execução por tipo de serviço.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'district-performance-chart',
+          title: 'Performance por Distrito',
+          component: <DistrictPerformanceChart data={chartData.districtPerformance || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Comparativo de performance entre os distritos, mostrando taxa de resolução e tempo médio.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'department-comparison-chart',
+          title: 'Comparação STLP / STM / STPO',
+          component: <DepartmentComparisonChart data={chartData.departmentComparison || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Comparação entre os departamentos técnicos: STLP, STM e STPO.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'oldest-pending-list',
+          title: 'Top 10 Pendências Mais Antigas',
+          component: <OldestPendingList data={chartData.oldestPending || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Lista das 10 ordens de serviço pendentes mais antigas.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        },
+        {
+          id: 'responsibility-chart',
+          title: 'Responsabilidade Real (Sub vs Externo)',
+          component: <ResponsibilityChart data={chartData.responsibility || {}} sgzData={sgzData} painelData={painelData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          isVisible: true,
+          analysis: 'Distribuição das ordens de serviço entre responsabilidade da Subprefeitura e entidades externas.',
+          isAnalysisExpanded: false,
+          showAnalysisOnly: false
+        }
+      ];
+      
+      setChartItems(items);
+    }
+  }, [sgzData, painelData, isLoading, chartData, isSimulationActive, hasData]);
   
-  if (!chartData && !isLoading) {
+  if (!hasData && !isLoading) {
     return <NoDataMessage />;
   }
   
   return (
-    <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={chartItems.map(item => item.id)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {chartItems.map((item) => (
-            <SortableChartCard
-              key={item.id}
-              id={item.id}
-              component={item.component}
-              isVisible={!hiddenCharts.includes(item.id)}
-              isAnalysisExpanded={expandedAnalyses.includes(item.id)}
-              showAnalysisOnly={analysisOnlyCharts.includes(item.id)}
-              title={item.title}
-              analysis={item.analysis}
-              onToggleVisibility={() => handleToggleVisibility(item.id)}
-              onToggleAnalysis={() => handleToggleAnalysis(item.id)}
-              onToggleView={() => handleToggleView(item.id)}
-            />
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button 
+          onClick={onSimulateIdealRanking}
+          className={`gap-2 ${isSimulationActive 
+            ? 'bg-gray-600 hover:bg-gray-700' 
+            : 'bg-orange-500 hover:bg-orange-600'} text-white transition-colors`}
+        >
+          <Sparkles className="h-4 w-4" />
+          {isSimulationActive ? 'Voltar ao Ranking Real' : 'Simular Ranking Ideal'}
+        </Button>
+      </div>
+      
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={chartItems.map(item => item.id)}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {chartItems.map((item) => (
+              <SortableChartCard
+                key={item.id}
+                id={item.id}
+                component={item.component}
+                isVisible={!hiddenCharts.includes(item.id)}
+                isAnalysisExpanded={expandedAnalyses.includes(item.id)}
+                showAnalysisOnly={analysisOnlyCharts.includes(item.id)}
+                title={item.title}
+                analysis={item.analysis}
+                onToggleVisibility={() => handleToggleVisibility(item.id)}
+                onToggleAnalysis={() => handleToggleAnalysis(item.id)}
+                onToggleView={() => handleToggleView(item.id)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
   );
 };
 
