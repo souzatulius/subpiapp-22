@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Demand, ResponseQA } from '@/types/demand';
+import { Demand, ResponseQA } from './types';
 import { useNavigate } from 'react-router-dom';
 
 export const useNotaForm = (onClose: () => void) => {
@@ -123,16 +124,12 @@ export const useNotaForm = (onClose: () => void) => {
         problemaId = problemaData[0].id;
       }
       
-      // Get coordination ID directly
-      const coordenacaoId = selectedDemanda.coordenacao_id || null;
-      
-      // Create the note with existing problema
+      // Create the note with existing problema - REMOVING coordenacao_id as it doesn't exist
       const { data, error } = await supabase
         .from('notas_oficiais')
         .insert({
           titulo,
           texto,
-          coordenacao_id: coordenacaoId,
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId,
