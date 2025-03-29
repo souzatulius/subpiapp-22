@@ -10,6 +10,7 @@ import DashboardCards from './insights/DashboardCards';
 import { ChartVisibility, FilterOptions } from './types';
 import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { BarChart3 } from 'lucide-react';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
