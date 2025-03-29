@@ -103,17 +103,17 @@ const UploadSection: React.FC<UploadSectionProps> = ({
     <div className="space-y-4">
       <Card
         className={`border-dashed ${
-          isDragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300'
+          isDragging ? 'border-orange-500 bg-orange-50' : 'border-orange-300'
         } cursor-pointer transition-colors`}
         {...dragEvents}
         onDrop={handleDrop}
       >
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center text-blue-800">
-            <FileUp className="h-5 w-5 mr-2 text-blue-600" />
+          <CardTitle className="flex items-center text-orange-800">
+            <FileUp className="h-5 w-5 mr-2 text-orange-600" />
             Upload da Planilha SGZ
           </CardTitle>
-          <CardDescription className="text-blue-600">
+          <CardDescription className="text-orange-600">
             Arraste e solte sua planilha SGZ aqui ou clique para fazer upload
           </CardDescription>
         </CardHeader>
@@ -139,8 +139,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
             {isUploading && (
               <div className="w-full space-y-2">
-                <Progress value={processingStats.processingStatus === 'processing' ? 50 : 100} className="bg-blue-100" />
-                <p className="text-center text-sm text-blue-700">
+                <Progress value={processingStats.processingStatus === 'processing' ? 50 : 100} className="bg-orange-100" />
+                <p className="text-center text-sm text-orange-700">
                   {processingStats.processingStatus === 'processing' 
                     ? `Processando ${processingStats.newOrders || 0} registros...` 
                     : processingStats.errorMessage || "Processamento concluído"}
@@ -151,13 +151,13 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="border-dashed border-blue-300 cursor-pointer transition-colors">
+      <Card className="border-dashed border-orange-300 cursor-pointer transition-colors">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center text-blue-800">
-            <FileUp className="h-5 w-5 mr-2 text-blue-600" />
+          <CardTitle className="flex items-center text-orange-800">
+            <FileUp className="h-5 w-5 mr-2 text-orange-600" />
             Upload do Painel da Zeladoria
           </CardTitle>
-          <CardDescription className="text-blue-600">
+          <CardDescription className="text-orange-600">
             Faça upload da planilha do Painel da Zeladoria para análises comparativas
           </CardDescription>
         </CardHeader>
@@ -183,8 +183,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
             {isLoadingPainel && (
               <div className="w-full space-y-2">
-                <Progress value={uploadProgress} className="bg-blue-100" />
-                <p className="text-center text-sm text-blue-700">
+                <Progress value={uploadProgress} className="bg-orange-100" />
+                <p className="text-center text-sm text-orange-700">
                   {processamentoPainel.status === 'processing' 
                     ? processamentoPainel.message 
                     : (processamentoPainel.status === 'success' 

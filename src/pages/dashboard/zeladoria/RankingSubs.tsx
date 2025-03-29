@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart3, SlidersHorizontal } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
 import { motion } from 'framer-motion';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 
 const RankingSubs = () => {
-  const [filterDialogOpen, setFilterDialogOpen] = React.useState(false);
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   
   return (
     <motion.div 
@@ -15,25 +15,16 @@ const RankingSubs = () => {
       animate={{ opacity: 1, y: 0 }} 
       transition={{ duration: 0.5 }}
     >
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-blue-800 flex items-center pb-2 border-b border-blue-200">
-          <BarChart3 className="h-6 w-6 mr-2 text-blue-700" />
-          Ranking das Subprefeituras
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Dashboard de análise das ordens de serviço do SGZ para acompanhamento dos distritos
-        </p>
-      </div>
-      
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setFilterDialogOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md transition-colors shadow-sm"
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          Filtros e Visualização
-        </button>
-      </div>
+      <WelcomeCard 
+        title="Ranking das Subprefeituras"
+        description="Dashboard de análise comparativa das ordens de serviço para acompanhamento de desempenho por distrito"
+        icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
+        color="bg-gradient-to-r from-orange-500 to-orange-700"
+        showButton={true}
+        buttonText="Filtros e Visualização"
+        buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
+        onButtonClick={() => setFilterDialogOpen(true)}
+      />
       
       <div className="mt-6">
         <RankingContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
