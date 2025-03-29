@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Demanda } from '../types';
+import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
 import { useRespostaSubmission } from '@/components/dashboard/forms/responder-demanda/hooks/useRespostaSubmission';
 import { toast } from '@/components/ui/use-toast';
 
@@ -26,14 +26,13 @@ export const useRespostaForm = (
         setResposta({});
         setComentarios('');
         
-        toast({
-          title: "Resposta enviada",
-          description: "A demanda foi respondida com sucesso."
-        });
+        // A mensagem de sucesso já é exibida no hook useRespostaSubmission,
+        // então removemos daqui para evitar duplicação
       }
     },
     onError: (error) => {
       console.error("Erro ao enviar resposta:", error);
+      // Mantemos este toast para casos específicos de erro
       toast({
         title: "Erro ao enviar resposta",
         description: "Ocorreu um erro ao enviar a resposta. Por favor, tente novamente.",
@@ -87,6 +86,8 @@ export const useRespostaForm = (
     // Chamamos a função submitResposta do hook useRespostaSubmission
     const result = await submitResposta(selectedDemanda, resposta, comentarios);
     console.log("Resultado do submitResposta:", result);
+
+    // Não exibimos toast aqui, pois já é exibido no submitResposta
   };
 
   return {

@@ -54,13 +54,42 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({
       }
     }
     
-    // Fix URLs by ensuring correct bucket name ('demandas')
+    // Fix URLs by ensuring correct structure for Supabase storage URLs
     const fixedUrls = validUrls.map(url => {
-      // Replace the incorrect 'demand_attachments' bucket reference with 'demandas'
-      return url.replace(
-        'demand_attachments',
-        'demandas'
-      );
+      if (!url) return url;
+      
+      // Corrigir URLs que possuem formatação incorreta
+      try {
+        // Se é uma URL completa do Supabase
+        if (url.includes('supabase.co') && url.includes('/storage/v1/object/public/')) {
+          // Garantir que a URL use HTTPS
+          if (url.startsWith('http://')) {
+            url = url.replace('http://', 'https://');
+          }
+          return url;
+        }
+        
+        // Se a URL começa com /storage
+        if (url.startsWith('/storage/')) {
+          return `https://mapjrbfzurpjmianfnev.supabase.co${url}`;
+        }
+        
+        // Se é apenas o caminho do arquivo no bucket
+        const supabasePrefix = 'https://mapjrbfzurpjmianfnev.supabase.co/storage/v1/object/public/';
+        if (!url.startsWith('http')) {
+          // Tentar determinar o bucket (padrão: demandas)
+          const bucket = 'demandas';
+          
+          // Certificar-se de que não tem barras duplicadas
+          const cleanPath = url.startsWith('/') ? url.substring(1) : url;
+          return `${supabasePrefix}${bucket}/${cleanPath}`;
+        }
+        
+        return url;
+      } catch (e) {
+        console.error("Erro ao processar URL:", e, url);
+        return url;
+      }
     });
     
     console.log('Normalized attachments:', fixedUrls);
