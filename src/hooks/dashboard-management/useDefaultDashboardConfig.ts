@@ -45,7 +45,7 @@ export const useDefaultDashboardConfig = () => {
     fetchDashboardConfigs();
   }, []);
 
-  // Fixed type instantiation error by explicitly typing the serialized cards
+  // Fixed type instantiation error by using a more explicit type approach
   const saveDefaultDashboard = async () => {
     if (!user) {
       toast({
@@ -59,8 +59,9 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      // Explicitly type the serialized cards as string to avoid deep type analysis
-      const cardsString: string = JSON.stringify(cards);
+      // Prevent TypeScript from trying to deeply analyze the cards structure
+      // by using JSON.stringify with a type assertion
+      const cardsString = JSON.stringify(cards) as string;
       
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
