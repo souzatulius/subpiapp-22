@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UploadSection from './UploadSection';
 import FilterDialog from './filters/FilterDialog';
 import { ChartVisibility, FilterOptions } from './types';
@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/card';
 import RankingCharts from './RankingCharts';
 import DashboardCards from './insights/DashboardCards';
 import ChartsSection from './ChartsSection';
+import { useDemoData } from './DemoDataProvider';
+import { Loader2 } from 'lucide-react';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -21,10 +23,11 @@ const RankingContent: React.FC<RankingContentProps> = ({
 }) => {
   const { user } = useAuth();
   const [uploadId, setUploadId] = useState<string | null>(null);
-  const [dadosSGZ, setDadosSGZ] = useState<any[] | null>(null);
-  const [dadosPainel, setDadosPainel] = useState<any[] | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSimulationActive, setIsSimulationActive] = useState(false);
+
+  // Use demo data provider
+  const { sgzData, painelData, isLoading: isDemoLoading, hasData } = useDemoData();
 
   const { 
     filters, 
@@ -37,13 +40,11 @@ const RankingContent: React.FC<RankingContentProps> = ({
   const handleUploadComplete = (id: string, data: any[]) => {
     console.log('SGZ Upload complete', id, data.length);
     setUploadId(id);
-    setDadosSGZ(data);
     setIsUploading(false);
   };
 
   const handlePainelUploadComplete = (id: string, data: any[]) => {
     console.log('Painel Upload complete', id, data.length);
-    setDadosPainel(data);
     setIsUploading(false);
   };
 
@@ -57,7 +58,15 @@ const RankingContent: React.FC<RankingContentProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Upload Section with themed border */}
+      {/* Mostra um loader enquanto carrega os dados demo */}
+      {isDemoLoading && (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <span className="ml-3 text-lg text-orange-700">Carregando dados...</span>
+        </div>
+      )}
+      
+      {/* Upload Section ainda disponível (não removemos) */}
       <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
         <h2 className="text-lg font-semibold text-orange-700 mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,25 +83,34 @@ const RankingContent: React.FC<RankingContentProps> = ({
         />
       </Card>
       
+      {/* Mensagem informando sobre os dados de demonstração */}
+      <Card className="p-4 bg-green-50 border-green-200 shadow-sm">
+        <h2 className="text-lg font-semibold text-green-700 mb-2">Dados de Demonstração Carregados</h2>
+        <p className="text-green-600">
+          Dados fictícios foram carregados automaticamente para permitir visualização dos gráficos sem necessidade de upload.
+          Você ainda pode fazer upload de seus próprios dados usando a seção acima.
+        </p>
+      </Card>
+      
       {/* AI Insights Cards Section */}
-      {dadosSGZ && dadosSGZ.length > 0 && (
+      {hasData && (
         <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
           <DashboardCards 
-            dadosPlanilha={dadosSGZ} 
-            dadosPainel={dadosPainel}
-            uploadId={uploadId || undefined} 
+            dadosPlanilha={sgzData || []} 
+            dadosPainel={painelData || []}
+            uploadId={uploadId || 'demo-data'} 
             isSimulationActive={isSimulationActive}
           />
         </Card>
       )}
 
       {/* Charts Section */}
-      {dadosSGZ && dadosSGZ.length > 0 && (
+      {hasData && (
         <>
           <RankingCharts 
-            sgzData={dadosSGZ}
-            painelData={dadosPainel}
-            isLoading={isUploading}
+            sgzData={sgzData || []}
+            painelData={painelData || []}
+            isLoading={isDemoLoading}
             chartVisibility={chartVisibility}
             isSimulationActive={isSimulationActive}
             onSimulateIdealRanking={handleSimulateIdealRanking}
@@ -100,10 +118,10 @@ const RankingContent: React.FC<RankingContentProps> = ({
           
           <ChartsSection
             chartData={{}}
-            isLoading={isUploading}
+            isLoading={isDemoLoading}
             chartVisibility={chartVisibility}
-            sgzData={dadosSGZ}
-            painelData={dadosPainel}
+            sgzData={sgzData || []}
+            painelData={painelData || []}
             onSimulateIdealRanking={handleSimulateIdealRanking}
             isSimulationActive={isSimulationActive}
           />

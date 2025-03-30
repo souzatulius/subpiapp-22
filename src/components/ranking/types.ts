@@ -1,4 +1,5 @@
 
+
 export interface ChartVisibility {
   districtPerformance: boolean;
   serviceTypes: boolean;
@@ -25,14 +26,13 @@ export interface ChartVisibility {
 }
 
 export interface FilterOptions {
-  dataInicio?: string;
-  dataFim?: string;
+  dateRange?: {
+    from: Date | null;
+    to: Date | null;
+  };
   status?: string[];
-  distritos?: string[];
-  tiposServico?: string[];
-  departamento?: string[];
-  dateRange?: any;
   serviceTypes?: string[];
+  distritos?: string[];
 }
 
 export interface ChartFilter extends FilterOptions {

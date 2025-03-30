@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
+// Import the demo data provider
+import DemoDataProvider from '@/components/ranking/DemoDataProvider';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -29,7 +31,9 @@ const RankingSubs = () => {
       />
       
       <div className="mt-6">
-        <RankingContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
+        <DemoDataProvider>
+          <RankingContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
+        </DemoDataProvider>
       </div>
     </motion.div>
   );

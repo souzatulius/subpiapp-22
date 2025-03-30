@@ -24,9 +24,9 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
 }) => {
   const hasActiveFilters = 
     filters.dateRange?.from || 
-    filters.statuses[0] !== 'Todos' || 
-    filters.serviceTypes[0] !== 'Todos' || 
-    filters.districts[0] !== 'Todos';
+    (filters.status && filters.status.length > 0 && filters.status[0] !== 'Todos') || 
+    (filters.serviceTypes && filters.serviceTypes.length > 0 && filters.serviceTypes[0] !== 'Todos') || 
+    (filters.distritos && filters.distritos.length > 0 && filters.distritos[0] !== 'Todos');
 
   if (!hasActiveFilters) return null;
 
@@ -48,7 +48,7 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
         </Badge>
       )}
       
-      {filters.statuses[0] !== 'Todos' && filters.statuses.map(status => (
+      {filters.status && filters.status[0] !== 'Todos' && filters.status.map(status => (
         <Badge key={status} variant="secondary" className="flex items-center gap-1">
           <span>Status: {status}</span>
           <Button 
@@ -62,7 +62,7 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
         </Badge>
       ))}
       
-      {filters.serviceTypes[0] !== 'Todos' && filters.serviceTypes.map(type => (
+      {filters.serviceTypes && filters.serviceTypes[0] !== 'Todos' && filters.serviceTypes.map(type => (
         <Badge key={type} variant="secondary" className="flex items-center gap-1">
           <span>Serviço: {type}</span>
           <Button 
@@ -76,7 +76,7 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
         </Badge>
       ))}
       
-      {filters.districts[0] !== 'Todos' && filters.districts.map(district => (
+      {filters.distritos && filters.distritos[0] !== 'Todos' && filters.distritos.map(district => (
         <Badge key={district} variant="secondary" className="flex items-center gap-1">
           <span>Distrito: {district}</span>
           <Button 

@@ -1,44 +1,58 @@
 
 import React from 'react';
-import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { FilterOptions } from '@/components/ranking/types';
 
 interface DistrictFilterProps {
-  districts: FilterOptions['districts'];
-  onDistrictChange: (district: string) => void;
+  filters: FilterOptions;
+  onFiltersChange: (filters: Partial<FilterOptions>) => void;
 }
 
-const DistrictFilter: React.FC<DistrictFilterProps> = ({ districts, onDistrictChange }) => {
+const DistrictFilter: React.FC<DistrictFilterProps> = ({ filters, onFiltersChange }) => {
+  const distritos = ['Todos', 'Pinheiros', 'Alto de Pinheiros', 'Itaim Bibi', 'Jardim Paulista'];
+  
+  const handleDistrictsChange = (district: string) => {
+    if (district === 'Todos') {
+      onFiltersChange({ distritos: ['Todos'] });
+    } else {
+      // Remove 'Todos' if it's in the array and add the new district
+      const currentDistritos = filters.distritos || [];
+      const newDistritos = currentDistritos.includes('Todos') 
+        ? [district]
+        : currentDistritos.includes(district)
+          ? currentDistritos.filter(d => d !== district)
+          : [...currentDistritos, district];
+      
+      // If no districts are selected, select 'Todos'
+      if (newDistritos.length === 0) {
+        onFiltersChange({ distritos: ['Todos'] });
+      } else {
+        onFiltersChange({ distritos: newDistritos });
+      }
+    }
+  };
+
   return (
     <div className="space-y-2">
-      <Label>Distrito</Label>
-      <Select>
-        <SelectTrigger className="border-orange-200">
-          <SelectValue placeholder="Filtrar por distrito" />
-        </SelectTrigger>
-        <SelectContent>
-          <div className="space-y-1 p-1">
-            {['Todos', 'Pinheiros', 'Itaim Bibi', 'Alto de Pinheiros', 'Jardim Paulista'].map((district) => (
-              <div key={district} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`district-${district}`} 
-                  checked={districts.includes(district as any)}
-                  onCheckedChange={() => onDistrictChange(district)}
-                  className="border-orange-400 data-[state=checked]:bg-orange-600"
-                />
-                <label 
-                  htmlFor={`district-${district}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  {district}
-                </label>
-              </div>
-            ))}
+      <h3 className="text-sm font-medium">Distritos</h3>
+      <div className="space-y-1">
+        {distritos.map((district) => (
+          <div key={district} className="flex items-center space-x-2">
+            <Checkbox 
+              id={`district-${district}`}
+              checked={filters.distritos ? filters.distritos.includes(district) : false}
+              onCheckedChange={() => handleDistrictsChange(district)}
+            />
+            <Label 
+              htmlFor={`district-${district}`}
+              className="text-sm cursor-pointer"
+            >
+              {district}
+            </Label>
           </div>
-        </SelectContent>
-      </Select>
+        ))}
+      </div>
     </div>
   );
 };
