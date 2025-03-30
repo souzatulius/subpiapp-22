@@ -7,6 +7,8 @@ import DashboardActions from '@/components/dashboard/DashboardActions';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Smartphone, Monitor } from 'lucide-react';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -67,12 +69,24 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
         <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
-            <Label htmlFor="mobile-preview" className="text-sm text-gray-600">Modo Mobile</Label>
             <Switch
               id="mobile-preview"
               checked={isMobilePreview}
               onCheckedChange={setIsMobilePreview}
             />
+            <Label htmlFor="mobile-preview" className="flex items-center text-sm text-gray-600">
+              {isMobilePreview ? (
+                <>
+                  <Smartphone className="h-4 w-4 mr-1" /> 
+                  Mobile
+                </>
+              ) : (
+                <>
+                  <Monitor className="h-4 w-4 mr-1" /> 
+                  Desktop
+                </>
+              )}
+            </Label>
           </div>
           <button
             className="text-sm text-blue-600 underline"
@@ -85,18 +99,20 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
       {modoAdmin && <DashboardActions onAddNewCard={handleAddCard} />}
 
-      <CardGrid
-        cards={cards}
-        onCardsChange={setCards}
-        onEditCard={handleEditCard}
-        onDeleteCard={handleDeleteCard}
-        onAddNewCard={handleAddCard}
-        specialCardsData={specialCardsData}
-        isMobileView={isMobilePreview}
-        modoAdmin={modoAdmin}
-        coordenacaoId={department}
-        usuarioId={user?.id ?? ''}
-      />
+      <div className={isMobilePreview ? "max-w-sm mx-auto border-2 border-gray-300 rounded-xl overflow-hidden shadow-lg bg-white p-2" : ""}>
+        <CardGrid
+          cards={cards}
+          onCardsChange={setCards}
+          onEditCard={handleEditCard}
+          onDeleteCard={handleDeleteCard}
+          onAddNewCard={handleAddCard}
+          specialCardsData={specialCardsData}
+          isMobileView={isMobilePreview}
+          modoAdmin={modoAdmin}
+          coordenacaoId={department}
+          usuarioId={user?.id ?? ''}
+        />
+      </div>
     </div>
   );
 };
