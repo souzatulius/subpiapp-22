@@ -67,7 +67,7 @@ export const dashboardPages = [
   { value: '/settings?tab=areas', label: 'Áreas de Coordenação (Configurações)' },
 ];
 
-// List of available icons for the cards - now using proper JSX elements
+// Define the icon data directly using React elements to avoid rendering issues
 export const iconsData = [
   { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <ClipboardList /> },
   { id: 'message-square', label: 'Responder Demanda', component: <MessageSquare /> },

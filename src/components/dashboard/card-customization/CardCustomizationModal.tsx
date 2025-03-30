@@ -72,6 +72,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   }, [initialData, form, isOpen]);
 
   const handleSubmit = (data: FormSchema) => {
+    // Get the proper React element for the icon (not the raw component)
     const iconComponent = getIconComponentById(data.iconId);
     onSave({
       title: data.title, 
@@ -88,7 +89,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     });
   };
 
-  return <Dialog open={isOpen} onOpenChange={onClose}>
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-100 rounded-xl">
         <DialogHeader>
           <DialogTitle>{initialData ? 'Editar Card' : 'Novo Card'}</DialogTitle>
@@ -103,7 +105,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
           onSubmit={handleSubmit}  
         />
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
 
 export default CardCustomizationModal;

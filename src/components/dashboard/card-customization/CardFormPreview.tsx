@@ -63,11 +63,8 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
             className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden h-[200px] w-[200px] ${getColorClass(color as CardColor)}`}
           >
             <div className="mb-3">
-              {React.isValidElement(IconComponent) ? (
-                React.cloneElement(IconComponent as React.ReactElement<any>, { 
-                  className: `h-16 w-16 ${getTextColor(color)}`
-                })
-              ) : null}
+              {/* Make sure we're rendering the icon properly */}
+              {IconComponent}
             </div>
             <h3 className={`text-lg font-medium text-center line-clamp-2 ${getTextColor(color)}`}>
               {title || 'Título do Card'}

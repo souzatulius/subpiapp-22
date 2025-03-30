@@ -6,25 +6,39 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 
+// Simple interface for cleaned card data to avoid deep type instantiation
+interface CleanedCardData {
+  id: string;
+  title: string;
+  path: string;
+  color: string;
+  width: string;
+  height: string;
+  iconId: string;
+  type: string;
+  displayMobile: boolean;
+  dataSourceKey?: string;
+  allowedDepartments?: string[];
+  allowedRoles?: string[];
+}
+
 // Helper function to clean card objects before stringifying
-const cleanCardForStorage = (card: ActionCardItem): Record<string, any> => {
+const cleanCardForStorage = (card: ActionCardItem): CleanedCardData => {
   // Create a clean object with only the properties we need to store
-  const cleanCard = {
+  return {
     id: card.id,
     title: card.title,
     path: card.path || '',
     color: card.color,
-    width: card.width,
-    height: card.height,
+    width: card.width || '25',
+    height: card.height || '1',
     iconId: card.iconId,
     type: card.type || 'standard',
-    displayMobile: card.displayMobile,
+    displayMobile: card.displayMobile ?? true,
     dataSourceKey: card.dataSourceKey || '',
     allowedDepartments: card.allowedDepartments || [],
     allowedRoles: card.allowedRoles || []
   };
-  
-  return cleanCard;
 };
 
 export const useDefaultDashboardConfig = () => {
