@@ -45,6 +45,7 @@ export const useDefaultDashboardConfig = () => {
     fetchDashboardConfigs();
   }, []);
 
+  // This is the function with the type instantiation error
   const saveDefaultDashboard = async () => {
     if (!user) {
       toast({
@@ -58,7 +59,9 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      const serializedCards = JSON.stringify(cards);
+      // Simplified by explicitly typing the serialized cards
+      const serializedCards: string = JSON.stringify(cards);
+      
       // Use the correct table name
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
