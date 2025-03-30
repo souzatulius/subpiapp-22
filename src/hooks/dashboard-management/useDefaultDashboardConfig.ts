@@ -13,7 +13,10 @@ export const useDefaultDashboardConfig = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
-  const { cards } = useDefaultDashboardState(selectedDepartment);
+  
+  // Explicitly type the cards array to prevent deep type inference
+  const result = useDefaultDashboardState(selectedDepartment);
+  const cards: ActionCardItem[] = result.cards;
 
   useEffect(() => {
     const fetchDashboardConfigs = async () => {
@@ -59,9 +62,8 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      // Prevent TypeScript from trying to deeply analyze the cards structure
-      // by using JSON.stringify with a type assertion
-      const cardsString = JSON.stringify(cards) as string;
+      // Use type assertion to prevent deep type analysis
+      const cardsString = JSON.stringify(cards as ActionCardItem[]);
       
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
