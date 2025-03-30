@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { ActionCardItem } from '../dashboard/types';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { ActionCardItem } from '@/hooks/dashboard/types';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
 
 export const useDefaultDashboardConfig = () => {
@@ -13,36 +12,30 @@ export const useDefaultDashboardConfig = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
-
   const { cards } = useDefaultDashboardState(selectedDepartment);
 
   useEffect(() => {
     const fetchDashboardConfigs = async () => {
       setIsLoading(true);
-
       try {
         const { data, error } = await supabase
           .from('department_dashboards')
           .select('*');
 
-        if (error) {
-          console.error('Erro ao carregar dashboards:', error);
-          return;
+        if (error) throw error;
+
+        const configs: { [key: string]: ActionCardItem[] } = {};
+        for (const item of data) {
+          try {
+            configs[`${item.department}_${item.view_type}`] = JSON.parse(item.cards_config);
+          } catch (e) {
+            console.error('Erro ao parsear JSON de cards_config:', e);
+          }
         }
 
-        const dashboardConfigs: { [key: string]: ActionCardItem[] } = {};
-        data.forEach((item) => {
-          try {
-            const parsed = JSON.parse(item.cards_config);
-            dashboardConfigs[item.department] = parsed;
-          } catch (e) {
-            console.error('Erro ao processar configuração:', e);
-          }
-        });
-
-        setDefaultDashboards(dashboardConfigs);
+        setDefaultDashboards(configs);
       } catch (err) {
-        console.error('Erro geral ao buscar dashboards:', err);
+        console.error('Erro ao buscar dashboards:', err);
       } finally {
         setIsLoading(false);
       }
@@ -55,8 +48,8 @@ export const useDefaultDashboardConfig = () => {
     if (!user) {
       toast({
         title: 'Erro',
-        description: 'Você precisa estar logado para realizar esta ação.',
-        variant: 'destructive',
+        description: 'Você precisa estar logado.',
+        variant: 'destructive'
       });
       return;
     }
@@ -65,7 +58,6 @@ export const useDefaultDashboardConfig = () => {
 
     try {
       const serializedCards = JSON.stringify(cards);
-
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
         .select('id')
@@ -80,7 +72,7 @@ export const useDefaultDashboardConfig = () => {
             department: selectedDepartment,
             view_type: selectedViewType,
             cards_config: serializedCards,
-            updated_by: user.id,
+            updated_by: user.id
           });
 
         if (insertError) throw insertError;
@@ -90,15 +82,13 @@ export const useDefaultDashboardConfig = () => {
           .update({
             cards_config: serializedCards,
             updated_by: user.id,
-            updated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           })
           .eq('id', existingConfig.id);
 
         if (updateError) throw updateError;
       }
 
-      // Reset: Apagar customizações antigas dos usuários
-      // Changed from user_dashboards to user_dashboard to match the table name
       await supabase
         .from('user_dashboard')
         .delete()
@@ -106,16 +96,16 @@ export const useDefaultDashboardConfig = () => {
         .eq('view_type', selectedViewType);
 
       toast({
-        title: 'Configuração salva',
-        description: `O dashboard padrão para ${selectedDepartment === 'default' ? 'todos' : selectedDepartment} foi atualizado e usuários foram resetados.`,
-        variant: 'success',
+        title: 'Salvo com sucesso',
+        description: 'Configuração atualizada e usuários resetados.',
+        variant: 'success'
       });
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error('Erro ao salvar dashboard:', error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível salvar a configuração. Tente novamente.',
-        variant: 'destructive',
+        title: 'Erro ao salvar',
+        description: 'Verifique a conexão e tente novamente.',
+        variant: 'destructive'
       });
     } finally {
       setIsSaving(false);
@@ -130,6 +120,6 @@ export const useDefaultDashboardConfig = () => {
     setSelectedViewType,
     isLoading,
     isSaving,
-    saveDefaultDashboard,
+    saveDefaultDashboard
   };
 };
