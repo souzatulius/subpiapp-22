@@ -77,6 +77,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   const handleSubmit = (data: FormSchema) => {
     const iconComponent = getIconComponentById(data.iconId);
     onSave({
+      title: data.title, // Ensure title is always provided
       ...data,
       icon: iconComponent,
     });

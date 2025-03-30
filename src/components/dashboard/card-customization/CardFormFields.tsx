@@ -45,6 +45,11 @@ interface Coordination {
   descricao: string;
 }
 
+interface Cargo {
+  id: string;
+  descricao: string;
+}
+
 const CardFormFields: React.FC<Props> = ({
   form,
   selectedIconId,
@@ -52,7 +57,9 @@ const CardFormFields: React.FC<Props> = ({
 }) => {
   const watchType = form.watch('type');
   const [coordinations, setCoordinations] = useState<{label: string, value: string}[]>([]);
+  const [cargos, setCargos] = useState<{label: string, value: string}[]>([]);
   const [isLoadingCoordinations, setIsLoadingCoordinations] = useState(false);
+  const [isLoadingCargos, setIsLoadingCargos] = useState(false);
 
   useEffect(() => {
     const fetchCoordinations = async () => {
@@ -81,7 +88,34 @@ const CardFormFields: React.FC<Props> = ({
       }
     };
 
+    const fetchCargos = async () => {
+      setIsLoadingCargos(true);
+      try {
+        const { data, error } = await supabase
+          .from('cargos')
+          .select('id, descricao')
+          .order('descricao');
+        
+        if (error) {
+          console.error('Error fetching cargos:', error);
+          return;
+        }
+        
+        const formattedCargos = (data || []).map((cargo: Cargo) => ({
+          label: cargo.descricao,
+          value: cargo.id
+        }));
+        
+        setCargos(formattedCargos);
+      } catch (error) {
+        console.error('Failed to fetch cargos:', error);
+      } finally {
+        setIsLoadingCargos(false);
+      }
+    };
+
     fetchCoordinations();
+    fetchCargos();
   }, []);
 
   return (
@@ -272,19 +306,6 @@ const CardFormFields: React.FC<Props> = ({
 
       <FormField
         control={form.control}
-        name="mobileOrder"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Ordem no mobile</FormLabel>
-            <FormControl>
-              <Input type="number" {...field} />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
         name="allowedDepartments"
         render={({ field }) => (
           <FormItem>
@@ -311,11 +332,8 @@ const CardFormFields: React.FC<Props> = ({
               <MultiSelect
                 selected={field.value || []}
                 onChange={field.onChange}
-                placeholder="Selecione cargos"
-                options={[
-                  { label: 'Coordenador', value: 'coordenador' },
-                  { label: 'Analista', value: 'analista' }
-                ]}
+                placeholder={isLoadingCargos ? "Carregando..." : "Selecione cargos"}
+                options={cargos}
               />
             </FormControl>
           </FormItem>

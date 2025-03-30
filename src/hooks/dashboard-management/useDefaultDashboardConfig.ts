@@ -30,7 +30,7 @@ const cleanCardForStorage = (card: ActionCardItem): Record<string, any> => {
 };
 
 export const useDefaultDashboardConfig = () => {
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('default');
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
   const [defaultDashboards, setDefaultDashboards] = useState<Record<string, ActionCardItem[]>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -69,7 +69,29 @@ export const useDefaultDashboardConfig = () => {
       }
     };
 
+    // Fetch initial coordinations and set first one as default
+    const fetchInitialCoordination = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('coordenacoes')
+          .select('id')
+          .limit(1)
+          .order('descricao');
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setSelectedDepartment(data[0].id);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar coordenação inicial:', err);
+      }
+    };
+
     fetchDashboardConfigs();
+    if (!selectedDepartment) {
+      fetchInitialCoordination();
+    }
   }, []);
 
   const saveDefaultDashboard = async () => {
@@ -77,6 +99,15 @@ export const useDefaultDashboardConfig = () => {
       toast({
         title: 'Erro',
         description: 'Você precisa estar logado.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!selectedDepartment) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione um departamento.',
         variant: 'destructive'
       });
       return;

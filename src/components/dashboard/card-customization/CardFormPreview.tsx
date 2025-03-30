@@ -5,6 +5,7 @@ import { getColorClass, getIconComponentById, dashboardPages } from './utils';
 import { useFormContext } from 'react-hook-form';
 import { FormSchema } from './types';
 import DynamicDataCard from '@/components/dashboard/DynamicDataCard';
+import { CardColor } from '@/types/dashboard';
 
 const CardFormPreview: React.FC<CardFormPreviewProps> = ({
   title,
@@ -23,7 +24,7 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
   // Generate text color based on background
   const getTextColor = (bgColor: string) => {
     const darkColors = ['blue-dark', 'gray-dark', 'orange-light', 'gray-ultra-light'];
-    return darkColors.includes(color) ? 'text-white' : 'text-gray-800';
+    return darkColors.includes(bgColor) ? 'text-white' : 'text-gray-800';
   };
 
   // Find data source label
@@ -50,7 +51,7 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
             <DynamicDataCard 
               title={title || 'Título do Card'}
               icon={IconComponent}
-              color={color}
+              color={color as CardColor}
               dataSourceKey={dataSourceKey || 'no_data'}
               coordenacaoId="preview"
               usuarioId="preview"
@@ -59,7 +60,7 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
           </div>
         ) : (
           <div 
-            className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden h-[200px] w-[200px] ${getColorClass(color)}`}
+            className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden h-[200px] w-[200px] ${getColorClass(color as CardColor)}`}
           >
             <div className="mb-3">
               {React.isValidElement(IconComponent) ? (

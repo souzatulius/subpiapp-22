@@ -31,10 +31,10 @@ const DashboardManagementContent: React.FC = () => {
   
   useEffect(() => {
     const fetchDepartmentName = async () => {
-      if (selectedDepartment && selectedDepartment !== 'default') {
+      if (selectedDepartment) {
         try {
           const { data, error } = await supabase
-            .from('areas_coordenacao')
+            .from('coordenacoes')
             .select('descricao')
             .eq('id', selectedDepartment)
             .single();
@@ -51,7 +51,7 @@ const DashboardManagementContent: React.FC = () => {
           console.error('Failed to fetch department name:', error);
         }
       } else {
-        setDepartmentName(selectedDepartment === 'default' ? 'Padrão (Todos)' : '');
+        setDepartmentName('');
       }
     };
     
@@ -105,7 +105,6 @@ const DashboardManagementContent: React.FC = () => {
                 dashboardType={selectedViewType} 
                 department={selectedDepartment}
                 isMobilePreview={isMobilePreview}
-                onAddNewCard={handleOpenCreateCardModal}
               />
             )}
           </div>

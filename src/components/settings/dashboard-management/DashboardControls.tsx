@@ -53,11 +53,10 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
       try {
         setIsLoading(true);
         
-        // Fetch coordinations from areas_coordenacao where is_supervision is false
+        // Fetch coordinations from coordenacoes table
         const { data, error } = await supabase
-          .from('areas_coordenacao')
+          .from('coordenacoes')
           .select('id, descricao, sigla')
-          .eq('is_supervision', false)
           .order('descricao');
         
         if (error) {
@@ -66,6 +65,11 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
         }
         
         setCoordinations(data || []);
+        
+        // If no department is selected yet, select the first one
+        if (!selectedDepartment && data && data.length > 0) {
+          setSelectedDepartment(data[0].id);
+        }
       } catch (error) {
         console.error('Failed to fetch coordinations:', error);
       } finally {
@@ -98,7 +102,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
                 <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">Padrão (Todos)</SelectItem>
                 {coordinations.map((coordination) => (
                   <SelectItem key={coordination.id} value={coordination.id}>
                     {coordination.descricao}

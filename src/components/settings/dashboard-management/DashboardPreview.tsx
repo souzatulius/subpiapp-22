@@ -3,7 +3,6 @@ import React from 'react';
 import CardGrid from '@/components/dashboard/CardGrid';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
-import DashboardActions from '@/components/dashboard/DashboardActions';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Smartphone, Monitor } from 'lucide-react';
 
@@ -11,39 +10,24 @@ interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
   department: string;
   isMobilePreview: boolean;
-  onAddNewCard?: () => void;
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
   dashboardType, 
   department,
-  isMobilePreview,
-  onAddNewCard 
+  isMobilePreview
 }) => {
   const {
     cards,
     setCards,
-    isCustomizationModalOpen,
-    setIsCustomizationModalOpen,
-    editingCard,
     handleDeleteCard,
-    handleAddNewCard,
     handleEditCard,
-    handleSaveCard,
     specialCardsData,
     departmentName
   } = useDefaultDashboardState(department);
 
   const { user } = useAuth();
   const [modoAdmin, setModoAdmin] = React.useState(true);
-
-  const handleAddCard = () => {
-    if (onAddNewCard) {
-      onAddNewCard();
-    } else {
-      handleAddNewCard();
-    }
-  };
 
   // Create device frame classes based on preview mode
   const deviceFrameClasses = isMobilePreview 
@@ -75,15 +59,12 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       <div className={deviceFrameClasses}>
         {mobileNotch}
         <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
-          {modoAdmin && <DashboardActions onAddNewCard={handleAddCard} />}
-          
           <div className="p-4">
             <CardGrid
               cards={cards}
               onCardsChange={setCards}
               onEditCard={handleEditCard}
               onDeleteCard={handleDeleteCard}
-              onAddNewCard={handleAddCard}
               specialCardsData={specialCardsData}
               isMobileView={isMobilePreview}
               modoAdmin={modoAdmin}

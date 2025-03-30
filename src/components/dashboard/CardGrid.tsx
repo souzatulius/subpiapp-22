@@ -18,7 +18,7 @@ interface CardGridProps {
   onCardsChange: (cards: ActionCardItem[]) => void;
   onEditCard: (card: ActionCardItem) => void;
   onDeleteCard: (id: string) => void;
-  onAddNewCard: () => void;
+  onAddNewCard?: () => void;
   isMobileView?: boolean;
   specialCardsData?: any;
   usuarioId?: string;
@@ -99,14 +99,14 @@ const CardGrid: React.FC<CardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={modoAdmin ? handleDragEnd : undefined}
     >
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-min">
+      <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         {/* Special search cards should appear first */}
         {regularCards
           .filter(card => card.isSearch)
           .map(card => (
             <div 
               key={card.id}
-              className={`${getWidthClass(card.width)} ${getHeightClass(card.height)}`}
+              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
             >
               <CardsContainer
                 cards={[card]}
@@ -126,7 +126,7 @@ const CardGrid: React.FC<CardGridProps> = ({
         {dynamicDataCards.map(card => (
           <div 
             key={card.id}
-            className={`${getWidthClass(card.width)} ${getHeightClass(card.height)}`}
+            className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
           >
             <DynamicDataCard
               key={card.id}
@@ -146,7 +146,7 @@ const CardGrid: React.FC<CardGridProps> = ({
           .map(card => (
             <div 
               key={card.id}
-              className={`${getWidthClass(card.width)} ${getHeightClass(card.height)}`}
+              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
             >
               <CardsContainer
                 cards={[card]}
@@ -167,29 +167,44 @@ const CardGrid: React.FC<CardGridProps> = ({
 };
 
 // Utility functions for determining class names based on card dimensions
-export const getWidthClass = (width?: string): string => {
-  switch (width) {
-    case '25':
-      return 'col-span-1';
-    case '50':
-      return 'col-span-1 sm:col-span-1 md:col-span-2';
-    case '75':
-      return 'col-span-1 sm:col-span-2 md:col-span-3';
-    case '100':
-      return 'col-span-1 sm:col-span-2 md:col-span-4';
-    default:
-      return 'col-span-1';
+export const getWidthClass = (width?: string, isMobileView: boolean = false): string => {
+  if (isMobileView) {
+    // In mobile view, we have only 2 columns
+    switch (width) {
+      case '25':
+        return 'col-span-1'; // 1/2 of mobile width
+      case '50':
+      case '75':
+      case '100':
+        return 'col-span-2'; // Full mobile width
+      default:
+        return 'col-span-1';
+    }
+  } else {
+    // In desktop view, we have 4 columns
+    switch (width) {
+      case '25':
+        return 'col-span-1'; // 1/4 of desktop width
+      case '50':
+        return 'col-span-2'; // 2/4 of desktop width
+      case '75':
+        return 'col-span-3'; // 3/4 of desktop width
+      case '100':
+        return 'col-span-4'; // Full desktop width
+      default:
+        return 'col-span-1';
+    }
   }
 };
 
 export const getHeightClass = (height?: string): string => {
   switch (height) {
     case '1':
-      return 'h-auto';
+      return 'h-40'; // Standard height
     case '2':
-      return 'h-auto row-span-2';
+      return 'h-80'; // Double height
     default:
-      return 'h-auto';
+      return 'h-40';
   }
 };
 
