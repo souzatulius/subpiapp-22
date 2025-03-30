@@ -1,7 +1,10 @@
+
 import { useState, useEffect } from 'react';
-import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
+import { getDefaultCards, getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
-import { ActionCardItem } from '@/hooks/dashboard/types';
+import { ActionCardItem } from '@/types/dashboard';
+import { FormSchema } from '@/components/dashboard/card-customization/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useDefaultDashboardState = (departmentId: string) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
@@ -20,11 +23,39 @@ export const useDefaultDashboardState = (departmentId: string) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const loadInitialCards = () => {
-      setCards(getDefaultCards());
-    };
+    const fetchDashboardCards = async () => {
+      setIsLoading(true);
+      try {
+        // Try to load saved configuration for this department
+        const { data, error } = await supabase
+          .from('department_dashboards')
+          .select('cards_config')
+          .eq('department', departmentId)
+          .eq('view_type', 'dashboard')
+          .maybeSingle();
 
-    loadInitialCards();
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching dashboard config:', error);
+          setCards(getDefaultCards());
+        } else if (data && data.cards_config) {
+          try {
+            const parsedCards = JSON.parse(data.cards_config);
+            setCards(parsedCards);
+          } catch (parseError) {
+            console.error('Error parsing cards config JSON:', parseError);
+            setCards(getDefaultCards());
+          }
+        } else {
+          // No saved config, use defaults
+          setCards(getDefaultCards());
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard cards:', err);
+        setCards(getDefaultCards());
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
     const fetchDepartmentName = async () => {
       if (departmentId && departmentId !== 'default') {
@@ -51,6 +82,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
       }
     };
 
+    fetchDashboardCards();
     fetchDepartmentName();
   }, [departmentId]);
 
@@ -68,28 +100,49 @@ export const useDefaultDashboardState = (departmentId: string) => {
     setIsCustomizationModalOpen(true);
   };
 
-  const handleSaveCard = (cardData: Partial<ActionCardItem>) => {
+  const handleSaveCard = (cardData: Omit<FormSchema, 'iconId'> & { icon: React.ReactNode }) => {
+    const { icon, ...data } = cardData;
+    
+    // Determine if we need to find an existing iconId
+    let iconId = 'clipboard-list';  // Default
+    if ('iconId' in data) {
+      iconId = (data as any).iconId;
+    }
+
     const newCardDefaults = {
       displayMobile: true,
-      mobileOrder: cards.length
+      mobileOrder: cards.length,
+      isCustom: true
     };
 
     if (editingCard) {
       // Edit existing card
       setCards(cards.map(card =>
-        card.id === editingCard.id ? { ...card, ...cardData } : card
+        card.id === editingCard.id ? { 
+          ...card, 
+          ...data, 
+          iconId,
+          icon 
+        } : card
       ));
     } else {
       // Add new card
-      setCards([
-        ...cards,
-        {
-          id: `card-${Date.now()}`,
-          ...newCardDefaults,
-          ...cardData
-        } as ActionCardItem
-      ]);
+      const newCard: ActionCardItem = {
+        id: `card-${uuidv4()}`,
+        title: data.title || 'Novo Card',
+        path: data.path || '',
+        color: data.color,
+        width: data.width,
+        height: data.height,
+        icon: icon,
+        iconId,
+        type: data.type || 'standard',
+        ...newCardDefaults
+      };
+      
+      setCards([...cards, newCard]);
     }
+    
     setIsCustomizationModalOpen(false);
   };
 

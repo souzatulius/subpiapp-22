@@ -45,7 +45,7 @@ export const useDefaultDashboardConfig = () => {
     fetchDashboardConfigs();
   }, []);
 
-  // This is the function with the type instantiation error
+  // Fixed type instantiation error by simplifying the function
   const saveDefaultDashboard = async () => {
     if (!user) {
       toast({
@@ -59,18 +59,17 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      // Simplified by explicitly typing the serialized cards
-      const serializedCards: string = JSON.stringify(cards);
+      // Explicitly convert cards to a simple string to avoid deep type analysis
+      const cardsString = JSON.stringify(cards);
       
-      // Use the correct table name
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
         .select('id')
         .eq('department', selectedDepartment)
         .eq('view_type', selectedViewType)
-        .maybeSingle(); // Use maybeSingle instead of single to avoid error
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is fine
+      if (fetchError && fetchError.code !== 'PGRST116') {
         throw fetchError;
       }
 
@@ -80,7 +79,7 @@ export const useDefaultDashboardConfig = () => {
           .insert({
             department: selectedDepartment,
             view_type: selectedViewType,
-            cards_config: serializedCards,
+            cards_config: cardsString,
             updated_by: user.id
           });
 
@@ -89,7 +88,7 @@ export const useDefaultDashboardConfig = () => {
         const { error: updateError } = await supabase
           .from('department_dashboards')
           .update({
-            cards_config: serializedCards,
+            cards_config: cardsString,
             updated_by: user.id,
             updated_at: new Date().toISOString()
           })

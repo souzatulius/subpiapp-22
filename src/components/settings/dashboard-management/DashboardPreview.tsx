@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import CardGrid from '@/components/dashboard/CardGrid';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
@@ -10,9 +11,14 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
   department: string;
+  onAddNewCard?: () => void;
 }
 
-const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, department }) => {
+const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
+  dashboardType, 
+  department,
+  onAddNewCard 
+}) => {
   const {
     cards,
     setCards,
@@ -30,6 +36,14 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
   const { user } = useAuth();
   const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [modoAdmin, setModoAdmin] = useState(true);
+
+  const handleAddCard = () => {
+    if (onAddNewCard) {
+      onAddNewCard();
+    } else {
+      handleAddNewCard();
+    }
+  };
 
   if (dashboardType === 'communication') {
     return (
@@ -69,14 +83,14 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({ dashboardType, depa
         </div>
       </div>
 
-      {modoAdmin && <DashboardActions onAddNewCard={handleAddNewCard} />}
+      {modoAdmin && <DashboardActions onAddNewCard={handleAddCard} />}
 
       <CardGrid
         cards={cards}
         onCardsChange={setCards}
         onEditCard={handleEditCard}
         onDeleteCard={handleDeleteCard}
-        onAddNewCard={handleAddNewCard}
+        onAddNewCard={handleAddCard}
         specialCardsData={specialCardsData}
         isMobileView={isMobilePreview}
         modoAdmin={modoAdmin}

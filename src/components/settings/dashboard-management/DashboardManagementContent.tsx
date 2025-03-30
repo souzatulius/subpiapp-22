@@ -5,8 +5,13 @@ import DashboardPreview from './DashboardPreview';
 import DashboardControls from './DashboardControls';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
+import { FormSchema } from '@/components/dashboard/card-customization/types';
+import { ActionCardItem } from '@/types/dashboard';
+import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
+import { toast } from '@/hooks/use-toast';
 
 const DashboardManagementContent: React.FC = () => {
   const {
@@ -21,6 +26,7 @@ const DashboardManagementContent: React.FC = () => {
   } = useDefaultDashboardConfig();
   
   const [departmentName, setDepartmentName] = useState('');
+  const [isCreateCardModalOpen, setIsCreateCardModalOpen] = useState(false);
   
   useEffect(() => {
     const fetchDepartmentName = async () => {
@@ -51,6 +57,24 @@ const DashboardManagementContent: React.FC = () => {
     fetchDepartmentName();
   }, [selectedDepartment]);
 
+  const handleOpenCreateCardModal = () => {
+    setIsCreateCardModalOpen(true);
+  };
+  
+  const handleCloseCreateCardModal = () => {
+    setIsCreateCardModalOpen(false);
+  };
+
+  const handleSaveNewCard = (data: Omit<FormSchema, 'iconId'> & { icon: React.ReactNode }) => {
+    // The card will be handled by the DashboardPreview component
+    setIsCreateCardModalOpen(false);
+    toast({
+      title: "Card criado com sucesso",
+      description: "O novo card foi adicionado ao dashboard",
+      variant: "success"
+    });
+  };
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -61,6 +85,16 @@ const DashboardManagementContent: React.FC = () => {
             selectedViewType={selectedViewType}
             setSelectedViewType={setSelectedViewType}
           />
+          
+          <div className="mt-6">
+            <Button 
+              onClick={handleOpenCreateCardModal}
+              className="w-full bg-gradient-to-r from-green-600 via-green-700 to-green-800"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Criar Novo Card
+            </Button>
+          </div>
         </div>
         
         <div className="md:col-span-3 space-y-4">
@@ -98,11 +132,19 @@ const DashboardManagementContent: React.FC = () => {
               <DashboardPreview 
                 dashboardType={selectedViewType} 
                 department={selectedDepartment}
+                onAddNewCard={handleOpenCreateCardModal}
               />
             )}
           </div>
         </div>
       </div>
+      
+      <CardCustomizationModal
+        isOpen={isCreateCardModalOpen}
+        onClose={handleCloseCreateCardModal}
+        onSave={handleSaveNewCard}
+        initialData={null}
+      />
     </div>
   );
 };
