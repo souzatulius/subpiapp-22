@@ -90,7 +90,7 @@ const ActionCard = ({
         )}
         
         {children ? (
-          children
+          <>{children}</>
         ) : (
           <>
             <div className="text-white mb-4">{icon}</div>

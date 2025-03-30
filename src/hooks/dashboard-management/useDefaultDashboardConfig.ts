@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -61,7 +62,8 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      const cardsString = JSON.stringify(cards); // Aqui o erro era a inferência infinita
+      // Explicitly cast cards to ActionCardItem[] to prevent deep type inference
+      const cardsString = JSON.stringify(cards as ActionCardItem[]);
 
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
