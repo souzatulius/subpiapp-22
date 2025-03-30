@@ -60,10 +60,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   if (dashboardType === 'communication') {
     return (
       <div className="bg-gray-50 p-6 h-full">
-        <h3 className="text-lg font-medium mb-4 text-gray-700 flex items-center">
-          {isMobilePreview ? <Smartphone className="mr-2 h-5 w-5" /> : <Monitor className="mr-2 h-5 w-5" />}
-          Visualização da página de Comunicação {departmentName ? `- ${departmentName}` : ''}
-        </h3>
         <div className={deviceFrameClasses}>
           {mobileNotch}
           <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
@@ -76,18 +72,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
   return (
     <div className="bg-gray-50 p-6 h-full">
-      <h3 className="text-lg font-medium mb-4 text-gray-700 flex items-center">
-        {isMobilePreview ? <Smartphone className="mr-2 h-5 w-5" /> : <Monitor className="mr-2 h-5 w-5" />}
-        Visualização do Dashboard {departmentName ? `- ${departmentName}` : ''}
-        
-        <button
-          className="ml-auto text-sm text-blue-600 underline"
-          onClick={() => setModoAdmin((prev) => !prev)}
-        >
-          {modoAdmin ? '👁 Visualizar como usuário' : '⚙️ Modo admin'}
-        </button>
-      </h3>
-
       <div className={deviceFrameClasses}>
         {mobileNotch}
         <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>

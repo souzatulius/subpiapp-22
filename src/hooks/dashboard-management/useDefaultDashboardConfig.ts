@@ -6,6 +6,26 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
 import { ActionCardItem } from '@/types/dashboard';
 
+// Helper function to clean card objects before stringifying
+const cleanCardForStorage = (card: ActionCardItem): Record<string, any> => {
+  // Create a clean object with only the properties we need to store
+  const cleanCard = {
+    id: card.id,
+    title: card.title,
+    path: card.path || '',
+    color: card.color,
+    width: card.width,
+    height: card.height,
+    iconId: card.iconId,
+    type: card.type || 'standard',
+    displayMobile: card.displayMobile,
+    mobileOrder: card.mobileOrder,
+    isCustom: card.isCustom
+  };
+  
+  return cleanCard;
+};
+
 export const useDefaultDashboardConfig = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('default');
   const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
@@ -14,9 +34,9 @@ export const useDefaultDashboardConfig = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
 
-  // Break the deep type inference chain by explicitly typing the result
+  // Extract dashboard state without deep type inference
   const dashboardState = useDefaultDashboardState(selectedDepartment);
-  // Extract cards with explicit typing to avoid excessive type inference
+  // Explicitly type the cards array to avoid excessive type inference
   const cards: ActionCardItem[] = dashboardState.cards;
 
   useEffect(() => {
@@ -62,8 +82,9 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      // Explicitly cast cards to ActionCardItem[] to prevent deep type inference
-      const cardsString = JSON.stringify(cards as ActionCardItem[]);
+      // Clean cards before stringify to prevent circular references
+      const cleanedCards = cards.map(cleanCardForStorage);
+      const cardsString = JSON.stringify(cleanedCards);
 
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
