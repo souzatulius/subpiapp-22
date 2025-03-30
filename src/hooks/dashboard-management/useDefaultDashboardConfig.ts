@@ -1,22 +1,22 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { ActionCardItem } from '@/types/dashboard';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
+import { ActionCardItem } from '@/types/dashboard';
 
 export const useDefaultDashboardConfig = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('default');
   const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
-  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, any>>({});
+  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, ActionCardItem[]>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
-  
-  // Explicitly type the cards array to prevent deep type inference
-  const result = useDefaultDashboardState(selectedDepartment);
-  const cards: ActionCardItem[] = result.cards;
+
+  // Use "as const" to break deep inference chain
+  const { cards } = useDefaultDashboardState(selectedDepartment) as {
+    cards: ActionCardItem[];
+  };
 
   useEffect(() => {
     const fetchDashboardConfigs = async () => {
@@ -28,12 +28,12 @@ export const useDefaultDashboardConfig = () => {
 
         if (error) throw error;
 
-        const configs: Record<string, any> = {};
+        const configs: Record<string, ActionCardItem[]> = {};
         for (const item of data) {
           try {
             configs[`${item.department}_${item.view_type}`] = JSON.parse(item.cards_config);
           } catch (e) {
-            console.error('Erro ao parsear JSON de cards_config:', e);
+            console.error('Erro ao parsear cards_config:', e);
           }
         }
 
@@ -48,7 +48,6 @@ export const useDefaultDashboardConfig = () => {
     fetchDashboardConfigs();
   }, []);
 
-  // Fixed type instantiation error by using a more explicit type approach
   const saveDefaultDashboard = async () => {
     if (!user) {
       toast({
@@ -62,9 +61,8 @@ export const useDefaultDashboardConfig = () => {
     setIsSaving(true);
 
     try {
-      // Use type assertion to prevent deep type analysis
-      const cardsString = JSON.stringify(cards as ActionCardItem[]);
-      
+      const cardsString = JSON.stringify(cards); // Aqui o erro era a inferência infinita
+
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
         .select('id')
@@ -108,7 +106,7 @@ export const useDefaultDashboardConfig = () => {
 
       toast({
         title: 'Salvo com sucesso',
-        description: 'Configuração atualizada e usuários resetados.',
+        description: 'Dashboard atualizado e usuários resetados.',
         variant: 'success'
       });
     } catch (error) {
