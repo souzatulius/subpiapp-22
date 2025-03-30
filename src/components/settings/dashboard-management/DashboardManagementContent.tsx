@@ -27,6 +27,7 @@ const DashboardManagementContent: React.FC = () => {
   
   const [departmentName, setDepartmentName] = useState('');
   const [isCreateCardModalOpen, setIsCreateCardModalOpen] = useState(false);
+  const [isMobilePreview, setIsMobilePreview] = useState(false);
   
   useEffect(() => {
     const fetchDepartmentName = async () => {
@@ -84,45 +85,16 @@ const DashboardManagementContent: React.FC = () => {
             setSelectedDepartment={setSelectedDepartment}
             selectedViewType={selectedViewType}
             setSelectedViewType={setSelectedViewType}
+            isMobilePreview={isMobilePreview}
+            setIsMobilePreview={setIsMobilePreview}
+            onAddNewCard={handleOpenCreateCardModal}
+            onSaveDashboard={saveDefaultDashboard}
+            isSaving={isSaving}
           />
-          
-          <div className="mt-6">
-            <Button 
-              onClick={handleOpenCreateCardModal}
-              className="w-full bg-gradient-to-r from-green-600 via-green-700 to-green-800"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Novo Card
-            </Button>
-          </div>
         </div>
         
-        <div className="md:col-span-3 space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-medium">
-              Visualização: {selectedViewType === 'dashboard' ? 'Dashboard' : 'Comunicação'}
-              {departmentName ? ` - ${departmentName}` : ''}
-            </h2>
-            <Button 
-              onClick={saveDefaultDashboard} 
-              disabled={isLoading || isSaving}
-              className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Salvar como Padrão
-                </>
-              )}
-            </Button>
-          </div>
-
-          <div className="border rounded-lg overflow-hidden bg-white">
+        <div className="md:col-span-3">
+          <div className="border rounded-lg overflow-hidden bg-white h-full">
             {isLoading ? (
               <div className="flex justify-center items-center h-96">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -132,6 +104,7 @@ const DashboardManagementContent: React.FC = () => {
               <DashboardPreview 
                 dashboardType={selectedViewType} 
                 department={selectedDepartment}
+                isMobilePreview={isMobilePreview}
                 onAddNewCard={handleOpenCreateCardModal}
               />
             )}

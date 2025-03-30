@@ -1,24 +1,23 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import CardGrid from '@/components/dashboard/CardGrid';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
 import DashboardActions from '@/components/dashboard/DashboardActions';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Smartphone, Monitor } from 'lucide-react';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
   department: string;
+  isMobilePreview: boolean;
   onAddNewCard?: () => void;
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
   dashboardType, 
   department,
+  isMobilePreview,
   onAddNewCard 
 }) => {
   const {
@@ -36,8 +35,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   } = useDefaultDashboardState(department);
 
   const { user } = useAuth();
-  const [isMobilePreview, setIsMobilePreview] = useState(false);
-  const [modoAdmin, setModoAdmin] = useState(true);
+  const [modoAdmin, setModoAdmin] = React.useState(true);
 
   const handleAddCard = () => {
     if (onAddNewCard) {
@@ -47,71 +45,69 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     }
   };
 
+  // Create device frame classes based on preview mode
+  const deviceFrameClasses = isMobilePreview 
+    ? "max-w-[375px] mx-auto border-[8px] border-gray-800 rounded-[36px] overflow-hidden shadow-xl bg-white p-0 h-[640px] relative" 
+    : "border-[16px] border-gray-800 rounded-xl overflow-hidden shadow-xl bg-white max-w-full relative";
+  
+  // Add notch for mobile preview
+  const mobileNotch = isMobilePreview && (
+    <div className="absolute top-0 left-0 w-full flex justify-center">
+      <div className="h-5 w-36 bg-gray-800 rounded-b-xl"></div>
+    </div>
+  );
+
   if (dashboardType === 'communication') {
     return (
-      <div className="bg-gray-50 p-6">
-        <h3 className="text-lg font-medium mb-4 text-gray-700">
+      <div className="bg-gray-50 p-6 h-full">
+        <h3 className="text-lg font-medium mb-4 text-gray-700 flex items-center">
+          {isMobilePreview ? <Smartphone className="mr-2 h-5 w-5" /> : <Monitor className="mr-2 h-5 w-5" />}
           Visualização da página de Comunicação {departmentName ? `- ${departmentName}` : ''}
         </h3>
-        <div className="border rounded-lg overflow-hidden">
-          <ComunicacaoDashboard isPreview={true} department={department} />
+        <div className={deviceFrameClasses}>
+          {mobileNotch}
+          <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
+            <ComunicacaoDashboard isPreview={true} department={department} />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-700">
-          Visualização do Dashboard {departmentName ? `- ${departmentName}` : ''}
-        </h3>
+    <div className="bg-gray-50 p-6 h-full">
+      <h3 className="text-lg font-medium mb-4 text-gray-700 flex items-center">
+        {isMobilePreview ? <Smartphone className="mr-2 h-5 w-5" /> : <Monitor className="mr-2 h-5 w-5" />}
+        Visualização do Dashboard {departmentName ? `- ${departmentName}` : ''}
+        
+        <button
+          className="ml-auto text-sm text-blue-600 underline"
+          onClick={() => setModoAdmin((prev) => !prev)}
+        >
+          {modoAdmin ? '👁 Visualizar como usuário' : '⚙️ Modo admin'}
+        </button>
+      </h3>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="mobile-preview"
-              checked={isMobilePreview}
-              onCheckedChange={setIsMobilePreview}
+      <div className={deviceFrameClasses}>
+        {mobileNotch}
+        <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
+          {modoAdmin && <DashboardActions onAddNewCard={handleAddCard} />}
+          
+          <div className="p-4">
+            <CardGrid
+              cards={cards}
+              onCardsChange={setCards}
+              onEditCard={handleEditCard}
+              onDeleteCard={handleDeleteCard}
+              onAddNewCard={handleAddCard}
+              specialCardsData={specialCardsData}
+              isMobileView={isMobilePreview}
+              modoAdmin={modoAdmin}
+              coordenacaoId={department}
+              usuarioId={user?.id ?? ''}
             />
-            <Label htmlFor="mobile-preview" className="flex items-center text-sm text-gray-600">
-              {isMobilePreview ? (
-                <>
-                  <Smartphone className="h-4 w-4 mr-1" /> 
-                  Mobile
-                </>
-              ) : (
-                <>
-                  <Monitor className="h-4 w-4 mr-1" /> 
-                  Desktop
-                </>
-              )}
-            </Label>
           </div>
-          <button
-            className="text-sm text-blue-600 underline"
-            onClick={() => setModoAdmin((prev) => !prev)}
-          >
-            {modoAdmin ? '👁 Visualizar como usuário' : '⚙️ Modo admin'}
-          </button>
         </div>
-      </div>
-
-      {modoAdmin && <DashboardActions onAddNewCard={handleAddCard} />}
-
-      <div className={isMobilePreview ? "max-w-sm mx-auto border-2 border-gray-300 rounded-xl overflow-hidden shadow-lg bg-white p-2" : ""}>
-        <CardGrid
-          cards={cards}
-          onCardsChange={setCards}
-          onEditCard={handleEditCard}
-          onDeleteCard={handleDeleteCard}
-          onAddNewCard={handleAddCard}
-          specialCardsData={specialCardsData}
-          isMobileView={isMobilePreview}
-          modoAdmin={modoAdmin}
-          coordenacaoId={department}
-          usuarioId={user?.id ?? ''}
-        />
       </div>
     </div>
   );

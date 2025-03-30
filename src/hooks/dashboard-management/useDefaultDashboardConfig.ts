@@ -14,10 +14,10 @@ export const useDefaultDashboardConfig = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
 
-  // Use "as const" to break deep inference chain
-  const { cards } = useDefaultDashboardState(selectedDepartment) as {
-    cards: ActionCardItem[];
-  };
+  // Break the deep type inference chain by explicitly typing the result
+  const dashboardState = useDefaultDashboardState(selectedDepartment);
+  // Extract cards with explicit typing to avoid excessive type inference
+  const cards: ActionCardItem[] = dashboardState.cards;
 
   useEffect(() => {
     const fetchDashboardConfigs = async () => {
