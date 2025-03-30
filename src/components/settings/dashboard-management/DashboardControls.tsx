@@ -164,7 +164,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           className="w-full bg-gradient-to-r from-orange-500 to-orange-600"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Criar Novo Card
+          Novo Card
         </Button>
         
         <Button 
@@ -183,7 +183,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              Salvar como Padrão
+              Salvar Padrão
             </>
           )}
         </Button>

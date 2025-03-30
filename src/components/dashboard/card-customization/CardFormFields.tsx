@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FormField,
   FormItem,
@@ -23,6 +23,7 @@ import IconSelector from './IconSelector';
 import { MultiSelect } from '@/components/ui/multiselect';
 import { dashboardPages } from './utils';
 import { CardColor } from '@/types/dashboard';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Props {
   form: UseFormReturn<FormSchema>;
@@ -39,12 +40,49 @@ const dataSourceOptions = [
   { label: 'Comunicados por cargo', value: 'comunicados_por_cargo' }
 ];
 
+interface Coordination {
+  id: string;
+  descricao: string;
+}
+
 const CardFormFields: React.FC<Props> = ({
   form,
   selectedIconId,
   setSelectedIconId
 }) => {
   const watchType = form.watch('type');
+  const [coordinations, setCoordinations] = useState<{label: string, value: string}[]>([]);
+  const [isLoadingCoordinations, setIsLoadingCoordinations] = useState(false);
+
+  useEffect(() => {
+    const fetchCoordinations = async () => {
+      setIsLoadingCoordinations(true);
+      try {
+        const { data, error } = await supabase
+          .from('coordenacoes')
+          .select('id, descricao')
+          .order('descricao');
+        
+        if (error) {
+          console.error('Error fetching coordinations:', error);
+          return;
+        }
+        
+        const formattedCoordinations = (data || []).map((coord: Coordination) => ({
+          label: coord.descricao,
+          value: coord.id
+        }));
+        
+        setCoordinations(formattedCoordinations);
+      } catch (error) {
+        console.error('Failed to fetch coordinations:', error);
+      } finally {
+        setIsLoadingCoordinations(false);
+      }
+    };
+
+    fetchCoordinations();
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -255,11 +293,8 @@ const CardFormFields: React.FC<Props> = ({
               <MultiSelect
                 selected={field.value || []}
                 onChange={field.onChange}
-                placeholder="Selecione departamentos"
-                options={[
-                  { label: 'Comunicação', value: 'ae3f06da-5cbe-4f23-8ad7-c019d31be124' }
-                  // outros...
-                ]}
+                placeholder={isLoadingCoordinations ? "Carregando..." : "Selecione departamentos"}
+                options={coordinations}
               />
             </FormControl>
           </FormItem>

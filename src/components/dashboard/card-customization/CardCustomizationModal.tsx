@@ -30,7 +30,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       allowedDepartments: [],
       allowedRoles: [],
       displayMobile: true,
-      mobileOrder: 0
+      mobileOrder: 0,
+      dataSourceKey: ''
     }
   });
 
@@ -66,7 +67,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
         allowedDepartments: [],
         allowedRoles: [],
         displayMobile: true,
-        mobileOrder: 0
+        mobileOrder: 0,
+        dataSourceKey: ''
       });
       setSelectedIconId('clipboard-list');
     }

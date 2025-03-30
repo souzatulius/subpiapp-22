@@ -20,7 +20,10 @@ const cleanCardForStorage = (card: ActionCardItem): Record<string, any> => {
     type: card.type || 'standard',
     displayMobile: card.displayMobile,
     mobileOrder: card.mobileOrder,
-    isCustom: card.isCustom
+    isCustom: card.isCustom,
+    dataSourceKey: card.dataSourceKey || '',
+    allowedDepartments: card.allowedDepartments || [],
+    allowedRoles: card.allowedRoles || []
   };
   
   return cleanCard;
