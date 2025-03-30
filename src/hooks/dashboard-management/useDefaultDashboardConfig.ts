@@ -11,7 +11,7 @@ interface CleanedCardData {
   id: string;
   title: string;
   path: string;
-  color: string;
+  color: CardColor;
   width: string;
   height: string;
   iconId: string;

@@ -67,29 +67,29 @@ export const dashboardPages = [
   { value: '/settings?tab=areas', label: 'Áreas de Coordenação (Configurações)' },
 ];
 
-// Define the icon data directly using React elements to avoid rendering issues
+// Define the icon data with proper React elements
 export const iconsData = [
-  { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <ClipboardList /> },
-  { id: 'message-square', label: 'Responder Demanda', component: <MessageSquare /> },
-  { id: 'file-text', label: 'Criar Nota Oficial', component: <FileText /> },
-  { id: 'check-circle', label: 'Aprovar Nota Oficial', component: <CheckCircle /> },
-  { id: 'search', label: 'Consultar Notas', component: <Search /> },
-  { id: 'list', label: 'Consultar Demandas', component: <List /> },
-  { id: 'layout-dashboard', label: 'Dashboard', component: <LayoutDashboard /> },
-  { id: 'settings', label: 'Configurações', component: <Settings /> },
-  { id: 'users', label: 'Usuários', component: <Users /> },
-  { id: 'bell', label: 'Notificações', component: <Bell /> },
-  { id: 'briefcase', label: 'Cargos', component: <Briefcase /> },
-  { id: 'file-stack', label: 'Serviços', component: <FileStack /> },
-  { id: 'image', label: 'Tipos de Mídia', component: <Image /> },
-  { id: 'inbox', label: 'Origem das Demandas', component: <Inbox /> },
-  { id: 'map-pin', label: 'Distritos e Bairros', component: <MapPin /> },
+  { id: 'clipboard-list', label: 'Cadastrar Demanda', component: <ClipboardList className="h-5 w-5" /> },
+  { id: 'message-square', label: 'Responder Demanda', component: <MessageSquare className="h-5 w-5" /> },
+  { id: 'file-text', label: 'Criar Nota Oficial', component: <FileText className="h-5 w-5" /> },
+  { id: 'check-circle', label: 'Aprovar Nota Oficial', component: <CheckCircle className="h-5 w-5" /> },
+  { id: 'search', label: 'Consultar Notas', component: <Search className="h-5 w-5" /> },
+  { id: 'list', label: 'Consultar Demandas', component: <List className="h-5 w-5" /> },
+  { id: 'layout-dashboard', label: 'Dashboard', component: <LayoutDashboard className="h-5 w-5" /> },
+  { id: 'settings', label: 'Configurações', component: <Settings className="h-5 w-5" /> },
+  { id: 'users', label: 'Usuários', component: <Users className="h-5 w-5" /> },
+  { id: 'bell', label: 'Notificações', component: <Bell className="h-5 w-5" /> },
+  { id: 'briefcase', label: 'Cargos', component: <Briefcase className="h-5 w-5" /> },
+  { id: 'file-stack', label: 'Serviços', component: <FileStack className="h-5 w-5" /> },
+  { id: 'image', label: 'Tipos de Mídia', component: <Image className="h-5 w-5" /> },
+  { id: 'inbox', label: 'Origem das Demandas', component: <Inbox className="h-5 w-5" /> },
+  { id: 'map-pin', label: 'Distritos e Bairros', component: <MapPin className="h-5 w-5" /> },
 ];
 
 // Function to get the icon component by its ID - returning a proper React element
 export const getIconComponentById = (id: string) => {
   const icon = iconsData.find(icon => icon.id === id);
-  return icon?.component || <ClipboardList />;
+  return icon?.component || <ClipboardList className="h-5 w-5" />;
 };
 
 // Function to identify the icon component based on its type
