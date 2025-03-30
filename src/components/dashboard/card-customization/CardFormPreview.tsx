@@ -18,7 +18,7 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
   const cardType = form.watch('type');
   const dataSourceKey = form.watch('dataSourceKey');
   
-  // Get the icon component properly - this returns a React element
+  // Get the icon component properly
   const IconComponent = getIconComponentById(iconId);
   
   // Generate text color based on background
@@ -63,7 +63,6 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
             className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden h-[200px] w-[200px] ${getColorClass(color as CardColor)}`}
           >
             <div className="mb-3">
-              {/* Render the icon properly */}
               {IconComponent}
             </div>
             <h3 className={`text-lg font-medium text-center line-clamp-2 ${getTextColor(color)}`}>

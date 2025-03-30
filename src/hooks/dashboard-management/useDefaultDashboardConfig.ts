@@ -44,7 +44,7 @@ const cleanCardForStorage = (card: ActionCardItem): CleanedCardData => {
 export const useDefaultDashboardConfig = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
-  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, any[]>>({});
+  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, CleanedCardData[]>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
@@ -63,7 +63,7 @@ export const useDefaultDashboardConfig = () => {
 
         if (error) throw error;
 
-        const configs: Record<string, any[]> = {};
+        const configs: Record<string, CleanedCardData[]> = {};
         for (const item of data) {
           try {
             configs[`${item.department}_${item.view_type}`] = JSON.parse(item.cards_config);

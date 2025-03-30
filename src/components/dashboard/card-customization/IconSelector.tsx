@@ -26,7 +26,6 @@ const IconSelector: React.FC<IconSelectorProps> = ({
                 `}
                 title={icon.label}
               >
-                {/* Render the icon component properly */}
                 {icon.component}
               </div>
             );

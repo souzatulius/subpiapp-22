@@ -86,8 +86,8 @@ export const iconsData = [
   { id: 'map-pin', label: 'Distritos e Bairros', component: <MapPin className="h-5 w-5" /> },
 ];
 
-// Function to get the icon component by its ID - returning a proper React element
-export const getIconComponentById = (id: string) => {
+// Function to get the icon component by its ID - returning a JSX Element
+export const getIconComponentById = (id: string): JSX.Element => {
   const icon = iconsData.find(icon => icon.id === id);
   return icon?.component || <ClipboardList className="h-5 w-5" />;
 };
