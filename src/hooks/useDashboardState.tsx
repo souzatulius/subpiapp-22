@@ -6,6 +6,7 @@ import { useSpecialCardsData } from './dashboard/useSpecialCardsData';
 import { DashboardStateReturn } from './dashboard/types';
 import { getDefaultCards } from './dashboard/defaultCards';
 import { useState } from 'react';
+import { DataSourceKey } from '@/types/dashboard';
 
 export const useDashboardState = (userId?: string): DashboardStateReturn => {
   const defaultCards = getDefaultCards();
@@ -13,11 +14,14 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
   const [firstName, setFirstName] = useState('Usuário');
   
   // Try to load data if userId is provided
-  // Pass empty callbacks as the second and third arguments to satisfy the function's signature
   useDashboardData(
-    userId || '',
-    () => {}, // onSuccess callback
-    () => {}  // onError callback
+    'pendencias_por_coordenacao' as DataSourceKey,
+    (data) => {
+      console.log('Dashboard data loaded:', data);
+    },
+    (error) => {
+      console.error('Error loading dashboard data:', error);
+    }
   );
   
   // Card manipulation actions

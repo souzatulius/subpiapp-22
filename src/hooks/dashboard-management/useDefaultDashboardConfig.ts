@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { ActionCardItem } from '@/hooks/dashboard/types';
+import { ActionCardItem } from '@/types/dashboard';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
 
 export const useDefaultDashboardConfig = () => {
@@ -65,7 +66,11 @@ export const useDefaultDashboardConfig = () => {
         .eq('view_type', selectedViewType)
         .single();
 
-      if (fetchError || !existingConfig) {
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is fine
+        throw fetchError;
+      }
+
+      if (!existingConfig) {
         const { error: insertError } = await supabase
           .from('department_dashboards')
           .insert({

@@ -1,18 +1,17 @@
-
 import { useState } from 'react';
-import { ChartVisibility, FilterOptions } from '@/components/ranking/types';
-import { subDays } from 'date-fns';
+import { ChartVisibility, FilterOptions } from '@/hooks/dashboard/types';
 
 export const useFilterManagement = () => {
-  // Estado para visibilidade de gráficos
+  // Initialize filters with default values
+  const [filters, setFilters] = useState<FilterOptions>({
+    dateRange: { from: null, to: null },
+    statuses: [],
+    serviceTypes: [],
+    districts: []
+  });
+
+  // Initialize chart visibility with all charts visible by default
   const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
-    districtPerformance: true,
-    serviceTypes: true,
-    resolutionTime: true,
-    responsibility: true,
-    evolution: true,
-    departmentComparison: true,
-    oldestPendingList: true,
     statusDistribution: true,
     topCompanies: true,
     districtDistribution: true,
@@ -27,47 +26,31 @@ export const useFilterManagement = () => {
     externalDistricts: true,
     efficiencyImpact: true,
     criticalStatus: true,
-    serviceDiversity: true
+    serviceDiversity: true,
+    // Keep original properties
+    districtPerformance: true,
+    serviceTypes: true,
+    resolutionTime: true,
+    responsibility: true,
+    evolution: true,
+    departmentComparison: true,
+    oldestPendingList: true
   });
 
-  // Estado para filtros
-  const [filters, setFilters] = useState<FilterOptions>({
-    dataInicio: new Date(subDays(new Date(), 30)).toISOString().split('T')[0],
-    dataFim: new Date().toISOString().split('T')[0],
-    status: [],
-    distritos: [],
-    tiposServico: [],
-    departamento: [],
-    statuses: [],
-    serviceTypes: [],
-    districts: []
-  });
-
-  // Manipular alterações de filtros
   const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      ...newFilters,
-    }));
+    setFilters({ ...filters, ...newFilters });
   };
 
-  // Manipular alterações de visibilidade de gráficos
-  const handleChartVisibilityChange = (chartName: keyof ChartVisibility, isVisible: boolean) => {
-    setChartVisibility((prev) => ({
-      ...prev,
-      [chartName]: isVisible,
-    }));
+  const handleChartVisibilityChange = (chartId: keyof ChartVisibility, isVisible: boolean) => {
+    setChartVisibility({
+      ...chartVisibility,
+      [chartId]: isVisible
+    });
   };
 
-  // Resetar filtros
   const resetFilters = () => {
     setFilters({
-      dataInicio: new Date(subDays(new Date(), 30)).toISOString().split('T')[0],
-      dataFim: new Date().toISOString().split('T')[0],
-      status: [],
-      distritos: [],
-      tiposServico: [],
-      departamento: [],
+      dateRange: { from: null, to: null },
       statuses: [],
       serviceTypes: [],
       districts: []
@@ -79,6 +62,6 @@ export const useFilterManagement = () => {
     chartVisibility,
     handleFiltersChange,
     handleChartVisibilityChange,
-    resetFilters,
+    resetFilters
   };
 };

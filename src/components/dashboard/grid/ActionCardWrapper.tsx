@@ -6,23 +6,7 @@ import SmartSearchCard from '../SmartSearchCard';
 import OverdueDemandsCard from '../cards/OverdueDemandsCard';
 import PendingActionsCard from '../cards/PendingActionsCard';
 import NewCardButton from '../cards/NewCardButton';
-import { ActionCardItem } from '@/hooks/dashboard/types';
-
-// Function to get width classes
-export const getWidthClasses = (width: string = '25') => {
-  switch (width) {
-    case '25':
-      return 'col-span-1';
-    case '50':
-      return 'col-span-2';
-    case '75':
-      return 'col-span-3';
-    case '100':
-      return 'col-span-4';
-    default:
-      return 'col-span-1';
-  }
-};
+import { ActionCardItem } from '@/types/dashboard';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -53,6 +37,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   onSearchSubmit = () => {},
   specialCardsData
 }) => {
+  // Map specific card types to their respective components
   if (card.isQuickDemand) {
     return (
       <SortableActionCard 
@@ -133,6 +118,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     );
   }
   
+  // Default case - standard card
   return (
     <SortableActionCard 
       key={card.id} 

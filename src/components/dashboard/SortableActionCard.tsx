@@ -3,7 +3,7 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ActionCard from '@/components/dashboard/ActionCard';
-import { ActionCardItem } from '@/hooks/dashboard/types';
+import { ActionCardItem } from '@/types/dashboard';
 import { X, Pencil } from 'lucide-react';
 
 interface SortableActionCardProps {
@@ -12,22 +12,6 @@ interface SortableActionCardProps {
   onDelete?: (id: string) => void;
   children?: React.ReactNode;
 }
-
-// Function to get width classes
-export const getWidthClasses = (width: string = '25') => {
-  switch (width) {
-    case '25':
-      return 'col-span-1';
-    case '50':
-      return 'col-span-2';
-    case '75':
-      return 'col-span-3';
-    case '100':
-      return 'col-span-4';
-    default:
-      return 'col-span-1';
-  }
-};
 
 // Control buttons component for card actions
 export const Controls = ({
@@ -87,9 +71,6 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
   const handleEdit = () => {
     onEdit(card);
   };
-
-  // Determine how wide the card should be
-  const widthClass = getWidthClasses(card.width);
   
   return (
     <div 
@@ -97,7 +78,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
       style={style} 
       {...attributes} 
       {...listeners}
-      className={`${widthClass} ${card.height === '2' ? 'row-span-2' : ''} flex-none`}
+      className="w-full h-full"
     >
       {children ? (
         <div className="w-full h-full relative group">
@@ -124,6 +105,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
           width={card.width}
           height={card.height}
           isCustom={card.isCustom}
+          type={card.type}
         />
       )}
     </div>

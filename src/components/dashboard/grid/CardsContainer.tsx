@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { SortableContext } from '@dnd-kit/sortable';
-import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
 import ActionCardWrapper from './ActionCardWrapper';
-import { ActionCardItem } from '@/hooks/dashboard/types';
+import { ActionCardItem } from '@/types/dashboard';
 
 interface CardsContainerProps {
   cards: ActionCardItem[];
@@ -38,25 +37,8 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
 
   return (
     <SortableContext items={allCardIds}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-auto">
-        {cards.filter(card => card.isSearch).map((card) => (
-          <ActionCardWrapper
-            key={card.id}
-            card={card}
-            onEdit={onEditCard}
-            onDelete={onDeleteCard}
-            onAddNewCard={onAddNewCard}
-            specialCardsData={specialCardsData}
-            quickDemandTitle={quickDemandTitle}
-            onQuickDemandTitleChange={onQuickDemandTitleChange}
-            onQuickDemandSubmit={onQuickDemandSubmit}
-            onSearchSubmit={onSearchSubmit}
-          />
-        ))}
-
-        <NotificationsEnabler />
-
-        {cards.filter(card => !card.isSearch).map((card) => (
+      <div className="w-full h-full">
+        {cards.map((card) => (
           <ActionCardWrapper
             key={card.id}
             card={card}

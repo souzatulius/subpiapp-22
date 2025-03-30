@@ -1,5 +1,5 @@
 
-import { ActionCardItem } from './types';
+import { ActionCardItem } from '@/types/dashboard';
 import { 
   ClipboardList, 
   MessageSquareReply, 
@@ -80,6 +80,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     height: '1',
     isCustom: false,
     isSearch: true,
+    type: 'standard',
   },
   
   // Overdue Demands card as a standard, mandatory card
@@ -88,12 +89,13 @@ export const getDefaultCards = (): ActionCardItem[] => [
     title: 'Demandas em Atraso',
     icon: <Clock className="h-12 w-12" />,
     iconId: 'clock',
-    path: '/dashboard/comunicacao/consultar-demandas', // Add a path to view all overdue demands
-    color: 'orange', // Keeping the existing orange color
+    path: '/dashboard/comunicacao/consultar-demandas',
+    color: 'orange',
     width: '25',
     height: '2',
     isCustom: false,
     isOverdueDemands: true,
+    type: 'standard',
   },
   
   // PendingActions card - Making it standard in the dashboard
@@ -108,6 +110,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     height: '1',
     isCustom: false,
     isPendingActions: true,
+    type: 'standard',
   },
   
   // Standard operational cards - Configuring the requested cards
@@ -119,7 +122,8 @@ export const getDefaultCards = (): ActionCardItem[] => [
     path: '/dashboard/comunicacao/cadastrar',
     color: 'blue',
     width: '25',
-    height: '1', // Keeping it at height 1 as requested
+    height: '1',
+    type: 'standard',
   },
   {
     id: '2',
@@ -127,9 +131,10 @@ export const getDefaultCards = (): ActionCardItem[] => [
     icon: <FileText className="h-12 w-12" />,
     iconId: 'file-text',
     path: '/dashboard/comunicacao/criar-nota',
-    color: 'blue-dark', // Changed from 'purple' to 'blue-dark'
+    color: 'blue-dark',
     width: '25',
     height: '1',
+    type: 'standard',
   },
   {
     id: '3',
@@ -140,6 +145,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     color: 'green',
     width: '25',
     height: '1',
+    type: 'standard',
   },
   {
     id: '4',
@@ -147,9 +153,10 @@ export const getDefaultCards = (): ActionCardItem[] => [
     icon: <FileText className="h-12 w-12" />,
     iconId: 'file-text',
     path: '/dashboard/comunicacao/consultar-notas',
-    color: 'orange-light', // Changed from 'cyan' to 'orange-light'
+    color: 'orange-light',
     width: '25',
     height: '1',
+    type: 'standard',
   },
   {
     id: '5',
@@ -160,6 +167,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     color: 'orange',
     width: '25',
     height: '1',
+    type: 'standard',
   },
   
   // Last row - Quick demand and New card
@@ -174,6 +182,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     height: '1',
     isCustom: false,
     isQuickDemand: true,
+    type: 'standard',
   },
   {
     id: 'new-card',
@@ -185,6 +194,7 @@ export const getDefaultCards = (): ActionCardItem[] => [
     width: '25',
     height: '1',
     isCustom: false,
-    isNewCardButton: true
+    isNewCardButton: true,
+    type: 'standard',
   }
 ];

@@ -2,20 +2,21 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Controls } from './SortableActionCard';
+import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 
 export interface ActionCardProps {
   id: string;
   title: string;
   icon: ReactNode;
   path: string;
-  color: "blue" | "green" | "orange" | "gray-light" | "gray-dark" | "blue-dark" | "orange-light" | "gray-ultra-light" | "lime" | "orange-600";
+  color: CardColor;
   isDraggable?: boolean;
-  width?: '25' | '50' | '75' | '100';
-  height?: '1' | '2'; 
+  width?: CardWidth;
+  height?: CardHeight;
+  type?: CardType;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   isCustom?: boolean;
-  type?: 'standard' | 'data_dynamic';
   dataSourceKey?: string;
   displayMobile?: boolean;
   mobileOrder?: number;
@@ -23,7 +24,7 @@ export interface ActionCardProps {
 }
 
 // Function to get background color based on the color prop
-const getBackgroundColor = (color: string): string => {
+const getBackgroundColor = (color: CardColor): string => {
   switch (color) {
     case 'blue':
       return 'bg-blue-500';
