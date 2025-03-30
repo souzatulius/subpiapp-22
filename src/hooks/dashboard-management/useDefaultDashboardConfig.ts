@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
-import { ActionCardItem } from '@/types/dashboard';
+import { ActionCardItem, CardColor } from '@/types/dashboard';
 
 // Helper function to clean card objects before stringifying
 const cleanCardForStorage = (card: ActionCardItem): Record<string, any> => {
@@ -19,8 +19,6 @@ const cleanCardForStorage = (card: ActionCardItem): Record<string, any> => {
     iconId: card.iconId,
     type: card.type || 'standard',
     displayMobile: card.displayMobile,
-    mobileOrder: card.mobileOrder,
-    isCustom: card.isCustom,
     dataSourceKey: card.dataSourceKey || '',
     allowedDepartments: card.allowedDepartments || [],
     allowedRoles: card.allowedRoles || []
@@ -32,15 +30,14 @@ const cleanCardForStorage = (card: ActionCardItem): Record<string, any> => {
 export const useDefaultDashboardConfig = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
-  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, ActionCardItem[]>>({});
+  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, any[]>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
 
-  // Extract dashboard state without deep type inference
+  // Get dashboard state
   const dashboardState = useDefaultDashboardState(selectedDepartment);
-  // Explicitly type the cards array to avoid excessive type inference
-  const cards: ActionCardItem[] = dashboardState.cards;
+  const cards = dashboardState.cards;
 
   useEffect(() => {
     const fetchDashboardConfigs = async () => {
@@ -52,7 +49,7 @@ export const useDefaultDashboardConfig = () => {
 
         if (error) throw error;
 
-        const configs: Record<string, ActionCardItem[]> = {};
+        const configs: Record<string, any[]> = {};
         for (const item of data) {
           try {
             configs[`${item.department}_${item.view_type}`] = JSON.parse(item.cards_config);

@@ -30,7 +30,6 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       allowedDepartments: [],
       allowedRoles: [],
       displayMobile: true,
-      mobileOrder: 0,
       dataSourceKey: ''
     }
   });
@@ -51,8 +50,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
         dataSourceKey: initialData.dataSourceKey,
         allowedDepartments: initialData.allowedDepartments || [],
         allowedRoles: initialData.allowedRoles || [],
-        displayMobile: initialData.displayMobile ?? true,
-        mobileOrder: initialData.mobileOrder || 0
+        displayMobile: initialData.displayMobile ?? true
       });
       setSelectedIconId(iconId);
     } else {
@@ -67,7 +65,6 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
         allowedDepartments: [],
         allowedRoles: [],
         displayMobile: true,
-        mobileOrder: 0,
         dataSourceKey: ''
       });
       setSelectedIconId('clipboard-list');
@@ -77,9 +74,17 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   const handleSubmit = (data: FormSchema) => {
     const iconComponent = getIconComponentById(data.iconId);
     onSave({
-      title: data.title, // Ensure title is always provided
-      ...data,
+      title: data.title, 
+      type: data.type,
+      path: data.path,
+      color: data.color, // Ensuring color is always passed
+      width: data.width,
+      height: data.height,
       icon: iconComponent,
+      dataSourceKey: data.dataSourceKey,
+      displayMobile: data.displayMobile,
+      allowedDepartments: data.allowedDepartments,
+      allowedRoles: data.allowedRoles
     });
   };
 
