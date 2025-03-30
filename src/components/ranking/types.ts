@@ -32,9 +32,7 @@ export interface FilterOptions {
   tiposServico?: string[];
   departamento?: string[];
   dateRange?: any;
-  statuses?: string[];
   serviceTypes?: string[];
-  districts?: string[];
 }
 
 export interface ChartFilter extends FilterOptions {

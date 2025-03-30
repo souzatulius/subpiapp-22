@@ -31,7 +31,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
   
   const handleStatusChange = (status: string) => {
-    let newStatuses = [...filters.statuses];
+    let newStatuses = [...(filters.status || [])];
     
     if (status === 'Todos') {
       newStatuses = ['Todos'];
@@ -40,10 +40,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       newStatuses = newStatuses.filter(s => s !== 'Todos');
       
       // Adiciona ou remove o status
-      if (newStatuses.includes(status as any)) {
+      if (newStatuses.includes(status)) {
         newStatuses = newStatuses.filter(s => s !== status);
       } else {
-        newStatuses.push(status as any);
+        newStatuses.push(status);
       }
       
       // Se não houver nenhum status, adiciona 'Todos'
@@ -52,11 +52,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       }
     }
     
-    onFiltersChange({ statuses: newStatuses as any });
+    onFiltersChange({ status: newStatuses });
   };
   
   const handleServiceTypeChange = (type: string) => {
-    let newTypes = [...filters.serviceTypes];
+    let newTypes = [...(filters.serviceTypes || [])];
     
     if (type === 'Todos') {
       newTypes = ['Todos'];
@@ -65,10 +65,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       newTypes = newTypes.filter(t => t !== 'Todos');
       
       // Adiciona ou remove o tipo
-      if (newTypes.includes(type as any)) {
+      if (newTypes.includes(type)) {
         newTypes = newTypes.filter(t => t !== type);
       } else {
-        newTypes.push(type as any);
+        newTypes.push(type);
       }
       
       // Se não houver nenhum tipo, adiciona 'Todos'
@@ -77,11 +77,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       }
     }
     
-    onFiltersChange({ serviceTypes: newTypes as any });
+    onFiltersChange({ serviceTypes: newTypes });
   };
   
   const handleDistrictChange = (district: string) => {
-    let newDistricts = [...filters.districts];
+    let newDistricts = [...(filters.distritos || [])];
     
     if (district === 'Todos') {
       newDistricts = ['Todos'];
@@ -90,10 +90,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       newDistricts = newDistricts.filter(d => d !== 'Todos');
       
       // Adiciona ou remove o distrito
-      if (newDistricts.includes(district as any)) {
+      if (newDistricts.includes(district)) {
         newDistricts = newDistricts.filter(d => d !== district);
       } else {
-        newDistricts.push(district as any);
+        newDistricts.push(district);
       }
       
       // Se não houver nenhum distrito, adiciona 'Todos'
@@ -102,15 +102,15 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       }
     }
     
-    onFiltersChange({ districts: newDistricts as any });
+    onFiltersChange({ distritos: newDistricts });
   };
   
   const clearFilters = () => {
     onFiltersChange({
       dateRange: undefined,
-      statuses: ['Todos'],
+      status: ['Todos'],
       serviceTypes: ['Todos'],
-      districts: ['Todos']
+      distritos: ['Todos']
     });
   };
   
@@ -183,17 +183,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 />
                 
                 <StatusFilter
-                  statuses={filters.statuses}
+                  statuses={filters.status || []}
                   onStatusChange={handleStatusChange}
                 />
                 
                 <ServiceTypeFilter
-                  serviceTypes={filters.serviceTypes}
+                  serviceTypes={filters.serviceTypes || []}
                   onServiceTypeChange={handleServiceTypeChange}
                 />
                 
                 <DistrictFilter
-                  districts={filters.districts}
+                  districts={filters.distritos || []}
                   onDistrictChange={handleDistrictChange}
                 />
               </div>
@@ -220,7 +220,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           >
             <ChartVisibilityManager
               chartVisibility={chartVisibility}
-              onChartVisibilityToggle={(chart, isVisible) => handleChartVisibilityToggle(chart)}
+              onChartVisibilityToggle={handleChartVisibilityToggle}
             />
           </motion.div>
         )}

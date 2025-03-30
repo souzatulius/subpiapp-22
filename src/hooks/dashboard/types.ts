@@ -1,8 +1,8 @@
 
 import { ReactNode } from 'react';
 
-// Re-export the types from the main dashboard types file
-export { CardColor, CardWidth, CardHeight, CardType, DataSourceKey, ActionCardItem } from '@/types/dashboard';
+// Re-export the types from the main dashboard types file with proper 'export type' syntax
+export type { CardColor, CardWidth, CardHeight, CardType, DataSourceKey, ActionCardItem } from '@/types/dashboard';
 
 // Used for form editing/creation - kept here for backward compatibility
 export interface FormSchema {

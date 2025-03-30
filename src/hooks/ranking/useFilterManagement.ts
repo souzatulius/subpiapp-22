@@ -5,9 +5,9 @@ export const useFilterManagement = () => {
   // Initialize filters with default values
   const [filters, setFilters] = useState<FilterOptions>({
     dateRange: { from: null, to: null },
-    statuses: [],
+    status: [],
     serviceTypes: [],
-    districts: []
+    distritos: []
   });
 
   // Initialize chart visibility with all charts visible by default
@@ -27,7 +27,6 @@ export const useFilterManagement = () => {
     efficiencyImpact: true,
     criticalStatus: true,
     serviceDiversity: true,
-    // Keep original properties
     districtPerformance: true,
     serviceTypes: true,
     resolutionTime: true,
@@ -51,9 +50,9 @@ export const useFilterManagement = () => {
   const resetFilters = () => {
     setFilters({
       dateRange: { from: null, to: null },
-      statuses: [],
+      status: [],
       serviceTypes: [],
-      districts: []
+      distritos: []
     });
   };
 
