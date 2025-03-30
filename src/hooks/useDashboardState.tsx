@@ -6,22 +6,18 @@ import { useSpecialCardsData } from './dashboard/useSpecialCardsData';
 import { DashboardStateReturn } from './dashboard/types';
 import { getDefaultCards } from './dashboard/defaultCards';
 import { useState } from 'react';
-import { DataSourceKey } from '@/types/dashboard';
+import { ActionCardItem, DataSourceKey } from '@/types/dashboard';
 
 export const useDashboardState = (userId?: string): DashboardStateReturn => {
   const defaultCards = getDefaultCards();
-  const [actionCards, setActionCards] = useState(defaultCards);
+  const [actionCards, setActionCards] = useState<ActionCardItem[]>(defaultCards);
   const [firstName, setFirstName] = useState('Usuário');
   
   // Try to load data if userId is provided
   useDashboardData(
-    'pendencias_por_coordenacao' as DataSourceKey,
-    (data) => {
-      console.log('Dashboard data loaded:', data);
-    },
-    (error) => {
-      console.error('Error loading dashboard data:', error);
-    }
+    'pendencias_por_coordenacao',
+    userId || '',
+    userId || ''
   );
   
   // Card manipulation actions

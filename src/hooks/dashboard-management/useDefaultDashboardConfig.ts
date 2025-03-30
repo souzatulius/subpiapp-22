@@ -59,12 +59,13 @@ export const useDefaultDashboardConfig = () => {
 
     try {
       const serializedCards = JSON.stringify(cards);
+      // Use the correct table name
       const { data: existingConfig, error: fetchError } = await supabase
         .from('department_dashboards')
         .select('id')
         .eq('department', selectedDepartment)
         .eq('view_type', selectedViewType)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to avoid error
 
       if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is fine
         throw fetchError;

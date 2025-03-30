@@ -27,8 +27,8 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
 }) => {
   const { data, loading } = useDashboardData(
     dataSourceKey,
-    () => {},
-    () => {}
+    coordenacaoId,
+    usuarioId
   );
   
   const borderClass = highlight ? 'border-2 border-orange-500' : 'border border-gray-200';

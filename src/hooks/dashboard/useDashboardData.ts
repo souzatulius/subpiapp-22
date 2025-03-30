@@ -1,14 +1,7 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-type DataSourceKey =
-  | 'pendencias_por_coordenacao'
-  | 'tarefas_por_status'
-  | 'notas_aguardando_aprovacao'
-  | 'respostas_atrasadas'
-  | 'demandas_aguardando_nota'
-  | 'ultimas_acoes_coordenacao'
-  | 'comunicados_por_cargo';
+import { DataSourceKey } from '@/types/dashboard';
 
 export const useDashboardData = (
   dataSourceKey: DataSourceKey,

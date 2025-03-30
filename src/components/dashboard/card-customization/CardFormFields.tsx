@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   FormField,
@@ -21,6 +22,7 @@ import ColorOptions from './ColorOptions';
 import IconSelector from './IconSelector';
 import { MultiSelect } from '@/components/ui/multiselect';
 import { dashboardPages } from './utils';
+import { CardColor } from '@/types/dashboard';
 
 interface Props {
   form: UseFormReturn<FormSchema>;
@@ -144,8 +146,8 @@ const CardFormFields: React.FC<Props> = ({
             <FormLabel>Cor</FormLabel>
             <FormControl>
               <ColorOptions
-                selectedColor={field.value}
-                onSelectColor={color => form.setValue('color', color)}
+                selectedColor={field.value as CardColor}
+                onSelectColor={(color: CardColor) => form.setValue('color', color)}
               />
             </FormControl>
             <FormMessage />

@@ -1,46 +1,19 @@
+
 import { ReactNode } from 'react';
 
-export type CardColor =
-  | 'blue' | 'green' | 'orange' | 'gray-light'
-  | 'gray-dark' | 'blue-dark' | 'orange-light'
-  | 'gray-ultra-light' | 'lime' | 'orange-600';
+// Re-export the types from the main dashboard types file
+export { CardColor, CardWidth, CardHeight, CardType, DataSourceKey, ActionCardItem } from '@/types/dashboard';
 
-export type CardWidth = '25' | '50' | '75' | '100';
-export type CardHeight = '1' | '2';
-
-export interface ActionCardItem {
-  id: string;
-  title: string;
-  icon: ReactNode;
-  iconId: string;
-  path: string;
-  color: CardColor;
-  width?: CardWidth;
-  height?: CardHeight;
-  isCustom?: boolean;
-  type: 'standard' | 'data_dynamic';
-  dataSourceKey?: string;
-  displayMobile?: boolean;
-  mobileOrder?: number;
-  allowedDepartments?: string[];
-  allowedRoles?: string[];
-  isQuickDemand?: boolean;
-  isSearch?: boolean;
-  isNewCardButton?: boolean;
-  isOverdueDemands?: boolean;
-  isPendingActions?: boolean;
-}
-
-// Usado para o formulário de edição/criação
+// Used for form editing/creation - kept here for backward compatibility
 export interface FormSchema {
   title: string;
   path: string;
-  color: CardColor;
+  color: string; // Using string type to avoid circular references
   iconId: string;
   type: 'standard' | 'data_dynamic';
   dataSourceKey?: string;
-  width?: CardWidth;
-  height?: CardHeight;
+  width?: string;
+  height?: string;
   displayMobile?: boolean;
   mobileOrder?: number;
   allowedDepartments: string[];
@@ -49,15 +22,15 @@ export interface FormSchema {
 
 export interface DashboardStateReturn {
   firstName: string;
-  actionCards: ActionCardItem[];
-  setActionCards: (cards: ActionCardItem[]) => void;
+  actionCards: import('@/types/dashboard').ActionCardItem[];
+  setActionCards: (cards: import('@/types/dashboard').ActionCardItem[]) => void;
   isCustomizationModalOpen: boolean;
   setIsCustomizationModalOpen: (isOpen: boolean) => void;
-  editingCard: ActionCardItem | null;
+  editingCard: import('@/types/dashboard').ActionCardItem | null;
   handleDeleteCard: (id: string) => void;
   handleAddNewCard: () => void;
-  handleEditCard: (card: ActionCardItem) => void;
-  handleSaveCard: (card: Partial<ActionCardItem>) => void;
+  handleEditCard: (card: import('@/types/dashboard').ActionCardItem) => void;
+  handleSaveCard: (card: Partial<import('@/types/dashboard').ActionCardItem>) => void;
   newDemandTitle: string;
   setNewDemandTitle: (title: string) => void;
   handleQuickDemandSubmit: () => void;
@@ -103,10 +76,8 @@ export interface FilterOptions {
     from: Date | null;
     to: Date | null;
   };
-  statuses?: string[];
   status?: string[];
   serviceTypes?: string[];
-  districts?: string[];
   distritos?: string[];
 }
 

@@ -9,13 +9,8 @@ export type CardColor =
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
 export type CardType = 'standard' | 'data_dynamic';
-export type DataSourceKey = 
-  | 'pendencias_por_coordenacao' 
-  | 'notas_aguardando_aprovacao' 
-  | 'respostas_atrasadas' 
-  | 'demandas_aguardando_nota'
-  | 'ultimas_acoes_coordenacao'
-  | 'comunicados_por_cargo';
+// Modified to string to match how it's being used
+export type DataSourceKey = string;
 
 export interface ActionCardItem {
   id: string;
