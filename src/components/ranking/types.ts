@@ -1,5 +1,4 @@
 
-
 export interface ChartVisibility {
   districtPerformance: boolean;
   serviceTypes: boolean;
@@ -33,6 +32,11 @@ export interface FilterOptions {
   status?: string[];
   serviceTypes?: string[];
   distritos?: string[];
+  // Add fields that are actually being used in the code
+  dataInicio?: string;
+  dataFim?: string;
+  tiposServico?: string[];
+  departamento?: string[];
 }
 
 export interface ChartFilter extends FilterOptions {

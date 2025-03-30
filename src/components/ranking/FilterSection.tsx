@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FilterOptions, ChartVisibility } from './types';
@@ -36,17 +35,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     if (status === 'Todos') {
       newStatuses = ['Todos'];
     } else {
-      // Remove 'Todos' se estiver presente
       newStatuses = newStatuses.filter(s => s !== 'Todos');
       
-      // Adiciona ou remove o status
       if (newStatuses.includes(status)) {
         newStatuses = newStatuses.filter(s => s !== status);
       } else {
         newStatuses.push(status);
       }
       
-      // Se não houver nenhum status, adiciona 'Todos'
       if (newStatuses.length === 0) {
         newStatuses = ['Todos'];
       }
@@ -61,17 +57,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     if (type === 'Todos') {
       newTypes = ['Todos'];
     } else {
-      // Remove 'Todos' se estiver presente
       newTypes = newTypes.filter(t => t !== 'Todos');
       
-      // Adiciona ou remove o tipo
       if (newTypes.includes(type)) {
         newTypes = newTypes.filter(t => t !== type);
       } else {
         newTypes.push(type);
       }
       
-      // Se não houver nenhum tipo, adiciona 'Todos'
       if (newTypes.length === 0) {
         newTypes = ['Todos'];
       }
@@ -86,17 +79,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     if (district === 'Todos') {
       newDistricts = ['Todos'];
     } else {
-      // Remove 'Todos' se estiver presente
       newDistricts = newDistricts.filter(d => d !== 'Todos');
       
-      // Adiciona ou remove o distrito
       if (newDistricts.includes(district)) {
         newDistricts = newDistricts.filter(d => d !== district);
       } else {
         newDistricts.push(district);
       }
       
-      // Se não houver nenhum distrito, adiciona 'Todos'
       if (newDistricts.length === 0) {
         newDistricts = ['Todos'];
       }
@@ -193,8 +183,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 />
                 
                 <DistrictFilter
-                  districts={filters.distritos || []}
-                  onDistrictChange={handleDistrictChange}
+                  filters={filters}
+                  onFiltersChange={onFiltersChange}
                 />
               </div>
               

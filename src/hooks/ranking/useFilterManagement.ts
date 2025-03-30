@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChartVisibility, FilterOptions } from '@/hooks/dashboard/types';
+import { ChartVisibility, FilterOptions } from '@/components/ranking/types';
 
 export const useFilterManagement = () => {
   // Initialize filters with default values
@@ -8,7 +8,11 @@ export const useFilterManagement = () => {
     dateRange: { from: null, to: null },
     status: [],
     serviceTypes: [],
-    distritos: []
+    distritos: [],
+    dataInicio: undefined,
+    dataFim: undefined,
+    tiposServico: [],
+    departamento: []
   });
 
   // Initialize chart visibility with all charts visible by default
@@ -53,7 +57,11 @@ export const useFilterManagement = () => {
       dateRange: { from: null, to: null },
       status: [],
       serviceTypes: [],
-      distritos: []
+      distritos: [],
+      dataInicio: undefined,
+      dataFim: undefined,
+      tiposServico: [],
+      departamento: []
     });
   };
 
