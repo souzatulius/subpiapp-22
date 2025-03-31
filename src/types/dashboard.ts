@@ -8,7 +8,7 @@ export type CardColor =
 
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
-export type CardType = 'standard' | 'data_dynamic';
+export type CardType = 'standard' | 'data_dynamic' | 'quickDemand' | 'search' | 'overdueDemands' | 'pendingActions';
 export type DataSourceKey = string;
 
 export interface ActionCardItem {
@@ -31,4 +31,18 @@ export interface ActionCardItem {
   isNewCardButton?: boolean;
   isOverdueDemands?: boolean;
   isPendingActions?: boolean;
+  hidden?: boolean;
+  version?: string;
+}
+
+export interface DashboardState {
+  cards: ActionCardItem[];
+  setCards: (cards: ActionCardItem[]) => void;
+  loading: boolean;
+  handleDeleteCard: (id: string) => void;
+  handleEditCard: (card: ActionCardItem) => void;
+  handleAddNewCard?: () => void;
+  saveDashboard?: () => Promise<boolean>;
+  isEditMode?: boolean;
+  setIsEditMode?: (value: boolean) => void;
 }
