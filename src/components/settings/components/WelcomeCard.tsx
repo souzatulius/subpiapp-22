@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, LayoutDashboard } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import StatCard from './StatCard';
+import { useNavigate } from 'react-router-dom';
 
 interface WelcomeCardProps {
   userCount?: number;
@@ -11,11 +12,16 @@ interface WelcomeCardProps {
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
   
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     // You could implement searching functionality here
     console.log("Searching for:", query);
+  };
+
+  const handleManageDashboards = () => {
+    navigate('/settings/dashboard-management');
   };
   
   return (
@@ -31,11 +37,18 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 })
               Gerencie todas as configurações do sistema em um só lugar.
             </p>
           </div>
-          <div className="flex space-x-4 w-full md:w-64">
+          <div className="flex space-x-4 w-full md:w-auto">
             <StatCard 
               showSearch={true}
               onSearch={handleSearch}
               searchPlaceholder="Buscar configurações..."
+            />
+            <StatCard
+              showButton={true}
+              buttonText="Gerenciar Dashboards"
+              buttonIcon={<LayoutDashboard className="h-4 w-4" />}
+              buttonVariant="secondary"
+              onButtonClick={handleManageDashboards}
             />
           </div>
         </div>

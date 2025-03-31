@@ -1,155 +1,121 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// Define the context type
 interface DemoDataContextType {
   sgzData: any[] | null;
   painelData: any[] | null;
   isLoading: boolean;
   hasData: boolean;
+  refreshData: () => Promise<void>;
 }
 
+// Create the context with default values
 const DemoDataContext = createContext<DemoDataContextType>({
   sgzData: null,
   painelData: null,
   isLoading: true,
-  hasData: false
+  hasData: false,
+  refreshData: async () => {}
 });
 
+// Custom hook to use the context
 export const useDemoData = () => useContext(DemoDataContext);
 
-export const DemoDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Provider component
+interface DemoDataProviderProps {
+  children: ReactNode;
+}
+
+const DemoDataProvider: React.FC<DemoDataProviderProps> = ({ children }) => {
   const [sgzData, setSgzData] = useState<any[] | null>(null);
   const [painelData, setPainelData] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  useEffect(() => {
-    // Simulando um carregamento
-    const loadDemoData = () => {
-      setIsLoading(true);
+  // Function to load demo data
+  const loadDemoData = async () => {
+    setIsLoading(true);
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Criar dados fictícios para SGZ
-      const mockSgzData = generateSgzMockData();
-      setSgzData(mockSgzData);
+      // Generate demo SGZ data
+      const demoSgzData = generateDemoSgzData();
+      setSgzData(demoSgzData);
       
-      // Criar dados fictícios para o Painel
-      const mockPainelData = generatePainelMockData();
-      setPainelData(mockPainelData);
-      
+      // Generate demo Painel data
+      const demoPainelData = generateDemoPainelData();
+      setPainelData(demoPainelData);
+    } catch (error) {
+      console.error("Error loading demo data:", error);
+    } finally {
       setIsLoading(false);
-    };
-    
-    // Carrega os dados após um pequeno delay para simular API
-    const timer = setTimeout(() => {
-      loadDemoData();
-    }, 800);
-    
-    return () => clearTimeout(timer);
+    }
+  };
+
+  // Function to refresh data (reload the demo data)
+  const refreshData = async () => {
+    await loadDemoData();
+  };
+  
+  // Load demo data on mount
+  useEffect(() => {
+    loadDemoData();
   }, []);
   
-  const hasData = Boolean(sgzData && sgzData.length > 0);
-  
   return (
-    <DemoDataContext.Provider value={{ sgzData, painelData, isLoading, hasData }}>
+    <DemoDataContext.Provider value={{ 
+      sgzData, 
+      painelData, 
+      isLoading, 
+      hasData: Boolean(sgzData?.length || painelData?.length),
+      refreshData
+    }}>
       {children}
     </DemoDataContext.Provider>
   );
 };
 
-// Funções para gerar dados fictícios
-function generateSgzMockData() {
-  const distritos = ['Pinheiros', 'Alto de Pinheiros', 'Itaim Bibi', 'Jardim Paulista'];
-  const statusOptions = ['Fechado', 'Pendente', 'Cancelado', 'Em andamento'];
-  const tiposServico = [
-    'Tapa-buraco', 'Poda de árvore', 'Limpeza de bueiro', 
-    'Reparo de calçada', 'Remoção de entulho', 'Sinalização viária',
-    'Reparo de iluminação', 'Manutenção de praça'
-  ];
-  const departamentos = ['STLP', 'STM', 'STPO'];
+// Helper functions to generate demo data
+function generateDemoSgzData() {
+  // Generate sample SGZ data for demonstration
+  const distritos = ['Butantã', 'Pinheiros', 'Lapa', 'Vila Mariana', 'Mooca'];
+  const tiposServico = ['Tapa-buraco', 'Poda de árvore', 'Limpeza de bueiro', 'Reparo de calçada', 'Sinalização'];
+  const status = ['Concluído', 'Em andamento', 'Pendente', 'Cancelado'];
+  const empresas = ['Empresa A', 'Empresa B', 'Empresa C'];
   
-  const mockData = [];
-  
-  // Gerar 150 registros de exemplo
-  for (let i = 0; i < 150; i++) {
-    const distrito = distritos[Math.floor(Math.random() * distritos.length)];
-    const status = statusOptions[Math.floor(Math.random() * statusOptions.length)];
-    const tipoServico = tiposServico[Math.floor(Math.random() * tiposServico.length)];
-    const departamento = departamentos[Math.floor(Math.random() * departamentos.length)];
-    
-    // Data de criação aleatória nos últimos 30 dias
-    const dataBase = new Date();
-    dataBase.setDate(dataBase.getDate() - Math.floor(Math.random() * 30));
-    
-    // Entre 0 e 15 dias para resolver
-    const diasResolucao = Math.floor(Math.random() * 16);
-    
-    const ordemServico = {
-      id: `OS-${100000 + i}`,
-      sgz_distrito: distrito,
-      sgz_status: status,
-      sgz_tipo_servico: tipoServico,
-      sgz_departamento_tecnico: departamento,
-      sgz_empresa: status === 'Cancelado' ? 'EXTERNA' : 'SUBPREFEITURA',
-      sgz_criado_em: dataBase.toISOString(),
-      sgz_modificado_em: new Date(dataBase.getTime() + diasResolucao * 24 * 60 * 60 * 1000).toISOString(),
-      sgz_dias_ate_status_atual: diasResolucao,
-      ordem_servico: `OS-${100000 + i}`,
-      sgz_bairro: `Bairro ${distrito}`,
-      planilha_referencia: 'demo-data'
-    };
-    
-    mockData.push(ordemServico);
-  }
-  
-  return mockData;
+  return Array.from({ length: 100 }, (_, i) => ({
+    id: `demo-sgz-${i}`,
+    sgz_distrito: distritos[Math.floor(Math.random() * distritos.length)],
+    sgz_bairro: `Bairro ${Math.floor(Math.random() * 15) + 1}`,
+    sgz_tipo_servico: tiposServico[Math.floor(Math.random() * tiposServico.length)],
+    sgz_status: status[Math.floor(Math.random() * status.length)],
+    sgz_empresa: empresas[Math.floor(Math.random() * empresas.length)],
+    sgz_criado_em: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
+    sgz_modificado_em: new Date(Date.now() - Math.floor(Math.random() * 15) * 24 * 60 * 60 * 1000),
+    sgz_dias_ate_status_atual: Math.floor(Math.random() * 30),
+    ordem_servico: `OS-${100000 + i}`
+  }));
 }
 
-function generatePainelMockData() {
-  const mockData = [];
+function generateDemoPainelData() {
+  // Generate sample Painel data for demonstration
+  const distritos = ['Butantã', 'Pinheiros', 'Lapa', 'Vila Mariana', 'Mooca'];
+  const tiposServico = ['Tapa-buraco', 'Poda de árvore', 'Limpeza de bueiro', 'Reparo de calçada', 'Sinalização'];
+  const status = ['Concluído', 'Em andamento', 'Pendente', 'Cancelado'];
+  const departamentos = ['SPUA', 'SPO', 'STLP', 'STSP'];
   
-  // Gerar 70 registros para o painel
-  for (let i = 0; i < 70; i++) {
-    // Usar alguns dos mesmos IDs do SGZ para permitir comparação
-    const osId = `OS-${100000 + i}`;
-    
-    const dataAbertura = new Date();
-    dataAbertura.setDate(dataAbertura.getDate() - Math.floor(Math.random() * 30));
-    
-    const temFechamento = Math.random() > 0.3; // 70% têm data de fechamento
-    let dataFechamento = null;
-    if (temFechamento) {
-      dataFechamento = new Date(dataAbertura);
-      dataFechamento.setDate(dataFechamento.getDate() + Math.floor(Math.random() * 10));
-    }
-    
-    const distritos = ['Pinheiros', 'Alto de Pinheiros', 'Itaim Bibi', 'Jardim Paulista'];
-    const distrito = distritos[Math.floor(Math.random() * distritos.length)];
-    
-    const responsavelOptions = ['SUBPREFEITURA', 'SABESP', 'ENEL', 'CET', 'COMGÁS'];
-    const responsavel = responsavelOptions[Math.floor(Math.random() * responsavelOptions.length)];
-    
-    const tiposServico = [
-      'Tapa-buraco', 'Poda de árvore', 'Limpeza de bueiro', 'Reparo de calçada'
-    ];
-    const tipoServico = tiposServico[Math.floor(Math.random() * tiposServico.length)];
-    
-    const status = temFechamento ? 'Fechado' : (Math.random() > 0.5 ? 'Pendente' : 'Em andamento');
-    
-    const painelItem = {
-      id: `PAINEL-${i}`,
-      id_os: osId,
-      data_abertura: dataAbertura.toISOString(),
-      data_fechamento: dataFechamento ? dataFechamento.toISOString() : null,
-      status: status,
-      distrito: distrito,
-      responsavel_real: responsavel,
-      tipo_servico: tipoServico,
-      departamento: 'ZELADORIA'
-    };
-    
-    mockData.push(painelItem);
-  }
-  
-  return mockData;
+  return Array.from({ length: 80 }, (_, i) => ({
+    id: `demo-painel-${i}`,
+    id_os: `OS-${100000 + i}`,
+    distrito: distritos[Math.floor(Math.random() * distritos.length)],
+    tipo_servico: tiposServico[Math.floor(Math.random() * tiposServico.length)],
+    status: status[Math.floor(Math.random() * status.length)],
+    departamento: departamentos[Math.floor(Math.random() * departamentos.length)],
+    data_abertura: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
+    data_fechamento: new Date(Date.now() - Math.floor(Math.random() * 15) * 24 * 60 * 60 * 1000),
+    responsavel_real: `Responsável ${Math.floor(Math.random() * 10) + 1}`
+  }));
 }
 
 export default DemoDataProvider;
