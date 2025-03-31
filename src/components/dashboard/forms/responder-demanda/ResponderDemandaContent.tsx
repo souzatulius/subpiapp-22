@@ -69,7 +69,7 @@ const ResponderDemandaContent: React.FC = () => {
   };
 
   return (
-    <div className="animate-fade-in container mx-auto px-4">
+    <div className="animate-fade-in w-full">
       {/* Mobile search bar - only shown when search is opened */}
       {isMobile && isSearchOpen && (
         <div className="mb-4 animate-fadeInDown">
@@ -84,7 +84,7 @@ const ResponderDemandaContent: React.FC = () => {
       )}
 
       {/* Desktop filter bar or Mobile filter with search icon */}
-      <div className="mb-6">
+      <div className="mb-4">
         {isMobile ? (
           <DemandasFilter 
             searchTerm={searchTerm} 
@@ -120,7 +120,7 @@ const ResponderDemandaContent: React.FC = () => {
 
       {/* Content area - dynamically showing either list or details */}
       <Card className="border border-gray-200 shadow-sm border-transparent bg-transparent rounded-none">
-        <CardContent className="p-6 px-0 border border-transparent border-0 bg-transparent py-0">
+        <CardContent className="p-0">
           {selectedDemanda ? (
             <RespostaForm 
               selectedDemanda={selectedDemanda} 
