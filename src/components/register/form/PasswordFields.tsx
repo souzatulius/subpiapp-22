@@ -57,7 +57,11 @@ const PasswordFields: React.FC<PasswordFieldsProps> = ({
           </button>
         </div>
         
-        <PasswordRequirements requirements={requirements} visible={showRequirements && password.length > 0} />
+        <PasswordRequirements 
+          password={password}
+          requirements={requirements} 
+          visible={showRequirements && password.length > 0} 
+        />
         
         {errors.password && !password && <p className="mt-1 text-sm text-[#f57b35]">Senha é obrigatória</p>}
       </div>

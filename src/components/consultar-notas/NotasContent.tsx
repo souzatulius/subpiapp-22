@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NotasFilter from './NotasFilter';
 import NotasTable from './NotasTable';
 import NotasCards from './NotasCards';
@@ -7,10 +7,11 @@ import { useNotasData } from '@/hooks/consultar-notas/useNotasData';
 import { useExportPDF } from '@/hooks/consultar-notas/useExportPDF';
 import { Button } from '@/components/ui/button';
 import { List, Grid } from 'lucide-react';
-import { NotaOficial } from '@/hooks/consultar-notas/types';
+import { NotaOficial } from '@/types/nota';
 
 const NotasContent: React.FC = () => {
   const {
+    loading,
     notas,
     isLoading,
     searchQuery,
@@ -43,6 +44,11 @@ const NotasContent: React.FC = () => {
   const handleRejectNota = async (notaId: string): Promise<void> => {
     await updateNotaStatus(notaId, 'rejeitado');
   };
+
+  // For debug purposes, log the filtered notes
+  useEffect(() => {
+    console.log('Filtered notas:', filteredNotas);
+  }, [filteredNotas]);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -96,10 +102,10 @@ const NotasContent: React.FC = () => {
       </div>
         
       {/* Results container */}
-      <div className="bg-white rounded-xl shadow p-6">
+      <div className="bg-white rounded-xl shadow p-6" id="notas-table">
         {viewMode === 'table' ? (
           <NotasTable
-            notas={filteredNotas as any}
+            notas={filteredNotas as NotaOficial[]}
             loading={isLoading}
             formatDate={formatDate}
             onDeleteNota={deleteNota}
@@ -110,7 +116,7 @@ const NotasContent: React.FC = () => {
           />
         ) : (
           <NotasCards 
-            notas={filteredNotas as any}
+            notas={filteredNotas as NotaOficial[]}
             loading={isLoading}
             formatDate={formatDate}
             onDeleteNota={deleteNota}

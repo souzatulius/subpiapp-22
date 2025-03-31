@@ -1,11 +1,21 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { UseNotasDataReturn } from '@/types/nota';
 
-export const useNotasData = () => {
+export const useNotasData = (): UseNotasDataReturn => {
   const [loading, setLoading] = useState(true);
   const [notas, setNotas] = useState<any[]>([]);
+  const [filteredNotas, setFilteredNotas] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [areaFilter, setAreaFilter] = useState('all');
+  const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
+  const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true); // Default to true for now
   
   const fetchNotas = useCallback(async () => {
     try {
@@ -21,6 +31,7 @@ export const useNotasData = () => {
       }
       
       setNotas(data || []);
+      setFilteredNotas(data || []);
       return data;
     } catch (error: any) {
       console.error('Error fetching notas:', error);
@@ -34,6 +45,65 @@ export const useNotasData = () => {
       setLoading(false);
     }
   }, []);
+
+  // Apply filters whenever filter states change
+  useEffect(() => {
+    if (!notas.length) return;
+
+    let filtered = [...notas];
+
+    // Apply search query filter
+    if (searchQuery) {
+      filtered = filtered.filter(nota => 
+        nota.titulo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        nota.texto?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(nota => nota.status === statusFilter);
+    }
+
+    // Apply area filter
+    if (areaFilter !== 'all') {
+      filtered = filtered.filter(nota => nota.supervisao_tecnica_id === areaFilter);
+    }
+
+    // Apply date filters
+    if (dataInicioFilter) {
+      const startDate = new Date(dataInicioFilter);
+      filtered = filtered.filter(nota => {
+        const notaDate = new Date(nota.criado_em || nota.created_at);
+        return notaDate >= startDate;
+      });
+    }
+
+    if (dataFimFilter) {
+      const endDate = new Date(dataFimFilter);
+      endDate.setHours(23, 59, 59, 999); // End of day
+      filtered = filtered.filter(nota => {
+        const notaDate = new Date(nota.criado_em || nota.created_at);
+        return notaDate <= endDate;
+      });
+    }
+
+    setFilteredNotas(filtered);
+  }, [notas, searchQuery, statusFilter, areaFilter, dataInicioFilter, dataFimFilter]);
+
+  // Format date helper
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
   
   const viewNotaDetails = async (notaId: string): Promise<void> => {
     try {
@@ -63,6 +133,7 @@ export const useNotasData = () => {
   // Wrapper function to make return type Promise<void>
   const handleDeleteNota = async (notaId: string): Promise<void> => {
     try {
+      setDeleteLoading(true);
       const result = await deleteNota(notaId);
       if (!result) {
         throw new Error('Falha ao deletar nota');
@@ -74,6 +145,8 @@ export const useNotasData = () => {
         description: 'Não foi possível deletar a nota',
         variant: 'destructive',
       });
+    } finally {
+      setDeleteLoading(false);
     }
   };
   
@@ -90,6 +163,7 @@ export const useNotasData = () => {
       
       // Update the local state to remove the deleted nota
       setNotas(notas.filter(nota => nota.id !== notaId));
+      setFilteredNotas(filteredNotas.filter(nota => nota.id !== notaId));
       
       toast({
         title: 'Sucesso',
@@ -112,6 +186,7 @@ export const useNotasData = () => {
   // Wrapper function to make return type Promise<void>
   const handleUpdateNotaStatus = async (notaId: string, newStatus: string): Promise<void> => {
     try {
+      setStatusLoading(true);
       const result = await updateNotaStatus(notaId, newStatus);
       if (!result) {
         throw new Error('Falha ao atualizar status da nota');
@@ -123,6 +198,8 @@ export const useNotasData = () => {
         description: 'Não foi possível atualizar o status da nota',
         variant: 'destructive',
       });
+    } finally {
+      setStatusLoading(false);
     }
   };
   
@@ -138,12 +215,24 @@ export const useNotasData = () => {
       }
       
       // Update the local state to reflect the status change
-      setNotas(notas.map(nota => {
+      const updatedNotas = notas.map(nota => {
         if (nota.id === notaId) {
           return { ...nota, status: newStatus };
         }
         return nota;
-      }));
+      });
+      
+      setNotas(updatedNotas);
+      
+      // Apply the same update to filtered notas
+      const updatedFilteredNotas = filteredNotas.map(nota => {
+        if (nota.id === notaId) {
+          return { ...nota, status: newStatus };
+        }
+        return nota;
+      });
+      
+      setFilteredNotas(updatedFilteredNotas);
       
       toast({
         title: 'Sucesso',
@@ -163,12 +252,33 @@ export const useNotasData = () => {
     }
   };
   
+  // On component mount, fetch notas
+  useEffect(() => {
+    fetchNotas();
+  }, [fetchNotas]);
+  
   return {
     loading,
     notas,
     fetchNotas,
     viewNotaDetails,
-    deleteNota: handleDeleteNota, // Use the wrapper function
-    updateNotaStatus: handleUpdateNotaStatus, // Use the wrapper function
+    deleteNota: handleDeleteNota,
+    updateNotaStatus: handleUpdateNotaStatus,
+    isLoading: loading,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    formatDate,
+    filteredNotas,
+    areaFilter,
+    setAreaFilter,
+    dataInicioFilter,
+    setDataInicioFilter,
+    dataFimFilter,
+    setDataFimFilter,
+    deleteLoading,
+    isAdmin,
+    statusLoading
   };
 };

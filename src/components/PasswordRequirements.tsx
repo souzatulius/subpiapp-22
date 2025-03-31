@@ -14,7 +14,7 @@ interface PasswordRequirementsProps {
 
 const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({ 
   password, 
-  requirements = { min: false, uppercase: false, number: false },
+  requirements,
   visible = true 
 }) => {
   if (!visible) return null;

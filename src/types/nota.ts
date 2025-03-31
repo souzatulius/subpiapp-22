@@ -61,8 +61,12 @@ export interface NotaEdicao {
 }
 
 export interface UseNotasDataReturn {
+  loading: boolean;
   notas: NotaOficial[] | null;
-  filteredNotas: NotaOficial[];
+  fetchNotas: () => Promise<any>;
+  viewNotaDetails: (notaId: string) => Promise<void>;
+  deleteNota: (notaId: string) => Promise<void>;
+  updateNotaStatus: (notaId: string, newStatus: string) => Promise<void>;
   isLoading: boolean;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -75,10 +79,8 @@ export interface UseNotasDataReturn {
   dataFimFilter: Date | undefined;
   setDataFimFilter: (date: Date | undefined) => void;
   formatDate: (dateStr: string) => string;
-  refetch: () => Promise<any>;
-  deleteNota: (id: string) => Promise<void>;
+  filteredNotas: NotaOficial[];
   deleteLoading: boolean;
   isAdmin: boolean;
-  updateNotaStatus: (notaId: string, newStatus: string) => Promise<boolean>;
   statusLoading: boolean;
 }
