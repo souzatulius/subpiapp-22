@@ -61,16 +61,10 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           return;
         }
         
-        // Add a default "all" option
-        const allDepartments = [
-          { id: 'default', descricao: 'Padrão (Todos)', sigla: 'ALL' },
-          ...data
-        ];
+        setDepartments(data || []);
         
-        setDepartments(allDepartments);
-        
-        if (!selectedDepartment && allDepartments.length > 0) {
-          setSelectedDepartment(allDepartments[0].id);
+        if (!selectedDepartment && data && data.length > 0) {
+          setSelectedDepartment(data[0].id);
         }
       } catch (error) {
         console.error('Failed to fetch departments:', error);
@@ -113,21 +107,19 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           {/* Dashboard Type Selection */}
           <div className="space-y-2">
             <Label>Tipo de Dashboard</Label>
-            <div className="flex space-x-2">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <Button 
                 variant={selectedViewType === 'dashboard' ? 'default' : 'outline'}
                 onClick={() => setSelectedViewType('dashboard')}
-                className="flex-1"
+                className="w-full"
               >
-                <LayoutDashboard className="h-4 w-4 mr-2" />
                 Padrão
               </Button>
               <Button 
                 variant={selectedViewType === 'communication' ? 'default' : 'outline'}
                 onClick={() => setSelectedViewType('communication')}
-                className="flex-1"
+                className="w-full"
               >
-                <MessageSquareReply className="h-4 w-4 mr-2" />
                 Comunicação
               </Button>
             </div>
