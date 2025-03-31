@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { UseFormRegisterReturn } from 'react-hook-form';
 
 interface EmailSuffixProps {
   id?: string;
@@ -9,6 +10,7 @@ interface EmailSuffixProps {
   error?: boolean;
   placeholder?: string;
   className?: string;
+  registerField?: UseFormRegisterReturn;
 }
 
 const EmailSuffix: React.FC<EmailSuffixProps> = ({
@@ -18,7 +20,8 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   suffix,
   error = false,
   placeholder = '',
-  className = ''
+  className = '',
+  registerField
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -42,7 +45,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   };
 
   const containerBorderColor = error 
-    ? 'border-subpi-orange' 
+    ? 'border-red-500' 
     : isFocused
       ? 'ring-2 ring-[#003570] border-transparent'
       : isHovered
@@ -70,10 +73,11 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
         value={value} 
         onChange={handleChange} 
         onFocus={() => setIsFocused(true)} 
-        placeholder="usuario" 
+        placeholder={placeholder || "usuario"} 
         className="px-4 py-2 w-full border-0 focus:outline-none transition-all duration-200"
         onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)} 
+        onMouseLeave={() => setIsHovered(false)}
+        {...registerField} 
       />
       <div 
         className={`bg-gray-100 w-full px-4 py-2 border-0 border-l ${dividerColor} transition-all duration-200 pr-1`}

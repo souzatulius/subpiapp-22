@@ -1,66 +1,174 @@
 
-import { useState } from 'react';
-import { UseNotasDataReturn, NotaOficial } from '@/types/nota';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { useNotasQuery } from './useNotasQuery';
-import { useNotasActions } from './useNotasActions';
 
-export const useNotasData = (): UseNotasDataReturn => {
-  const {
-    notas,
-    filteredNotas,
-    isLoading,
-    searchQuery,
-    setSearchQuery,
-    statusFilter,
-    setStatusFilter,
-    areaFilter,
-    setAreaFilter,
-    dataInicioFilter,
-    setDataInicioFilter,
-    dataFimFilter,
-    setDataFimFilter,
-    formatDate,
-    refetch,
-    isAdmin
-  } = useNotasQuery();
+export const useNotasData = () => {
+  const [loading, setLoading] = useState(true);
+  const [notas, setNotas] = useState<any[]>([]);
   
-  // Get the actions from useNotasActions
-  const { deleteNota, deleteLoading, updateNotaStatus, statusLoading } = useNotasActions(refetch);
+  const fetchNotas = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('notas_oficiais')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        throw error;
+      }
+      
+      setNotas(data || []);
+      return data;
+    } catch (error: any) {
+      console.error('Error fetching notas:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as notas oficiais',
+        variant: 'destructive',
+      });
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   
-  // Create a wrapper function for updateNotaStatus to match the expected type signature (Promise<void>)
-  const handleUpdateNotaStatus = async (id: string, newStatus: string): Promise<void> => {
-    await updateNotaStatus(id, newStatus);
-    // This function returns void, which matches the expected return type
+  const viewNotaDetails = async (notaId: string): Promise<void> => {
+    try {
+      const { data, error } = await supabase
+        .from('notas_oficiais')
+        .select('*')
+        .eq('id', notaId)
+        .single();
+        
+      if (error) {
+        throw error;
+      }
+      
+      // You would typically set this data to a state or show it in a modal
+      console.log('Nota details:', data);
+      
+    } catch (error: any) {
+      console.error('Error fetching nota details:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os detalhes da nota',
+        variant: 'destructive',
+      });
+    }
   };
-
-  // Create a wrapper function for deleteNota to match the expected type signature (Promise<void>)
-  const handleDeleteNota = async (id: string): Promise<void> => {
-    await deleteNota(id);
-    // This function returns void, which matches the expected return type
+  
+  // Wrapper function to make return type Promise<void>
+  const handleDeleteNota = async (notaId: string): Promise<void> => {
+    try {
+      const result = await deleteNota(notaId);
+      if (!result) {
+        throw new Error('Falha ao deletar nota');
+      }
+    } catch (error: any) {
+      console.error('Error deleting nota:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível deletar a nota',
+        variant: 'destructive',
+      });
+    }
   };
-
+  
+  const deleteNota = async (notaId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .delete()
+        .eq('id', notaId);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update the local state to remove the deleted nota
+      setNotas(notas.filter(nota => nota.id !== notaId));
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Nota oficial deletada com sucesso',
+        variant: 'success',
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting nota:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível deletar a nota oficial',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+  
+  // Wrapper function to make return type Promise<void>
+  const handleUpdateNotaStatus = async (notaId: string, newStatus: string): Promise<void> => {
+    try {
+      const result = await updateNotaStatus(notaId, newStatus);
+      if (!result) {
+        throw new Error('Falha ao atualizar status da nota');
+      }
+    } catch (error: any) {
+      console.error('Error updating nota status:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status da nota',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const updateNotaStatus = async (notaId: string, newStatus: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .update({ status: newStatus })
+        .eq('id', notaId);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update the local state to reflect the status change
+      setNotas(notas.map(nota => {
+        if (nota.id === notaId) {
+          return { ...nota, status: newStatus };
+        }
+        return nota;
+      }));
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Status da nota oficial atualizado com sucesso',
+        variant: 'success',
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error updating nota status:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status da nota oficial',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+  
   return {
+    loading,
     notas,
-    filteredNotas,
-    isLoading,
-    searchQuery,
-    setSearchQuery,
-    statusFilter,
-    setStatusFilter,
-    areaFilter,
-    setAreaFilter,
-    dataInicioFilter,
-    setDataInicioFilter,
-    dataFimFilter,
-    setDataFimFilter,
-    formatDate,
-    refetch,
-    deleteNota: handleDeleteNota,
-    deleteLoading,
-    isAdmin,
-    updateNotaStatus: handleUpdateNotaStatus,
-    statusLoading
+    fetchNotas,
+    viewNotaDetails,
+    deleteNota: handleDeleteNota, // Use the wrapper function
+    updateNotaStatus: handleUpdateNotaStatus, // Use the wrapper function
   };
 };
