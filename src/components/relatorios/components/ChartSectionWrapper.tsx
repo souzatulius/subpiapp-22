@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { SortableContext } from '@dnd-kit/sortable';
 import { RelatorioItem } from '../hooks/useRelatorioItemsState';
 

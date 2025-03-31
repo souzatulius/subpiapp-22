@@ -38,8 +38,8 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   };
 
   return (
-    <div className={`h-full border border-orange-200 shadow-sm hover:shadow-md transition-all duration-300 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl ${className}`}>
-      <div className="pb-2 border-b border-orange-200 p-4">
+    <div className={`h-full border border-orange-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-xl ${className}`}>
+      <div className="pb-2 border-b border-orange-200 p-4 bg-gradient-to-r from-orange-50 to-white">
         <div className="flex items-center justify-between">
           <h3 className="text-lg text-orange-800">{title}</h3>
           {badge && (
@@ -55,9 +55,9 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
       </div>
       <div className="p-2">
         {isLoading ? (
-          <Skeleton className="h-[200px] w-full bg-orange-50" />
+          <Skeleton className="h-[250px] w-full bg-orange-50" />
         ) : (
-          <div className="h-[200px]">
+          <div className="h-[250px] overflow-auto">
             {children}
           </div>
         )}

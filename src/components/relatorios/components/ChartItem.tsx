@@ -95,7 +95,6 @@ const ChartItem: React.FC<ChartItemProps> = ({
             <RelatorioCard 
               title={title} 
               description={description}
-              className=""
               value={value}
               isLoading={isLoading}
               analysis={analysis}
