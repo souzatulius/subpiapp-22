@@ -44,8 +44,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             titulo, 
             status, 
             criado_em,
-            autor_id,
-            usuarios!autor_id (nome_completo)
+            autor:autor_id (nome_completo)
           `);
         
         // Apply filters based on role
@@ -61,13 +60,13 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
         }
         
         // Get count
-        const { data: countData, error: countError } = await query;
-        if (countError) {
-          console.error('Error fetching notas count:', countError);
+        const countResult = await query.count();
+        if (countResult.error) {
+          console.error('Error fetching notas count:', countResult.error);
           return;
         }
         
-        setTotalNotas(countData?.length || 0);
+        setTotalNotas(countResult.count || 0);
         
         // Then get limited data 
         const { data, error } = await query.limit(5);
@@ -77,14 +76,14 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
           return;
         }
         
-        // Transform the data to match the Nota interface
+        // Make sure we handle the response properly
         const formattedNotas: Nota[] = data.map((nota: any) => ({
           id: nota.id,
           titulo: nota.titulo,
           status: nota.status,
           criado_em: nota.criado_em,
           autor: {
-            nome_completo: nota.usuarios?.nome_completo || 'Desconhecido'
+            nome_completo: nota.autor?.nome_completo || 'Desconhecido'
           }
         }));
         
@@ -102,11 +101,11 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
   }, [coordenacaoId, isComunicacao]);
 
   const handleCardClick = () => {
-    navigate(`${baseUrl ? `/${baseUrl}` : ''}`);
+    navigate('/dashboard/comunicacao/consultar-notas');
   };
   
   const handleNotaClick = (id: string) => {
-    navigate(`${baseUrl ? `/${baseUrl}` : ''}/${id}`);
+    navigate(`/dashboard/comunicacao/consultar-notas/${id}`);
   };
   
   const formatDate = (dateString: string) => {

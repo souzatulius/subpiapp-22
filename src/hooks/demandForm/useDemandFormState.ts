@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -172,6 +173,25 @@ export const useDemandFormState = (
         ...prev,
         [name]: formattedValue
       }));
+    } else if (name === 'prazo_resposta' && value.includes(':')) {
+      // Handle time input for deadline field
+      const [datePart, oldTime] = formData.prazo_resposta?.split('T') || ['', ''];
+      const newTime = value;
+      
+      // If we have a valid date part, update only the time portion
+      if (datePart) {
+        const newValue = `${datePart}T${newTime}:00`;
+        setFormData(prev => ({
+          ...prev,
+          [name]: newValue
+        }));
+      } else {
+        // If no date part yet, just store the time temporarily
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,

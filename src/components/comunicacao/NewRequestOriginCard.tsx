@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Plus, MessageSquare, FileText, BadgePlus } from 'lucide-react';
+import { Loader2, Plus, BadgePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
 
@@ -57,10 +57,10 @@ const NewRequestOriginCard: React.FC<NewRequestOriginCardProps> = ({ baseUrl = '
     // Convert string to Lucide icon format (first letter uppercase, rest lowercase)
     const formattedIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1).toLowerCase();
     
-    // Check if icon exists in Lucide library using type assertion
+    // Check if icon exists in Lucide library
     const LucideIcon = (LucideIcons as any)[formattedIconName];
     
-    if (LucideIcon) {
+    if (LucideIcon && typeof LucideIcon === 'function') {
       return <LucideIcon className="h-5 w-5" />;
     }
     

@@ -35,14 +35,14 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       description: 'Elabore notas oficiais',
       icon: <FileText className="h-4 w-4 text-orange-500" />,
       iconBg: 'bg-orange-50',
-      link: `/${baseUrl}/notas/criar`
+      link: `/${baseUrl}/criar-nota`
     },
     {
       title: 'Aprovar Notas',
       description: 'Revise e aprove notas oficiais',
       icon: <CheckCircle className="h-4 w-4 text-purple-500" />,
       iconBg: 'bg-purple-50',
-      link: `/${baseUrl}/notas/aprovar`
+      link: `/${baseUrl}/aprovar-nota`
     }
   ];
 
