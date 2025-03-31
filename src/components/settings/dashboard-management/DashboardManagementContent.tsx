@@ -15,7 +15,7 @@ import { toast } from '@/hooks/use-toast';
 
 const DashboardManagementContent: React.FC = () => {
   const {
-    defaultDashboards,
+    config,
     selectedDepartment,
     setSelectedDepartment,
     selectedViewType,

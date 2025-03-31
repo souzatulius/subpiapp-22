@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { CardColor, CardWidth, CardHeight, CardType, ActionCardItem } from '@/types/dashboard';
-import { useUserStore } from '@/store/useUserStore';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 // Simplified config to avoid excessive type instantiation
 type ConfigType = Record<string, ActionCardItem[]>;
@@ -12,7 +12,10 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
   const [config, setConfig] = useState<ConfigType>({});
   const [loading, setLoading] = useState(true);
   const [defaultConfig, setDefaultConfig] = useState<ActionCardItem[]>([]);
-  const { user } = useUserStore();
+  const [selectedDepartment, setSelectedDepartment] = useState<string>(departmentId || '');
+  const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
+  const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -27,9 +30,9 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
 
         // Get the default config for the department
         let { data: depConfig, error: depError } = await supabase
-          .from('dashboard_configs')
+          .from('department_dashboards')
           .select('*')
-          .eq('coordenacao_id', departmentId || user.coordenacao_id)
+          .eq('department', departmentId || user.coordenacao_id)
           .single();
 
         // If there's no config for this department
@@ -46,8 +49,8 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
         }
 
         // Parse the config
-        const parsedConfig = depConfig.config ? 
-          JSON.parse(depConfig.config) : 
+        const parsedConfig = depConfig.cards_config ? 
+          JSON.parse(depConfig.cards_config) : 
           generateDefaultCards(departmentId || user.coordenacao_id);
         
         setDefaultConfig(parsedConfig);
@@ -71,9 +74,68 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     }
   }, [user, departmentId]);
 
+  const saveDefaultDashboard = async () => {
+    try {
+      setIsSaving(true);
+      const departmentToUse = selectedDepartment || departmentId || (user ? user.coordenacao_id : null);
+      
+      if (!departmentToUse) {
+        console.error('No department ID provided for saving config');
+        return false;
+      }
+
+      const currentCards = config[departmentToUse] || defaultConfig;
+
+      // Check if config already exists
+      const { data: existingConfig } = await supabase
+        .from('department_dashboards')
+        .select('*')
+        .eq('department', departmentToUse)
+        .single();
+
+      if (existingConfig) {
+        // Update existing config
+        const { error } = await supabase
+          .from('department_dashboards')
+          .update({
+            cards_config: JSON.stringify(currentCards),
+            updated_at: new Date().toISOString()
+          })
+          .eq('department', departmentToUse);
+        
+        if (error) throw error;
+      } else {
+        // Insert new config
+        const { error } = await supabase
+          .from('department_dashboards')
+          .insert({
+            department: departmentToUse,
+            cards_config: JSON.stringify(currentCards),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        
+        if (error) throw error;
+      }
+
+      // Update local state
+      setConfig(prevConfig => ({
+        ...prevConfig,
+        [departmentToUse]: currentCards
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving dashboard config:', error);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const saveConfig = async (cards: ActionCardItem[], deptId?: string) => {
     try {
-      const departmentToUse = deptId || departmentId || (user ? user.coordenacao_id : null);
+      const departmentToUse = deptId || selectedDepartment || departmentId || (user ? user.coordenacao_id : null);
       
       if (!departmentToUse) {
         console.error('No department ID provided for saving config');
@@ -82,29 +144,29 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
 
       // Check if config already exists
       const { data: existingConfig } = await supabase
-        .from('dashboard_configs')
+        .from('department_dashboards')
         .select('*')
-        .eq('coordenacao_id', departmentToUse)
+        .eq('department', departmentToUse)
         .single();
 
       if (existingConfig) {
         // Update existing config
         const { error } = await supabase
-          .from('dashboard_configs')
+          .from('department_dashboards')
           .update({
-            config: JSON.stringify(cards),
+            cards_config: JSON.stringify(cards),
             updated_at: new Date().toISOString()
           })
-          .eq('coordenacao_id', departmentToUse);
+          .eq('department', departmentToUse);
         
         if (error) throw error;
       } else {
         // Insert new config
         const { error } = await supabase
-          .from('dashboard_configs')
+          .from('department_dashboards')
           .insert({
-            coordenacao_id: departmentToUse,
-            config: JSON.stringify(cards),
+            department: departmentToUse,
+            cards_config: JSON.stringify(cards),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
@@ -126,10 +188,17 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
   };
 
   return {
-    config: config[departmentId || (user ? user.coordenacao_id : '')] || defaultConfig,
+    config: config[selectedDepartment || departmentId || (user ? user.coordenacao_id : '')] || defaultConfig,
     defaultConfig,
     loading,
-    saveConfig
+    saveConfig,
+    selectedDepartment,
+    setSelectedDepartment,
+    selectedViewType,
+    setSelectedViewType,
+    isLoading: loading,
+    isSaving,
+    saveDefaultDashboard
   };
 };
 
@@ -148,7 +217,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
       width: '1' as CardWidth,
       height: '1' as CardHeight,
       isCustom: false,
-      type: 'default' as CardType,
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 3
     },
@@ -161,7 +230,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
       width: '1' as CardWidth,
       height: '1' as CardHeight,
       isCustom: false,
-      type: 'default' as CardType,
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 4
     }
@@ -179,7 +248,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
         width: '1' as CardWidth,
         height: '1' as CardHeight,
         isCustom: false,
-        type: 'default' as CardType,
+        type: 'standard' as CardType,
         displayMobile: true,
         mobileOrder: 1
       },
@@ -192,7 +261,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
         width: '1' as CardWidth,
         height: '1' as CardHeight,
         isCustom: false,
-        type: 'default' as CardType,
+        type: 'standard' as CardType,
         displayMobile: true,
         mobileOrder: 2
       }

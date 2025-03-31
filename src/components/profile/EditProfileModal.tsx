@@ -18,7 +18,7 @@ import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { ProfileData } from './types';
 
 interface EditProfileModalProps {
@@ -168,7 +168,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <DatePicker
               date={selectedDate}
               setDate={setSelectedDate}
-              locale={ptBR}
               className="w-full"
             />
           </div>
