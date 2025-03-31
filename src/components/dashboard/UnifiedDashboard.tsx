@@ -38,12 +38,12 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Use explicit typing for filtered cards
-  const visibleCards = useMemo<ActionCardItem[]>(() => {
+  // Use non-generic filter to avoid excessive type instantiation
+  const visibleCards = useMemo(() => {
     return cards.filter(card => !card.hidden);
   }, [cards]);
   
-  const hiddenCards = useMemo<ActionCardItem[]>(() => {
+  const hiddenCards = useMemo(() => {
     return cards.filter(card => card.hidden === true);
   }, [cards]);
   
@@ -121,6 +121,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     setLoading(true);
     
     try {
+      console.log("Carregando dashboard para usuário:", userId, "tipo:", dashboardType);
+      
       const { data, error } = await supabase
         .from('user_dashboard')
         .select('cards_config')
@@ -128,20 +130,28 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         .eq('dashboard_type', dashboardType)
         .single();
       
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (error) {
+        if (error.code !== 'PGRST116') { // PGRST116 is "No rows returned" from postgREST
+          console.error("Erro ao carregar dashboard:", error);
+          throw error;
+        } else {
+          console.log("Nenhum dashboard encontrado, usando cards padrão");
+        }
       }
       
       if (data && data.cards_config) {
         try {
           const parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
+          console.log("Cards carregados do banco:", parsedCards.length);
           setCards(parsedCards);
         } catch (parseError) {
           console.error("Error parsing cards_config:", parseError);
+          console.log("Usando cards fallback devido a erro de parse");
           setCards(fallbackCards);
         }
       } 
       else {
+        console.log("Criando configuração inicial com fallback cards");
         // Create a new array of defaultDashboardCards to avoid reference issues
         const defaultDashboardCards = fallbackCards.map(card => ({
           ...card,
@@ -162,6 +172,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
           }, {
             onConflict: 'user_id,dashboard_type'
           });
+          
+        console.log("Configuração inicial salva no banco");
       }
     } catch (error) {
       console.error("Erro ao carregar dashboard:", error);

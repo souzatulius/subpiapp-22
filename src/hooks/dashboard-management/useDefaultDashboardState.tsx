@@ -5,7 +5,7 @@ import { useDefaultDashboardConfig } from './useDefaultDashboardConfig';
 import { ActionCardItem } from '@/types/dashboard';
 import { v4 as uuidv4 } from 'uuid';
 import { useCardActions } from '../dashboard/useCardActions';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 
 export const useDefaultDashboardState = (departmentId: string) => {
@@ -27,6 +27,8 @@ export const useDefaultDashboardState = (departmentId: string) => {
   // Initialize cards from the configuration
   useEffect(() => {
     if (!configLoading && config) {
+      console.log("Configuração carregada para departamento", departmentId, ":", config);
+      
       // Add version field if it doesn't exist
       const configWithVersion = Array.isArray(config) ? 
         config.map(card => ({
@@ -77,6 +79,8 @@ export const useDefaultDashboardState = (departmentId: string) => {
   // Save the cards to the database
   const saveCards = async () => {
     try {
+      console.log("Salvando cards para departamento", departmentId, ":", cards);
+      
       // Ensure all cards have the version field
       const cardsWithVersion = cards.map(card => ({
         ...card,
@@ -129,6 +133,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
 
   // Function to reorder cards
   const reorderCards = (reorderedCards: ActionCardItem[]) => {
+    console.log("Reordenando cards:", reorderedCards);
     setCards(reorderedCards);
   };
 

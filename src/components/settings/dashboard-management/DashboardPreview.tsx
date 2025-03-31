@@ -6,6 +6,7 @@ import CardCustomizationModal from '@/components/dashboard/card-customization/Ca
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/components/ui/use-toast';
 import WelcomeCard from '@/components/shared/WelcomeCard';
+import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -34,6 +35,13 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   // Separar Welcome Cards dos cards normais
   const welcomeCards = cards.filter(card => card.type === 'welcome_card');
   const standardCards = cards.filter(card => card.type !== 'welcome_card');
+  
+  useEffect(() => {
+    // Log the cards at mount to debug
+    console.log("Dashboard Preview Cards:", cards);
+    console.log("Welcome Cards:", welcomeCards);
+    console.log("Standard Cards:", standardCards);
+  }, [cards]);
 
   const handleCardsChange = (newCards: ActionCardItem[]) => {
     if (reorderCards) {
@@ -44,6 +52,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   };
 
   const handleEditCardClick = (card: ActionCardItem) => {
+    console.log("Editando card:", card);
     setEditingCard(card);
     setIsCustomizationModalOpen(true);
   };
@@ -53,40 +62,49 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     setIsCustomizationModalOpen(true);
   };
 
-  const handleSaveCard = (cardData: any) => {
-    if (editingCard) {
-      const updatedCards = cards.map(card => 
-        card.id === editingCard.id ? { ...card, ...cardData } : card
-      );
-      setCards(updatedCards);
+  const handleSaveCard = (cardData: ActionCardItem) => {
+    try {
+      console.log("Salvando card:", cardData);
+      
+      if (editingCard) {
+        console.log("Atualizando card existente:", editingCard.id);
+        const updatedCards = cards.map(card => 
+          card.id === editingCard.id ? { ...card, ...cardData } : card
+        );
+        console.log("Cards após atualização:", updatedCards);
+        setCards(updatedCards);
+      } else {
+        // Criação de um novo card
+        const newCard: ActionCardItem = {
+          ...cardData,
+          id: `card-${Date.now()}`, // Garantir ID único
+          isCustom: true
+        };
+        console.log("Novo card criado:", newCard);
+        setCards([...cards, newCard]);
+      }
+      
       // Salvar imediatamente para visualizar as mudanças
-      saveCards();
-    } else {
-      // Criação de um novo card
-      const newCard: ActionCardItem = {
-        ...cardData,
-        id: `card-${Date.now()}`, // Garantir ID único
-        isCustom: true
-      };
-      setCards([...cards, newCard]);
-      // Salvar imediatamente para visualizar as mudanças
-      saveCards();
+      if (saveCards) {
+        console.log("Salvando cards no banco...");
+        saveCards();
+      }
+      
+      setIsCustomizationModalOpen(false);
+      
+      toast({
+        title: editingCard ? "Card atualizado" : "Card adicionado",
+        description: editingCard ? "O card foi atualizado com sucesso." : "O card foi adicionado ao dashboard.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error("Erro ao salvar card:", error);
+      toast({
+        title: "Erro ao salvar card",
+        description: "Ocorreu um erro ao tentar salvar o card. Tente novamente.",
+        variant: "destructive"
+      });
     }
-    setIsCustomizationModalOpen(false);
-    
-    toast({
-      title: editingCard ? "Card atualizado" : "Card adicionado",
-      description: editingCard ? "O card foi atualizado com sucesso." : "O card foi adicionado ao dashboard.",
-      variant: "success"
-    });
-  };
-
-  // Helper para obter componente de ícone
-  const getIconComponentFromId = (iconId: string) => {
-    // Simple fallback when dynamic imports are not easy
-    return function DefaultIcon(props: any) {
-      return <span {...props}>📋</span>;
-    };
   };
 
   return (
@@ -106,15 +124,27 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           )}
           
           {/* Welcome Cards */}
-          {welcomeCards.map(card => (
-            <WelcomeCard
-              key={card.id}
-              title={card.title}
-              description={card.customProperties?.description || ''}
-              color={card.customProperties?.gradient || 'bg-gradient-to-r from-blue-600 to-blue-800'}
-              icon={React.createElement(getIconComponentFromId(card.iconId), { className: "h-6 w-6" })}
-              showButton={false}
-            />
+          {welcomeCards.length > 0 && welcomeCards.map(card => (
+            <div key={card.id} className="mb-4 relative group">
+              <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 bg-white/80 rounded-full p-1">
+                <button 
+                  onClick={() => handleEditCardClick(card)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+              </div>
+              <WelcomeCard
+                title={card.title}
+                description={card.customProperties?.description || ''}
+                color={card.customProperties?.gradient || 'bg-gradient-to-r from-blue-600 to-blue-800'}
+                icon={React.createElement(getIconComponentFromId(card.iconId), { className: "h-6 w-6" })}
+                showButton={false}
+              />
+            </div>
           ))}
           
           {/* Regular Cards */}
