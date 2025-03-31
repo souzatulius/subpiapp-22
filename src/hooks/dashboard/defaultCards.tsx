@@ -1,38 +1,28 @@
+// hooks/dashboard/defaultCards.tsx
 import { ActionCardItem, CardColor } from '@/types/dashboard';
-import {
-  ClipboardList,
-  MessageSquareReply,
-  FileCheck,
-  BarChart2,
-  PlusCircle,
-  Search,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  FileText,
-  ListFilter
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
-// Retorna o componente (não JSX) com base no ID
+// Retorna o componente React correspondente ao iconId
 export const getIconComponentFromId = (iconId: string) => {
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    'clipboard-list': ClipboardList,
-    'message-square-reply': MessageSquareReply,
-    'file-check': FileCheck,
-    'bar-chart-2': BarChart2,
-    'plus-circle': PlusCircle,
-    'search': Search,
-    'clock': Clock,
-    'alert-triangle': AlertTriangle,
-    'check-circle': CheckCircle,
-    'file-text': FileText,
-    'list-filter': ListFilter
+  const iconMap: Record<string, keyof typeof LucideIcons> = {
+    'clipboard-list': 'ClipboardList',
+    'message-square-reply': 'MessageSquareReply',
+    'file-check': 'FileCheck',
+    'bar-chart-2': 'BarChart2',
+    'plus-circle': 'PlusCircle',
+    'search': 'Search',
+    'clock': 'Clock',
+    'alert-triangle': 'AlertTriangle',
+    'check-circle': 'CheckCircle',
+    'file-text': 'FileText',
+    'list-filter': 'ListFilter'
   };
 
-  return iconMap[iconId] || ClipboardList;
+  const componentName = iconMap[iconId] || 'ClipboardList';
+  return LucideIcons[componentName] || LucideIcons['ClipboardList'];
 };
 
-// Cards padrão (sem ícone JSX)
+// Cards padrão sem JSX nos dados
 export const getDefaultCards = (): ActionCardItem[] => [
   {
     id: 'smart-search',
