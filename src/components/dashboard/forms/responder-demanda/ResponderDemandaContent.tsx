@@ -53,6 +53,12 @@ const ResponderDemandaContent: React.FC = () => {
     setSelectedDemanda(null);
   };
   
+  // Convert areas to the expected format
+  const formattedAreas = areas.map(area => ({
+    id: area.id,
+    nome: area.descricao // Use the descricao field as nome
+  }));
+  
   return (
     <div className="animate-fade-in">
       {/* Unified filter bar that's always visible */}
@@ -66,7 +72,7 @@ const ResponderDemandaContent: React.FC = () => {
           setPrioridadeFilter={setPrioridadeFilter} 
           viewMode={viewMode} 
           setViewMode={setViewMode} 
-          areas={areas}
+          areas={formattedAreas}
           onBack={handleBack}
           showBackButton={!!selectedDemanda}
         />

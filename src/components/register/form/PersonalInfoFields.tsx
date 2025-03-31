@@ -10,7 +10,7 @@ interface PersonalInfoFieldsProps {
   birthday: string;
   whatsapp: string;
   errors: Record<string, boolean>;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | string, value?: string) => void;
 }
 
 const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({

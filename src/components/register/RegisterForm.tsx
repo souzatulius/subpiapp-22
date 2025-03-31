@@ -14,12 +14,20 @@ const RegisterForm = ({ roles, areas, coordenacoes, loadingOptions }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedArea, setSelectedArea] = useState('');
+  const [selectedCoord, setSelectedCoord] = useState('');
   
   const { 
-    register, formState, handleSubmit, watch, 
-    errors, isLoading, onSubmit, customError,
-    selectedArea, setSelectedArea,
-    selectedCoord, setSelectedCoord 
+    formData,
+    password,
+    setPassword,
+    showRequirements,
+    setShowRequirements,
+    requirements,
+    errors,
+    loading: isLoading,
+    handleChange,
+    handleSubmit
   } = useRegisterForm();
   
   // Função para rolar até o formulário em dispositivos móveis
@@ -57,35 +65,39 @@ const RegisterForm = ({ roles, areas, coordenacoes, loadingOptions }) => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#003570]"></div>
         </div>
       ) : (
-        <form id="register-form" ref={formRef} onSubmit={handleSubmit(onSubmit)}>
+        <form id="register-form" ref={formRef} onSubmit={handleSubmit}>
           <div className="space-y-6">
             <PersonalInfoFields 
-              register={register} 
-              errors={errors} 
-              watch={watch}
+              name={formData.name}
+              email={formData.email}
+              birthday={formData.birthday}
+              whatsapp={formData.whatsapp}
+              errors={errors}
+              handleChange={handleChange}
             />
             
             <PositionFields 
-              register={register}
-              errors={errors}
+              role={formData.role}
+              area={formData.area}
+              coordenacao={formData.coordenacao}
               roles={roles}
               areas={areas}
               coordenacoes={coordenacoes}
-              selectedArea={selectedArea}
-              setSelectedArea={setSelectedArea}
-              selectedCoord={selectedCoord}
-              setSelectedCoord={setSelectedCoord}
+              loadingOptions={loadingOptions}
+              errors={errors}
+              handleChange={handleChange}
             />
             
             <PasswordFields 
-              register={register} 
-              errors={errors} 
-              watch={watch}
+              password={password}
+              confirmPassword={formData.confirmPassword}
+              setPassword={setPassword}
+              setShowRequirements={setShowRequirements}
+              showRequirements={showRequirements}
+              requirements={requirements}
+              errors={errors}
+              handleChange={handleChange}
             />
-            
-            {customError && (
-              <p className="text-red-500 text-sm">{customError}</p>
-            )}
             
             <RegisterButton isLoading={isLoading} />
           </div>

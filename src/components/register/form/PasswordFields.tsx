@@ -16,7 +16,7 @@ interface PasswordFieldsProps {
     number: boolean;
   };
   errors: Record<string, boolean>;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | string, value?: string) => void;
 }
 
 const PasswordFields: React.FC<PasswordFieldsProps> = ({
