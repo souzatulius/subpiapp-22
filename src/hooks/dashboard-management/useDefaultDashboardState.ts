@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { getDefaultCards, getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { FormSchema } from '@/components/dashboard/card-customization/types';
@@ -26,7 +25,6 @@ export const useDefaultDashboardState = (departmentId: string) => {
     const fetchDashboardCards = async () => {
       setIsLoading(true);
       try {
-        // Try to load saved configuration for this department
         const { data, error } = await supabase
           .from('department_dashboards')
           .select('cards_config')
@@ -46,7 +44,6 @@ export const useDefaultDashboardState = (departmentId: string) => {
             setCards(getDefaultCards());
           }
         } else {
-          // No saved config, use defaults
           setCards(getDefaultCards());
         }
       } catch (err) {
@@ -100,15 +97,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
     setIsCustomizationModalOpen(true);
   };
 
-  const handleSaveCard = (cardData: Omit<FormSchema, 'iconId'> & { icon: React.ReactNode }) => {
-    const { icon, ...data } = cardData;
-    
-    // Determine if we need to find an existing iconId
-    let iconId = 'clipboard-list';  // Default
-    if ('iconId' in data) {
-      iconId = (data as any).iconId;
-    }
-
+  const handleSaveCard = (cardData: Omit<FormSchema, 'iconId'> & { iconId: string }) => {
     const newCardDefaults = {
       displayMobile: true,
       mobileOrder: cards.length,
@@ -116,27 +105,22 @@ export const useDefaultDashboardState = (departmentId: string) => {
     };
 
     if (editingCard) {
-      // Edit existing card
       setCards(cards.map(card =>
         card.id === editingCard.id ? { 
           ...card, 
-          ...data, 
-          iconId,
-          icon 
+          ...cardData 
         } : card
       ));
     } else {
-      // Add new card
       const newCard: ActionCardItem = {
         id: `card-${uuidv4()}`,
-        title: data.title || 'Novo Card',
-        path: data.path || '',
-        color: data.color,
-        width: data.width,
-        height: data.height,
-        icon: icon,
-        iconId,
-        type: data.type || 'standard',
+        title: cardData.title || 'Novo Card',
+        path: cardData.path || '',
+        color: cardData.color,
+        width: cardData.width,
+        height: cardData.height,
+        iconId: cardData.iconId,
+        type: cardData.type || 'standard',
         ...newCardDefaults
       };
       
@@ -144,15 +128,6 @@ export const useDefaultDashboardState = (departmentId: string) => {
     }
     
     setIsCustomizationModalOpen(false);
-  };
-
-  const handleQuickDemandSubmit = () => {
-    console.log('Submitting quick demand:', newDemandTitle);
-    setNewDemandTitle('');
-  };
-
-  const handleSearchSubmit = (query: string) => {
-    console.log('Searching for:', query);
   };
 
   return {
@@ -170,9 +145,9 @@ export const useDefaultDashboardState = (departmentId: string) => {
     isLoading,
     newDemandTitle,
     setNewDemandTitle,
-    handleQuickDemandSubmit,
+    handleQuickDemandSubmit: () => setNewDemandTitle(''),
     searchQuery,
     setSearchQuery,
-    handleSearchSubmit
+    handleSearchSubmit: (q: string) => console.log('Searching for:', q)
   };
 };
