@@ -36,10 +36,10 @@ const Relatorios = () => {
               title="Relatórios" 
               description="Visualize estatísticas e relatórios de comunicação" 
               icon={<PieChart className="h-6 w-6 mr-2" />} 
-              color="bg-gradient-to-r from-blue-500 to-blue-700"
+              color="bg-gradient-to-r from-orange-500 to-orange-700"
               showButton={true}
-              buttonText="Novo Relatório"
-              buttonIcon={<PlusCircle className="h-4 w-4" />}
+              buttonText="Filtros e Visualização"
+              buttonIcon={<SlidersHorizontal className="h-4 w-4" />}
               buttonVariant="action"
               onButtonClick={() => setFilterDialogOpen(true)}
             />

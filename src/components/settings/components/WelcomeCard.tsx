@@ -25,7 +25,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 })
   };
   
   return (
-    <Card className="bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg overflow-hidden">
+    <Card className="bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg overflow-hidden">
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -33,7 +33,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ userCount, unreadCount = 0 })
               <Settings className="h-6 w-6 mr-2" />
               Central de Configurações
             </h2>
-            <p className="text-blue-100">
+            <p className="text-orange-100">
               Gerencie todas as configurações do sistema em um só lugar.
             </p>
           </div>
