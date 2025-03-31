@@ -29,14 +29,10 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   const { user } = useAuth();
   const [modoAdmin, setModoAdmin] = React.useState(true);
 
-  // Handle cards change in a type-safe way
+  // Handle cards change with proper type safety
   const handleCardsChange = (newCards: ActionCardItem[] | any[]) => {
-    // Ensure that the input is properly cast to ActionCardItem[]
-    setCards(newCards.map(card => ({
-      ...card,
-      type: card.type || 'standard', // Ensure type is always set
-      path: card.path || '', // Ensure path is always set
-    })) as ActionCardItem[]);
+    // Ensure proper ActionCardItem[] type is maintained
+    setCards(newCards as ActionCardItem[]);
   };
 
   // Create device frame classes based on preview mode

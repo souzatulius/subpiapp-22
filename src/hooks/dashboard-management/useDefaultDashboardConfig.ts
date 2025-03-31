@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
 import { ActionCardItem, CardColor, CardType } from '@/types/dashboard';
 
-// Define a simplified type to avoid infinite type instantiation
+// Define a non-recursive type with only the properties we need to store
 interface SimpleCardData {
   id: string;
   title: string;

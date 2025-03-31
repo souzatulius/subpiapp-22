@@ -12,10 +12,10 @@ import {
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass } from './CardGrid';
-import { ActionCardItem, CardType } from '@/types/dashboard';
+import { ActionCardItem, CardType, CardColor } from '@/types/dashboard';
 
 // Make sure UnifiedCardItem includes all required properties from ActionCardItem
-export interface UnifiedCardItem extends UnifiedActionCardProps {
+export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color'> {
   width?: string;
   height?: string;
   displayMobile?: boolean;
@@ -23,7 +23,7 @@ export interface UnifiedCardItem extends UnifiedActionCardProps {
   type: CardType;
   path: string; // Make path required to match ActionCardItem
   iconId: string; // Make iconId required
-  color: string; // Make color required
+  color: CardColor; // Use CardColor type explicitly
   isCustom?: boolean;
 }
 
