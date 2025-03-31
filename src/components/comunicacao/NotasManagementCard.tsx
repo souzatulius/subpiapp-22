@@ -27,7 +27,14 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
         // For other departments, show notes related to their area
         let query = supabase
           .from('notas_oficiais')
-          .select('id, titulo, status, criado_em, autor:autor_id(nome_completo)')
+          .select(`
+            id, 
+            titulo, 
+            status, 
+            criado_em, 
+            autor_id,
+            autor:autor_id (nome_completo)
+          `)
           .order('criado_em', { ascending: false })
           .limit(5);
           
