@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
 import { ProfileData } from '@/components/profile/types';
+import ChangePhotoModal from '@/components/profile/photo/ChangePhotoModal';
 
 const ProfileMenu: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const ProfileMenu: React.FC = () => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isAccountSettingsModalOpen, setIsAccountSettingsModalOpen] = useState(false);
+  const [isChangePhotoModalOpen, setIsChangePhotoModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -52,9 +54,6 @@ const ProfileMenu: React.FC = () => {
 
   const displayName = userProfile?.nome_completo || 'Usuário';
   const photoUrl = userProfile?.foto_perfil_url || '';
-  const coordenacao = userProfile?.coordenacao || '-';
-  const supervisao = userProfile?.supervisao_tecnica || '';
-  const hasSupervisao = !!supervisao && supervisao !== '-';
 
   return (
     <>
@@ -63,10 +62,7 @@ const ProfileMenu: React.FC = () => {
           <button className="focus:outline-none flex items-center gap-2">
             <div className="hidden md:block text-right mr-2">
               <p className="text-sm font-medium">{displayName}</p>
-              <p className="text-xs text-gray-500">
-                {coordenacao}
-                {hasSupervisao && ` / ${supervisao}`}
-              </p>
+              <p className="text-xs text-gray-500">{userProfile?.email}</p>
             </div>
             <AvatarDisplay 
               nome={displayName}
@@ -79,18 +75,12 @@ const ProfileMenu: React.FC = () => {
           <div className="p-3">
             <p className="font-medium">{displayName}</p>
             <p className="text-xs text-gray-500 mt-1">{userProfile?.email}</p>
-            <div className="flex flex-col mt-1">
-              <p className="text-xs text-gray-500">
-                <span className="font-medium">Coordenação:</span> {coordenacao}
-              </p>
-              {hasSupervisao && (
-                <p className="text-xs text-gray-500">
-                  <span className="font-medium">Supervisão:</span> {supervisao}
-                </p>
-              )}
-            </div>
           </div>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setIsChangePhotoModalOpen(true)} className="cursor-pointer py-2">
+            <User className="mr-2 h-4 w-4" />
+            <span>Alterar foto</span>
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsEditProfileModalOpen(true)} className="cursor-pointer py-2">
             <User className="mr-2 h-4 w-4" />
             <span>Editar Perfil</span>
@@ -125,6 +115,11 @@ const ProfileMenu: React.FC = () => {
       <AccountSettingsModal
         isOpen={isAccountSettingsModalOpen}
         onClose={() => setIsAccountSettingsModalOpen(false)}
+      />
+
+      <ChangePhotoModal
+        isOpen={isChangePhotoModalOpen}
+        onClose={() => setIsChangePhotoModalOpen(false)}
       />
     </>
   );

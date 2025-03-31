@@ -13,13 +13,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
-import { format, parse, isValid } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { DatePicker } from '@/components/ui/date-picker';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ProfileData } from './types';
+import { formatDateInput, formatDateToString, parseFormattedDate } from '@/lib/inputFormatting';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -36,9 +34,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [dateInputValue, setDateInputValue] = useState('');
   
-  const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<ProfileData>({
+  const { register, handleSubmit, setValue, formState: { errors }, reset, watch } = useForm<ProfileData>({
     defaultValues: {
       nome_completo: '',
       whatsapp: '',
@@ -54,49 +52,58 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       // Parse aniversario from string to Date if it exists
       if (userData.aniversario) {
         try {
-          let dateObj;
+          let formattedDate = '';
           if (typeof userData.aniversario === 'string') {
-            // Try to parse the date string
-            if (userData.aniversario.includes('T')) {
-              // ISO format
-              dateObj = new Date(userData.aniversario);
-            } else {
-              // DD/MM/YYYY format
-              dateObj = parse(userData.aniversario, 'dd/MM/yyyy', new Date(), { locale: ptBR });
-            }
+            // Format date string to DD/MM/YYYY
+            const dateObj = new Date(userData.aniversario);
+            formattedDate = formatDateToString(dateObj);
           } else {
             // Already a Date object
-            dateObj = userData.aniversario;
+            formattedDate = formatDateToString(userData.aniversario);
           }
           
-          // Only set the date if it's valid
-          if (dateObj instanceof Date && !isNaN(dateObj.getTime())) {
-            setSelectedDate(dateObj);
-            setValue('aniversario', dateObj);
-          } else {
-            console.error('Invalid date object:', dateObj);
-            setSelectedDate(undefined);
-          }
+          setDateInputValue(formattedDate);
         } catch (error) {
           console.error('Error parsing date:', error);
-          setSelectedDate(undefined);
+          setDateInputValue('');
         }
       } else {
-        setSelectedDate(undefined);
+        setDateInputValue('');
       }
     }
-  }, [userData, setValue]);
+  }, [userData, setValue, isOpen]);
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatDateInput(value);
+    setDateInputValue(formattedValue);
+  };
 
   const onSubmit = async (data: ProfileData) => {
     if (!user?.id) return;
     
     setIsSubmitting(true);
     try {
+      // Parse the formatted date into a Date object
+      let parsedDate = null;
+      if (dateInputValue) {
+        parsedDate = parseFormattedDate(dateInputValue);
+        if (!parsedDate) {
+          toast({
+            title: "Erro",
+            description: "Formato de data inválido. Use DD/MM/AAAA.",
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
       // Prepare data for update
       const updateData = {
         nome_completo: data.nome_completo,
         whatsapp: data.whatsapp || null,
-        aniversario: selectedDate && isValid(selectedDate) ? selectedDate.toISOString() : null
+        aniversario: parsedDate ? parsedDate.toISOString() : null
       };
       
       // Update the user profile in the usuarios table
@@ -129,6 +136,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   const handleClose = () => {
     reset();
+    setDateInputValue('');
     onClose();
   };
 
@@ -164,12 +172,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label>Data de aniversário</Label>
-            <DatePicker
-              date={selectedDate}
-              setDate={setSelectedDate}
-              className="w-full"
+            <Label htmlFor="aniversario">Data de aniversário</Label>
+            <Input
+              id="aniversario"
+              placeholder="DD/MM/AAAA"
+              value={dateInputValue}
+              onChange={handleDateChange}
+              maxLength={10}
             />
+            <p className="text-xs text-gray-500">Formato: DD/MM/AAAA</p>
           </div>
           
           <DialogFooter>

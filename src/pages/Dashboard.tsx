@@ -84,7 +84,7 @@ const Dashboard = () => {
         <main className="flex-1 overflow-auto p-6 pb-20 md:pb-6">
           <div className="max-w-7xl mx-auto">
             <WelcomeCard
-              title={`Olá, ${firstName || 'Usuário'}!`}
+              title={`Olá, ${firstName}!`}
               description="Organize esta área do seu jeito, movendo ou ocultando os cards."
               icon={<Home className="h-6 w-6 mr-2" />}
               showButton={true}
