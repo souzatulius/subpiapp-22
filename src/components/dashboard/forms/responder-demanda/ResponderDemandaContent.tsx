@@ -60,7 +60,7 @@ const ResponderDemandaContent: React.FC = () => {
   }));
   
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in container mx-auto px-4">
       {/* Unified filter bar that's always visible */}
       <div className="mb-6">
         <DemandasFilter 

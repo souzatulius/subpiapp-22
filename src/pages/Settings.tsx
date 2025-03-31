@@ -98,16 +98,6 @@ const Settings = () => {
                     </div>
                   ) : (
                     <div>
-                      <div className="flex items-center mb-2 text-sm">
-                        <span className="cursor-pointer hover:underline" onClick={handleBackClick}>Configurações</span>
-                        <span className="mx-2">/</span>
-                        <span className={`font-medium`}>
-                          {getSectionCategory(activeSection)}
-                        </span>
-                        <span className="mx-2">/</span>
-                        <span className="font-medium">{getSectionTitle(activeSection)}</span>
-                      </div>
-                      
                       <h1 className={`text-2xl font-bold mb-6`}>
                         {getSectionTitle(activeSection)}
                       </h1>
