@@ -20,6 +20,13 @@ const NotasListView: React.FC<NotasListViewProps> = ({
 }) => {
   return (
     <Card className="p-6">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold">Aprovar Notas Oficiais</h2>
+        <p className="text-sm text-gray-600">
+          Revise e aprove notas oficiais criadas pela equipe.
+        </p>
+      </div>
+      
       <Tabs defaultValue="pendentes">
         <TabsList className="mb-4">
           <TabsTrigger value="pendentes">Pendentes de Aprovação</TabsTrigger>

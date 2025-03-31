@@ -1,13 +1,12 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText, Edit, Building, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Clock, FileText, Edit, Building } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotaOficial } from '@/types/nota';
 import DemandHistorySection from './DemandHistorySection';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface NotaDetailProps {
   nota: NotaOficial;
@@ -26,8 +25,6 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
   onEditar,
   isSubmitting 
 }) => {
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  
   // Use either criado_em or created_at, whichever is available
   const dataCreated = nota.criado_em || nota.created_at;
   const temDemanda = !!(nota.demanda_id || nota.demanda?.id);
@@ -126,46 +123,33 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
 
         {nota.historico_edicoes && nota.historico_edicoes.length > 0 && (
           <div className="mt-6">
-            <Collapsible open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="flex items-center justify-between w-full mb-2">
-                  <h4 className="text-base font-medium text-gray-700">Histórico de Edições</h4>
-                  {isHistoryOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <Card className="p-4 border border-gray-200">
-                  <div className="space-y-3">
-                    {nota.historico_edicoes.map((edicao) => (
-                      <div key={edicao.id} className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium text-sm">{edicao.editor?.nome_completo || "Editor desconhecido"}</span>
-                          <span className="text-xs text-gray-500">
-                            {formatDateDisplay(edicao.criado_em)} às {formatTimeDisplay(edicao.criado_em)}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
-                          <div>
-                            <span className="font-medium">Título alterado:</span> 
-                            <span className="line-through text-gray-400 ml-1">{edicao.titulo_anterior}</span>
-                            <span className="text-blue-600 ml-2">{edicao.titulo_novo}</span>
-                          </div>
-                          {edicao.texto_anterior !== edicao.texto_novo && (
-                            <div>
-                              <span className="font-medium">Texto editado</span>
-                            </div>
-                          )}
-                        </div>
+            <h4 className="text-base font-medium text-gray-700 mb-2">Histórico de Edições</h4>
+            <Card className="p-4 border border-gray-200">
+              <div className="space-y-3">
+                {nota.historico_edicoes.map((edicao) => (
+                  <div key={edicao.id} className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium text-sm">{edicao.editor?.nome_completo || "Editor desconhecido"}</span>
+                      <span className="text-xs text-gray-500">
+                        {formatDateDisplay(edicao.criado_em)} às {formatTimeDisplay(edicao.criado_em)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
+                      <div>
+                        <span className="font-medium">Título alterado:</span> 
+                        <span className="line-through text-gray-400 ml-1">{edicao.titulo_anterior}</span>
+                        <span className="text-blue-600 ml-2">{edicao.titulo_novo}</span>
                       </div>
-                    ))}
+                      {edicao.texto_anterior !== edicao.texto_novo && (
+                        <div>
+                          <span className="font-medium">Texto editado</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </Card>
-              </CollapsibleContent>
-            </Collapsible>
+                ))}
+              </div>
+            </Card>
           </div>
         )}
         

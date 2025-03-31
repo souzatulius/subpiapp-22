@@ -22,7 +22,7 @@ const DashboardLayout: React.FC = () => {
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 overflow-auto p-4 pb-20 md:pb-6 container mx-auto">
+        <main className="flex-1 overflow-auto p-6 pb-20 md:pb-6">
           <Outlet />
         </main>
       </div>
