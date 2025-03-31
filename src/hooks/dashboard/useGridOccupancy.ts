@@ -18,6 +18,7 @@ interface UseGridOccupancyProps {
 
 export const useGridOccupancy = ({ cards }: UseGridOccupancyProps) => {
   const [gridMap, setGridMap] = useState<GridMap>([]);
+  const totalColumns = 4; // Adding totalColumns property for grid layout
   
   // Initialize grid with all cells free
   const initializeGrid = () => {
@@ -97,5 +98,5 @@ export const useGridOccupancy = ({ cards }: UseGridOccupancyProps) => {
     setGridMap(processedGrid);
   }, [processedGrid]);
   
-  return { gridMap };
+  return { gridMap, totalColumns };
 };

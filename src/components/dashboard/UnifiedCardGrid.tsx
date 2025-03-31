@@ -56,16 +56,14 @@ const UnifiedCardGrid: React.FC<DashboardState> = ({
     const { active, over } = event;
     
     if (active.id !== over?.id) {
-      setCards((items) => {
-        const activeIndex = items.findIndex(item => item.id === active.id);
-        const overIndex = items.findIndex(item => item.id === over?.id);
-        
-        const newItems = [...items];
-        const [reorderedItem] = newItems.splice(activeIndex, 1);
-        newItems.splice(overIndex, 0, reorderedItem);
-        
-        return newItems;
-      });
+      const activeIndex = cards.findIndex(item => item.id === active.id);
+      const overIndex = cards.findIndex(item => item.id === over?.id);
+      
+      const newItems = [...cards];
+      const [reorderedItem] = newItems.splice(activeIndex, 1);
+      newItems.splice(overIndex, 0, reorderedItem);
+      
+      setCards(newItems);
     }
   };
 

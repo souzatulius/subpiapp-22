@@ -1,84 +1,100 @@
 
-import React from 'react';
-import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
+import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
-import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import UnifiedDashboard from '@/components/dashboard/UnifiedDashboard';
+import CardGrid from '@/components/dashboard/CardGrid';
+import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import { ActionCardItem } from '@/types/dashboard';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
   department: string;
-  isMobilePreview: boolean;
+  isMobilePreview?: boolean;
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
   dashboardType, 
   department,
-  isMobilePreview
+  isMobilePreview = false
 }) => {
-  const {
-    cards,
-    setCards,
-    handleDeleteCard,
-    handleEditCard,
-    specialCardsData,
-    departmentName
+  const [isCustomizationModalOpen, setIsCustomizationModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
+  const [isEditMode, setIsEditMode] = useState(true); // Start in edit mode for management
+  const { 
+    cards, 
+    setCards, 
+    handleDeleteCard, 
+    handleEditCard, 
+    saveCards 
   } = useDefaultDashboardState(department);
 
-  const { user } = useAuth();
-  const [modoAdmin, setModoAdmin] = React.useState(true);
-
-  // Handle cards change with proper type safety
-  const handleCardsChange = (newCards: ActionCardItem[] | any[]) => {
-    // Ensure proper ActionCardItem[] type is maintained
-    setCards(newCards as ActionCardItem[]);
+  const handleCardsChange = (newCards: ActionCardItem[]) => {
+    setCards(newCards);
   };
 
-  // Create device frame classes based on preview mode
-  const deviceFrameClasses = isMobilePreview 
-    ? "max-w-[375px] mx-auto border-[8px] border-gray-800 rounded-[36px] overflow-hidden shadow-xl bg-white p-0 h-[640px] relative" 
-    : "border-[16px] border-gray-800 rounded-xl overflow-hidden shadow-xl bg-white max-w-full relative";
-  
-  // Add notch for mobile preview
-  const mobileNotch = isMobilePreview && (
-    <div className="absolute top-0 left-0 w-full flex justify-center">
-      <div className="h-5 w-36 bg-gray-800 rounded-b-xl"></div>
-    </div>
-  );
+  const handleEditCardClick = (card: ActionCardItem) => {
+    setEditingCard(card);
+    setIsCustomizationModalOpen(true);
+  };
 
-  if (dashboardType === 'communication') {
-    return (
-      <div className="bg-gray-50 p-6 h-full">
-        <div className={deviceFrameClasses}>
-          {mobileNotch}
-          <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
-            <ComunicacaoDashboard isPreview={true} department={department} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleAddNewCard = () => {
+    setEditingCard(null);
+    setIsCustomizationModalOpen(true);
+  };
+
+  const handleSaveCard = (cardData: any) => {
+    if (editingCard) {
+      const updatedCards = cards.map(card => 
+        card.id === editingCard.id ? { ...card, ...cardData } : card
+      );
+      setCards(updatedCards);
+    } else {
+      setCards([...cards, cardData]);
+    }
+    setIsCustomizationModalOpen(false);
+  };
+
+  const saveDashboard = async () => {
+    const saved = await saveCards();
+    return saved;
+  };
 
   return (
-    <div className="bg-gray-50 p-6 h-full">
-      <div className={deviceFrameClasses}>
-        {mobileNotch}
-        <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
-          <div className="p-4">
-            <UnifiedCardGrid
-              cards={cards}
-              onCardsChange={handleCardsChange}
-              onEditCard={handleEditCard}
-              onDeleteCard={handleDeleteCard}
-              isMobileView={isMobilePreview}
-              isEditMode={modoAdmin}
-              disableWiggleEffect={true} // Add this to disable wiggle effect in preview
-            />
-          </div>
+    <>
+      <div className="relative w-full h-full bg-gray-50 p-4 rounded-lg overflow-auto">
+        <div className={`${isMobilePreview ? 'max-w-sm mx-auto' : ''}`}>
+          {dashboardType === 'dashboard' ? (
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">Dashboard Principal</h3>
+              <p className="text-sm text-gray-500">Visualização do dashboard padrão para {department}</p>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">Dashboard de Comunicação</h3>
+              <p className="text-sm text-gray-500">Visualização do dashboard de comunicação para {department}</p>
+            </div>
+          )}
+          
+          <CardGrid 
+            cards={cards} 
+            onCardsChange={handleCardsChange} 
+            onEditCard={handleEditCardClick} 
+            onDeleteCard={handleDeleteCard}
+            isMobileView={isMobilePreview}
+            isEditMode={isEditMode}
+            disableWiggleEffect={true}
+            onAddNewCard={handleAddNewCard}
+          />
         </div>
       </div>
-    </div>
+      
+      <CardCustomizationModal
+        isOpen={isCustomizationModalOpen}
+        onClose={() => setIsCustomizationModalOpen(false)}
+        onSave={handleSaveCard}
+        initialData={editingCard}
+      />
+    </>
   );
 };
 

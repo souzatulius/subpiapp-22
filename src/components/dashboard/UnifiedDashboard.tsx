@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,9 +15,10 @@ import HiddenCardsTray from '@/components/dashboard/HiddenCardsTray';
 interface UnifiedDashboardProps {
   userId: string;
   dashboardType: 'dashboard' | 'communication';
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   fallbackCards: ActionCardItem[];
+  headerComponent?: React.ReactNode;
 }
 
 const CURRENT_DASHBOARD_VERSION = "1.0.0";
@@ -26,7 +28,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   dashboardType,
   title,
   description,
-  fallbackCards
+  fallbackCards,
+  headerComponent
 }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -87,7 +90,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         .upsert({
           user_id: userId,
           dashboard_type: dashboardType,
-          cards: cardsWithVersion,
+          cards_config: JSON.stringify(cardsWithVersion),
           version: CURRENT_DASHBOARD_VERSION,
           updated_at: new Date().toISOString()
         }, {
@@ -121,7 +124,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       // Fetch the user's dashboard from the database
       const { data, error } = await supabase
         .from('user_dashboard')
-        .select('cards')
+        .select('cards_config')
         .eq('user_id', userId)
         .eq('dashboard_type', dashboardType)
         .single();
@@ -131,8 +134,15 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       }
       
       // If dashboard exists in the database, use it
-      if (data && data.cards && Array.isArray(data.cards)) {
-        setCards(data.cards);
+      if (data && data.cards_config) {
+        let parsedCards;
+        try {
+          parsedCards = JSON.parse(data.cards_config);
+        } catch (parseError) {
+          console.error("Error parsing cards_config:", parseError);
+          parsedCards = fallbackCards;
+        }
+        setCards(parsedCards);
       } 
       // Otherwise, use the fallback cards
       else {
@@ -149,9 +159,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
           .upsert({
             user_id: userId,
             dashboard_type: dashboardType,
-            cards: defaultDashboardCards,
+            cards_config: JSON.stringify(defaultDashboardCards),
             version: CURRENT_DASHBOARD_VERSION,
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,dashboard_type'
           });
         
         if (saveError) {
@@ -197,9 +209,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   
   return (
     <div className="space-y-4">
-      {!isMobile && (
+      {!isMobile && headerComponent ? (
+        headerComponent
+      ) : title && description && !isMobile ? (
         <WelcomeMessage title={title} description={description} />
-      )}
+      ) : null}
       
       {/* Hidden Cards Tray */}
       {hiddenCards.length > 0 && (

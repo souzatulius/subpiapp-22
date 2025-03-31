@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   DndContext,
@@ -60,14 +59,13 @@ const CardGrid: React.FC<CardGridProps> = ({
   );
 
   // Always initialize this state regardless of card presence
-  const { totalColumns } = useGridOccupancy(
+  const { gridMap, totalColumns } = useGridOccupancy(
     cards.map(card => ({ 
       id: card.id,
       width: card.width || '25', 
       height: card.height || '1',
       type: card.type
-    })), 
-    isMobileView
+    }))
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
