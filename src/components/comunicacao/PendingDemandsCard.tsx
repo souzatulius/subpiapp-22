@@ -60,11 +60,11 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ coordenacaoId, 
   }, [coordenacaoId, isComunicacao]);
 
   const handleDemandClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/responder-demanda?id=${id}`);
+    navigate(`/dashboard/comunicacao/responder?id=${id}`);
   };
 
   const handleViewAllClick = () => {
-    navigate(`/dashboard/comunicacao/responder-demanda`);
+    navigate(`/dashboard/comunicacao/responder`);
   };
 
   // Check if prazo is expired

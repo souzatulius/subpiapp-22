@@ -8,7 +8,7 @@ export const getCorrectPath = (title: string, path: string): string => {
     return "/dashboard/comunicacao/cadastrar";
   } else if (title === "Aprovar Nota" && path.includes("aprovar-nota-oficial")) {
     return "/dashboard/comunicacao/aprovar-nota";
-  } else if (title === "Responder Demandas" && path.includes("responder-demandas")) {
+  } else if (title === "Responder Demandas" && (path.includes("responder-demanda") || path.includes("responder-demandas"))) {
     return "/dashboard/comunicacao/responder";
   } else if (title === "Números da Comunicação" && !path.includes("relatorios")) {
     return "/dashboard/comunicacao/relatorios";

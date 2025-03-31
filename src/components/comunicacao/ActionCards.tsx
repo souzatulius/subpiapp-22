@@ -120,7 +120,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({ coordenacaoId, isComunicacao 
         title="Responder Demandas"
         icon={<MessageSquareReply className="w-20 h-20" />}
         color="bg-orange-500"
-        path="/dashboard/comunicacao/responder-demanda"
+        path="/dashboard/comunicacao/responder"
         badge={pendingDemandsCount}
       />
       

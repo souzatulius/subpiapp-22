@@ -68,7 +68,7 @@ const DemandasEmAndamentoCard: React.FC<DemandasEmAndamentoCardProps> = ({
   };
 
   const handleDemandaClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/responder-demanda?id=${id}`);
+    navigate(`/dashboard/comunicacao/responder?id=${id}`);
   };
 
   const handleViewAllClick = () => {

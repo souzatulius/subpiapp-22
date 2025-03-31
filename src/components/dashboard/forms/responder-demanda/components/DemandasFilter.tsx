@@ -34,13 +34,15 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
       {/* Main filter grid */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-4 items-center mb-4">
         <div className="col-span-1 md:col-span-2">
-          <Input
-            placeholder="Buscar demandas por título..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-            icon={<Search className="h-4 w-4" />}
-          />
+          <div className="relative">
+            <Input
+              placeholder="Buscar demandas por título..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10"
+            />
+            <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+          </div>
         </div>
         
         <Select value={areaFilter} onValueChange={setAreaFilter}>
