@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -85,6 +86,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
           cards_config: JSON.stringify(cardsWithVersion),
           version: CURRENT_DASHBOARD_VERSION,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,dashboard_type'
         });
       
       if (error) throw error;

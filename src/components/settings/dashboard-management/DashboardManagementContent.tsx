@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardPreview from './DashboardPreview';
@@ -87,7 +88,7 @@ const DashboardManagementContent: React.FC = () => {
         .from('department_dashboards')
         .select('cards_config')
         .eq('department', selectedDepartment)
-        .eq('dashboard_type', selectedViewType)
+        .eq('view_type', selectedViewType)
         .single();
         
       if (sourceError && sourceError.code !== 'PGRST116') throw sourceError;
@@ -105,7 +106,7 @@ const DashboardManagementContent: React.FC = () => {
         .from('department_dashboards')
         .upsert({
           department: targetDepartment,
-          dashboard_type: selectedViewType,
+          view_type: selectedViewType,
           cards_config: sourceData.cards_config,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -136,7 +137,7 @@ const DashboardManagementContent: React.FC = () => {
         .from('department_dashboards')
         .select('cards_config')
         .eq('department', selectedDepartment)
-        .eq('dashboard_type', selectedViewType)
+        .eq('view_type', selectedViewType)
         .single();
       
       if (error) throw error;
@@ -144,7 +145,7 @@ const DashboardManagementContent: React.FC = () => {
       if (data && data.cards_config) {
         const exportObj = {
           department: selectedDepartment,
-          dashboard_type: selectedViewType,
+          view_type: selectedViewType,
           cards_config: JSON.parse(data.cards_config),
           exported_at: new Date().toISOString()
         };
@@ -180,11 +181,11 @@ const DashboardManagementContent: React.FC = () => {
         .from('department_dashboards')
         .upsert({
           department: selectedDepartment,
-          dashboard_type: selectedViewType,
+          view_type: selectedViewType,
           cards_config: JSON.stringify(importedData.cards_config),
           updated_at: new Date().toISOString()
         }, {
-          onConflict: 'department,dashboard_type'
+          onConflict: 'department,view_type'
         });
       
       if (error) throw error;
@@ -216,7 +217,7 @@ const DashboardManagementContent: React.FC = () => {
         .from('department_dashboards')
         .delete()
         .eq('department', selectedDepartment)
-        .eq('dashboard_type', selectedViewType);
+        .eq('view_type', selectedViewType);
       
       toast({
         title: "Dashboard restaurado",
@@ -258,7 +259,7 @@ const DashboardManagementContent: React.FC = () => {
               <Copy className="h-4 w-4 mr-1" /> Duplicar
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportDashboard}>
-              <Export className="h-4 w-4 mr-1" /> Exportar
+              <ExportIcon className="h-4 w-4 mr-1" /> Exportar
             </Button>
             <Button variant="outline" size="sm" onClick={() => setIsImportModalOpen(true)}>
               <Import className="h-4 w-4 mr-1" /> Importar
@@ -394,7 +395,7 @@ const DashboardManagementContent: React.FC = () => {
           <div className="mt-4">
             <textarea 
               className="w-full h-64 p-2 font-mono text-sm border rounded-md" 
-              placeholder='{"cards_config": [...], "dashboard_type": "dashboard"}'
+              placeholder='{"cards_config": [...], "view_type": "dashboard"}'
               value={importData}
               onChange={(e) => setImportData(e.target.value)}
             />
@@ -436,6 +437,25 @@ const Copy = (props: any) => (
   >
     <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
     <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+  </svg>
+);
+
+const ExportIcon = (props: any) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
   </svg>
 );
 

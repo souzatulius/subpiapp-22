@@ -21,7 +21,7 @@ interface CardsContainerProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   isMobileView?: boolean;
-  isEditMode?: boolean; // Added isEditMode property
+  isEditMode?: boolean; // Add isEditMode prop
 }
 
 const CardsContainer: React.FC<CardsContainerProps> = ({
@@ -34,7 +34,8 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
   onSearchSubmit = () => {},
-  isMobileView = false
+  isMobileView = false,
+  isEditMode = false // Set default value
 }) => {
   const allCardIds = cards.map(card => card.id);
 
