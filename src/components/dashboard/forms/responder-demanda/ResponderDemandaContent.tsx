@@ -55,20 +55,6 @@ const ResponderDemandaContent: React.FC = () => {
         </div>
 
         <CardContent className="p-6 space-y-6">
-          {!selectedDemanda && (
-            <DemandasFilter 
-              searchTerm={searchTerm} 
-              setSearchTerm={setSearchTerm} 
-              areaFilter={areaFilter} 
-              setAreaFilter={setAreaFilter} 
-              prioridadeFilter={prioridadeFilter} 
-              setPrioridadeFilter={setPrioridadeFilter} 
-              viewMode={viewMode} 
-              setViewMode={setViewMode} 
-              areas={areas} 
-            />
-          )}
-
           {selectedDemanda ? (
             <RespostaForm 
               selectedDemanda={selectedDemanda} 
@@ -81,20 +67,36 @@ const ResponderDemandaContent: React.FC = () => {
               onSubmit={handleSubmitResposta}
               handleRespostaChange={handleRespostaChange}
             />
-          ) : viewMode === 'cards' ? (
-            <DemandaGrid 
-              demandas={filteredDemandas} 
-              selectedDemanda={selectedDemanda} 
-              handleSelectDemanda={handleSelectDemanda} 
-              isLoading={isLoadingDemandas} 
-            />
           ) : (
-            <DemandaList 
-              demandas={filteredDemandas} 
-              selectedDemanda={selectedDemanda} 
-              handleSelectDemanda={handleSelectDemanda} 
-              isLoading={isLoadingDemandas} 
-            />
+            <>
+              <DemandasFilter 
+                searchTerm={searchTerm} 
+                setSearchTerm={setSearchTerm} 
+                areaFilter={areaFilter} 
+                setAreaFilter={setAreaFilter} 
+                prioridadeFilter={prioridadeFilter} 
+                setPrioridadeFilter={setPrioridadeFilter} 
+                viewMode={viewMode} 
+                setViewMode={setViewMode} 
+                areas={areas} 
+              />
+
+              {viewMode === 'cards' ? (
+                <DemandaGrid 
+                  demandas={filteredDemandas} 
+                  selectedDemanda={selectedDemanda} 
+                  handleSelectDemanda={handleSelectDemanda} 
+                  isLoading={isLoadingDemandas} 
+                />
+              ) : (
+                <DemandaList 
+                  demandas={filteredDemandas} 
+                  selectedDemanda={selectedDemanda} 
+                  handleSelectDemanda={handleSelectDemanda} 
+                  isLoading={isLoadingDemandas} 
+                />
+              )}
+            </>
           )}
         </CardContent>
       </Card>

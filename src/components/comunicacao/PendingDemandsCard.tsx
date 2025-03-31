@@ -59,8 +59,9 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ coordenacaoId, 
     fetchDemands();
   }, [coordenacaoId, isComunicacao]);
 
+  // Updated to navigate directly to the specific demand
   const handleDemandClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/responder?id=${id}`);
+    navigate(`/dashboard/comunicacao/responder-demandas?id=${id}`);
   };
 
   const handleViewAllClick = () => {
