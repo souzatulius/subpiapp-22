@@ -30,18 +30,14 @@ const CardFormMain: React.FC<CardFormMainProps> = ({
         <div className="flex flex-col md:flex-row gap-6">
           {/* Card form fields - left side */}
           <div className="w-full md:w-1/2">
-            <CardFormFields 
-              form={form}
-              selectedIconId={selectedIconId}
-              setSelectedIconId={setSelectedIconId}
-            />
+            <CardFormFields isNewCard={!initialData} />
           </div>
           
           {/* Preview - right side */}
           <div className="w-full md:w-1/2">
             <CardFormPreview 
               title={form.watch('title')} 
-              iconId={selectedIconId}
+              iconId={form.watch('iconId')}
               color={form.watch('color')}
               width={form.watch('width')}
               height={form.watch('height')}

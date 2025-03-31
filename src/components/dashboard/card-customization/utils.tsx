@@ -61,6 +61,19 @@ export const gradientOptions = [
   { value: 'bg-gradient-to-r from-teal-500 to-green-600', label: 'Turquesa' },
 ];
 
+// Opções de dimensões
+export const widthOptions = [
+  { value: '25', label: '25%', class: 'w-1/4' },
+  { value: '50', label: '50%', class: 'w-1/2' },
+  { value: '75', label: '75%', class: 'w-3/4' },
+  { value: '100', label: '100%', class: 'w-full' },
+];
+
+export const heightOptions = [
+  { value: '1', label: 'Padrão', class: 'h-32' },
+  { value: '2', label: 'Alto', class: 'h-64' },
+];
+
 // Função ajudante para obter a classe de cor
 export function getColorClass(color: CardColor): string {
   const colorOption = colorOptions.find(option => option.value === color);
@@ -89,9 +102,43 @@ export function getIconComponentById(iconId: string): React.ReactElement {
   });
 }
 
-// Lista de ícones para seleção
+// Identificar o tipo de componente de ícone (useful for editing existing cards)
+export function identifyIconComponent(iconComponent: React.ReactElement | string): string {
+  // If it's already a string, just return it
+  if (typeof iconComponent === 'string') {
+    return iconComponent;
+  }
+  
+  // Try to identify the icon from its type or props
+  if (iconComponent && iconComponent.type) {
+    const iconName = iconComponent.type.displayName || iconComponent.type.name;
+    if (iconName && LucideIcons[iconName as keyof typeof LucideIcons]) {
+      return iconName;
+    }
+  }
+  
+  // Default fallback
+  return 'Layout';
+}
+
+// Lista de ícones para seleção (transformed for IconSelector component)
+export const iconsData = Object.keys(LucideIcons)
+  .filter(key => typeof LucideIcons[key as keyof typeof LucideIcons] === 'function' && key !== 'Icon' && key !== 'createLucideIcon')
+  .map(key => {
+    const IconComponent = LucideIcons[key as keyof typeof LucideIcons];
+    return {
+      id: key,
+      label: key.replace(/([A-Z])/g, ' $1').trim(),
+      component: React.createElement(IconComponent, {
+        className: "h-4 w-4",
+        strokeWidth: 1.5
+      })
+    };
+  });
+
+// Lista de ícones para seleção (original version for backward compatibility)
 export const iconOptions = Object.keys(LucideIcons)
-  .filter(key => typeof LucideIcons[key as keyof typeof LucideIcons] === 'function')
+  .filter(key => typeof LucideIcons[key as keyof typeof LucideIcons] === 'function' && key !== 'Icon' && key !== 'createLucideIcon')
   .map(key => ({
     value: key,
     label: key.replace(/([A-Z])/g, ' $1').trim(),

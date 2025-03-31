@@ -1,52 +1,28 @@
 
 import React from 'react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
+import { colorOptions } from './utils';
+import { CardColor } from '@/types/dashboard';
 
 interface ColorOptionsProps {
-  selectedColor: string;
-  onSelectColor: (color: string) => void;
+  value: string;
+  onChange: (color: CardColor) => void;
 }
 
-const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColor }) => {
-  // Updated color options with the new orange-600 option
-  const colorOptions = [
-    { value: 'blue', display: 'blue-50', className: 'bg-blue-50 border-blue-100' },
-    { value: 'blue-dark', display: 'blue-950', className: 'bg-blue-950 border-blue-900' },
-    { value: 'orange', display: 'orange-50', className: 'bg-orange-50 border-orange-100' },
-    { value: 'orange-light', display: 'orange-500', className: 'bg-orange-500 border-orange-600' },
-    { value: 'orange-600', display: 'orange-600', className: 'bg-orange-600 border-orange-700 text-white' },
-    { value: 'gray-light', display: 'gray-25', className: 'bg-gray-25 border-gray-100' },
-    { value: 'gray-dark', display: 'gray-400', className: 'bg-gray-400 border-gray-500' },
-    { value: 'green', display: 'lime-50', className: 'bg-lime-50 border-lime-100' },
-    { value: 'lime', display: 'lime-500', className: 'bg-lime-500 border-lime-600' },
-  ];
-
+const ColorOptions: React.FC<ColorOptionsProps> = ({ value, onChange }) => {
   return (
-    <RadioGroup 
-      value={selectedColor}
-      onValueChange={onSelectColor}
-      className="flex flex-wrap gap-3"
-    >
+    <div className="grid grid-cols-5 gap-2 my-3">
       {colorOptions.map((option) => (
-        <div key={option.value} className="flex flex-col items-center">
-          <RadioGroupItem 
-            value={option.value} 
-            id={`color-${option.value}`} 
-            className="sr-only"
-          />
-          <Label
-            htmlFor={`color-${option.value}`}
-            className={`flex items-center justify-center w-8 h-8 rounded-full cursor-pointer border transition-all ${
-              selectedColor === option.value 
-                ? 'ring-2 ring-offset-2 ring-blue-500' 
-                : 'hover:scale-110'
-            } ${option.className}`}
-            aria-label={option.display}
-          />
-        </div>
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={`h-10 rounded-md transition-all ${option.class}
+            ${value === option.value ? 'ring-2 ring-blue-400 ring-offset-2' : 'hover:ring-1 hover:ring-gray-400'}
+          `}
+          title={option.label}
+        />
       ))}
-    </RadioGroup>
+    </div>
   );
 };
 

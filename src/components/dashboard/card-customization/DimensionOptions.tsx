@@ -1,68 +1,59 @@
 
 import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { UseFormReturn } from 'react-hook-form';
-import { FormSchema } from './types';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { widthOptions, heightOptions } from './utils';
-import { Label } from '@/components/ui/label';
 
 interface DimensionOptionsProps {
-  form: UseFormReturn<FormSchema>;
+  width: string;
+  height: string;
+  onWidthChange: (width: string) => void;
+  onHeightChange: (height: string) => void;
 }
 
-const DimensionOptions: React.FC<DimensionOptionsProps> = ({ form }) => {
+const DimensionOptions: React.FC<DimensionOptionsProps> = ({
+  width,
+  height,
+  onWidthChange,
+  onHeightChange
+}) => {
   return (
-    <div className="space-y-2">
-      <FormField
-        control={form.control}
-        name="width"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Largura</FormLabel>
-            <FormControl>
-              <RadioGroup
-                value={field.value}
-                onValueChange={field.onChange}
-                className="flex flex-wrap gap-2"
-              >
-                {widthOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-1">
-                    <RadioGroupItem value={option.value} id={`width-${option.id}`} />
-                    <Label htmlFor={`width-${option.id}`} className="text-sm cursor-pointer">{option.label}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="height"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Altura</FormLabel>
-            <FormControl>
-              <RadioGroup
-                value={field.value}
-                onValueChange={field.onChange}
-                className="flex gap-4"
-              >
-                {heightOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-1">
-                    <RadioGroupItem value={option.value} id={`height-${option.id}`} />
-                    <Label htmlFor={`height-${option.id}`} className="text-sm cursor-pointer">{option.label}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm font-medium mb-2">Largura</p>
+        <div className="grid grid-cols-4 gap-2">
+          {widthOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onWidthChange(option.value)}
+              className={`
+                p-2 rounded-md text-center text-sm border transition-all
+                ${width === option.value ? 'bg-blue-100 border-blue-300' : 'border-gray-200 hover:border-gray-300'}
+              `}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      <div>
+        <p className="text-sm font-medium mb-2">Altura</p>
+        <div className="grid grid-cols-2 gap-2">
+          {heightOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onHeightChange(option.value)}
+              className={`
+                p-2 rounded-md text-center text-sm border transition-all
+                ${height === option.value ? 'bg-blue-100 border-blue-300' : 'border-gray-200 hover:border-gray-300'}
+              `}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
