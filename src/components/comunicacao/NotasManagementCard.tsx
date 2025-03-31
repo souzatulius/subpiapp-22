@@ -19,7 +19,7 @@ interface Nota {
   criado_em: string;
   autor: {
     nome_completo: string;
-  };
+  } | null;
 }
 
 const NotasManagementCard: React.FC<NotasManagementCardProps> = ({ 
@@ -89,9 +89,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             titulo: nota.titulo,
             status: nota.status,
             criado_em: nota.criado_em,
-            autor: {
-              nome_completo: nota.autor?.nome_completo || 'Desconhecido'
-            }
+            autor: nota.autor || { nome_completo: 'Desconhecido' }
           }));
           
           setNotas(formattedNotas);

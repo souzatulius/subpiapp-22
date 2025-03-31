@@ -46,7 +46,7 @@ const AddressInput: React.FC<AddressInputProps> = ({
     
     // Add the script element if it doesn't exist
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''}&libraries=places&callback=initAutocomplete`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDlWrQZR2uFMdvTA4ut96BaXI4Fx80k3Ho&libraries=places&callback=initAutocomplete`;
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
