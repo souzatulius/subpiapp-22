@@ -71,12 +71,27 @@ const CardGrid: React.FC<CardGridProps> = ({
     }
   };
 
+  // Process the displayed cards - do this outside any conditional
   const displayedCards = isMobileView
     ? cards
         .filter((card) => card.displayMobile !== false)
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : cards;
 
+  // Always prepare card dimensions for the grid occupancy system
+  const cardDimensions = React.useMemo(() => {
+    return displayedCards.map(card => ({ 
+      id: card.id,
+      width: card.width || '25', 
+      height: card.height || '1',
+      type: card.type
+    }));
+  }, [displayedCards]);
+
+  // Always call the hook - even if there are no cards
+  const { totalColumns } = useGridOccupancy(cardDimensions, isMobileView);
+
+  // If there are no cards, show a placeholder
   if (!displayedCards || displayedCards.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
@@ -84,17 +99,6 @@ const CardGrid: React.FC<CardGridProps> = ({
       </div>
     );
   }
-
-  // Always prepare the card dimensions for the useGridOccupancy hook
-  const cardDimensions = displayedCards.map(card => ({ 
-    id: card.id,
-    width: card.width || '25', 
-    height: card.height || '1',
-    type: card.type
-  }));
-
-  // Use our grid occupancy system - ensure hook is always called
-  const { totalColumns } = useGridOccupancy(cardDimensions, isMobileView);
 
   const dynamicDataCards = displayedCards.filter(
     (card) => card.type === 'data_dynamic' && card.dataSourceKey
