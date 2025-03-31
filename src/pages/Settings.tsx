@@ -92,29 +92,6 @@ const Settings = () => {
             <div className="w-full h-full">
               <div className="overflow-y-auto p-6 pb-24 md:pb-6">
                 <div className="max-w-7xl mx-auto">
-                  {activeSection !== 'dashboard' && (
-                    <div className="mb-4">
-                      <nav className="flex" aria-label="Breadcrumb">
-                        <ol className="flex items-center space-x-2">
-                          <li>
-                            <button
-                              onClick={handleBackClick}
-                              className="text-blue-600 hover:text-blue-800 font-medium"
-                            >
-                              Configurações
-                            </button>
-                          </li>
-                          <li className="text-gray-500 flex items-center">
-                            <span className="mx-1">/</span>
-                            <span className={`${getSectionColor(activeSection)} font-medium`}>
-                              {getSectionTitle(activeSection)}
-                            </span>
-                          </li>
-                        </ol>
-                      </nav>
-                    </div>
-                  )}
-                  
                   {activeSection === 'dashboard' ? (
                     <div>
                       <SettingsDashboard searchQuery={searchQuery} />

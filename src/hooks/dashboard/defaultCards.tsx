@@ -26,8 +26,6 @@ export const getIconComponentFromId = (iconId: string): React.ElementType => {
 
 // Cards padrão sem JSX nos dados
 export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
-  const isComunicacao = coordenacaoId === 'comunicacao';
-  
   const baseCards: ActionCardItem[] = [
     {
       id: 'smart-search',
@@ -124,8 +122,9 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
   ];
 
   // Add communication team specific cards
-  if (isComunicacao) {
+  if (coordenacaoId === 'comunicacao') {
     return [
+      ...baseCards,
       {
         id: '1',
         title: 'Nova Demanda',
@@ -149,8 +148,7 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
         type: 'standard' as CardType,
         displayMobile: true,
         mobileOrder: 3
-      },
-      ...baseCards
+      }
     ];
   }
   

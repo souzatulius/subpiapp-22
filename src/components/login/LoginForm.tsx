@@ -93,114 +93,118 @@ const LoginForm = () => {
 
   const scrollToForm = () => {
     if (isMobile && formRef.current) {
-      formRef.current.scrollIntoView({ behavior: 'smooth' });
+      formRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start'
+      });
     }
   };
 
-  return (
-    <div className="w-full md:max-w-md mx-auto p-6 bg-white rounded-xl shadow-sm">
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Acesso ao Sistema</h1>
-        <p className="text-gray-600">Entre com suas credenciais para acessar</p>
+  if (loading || authLoading) {
+    return (
+      <div className="h-full flex items-center justify-center p-8">
+        <div className="animate-spin w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full" />
       </div>
+    );
+  }
 
-      <form ref={formRef} onSubmit={handleLogin} className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <EmailSuffix
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError(false);
-            }}
-            error={emailError}
-            onFocus={scrollToForm}
-          />
-          {emailError && (
-            <p className="text-red-500 text-xs mt-1">Email é obrigatório</p>
-          )}
-        </div>
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-8 w-full">
+      <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
+      <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Senha
-            </label>
-            <Link to="/esqueci-senha" className="text-xs text-blue-600 hover:text-blue-800">
-              Esqueceu a senha?
-            </Link>
-          </div>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => setShowRequirements(true)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Digite sua senha"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
-          </div>
-          {showRequirements && (
-            <PasswordRequirements requirements={requirements} />
-          )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || authLoading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-xl font-medium flex items-center justify-center"
-        >
-          {(loading || authLoading) ? (
-            <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Processando...
-            </span>
-          ) : (
-            <span className="flex items-center">
-              <LogIn className="h-4 w-4 mr-2" />
-              Entrar
-            </span>
-          )}
-        </button>
-
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-gray-200 flex-grow"></div>
-          <span className="mx-2 text-xs text-gray-500">ou</span>
-          <div className="border-t border-gray-200 flex-grow"></div>
-        </div>
-
+      {/* Botão de acesso rápido para mobile */}
+      {isMobile && (
         <button
           type="button"
-          onClick={handleGoogleLogin}
-          disabled={loading || authLoading}
-          className="w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-xl font-medium hover:bg-gray-50 flex items-center justify-center"
+          onClick={scrollToForm}
+          className="w-full mb-6 bg-[#003570] text-white py-3 px-4 rounded-xl flex items-center justify-center"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 mr-2">
-            <path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0545455,0 12,0 C7.27006974,0 3.1977497,2.69829785 1.23999023,6.65002441 L5.26620003,9.76452941 Z" />
-            <path fill="#34A853" d="M16.0407269,18.0125889 C14.9509167,18.7163016 13.5660892,19.0909091 12,19.0909091 C8.86648613,19.0909091 6.21911939,17.076871 5.27698177,14.2678769 L1.23746264,17.3349879 C3.19279051,21.2936293 7.26500293,24 12,24 C14.9328362,24 17.7353462,22.9573905 19.834192,20.9995801 L16.0407269,18.0125889 Z" />
-            <path fill="#4A90E2" d="M19.834192,20.9995801 C22.0291676,18.9520994 23.4545455,15.903663 23.4545455,12 C23.4545455,11.2909091 23.3454545,10.5272727 23.1818182,9.81818182 L12,9.81818182 L12,14.4545455 L18.4363636,14.4545455 C18.1187732,16.013626 17.2662994,17.2212117 16.0407269,18.0125889 L19.834192,20.9995801 Z" />
-            <path fill="#FBBC05" d="M5.27698177,14.2678769 C5.03832634,13.556323 4.90909091,12.7937589 4.90909091,12 C4.90909091,11.2182781 5.03443647,10.4668121 5.26620003,9.76452941 L1.23999023,6.65002441 C0.43658717,8.26043162 0,10.0753848 0,12 C0,13.9195484 0.444780743,15.7301709 1.23746264,17.3349879 L5.27698177,14.2678769 Z" />
-          </svg>
-          Google
+          <LogIn className="mr-2 h-5 w-5" /> Acessar
         </button>
+      )}
+
+      <form id="login-form" ref={formRef} onSubmit={handleLogin}>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-[#111827] mb-1">E-mail</label>
+            <EmailSuffix
+              id="email"
+              value={email}
+              onChange={setEmail}
+              suffix="@smsub.prefeitura.sp.gov.br"
+              error={emailError}
+              placeholder="seu.email"
+            />
+            {emailError && <p className="text-sm text-[#f57b35]">E-mail é obrigatório</p>}
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-[#111827] mb-1">Senha</label>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onFocus={() => setShowRequirements(true)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003570]"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+              </button>
+            </div>
+            <PasswordRequirements 
+              password={password}
+              requirements={requirements} 
+              visible={showRequirements && password.length > 0} 
+            />
+            <div className="mt-2">
+              <Link to="/forgot-password" className="text-[#f57c35] font-semibold hover:underline">Esqueceu sua senha?</Link>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#003570] text-white py-3 px-4 hover:bg-blue-900 flex items-center justify-center rounded-xl"
+          >
+            <LogIn className="mr-2 h-5 w-5" /> Entrar
+          </button>
+
+          <div className="relative flex items-center justify-center my-4">
+            <hr className="w-full border-gray-300" />
+            <span className="text-xs uppercase text-[#6B7280] bg-white px-4 absolute">OU</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full border border-gray-300 py-3 rounded-xl flex justify-center items-center"
+          >
+            <svg className="mr-2" width="18" height="18" viewBox="0 0 48 48">
+              <path fill="#FFC107" d="..."></path>
+              <path fill="#FF3D00" d="..."></path>
+              <path fill="#4CAF50" d="..."></path>
+              <path fill="#1976D2" d="..."></path>
+            </svg>
+            Entrar com Google (@smsub.prefeitura.sp.gov.br)
+          </button>
+
+          <AttentionBox title="Importante:">
+            <p>Use uma conta do domínio @smsub.prefeitura.sp.gov.br</p>
+          </AttentionBox>
+        </div>
       </form>
+
+      <p className="mt-6 text-center text-sm text-[#6B7280]">
+        Não tem uma conta? <Link to="/register" className="text-[#f57c35] font-semibold hover:underline">Registre-se</Link>
+      </p>
     </div>
   );
 };
