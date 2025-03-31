@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { UserProfile } from '@/types/common';
-import { setupProfilePhotosStorage } from './setupProfilePhotosStorage';
 
 // The bucket name must only contain lowercase letters, numbers, dots, and hyphens
 const PROFILE_PHOTOS_BUCKET = 'profile-photos';
@@ -82,13 +81,6 @@ export const usePhotoUpload = (
     setError(null);
     
     try {
-      // Ensure storage bucket exists first
-      const bucketExists = await setupProfilePhotosStorage();
-      
-      if (!bucketExists) {
-        throw new Error("Não foi possível configurar o armazenamento para fotos de perfil");
-      }
-      
       // If photo was removed
       if (photoRemoved) {
         // If the user has an existing photo, remove it from storage
@@ -115,7 +107,6 @@ export const usePhotoUpload = (
         toast({
           title: "Foto removida",
           description: "Sua foto de perfil foi removida com sucesso.",
-          variant: "success",
         });
         
         return;
@@ -161,7 +152,6 @@ export const usePhotoUpload = (
         toast({
           title: "Foto atualizada",
           description: "Sua foto de perfil foi atualizada com sucesso.",
-          variant: "success",
         });
       } else if (!photoRemoved) {
         // If neither a new photo nor removal, just close the modal

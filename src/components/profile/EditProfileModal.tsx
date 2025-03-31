@@ -60,8 +60,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           if (typeof userData.aniversario === 'string') {
             // Format date string to DD/MM/YYYY
             const dateObj = new Date(userData.aniversario);
-            formattedDate = formatDateToString(dateObj);
-          } else {
+            if (!isNaN(dateObj.getTime())) {
+              formattedDate = formatDateToString(dateObj);
+            }
+          } else if (userData.aniversario instanceof Date) {
             // Already a Date object
             formattedDate = formatDateToString(userData.aniversario);
           }
@@ -90,12 +92,21 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
 
   const onSubmit = async (data: ProfileData) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Erro",
+        description: "Usuário não identificado. Por favor, faça login novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     try {
       // Parse the formatted date into a Date object
       let parsedDate = null;
+      let aniversarioISO = null;
+      
       if (dateInputValue) {
         parsedDate = parseFormattedDate(dateInputValue);
         if (!parsedDate) {
@@ -107,21 +118,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           setIsSubmitting(false);
           return;
         }
+        aniversarioISO = parsedDate.toISOString();
       }
       
       // Clean whatsapp input (remove mask)
       const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
       
       // Prepare data for update with correct types
-      const updateData: Record<string, any> = {
+      const updateData = {
         nome_completo: data.nome_completo,
-        whatsapp: cleanWhatsapp || null
+        whatsapp: cleanWhatsapp || null,
+        aniversario: aniversarioISO
       };
-      
-      // Only include aniversario if we have a valid parsed date
-      if (parsedDate) {
-        updateData.aniversario = parsedDate.toISOString();
-      }
       
       console.log('Updating with data:', updateData);
       

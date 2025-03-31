@@ -76,13 +76,24 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
   useEffect(() => {
     if (user && open) {
-      // Instead of directly assigning aniversario as a string,
-      // we'll parse it to a Date object if needed
-      const parsedAniversario = user.aniversario 
-        ? (typeof user.aniversario === 'string' 
-            ? parseFormattedDate(formatDateToString(new Date(user.aniversario)))
-            : user.aniversario)
-        : undefined;
+      // Handle aniversario date parsing more carefully
+      let parsedAniversario = undefined;
+      
+      if (user.aniversario) {
+        try {
+          if (typeof user.aniversario === 'string') {
+            const dateObj = new Date(user.aniversario);
+            if (!isNaN(dateObj.getTime())) {
+              parsedAniversario = dateObj;
+            }
+          } else if (user.aniversario instanceof Date) {
+            parsedAniversario = user.aniversario;
+          }
+        } catch (error) {
+          console.error('Error parsing birthday date:', error);
+          parsedAniversario = undefined;
+        }
+      }
         
       reset({
         nome_completo: user.nome_completo,
@@ -167,8 +178,9 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     setUploadError(null);
     
     try {
+      // Handle photo upload
       if (photoFile) {
-        // Ensure bucket exists
+        // Ensure bucket exists - should already be created by our SQL migration
         const bucketExists = await ensureProfilePhotosBucketExists();
         if (!bucketExists) {
           throw new Error("Não foi possível configurar o armazenamento para fotos");
@@ -179,7 +191,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         const fileName = `${user?.id || 'temp'}-${uuidv4()}.${fileExt}`;
         
         // Upload the file
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('profile-photos')
           .upload(fileName, photoFile, {
             upsert: true,
@@ -201,7 +213,19 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         }
       }
       
-      await onSubmit(data);
+      // Make sure aniversario is properly converted to ISO string if present
+      if (data.aniversario instanceof Date) {
+        // All date handling should use ISO format for storage
+        const formattedDate = data.aniversario.toISOString();
+        // Create a copy of data with the properly formatted date
+        const submitData = {
+          ...data,
+          aniversario: formattedDate
+        };
+        await onSubmit(submitData);
+      } else {
+        await onSubmit(data);
+      }
     } catch (error: any) {
       console.error('Error processing form submission:', error);
       setUploadError(error.message || "Ocorreu um erro ao processar o formulário");

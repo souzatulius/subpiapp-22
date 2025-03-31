@@ -33,6 +33,7 @@ export const setupProfilePhotosStorage = async () => {
       
       if (updateError) {
         console.error('Error updating bucket policies:', updateError);
+        return false;
       }
     }
     
