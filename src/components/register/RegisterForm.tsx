@@ -52,9 +52,6 @@ const RegisterForm = ({ roles, areas, coordenacoes, loadingOptions }) => {
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Cadastre-se</h2>
       <p className="text-[#6B7280] mb-6">Preencha seus dados para solicitar acesso à plataforma.</p>
 
-      {/* Hide "Solicitar Acesso" button on mobile */}
-      {/* Mobile quick access button removed */}
-
       {loadingOptions ? (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#003570]"></div>

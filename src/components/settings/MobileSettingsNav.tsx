@@ -17,20 +17,26 @@ const MobileSettingsNav = () => {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#003570] border-t border-gray-700 shadow-lg z-50">
       <div className="flex justify-around">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => navigate(item.path)}
-            className={`flex flex-col items-center justify-center py-2 px-1 flex-1 ${
-              location.pathname.includes(item.path) ? 'text-white' : 'text-gray-300'
-            }`}
-          >
-            <div className="text-[#f57737]">
-              {item.icon}
-            </div>
-            <span className="text-[11px] mt-1 truncate">{item.label}</span>
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const isActive = location.pathname.includes(item.path);
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center justify-center py-2 px-1 flex-1 ${
+                isActive 
+                  ? 'text-white bg-[#f57737]' 
+                  : 'text-gray-300'
+              }`}
+            >
+              <div className={isActive ? "text-white" : "text-[#f57737]"}>
+                {item.icon}
+              </div>
+              <span className="text-[11px] mt-1 truncate">{item.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

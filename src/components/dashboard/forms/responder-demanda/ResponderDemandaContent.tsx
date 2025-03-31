@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDemandasData } from './hooks/useDemandasData';
@@ -8,9 +9,15 @@ import DemandaList from './components/DemandaList';
 import DemandaGrid from './components/DemandaGrid';
 import RespostaForm from './components/RespostaForm';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 const ResponderDemandaContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const isMobile = useIsMobile();
+
   const {
     demandas,
     setDemandas,
@@ -28,6 +35,7 @@ const ResponderDemandaContent: React.FC = () => {
     setPrioridadeFilter,
     handleSelectDemanda
   } = useDemandasData();
+
   const {
     resposta,
     setResposta,
@@ -36,7 +44,15 @@ const ResponderDemandaContent: React.FC = () => {
     isLoading,
     handleSubmitResposta,
     handleRespostaChange
-  } = useRespostaForm(selectedDemanda, setSelectedDemanda, demandas, setDemandas, filteredDemandas, setFilteredDemandas);
+  } = useRespostaForm(
+    selectedDemanda, 
+    setSelectedDemanda, 
+    demandas, 
+    setDemandas, 
+    filteredDemandas, 
+    setFilteredDemandas
+  );
+
   const handleBack = () => {
     setSelectedDemanda(null);
   };
@@ -46,21 +62,101 @@ const ResponderDemandaContent: React.FC = () => {
     id: area.id,
     nome: area.descricao // Use the descricao field as nome
   }));
-  return <div className="animate-fade-in container mx-auto px-4">
-      {/* Unified filter bar that's always visible */}
+
+  // Mobile search functionality
+  const toggleMobileSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+  };
+
+  return (
+    <div className="animate-fade-in container mx-auto px-4">
+      {/* Mobile search bar - only shown when search is opened */}
+      {isMobile && isSearchOpen && (
+        <div className="mb-4 animate-fadeInDown">
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar demanda..."
+            className="w-full py-2"
+            autoFocus
+          />
+        </div>
+      )}
+
+      {/* Desktop filter bar or Mobile filter with search icon */}
       <div className="mb-6">
-        <DemandasFilter searchTerm={searchTerm} setSearchTerm={setSearchTerm} areaFilter={areaFilter} setAreaFilter={setAreaFilter} prioridadeFilter={prioridadeFilter} setPrioridadeFilter={setPrioridadeFilter} viewMode={viewMode} setViewMode={setViewMode} areas={formattedAreas} onBack={handleBack} showBackButton={!!selectedDemanda} />
+        {isMobile ? (
+          <DemandasFilter 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+            areaFilter={areaFilter}
+            setAreaFilter={setAreaFilter}
+            prioridadeFilter={prioridadeFilter}
+            setPrioridadeFilter={setPrioridadeFilter}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            areas={formattedAreas}
+            onBack={handleBack}
+            showBackButton={!!selectedDemanda}
+            showSearchIcon={true}
+            onSearchClick={toggleMobileSearch}
+          />
+        ) : (
+          <DemandasFilter 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+            areaFilter={areaFilter}
+            setAreaFilter={setAreaFilter}
+            prioridadeFilter={prioridadeFilter}
+            setPrioridadeFilter={setPrioridadeFilter}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            areas={formattedAreas}
+            onBack={handleBack}
+            showBackButton={!!selectedDemanda}
+          />
+        )}
       </div>
 
       {/* Content area - dynamically showing either list or details */}
       <Card className="border border-gray-200 shadow-sm border-transparent bg-transparent rounded-none">
         <CardContent className="p-6 px-0 border border-transparent border-0 bg-transparent py-0">
-          {selectedDemanda ? <RespostaForm selectedDemanda={selectedDemanda} resposta={resposta} setResposta={setResposta} comentarios={comentarios} setComentarios={setComentarios} onBack={handleBack} isLoading={isLoading} onSubmit={handleSubmitResposta} handleRespostaChange={handleRespostaChange} hideBackButton={true} // Hide the back button in the form as we now have it in the filter bar
-        /> : <>
-              {viewMode === 'cards' ? <DemandaGrid demandas={filteredDemandas} selectedDemanda={selectedDemanda} handleSelectDemanda={handleSelectDemanda} isLoading={isLoadingDemandas} /> : <DemandaList demandas={filteredDemandas} selectedDemanda={selectedDemanda} handleSelectDemanda={handleSelectDemanda} isLoading={isLoadingDemandas} />}
-            </>}
+          {selectedDemanda ? (
+            <RespostaForm 
+              selectedDemanda={selectedDemanda} 
+              resposta={resposta} 
+              setResposta={setResposta}
+              comentarios={comentarios}
+              setComentarios={setComentarios}
+              onBack={handleBack}
+              isLoading={isLoading}
+              onSubmit={handleSubmitResposta}
+              handleRespostaChange={handleRespostaChange}
+              hideBackButton={true} // Hide the back button in the form as we now have it in the filter bar
+            /> 
+          ) : (
+            <>
+              {viewMode === 'cards' ? (
+                <DemandaGrid 
+                  demandas={filteredDemandas}
+                  selectedDemanda={selectedDemanda}
+                  handleSelectDemanda={handleSelectDemanda}
+                  isLoading={isLoadingDemandas}
+                />
+              ) : (
+                <DemandaList 
+                  demandas={filteredDemandas}
+                  selectedDemanda={selectedDemanda}
+                  handleSelectDemanda={handleSelectDemanda}
+                  isLoading={isLoadingDemandas}
+                />
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default ResponderDemandaContent;
