@@ -30,9 +30,9 @@ const ComunicacaoCard: React.FC<ComunicacaoCardProps> = ({
           </div>
           
           {typeof badgeCount !== 'undefined' && (
-            <div className="h-6 min-w-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-medium px-1.5">
+            <div className="h-6 min-w-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-medium px-1.5">
               {loading ? (
-                <Skeleton className="h-4 w-4 rounded-full bg-red-400" />
+                <Skeleton className="h-4 w-4 rounded-full bg-orange-400" />
               ) : (
                 badgeCount
               )}

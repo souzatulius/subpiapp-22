@@ -118,14 +118,21 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     <div className="max-w-7xl mx-auto space-y-6 p-6 pb-20 md:pb-6">
       {/* Welcome Card */}
       <WelcomeCard
-        title={`Comunicação ${departmentName ? '- ' + departmentName : ''}`}
-        description={isPreview 
-          ? "Visualização da página de comunicação" 
-          : "Gerencie demandas e notas oficiais"
-        }
+        title="Comunicação"
+        description="Gerencie demandas e notas oficiais"
         icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
+      
+      {/* Action Cards - Moved to top */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Ações rápidas</h2>
+        <ActionCards 
+          coordenacaoId={userDepartment || ''} 
+          isComunicacao={isComunicacao}
+          baseUrl="dashboard/comunicacao" 
+        />
+      </div>
       
       {/* Dynamic Content Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -162,16 +169,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
             baseUrl="dashboard/comunicacao" 
           />
         </div>
-      </div>
-      
-      {/* Action Cards */}
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Ações rápidas</h2>
-        <ActionCards 
-          coordenacaoId={userDepartment || ''} 
-          isComunicacao={isComunicacao}
-          baseUrl="dashboard/comunicacao" 
-        />
       </div>
       
       {/* Only add MobileBottomNav if this page is not in preview mode */}

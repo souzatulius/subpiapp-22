@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import ComunicacaoCard from './ComunicacaoCard';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Newspaper, MessageSquare, Phone, Mail, Globe, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +25,25 @@ const NewRequestOriginCard: React.FC<NewRequestOriginCardProps> = ({ baseUrl = '
     }
   });
 
+  // Map origin icons based on the origin data
+  const getOriginIcon = (icone: string | null) => {
+    switch (icone?.toLowerCase()) {
+      case 'newspaper':
+        return <Newspaper className="h-5 w-5 text-blue-500" />;
+      case 'message':
+      case 'messagesquare':
+        return <MessageSquare className="h-5 w-5 text-green-500" />;
+      case 'phone':
+        return <Phone className="h-5 w-5 text-orange-500" />;
+      case 'mail':
+        return <Mail className="h-5 w-5 text-purple-500" />;
+      case 'globe':
+        return <Globe className="h-5 w-5 text-cyan-500" />;
+      default:
+        return <HelpCircle className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
   return (
     <ComunicacaoCard
       title="Nova Demanda"
@@ -33,20 +51,20 @@ const NewRequestOriginCard: React.FC<NewRequestOriginCardProps> = ({ baseUrl = '
       loading={isLoading}
     >
       <CardContent className="p-4">
-        <h4 className="text-sm font-medium mb-2 text-gray-500">Selecione a origem da demanda:</h4>
+        <h4 className="text-sm font-medium mb-3 text-gray-500">Selecione a origem da demanda:</h4>
         
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {origens?.map((origem) => (
-            <Button
+            <Link
               key={origem.id}
-              variant="outline"
-              className="w-full justify-start text-left"
-              asChild
+              to={`/${baseUrl}/cadastrar?origem_id=${origem.id}`}
+              className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all"
             >
-              <Link to={`/${baseUrl}/cadastrar?origem_id=${origem.id}`}>
-                {origem.descricao}
-              </Link>
-            </Button>
+              <div className="mr-3 flex-shrink-0">
+                {getOriginIcon(origem.icone)}
+              </div>
+              <span className="text-sm">{origem.descricao}</span>
+            </Link>
           ))}
         </div>
       </CardContent>

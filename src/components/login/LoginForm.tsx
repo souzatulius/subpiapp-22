@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom'; // <-- import necessário
+import { Link, useNavigate } from 'react-router-dom';
 import EmailSuffix from '@/components/EmailSuffix';
 import PasswordRequirements from '@/components/PasswordRequirements';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
@@ -10,7 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 import AttentionBox from '@/components/ui/attention-box';
 
 const LoginForm = () => {
-  const navigate = useNavigate(); // <-- hook do react-router-dom
+  const navigate = useNavigate();
 
   const {
     password,
@@ -55,7 +56,7 @@ const LoginForm = () => {
           variant: 'success'
         });
 
-        navigate('/dashboard'); // <-- redireciona ao sucesso
+        navigate('/dashboard');
       }
     } catch (err: any) {
       toast({
@@ -135,7 +136,11 @@ const LoginForm = () => {
                 {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
               </button>
             </div>
-            <PasswordRequirements requirements={requirements} visible={showRequirements && password.length > 0} />
+            <PasswordRequirements 
+              password={password}
+              requirements={requirements} 
+              visible={showRequirements && password.length > 0} 
+            />
             <div className="mt-2">
               <Link to="/forgot-password" className="text-[#f57c35] font-semibold hover:underline">Esqueceu sua senha?</Link>
             </div>

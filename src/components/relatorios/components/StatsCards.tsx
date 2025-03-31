@@ -73,32 +73,32 @@ export const StatsCards: React.FC<{
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <StatsCard
         title="Total de Demandas"
-        value={cardStats.totalDemandas}
-        trend={cardStats.demandasVariacao}
+        value={cardStats.totalDemandas || 0}
+        trend={cardStats.demandasVariacao || 0}
         description="vs. mês anterior"
         icon={<BarChartIcon className="h-4 w-4 text-orange-600" />}
         isLoading={isLoading}
       />
       <StatsCard
         title="Notas Oficiais"
-        value={cardStats.totalNotas}
-        trend={cardStats.notasVariacao}
+        value={cardStats.totalNotas || 0}
+        trend={cardStats.notasVariacao || 0}
         description="vs. mês anterior"
         icon={<FileTextIcon className="h-4 w-4 text-orange-600" />}
         isLoading={isLoading}
       />
       <StatsCard
         title="Tempo Médio Resposta"
-        value={`${cardStats.tempoMedioResposta.toFixed(1)} dias`}
-        trend={cardStats.tempoRespostaVariacao}
+        value={`${(cardStats.tempoMedioResposta || 0).toFixed(1)} dias`}
+        trend={cardStats.tempoRespostaVariacao || 0}
         description="vs. mês anterior"
         icon={<ClockIcon className="h-4 w-4 text-orange-600" />}
         isLoading={isLoading}
       />
       <StatsCard
         title="Taxa de Aprovação"
-        value={`${cardStats.taxaAprovacao}%`}
-        trend={cardStats.aprovacaoVariacao}
+        value={`${cardStats.taxaAprovacao || 0}%`}
+        trend={cardStats.aprovacaoVariacao || 0}
         description="vs. mês anterior"
         icon={<PercentIcon className="h-4 w-4 text-orange-600" />}
         isLoading={isLoading}
