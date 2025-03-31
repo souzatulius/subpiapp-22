@@ -26,13 +26,18 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     const exactMatch = navSections.find(section => section.path === location.pathname);
     if (exactMatch) return exactMatch.id;
     
-    // Then check for parent paths, but be careful to find the most specific one
+    // Check if we're on a child route of a section and handle nested routes properly
     // Sort paths by length descending to check the most specific paths first
     const sortedSections = [...navSections].sort(
       (a, b) => (b.path?.length || 0) - (a.path?.length || 0)
     );
     
     for (const section of sortedSections) {
+      // Skip the home/dashboard root path when checking child routes to avoid it always being active
+      if (section.path === '/dashboard' && location.pathname !== '/dashboard') {
+        continue;
+      }
+      
       if (section.path && location.pathname.startsWith(section.path + '/')) {
         return section.id;
       }
@@ -56,6 +61,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 isSection={section.isSection}
                 isOpen={isOpen}
                 path={section.path}
+                isActive={section.id === activeSectionId}
               />
             </li>
           ))}
