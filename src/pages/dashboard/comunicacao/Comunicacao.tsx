@@ -1,3 +1,4 @@
+
 // (sem alterações até aqui)
 
   if (isLoading) {
@@ -10,7 +11,7 @@
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 px-4 pt-6 pb-20 md:px-6 md:pb-6">
+    <div className="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 pt-6 pb-20 md:pb-6">
       {/* Welcome Card */}
       <WelcomeCard
         title="Comunicação"
@@ -20,7 +21,7 @@
       />
       
       {/* Action Cards - Moved to top without title */}
-      <div>
+      <div className="w-full">
         <ActionCards 
           coordenacaoId={userDepartment || ''} 
           isComunicacao={isComunicacao}
@@ -29,16 +30,16 @@
       </div>
       
       {/* Dynamic Content Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
         {/* Card 1: Nova Solicitação - only for Comunicação */}
         {isComunicacao && (
-          <div className="col-span-1 md:col-span-1">
+          <div className="col-span-1 md:col-span-1 w-full">
             <NewRequestOriginCard baseUrl="dashboard/comunicacao" />
           </div>
         )}
         
         {/* Card 2: Responder Demandas - for all */}
-        <div className="col-span-1 md:col-span-1">
+        <div className="col-span-1 md:col-span-1 w-full">
           <PendingDemandsCard 
             coordenacaoId={userDepartment || ''} 
             isComunicacao={isComunicacao}
@@ -47,7 +48,7 @@
         </div>
         
         {/* Card 3: Gerenciamento de Notas - for all */}
-        <div className="col-span-1 md:col-span-1">
+        <div className="col-span-1 md:col-span-1 w-full">
           <NotasManagementCard 
             coordenacaoId={userDepartment || ''} 
             isComunicacao={isComunicacao}
@@ -56,7 +57,7 @@
         </div>
         
         {/* Card 4: Demandas em Andamento - for all */}
-        <div className={`col-span-1 md:col-span-${isComunicacao ? 3 : 1}`}>
+        <div className={`col-span-1 md:col-span-${isComunicacao ? 3 : 1} w-full`}>
           <DemandasEmAndamentoCard 
             coordenacaoId={userDepartment || ''} 
             isComunicacao={isComunicacao}
