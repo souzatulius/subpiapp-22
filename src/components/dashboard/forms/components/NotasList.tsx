@@ -50,7 +50,7 @@ const NotasList: React.FC<NotasListProps> = ({
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
         <Input
           type="text"
-          placeholder="Buscar notas por título, autor ou área..."
+          placeholder="Buscar notas"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-8"
@@ -61,12 +61,17 @@ const NotasList: React.FC<NotasListProps> = ({
         <SearchEmptyState />
       ) : (
         filteredNotas.map((nota) => (
-          <NotaCard
-            key={nota.id}
-            nota={nota}
-            isSelected={selectedNota?.id === nota.id}
+          <div 
+            key={nota.id} 
             onClick={() => onSelectNota(nota)}
-          />
+            className="cursor-pointer"
+          >
+            <NotaCard
+              nota={nota}
+              isSelected={selectedNota?.id === nota.id}
+              onClick={() => onSelectNota(nota)}
+            />
+          </div>
         ))
       )}
     </div>

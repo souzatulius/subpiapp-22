@@ -136,6 +136,10 @@ export default {
 				'wiggle': {
 					'0%, 100%': { transform: 'rotate(-2deg)' },
 					'50%': { transform: 'rotate(2deg)' }
+				},
+				'pulse': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.05)' }
 				}
 			},
 			animation: {
@@ -144,7 +148,8 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-out',
 				'fade-in-right': 'fade-in-right 0.4s ease-out',
 				'spin': 'spin 1s linear infinite',
-				'wiggle': 'wiggle 1s ease-in-out infinite'
+				'wiggle': 'wiggle 1s ease-in-out infinite',
+				'pulse': 'pulse 2s ease-in-out infinite'
 			}
 		}
 	},
