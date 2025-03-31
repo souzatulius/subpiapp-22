@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import DashboardPreview from './DashboardPreview';
 import DashboardControls from './DashboardControls';
@@ -55,12 +54,17 @@ const DashboardManagementContent: React.FC = () => {
     isSaving,
   } = useDefaultDashboardConfig(selectedDepartment);
   
-  // Load departments when component mounts
   useEffect(() => {
     loadDepartments();
   }, []);
 
   const handleAddCardToDashboard = (card: ActionCardItem) => {
+    const dashboardPreviewRef = document.getElementById('dashboard-preview-container');
+    if (dashboardPreviewRef) {
+      dashboardPreviewRef.classList.add('highlight-pulse');
+      setTimeout(() => dashboardPreviewRef.classList.remove('highlight-pulse'), 1000);
+    }
+    
     toast({
       title: "Card adicionado",
       description: "O card foi adicionado ao dashboard.",
@@ -101,7 +105,7 @@ const DashboardManagementContent: React.FC = () => {
         </div>
         
         <div className="lg:col-span-9">
-          <Card className="border rounded-lg overflow-hidden bg-white h-full">
+          <Card id="dashboard-preview-container" className="border rounded-lg overflow-hidden bg-white h-full">
             {isLoading ? (
               <div className="flex justify-center items-center h-96">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -118,7 +122,6 @@ const DashboardManagementContent: React.FC = () => {
         </div>
       </div>
       
-      {/* Modals */}
       <CardCustomizationModal
         isOpen={isCreateCardModalOpen}
         onClose={() => setIsCreateCardModalOpen(false)}

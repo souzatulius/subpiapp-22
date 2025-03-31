@@ -4,6 +4,7 @@ import { ActionCardItem } from '@/types/dashboard';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { LayoutDashboard } from 'lucide-react';
 
 export interface CardLibraryFilters {
   type: string;
@@ -131,6 +132,26 @@ export const useCardLibrary = (onAddCard?: (card: ActionCardItem) => void) => {
     };
   };
 
+  // Create a welcome card
+  const createWelcomeCard = (title: string, description: string, gradient: string): ActionCardItem => {
+    return {
+      id: `welcome-card-${uuidv4()}`,
+      title: title || "Bem-vindo",
+      iconId: "layout-dashboard",
+      path: "/",
+      color: "blue",
+      type: "welcome_card",
+      width: "100",
+      height: "1",
+      isCustom: true,
+      customProperties: {
+        description: description || "Bem-vindo ao dashboard",
+        gradient: gradient || "bg-gradient-to-r from-blue-600 to-blue-800",
+        isWelcomeCard: true
+      }
+    };
+  };
+
   const handleAddToLibrary = (card: ActionCardItem) => {
     if (onAddCard) {
       const newCard = createCardFromTemplate(card);
@@ -147,6 +168,7 @@ export const useCardLibrary = (onAddCard?: (card: ActionCardItem) => void) => {
     filters,
     setFilters,
     createCardFromTemplate,
-    createBlankCard
+    createBlankCard,
+    createWelcomeCard
   };
 };

@@ -1,4 +1,3 @@
-
 import {
   ClipboardList,
   MessageSquare,
@@ -19,30 +18,30 @@ import {
 import React from 'react';
 
 // Function to get color class based on color name
-export const getColorClass = (color: string): string => {
+export const getColorClass = (color: string) => {
   switch (color) {
     case 'blue':
-      return 'bg-blue-50 text-blue-950 border-blue-100';
-    case 'blue-dark':
-      return 'bg-blue-950 text-white border-blue-900';
-    case 'orange':
-      return 'bg-orange-50 text-orange-950 border-orange-100';
-    case 'orange-light':
-      return 'bg-orange-500 text-white border-orange-600';
-    case 'orange-600':
-      return 'bg-orange-600 text-white border-orange-700';
-    case 'gray-light':
-      return 'bg-gray-25 text-gray-700 border-gray-100';
-    case 'gray-dark':
-      return 'bg-gray-400 text-white border-gray-500';
+      return 'bg-blue-50 text-blue-600 border border-blue-200';
     case 'green':
-      return 'bg-lime-50 text-lime-950 border-lime-100';
-    case 'lime':
-      return 'bg-lime-500 text-white border-lime-600';
+      return 'bg-green-50 text-green-600 border border-green-200';
+    case 'orange':
+      return 'bg-orange-50 text-orange-600 border border-orange-200';
+    case 'gray-light':
+      return 'bg-gray-50 text-gray-600 border border-gray-200';
+    case 'gray-dark':
+      return 'bg-gray-700 text-white border border-gray-600';
+    case 'blue-dark':
+      return 'bg-blue-600 text-white border border-blue-700';
+    case 'orange-light':
+      return 'bg-amber-50 text-amber-600 border border-amber-100';
+    case 'orange-600':
+      return 'bg-orange-600 text-white border border-orange-700';
     case 'gray-ultra-light':
-      return 'bg-gray-25 text-gray-700 border-gray-50';
+      return 'bg-gray-100 text-gray-600 border border-gray-200';
+    case 'lime':
+      return 'bg-lime-500 text-white border border-lime-600';
     default:
-      return 'bg-blue-50 text-blue-950 border-blue-100';
+      return 'bg-blue-50 text-blue-600 border border-blue-200';
   }
 };
 

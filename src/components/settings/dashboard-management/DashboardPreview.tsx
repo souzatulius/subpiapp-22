@@ -54,8 +54,18 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         card.id === editingCard.id ? { ...card, ...cardData } : card
       );
       setCards(updatedCards);
+      // Salvar imediatamente para visualizar as mudanças
+      saveCards();
     } else {
-      setCards([...cards, cardData]);
+      // Criação de um novo card
+      const newCard: ActionCardItem = {
+        ...cardData,
+        id: `card-${Date.now()}`, // Garantir ID único
+        isCustom: true
+      };
+      setCards([...cards, newCard]);
+      // Salvar imediatamente para visualizar as mudanças
+      saveCards();
     }
     setIsCustomizationModalOpen(false);
     
