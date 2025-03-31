@@ -1,10 +1,7 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Users, Building, Settings, 
-  Map, Bell 
-} from 'lucide-react';
+import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const MobileSettingsNav = () => {
@@ -14,42 +11,8 @@ const MobileSettingsNav = () => {
   
   if (!isMobile) return null;
 
-  const navItems = [
-    { 
-      id: 'dashboard', 
-      label: 'Início', 
-      path: '/settings',
-      icon: <Settings className="h-5 w-5" />
-    },
-    { 
-      id: 'usuarios', 
-      label: 'Usuários', 
-      path: '/settings?tab=usuarios',
-      icon: <Users className="h-5 w-5" /> 
-    },
-    { 
-      id: 'coordenacoes', 
-      label: 'Coord.', 
-      path: '/settings?tab=coordenacoes_lista',
-      icon: <Building className="h-5 w-5" /> 
-    },
-    { 
-      id: 'distritos', 
-      label: 'Distritos', 
-      path: '/settings?tab=distritos_bairros',
-      icon: <Map className="h-5 w-5" /> 
-    },
-    { 
-      id: 'comunicados', 
-      label: 'Avisos', 
-      path: '/settings?tab=comunicados',
-      icon: <Bell className="h-5 w-5" /> 
-    }
-  ];
-  
-  // Find current active tab
-  const query = new URLSearchParams(location.search);
-  const activeTab = query.get('tab') || 'dashboard';
+  // Use the same navigation items as in the main dashboard
+  const navItems = getNavigationSections();
   
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
@@ -59,9 +22,7 @@ const MobileSettingsNav = () => {
             key={item.id}
             onClick={() => navigate(item.path)}
             className={`flex flex-col items-center justify-center py-2 px-1 flex-1 ${
-              (activeTab === item.id || 
-               (item.id === 'dashboard' && !activeTab)) ? 
-               'text-blue-600' : 'text-gray-500'
+              location.pathname.includes(item.path) ? 'text-blue-600' : 'text-gray-500'
             }`}
           >
             <div className="text-[#f57737]">
