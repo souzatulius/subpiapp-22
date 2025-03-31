@@ -20,6 +20,7 @@ interface CardsContainerProps {
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
+  isMobileView?: boolean;
 }
 
 const CardsContainer: React.FC<CardsContainerProps> = ({
@@ -31,7 +32,8 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
   quickDemandTitle = "",
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
-  onSearchSubmit = () => {}
+  onSearchSubmit = () => {},
+  isMobileView = false
 }) => {
   const allCardIds = cards.map(card => card.id);
 
@@ -50,6 +52,7 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
             onQuickDemandTitleChange={onQuickDemandTitleChange}
             onQuickDemandSubmit={onQuickDemandSubmit}
             onSearchSubmit={onSearchSubmit}
+            isMobileView={isMobileView}
           />
         ))}
       </div>

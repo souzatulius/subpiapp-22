@@ -17,6 +17,7 @@ interface ActionCardWrapperProps {
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
+  isMobileView?: boolean;
   specialCardsData: {
     overdueCount: number;
     overdueItems: { title: string; id: string }[];
@@ -35,6 +36,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
   onSearchSubmit = () => {},
+  isMobileView = false,
   specialCardsData
 }) => {
   // Map specific card types to their respective components
@@ -45,6 +47,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         card={card} 
         onEdit={onEdit}
         onDelete={onDelete}
+        isMobileView={isMobileView}
       >
         <QuickDemandCard 
           value={quickDemandTitle}
@@ -62,6 +65,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         card={card} 
         onEdit={onEdit}
         onDelete={onDelete}
+        isMobileView={isMobileView}
       >
         <SmartSearchCard
           placeholder={card.title}
@@ -78,6 +82,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         card={card} 
         onEdit={onEdit}
         onDelete={onDelete}
+        isMobileView={isMobileView}
       >
         <OverdueDemandsCard
           id={card.id}
@@ -95,6 +100,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         card={card} 
         onEdit={onEdit}
         onDelete={onDelete}
+        isMobileView={isMobileView}
       >
         <PendingActionsCard
           id={card.id}
@@ -112,6 +118,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         card={card} 
         onEdit={onEdit}
         onDelete={onDelete}
+        isMobileView={isMobileView}
       >
         <NewCardButton onClick={onAddNewCard} />
       </SortableActionCard>
@@ -125,6 +132,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       card={card} 
       onEdit={onEdit}
       onDelete={onDelete}
+      isMobileView={isMobileView}
     />
   );
 };

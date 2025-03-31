@@ -40,7 +40,8 @@ const cleanCardForStorage = (card: ActionCardItem): SimpleCardData => {
     dataSourceKey: card.dataSourceKey || '',
     allowedDepartments: card.allowedDepartments || [],
     allowedRoles: card.allowedRoles || [],
-    isCustom: card.isCustom
+    isCustom: card.isCustom,
+    mobileOrder: card.mobileOrder
   };
 };
 

@@ -11,6 +11,7 @@ interface SortableActionCardProps {
   onEdit: (card: ActionCardItem) => void;
   onDelete?: (id: string) => void;
   children?: React.ReactNode;
+  isMobileView?: boolean;
 }
 
 // Control buttons component for card actions
@@ -57,6 +58,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
   card, 
   onEdit, 
   onDelete,
+  isMobileView = false,
   children
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: card.id });
@@ -106,6 +108,8 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
           height={card.height}
           isCustom={card.isCustom}
           type={card.type}
+          iconSize={isMobileView ? 'lg' : 'xl'}
+          isMobileView={isMobileView}
         />
       )}
     </div>

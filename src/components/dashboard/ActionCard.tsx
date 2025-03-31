@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { Controls } from './SortableActionCard';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
@@ -21,6 +22,7 @@ export interface ActionCardProps {
   mobileOrder?: number;
   children?: React.ReactNode;
   iconSize?: 'sm' | 'md' | 'lg' | 'xl';
+  isMobileView?: boolean;
 }
 
 const getBackgroundColor = (color: CardColor): string => {
@@ -43,9 +45,9 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm': return 'w-6 h-6';
     case 'md': return 'w-8 h-8';
-    case 'lg': return 'w-10 h-10';
-    case 'xl': return 'w-20 h-20';
-    default: return 'w-20 h-20';
+    case 'lg': return 'w-12 h-12'; // Mobile size
+    case 'xl': return 'w-16 h-16'; // Desktop size
+    default: return 'w-16 h-16';
   }
 };
 
@@ -60,12 +62,14 @@ const ActionCard = ({
   onDelete,
   isCustom = false,
   iconSize = 'xl',
+  isMobileView = false,
   children
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
-  const iconSizeClass = getIconSize(iconSize);
+  // Use mobile size if specified or isMobileView is true
+  const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
 
   const handleClick = () => {
     if (path) navigate(path);

@@ -13,6 +13,7 @@ import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass } from './CardGrid';
 import { ActionCardItem, CardType, CardColor } from '@/types/dashboard';
+import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
 // Make sure UnifiedCardItem includes all required properties from ActionCardItem
 export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color'> {
@@ -77,6 +78,17 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       </div>
     );
   }
+  
+  // Use our grid occupancy hook
+  const { totalColumns } = useGridOccupancy(
+    displayedCards.map(card => ({ 
+      id: card.id,
+      width: card.width || '25', 
+      height: card.height || '1',
+      type: card.type
+    })), 
+    isMobileView
+  );
 
   return (
     <DndContext
@@ -100,6 +112,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                   if (cardToEdit && onEditCard) onEditCard(cardToEdit);
                 } : undefined}
                 onDelete={onDeleteCard}
+                iconSize={isMobileView ? 'lg' : 'xl'}
               />
             </div>
           ))}

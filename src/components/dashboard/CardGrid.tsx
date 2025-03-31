@@ -12,6 +12,7 @@ import {
 import CardsContainer from './grid/CardsContainer';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicDataCard from './DynamicDataCard';
+import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
 interface CardGridProps {
@@ -84,6 +85,17 @@ const CardGrid: React.FC<CardGridProps> = ({
     );
   }
 
+  // Use our grid occupancy system
+  const { totalColumns } = useGridOccupancy(
+    displayedCards.map(card => ({ 
+      id: card.id,
+      width: card.width || '25', 
+      height: card.height || '1',
+      type: card.type
+    })), 
+    isMobileView
+  );
+
   const dynamicDataCards = displayedCards.filter(
     (card) => card.type === 'data_dynamic' && card.dataSourceKey
   );
@@ -116,6 +128,7 @@ const CardGrid: React.FC<CardGridProps> = ({
                 onQuickDemandTitleChange={onQuickDemandTitleChange}
                 onQuickDemandSubmit={onQuickDemandSubmit}
                 onSearchSubmit={onSearchSubmit}
+                isMobileView={isMobileView}
               />
             </div>
           ))}
@@ -130,7 +143,7 @@ const CardGrid: React.FC<CardGridProps> = ({
               <DynamicDataCard
                 key={card.id}
                 title={card.title}
-                icon={IconComponent ? <IconComponent /> : null}
+                icon={IconComponent ? <IconComponent className={isMobileView ? "w-12 h-12" : "w-16 h-16"} /> : null}
                 color={card.color}
                 dataSourceKey={card.dataSourceKey as any}
                 coordenacaoId={coordenacaoId}
@@ -157,6 +170,7 @@ const CardGrid: React.FC<CardGridProps> = ({
                 onQuickDemandTitleChange={onQuickDemandTitleChange}
                 onQuickDemandSubmit={onQuickDemandSubmit}
                 onSearchSubmit={onSearchSubmit}
+                isMobileView={isMobileView}
               />
             </div>
           ))}
