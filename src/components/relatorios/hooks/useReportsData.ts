@@ -290,12 +290,17 @@ export const useReportsData = (filters: any) => {
         .sort((a, b) => b.value - a.value)
         .slice(0, 3);
       
-      // Buscar demandas por coordenação
+      // Buscar demandas por coordenação - CORRIGIDO AQUI
       const { data: coordData, error: coordError } = await supabase
         .from('demandas')
         .select(`
           coordenacao_id,
-          area_coordenacao:areas_coordenacao!inner(descricao)
+          problemas!inner(
+            supervisao_tecnica_id,
+            supervisoes_tecnicas!inner(
+              coordenacao:coordenacoes!inner(descricao)
+            )
+          )
         `)
         .not('coordenacao_id', 'is', null);
       
@@ -303,8 +308,10 @@ export const useReportsData = (filters: any) => {
       
       const coordCounts: Record<string, number> = {};
       coordData?.forEach(item => {
-        if (item.area_coordenacao) {
-          const coord = item.area_coordenacao.descricao;
+        if (item.problemas && 
+            item.problemas.supervisoes_tecnicas && 
+            item.problemas.supervisoes_tecnicas.coordenacao) {
+          const coord = item.problemas.supervisoes_tecnicas.coordenacao.descricao;
           coordCounts[coord] = (coordCounts[coord] || 0) + 1;
         }
       });
