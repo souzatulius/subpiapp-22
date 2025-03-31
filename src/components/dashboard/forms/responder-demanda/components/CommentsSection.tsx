@@ -27,7 +27,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
         value={comentarios}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="min-h-[120px] border-gray-300"
+        className="min-h-[120px] border-gray-300 rounded-md"
       />
     </div>
   );
