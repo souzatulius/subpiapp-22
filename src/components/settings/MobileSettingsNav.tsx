@@ -18,7 +18,16 @@ const MobileSettingsNav = () => {
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#003570] border-t border-gray-700 shadow-lg z-50">
       <div className="flex justify-around">
         {navItems.map((item) => {
-          const isActive = location.pathname.includes(item.path);
+          // Lógica mais precisa para verificar se um item está ativo
+          const isActive = 
+            location.pathname === item.path || 
+            (location.pathname.startsWith(item.path + '/') && 
+             // Exceção para evitar que rotas parciais ativem múltiplos itens
+             !navItems.some(
+               otherItem => 
+                 otherItem.path !== item.path && 
+                 location.pathname.startsWith(otherItem.path + '/')
+             ));
           
           return (
             <button

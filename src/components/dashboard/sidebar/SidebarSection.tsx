@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 interface SubSection {
   id: string;
@@ -40,6 +40,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   items,
   path
 }) => {
+  const location = useLocation();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     [id]: true
   });
@@ -85,11 +86,26 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
     }
   }, [isOpen, isTogglingOpen]);
 
+  // Nova função para verificar se uma rota está ativa
+  const isRouteActive = (itemPath: string) => {
+    return location.pathname === itemPath || 
+           (location.pathname.startsWith(itemPath + '/') && 
+            !subSections?.some(subSection => 
+              subSection.items?.some(item => 
+                item.path !== itemPath && location.pathname.startsWith(item.path + '/')
+              )
+            ));
+  };
+
   if (!isSection) {
     return (
       <NavLink 
         to={path || '#'} 
-        className={({isActive}) => `flex items-center px-4 py-3 rounded-xl mb-1 ${isActive ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'} transition-colors`}
+        className={({ isActive }) => {
+          // Usando nossa lógica personalizada ao invés da lógica padrão do NavLink
+          const isActiveRoute = isRouteActive(path || '');
+          return `flex items-center px-4 py-3 rounded-xl mb-1 ${isActiveRoute ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'} transition-colors`;
+        }}
       >
         <div className="flex-shrink-0 text-[#f57737]">{icon}</div>
         <span className={`ml-3 text-base ${isOpen ? 'block' : 'hidden'}`}>{label}</span>
@@ -127,7 +143,11 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                     <li key={`${subSection.id}-item-${index}`}>
                       <NavLink 
                         to={item.path} 
-                        className={({isActive}) => `flex items-center py-2 px-3 ${isActive ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`}
+                        className={({ isActive }) => {
+                          // Usando nossa lógica personalizada ao invés da lógica padrão do NavLink
+                          const isActiveRoute = isRouteActive(item.path);
+                          return `flex items-center py-2 px-3 ${isActiveRoute ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
+                        }}
                       >
                         <div className="flex-shrink-0 mr-2 text-[#f57737]">{item.icon}</div>
                         <span>{item.label}</span>
@@ -147,7 +167,11 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
             <li key={`${id}-item-${index}`}>
               <NavLink 
                 to={item.path} 
-                className={({isActive}) => `flex items-center py-2 px-3 ${isActive ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`}
+                className={({ isActive }) => {
+                  // Usando nossa lógica personalizada ao invés da lógica padrão do NavLink
+                  const isActiveRoute = isRouteActive(item.path);
+                  return `flex items-center py-2 px-3 ${isActiveRoute ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
+                }}
               >
                 <div className="flex-shrink-0 mr-2 text-[#f57737]">{item.icon}</div>
                 <span>{item.label}</span>

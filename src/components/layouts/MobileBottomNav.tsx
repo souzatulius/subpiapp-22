@@ -15,8 +15,16 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
     <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#003570] border-t border-gray-700 shadow-lg z-50 ${className}`}>
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
-          // Check if the current route matches this nav item
-          const isActive = location.pathname.includes(item.path);
+          // Implementando uma lógica mais precisa de match de rotas
+          const isActive = 
+            location.pathname === item.path || 
+            (location.pathname.startsWith(item.path + '/') && 
+             // Exceção para evitar que rotas parciais ativem múltiplos itens
+             !navItems.some(
+               otherItem => 
+                 otherItem.path !== item.path && 
+                 location.pathname.startsWith(otherItem.path + '/')
+             ));
           
           return (
             <NavLink
