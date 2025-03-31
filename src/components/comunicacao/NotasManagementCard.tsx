@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -87,7 +88,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             titulo: nota.titulo,
             status: nota.status,
             criado_em: nota.criado_em,
-            autor: nota.autor || { nome_completo: 'Desconhecido' }
+            autor: nota.autor || null
           }));
           
           setNotas(formattedNotas);
