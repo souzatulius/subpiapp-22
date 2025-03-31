@@ -26,13 +26,19 @@ export const useNotasData = (): UseNotasDataReturn => {
     isAdmin
   } = useNotasQuery();
   
-  // We need to modify the useNotasActions hook to match the expected type signatures
+  // Get the actions from useNotasActions
   const { deleteNota, deleteLoading, updateNotaStatus, statusLoading } = useNotasActions(refetch);
   
-  // Create a wrapper function for updateNotaStatus that returns Promise<void> instead of Promise<boolean>
-  const updateNotaStatusWrapper = async (id: string, newStatus: string): Promise<void> => {
+  // Create a wrapper function for updateNotaStatus to match the expected type signature (Promise<void>)
+  const handleUpdateNotaStatus = async (id: string, newStatus: string): Promise<void> => {
     await updateNotaStatus(id, newStatus);
-    // This discards the boolean return value to match the expected Promise<void> return type
+    // This function returns void, which matches the expected return type
+  };
+
+  // Create a wrapper function for deleteNota to match the expected type signature (Promise<void>)
+  const handleDeleteNota = async (id: string): Promise<void> => {
+    await deleteNota(id);
+    // This function returns void, which matches the expected return type
   };
 
   return {
@@ -51,10 +57,10 @@ export const useNotasData = (): UseNotasDataReturn => {
     setDataFimFilter,
     formatDate,
     refetch,
-    deleteNota,
+    deleteNota: handleDeleteNota,
     deleteLoading,
     isAdmin,
-    updateNotaStatus: updateNotaStatusWrapper, // Use the wrapper function
+    updateNotaStatus: handleUpdateNotaStatus,
     statusLoading
   };
 };
