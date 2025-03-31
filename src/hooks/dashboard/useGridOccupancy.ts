@@ -67,9 +67,10 @@ export const getMinimumHeight = (type?: string): string => {
 };
 
 export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean) => {
+  // Fix: Ensure we initialize with an empty array instead of conditional useState
   const [occupiedSlots, setOccupiedSlots] = useState<boolean[][]>([]);
   
-  // Total columns for the grid
+  // Total columns for the grid - constant value
   const totalColumns = isMobileView ? 2 : 4;
   
   // Update occupied slots when cards change
