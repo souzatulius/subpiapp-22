@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import {
   Dialog,
@@ -121,7 +120,6 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     }
   }, [user, open, reset]);
 
-  // Ensure profile-photos bucket exists
   const ensureProfilePhotosBucketExists = async () => {
     try {
       // Check if 'profile-photos' bucket exists
@@ -213,19 +211,13 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         }
       }
       
-      // Make sure aniversario is properly converted to ISO string if present
-      if (data.aniversario instanceof Date) {
-        // All date handling should use ISO format for storage
-        const formattedDate = data.aniversario.toISOString();
-        // Create a copy of data with the properly formatted date
-        const submitData = {
-          ...data,
-          aniversario: formattedDate
-        };
-        await onSubmit(submitData);
-      } else {
-        await onSubmit(data);
-      }
+      // Create a copy of the data for submission
+      const submitData: UserFormData = {
+        ...data
+      };
+      
+      // Submit the form with the data
+      await onSubmit(submitData);
     } catch (error: any) {
       console.error('Error processing form submission:', error);
       setUploadError(error.message || "Ocorreu um erro ao processar o formulário");
