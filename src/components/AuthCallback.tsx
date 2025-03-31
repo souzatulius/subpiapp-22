@@ -22,22 +22,24 @@ const AuthCallback = () => {
       // Check for errors in both hash and query parameters
       const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
       const errorType = hashParams.get('error') || queryParams.get('error');
+      const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
       
       console.log("URL parameters:", { 
         hash: Object.fromEntries(hashParams.entries()),
         query: Object.fromEntries(queryParams.entries()),
         errorType,
+        errorCode,
         errorDescription,
         url: window.location.href
       });
       
       if (errorType || errorDescription) {
-        console.error('Error from OAuth provider:', { errorType, errorDescription });
+        console.error('Error from OAuth provider:', { errorType, errorCode, errorDescription });
         
         let userMessage = 'Erro na autenticação com Google';
         let errorDetailsMsg = errorDescription || 'Detalhes não disponíveis';
         
-        // Customize messages based on error type
+        // Customize messages based on error type and code
         if (errorDescription?.includes('domain_mismatch') || errorType === 'access_denied') {
           userMessage = 'A conta Google utilizada não pertence ao domínio @smsub.prefeitura.sp.gov.br';
           errorDetailsMsg = 'Por favor, utilize uma conta Google do domínio @smsub.prefeitura.sp.gov.br';
@@ -47,6 +49,9 @@ const AuthCallback = () => {
         } else if (errorType === 'access_denied') {
           userMessage = 'Acesso negado';
           errorDetailsMsg = 'A permissão para acessar o recurso foi negada.';
+        } else if (errorType === 'server_error' && errorCode === 'unexpected_failure') {
+          userMessage = 'Erro ao trocar código de autenticação';
+          errorDetailsMsg = 'Não foi possível completar o processo de autenticação. Verifique as URLs de redirecionamento no Google Console e no Supabase.';
         }
         
         setError(userMessage);
@@ -67,57 +72,72 @@ const AuthCallback = () => {
       console.log("No error params found, proceeding with auth check");
 
       // Handle successful authentication
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Erro no callback de autenticação:', error);
-        setError('Falha ao verificar sessão');
-        setErrorDetails(error.message);
-        setProcessingAuth(false);
+      try {
+        const { data, error } = await supabase.auth.getSession();
         
-        toast({
-          title: "Erro de autenticação",
-          description: error.message,
-          variant: "destructive"
-        });
-        
-        setTimeout(() => navigate('/login'), 3000);
-        return;
-      }
-
-      if (data?.session) {
-        // Check if user email matches the organization domain
-        const userEmail = data.session.user?.email || '';
-        console.log("Authenticated user email:", userEmail);
-        
-        if (!userEmail.endsWith('@smsub.prefeitura.sp.gov.br')) {
-          console.warn('Email domain not allowed:', userEmail);
-          await supabase.auth.signOut(); // Sign out the user
-          
-          setError('Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos');
-          setErrorDetails(`Email utilizado: ${userEmail}`);
+        if (error) {
+          console.error('Erro no callback de autenticação:', error);
+          setError('Falha ao verificar sessão');
+          setErrorDetails(error.message);
           setProcessingAuth(false);
           
           toast({
-            title: "Domínio não permitido",
-            description: "Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos",
+            title: "Erro de autenticação",
+            description: error.message,
             variant: "destructive"
           });
           
           setTimeout(() => navigate('/login'), 3000);
           return;
         }
-        
-        console.log("Authentication successful, redirecting to dashboard");
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo(a) de volta!",
-        });
-        navigate('/dashboard');
-      } else {
-        console.log("No session found, redirecting to login");
+
+        if (data?.session) {
+          // Check if user email matches the organization domain
+          const userEmail = data.session.user?.email || '';
+          console.log("Authenticated user email:", userEmail);
+          
+          if (!userEmail.endsWith('@smsub.prefeitura.sp.gov.br')) {
+            console.warn('Email domain not allowed:', userEmail);
+            await supabase.auth.signOut(); // Sign out the user
+            
+            setError('Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos');
+            setErrorDetails(`Email utilizado: ${userEmail}`);
+            setProcessingAuth(false);
+            
+            toast({
+              title: "Domínio não permitido",
+              description: "Apenas emails do domínio @smsub.prefeitura.sp.gov.br são permitidos",
+              variant: "destructive"
+            });
+            
+            setTimeout(() => navigate('/login'), 3000);
+            return;
+          }
+          
+          console.log("Authentication successful, redirecting to dashboard");
+          toast({
+            title: "Login realizado com sucesso",
+            description: "Bem-vindo(a) de volta!",
+          });
+          navigate('/dashboard');
+        } else {
+          console.log("No session found, redirecting to login");
+          setProcessingAuth(false);
+          navigate('/login');
+        }
+      } catch (callbackError) {
+        console.error('Erro durante processamento do callback:', callbackError);
+        setError('Erro inesperado durante autenticação');
+        setErrorDetails('Por favor, tente novamente ou entre em contato com o suporte');
         setProcessingAuth(false);
-        navigate('/login');
+        
+        toast({
+          title: "Erro de autenticação",
+          description: "Ocorreu um erro inesperado durante o processo de autenticação",
+          variant: "destructive"
+        });
+        
+        setTimeout(() => navigate('/login'), 3000);
       }
     };
 

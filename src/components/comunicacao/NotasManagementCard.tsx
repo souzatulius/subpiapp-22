@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +82,6 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
         }
         
         if (data) {
-          // Format the data to match the Nota interface
           const formattedNotas: Nota[] = data.map(nota => ({
             id: nota.id,
             titulo: nota.titulo,

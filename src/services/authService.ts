@@ -61,9 +61,11 @@ export const signInWithGoogle = async () => {
     // Log the configuration to help with debugging
     console.log('Iniciando login com Google', {
       redirectUrl: `${window.location.origin}/auth/callback`,
-      domain: 'smsub.prefeitura.sp.gov.br'
+      domain: 'smsub.prefeitura.sp.gov.br',
+      fullUrl: window.location.href
     });
     
+    // Add additional query params to help troubleshoot the code exchange
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -72,7 +74,8 @@ export const signInWithGoogle = async () => {
           prompt: 'consent',
           hd: 'smsub.prefeitura.sp.gov.br', // Restrict to specific domain
         },
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${window.location.origin}/auth/callback`,
+        skipBrowserRedirect: false // Ensure browser is redirected
       }
     });
     
