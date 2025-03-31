@@ -1,12 +1,13 @@
 
-import React, { ReactNode } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { SortableContext } from '@dnd-kit/sortable';
 import { RelatorioItem } from '../hooks/useRelatorioItemsState';
 
 interface ChartSectionWrapperProps {
   title: string;
   items: RelatorioItem[];
-  renderItem: (item: RelatorioItem) => ReactNode;
+  renderItem: (item: RelatorioItem) => React.ReactNode;
 }
 
 const ChartSectionWrapper: React.FC<ChartSectionWrapperProps> = ({

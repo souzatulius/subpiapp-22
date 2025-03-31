@@ -1,10 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import SortableRelatorioCard from './components/SortableRelatorioCard';
 import { useRelatorioItemsState } from './hooks/useRelatorioItemsState';
 import { createRelatorioItems } from './utils/relatorioItemsFactory';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
 import { useChartData } from './hooks/useChartData';
 import { useChartComponents } from './hooks/useChartComponents';
 import StatusDistributionChart from '../ranking/charts/StatusDistributionChart';
@@ -14,6 +13,10 @@ import TopCompaniesChart from '../ranking/charts/TopCompaniesChart';
 import ServiceDiversityChart from '../ranking/charts/ServiceDiversityChart';
 import ServicesByDistrictChart from '../ranking/charts/ServicesByDistrictChart';
 import StatusTransitionChart from '../ranking/charts/StatusTransitionChart';
+import TemasTecnicos from './sections/TemasTecnicos';
+import TempoDesempenho from './sections/TempoDesempenho';
+import NotasOficiais from './sections/NotasOficiais';
+import Tendencias from './sections/Tendencias';
 
 interface RelatoriosContentProps {
   filterDialogOpen?: boolean;
@@ -87,109 +90,37 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Temas Técnicos</h2>
-          <SortableContext items={temasTecnicosItems.map(item => item.id)}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {temasTecnicosItems.map((item) => (
-                <SortableRelatorioCard
-                  key={item.id}
-                  id={item.id}
-                  title={item.title}
-                  value={item.value}
-                  analysis={item.analysis}
-                  isVisible={item.isVisible}
-                  isAnalysisExpanded={item.isAnalysisExpanded}
-                  showAnalysisOnly={item.showAnalysisOnly}
-                  isLoading={isLoading}
-                  onToggleVisibility={() => handleToggleVisibility(item.id)}
-                  onToggleAnalysis={() => handleToggleAnalysis(item.id)}
-                  onToggleView={() => handleToggleView(item.id)}
-                >
-                  {item.component}
-                </SortableRelatorioCard>
-              ))}
-            </div>
-          </SortableContext>
-        </div>
+        <TemasTecnicos 
+          items={temasTecnicosItems} 
+          isLoading={isLoading}
+          handleToggleVisibility={handleToggleVisibility}
+          handleToggleAnalysis={handleToggleAnalysis}
+          handleToggleView={handleToggleView}
+        />
         
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Tempo e Desempenho</h2>
-          <SortableContext items={tempoDesempenhoItems.map(item => item.id)}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tempoDesempenhoItems.map((item) => (
-                <SortableRelatorioCard
-                  key={item.id}
-                  id={item.id}
-                  title={item.title}
-                  value={item.value}
-                  analysis={item.analysis}
-                  isVisible={item.isVisible}
-                  isAnalysisExpanded={item.isAnalysisExpanded}
-                  showAnalysisOnly={item.showAnalysisOnly}
-                  isLoading={isLoading}
-                  onToggleVisibility={() => handleToggleVisibility(item.id)}
-                  onToggleAnalysis={() => handleToggleAnalysis(item.id)}
-                  onToggleView={() => handleToggleView(item.id)}
-                >
-                  {item.component}
-                </SortableRelatorioCard>
-              ))}
-            </div>
-          </SortableContext>
-        </div>
+        <TempoDesempenho
+          items={tempoDesempenhoItems}
+          isLoading={isLoading}
+          handleToggleVisibility={handleToggleVisibility}
+          handleToggleAnalysis={handleToggleAnalysis}
+          handleToggleView={handleToggleView}
+        />
         
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Notas Oficiais</h2>
-          <SortableContext items={notasOficiaisItems.map(item => item.id)}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {notasOficiaisItems.map((item) => (
-                <SortableRelatorioCard
-                  key={item.id}
-                  id={item.id}
-                  title={item.title}
-                  value={item.value}
-                  analysis={item.analysis}
-                  isVisible={item.isVisible}
-                  isAnalysisExpanded={item.isAnalysisExpanded}
-                  showAnalysisOnly={item.showAnalysisOnly}
-                  isLoading={isLoading}
-                  onToggleVisibility={() => handleToggleVisibility(item.id)}
-                  onToggleAnalysis={() => handleToggleAnalysis(item.id)}
-                  onToggleView={() => handleToggleView(item.id)}
-                >
-                  {item.component}
-                </SortableRelatorioCard>
-              ))}
-            </div>
-          </SortableContext>
-        </div>
+        <NotasOficiais
+          items={notasOficiaisItems}
+          isLoading={isLoading}
+          handleToggleVisibility={handleToggleVisibility}
+          handleToggleAnalysis={handleToggleAnalysis}
+          handleToggleView={handleToggleView}
+        />
         
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Tendências</h2>
-          <SortableContext items={tendenciasItems.map(item => item.id)}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tendenciasItems.map((item) => (
-                <SortableRelatorioCard
-                  key={item.id}
-                  id={item.id}
-                  title={item.title}
-                  value={item.value}
-                  analysis={item.analysis}
-                  isVisible={item.isVisible}
-                  isAnalysisExpanded={item.isAnalysisExpanded}
-                  showAnalysisOnly={item.showAnalysisOnly}
-                  isLoading={isLoading}
-                  onToggleVisibility={() => handleToggleVisibility(item.id)}
-                  onToggleAnalysis={() => handleToggleAnalysis(item.id)}
-                  onToggleView={() => handleToggleView(item.id)}
-                >
-                  {item.component}
-                </SortableRelatorioCard>
-              ))}
-            </div>
-          </SortableContext>
-        </div>
+        <Tendencias
+          items={tendenciasItems}
+          isLoading={isLoading}
+          handleToggleVisibility={handleToggleVisibility}
+          handleToggleAnalysis={handleToggleAnalysis}
+          handleToggleView={handleToggleView}
+        />
         
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Ranking de Zeladoria</h2>
