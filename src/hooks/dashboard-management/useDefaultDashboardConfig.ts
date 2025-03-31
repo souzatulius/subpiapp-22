@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
-import { ActionCardItem, CardColor } from '@/types/dashboard';
+import { ActionCardItem, CardColor, CardType } from '@/types/dashboard';
 
 // Simplified type to avoid infinite type instantiation
 interface SimpleCardData {
@@ -13,7 +13,7 @@ interface SimpleCardData {
   path: string;
   color: CardColor;
   iconId: string;
-  type: string;
+  type: CardType;
   width?: string;
   height?: string;
   displayMobile?: boolean;

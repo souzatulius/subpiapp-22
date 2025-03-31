@@ -4,7 +4,6 @@ import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Smartphone, Monitor } from 'lucide-react';
 import { ActionCardItem } from '@/types/dashboard';
 
 interface DashboardPreviewProps {
@@ -32,7 +31,12 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
   // Handle cards change in a type-safe way
   const handleCardsChange = (newCards: ActionCardItem[] | any[]) => {
-    setCards(newCards as ActionCardItem[]);
+    // Ensure that the input is properly cast to ActionCardItem[]
+    setCards(newCards.map(card => ({
+      ...card,
+      type: card.type || 'standard', // Ensure type is always set
+      path: card.path || '', // Ensure path is always set
+    })) as ActionCardItem[]);
   };
 
   // Create device frame classes based on preview mode

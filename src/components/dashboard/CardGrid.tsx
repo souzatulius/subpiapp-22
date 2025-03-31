@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   DndContext,
@@ -119,22 +120,25 @@ const CardGrid: React.FC<CardGridProps> = ({
             </div>
           ))}
           
-        {dynamicDataCards.map(card => (
-          <div 
-            key={card.id}
-            className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
-          >
-            <DynamicDataCard
+        {dynamicDataCards.map(card => {
+          const IconComponent = getIconComponentFromId(card.iconId);
+          return (
+            <div 
               key={card.id}
-              title={card.title}
-              icon={getIconComponentFromId(card.iconId)}
-              color={card.color}
-              dataSourceKey={card.dataSourceKey as any}
-              coordenacaoId={coordenacaoId}
-              usuarioId={usuarioId}
-            />
-          </div>
-        ))}
+              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
+            >
+              <DynamicDataCard
+                key={card.id}
+                title={card.title}
+                icon={IconComponent}
+                color={card.color}
+                dataSourceKey={card.dataSourceKey as any}
+                coordenacaoId={coordenacaoId}
+                usuarioId={usuarioId}
+              />
+            </div>
+          );
+        })}
         
         {regularCards
           .filter(card => !card.isSearch)

@@ -15,12 +15,13 @@ import { getWidthClass, getHeightClass } from './CardGrid';
 import { ActionCardItem, CardType } from '@/types/dashboard';
 
 // Make sure UnifiedCardItem includes all required properties from ActionCardItem
-interface UnifiedCardItem extends UnifiedActionCardProps {
+export interface UnifiedCardItem extends UnifiedActionCardProps {
   width?: string;
   height?: string;
   displayMobile?: boolean;
   mobileOrder?: number;
   type: CardType;
+  path: string;
 }
 
 interface UnifiedCardGridProps {
@@ -53,7 +54,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       const newIndex = cards.findIndex((item) => item.id === over.id);
       
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newCards = arrayMove(cards, oldIndex, newIndex);
+        const newCards = arrayMove([...cards], oldIndex, newIndex);
         onCardsChange(newCards);
       }
     }

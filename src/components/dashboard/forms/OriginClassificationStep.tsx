@@ -2,8 +2,10 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useOriginIcon } from '@/hooks/useOriginIcon';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio as AudioRadio, Flag, Building, Phone, Users, MessageSquare, Mail } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { useOriginIcon } from '@/hooks/useOriginIcon';
+import { useMediaTypeIcon } from '@/hooks/useMediaTypeIcon';
 
 interface OriginClassificationStepProps {
   formData: {
@@ -46,24 +48,6 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
       handleSelectChange('tipo_midia_id', '');
     }
   }, [showMediaFields, formData.tipo_midia_id]);
-
-  // Get media type icon based on description
-  const getMediaTypeIcon = (descricao: string) => {
-    const iconMap: {
-      [key: string]: React.ReactNode;
-    } = {
-      "Revista": <Book className="h-6 w-6" />,
-      "Impresso": <Newspaper className="h-6 w-6" />,
-      "Jornal Online": <Monitor className="h-6 w-6" />,
-      "Portal": <MousePointer className="h-6 w-6" />,
-      "Blog": <Globe className="h-6 w-6" />,
-      "Podcast": <Mic className="h-6 w-6" />,
-      "TV": <Tv className="h-6 w-6" />,
-      "Rádio": <Radio className="h-6 w-6" />,
-      "Outros": <HelpCircle className="h-6 w-6" />
-    };
-    return iconMap[descricao] || <HelpCircle className="h-6 w-6" />;
-  };
 
   return (
     <div className="space-y-6">
@@ -118,7 +102,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
                 }`} 
                 onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
               >
-                {getMediaTypeIcon(tipo.descricao)}
+                {useMediaTypeIcon(tipo, "h-6 w-6")}
                 <span className="text-sm font-semibold">{tipo.descricao}</span>
               </Button>
             ))}
