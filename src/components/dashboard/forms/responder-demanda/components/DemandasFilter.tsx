@@ -73,34 +73,6 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
         </Select>
       </div>
 
-      {/* New section - Place for additional fields */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Campos adicionais</h3>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          {/* Add your new fields here */}
-          <div className="col-span-1">
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma opção" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="opcao1">Opção 1</SelectItem>
-                <SelectItem value="opcao2">Opção 2</SelectItem>
-                <SelectItem value="opcao3">Opção 3</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="col-span-1">
-            <Input placeholder="Campo adicional..." />
-          </div>
-          <div className="col-span-1">
-            <Button variant="outline" className="w-full">
-              Aplicar
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* View mode toggle */}
       <div className="flex justify-end mb-3">
         <div className="bg-gray-100 p-1 rounded-md inline-flex">
