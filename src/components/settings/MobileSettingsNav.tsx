@@ -18,16 +18,20 @@ const MobileSettingsNav = () => {
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#003570] border-t border-gray-700 shadow-lg z-50">
       <div className="flex justify-around">
         {navItems.map((item) => {
-          // Lógica mais precisa para verificar se um item está ativo
-          const isActive = 
-            location.pathname === item.path || 
-            (location.pathname.startsWith(item.path + '/') && 
-             // Exceção para evitar que rotas parciais ativem múltiplos itens
-             !navItems.some(
-               otherItem => 
-                 otherItem.path !== item.path && 
-                 location.pathname.startsWith(otherItem.path + '/')
-             ));
+          // Improved route matching logic to prevent multiple active items
+          const isExactMatch = location.pathname === item.path;
+          const isChildRoute = location.pathname.startsWith(item.path + '/');
+          
+          // Check if this is just a partial match that should be ignored
+          const isPartialMatch = navItems.some(
+            otherItem => 
+              otherItem !== item && 
+              otherItem.path.startsWith(item.path + '/') && 
+              location.pathname.startsWith(otherItem.path)
+          );
+          
+          // Only active if it's an exact match or a child route without being a partial match
+          const isActive = isExactMatch || (isChildRoute && !isPartialMatch);
           
           return (
             <button

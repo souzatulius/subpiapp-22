@@ -86,15 +86,44 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
     }
   }, [isOpen, isTogglingOpen]);
 
-  // Nova função para verificar se uma rota está ativa
+  // Improved function to check if a route is active
   const isRouteActive = (itemPath: string) => {
-    return location.pathname === itemPath || 
-           (location.pathname.startsWith(itemPath + '/') && 
-            !subSections?.some(subSection => 
-              subSection.items?.some(item => 
-                item.path !== itemPath && location.pathname.startsWith(item.path + '/')
-              )
-            ));
+    if (!itemPath) return false;
+    
+    const isExactMatch = location.pathname === itemPath;
+    const isChildRoute = location.pathname.startsWith(itemPath + '/');
+    
+    // If we're on a child route, we need to check if there's a more specific match
+    // among the other navigation items to avoid multiple active items
+    let isMoreSpecificMatch = false;
+    
+    if (isChildRoute) {
+      // Check subsections and their items
+      const allRoutes: string[] = [];
+      
+      // Collect all possible routes from subsections
+      subSections?.forEach(subSection => {
+        subSection.items?.forEach(item => {
+          if (item.path && item.path !== itemPath) {
+            allRoutes.push(item.path);
+          }
+        });
+      });
+      
+      // Collect all routes from direct items
+      items?.forEach(item => {
+        if (item.path && item.path !== itemPath) {
+          allRoutes.push(item.path);
+        }
+      });
+      
+      // Check if there's a more specific route that matches the current location
+      isMoreSpecificMatch = allRoutes.some(route => 
+        route.startsWith(itemPath + '/') && location.pathname.startsWith(route)
+      );
+    }
+    
+    return isExactMatch || (isChildRoute && !isMoreSpecificMatch);
   };
 
   if (!isSection) {
@@ -102,7 +131,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
       <NavLink 
         to={path || '#'} 
         className={({ isActive }) => {
-          // Usando nossa lógica personalizada ao invés da lógica padrão do NavLink
+          // Using our improved custom logic instead of NavLink's default logic
           const isActiveRoute = isRouteActive(path || '');
           return `flex items-center px-4 py-3 rounded-xl mb-1 ${isActiveRoute ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'} transition-colors`;
         }}
@@ -144,7 +173,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                       <NavLink 
                         to={item.path} 
                         className={({ isActive }) => {
-                          // Usando nossa lógica personalizada ao invés da lógica padrão do NavLink
+                          // Using our improved custom logic instead of NavLink's default logic
                           const isActiveRoute = isRouteActive(item.path);
                           return `flex items-center py-2 px-3 ${isActiveRoute ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
                         }}
@@ -168,7 +197,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
               <NavLink 
                 to={item.path} 
                 className={({ isActive }) => {
-                  // Usando nossa lógica personalizada ao invés da lógica padrão do NavLink
+                  // Using our improved custom logic instead of NavLink's default logic
                   const isActiveRoute = isRouteActive(item.path);
                   return `flex items-center py-2 px-3 ${isActiveRoute ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
                 }}

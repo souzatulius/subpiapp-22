@@ -15,16 +15,22 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
     <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#003570] border-t border-gray-700 shadow-lg z-50 ${className}`}>
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
-          // Implementando uma lógica mais precisa de match de rotas
-          const isActive = 
-            location.pathname === item.path || 
-            (location.pathname.startsWith(item.path + '/') && 
-             // Exceção para evitar que rotas parciais ativem múltiplos itens
-             !navItems.some(
-               otherItem => 
-                 otherItem.path !== item.path && 
-                 location.pathname.startsWith(otherItem.path + '/')
-             ));
+          // Improved route matching logic to prevent multiple active items
+          const isExactMatch = location.pathname === item.path;
+          const isChildRoute = location.pathname.startsWith(item.path + '/');
+          
+          // Check if this is just a partial match that should be ignored
+          // For example, if we're on /dashboard/comunicacao and have a link to /dashboard,
+          // we don't want /dashboard to be active
+          const isPartialMatch = navItems.some(
+            otherItem => 
+              otherItem !== item && // Not the current item
+              otherItem.path.startsWith(item.path + '/') && // Other item is a child of current
+              location.pathname.startsWith(otherItem.path) // Current location is under other item
+          );
+          
+          // Only active if it's an exact match or a child route without being a partial match
+          const isActive = isExactMatch || (isChildRoute && !isPartialMatch);
           
           return (
             <NavLink
