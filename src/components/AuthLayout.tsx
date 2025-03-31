@@ -3,6 +3,7 @@ import React from 'react';
 import PWAButton from './PWAButton';
 import Header from '@/components/layouts/Header';
 import LeftContentSection from './shared/LeftContentSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,8 @@ interface AuthLayoutProps {
 const AuthLayout: React.FC<AuthLayoutProps> = ({
   children
 }) => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header - explicitly pass showControls={false} for auth pages */}
@@ -18,20 +21,22 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
-        {/* Left side - Fixed content */}
-        <div className="w-full md:w-1/2 bg-white px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
-          <LeftContentSection />
-        </div>
+        {/* Left side - Fixed content - Mostrar apenas no desktop */}
+        {!isMobile && (
+          <div className="w-full md:w-1/2 bg-white px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
+            <LeftContentSection />
+          </div>
+        )}
 
-        {/* Right side - Dynamic content with background image */}
+        {/* Right side - Dynamic content with background image apenas no desktop */}
         <div 
           className="w-full md:w-1/2 bg-[#003570] p-8 flex flex-col items-center justify-center relative"
-          style={{
+          style={!isMobile ? {
             backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
             backgroundSize: 'cover',
             backgroundPosition: 'left center',
             backgroundRepeat: 'no-repeat'
-          }}
+          } : undefined}
         >
           <div className="w-full max-w-md animate-fade-right">
             {children}

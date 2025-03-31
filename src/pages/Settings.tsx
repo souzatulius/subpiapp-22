@@ -5,11 +5,13 @@ import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import SettingsContent from '@/components/settings/SettingsContent';
 import SettingsDashboard from '@/components/settings/SettingsDashboard';
+import MobileSettingsNav from '@/components/settings/MobileSettingsNav';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,6 +19,7 @@ const Settings = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -82,11 +85,12 @@ const Settings = () => {
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
         <div className="flex flex-1 overflow-hidden">
-          <DashboardSidebar isOpen={sidebarOpen} />
+          {/* Somente mostrar sidebar no desktop */}
+          {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
           <main className="flex-1 overflow-hidden">
             <div className="w-full h-full">
-              <div className="overflow-y-auto p-6">
+              <div className="overflow-y-auto p-6 pb-24 md:pb-6">
                 <div className="max-w-7xl mx-auto">
                   {activeSection === 'dashboard' ? (
                     <div>
@@ -115,6 +119,9 @@ const Settings = () => {
             </div>
           </main>
         </div>
+        
+        {/* Bottom Navigation for Mobile */}
+        <MobileSettingsNav />
       </div>
     </AdminProtectedRoute>
   );

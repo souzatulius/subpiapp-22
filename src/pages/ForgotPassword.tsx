@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AuthLayout from '@/components/AuthLayout';
@@ -7,12 +7,15 @@ import EmailSuffix from '@/components/EmailSuffix';
 import { supabase } from '@/integrations/supabase/client';
 import { completeEmailWithDomain } from '@/lib/authUtils';
 import { toast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const isMobile = useIsMobile();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +52,15 @@ const ForgotPassword = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const scrollToForm = () => {
+    if (isMobile && formRef.current) {
+      formRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
     }
   };
 
@@ -91,7 +103,18 @@ const ForgotPassword = () => {
               Digite seu e-mail para receber um link de recuperação de senha.
             </p>
             
-            <form onSubmit={handleResetPassword}>
+            {/* Botão de acesso rápido para mobile */}
+            {isMobile && (
+              <button
+                type="button"
+                onClick={scrollToForm}
+                className="w-full mb-6 bg-[#003570] text-white py-3 px-4 rounded-xl flex items-center justify-center"
+              >
+                Recuperar Senha
+              </button>
+            )}
+            
+            <form id="recovery-form" ref={formRef} onSubmit={handleResetPassword}>
               <div className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-[#111827] mb-1">
