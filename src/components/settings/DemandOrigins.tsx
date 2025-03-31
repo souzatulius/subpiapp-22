@@ -4,6 +4,7 @@ import DataTable from './data-table/DataTable';
 import DemandOriginForm from './demand-origins/DemandOriginForm';
 import DemandOriginEditDialog from './demand-origins/DemandOriginEditDialog';
 import { useDemandOrigins, DemandOrigin } from '@/hooks/useDemandOrigins';
+import { useOriginIcon } from '@/hooks/useOriginIcon';
 
 const DemandOrigins = () => {
   const {
@@ -37,7 +38,7 @@ const DemandOrigins = () => {
     setIsAddFormOpen(false);
   };
 
-  const handleEdit = async (data: { descricao: string }) => {
+  const handleEdit = async (data: { descricao: string, icone: string }) => {
     if (!editingOrigin) return Promise.reject(new Error('Nenhuma origem de demanda selecionada'));
     
     try {
@@ -49,7 +50,7 @@ const DemandOrigins = () => {
     }
   };
 
-  const handleAdd = async (data: { descricao: string }) => {
+  const handleAdd = async (data: { descricao: string, icone: string }) => {
     try {
       await addDemandOrigin(data);
       closeAddForm();
@@ -60,6 +61,15 @@ const DemandOrigins = () => {
   };
 
   const columns = [
+    {
+      key: 'icone',
+      header: 'Ícone',
+      render: (row: DemandOrigin) => (
+        <div className="flex justify-center">
+          {useOriginIcon(row, "h-6 w-6")}
+        </div>
+      ),
+    },
     {
       key: 'descricao',
       header: 'Descrição',

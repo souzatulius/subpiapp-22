@@ -7,13 +7,14 @@ export interface DemandOrigin {
   id: string;
   descricao: string;
   criado_em: string;
+  icone?: string;
 }
 
 interface DemandOriginEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   demandOrigin: DemandOrigin | null;
-  onSubmit: (data: { descricao: string }) => Promise<void>;
+  onSubmit: (data: { descricao: string, icone: string }) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -36,6 +37,7 @@ const DemandOriginEditDialog: React.FC<DemandOriginEditDialogProps> = ({
         onSubmit={onSubmit}
         onCancel={onClose}
         defaultValue={demandOrigin.descricao}
+        defaultIcon={demandOrigin.icone}
         isSubmitting={isSubmitting}
         submitText="Salvar Alterações"
       />

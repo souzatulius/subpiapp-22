@@ -7,6 +7,7 @@ import { demandOriginSchema } from '@/components/settings/demand-origins/DemandO
 export type DemandOrigin = {
   id: string;
   descricao: string;
+  icone?: string;
   criado_em: string;
 };
 
@@ -41,18 +42,25 @@ export function useDemandOrigins() {
     }
   };
 
-  const addDemandOrigin = async (data: { descricao: string }) => {
+  const addDemandOrigin = async (data: { descricao: string, icone: string }) => {
     setIsSubmitting(true);
     try {
       console.log('Adicionando origem de demanda:', data);
       
-      const { data: newId, error } = await supabase.rpc('insert_origem_demanda', {
-        p_descricao: data.descricao
-      });
+      const { data: newOrigin, error } = await supabase
+        .from('origens_demandas')
+        .insert([
+          { 
+            descricao: data.descricao,
+            icone: data.icone
+          }
+        ])
+        .select()
+        .single();
       
       if (error) throw error;
       
-      console.log('Origem de demanda adicionada com sucesso:', newId);
+      console.log('Origem de demanda adicionada com sucesso:', newOrigin);
       
       toast({
         title: 'Sucesso',
@@ -74,15 +82,19 @@ export function useDemandOrigins() {
     }
   };
 
-  const updateDemandOrigin = async (id: string, data: { descricao: string }) => {
+  const updateDemandOrigin = async (id: string, data: { descricao: string, icone: string }) => {
     setIsSubmitting(true);
     try {
       console.log('Editando origem de demanda:', id, data);
       
-      const { data: result, error } = await supabase.rpc('update_origem_demanda', {
-        p_id: id,
-        p_descricao: data.descricao
-      });
+      const { data: result, error } = await supabase
+        .from('origens_demandas')
+        .update({
+          descricao: data.descricao,
+          icone: data.icone
+        })
+        .eq('id', id)
+        .select();
       
       if (error) throw error;
       
@@ -129,9 +141,10 @@ export function useDemandOrigins() {
       
       console.log('Excluindo origem de demanda:', origin.id);
       
-      const { error } = await supabase.rpc('delete_origem_demanda', {
-        p_id: origin.id
-      });
+      const { error } = await supabase
+        .from('origens_demandas')
+        .delete()
+        .eq('id', origin.id);
       
       if (error) throw error;
       

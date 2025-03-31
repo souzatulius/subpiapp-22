@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag } from 'lucide-react';
+import { useOriginIcon } from '@/hooks/useOriginIcon';
 import { ValidationError } from '@/lib/formValidationUtils';
 
 interface OriginClassificationStepProps {
@@ -72,7 +72,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
           htmlFor="origem_id" 
           className={`block mb-2 ${hasError('origem_id') ? 'text-orange-500 font-semibold' : ''}`}
         >
-          Origem da Demanda {hasError('origem_id') && <span className="text-orange-500">*</span>}
+          De onde vem a sua solicitação? {hasError('origem_id') && <span className="text-orange-500">*</span>}
         </label>
         <div className="flex flex-wrap gap-3">
           {origens.map(origem => (
@@ -87,6 +87,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
               }`} 
               onClick={() => handleSelectChange('origem_id', origem.id)}
             >
+              {useOriginIcon(origem, "h-8 w-8")}
               <span className="text-sm font-semibold">{origem.descricao}</span>
             </Button>
           ))}

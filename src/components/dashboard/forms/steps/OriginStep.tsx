@@ -2,7 +2,7 @@
 import React from 'react';
 import { ValidationError, hasFieldError, getFieldErrorMessage } from '@/lib/formValidationUtils';
 import { Button } from '@/components/ui/button';
-import { Building, Phone, Mail, MessageSquare, Newspaper, Users, Flag } from 'lucide-react';
+import { useOriginIcon } from '@/hooks/useOriginIcon';
 
 interface OriginStepProps {
   formData: {
@@ -29,22 +29,6 @@ const OriginStep: React.FC<OriginStepProps> = ({
   const getErrorMessage = (field: string) => {
     const error = errors.find(err => err.field === field);
     return error ? error.message : '';
-  };
-
-  // Get origin icon based on description
-  const getOriginIcon = (descricao: string) => {
-    const iconMap: {
-      [key: string]: React.ReactNode;
-    } = {
-      "Imprensa": <Newspaper className="h-5 w-5" />,
-      "SMSUB": <Building className="h-5 w-5" />,
-      "SECOM": <MessageSquare className="h-5 w-5" />,
-      "Telefone": <Phone className="h-5 w-5" />,
-      "Email": <Mail className="h-5 w-5" />,
-      "Ouvidoria": <Users className="h-5 w-5" />,
-      "Outros": <Flag className="h-5 w-5" />
-    };
-    return iconMap[descricao] || <Flag className="h-5 w-5" />;
   };
 
   // Allow deselection of origin
@@ -78,7 +62,7 @@ const OriginStep: React.FC<OriginStepProps> = ({
               }`} 
               onClick={() => handleOriginClick(origem.id)}
             >
-              {getOriginIcon(origem.descricao)}
+              {useOriginIcon(origem, "h-8 w-8")}
               <span className="text-sm font-semibold">{origem.descricao}</span>
             </Button>
           ))}
