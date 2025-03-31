@@ -4,7 +4,8 @@ import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaul
 import CardGrid from '@/components/dashboard/CardGrid';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
+import WelcomeCard from '@/components/shared/WelcomeCard';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -29,6 +30,10 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     saveCards,
     reorderCards,
   } = useDefaultDashboardState(department);
+
+  // Separar Welcome Cards dos cards normais
+  const welcomeCards = cards.filter(card => card.type === 'welcome_card');
+  const standardCards = cards.filter(card => card.type !== 'welcome_card');
 
   const handleCardsChange = (newCards: ActionCardItem[]) => {
     if (reorderCards) {
@@ -76,6 +81,14 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     });
   };
 
+  // Helper para obter componente de ícone
+  const getIconComponentFromId = (iconId: string) => {
+    // Simple fallback when dynamic imports are not easy
+    return function DefaultIcon(props: any) {
+      return <span {...props}>📋</span>;
+    };
+  };
+
   return (
     <>
       <div className="relative w-full h-full bg-gray-50 p-4 rounded-lg overflow-auto">
@@ -92,8 +105,21 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             </div>
           )}
           
+          {/* Welcome Cards */}
+          {welcomeCards.map(card => (
+            <WelcomeCard
+              key={card.id}
+              title={card.title}
+              description={card.customProperties?.description || ''}
+              color={card.customProperties?.gradient || 'bg-gradient-to-r from-blue-600 to-blue-800'}
+              icon={React.createElement(getIconComponentFromId(card.iconId), { className: "h-6 w-6" })}
+              showButton={false}
+            />
+          ))}
+          
+          {/* Regular Cards */}
           <CardGrid 
-            cards={cards} 
+            cards={standardCards} 
             onCardsChange={handleCardsChange} 
             onEditCard={handleEditCardClick} 
             onDeleteCard={handleDeleteCard}

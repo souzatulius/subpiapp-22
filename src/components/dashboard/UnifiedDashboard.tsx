@@ -34,18 +34,17 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Fix type instantiation issue by using explicit types
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Use explicit typing in useMemo to prevent deep type instantiation
-  const visibleCards = useMemo(() => {
-    return cards.filter(card => !card.hidden) as ActionCardItem[];
+  // Use explicit typing for filtered cards
+  const visibleCards = useMemo<ActionCardItem[]>(() => {
+    return cards.filter(card => !card.hidden);
   }, [cards]);
   
-  const hiddenCards = useMemo(() => {
-    return cards.filter(card => card.hidden === true) as ActionCardItem[];
+  const hiddenCards = useMemo<ActionCardItem[]>(() => {
+    return cards.filter(card => card.hidden === true);
   }, [cards]);
   
   // Simple function to toggle card visibility

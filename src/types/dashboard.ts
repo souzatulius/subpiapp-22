@@ -8,7 +8,7 @@ export type CardColor =
 
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
-export type CardType = 'standard' | 'data_dynamic' | 'quickDemand' | 'search' | 'overdueDemands' | 'pendingActions';
+export type CardType = 'standard' | 'data_dynamic' | 'quickDemand' | 'search' | 'overdueDemands' | 'pendingActions' | 'welcome_card';
 export type DataSourceKey = string;
 
 // Interface de dimensões dos cards (específica para ocupação de grid)
@@ -43,6 +43,11 @@ export interface ActionCardItem {
   version?: string;
   _departmentId?: string; // Used for card library
   _dashboardType?: 'dashboard' | 'communication'; // Used for card library
+  customProperties?: {
+    description?: string;
+    gradient?: string;
+    [key: string]: any;
+  };
 }
 
 export interface UnifiedCardItem extends ActionCardItem {
