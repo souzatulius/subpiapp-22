@@ -171,3 +171,5 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     </DndContext>
   );
 };
+
+export default RelatoriosContent;
