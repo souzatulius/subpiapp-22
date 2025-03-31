@@ -1,27 +1,26 @@
 
-import { useNavigate } from 'react-router-dom';
-import { Controls } from './SortableActionCard';
-import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
+import { useState } from 'react';
+import { CardColor } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import { Controls } from './SortableActionCard';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-export interface ActionCardProps {
+export interface UnifiedActionCardProps {
   id: string;
   title: string;
   iconId: string;
-  path: string;
+  path?: string;
   color: CardColor;
+  iconSize?: 'sm' | 'md' | 'lg';
+  badgeCount?: number;
+  isEditing?: boolean;
   isDraggable?: boolean;
-  width?: CardWidth;
-  height?: CardHeight;
-  type?: CardType;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   isCustom?: boolean;
-  dataSourceKey?: string;
-  displayMobile?: boolean;
-  mobileOrder?: number;
+  onClick?: () => void;
   children?: React.ReactNode;
-  iconSize?: 'sm' | 'md' | 'lg';
 }
 
 const getBackgroundColor = (color: CardColor): string => {
@@ -45,38 +44,43 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg'): string => {
     case 'sm': return 'w-6 h-6';
     case 'md': return 'w-8 h-8';
     case 'lg': return 'w-10 h-10';
-    default: return 'w-6 h-6'; // default size for backward compatibility
+    default: return 'w-8 h-8'; // default to medium
   }
 };
 
-const ActionCard = ({
+export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   id,
   title,
   iconId,
   path,
   color,
+  iconSize = 'md',
+  badgeCount,
+  isEditing = false,
   isDraggable = false,
   onEdit,
   onDelete,
   isCustom = false,
-  iconSize,
+  onClick,
   children
-}: ActionCardProps) => {
-  const navigate = useNavigate();
+}) => {
   const bgColor = getBackgroundColor(color);
   const Icon = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize(iconSize);
-
+  
+  // Handle click events
   const handleClick = () => {
-    if (path) navigate(path);
+    if (onClick) {
+      onClick();
+    }
   };
-
-  return (
+  
+  const cardContent = (
     <div 
       className={`w-full h-full rounded-xl shadow-md overflow-hidden cursor-pointer 
-        transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColor}`}
-      onClick={path ? handleClick : undefined}
+      transition-all duration-300 hover:shadow-lg hover:-translate-y-1 active:scale-95 
+      ${bgColor} ${isEditing ? 'animate-wiggle' : ''}`}
+      onClick={handleClick}
     >
       <div className="relative p-6 h-full flex flex-col items-center justify-center text-center group">
         {isDraggable && onEdit && (
@@ -87,6 +91,12 @@ const ActionCard = ({
               onDelete={onDelete} 
               isCustom={isCustom}
             />
+          </div>
+        )}
+        
+        {badgeCount !== undefined && badgeCount > 0 && (
+          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {badgeCount > 99 ? '99+' : badgeCount}
           </div>
         )}
         
@@ -103,6 +113,32 @@ const ActionCard = ({
       </div>
     </div>
   );
+
+  return cardContent;
 };
 
-export default ActionCard;
+// Sortable version of the UnifiedActionCard
+export const SortableUnifiedActionCard: React.FC<UnifiedActionCardProps & { index?: number }> = (props) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.id });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    width: '100%',
+    height: '100%',
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners}
+      className="w-full h-full"
+    >
+      <UnifiedActionCard {...props} />
+    </div>
+  );
+};
+
+export default UnifiedActionCard;
