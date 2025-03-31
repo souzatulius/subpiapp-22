@@ -4,7 +4,7 @@ import { PieChart as RechartsBarChart, Pie, Cell, ResponsiveContainer, Tooltip, 
 
 interface DataItem {
   name: string;
-  value: number;
+  value?: number;  // Changed to optional for compatibility with ChartData
 }
 
 interface PieChartProps {
@@ -34,12 +34,24 @@ export const PieChart: React.FC<PieChartProps> = ({
     );
   }
 
+  // Filter out items without a value property
+  const validData = data.filter(item => typeof item.value === 'number');
+
+  // If no valid data remains after filtering, show placeholder
+  if (validData.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p className="text-gray-400">Dados não disponíveis</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full w-full">
       <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart>
           <Pie
-            data={data}
+            data={validData}
             cx="50%"
             cy="50%"
             labelLine={false}
@@ -49,7 +61,7 @@ export const PieChart: React.FC<PieChartProps> = ({
             nameKey="name"
             label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
           >
-            {data.map((entry, index) => (
+            {validData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
             ))}
           </Pie>
