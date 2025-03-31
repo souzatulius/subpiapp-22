@@ -10,6 +10,8 @@ import TemasTecnicos from './sections/TemasTecnicos';
 import TempoDesempenho from './sections/TempoDesempenho';
 import NotasOficiais from './sections/NotasOficiais';
 import Tendencias from './sections/Tendencias';
+import { useReportsData } from './hooks/useReportsData';
+import StatsCards from './components/StatsCards';
 
 interface RelatoriosContentProps {
   filterDialogOpen?: boolean;
@@ -33,7 +35,11 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     })
   );
   
-  const { chartData, rankingChartData, rankingData } = useChartData();
+  const { reportsData, cardStats, isLoading: dataLoading } = useReportsData({
+    dateRange
+  });
+  
+  const { chartData } = useChartData();
   
   const {
     chartComponents
@@ -42,11 +48,11 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
   const initialItems = React.useMemo(() => createRelatorioItems({
     chartData,
     chartComponents,
-    isLoading,
+    isLoading: isLoading || dataLoading,
     hiddenItems: [],
     expandedAnalyses: [],
     analysisOnlyItems: []
-  }), [chartComponents, chartData, isLoading]);
+  }), [chartComponents, chartData, isLoading, dataLoading]);
 
   const {
     items,
@@ -60,16 +66,20 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
   } = useRelatorioItemsState(initialItems);
 
   useEffect(() => {
+    // Definir um timer para simular carregamento, mas se os dados reais já estiverem prontos, termine mais cedo
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, dataLoading ? 1500 : 500);
+    
     return () => clearTimeout(timer);
-  }, []);
+  }, [dataLoading]);
 
   const temasTecnicosItems = items.filter(item => ['distribuicaoPorTemas', 'complexidadePorTema', 'origemDemandas'].includes(item.id));
   const tempoDesempenhoItems = items.filter(item => ['tempoMedioResposta', 'performanceArea', 'timelineRespostas'].includes(item.id));
   const notasOficiaisItems = items.filter(item => ['notasEmitidas', 'notasPorTema', 'distribuicaoImpacto'].includes(item.id));
   const tendenciasItems = items.filter(item => ['evolucaoMensal', 'comparativoAnual', 'indiceSatisfacao'].includes(item.id));
+
+  const loading = isLoading || dataLoading;
 
   return (
     <DndContext 
@@ -83,9 +93,11 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
+        <StatsCards cardStats={cardStats} isLoading={loading} />
+        
         <TemasTecnicos 
           items={temasTecnicosItems} 
-          isLoading={isLoading}
+          isLoading={loading}
           handleToggleVisibility={handleToggleVisibility}
           handleToggleAnalysis={handleToggleAnalysis}
           handleToggleView={handleToggleView}
@@ -93,7 +105,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         
         <TempoDesempenho
           items={tempoDesempenhoItems}
-          isLoading={isLoading}
+          isLoading={loading}
           handleToggleVisibility={handleToggleVisibility}
           handleToggleAnalysis={handleToggleAnalysis}
           handleToggleView={handleToggleView}
@@ -101,7 +113,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         
         <NotasOficiais
           items={notasOficiaisItems}
-          isLoading={isLoading}
+          isLoading={loading}
           handleToggleVisibility={handleToggleVisibility}
           handleToggleAnalysis={handleToggleAnalysis}
           handleToggleView={handleToggleView}
@@ -109,7 +121,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
         
         <Tendencias
           items={tendenciasItems}
-          isLoading={isLoading}
+          isLoading={loading}
           handleToggleVisibility={handleToggleVisibility}
           handleToggleAnalysis={handleToggleAnalysis}
           handleToggleView={handleToggleView}
@@ -120,4 +132,3 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
 };
 
 export default RelatoriosContent;
-
