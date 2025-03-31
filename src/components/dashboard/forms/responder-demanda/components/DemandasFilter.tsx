@@ -3,7 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, List, Grid } from 'lucide-react';
+import { Search, List, Grid, ArrowLeft } from 'lucide-react';
 import { ViewMode } from '../types';
 
 interface DemandasFilterProps {
@@ -16,6 +16,8 @@ interface DemandasFilterProps {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
   areas: Array<{ id: string; descricao: string }>;
+  onBack?: () => void;
+  showBackButton?: boolean;
 }
 
 const DemandasFilter: React.FC<DemandasFilterProps> = ({
@@ -27,26 +29,40 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
   setPrioridadeFilter,
   viewMode,
   setViewMode,
-  areas
+  areas,
+  onBack,
+  showBackButton = false
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100">
-      {/* Main filter grid */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-4 items-center mb-4">
-        <div className="col-span-1 md:col-span-2">
-          <div className="relative">
-            <Input
-              placeholder="Buscar demandas por título..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10"
-            />
-            <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
-          </div>
+    <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Back button - only shown when needed */}
+        {showBackButton && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onBack}
+            className="mr-1"
+            title="Voltar"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        )}
+        
+        {/* Search input with reduced width */}
+        <div className="relative w-64 flex-shrink">
+          <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+          <Input
+            placeholder="Buscar demandas..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 h-10"
+          />
         </div>
         
+        {/* Area filter dropdown */}
         <Select value={areaFilter} onValueChange={setAreaFilter}>
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-white w-44">
             <SelectValue placeholder="Filtrar por área" />
           </SelectTrigger>
           <SelectContent>
@@ -59,8 +75,9 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           </SelectContent>
         </Select>
         
+        {/* Priority filter dropdown */}
         <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter}>
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-white w-44">
             <SelectValue placeholder="Filtrar por prioridade" />
           </SelectTrigger>
           <SelectContent>
@@ -71,29 +88,27 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
             <SelectItem value="urgente">Urgente</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      {/* View mode toggle */}
-      <div className="flex justify-end">
-        <div className="bg-gray-100 p-1 rounded-md inline-flex">
-          <Button 
-            variant={viewMode === 'list' ? "default" : "ghost"} 
-            size="sm"
-            onClick={() => setViewMode('list')}
-            className={`rounded-sm px-2 ${viewMode === 'list' ? 'bg-white text-primary-foreground' : ''}`}
-          >
-            <List className="h-4 w-4 mr-1" />
-            Lista
-          </Button>
-          <Button 
-            variant={viewMode === 'cards' ? "default" : "ghost"} 
-            size="sm"
-            onClick={() => setViewMode('cards')}
-            className={`rounded-sm px-2 ${viewMode === 'cards' ? 'bg-white text-primary-foreground' : ''}`}
-          >
-            <Grid className="h-4 w-4 mr-1" />
-            Cards
-          </Button>
+        
+        {/* Push the view mode toggle to the right */}
+        <div className="ml-auto">
+          <div className="bg-gray-100 p-1 rounded-md inline-flex">
+            <Button 
+              variant={viewMode === 'list' ? "default" : "ghost"} 
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className={`rounded-sm px-2 ${viewMode === 'list' ? 'bg-white text-primary-foreground' : ''}`}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant={viewMode === 'cards' ? "default" : "ghost"} 
+              size="sm"
+              onClick={() => setViewMode('cards')}
+              className={`rounded-sm px-2 ${viewMode === 'cards' ? 'bg-white text-primary-foreground' : ''}`}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

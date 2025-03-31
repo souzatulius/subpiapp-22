@@ -22,6 +22,7 @@ interface RespostaFormProps {
   isLoading: boolean;
   onSubmit: () => Promise<void>;
   handleRespostaChange: (key: string, value: string) => void;
+  hideBackButton?: boolean;
 }
 
 const RespostaForm: React.FC<RespostaFormProps> = ({
@@ -34,6 +35,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   isLoading,
   onSubmit,
   handleRespostaChange,
+  hideBackButton = false
 }) => {
   // Check if all questions have been answered
   const normalizedQuestions = React.useMemo(() => 
@@ -52,16 +54,19 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <Button 
-          variant="ghost"
-          onClick={onBack} 
-          className="flex items-center space-x-2"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
-      </div>
+      {/* Back button (only if not hidden) */}
+      {!hideBackButton && (
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="ghost"
+            onClick={onBack} 
+            className="flex items-center space-x-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+        </div>
+      )}
       
       <RespostaFormHeader selectedDemanda={selectedDemanda} />
       

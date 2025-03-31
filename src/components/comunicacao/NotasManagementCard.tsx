@@ -89,7 +89,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
               {pendingNotasCount} nota{pendingNotasCount !== 1 ? 's' : ''} aguardando aprovação:
             </p>
             <ul className="divide-y divide-gray-100">
-              {pendingNotas?.map((nota) => (
+              {pendingNotas?.map((nota: any) => (
                 <li key={nota.id} className="py-2">
                   <Link 
                     to={`/${baseUrl}/consultar?id=${nota.id}`}
