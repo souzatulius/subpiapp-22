@@ -1,6 +1,6 @@
 
 import React from 'react';
-import CardGrid from '@/components/dashboard/CardGrid';
+import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -60,16 +60,13 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         {mobileNotch}
         <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
           <div className="p-4">
-            <CardGrid
+            <UnifiedCardGrid
               cards={cards}
               onCardsChange={setCards}
               onEditCard={handleEditCard}
               onDeleteCard={handleDeleteCard}
-              specialCardsData={specialCardsData}
               isMobileView={isMobilePreview}
-              modoAdmin={modoAdmin}
-              coordenacaoId={department}
-              usuarioId={user?.id ?? ''}
+              isEditMode={modoAdmin}
             />
           </div>
         </div>

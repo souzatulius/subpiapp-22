@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Controls } from './SortableActionCard';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
@@ -21,7 +20,7 @@ export interface ActionCardProps {
   displayMobile?: boolean;
   mobileOrder?: number;
   children?: React.ReactNode;
-  iconSize?: 'sm' | 'md' | 'lg';
+  iconSize?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const getBackgroundColor = (color: CardColor): string => {
@@ -40,12 +39,13 @@ const getBackgroundColor = (color: CardColor): string => {
   }
 };
 
-const getIconSize = (size?: 'sm' | 'md' | 'lg'): string => {
+const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm': return 'w-6 h-6';
     case 'md': return 'w-8 h-8';
     case 'lg': return 'w-10 h-10';
-    default: return 'w-6 h-6'; // default size for backward compatibility
+    case 'xl': return 'w-20 h-20';
+    default: return 'w-20 h-20';
   }
 };
 
@@ -59,12 +59,12 @@ const ActionCard = ({
   onEdit,
   onDelete,
   isCustom = false,
-  iconSize,
+  iconSize = 'xl',
   children
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
-  const Icon = getIconComponentFromId(iconId);
+  const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize(iconSize);
 
   const handleClick = () => {
@@ -95,7 +95,7 @@ const ActionCard = ({
         ) : (
           <>
             <div className="text-white mb-4">
-              {Icon && <Icon className={iconSizeClass} />}
+              {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <h3 className="text-lg font-semibold text-white">{title}</h3>
           </>

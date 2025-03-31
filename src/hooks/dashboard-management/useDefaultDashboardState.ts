@@ -115,6 +115,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
         } : card
       ));
     } else {
+      // Create a new card with required properties
       const newCard: ActionCardItem = {
         id: `card-${uuidv4()}`,
         title: cardData.title || 'Novo Card',

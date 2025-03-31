@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -6,8 +5,8 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 
-// Simple interface for cleaned card data to avoid deep type instantiation
-interface CleanedCardData {
+// Simplified type to avoid infinite type instantiation
+interface SimpleCardData {
   id: string;
   title: string;
   path: string;
@@ -23,7 +22,7 @@ interface CleanedCardData {
 }
 
 // Helper function to clean card objects before stringifying
-const cleanCardForStorage = (card: ActionCardItem): CleanedCardData => {
+const cleanCardForStorage = (card: ActionCardItem): SimpleCardData => {
   // Create a clean object with only the properties we need to store
   return {
     id: card.id,
@@ -44,7 +43,7 @@ const cleanCardForStorage = (card: ActionCardItem): CleanedCardData => {
 export const useDefaultDashboardConfig = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
-  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, CleanedCardData[]>>({});
+  const [defaultDashboards, setDefaultDashboards] = useState<Record<string, SimpleCardData[]>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { user } = useAuth();
@@ -63,7 +62,7 @@ export const useDefaultDashboardConfig = () => {
 
         if (error) throw error;
 
-        const configs: Record<string, CleanedCardData[]> = {};
+        const configs: Record<string, SimpleCardData[]> = {};
         for (const item of data) {
           try {
             configs[`${item.department}_${item.view_type}`] = JSON.parse(item.cards_config);

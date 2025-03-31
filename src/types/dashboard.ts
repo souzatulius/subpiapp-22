@@ -9,14 +9,12 @@ export type CardColor =
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
 export type CardType = 'standard' | 'data_dynamic';
-// Modified to string to match how it's being used
 export type DataSourceKey = string;
 
 export interface ActionCardItem {
   id: string;
   title: string;
   iconId: string;
-  icon?: ReactNode;
   path: string;
   color: CardColor;
   width?: CardWidth;

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
-import CardGrid from '@/components/dashboard/CardGrid';
+import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { MessageSquareReply, Loader2, PlusCircle } from 'lucide-react';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
@@ -77,21 +77,13 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           <span className="ml-2 text-blue-600 font-medium">Carregando dashboard...</span>
         </div>
       ) : (
-        /* Card Grid */
-        <CardGrid
+        /* Card Grid - Usando UnifiedCardGrid em vez de CardGrid */
+        <UnifiedCardGrid
           cards={cards}
           onCardsChange={setCards}
           onEditCard={handleEditCard}
           onDeleteCard={handleDeleteCard}
-          onAddNewCard={handleAddNewCard}
-          specialCardsData={specialCardsData}
-          // Add the missing props
-          quickDemandTitle={newDemandTitle}
-          onQuickDemandTitleChange={setNewDemandTitle}
-          onQuickDemandSubmit={handleQuickDemandSubmit}
-          onSearchSubmit={handleSearchSubmit}
-          usuarioId={user?.id || ''}
-          coordenacaoId={department || ''}
+          isEditMode={!isPreview}
         />
       )}
 
