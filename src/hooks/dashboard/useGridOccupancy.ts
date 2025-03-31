@@ -12,7 +12,7 @@ export interface OccupancyCell {
 
 export type GridMap = OccupancyCell[][];
 
-interface UseGridOccupancyProps {
+export interface UseGridOccupancyProps {
   cards: CardDimensions[];
 }
 

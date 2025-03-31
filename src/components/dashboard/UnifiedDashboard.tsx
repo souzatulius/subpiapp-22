@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ActionCardItem, UnifiedCardItem } from '@/types/dashboard';
+import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/components/ui/use-toast';
 import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
@@ -212,7 +211,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       {!isMobile && headerComponent ? (
         headerComponent
       ) : title && description && !isMobile ? (
-        <WelcomeMessage title={title} description={description} />
+        <WelcomeMessage firstName="" title={title} description={description} />
       ) : null}
       
       {/* Hidden Cards Tray */}
@@ -225,7 +224,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       
       {/* Card Grid */}
       <UnifiedCardGrid
-        cards={visibleCards as ActionCardItem[]}
+        cards={visibleCards}
         setCards={setCards}
         loading={loading}
         handleDeleteCard={handleDeleteCard}

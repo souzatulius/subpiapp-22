@@ -41,6 +41,8 @@ export interface ActionCardItem {
   isPendingActions?: boolean;
   hidden?: boolean;
   version?: string;
+  _departmentId?: string; // Used for card library
+  _dashboardType?: 'dashboard' | 'communication'; // Used for card library
 }
 
 export interface UnifiedCardItem extends ActionCardItem {
@@ -49,7 +51,7 @@ export interface UnifiedCardItem extends ActionCardItem {
 
 export interface DashboardState {
   cards: ActionCardItem[];
-  setCards: (cards: ActionCardItem[]) => void;
+  setCards: (cards: ActionCardItem[] | ((prevCards: ActionCardItem[]) => ActionCardItem[])) => void;
   loading: boolean;
   handleDeleteCard: (id: string) => void;
   handleEditCard: (card: ActionCardItem) => void;

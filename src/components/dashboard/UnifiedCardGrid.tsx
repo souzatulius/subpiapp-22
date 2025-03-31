@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import React, { useState } from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { ActionCardItem, CardType, DashboardState, CardDimensions } from '@/types/dashboard';
@@ -50,7 +50,7 @@ const UnifiedCardGrid: React.FC<DashboardState> = ({
     setIsDragging(true);
   };
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     setIsDragging(false);
     
     const { active, over } = event;

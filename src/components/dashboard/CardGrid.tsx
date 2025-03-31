@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import {
   DndContext,
   closestCenter,
@@ -21,6 +22,8 @@ interface CardGridProps {
   onDeleteCard: (id: string) => void;
   onAddNewCard?: () => void;
   isMobileView?: boolean;
+  disableWiggleEffect?: boolean;
+  isEditMode?: boolean;
   specialCardsData?: any;
   usuarioId?: string;
   coordenacaoId?: string;
@@ -38,6 +41,8 @@ const CardGrid: React.FC<CardGridProps> = ({
   onDeleteCard,
   onAddNewCard,
   isMobileView = false,
+  disableWiggleEffect = false,
+  isEditMode = false,
   specialCardsData = {
     overdueCount: 0,
     overdueItems: [],
@@ -59,14 +64,14 @@ const CardGrid: React.FC<CardGridProps> = ({
   );
 
   // Always initialize this state regardless of card presence
-  const { gridMap, totalColumns } = useGridOccupancy(
-    cards.map(card => ({ 
+  const { gridMap, totalColumns } = useGridOccupancy({
+    cards: cards.map(card => ({ 
       id: card.id,
       width: card.width || '25', 
       height: card.height || '1',
       type: card.type
     }))
-  );
+  });
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -128,6 +133,7 @@ const CardGrid: React.FC<CardGridProps> = ({
                 onQuickDemandSubmit={onQuickDemandSubmit}
                 onSearchSubmit={onSearchSubmit}
                 isMobileView={isMobileView}
+                isEditMode={isEditMode}
               />
             </div>
           ))}
@@ -170,6 +176,7 @@ const CardGrid: React.FC<CardGridProps> = ({
                 onQuickDemandSubmit={onQuickDemandSubmit}
                 onSearchSubmit={onSearchSubmit}
                 isMobileView={isMobileView}
+                isEditMode={isEditMode}
               />
             </div>
           ))}

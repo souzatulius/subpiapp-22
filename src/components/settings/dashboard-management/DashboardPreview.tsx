@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
-import UnifiedDashboard from '@/components/dashboard/UnifiedDashboard';
 import CardGrid from '@/components/dashboard/CardGrid';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import { ActionCardItem } from '@/types/dashboard';
+import { toast } from '@/hooks/use-toast';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -20,12 +20,13 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   const [isCustomizationModalOpen, setIsCustomizationModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
   const [isEditMode, setIsEditMode] = useState(true); // Start in edit mode for management
+  
   const { 
     cards, 
     setCards, 
     handleDeleteCard, 
-    handleEditCard, 
-    saveCards 
+    handleEditCard,
+    saveCards
   } = useDefaultDashboardState(department);
 
   const handleCardsChange = (newCards: ActionCardItem[]) => {
@@ -52,11 +53,20 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       setCards([...cards, cardData]);
     }
     setIsCustomizationModalOpen(false);
+    
+    toast({
+      title: editingCard ? "Card atualizado" : "Card adicionado",
+      description: editingCard ? "O card foi atualizado com sucesso." : "O card foi adicionado ao dashboard.",
+      variant: "success"
+    });
   };
 
   const saveDashboard = async () => {
-    const saved = await saveCards();
-    return saved;
+    if (saveCards) {
+      const saved = await saveCards();
+      return saved;
+    }
+    return false;
   };
 
   return (
