@@ -6,13 +6,6 @@ import { createRelatorioItems } from './utils/relatorioItemsFactory';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useChartData } from './hooks/useChartData';
 import { useChartComponents } from './hooks/useChartComponents';
-import StatusDistributionChart from '../ranking/charts/StatusDistributionChart';
-import ServiceTypesChart from '../ranking/charts/ServiceTypesChart';
-import TimeComparisonChart from '../ranking/charts/TimeComparisonChart';
-import TopCompaniesChart from '../ranking/charts/TopCompaniesChart';
-import ServiceDiversityChart from '../ranking/charts/ServiceDiversityChart';
-import ServicesByDistrictChart from '../ranking/charts/ServicesByDistrictChart';
-import StatusTransitionChart from '../ranking/charts/StatusTransitionChart';
 import TemasTecnicos from './sections/TemasTecnicos';
 import TempoDesempenho from './sections/TempoDesempenho';
 import NotasOficiais from './sections/NotasOficiais';
@@ -121,55 +114,10 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
           handleToggleAnalysis={handleToggleAnalysis}
           handleToggleView={handleToggleView}
         />
-        
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Ranking de Zeladoria</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rankingData && (
-              <>
-                <StatusDistributionChart 
-                  data={rankingData.statusDistribution} 
-                  isLoading={isLoading} 
-                />
-                
-                <ServiceTypesChart 
-                  data={rankingData.serviceTypes} 
-                  sgzData={[]} 
-                  isLoading={isLoading}
-                  isSimulationActive={false}
-                />
-                
-                <TimeComparisonChart 
-                  data={rankingData.timeComparison} 
-                  isLoading={isLoading} 
-                />
-                
-                <TopCompaniesChart 
-                  data={rankingData.topCompanies} 
-                  isLoading={isLoading} 
-                />
-                
-                <ServiceDiversityChart 
-                  data={rankingData.serviceDiversity} 
-                  isLoading={isLoading} 
-                />
-                
-                <ServicesByDistrictChart 
-                  data={rankingData.servicesByDistrict} 
-                  isLoading={isLoading} 
-                />
-                
-                <StatusTransitionChart 
-                  data={rankingData.statusTransition} 
-                  isLoading={isLoading} 
-                />
-              </>
-            )}
-          </div>
-        </div>
       </motion.div>
     </DndContext>
   );
 };
 
 export default RelatoriosContent;
+
