@@ -34,48 +34,66 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
       try {
         setIsLoading(true);
         
-        let query = supabase
+        // Build base query for data
+        let baseQuery = supabase
           .from('demandas')
           .select(`
             id, 
             titulo, 
             status, 
-            criado_em,
+            horario_publicacao,
             requerente:requerente_id (nome)
           `);
         
         // Apply filters based on role
         if (isComunicacao) {
           // For communication team, show all pending demands
-          query = query
+          baseQuery = baseQuery
             .eq('status', 'pendente_resposta')
-            .order('criado_em', { ascending: false });
+            .order('horario_publicacao', { ascending: false });
         } else {
           // For other areas, show only demands for their coordination
-          query = query
+          baseQuery = baseQuery
             .eq('coordenacao_id', coordenacaoId)
             .eq('status', 'pendente_resposta')
-            .order('criado_em', { ascending: false });
+            .order('horario_publicacao', { ascending: false });
         }
         
-        // Get count first
-        const countResult = await query.count();
-        if (countResult.error) {
-          console.error('Error fetching demandas count:', countResult.error);
+        // Get count using separate query with head: true
+        const countQuery = isComunicacao 
+          ? supabase.from('demandas').select('*', { count: 'exact', head: true }).eq('status', 'pendente_resposta')
+          : supabase.from('demandas').select('*', { count: 'exact', head: true })
+              .eq('coordenacao_id', coordenacaoId)
+              .eq('status', 'pendente_resposta');
+        
+        const { count, error: countError } = await countQuery;
+        
+        if (countError) {
+          console.error('Error fetching demandas count:', countError);
           return;
         }
         
-        setTotalDemandas(countResult.count || 0);
+        setTotalDemandas(count || 0);
         
         // Then get limited data for display
-        const { data, error } = await query.limit(5);
+        const { data, error } = await baseQuery.limit(5);
         
         if (error) {
           console.error('Error fetching demandas:', error);
           return;
         }
         
-        setDemandas(data || []);
+        if (data) {
+          // Format data to match the Demanda interface
+          const formattedDemandas: Demanda[] = data.map(item => ({
+            id: item.id,
+            titulo: item.titulo,
+            criado_em: item.horario_publicacao, // Using horario_publicacao instead of criado_em
+            requerente: item.requerente
+          }));
+          
+          setDemandas(formattedDemandas);
+        }
       } catch (err) {
         console.error('Failed to fetch demandas:', err);
       } finally {

@@ -37,6 +37,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
       try {
         setIsLoading(true);
         
+        // Build base query
         let query = supabase
           .from('notas_oficiais')
           .select(`
@@ -59,14 +60,19 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             .order('criado_em', { ascending: false });
         }
         
-        // Get count
-        const countResult = await query.count();
-        if (countResult.error) {
-          console.error('Error fetching notas count:', countResult.error);
+        // Get count using separate query
+        const countQuery = isComunicacao 
+          ? supabase.from('notas_oficiais').select('*', { count: 'exact', head: true })
+          : supabase.from('notas_oficiais').select('*', { count: 'exact', head: true }).eq('coordenacao_id', coordenacaoId);
+        
+        const { count, error: countError } = await countQuery;
+        
+        if (countError) {
+          console.error('Error fetching notas count:', countError);
           return;
         }
         
-        setTotalNotas(countResult.count || 0);
+        setTotalNotas(count || 0);
         
         // Then get limited data 
         const { data, error } = await query.limit(5);
@@ -76,18 +82,20 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
           return;
         }
         
-        // Make sure we handle the response properly
-        const formattedNotas: Nota[] = data.map((nota: any) => ({
-          id: nota.id,
-          titulo: nota.titulo,
-          status: nota.status,
-          criado_em: nota.criado_em,
-          autor: {
-            nome_completo: nota.autor?.nome_completo || 'Desconhecido'
-          }
-        }));
-        
-        setNotas(formattedNotas);
+        if (data) {
+          // Ensure data formatting is correct
+          const formattedNotas = data.map(nota => ({
+            id: nota.id,
+            titulo: nota.titulo,
+            status: nota.status,
+            criado_em: nota.criado_em,
+            autor: {
+              nome_completo: nota.autor?.nome_completo || 'Desconhecido'
+            }
+          }));
+          
+          setNotas(formattedNotas);
+        }
       } catch (err) {
         console.error('Failed to fetch notas:', err);
       } finally {
@@ -101,11 +109,11 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
   }, [coordenacaoId, isComunicacao]);
 
   const handleCardClick = () => {
-    navigate('/dashboard/comunicacao/consultar-notas');
+    navigate(`${baseUrl ? `/${baseUrl}` : ''}/consultar-notas`);
   };
   
   const handleNotaClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/consultar-notas/${id}`);
+    navigate(`${baseUrl ? `/${baseUrl}` : ''}/consultar-notas/${id}`);
   };
   
   const formatDate = (dateString: string) => {
