@@ -13,10 +13,17 @@ import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass } from './CardGrid';
 
+interface UnifiedCardItem extends UnifiedActionCardProps {
+  width?: string; 
+  height?: string;
+  displayMobile?: boolean;
+  mobileOrder?: number;
+}
+
 interface UnifiedCardGridProps {
-  cards: (UnifiedActionCardProps & { width?: string; height?: string })[];
-  onCardsChange: (cards: any[]) => void;
-  onEditCard?: (card: any) => void;
+  cards: UnifiedCardItem[];
+  onCardsChange: (cards: UnifiedCardItem[]) => void;
+  onEditCard?: (card: UnifiedCardItem) => void;
   onDeleteCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
