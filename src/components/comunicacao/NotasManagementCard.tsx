@@ -45,7 +45,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             titulo, 
             status, 
             criado_em,
-            autor:autor_id (nome_completo)
+            autor:usuarios!autor_id (nome_completo)
           `);
         
         // Apply filters based on role
