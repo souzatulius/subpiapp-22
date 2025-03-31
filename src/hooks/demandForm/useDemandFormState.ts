@@ -108,10 +108,8 @@ export const useDemandFormState = (
     }
   }, [formData.problema_id, problemas]);
 
-  // Enhanced title generation logic
   useEffect(() => {
     if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
-      // Generate title automatically when reaching step 4 (review step) or when we don't have a title yet
       if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 3) {
         const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
         if (suggestedTitle) {
@@ -175,11 +173,9 @@ export const useDemandFormState = (
         [name]: formattedValue
       }));
     } else if (name === 'prazo_resposta' && value.includes(':')) {
-      // Handle time input for deadline field
       const [datePart, oldTime] = formData.prazo_resposta?.split('T') || ['', ''];
       const newTime = value;
       
-      // If we have a valid date part, update only the time portion
       if (datePart) {
         const newValue = `${datePart}T${newTime}:00`;
         setFormData(prev => ({
@@ -187,7 +183,6 @@ export const useDemandFormState = (
           [name]: newValue
         }));
       } else {
-        // If no date part yet, just store the time temporarily
         setFormData(prev => ({
           ...prev,
           [name]: value
