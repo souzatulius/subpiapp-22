@@ -4,8 +4,9 @@ import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaul
 import CardGrid from '@/components/dashboard/CardGrid';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { MessageSquareReply, Loader2, PlusCircle } from 'lucide-react';
-import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
+import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -39,6 +40,17 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     setSearchQuery,
     handleSearchSubmit
   } = useDefaultDashboardState(department);
+
+  // Adapter for CardCustomizationModal to work with our card format
+  const handleSaveCardAdapter = (data: any) => {
+    // Convert the icon prop to iconId if needed
+    const cardData = {
+      ...data,
+      iconId: data.iconId || (typeof data.icon === 'string' ? data.icon : 'clipboard-list'),
+    };
+    
+    handleSaveCard(cardData);
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -88,7 +100,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         <CardCustomizationModal
           isOpen={isCustomizationModalOpen}
           onClose={() => setIsCustomizationModalOpen(false)}
-          onSave={handleSaveCard}
+          onSave={handleSaveCardAdapter}
           initialData={editingCard}
         />
       )}

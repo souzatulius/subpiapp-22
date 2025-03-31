@@ -21,6 +21,10 @@ export interface UnifiedActionCardProps {
   isCustom?: boolean;
   onClick?: () => void;
   children?: React.ReactNode;
+  displayMobile?: boolean;
+  mobileOrder?: number;
+  width?: string;
+  height?: string;
 }
 
 const getBackgroundColor = (color: CardColor): string => {

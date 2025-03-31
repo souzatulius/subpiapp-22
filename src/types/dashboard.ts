@@ -15,8 +15,8 @@ export type DataSourceKey = string;
 export interface ActionCardItem {
   id: string;
   title: string;
-  icon: ReactNode;
   iconId: string;
+  icon?: ReactNode;
   path: string;
   color: CardColor;
   width?: CardWidth;

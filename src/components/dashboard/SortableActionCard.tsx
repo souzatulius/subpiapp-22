@@ -96,7 +96,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
         <ActionCard
           id={card.id}
           title={card.title}
-          icon={card.icon}
+          iconId={card.iconId}
           path={card.path}
           color={card.color}
           isDraggable={true}

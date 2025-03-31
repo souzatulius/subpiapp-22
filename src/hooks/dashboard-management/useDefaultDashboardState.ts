@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,7 +98,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
     setIsCustomizationModalOpen(true);
   };
 
-  const handleSaveCard = (cardData: Omit<FormSchema, 'iconId'> & { iconId: string }) => {
+  const handleSaveCard = (cardData: any) => {
     const newCardDefaults = {
       displayMobile: true,
       mobileOrder: cards.length,
@@ -108,7 +109,9 @@ export const useDefaultDashboardState = (departmentId: string) => {
       setCards(cards.map(card =>
         card.id === editingCard.id ? { 
           ...card, 
-          ...cardData 
+          ...cardData,
+          // Ensure iconId is set correctly
+          iconId: cardData.iconId || card.iconId
         } : card
       ));
     } else {
@@ -119,7 +122,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
         color: cardData.color,
         width: cardData.width,
         height: cardData.height,
-        iconId: cardData.iconId,
+        iconId: cardData.iconId || 'clipboard-list',
         type: cardData.type || 'standard',
         ...newCardDefaults
       };
