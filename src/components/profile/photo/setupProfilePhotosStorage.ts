@@ -25,14 +25,14 @@ export const setupProfilePhotosStorage = async () => {
       }
       
       console.log('Bucket created successfully');
-      
-      // Update bucket policies instead of using setPublic which doesn't exist
-      const { error: policyError } = await supabase.storage.updateBucket('profile-photos', {
+
+      // Update bucket policies to make it public
+      const { error: updateError } = await supabase.storage.updateBucket('profile-photos', {
         public: true
       });
       
-      if (policyError) {
-        console.error('Error updating bucket policies:', policyError);
+      if (updateError) {
+        console.error('Error updating bucket policies:', updateError);
       }
     }
     

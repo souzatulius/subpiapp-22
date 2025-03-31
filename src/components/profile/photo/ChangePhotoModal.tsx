@@ -7,6 +7,7 @@ import EditModal from '@/components/settings/EditModal';
 import AvatarDisplay from './AvatarDisplay';
 import PhotoUploadActions from './PhotoUploadActions';
 import { usePhotoUpload } from './usePhotoUpload';
+import { setupProfilePhotosStorage } from './setupProfilePhotosStorage';
 
 interface ChangePhotoModalProps {
   isOpen: boolean;
@@ -15,6 +16,15 @@ interface ChangePhotoModalProps {
 
 const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) => {
   const { userProfile, refreshUserProfile, isLoading: profileLoading } = useUserProfile();
+  
+  // Ensure the profile photos bucket exists when the modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setupProfilePhotosStorage().catch(err => {
+        console.error('Error setting up profile photos storage:', err);
+      });
+    }
+  }, [isOpen]);
   
   const handleClose = async () => {
     // Atualizar perfil do usuário ao fechar para garantir que as alterações sejam exibidas

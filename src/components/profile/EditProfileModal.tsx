@@ -112,12 +112,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       // Clean whatsapp input (remove mask)
       const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
       
-      // Prepare data for update
-      const updateData = {
+      // Prepare data for update with correct types
+      const updateData: Record<string, any> = {
         nome_completo: data.nome_completo,
-        whatsapp: cleanWhatsapp || null,
-        aniversario: parsedDate ? parsedDate.toISOString() : null
+        whatsapp: cleanWhatsapp || null
       };
+      
+      // Only include aniversario if we have a valid parsed date
+      if (parsedDate) {
+        updateData.aniversario = parsedDate.toISOString();
+      }
+      
+      console.log('Updating with data:', updateData);
       
       // Update the user profile in the usuarios table
       const { error } = await supabase
