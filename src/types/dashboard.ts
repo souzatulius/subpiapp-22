@@ -16,7 +16,7 @@ export interface CardDimensions {
   id: string;
   width: CardWidth;
   height: CardHeight;
-  type: CardType; // Atualizamos para aceitar todos os tipos de card
+  type: CardType; // Updated to accept all card types
 }
 
 export interface ActionCardItem {

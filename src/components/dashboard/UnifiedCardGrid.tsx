@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { ActionCardItem, CardType, DashboardState } from '@/types/dashboard';
+import { ActionCardItem, CardType, DashboardState, CardDimensions } from '@/types/dashboard';
 import SortableActionCard from '@/components/dashboard/SortableActionCard';
 import DashboardActions from '@/components/dashboard/DashboardActions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useGridOccupancy, CardDimensions } from '@/hooks/dashboard/useGridOccupancy';
+import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
 const UnifiedCardGrid: React.FC<DashboardState> = ({
   cards,
