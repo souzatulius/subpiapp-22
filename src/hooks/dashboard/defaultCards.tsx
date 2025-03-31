@@ -1,6 +1,6 @@
 
 // hooks/dashboard/defaultCards.tsx
-import { ActionCardItem, CardColor } from '@/types/dashboard';
+import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
 
@@ -26,18 +26,18 @@ export const getIconComponentFromId = (iconId: string): React.ElementType => {
 
 // Cards padrão sem JSX nos dados
 export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
-  const baseCards = [
+  const baseCards: ActionCardItem[] = [
     {
       id: 'smart-search',
       title: 'O que você deseja fazer?',
       iconId: 'search',
       path: '',
       color: 'gray-light' as CardColor,
-      width: '100',
-      height: '1',
+      width: '100' as CardWidth,
+      height: '1' as CardHeight,
       isCustom: false,
       isSearch: true,
-      type: 'standard',
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 1
     },
@@ -47,11 +47,11 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
       iconId: 'clock',
       path: '/dashboard/comunicacao/consultar-demandas',
       color: 'orange' as CardColor,
-      width: '25',
-      height: '2',
+      width: '25' as CardWidth,
+      height: '2' as CardHeight,
       isCustom: false,
       isOverdueDemands: true,
-      type: 'standard',
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 5
     },
@@ -61,11 +61,11 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
       iconId: 'alert-triangle',
       path: '',
       color: 'orange-light' as CardColor,
-      width: '25',
-      height: '1',
+      width: '25' as CardWidth,
+      height: '1' as CardHeight,
       isCustom: false,
       isPendingActions: true,
-      type: 'standard',
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 6
     },
@@ -75,9 +75,9 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
       iconId: 'list-filter',
       path: '/dashboard/comunicacao/consultar-demandas',
       color: 'green' as CardColor,
-      width: '25',
-      height: '1',
-      type: 'standard',
+      width: '25' as CardWidth,
+      height: '1' as CardHeight,
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 3
     },
@@ -87,9 +87,9 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
       iconId: 'file-text',
       path: '/dashboard/comunicacao/consultar-notas',
       color: 'blue-dark' as CardColor,
-      width: '25',
-      height: '1',
-      type: 'standard',
+      width: '25' as CardWidth,
+      height: '1' as CardHeight,
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 4
     },
@@ -99,9 +99,9 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
       iconId: 'bar-chart-2',
       path: '/dashboard/zeladoria/ranking-subs',
       color: 'orange' as CardColor,
-      width: '25',
-      height: '1',
-      type: 'standard',
+      width: '25' as CardWidth,
+      height: '1' as CardHeight,
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 7
     },
@@ -111,11 +111,11 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
       iconId: 'plus-circle',
       path: '',
       color: 'orange-light' as CardColor,
-      width: '25',
-      height: '1',
+      width: '25' as CardWidth,
+      height: '1' as CardHeight,
       isCustom: false,
       isNewCardButton: true,
-      type: 'standard',
+      type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 8
     }
@@ -131,9 +131,9 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
         iconId: 'clipboard-list',
         path: '/dashboard/comunicacao/cadastrar',
         color: 'blue' as CardColor,
-        width: '25',
-        height: '1',
-        type: 'standard',
+        width: '25' as CardWidth,
+        height: '1' as CardHeight,
+        type: 'standard' as CardType,
         displayMobile: true,
         mobileOrder: 2
       },
@@ -143,9 +143,9 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
         iconId: 'file-text',
         path: '/dashboard/comunicacao/criar-nota',
         color: 'lime' as CardColor,
-        width: '25',
-        height: '1',
-        type: 'standard',
+        width: '25' as CardWidth,
+        height: '1' as CardHeight,
+        type: 'standard' as CardType,
         displayMobile: true,
         mobileOrder: 3
       }

@@ -60,13 +60,9 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
         }
         
         // Get count first
-        const { count, error: countError } = await query.count();
-        
-        if (countError) {
-          console.error('Error counting notas:', countError);
-        } else {
-          setTotalNotas(count || 0);
-        }
+        const countResult = await query;
+        const count = countResult.data?.length || 0;
+        setTotalNotas(count);
         
         // Then get limited data 
         const { data, error } = await query.limit(5);
@@ -76,7 +72,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
           return;
         }
         
-        setNotas(data || []);
+        setNotas(data as Nota[]);
       } catch (err) {
         console.error('Failed to fetch notas:', err);
       } finally {

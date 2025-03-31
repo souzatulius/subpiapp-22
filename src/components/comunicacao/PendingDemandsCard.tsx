@@ -54,13 +54,8 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
         }
         
         // Get count first
-        const { count, error: countError } = await query.count();
-        
-        if (countError) {
-          console.error('Error counting demands:', countError);
-        } else {
-          setTotalDemandas(count || 0);
-        }
+        const countResult = await query;
+        setTotalDemandas(countResult.data?.length || 0);
         
         // Then get limited data
         const { data, error } = await query.limit(5);

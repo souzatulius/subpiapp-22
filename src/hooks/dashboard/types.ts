@@ -44,6 +44,7 @@ export interface DashboardStateReturn {
     responsesToDo: number;
     isLoading: boolean;
   };
+  userCoordenaticaoId: string | null;
 }
 
 export interface ChartVisibility {
