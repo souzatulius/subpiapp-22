@@ -11,7 +11,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   const navItems = getNavigationSections();
 
   return (
-    <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 ${className}`}>
+    <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#003570] border-t border-gray-700 shadow-lg z-50 ${className}`}>
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => (
           <NavLink
@@ -19,7 +19,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
             to={item.path}
             className={({ isActive }) => 
               `flex flex-col items-center justify-center w-full h-full py-1 
-              ${isActive ? 'text-[#174ba9]' : 'text-gray-500'}`
+              ${isActive ? 'text-white' : 'text-gray-300'}`
             }
           >
             <div className="text-[#f57737]">

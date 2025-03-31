@@ -7,7 +7,6 @@ import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
 import { toast } from '@/components/ui/use-toast';
-import AttentionBox from '@/components/ui/attention-box';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const LoginForm = () => {
@@ -112,17 +111,6 @@ const LoginForm = () => {
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
       <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
 
-      {/* Botão de acesso rápido para mobile */}
-      {isMobile && (
-        <button
-          type="button"
-          onClick={scrollToForm}
-          className="w-full mb-6 bg-[#003570] text-white py-3 px-4 rounded-xl flex items-center justify-center"
-        >
-          <LogIn className="mr-2 h-5 w-5" /> Acessar
-        </button>
-      )}
-
       <form id="login-form" ref={formRef} onSubmit={handleLogin}>
         <div className="space-y-4">
           <div>
@@ -195,7 +183,6 @@ const LoginForm = () => {
             Google
           </button>
 
-          
         </div>
       </form>
 
