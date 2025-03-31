@@ -65,6 +65,16 @@ export interface Demanda {
     };
 }
 
+// Adding DemandaComDetalhes type to extend Demanda with additional details
+export interface DemandaComDetalhes extends Demanda {
+    detalhes?: {
+        data_criacao?: string;
+        ultima_atualizacao?: string;
+        status_anterior?: string;
+        responsaveis?: string[];
+    };
+}
+
 export interface Resposta {
     texto: string;
     respostas?: { [key: string]: string };

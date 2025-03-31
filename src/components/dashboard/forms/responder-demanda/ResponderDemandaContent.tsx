@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDemandasData } from './hooks/useDemandasData';
 import { useRespostaForm } from './hooks/useRespostaForm';
@@ -38,8 +38,13 @@ const ResponderDemandaContent: React.FC = () => {
     setComentarios,
     isLoading,
     handleSubmitResposta,
-    handleRespostaChange
+    handleRespostaChange: originalHandleRespostaChange
   } = useRespostaForm(selectedDemanda, setSelectedDemanda, demandas, setDemandas, filteredDemandas, setFilteredDemandas);
+
+  // Create a wrapper for handleRespostaChange to adapt it to the expected format
+  const handleRespostaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    originalHandleRespostaChange('resposta', e.target.value);
+  };
 
   const handleBack = () => {
     setSelectedDemanda(null);
@@ -76,8 +81,8 @@ const ResponderDemandaContent: React.FC = () => {
           {selectedDemanda ? (
             <RespostaForm 
               selectedDemanda={selectedDemanda} 
-              resposta={resposta} 
-              setResposta={setResposta} 
+              resposta={resposta['resposta'] || ''} 
+              setResposta={(value) => setResposta({...resposta, resposta: value})} 
               comentarios={comentarios} 
               setComentarios={setComentarios} 
               onBack={handleBack} 

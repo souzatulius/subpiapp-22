@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, AlertTriangle, Send, Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ interface RespostaFormProps {
   onBack: () => void;
   isLoading: boolean;
   onSubmit: () => void;
-  handleRespostaChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleRespostaChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   hideBackButton?: boolean;
 }
 
@@ -72,7 +72,7 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
         
         <TabsContent value="resposta" className="space-y-6">
           <div className="space-y-4">
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-gray-50 rounded-md">
               <h4 className="font-medium mb-2">{selectedDemanda.titulo}</h4>
               <p className="text-sm text-gray-600">{selectedDemanda.detalhes_solicitacao}</p>
             </div>
