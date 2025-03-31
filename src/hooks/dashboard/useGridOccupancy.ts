@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 // Type for card dimensions
 export interface CardDimensions {
@@ -67,10 +67,11 @@ export const getMinimumHeight = (type?: string): string => {
 };
 
 export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean) => {
+  // Always initialize state regardless of cards array
   const [occupiedSlots, setOccupiedSlots] = useState<boolean[][]>([]);
   
-  // Total columns for the grid
-  const totalColumns = isMobileView ? 2 : 4;
+  // Total columns for the grid - calculated using useMemo to avoid recalculations
+  const totalColumns = useMemo(() => isMobileView ? 2 : 4, [isMobileView]);
   
   // Update occupied slots when cards change
   useEffect(() => {
@@ -119,7 +120,7 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
     });
     
     setOccupiedSlots(newOccupiedSlots);
-  }, [cards, isMobileView]);
+  }, [cards, isMobileView, totalColumns]);
   
   // Check if a card can be placed at a specific position
   const canPlaceCard = (
@@ -154,46 +155,51 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
     }
   };
   
-  // Calculate best position for a new card
-  const findBestPosition = (width: string, height: string, type?: string): { row: number, col: number } => {
-    const cardWidth = widthToSlots(width || getMinimumWidth(type, isMobileView), isMobileView);
-    const cardHeight = heightToSlots(height || getMinimumHeight(type));
-    
-    let bestRow = 0;
-    let bestCol = 0;
-    let placed = false;
-    
-    while (!placed) {
-      // Ensure we have enough rows
-      while (bestRow + cardHeight > occupiedSlots.length) {
-        // Need to create a theoretical new row
-        bestRow = occupiedSlots.length;
-        bestCol = 0;
-        placed = true;
-        break;
-      }
+  // Calculate best position for a new card - using useMemo to prevent recreating on each render
+  const findBestPosition = useMemo(() => {
+    return (width: string, height: string, type?: string): { row: number, col: number } => {
+      const cardWidth = widthToSlots(width || getMinimumWidth(type, isMobileView), isMobileView);
+      const cardHeight = heightToSlots(height || getMinimumHeight(type));
       
-      // Try each column
-      for (let col = 0; col <= totalColumns - cardWidth && !placed; col++) {
-        if (canPlaceCard(occupiedSlots, bestRow, col, cardWidth, cardHeight)) {
-          bestCol = col;
+      let bestRow = 0;
+      let bestCol = 0;
+      let placed = false;
+      
+      while (!placed) {
+        // Ensure we have enough rows
+        while (bestRow + cardHeight > occupiedSlots.length) {
+          // Need to create a theoretical new row
+          bestRow = occupiedSlots.length;
+          bestCol = 0;
           placed = true;
           break;
         }
+        
+        // Try each column
+        for (let col = 0; col <= totalColumns - cardWidth && !placed; col++) {
+          if (canPlaceCard(occupiedSlots, bestRow, col, cardWidth, cardHeight)) {
+            bestCol = col;
+            placed = true;
+            break;
+          }
+        }
+        
+        if (!placed) {
+          bestRow++;
+        }
       }
       
-      if (!placed) {
-        bestRow++;
-      }
-    }
-    
-    return { row: bestRow, col: bestCol };
-  };
+      return { row: bestRow, col: bestCol };
+    };
+  }, [occupiedSlots, isMobileView, totalColumns]);
+  
+  // Calculate the total rows once
+  const totalRows = useMemo(() => occupiedSlots.length, [occupiedSlots]);
   
   return {
     occupiedSlots,
     findBestPosition,
-    totalRows: occupiedSlots.length,
+    totalRows,
     totalColumns
   };
 };

@@ -85,16 +85,16 @@ const CardGrid: React.FC<CardGridProps> = ({
     );
   }
 
-  // Use our grid occupancy system
-  const { totalColumns } = useGridOccupancy(
-    displayedCards.map(card => ({ 
-      id: card.id,
-      width: card.width || '25', 
-      height: card.height || '1',
-      type: card.type
-    })), 
-    isMobileView
-  );
+  // Always prepare the card dimensions for the useGridOccupancy hook
+  const cardDimensions = displayedCards.map(card => ({ 
+    id: card.id,
+    width: card.width || '25', 
+    height: card.height || '1',
+    type: card.type
+  }));
+
+  // Use our grid occupancy system - ensure hook is always called
+  const { totalColumns } = useGridOccupancy(cardDimensions, isMobileView);
 
   const dynamicDataCards = displayedCards.filter(
     (card) => card.type === 'data_dynamic' && card.dataSourceKey
