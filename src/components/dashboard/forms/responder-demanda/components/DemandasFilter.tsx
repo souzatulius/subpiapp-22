@@ -30,7 +30,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
   areas
 }) => {
   return (
-    <>
+    <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100">
       {/* Main filter grid */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-4 items-center mb-4">
         <div className="col-span-1 md:col-span-2">
@@ -46,7 +46,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
         </div>
         
         <Select value={areaFilter} onValueChange={setAreaFilter}>
-          <SelectTrigger>
+          <SelectTrigger className="bg-white">
             <SelectValue placeholder="Filtrar por área" />
           </SelectTrigger>
           <SelectContent>
@@ -60,7 +60,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
         </Select>
         
         <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter}>
-          <SelectTrigger>
+          <SelectTrigger className="bg-white">
             <SelectValue placeholder="Filtrar por prioridade" />
           </SelectTrigger>
           <SelectContent>
@@ -74,7 +74,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
       </div>
 
       {/* View mode toggle */}
-      <div className="flex justify-end mb-3">
+      <div className="flex justify-end">
         <div className="bg-gray-100 p-1 rounded-md inline-flex">
           <Button 
             variant={viewMode === 'list' ? "default" : "ghost"} 
@@ -96,7 +96,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

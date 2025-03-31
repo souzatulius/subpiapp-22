@@ -49,9 +49,9 @@ const ResponderDemandaContent: React.FC = () => {
   
   return (
     <div className="animate-fade-in">
-      <Card className="border border-gray-200 mb-4 shadow-sm rounded-lg">
-        <CardContent className="p-6 space-y-6">
-          {selectedDemanda ? (
+      {selectedDemanda ? (
+        <Card className="border border-gray-200 shadow-sm rounded-lg">
+          <CardContent className="p-6 space-y-6">
             <RespostaForm 
               selectedDemanda={selectedDemanda} 
               resposta={resposta} 
@@ -63,20 +63,28 @@ const ResponderDemandaContent: React.FC = () => {
               onSubmit={handleSubmitResposta}
               handleRespostaChange={handleRespostaChange}
             />
-          ) : (
-            <>
-              <DemandasFilter 
-                searchTerm={searchTerm} 
-                setSearchTerm={setSearchTerm} 
-                areaFilter={areaFilter} 
-                setAreaFilter={setAreaFilter} 
-                prioridadeFilter={prioridadeFilter} 
-                setPrioridadeFilter={setPrioridadeFilter} 
-                viewMode={viewMode} 
-                setViewMode={setViewMode} 
-                areas={areas} 
-              />
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Área de filtros separada visualmente */}
+          <div className="mt-4 mb-6">
+            <DemandasFilter 
+              searchTerm={searchTerm} 
+              setSearchTerm={setSearchTerm} 
+              areaFilter={areaFilter} 
+              setAreaFilter={setAreaFilter} 
+              prioridadeFilter={prioridadeFilter} 
+              setPrioridadeFilter={setPrioridadeFilter} 
+              viewMode={viewMode} 
+              setViewMode={setViewMode} 
+              areas={areas} 
+            />
+          </div>
 
+          {/* Lista ou grid de demandas */}
+          <Card className="border border-gray-200 shadow-sm rounded-lg">
+            <CardContent className="p-6">
               {viewMode === 'cards' ? (
                 <DemandaGrid 
                   demandas={filteredDemandas} 
@@ -92,10 +100,10 @@ const ResponderDemandaContent: React.FC = () => {
                   isLoading={isLoadingDemandas} 
                 />
               )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };
