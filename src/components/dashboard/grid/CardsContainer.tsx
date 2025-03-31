@@ -55,6 +55,7 @@ const CardsContainer: React.FC<CardsContainerProps> = ({
             onQuickDemandSubmit={onQuickDemandSubmit}
             onSearchSubmit={onSearchSubmit}
             isMobileView={isMobileView}
+            isEditMode={isEditMode} // Pass the isEditMode prop to ActionCardWrapper
           />
         ))}
       </div>

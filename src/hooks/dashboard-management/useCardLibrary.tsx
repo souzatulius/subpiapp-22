@@ -43,7 +43,7 @@ export const useCardLibrary = () => {
             if (Array.isArray(dashboardCards)) {
               dashboardCards.forEach(card => {
                 // Store department and dashboard information with the card
-                // Handle both view_type and dashboard_type (backward compatibility)
+                // Use view_type field from database
                 const dashboardType = dashboard.view_type || 'dashboard';
                 const cardWithMeta = {
                   ...card,
