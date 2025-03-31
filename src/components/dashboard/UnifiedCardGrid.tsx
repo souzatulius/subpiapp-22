@@ -71,16 +71,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : cards;
 
-  if (!displayedCards || displayedCards.length === 0) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        Nenhum card disponível para exibir.
-      </div>
-    );
-  }
+  // Calculate total columns based on mobile view
+  const totalColumns = isMobileView ? 2 : 4;
   
-  // Always call the hook, even if there are no cards to display
-  const { totalColumns } = useGridOccupancy(
+  // Always call useGridOccupancy with displayedCards, even if empty
+  // We moved this outside the conditional render to avoid the hooks error
+  const { occupiedSlots } = useGridOccupancy(
     displayedCards.map(card => ({ 
       id: card.id,
       width: card.width || '25', 
@@ -89,6 +85,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     })), 
     isMobileView
   );
+
+  if (!displayedCards || displayedCards.length === 0) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        Nenhum card disponível para exibir.
+      </div>
+    );
+  }
 
   return (
     <DndContext

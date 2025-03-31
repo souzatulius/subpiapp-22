@@ -39,3 +39,47 @@ export const normalizeQuestions = (perguntas: any): string[] => {
   
   return [];
 };
+
+/**
+ * Formats an array or object of questions into an object with numeric keys
+ * 
+ * @param perguntas - Array or object of questions
+ * @returns Object with numeric keys as question indices
+ */
+export const formatQuestionsToObject = (perguntas: string[] | Record<string, string> | null): Record<string, string> => {
+  if (!perguntas) return {};
+  
+  // If it's already an object, return it
+  if (typeof perguntas === 'object' && !Array.isArray(perguntas)) {
+    return perguntas;
+  }
+  
+  // Convert array to object with numeric keys
+  if (Array.isArray(perguntas)) {
+    return perguntas.reduce((acc: Record<string, string>, question: string, index: number) => {
+      if (question && question.trim() !== '') {
+        acc[index.toString()] = question;
+      }
+      return acc;
+    }, {});
+  }
+  
+  return {};
+};
+
+/**
+ * Validates if a string is a valid public URL
+ * 
+ * @param url - URL to validate
+ * @returns Boolean indicating if the URL is valid
+ */
+export const isValidPublicUrl = (url: string): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  
+  try {
+    const urlObj = new URL(url);
+    return ['http:', 'https:'].includes(urlObj.protocol);
+  } catch (e) {
+    return false;
+  }
+};
