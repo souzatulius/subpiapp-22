@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
 import { Demanda } from '@/components/dashboard/forms/responder-demanda/types';
+import { useRespostaSubmission } from '@/components/dashboard/forms/responder-demanda/hooks/useRespostaSubmission';
 
 export const useRespostaForm = (
   selectedDemanda: Demanda | null,
@@ -17,6 +18,12 @@ export const useRespostaForm = (
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [comentarios, setComentarios] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Initialize useRespostaSubmission hook with showSuccessToast=false
+  // to prevent duplicate toasts as we'll show our own toast here
+  const { isSubmitting, submitResposta } = useRespostaSubmission({
+    showSuccessToast: false
+  });
 
   const handleRespostaChange = (key: string, value: string) => {
     setResposta(prev => ({
@@ -37,52 +44,24 @@ export const useRespostaForm = (
     
     try {
       setIsLoading(true);
-
-      // Generate a text summary of responses
-      const respostasText = Object.entries(resposta)
-        .map(([key, value]) => {
-          const perguntaText = Array.isArray(selectedDemanda.perguntas) 
-            ? selectedDemanda.perguntas[parseInt(key)]
-            : selectedDemanda.perguntas?.[key] || '';
-          return `Pergunta: ${perguntaText}\nResposta: ${value}`;
-        })
-        .join('\n\n');
-
-      // Create the response with both text and JSON format
-      const { error: respostaError } = await supabase
-        .from('respostas_demandas')
-        .insert({
-          demanda_id: selectedDemanda.id,
-          usuario_id: user?.id,
-          respostas: resposta,
-          texto: respostasText, // Add required texto field
-          comentarios: comentarios || null
+      
+      // Use the submitResposta function from useRespostaSubmission
+      const success = await submitResposta(selectedDemanda, resposta, comentarios);
+      
+      if (success) {
+        // Only show toast here since we disabled it in the submission hook
+        toast({
+          title: "Resposta enviada com sucesso!",
+          description: "A demanda foi respondida."
         });
         
-      if (respostaError) throw respostaError;
-
-      // Try to update status to em_andamento, but don't fail if it doesn't work
-      try {
-        await supabase
-          .from('demandas')
-          .update({ status: 'em_andamento' })
-          .eq('id', selectedDemanda.id);
-      } catch (error) {
-        console.warn("Could not update status, but response was saved", error);
-        // Continue anyway since the response was saved
+        // Update local state
+        setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
+        setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
+        setSelectedDemanda(null);
+        setResposta({});
+        setComentarios('');
       }
-      
-      toast({
-        title: "Resposta enviada com sucesso!",
-        description: "A demanda foi respondida."
-      });
-
-      // Update local state
-      setDemandas(demandas.filter(d => d.id !== selectedDemanda.id));
-      setFilteredDemandas(filteredDemandas.filter(d => d.id !== selectedDemanda.id));
-      setSelectedDemanda(null);
-      setResposta({});
-      setComentarios('');
     } catch (error: any) {
       console.error('Erro ao enviar resposta:', error);
       toast({
@@ -100,7 +79,7 @@ export const useRespostaForm = (
     setResposta,
     comentarios,
     setComentarios,
-    isLoading,
+    isLoading: isLoading || isSubmitting,
     handleSubmitResposta,
     handleRespostaChange
   };

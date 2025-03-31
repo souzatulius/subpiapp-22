@@ -10,6 +10,7 @@ import { useRespostaValidation } from './useRespostaValidation';
 interface SubmissionOptions {
   onSuccess?: () => void;
   onError?: (error: any) => void;
+  showSuccessToast?: boolean; // Added option to control toast display
 }
 
 export const useRespostaSubmission = (options?: SubmissionOptions) => {
@@ -17,6 +18,7 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
   const { user } = useAuth();
   const { formatRespostaText } = useRespostaFormatter();
   const { validateResposta } = useRespostaValidation();
+  const showSuccessToast = options?.showSuccessToast !== false; // Default to true
 
   /**
    * Submits the response to the database
@@ -85,10 +87,13 @@ export const useRespostaSubmission = (options?: SubmissionOptions) => {
         // We continue anyway since the response is saved
       }
       
-      toast({
-        title: "Resposta enviada com sucesso!",
-        description: "A demanda foi respondida."
-      });
+      // Only show toast if the option is enabled
+      if (showSuccessToast) {
+        toast({
+          title: "Resposta enviada com sucesso!",
+          description: "A demanda foi respondida."
+        });
+      }
 
       if (options?.onSuccess) {
         console.log("Calling onSuccess callback");

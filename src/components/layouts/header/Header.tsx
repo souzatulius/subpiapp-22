@@ -4,7 +4,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProfileMenu from './ProfileMenu';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { NotificationsPopover } from './NotificationsPopover';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
       <Breadcrumb className="w-full">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            <BreadcrumbLink as={Link} to="/dashboard">Dashboard</BreadcrumbLink>
           </BreadcrumbItem>
           
           {paths.map((path, index) => {
@@ -71,6 +71,9 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
             
             // Get friendly name from the map or capitalize the first letter
             const formattedPath = routeNames[path] || (path.charAt(0).toUpperCase() + path.slice(1));
+            
+            // Build the correct URL path
+            // If this is a section like "comunicacao/comunicacao", create a proper link
             const href = `/${paths.slice(0, index + 1).join('/')}`;
             
             return (
@@ -80,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
                   {index === paths.length - 1 ? (
                     <span className="font-medium">{formattedPath}</span>
                   ) : (
-                    <BreadcrumbLink href={href}>{formattedPath}</BreadcrumbLink>
+                    <BreadcrumbLink as={Link} to={href}>{formattedPath}</BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
               </React.Fragment>
