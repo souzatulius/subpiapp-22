@@ -40,26 +40,16 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
   
   // Generate breadcrumbs based on current path
   const generateBreadcrumbs = () => {
-    // Don't show breadcrumbs on public pages
-    if (!user || isPublicPage) {
+    // Don't show breadcrumbs on public pages or dashboard index
+    if (!user || isPublicPage || location.pathname === '/dashboard') {
       return null;
     }
     
     const paths = location.pathname.split('/').filter(path => path);
     
-    if (paths.length === 0) return null;
-    
     // Special case for dashboard to avoid duplication
     if (paths.length === 1 && paths[0] === 'dashboard') {
-      return (
-        <Breadcrumb className="w-full">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <span className="font-medium">Dashboard</span>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      );
+      return null;
     }
     
     return (
@@ -87,15 +77,19 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
               href = '/dashboard/comunicacao/comunicacao';
             }
             
+            // Special handling for "settings" to ensure it's always clickable
+            const isSettings = path === 'settings';
+            const isLastItem = index === paths.length - 1;
+            
             return (
               <React.Fragment key={index}>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  {index === paths.length - 1 ? (
+                  {isLastItem && !isSettings ? (
                     <span className="font-medium">{formattedPath}</span>
                   ) : (
                     <BreadcrumbLink asChild>
-                      <Link to={href}>{formattedPath}</Link>
+                      <Link to={isSettings ? '/settings' : href}>{formattedPath}</Link>
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
