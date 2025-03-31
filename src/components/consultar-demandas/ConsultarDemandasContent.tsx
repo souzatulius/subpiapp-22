@@ -8,12 +8,14 @@ import DeleteDemandDialog from './DeleteDemandDialog';
 import { useDemandasData } from '@/hooks/consultar-demandas';
 import { Demand } from '@/types/demand';
 import { usePermissions } from '@/hooks/permissions';
+import DemandDetail from '@/components/demandas/DemandDetail';
 
 const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const { isAdmin } = usePermissions();
 
   const {
@@ -39,6 +41,16 @@ const ConsultarDemandasContent = () => {
   const handleSearch = (term: string) => {
     updateSearchTerm(term);
     setPage(1);
+  };
+
+  const handleViewDemand = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedDemand(null);
   };
 
   const handleEdit = (id: string) => {
@@ -82,7 +94,7 @@ const ConsultarDemandasContent = () => {
       />
       <DemandasTable
         demandas={demandas || []}
-        onEdit={handleEdit}
+        onViewDemand={handleViewDemand}
         onDelete={handleDelete}
         totalCount={totalCount}
         page={page}
@@ -91,6 +103,17 @@ const ConsultarDemandasContent = () => {
         setPageSize={setPageSize}
         isAdmin={isAdmin}
       />
+      
+      {/* Detail Dialog */}
+      {selectedDemand && (
+        <DemandDetail 
+          demand={selectedDemand} 
+          isOpen={isDetailOpen} 
+          onClose={handleCloseDetail}
+        />
+      )}
+      
+      {/* Delete Dialog */}
       {selectedDemand && (
         <DeleteDemandDialog
           isOpen={isDeleteModalOpen}

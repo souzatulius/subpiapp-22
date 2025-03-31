@@ -100,6 +100,20 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
     return priorityMap[priority] || { label: priority, class: 'bg-gray-100 text-gray-800' };
   };
 
+  const getCoordination = (demand: Demand) => {
+    // Get coordination information from the problem-related data
+    if (demand.problema?.supervisao_tecnica?.coordenacao_id) {
+      return 'Não informada';
+    }
+    
+    // Try to get the coordination from area_coordenacao
+    if (demand.area_coordenacao?.descricao) {
+      return demand.area_coordenacao.descricao;
+    }
+    
+    return 'Não informada';
+  };
+
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
@@ -118,16 +132,7 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
           {demandas.map((demand) => {
             const statusInfo = formatStatus(demand.status);
             const priorityInfo = formatPriority(demand.prioridade);
-            
-            let coordination = 'Não informada';
-            
-            // Fix the type error by safely accessing the supervisao_tecnica property
-            // Problem: demand.problema_id could be a string or an object with a supervisao_tecnica property
-            if (demand.problema && demand.problema.supervisao_tecnica) {
-              coordination = demand.problema.supervisao_tecnica.descricao || 'Não informada';
-            } else if (demand.supervisao_tecnica) {
-              coordination = demand.supervisao_tecnica.descricao || 'Não informada';
-            }
+            const coordination = getCoordination(demand);
 
             return (
               <TableRow key={demand.id}>

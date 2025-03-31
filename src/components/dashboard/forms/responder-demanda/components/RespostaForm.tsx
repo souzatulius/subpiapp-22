@@ -1,150 +1,111 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, SendHorizontal, Loader2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Demanda } from '../types';
 import RespostaFormHeader from './RespostaFormHeader';
-import FormFooter from './FormFooter';
-import DemandaMetadataSection from './sections/DemandaMetadataSection';
-import ServicoSection from './sections/ServicoSection';
-import QuestionsAnswersSection from './QuestionsAnswersSection';
-import CommentsSection from './CommentsSection';
-import AttachmentsSection from './AttachmentsSection';
-import { Paperclip, MessageSquare, HelpCircle } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { useRespostaFormState } from '../hooks/useRespostaFormState';
+import TabsNavigation from './TabsNavigation';
+import DetailsTab from './DetailsTab';
+import QuestionsTab from './QuestionsTab';
+import CommentsTab from './CommentsTab';
 
 interface RespostaFormProps {
-  selectedDemanda: any;
+  selectedDemanda: Demanda;
   resposta: Record<string, string>;
-  setResposta: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  onBack?: () => void;
+  comentarios: string;
+  setResposta: (resposta: Record<string, string>) => void;
+  setComentarios: (comentarios: string) => void;
+  onBack: () => void;
   isLoading: boolean;
   onSubmit: () => Promise<void>;
-  comentarios?: string;
-  setComentarios?: React.Dispatch<React.SetStateAction<string>>;
-  handleRespostaChange?: (key: string, value: string) => void;
+  handleRespostaChange: (key: string, value: string) => void;
 }
 
 const RespostaForm: React.FC<RespostaFormProps> = ({
   selectedDemanda,
   resposta,
+  comentarios,
   setResposta,
+  setComentarios,
   onBack,
   isLoading,
   onSubmit,
-  comentarios = '',
-  setComentarios,
-  handleRespostaChange
+  handleRespostaChange,
 }) => {
-  const {
-    updateService,
-    allQuestionsAnswered,
-    setSelectedServicoId
-  } = useRespostaFormState({
-    selectedDemanda,
-    resposta,
-    setResposta
-  });
-
-  // Use the passed handleRespostaChange function or create a default one
-  const onRespostaChange = handleRespostaChange || ((key: string, value: string) => {
-    setResposta(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  });
-
-  const handleServiceChange = (serviceId: string) => {
-    setSelectedServicoId(serviceId);
-  };
+  const [activeTab, setActiveTab] = React.useState<string>('details');
+  const perguntas = selectedDemanda.perguntas || {};
   
-  const handleSubmitWithExtra = async () => {
-    try {
-      await updateService();
-      await onSubmit();
-      toast({
-        title: "Resposta enviada!",
-        description: "Demanda respondida com sucesso."
-      });
-    } catch (error) {
-      console.error('Erro ao enviar resposta:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao enviar resposta",
-        description: "Ocorreu um erro ao enviar a resposta. Tente novamente."
-      });
-    }
+  // Check if all questions have been answered
+  const allQuestionsAnswered = Object.keys(perguntas).every(
+    (key) => resposta[key] && resposta[key].trim() !== ''
+  );
+  
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <Button 
+          variant="ghost"
+          onClick={onBack} 
+          className="flex items-center space-x-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+      </div>
+      
       <RespostaFormHeader selectedDemanda={selectedDemanda} />
-
-      <Card className="border shadow-sm">
-        <CardContent className="p-4 space-y-4">
-          <DemandaMetadataSection selectedDemanda={selectedDemanda} />
-
-          <ServicoSection 
+      
+      <TabsNavigation
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
+      
+      <div className="mt-6">
+        {activeTab === 'details' && (
+          <DetailsTab selectedDemanda={selectedDemanda} />
+        )}
+        
+        {activeTab === 'questions' && (
+          <QuestionsTab 
             selectedDemanda={selectedDemanda} 
-            onServiceChange={handleServiceChange}
+            resposta={resposta}
+            handleRespostaChange={handleRespostaChange}
           />
-
-          {selectedDemanda.detalhes_solicitacao && (
-            <div className="space-y-2">
-              <h3 className="font-semibold text-subpi-blue">Detalhes da Solicitação</h3>
-              <Card className="bg-blue-50 p-4 rounded-xl">
-                <p className="leading-relaxed py-[15px] px-[25px]">{selectedDemanda.detalhes_solicitacao}</p>
-              </Card>
-            </div>
-          )}
-
-          {selectedDemanda.perguntas && (
-            <div className="space-y-2">
-              <h3 className="font-semibold text-subpi-blue flex items-center gap-2">
-                <HelpCircle className="h-5 w-5" /> Perguntas e Respostas
-              </h3>
-              <QuestionsAnswersSection 
-                perguntas={selectedDemanda.perguntas} 
-                resposta={resposta} 
-                onRespostaChange={onRespostaChange} 
-              />
-            </div>
-          )}
-
-          {(selectedDemanda.arquivo_url || selectedDemanda.anexos?.length > 0) && (
-            <div>
-              <h3 className="font-semibold text-subpi-blue flex items-center gap-2">
-                <Paperclip className="h-5 w-5" /> Anexos
-              </h3>
-              <AttachmentsSection 
-                arquivo_url={selectedDemanda.arquivo_url} 
-                anexos={selectedDemanda.anexos}
-                onViewAttachment={url => window.open(url, '_blank')}
-                onDownloadAttachment={url => window.open(url, '_blank')}
-              />
-            </div>
-          )}
-
-          <div>
-            <h3 className="font-semibold text-subpi-blue flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" /> Comentários
-            </h3>
-            <CommentsSection 
-              comentarios={comentarios} 
-              onChange={setComentarios ? value => setComentarios(value) : () => {}} 
-              placeholder="Tem mais alguma informação?" 
-              simplifiedText={true} 
-            />
-          </div>
-        </CardContent>
-
-        <CardFooter className="border-t bg-white sticky bottom-0">
-          <FormFooter 
-            isLoading={isLoading} 
-            onSubmit={handleSubmitWithExtra} 
-            allQuestionsAnswered={allQuestionsAnswered()} 
+        )}
+        
+        {activeTab === 'comments' && (
+          <CommentsTab 
+            comentarios={comentarios} 
+            setComentarios={setComentarios} 
           />
-        </CardFooter>
-      </Card>
+        )}
+      </div>
+      
+      <div className="flex justify-end pt-4 border-t">
+        <Button 
+          disabled={!allQuestionsAnswered || isLoading} 
+          onClick={onSubmit}
+          className="bg-subpi-blue hover:bg-subpi-blue/90"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+              Enviando...
+            </>
+          ) : (
+            <>
+              <SendHorizontal className="mr-2 h-4 w-4" />
+              Enviar resposta
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };

@@ -62,7 +62,9 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
       <Breadcrumb className="w-full">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/dashboard">Dashboard</BreadcrumbLink>
+            <BreadcrumbLink asChild>
+              <Link to="/dashboard">Dashboard</Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           
           {paths.map((path, index) => {
@@ -83,7 +85,9 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
                   {index === paths.length - 1 ? (
                     <span className="font-medium">{formattedPath}</span>
                   ) : (
-                    <BreadcrumbLink as={Link} to={href}>{formattedPath}</BreadcrumbLink>
+                    <BreadcrumbLink asChild>
+                      <Link to={href}>{formattedPath}</Link>
+                    </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
               </React.Fragment>
