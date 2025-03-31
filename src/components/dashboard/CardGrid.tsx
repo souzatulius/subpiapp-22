@@ -130,7 +130,7 @@ const CardGrid: React.FC<CardGridProps> = ({
               <DynamicDataCard
                 key={card.id}
                 title={card.title}
-                icon={IconComponent}
+                icon={IconComponent ? <IconComponent /> : null}
                 color={card.color}
                 dataSourceKey={card.dataSourceKey as any}
                 coordenacaoId={coordenacaoId}

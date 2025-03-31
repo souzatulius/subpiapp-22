@@ -1,13 +1,14 @@
 
-import React from 'react';
-import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
-import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import WelcomeCard from '@/components/shared/WelcomeCard';
-import { MessageSquareReply, Loader2, PlusCircle } from 'lucide-react';
-import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
-import { ActionCardItem } from '@/types/dashboard';
+import { supabase } from '@/integrations/supabase/client';
+import WelcomeCard from '@/components/shared/WelcomeCard';
+import { MessageSquareReply, Loader2 } from 'lucide-react';
+import NewRequestOriginCard from '@/components/comunicacao/NewRequestOriginCard';
+import PendingDemandsCard from '@/components/comunicacao/PendingDemandsCard';
+import NotasManagementCard from '@/components/comunicacao/NotasManagementCard';
+import DemandasEmAndamentoCard from '@/components/comunicacao/DemandasEmAndamentoCard';
+import ActionCards from '@/components/comunicacao/ActionCards';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -19,89 +20,152 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   department = 'comunicacao' 
 }) => {
   const { user } = useAuth();
-  
-  // Get dashboard state and card actions from the hook
-  const {
-    cards,
-    setCards,
-    isCustomizationModalOpen,
-    setIsCustomizationModalOpen,
-    editingCard,
-    handleDeleteCard,
-    handleAddNewCard,
-    handleEditCard,
-    handleSaveCard,
-    specialCardsData,
-    departmentName,
-    isLoading,
-    newDemandTitle,
-    setNewDemandTitle,
-    handleQuickDemandSubmit,
-    searchQuery,
-    setSearchQuery,
-    handleSearchSubmit
-  } = useDefaultDashboardState(department);
+  const [userDepartment, setUserDepartment] = useState<string | null>(department);
+  const [isComunicacao, setIsComunicacao] = useState<boolean>(department === 'comunicacao');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [departmentName, setDepartmentName] = useState<string>('');
 
-  // Handle cards change in a type-safe way
-  const handleCardsChange = (newCards: ActionCardItem[] | any[]) => {
-    setCards(newCards as ActionCardItem[]);
+  useEffect(() => {
+    if (isPreview) {
+      // In preview mode, use the department provided as prop
+      setUserDepartment(department);
+      setIsComunicacao(department === 'comunicacao');
+      fetchDepartmentName(department);
+      setIsLoading(false);
+      return;
+    }
+
+    // If not in preview mode, fetch the user's actual department
+    async function fetchUserDepartment() {
+      if (!user) return;
+      
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('coordenacao_id')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching user department:', error);
+          return;
+        }
+        
+        if (data) {
+          setUserDepartment(data.coordenacao_id);
+          
+          // Check if user is from Comunicacao
+          const { data: coordData, error: coordError } = await supabase
+            .from('coordenacoes')
+            .select('descricao')
+            .eq('id', data.coordenacao_id)
+            .single();
+          
+          if (coordError) {
+            console.error('Error fetching coordination info:', coordError);
+          } else if (coordData) {
+            setIsComunicacao(
+              coordData.descricao.toLowerCase().includes('comunica') || 
+              data.coordenacao_id === 'comunicacao'
+            );
+            setDepartmentName(coordData.descricao);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch user department:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchUserDepartment();
+  }, [user, isPreview, department]);
+
+  const fetchDepartmentName = async (deptId: string) => {
+    if (deptId) {
+      try {
+        const { data, error } = await supabase
+          .from('coordenacoes')
+          .select('descricao')
+          .eq('id', deptId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching department name:', error);
+        } else if (data) {
+          setDepartmentName(data.descricao);
+        }
+      } catch (err) {
+        console.error('Failed to fetch department name:', err);
+      }
+    }
   };
 
-  // Adapter for CardCustomizationModal to work with our card format
-  const handleSaveCardAdapter = (data: any) => {
-    // Convert the icon prop to iconId if needed
-    const cardData = {
-      ...data,
-      iconId: data.iconId || (typeof data.icon === 'string' ? data.icon : 'clipboard-list'),
-    };
-    
-    handleSaveCard(cardData);
-  };
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <span className="ml-2 text-blue-600 font-medium">Carregando dashboard...</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 p-6">
       {/* Welcome Card */}
       <WelcomeCard
-        title="Comunicação"
+        title={`Comunicação ${departmentName ? '- ' + departmentName : ''}`}
         description={isPreview 
-          ? "Visualização da página de comunicação para configuração" 
-          : "Gerencie todas as suas demandas e notas oficiais"
+          ? "Visualização da página de comunicação" 
+          : "Gerencie demandas e notas oficiais"
         }
         icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-500 to-blue-700"
-        showButton={!isPreview}
-        buttonText="Novo Card"
-        buttonIcon={<PlusCircle className="h-4 w-4" />}
-        buttonVariant="action"
-        onButtonClick={handleAddNewCard}
       />
-
-      {/* Loading State */}
-      {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-blue-600 font-medium">Carregando dashboard...</span>
+      
+      {/* Dynamic Content Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Card 1: Nova Solicitação - only for Comunicação */}
+        {isComunicacao && (
+          <div className="col-span-1 md:col-span-1">
+            <NewRequestOriginCard />
+          </div>
+        )}
+        
+        {/* Card 2: Responder Demandas - for all */}
+        <div className="col-span-1 md:col-span-1">
+          <PendingDemandsCard 
+            coordenacaoId={userDepartment || ''} 
+            isComunicacao={isComunicacao} 
+          />
         </div>
-      ) : (
-        /* Card Grid - Usando UnifiedCardGrid em vez de CardGrid */
-        <UnifiedCardGrid
-          cards={cards}
-          onCardsChange={handleCardsChange}
-          onEditCard={handleEditCard}
-          onDeleteCard={handleDeleteCard}
-          isEditMode={!isPreview}
+        
+        {/* Card 3: Gerenciamento de Notas - for all */}
+        <div className="col-span-1 md:col-span-1">
+          <NotasManagementCard 
+            coordenacaoId={userDepartment || ''} 
+            isComunicacao={isComunicacao} 
+          />
+        </div>
+        
+        {/* Card 4: Demandas em Andamento - for all - Spans 2 columns when Comunicação has New Request card */}
+        <div className={`col-span-1 md:col-span-${isComunicacao ? 3 : 1}`}>
+          <DemandasEmAndamentoCard 
+            coordenacaoId={userDepartment || ''} 
+            isComunicacao={isComunicacao} 
+          />
+        </div>
+      </div>
+      
+      {/* Action Cards */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Ações rápidas</h2>
+        <ActionCards 
+          coordenacaoId={userDepartment || ''} 
+          isComunicacao={isComunicacao} 
         />
-      )}
-
-      {/* Card Customization Modal */}
-      {!isPreview && (
-        <CardCustomizationModal
-          isOpen={isCustomizationModalOpen}
-          onClose={() => setIsCustomizationModalOpen(false)}
-          onSave={handleSaveCardAdapter}
-          initialData={editingCard}
-        />
-      )}
+      </div>
     </div>
   );
 };

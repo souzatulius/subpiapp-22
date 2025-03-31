@@ -1,44 +1,58 @@
 
 import React from 'react';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { 
+  Newspaper, 
+  Tv, 
+  Radio, 
+  Monitor, 
+  Globe, 
+  Smartphone, 
+  Mail, 
+  MessageSquare, 
+  FileText
+} from 'lucide-react';
 
-export const useMediaTypeIcon = (tipoMidia: any, className = "h-5 w-5") => {
-  // Se o registro tiver um ícone definido, usá-lo
-  if (tipoMidia && tipoMidia.icone) {
-    // Verificar se é um ícone do Lucide
-    if (Object.keys(LucideIcons).includes(tipoMidia.icone)) {
-      const IconComponent = LucideIcons[tipoMidia.icone as keyof typeof LucideIcons] as React.ElementType;
-      return <IconComponent className={className} />;
+interface MediaType {
+  id?: string;
+  descricao?: string;
+  icone?: string;
+}
+
+export const useMediaTypeIcon = (mediaType: MediaType, className: string = 'h-6 w-6') => {
+  // If we have an explicit icon, use it
+  if (mediaType?.icone) {
+    switch (mediaType.icone) {
+      case 'Newspaper': return <Newspaper className={className} />;
+      case 'Tv': return <Tv className={className} />;
+      case 'Radio': return <Radio className={className} />;
+      case 'Monitor': return <Monitor className={className} />;
+      case 'Globe': return <Globe className={className} />;
+      case 'Smartphone': return <Smartphone className={className} />;
+      case 'Mail': return <Mail className={className} />;
+      case 'MessageSquare': return <MessageSquare className={className} />;
+      case 'FileText': return <FileText className={className} />;
+      default: return <Newspaper className={className} />;
     }
-    
-    // Se não for um ícone do Lucide, pode ser uma URL de imagem
-    return (
-      <img 
-        src={tipoMidia.icone} 
-        alt="Ícone" 
-        className={className}
-        onError={(e) => {
-          // Fallback para ícone padrão se a imagem falhar
-          e.currentTarget.style.display = 'none';
-        }}
-      />
-    );
   }
   
-  // Mapeamento padrão baseado na descrição
-  const iconMap: Record<string, React.ReactNode> = {
-    "Revista": <Book className={className} />,
-    "Impresso": <Newspaper className={className} />,
-    "Jornal Online": <Monitor className={className} />,
-    "Portal": <MousePointer className={className} />,
-    "Blog": <Globe className={className} />,
-    "Podcast": <Mic className={className} />,
-    "TV": <Tv className={className} />,
-    "Rádio": <Radio className={className} />,
-  };
+  // If no explicit icon, guess based on description
+  const description = mediaType?.descricao?.toLowerCase() || '';
   
-  return tipoMidia && tipoMidia.descricao && iconMap[tipoMidia.descricao] 
-    ? iconMap[tipoMidia.descricao] 
-    : <HelpCircle className={className} />;
+  if (description.includes('impresso') || description.includes('jornal')) 
+    return <Newspaper className={className} />;
+  if (description.includes('tv') || description.includes('televisão'))
+    return <Tv className={className} />;
+  if (description.includes('rádio'))
+    return <Radio className={className} />;
+  if (description.includes('internet') || description.includes('site'))
+    return <Globe className={className} />;
+  if (description.includes('portal'))
+    return <Monitor className={className} />;
+  if (description.includes('app') || description.includes('mobile'))
+    return <Smartphone className={className} />;
+  
+  // Default icon
+  return <Newspaper className={className} />;
 };
+
+export default useMediaTypeIcon;

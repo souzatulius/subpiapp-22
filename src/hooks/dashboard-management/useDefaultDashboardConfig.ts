@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDefaultDashboardState } from './useDefaultDashboardState';
 import { ActionCardItem, CardColor, CardType } from '@/types/dashboard';
 
-// Simplified type to avoid infinite type instantiation
+// Define a simplified type to avoid infinite type instantiation
 interface SimpleCardData {
   id: string;
   title: string;
@@ -20,6 +20,8 @@ interface SimpleCardData {
   dataSourceKey?: string;
   allowedDepartments?: string[];
   allowedRoles?: string[];
+  isCustom?: boolean;
+  mobileOrder?: number;
 }
 
 // Helper function to clean card objects before stringifying
@@ -37,7 +39,8 @@ const cleanCardForStorage = (card: ActionCardItem): SimpleCardData => {
     displayMobile: card.displayMobile ?? true,
     dataSourceKey: card.dataSourceKey || '',
     allowedDepartments: card.allowedDepartments || [],
-    allowedRoles: card.allowedRoles || []
+    allowedRoles: card.allowedRoles || [],
+    isCustom: card.isCustom
   };
 };
 

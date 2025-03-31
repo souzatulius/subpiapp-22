@@ -21,7 +21,10 @@ export interface UnifiedCardItem extends UnifiedActionCardProps {
   displayMobile?: boolean;
   mobileOrder?: number;
   type: CardType;
-  path: string;
+  path: string; // Make path required to match ActionCardItem
+  iconId: string; // Make iconId required
+  color: string; // Make color required
+  isCustom?: boolean;
 }
 
 interface UnifiedCardGridProps {
@@ -54,6 +57,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       const newIndex = cards.findIndex((item) => item.id === over.id);
       
       if (oldIndex !== -1 && newIndex !== -1) {
+        // Use type assertion to ensure the array is recognized as the right type
         const newCards = arrayMove([...cards], oldIndex, newIndex);
         onCardsChange(newCards);
       }
