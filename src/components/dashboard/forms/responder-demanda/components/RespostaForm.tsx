@@ -1,35 +1,32 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Demanda } from '../types';
-import RespostaFormHeader from './RespostaFormHeader';
-import { normalizeQuestions } from '@/utils/questionFormatUtils';
-import FormFooter from './FormFooter';
-import DemandaMetadataSection from './sections/DemandaMetadataSection';
-import QuestionsAnswersSection from './QuestionsAnswersSection';
-import CommentsSection from './CommentsSection';
-import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, AlertTriangle, Send, Loader2 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import DetalheDemanda from './DetalheDemanda';
+import { DemandaComDetalhes } from '../types';
+import DemandaReplyAlert from './DemandaReplyAlert';
 
 interface RespostaFormProps {
-  selectedDemanda: Demanda;
-  resposta: Record<string, string>;
+  selectedDemanda: DemandaComDetalhes;
+  resposta: string;
+  setResposta: (resposta: string) => void;
   comentarios: string;
-  setResposta: (resposta: Record<string, string>) => void;
   setComentarios: (comentarios: string) => void;
   onBack: () => void;
   isLoading: boolean;
-  onSubmit: () => Promise<void>;
-  handleRespostaChange: (key: string, value: string) => void;
+  onSubmit: () => void;
+  handleRespostaChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   hideBackButton?: boolean;
 }
 
 const RespostaForm: React.FC<RespostaFormProps> = ({
   selectedDemanda,
   resposta,
-  comentarios,
   setResposta,
+  comentarios,
   setComentarios,
   onBack,
   isLoading,
@@ -37,90 +34,101 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   handleRespostaChange,
   hideBackButton = false
 }) => {
-  // Check if all questions have been answered
-  const normalizedQuestions = React.useMemo(() => 
-    normalizeQuestions(selectedDemanda.perguntas || {}),
-    [selectedDemanda.perguntas]
-  );
+  const [activeTab, setActiveTab] = useState<string>('detalhes');
   
-  const allQuestionsAnswered = React.useMemo(() => {
-    if (normalizedQuestions.length === 0) return true;
-    
-    return normalizedQuestions.every((_, index) => {
-      const key = index.toString();
-      return resposta[key] && resposta[key].trim() !== '';
-    });
-  }, [normalizedQuestions, resposta]);
-  
+  if (!selectedDemanda) {
+    return <div>Selecione uma demanda para responder</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Back button (only if not hidden) */}
+    <div className="space-y-6 animate-in animate-fade-in">
       {!hideBackButton && (
-        <div className="flex justify-between items-center">
-          <Button 
-            variant="ghost"
-            onClick={onBack} 
-            className="flex items-center space-x-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-        </div>
+        <Button 
+          variant="ghost" 
+          className="mb-2 flex gap-2 items-center" 
+          onClick={onBack}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Voltar</span>
+        </Button>
       )}
       
-      <RespostaFormHeader selectedDemanda={selectedDemanda} />
-      
-      <Card className="border border-gray-200">
-        <CardContent className="p-6 space-y-8">
-          {/* Seção de metadados da demanda */}
-          <DemandaMetadataSection selectedDemanda={selectedDemanda} />
-          
-          <Separator />
-          
-          {/* Seção de detalhes da solicitação */}
-          {selectedDemanda.detalhes_solicitacao && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-subpi-blue">Detalhes da Solicitação</h3>
-              <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                <p className="text-sm text-gray-700 whitespace-pre-line">
-                  {selectedDemanda.detalhes_solicitacao}
-                </p>
-              </div>
+      <Tabs defaultValue="detalhes" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="detalhes">Detalhes da Demanda</TabsTrigger>
+          <TabsTrigger value="resposta">Responder Demanda</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="detalhes" className="space-y-4">
+          <DetalheDemanda demanda={selectedDemanda} />
+          <div className="pt-4 flex justify-end">
+            <Button 
+              onClick={() => setActiveTab('resposta')}
+            >
+              Responder Demanda
+            </Button>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="resposta" className="space-y-6">
+          <div className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-medium mb-2">{selectedDemanda.titulo}</h4>
+              <p className="text-sm text-gray-600">{selectedDemanda.detalhes_solicitacao}</p>
             </div>
-          )}
-          
-          <Separator />
-          
-          {/* Seção de perguntas e respostas */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-subpi-blue">Perguntas e Respostas</h3>
-            <QuestionsAnswersSection
-              perguntas={selectedDemanda.perguntas}
-              resposta={resposta}
-              onRespostaChange={handleRespostaChange}
-            />
+
+            <div className="space-y-2">
+              <Label htmlFor="resposta">Resposta</Label>
+              <DemandaReplyAlert demanda={selectedDemanda} />
+              <Textarea
+                id="resposta"
+                value={resposta}
+                onChange={handleRespostaChange}
+                placeholder="Escreva a resposta para a demanda..."
+                className="min-h-[200px] rounded-md"
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="comentarios">Comentários Internos</Label>
+              <Textarea
+                id="comentarios"
+                value={comentarios}
+                onChange={(e) => setComentarios(e.target.value)}
+                placeholder="Adicione comentários internos (opcional)"
+                className="min-h-[100px] rounded-md"
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div className="flex justify-between pt-4">
+              <Button variant="outline" onClick={() => setActiveTab('detalhes')}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar aos Detalhes
+              </Button>
+              
+              <Button 
+                onClick={onSubmit} 
+                disabled={isLoading || !resposta.trim()} 
+                className="text-white"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Enviar Resposta
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-          
-          <Separator />
-          
-          {/* Seção de comentários */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-subpi-blue">Comentários Internos</h3>
-            <CommentsSection
-              comentarios={comentarios}
-              onChange={setComentarios}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="flex justify-end pt-4 border-t">
-        <FormFooter 
-          isLoading={isLoading}
-          allQuestionsAnswered={allQuestionsAnswered}
-          onSubmit={onSubmit}
-        />
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

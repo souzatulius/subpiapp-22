@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { LayoutDashboard, MessageSquareReply, Smartphone, Monitor, Loader2, Save } from 'lucide-react';
+import { Smartphone, Monitor, Loader2, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client'; 
 
@@ -61,16 +61,10 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           return;
         }
         
-        // Add a default "all" option
-        const allDepartments = [
-          { id: 'default', descricao: 'Padrão (Todos)', sigla: 'ALL' },
-          ...data
-        ];
+        setDepartments(data);
         
-        setDepartments(allDepartments);
-        
-        if (!selectedDepartment && allDepartments.length > 0) {
-          setSelectedDepartment(allDepartments[0].id);
+        if (!selectedDepartment && data.length > 0) {
+          setSelectedDepartment(data[0].id);
         }
       } catch (error) {
         console.error('Failed to fetch departments:', error);
@@ -119,7 +113,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
                 onClick={() => setSelectedViewType('dashboard')}
                 className="flex-1"
               >
-                <LayoutDashboard className="h-4 w-4 mr-2" />
                 Padrão
               </Button>
               <Button 
@@ -127,7 +120,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
                 onClick={() => setSelectedViewType('communication')}
                 className="flex-1"
               >
-                <MessageSquareReply className="h-4 w-4 mr-2" />
                 Comunicação
               </Button>
             </div>
