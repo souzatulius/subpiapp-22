@@ -82,10 +82,28 @@ export const usePhotoUpload = (
     setError(null);
     
     try {
-      // Ensure profile photos bucket exists
-      const bucketExists = await setupProfilePhotosStorage();
+      // Verificar se o bucket já existe antes de tentar criá-lo novamente
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      
+      if (listError) {
+        console.error('Erro ao listar buckets:', listError);
+        throw new Error("Não foi possível verificar o armazenamento para fotos de perfil");
+      }
+      
+      let bucketExists = buckets.some(bucket => bucket.name === PROFILE_PHOTOS_BUCKET);
+      
+      // Se o bucket não existir, tente criá-lo
       if (!bucketExists) {
-        throw new Error("Não foi possível configurar o armazenamento para fotos de perfil");
+        const { error: createError } = await supabase.storage.createBucket(PROFILE_PHOTOS_BUCKET, {
+          public: true
+        });
+        
+        if (createError) {
+          console.error('Erro ao criar bucket:', createError);
+          throw new Error("Não foi possível criar o armazenamento para fotos de perfil");
+        }
+        
+        bucketExists = true;
       }
       
       // If photo was removed

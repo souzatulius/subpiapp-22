@@ -31,9 +31,7 @@ export const useUserProfile = () => {
           whatsapp,
           aniversario,
           foto_perfil_url,
-          cargos:cargo_id (descricao),
-          coordenacao:coordenacao_id (descricao),
-          supervisao_tecnica:supervisao_tecnica_id (descricao, coordenacao_id)
+          cargos:cargo_id (descricao)
         `)
         .eq('id', user.id)
         .single();
@@ -51,9 +49,7 @@ export const useUserProfile = () => {
         whatsapp: data.whatsapp || '',
         aniversario: data.aniversario,
         foto_perfil_url: data.foto_perfil_url,
-        cargo: data.cargos?.descricao,
-        coordenacao: data.coordenacao?.descricao,
-        supervisao_tecnica: data.supervisao_tecnica?.descricao,
+        cargo: data.cargos?.descricao
       };
       
       setUserProfile(transformedData);
@@ -69,8 +65,7 @@ export const useUserProfile = () => {
     fetchUserProfile();
   }, [fetchUserProfile]);
 
-  // Update to return Promise<void> instead of void
-  const refreshUserProfile = useCallback((): Promise<void> => {
+  const refreshUserProfile = useCallback(async (): Promise<void> => {
     return fetchUserProfile();
   }, [fetchUserProfile]);
 

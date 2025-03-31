@@ -15,28 +15,29 @@ import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { ProfileData } from './types';
-import { formatDateInput, formatDateToString, parseFormattedDate } from '@/lib/inputFormatting';
+import { formatDateInput, formatPhoneNumber, formatDateToString, parseFormattedDate } from '@/lib/inputFormatting';
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   userData?: ProfileData | null;
-  refreshUserData?: () => void;
+  refreshUserData?: () => Promise<void>;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,
   userData,
-  refreshUserData = () => {} // Provide default empty function
+  refreshUserData = () => Promise.resolve() // Provide default empty function
 }) => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateInputValue, setDateInputValue] = useState('');
+  const [whatsappValue, setWhatsappValue] = useState('');
   
-  const { register, handleSubmit, setValue, formState: { errors }, reset, watch } = useForm<ProfileData>({
+  const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<ProfileData>({
     defaultValues: {
       nome_completo: '',
       whatsapp: '',
@@ -47,7 +48,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   useEffect(() => {
     if (userData) {
       setValue('nome_completo', userData.nome_completo || '');
-      setValue('whatsapp', userData.whatsapp || '');
+      
+      // Format whatsapp with mask
+      const formattedWhatsapp = userData.whatsapp ? formatPhoneNumber(userData.whatsapp) : '';
+      setWhatsappValue(formattedWhatsapp);
       
       // Parse aniversario from string to Date if it exists
       if (userData.aniversario) {
@@ -78,6 +82,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     const formattedValue = formatDateInput(value);
     setDateInputValue(formattedValue);
   };
+  
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatPhoneNumber(value);
+    setWhatsappValue(formattedValue);
+  };
 
   const onSubmit = async (data: ProfileData) => {
     if (!user?.id) return;
@@ -99,10 +109,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         }
       }
       
+      // Clean whatsapp input (remove mask)
+      const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
+      
       // Prepare data for update
       const updateData = {
         nome_completo: data.nome_completo,
-        whatsapp: data.whatsapp || null,
+        whatsapp: cleanWhatsapp || null,
         aniversario: parsedDate ? parsedDate.toISOString() : null
       };
       
@@ -112,14 +125,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         .update(updateData)
         .eq('id', user.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao atualizar perfil:', error);
+        throw error;
+      }
       
       toast({
         title: "Perfil atualizado",
         description: "Suas informações foram atualizadas com sucesso."
       });
       
-      if (refreshUserData) refreshUserData();
+      if (refreshUserData) await refreshUserData();
       onClose();
       
     } catch (error: any) {
@@ -137,6 +153,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const handleClose = () => {
     reset();
     setDateInputValue('');
+    setWhatsappValue('');
     onClose();
   };
 
@@ -166,8 +183,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <Label htmlFor="whatsapp">WhatsApp</Label>
             <Input
               id="whatsapp"
-              {...register('whatsapp')}
               placeholder="(11) 98765-4321"
+              value={whatsappValue}
+              onChange={handleWhatsappChange}
+              maxLength={15}
             />
           </div>
           
@@ -180,7 +199,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               onChange={handleDateChange}
               maxLength={10}
             />
-            <p className="text-xs text-gray-500">Formato: DD/MM/AAAA</p>
           </div>
           
           <DialogFooter>

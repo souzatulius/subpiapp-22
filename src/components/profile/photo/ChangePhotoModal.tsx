@@ -16,6 +16,12 @@ interface ChangePhotoModalProps {
 const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) => {
   const { userProfile, refreshUserProfile, isLoading: profileLoading } = useUserProfile();
   
+  const handleClose = async () => {
+    // Atualizar perfil do usuário ao fechar para garantir que as alterações sejam exibidas
+    await refreshUserProfile();
+    onClose();
+  };
+  
   const {
     loading,
     previewUrl,
@@ -27,11 +33,11 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     handleSavePhoto,
     photoRemoved,
     error
-  } = usePhotoUpload(userProfile, refreshUserProfile, onClose);
+  } = usePhotoUpload(userProfile, refreshUserProfile, handleClose);
 
   const footerContent = (
     <>
-      <Button variant="outline" onClick={onClose} disabled={loading || profileLoading}>
+      <Button variant="outline" onClick={handleClose} disabled={loading || profileLoading}>
         Cancelar
       </Button>
       {(selectedFile || photoRemoved) && (
@@ -49,7 +55,7 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
   return (
     <EditModal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Alterar Foto de Perfil"
       footerContent={footerContent}
     >
