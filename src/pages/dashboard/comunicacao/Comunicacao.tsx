@@ -9,6 +9,8 @@ import PendingDemandsCard from '@/components/comunicacao/PendingDemandsCard';
 import NotasManagementCard from '@/components/comunicacao/NotasManagementCard';
 import DemandasEmAndamentoCard from '@/components/comunicacao/DemandasEmAndamentoCard';
 import ActionCards from '@/components/comunicacao/ActionCards';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -24,6 +26,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const [isComunicacao, setIsComunicacao] = useState<boolean>(department === 'comunicacao');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [departmentName, setDepartmentName] = useState<string>('');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (isPreview) {
@@ -112,7 +115,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 p-6">
+    <div className="max-w-7xl mx-auto space-y-6 p-6 pb-20 md:pb-6">
       {/* Welcome Card */}
       <WelcomeCard
         title={`Comunicação ${departmentName ? '- ' + departmentName : ''}`}
@@ -166,6 +169,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           isComunicacao={isComunicacao} 
         />
       </div>
+      
+      {/* Only add MobileBottomNav if this page is not in preview mode */}
+      {!isPreview && isMobile && <MobileBottomNav />}
     </div>
   );
 };

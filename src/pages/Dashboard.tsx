@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
@@ -11,12 +11,15 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Home, PlusCircle } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ActionCardItem } from '@/hooks/dashboard/types';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 
 const Dashboard = () => {
   // Start with sidebar collapsed
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   
   const {
     firstName,
@@ -76,9 +79,9 @@ const Dashboard = () => {
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} />
+        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 pb-20 md:pb-6">
           <div className="max-w-7xl mx-auto">
             <WelcomeCard
               title={`Olá, ${firstName || 'Usuário'}!`}
@@ -108,11 +111,15 @@ const Dashboard = () => {
                 onQuickDemandSubmit={handleQuickDemandSubmit}
                 onSearchSubmit={handleSearchSubmit}
                 usuarioId={user?.id || ''}
+                isMobileView={isMobile}
               />
             </div>
           </div>
         </main>
       </div>
+      
+      {/* Mobile Bottom Navigation - only visible on mobile */}
+      {isMobile && <MobileBottomNav />}
       
       {/* Card Selection Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>

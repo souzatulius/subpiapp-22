@@ -3,9 +3,12 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+import MobileBottomNav from '@/components/layouts/MobileBottomNav';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const DashboardLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -16,12 +19,16 @@ const DashboardLayout: React.FC = () => {
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} />
+        {/* Only show sidebar on desktop */}
+        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 pb-20 md:pb-6">
           <Outlet />
         </main>
       </div>
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 };

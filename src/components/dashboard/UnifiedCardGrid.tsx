@@ -94,7 +94,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragEnd={isEditMode ? handleDragEnd : undefined}
+      onDragEnd={handleDragEnd}
     >
       <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={displayedCards.map(card => card.id)}>
@@ -105,7 +105,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
             >
               <SortableUnifiedActionCard
                 {...card}
-                isDraggable={isEditMode}
+                isDraggable={true}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {
                   const cardToEdit = cards.find(c => c.id === id);
