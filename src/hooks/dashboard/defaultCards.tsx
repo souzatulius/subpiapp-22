@@ -6,6 +6,12 @@ import React from 'react';
 
 // Retorna o componente React correspondente ao iconId
 export const getIconComponentFromId = (iconId: string): React.ElementType => {
+  // First check if the iconId is directly a key in LucideIcons
+  if (iconId in LucideIcons) {
+    return LucideIcons[iconId as keyof typeof LucideIcons] as React.ElementType;
+  }
+  
+  // If not, use the mapping for legacy icon IDs
   const iconMap: Record<string, keyof typeof LucideIcons> = {
     'clipboard-list': 'ClipboardList',
     'message-square-reply': 'MessageSquareReply',
@@ -17,140 +23,81 @@ export const getIconComponentFromId = (iconId: string): React.ElementType => {
     'alert-triangle': 'AlertTriangle',
     'check-circle': 'CheckCircle',
     'file-text': 'FileText',
-    'list-filter': 'ListFilter'
+    'list-filter': 'ListFilter',
+    'Search': 'Search',
+    'FileText': 'FileText',
+    'Plus': 'Plus',
+    'FileEdit': 'FileEdit'
   };
 
   const componentName = iconMap[iconId] || 'ClipboardList';
   return LucideIcons[componentName] as React.ElementType || LucideIcons.ClipboardList;
 };
 
-// Cards padrão sem JSX nos dados
+// Cards padrão sem JSX nos dados - agora usando a configuração CPDU como base
 export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
-  const baseCards: ActionCardItem[] = [
+  // CPDU focused cards that will be used as the standard default
+  const cpduBaseCards: ActionCardItem[] = [
     {
-      id: 'smart-search',
-      title: 'O que você deseja fazer?',
-      iconId: 'search',
-      path: '',
-      color: 'gray-light' as CardColor,
-      width: '100' as CardWidth,
+      id: 'search',
+      title: 'Pesquisar',
+      iconId: 'Search',
+      path: '/demandas',
+      color: 'blue-dark' as CardColor,
+      width: '1' as CardWidth,
       height: '1' as CardHeight,
       isCustom: false,
-      isSearch: true,
       type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 1
     },
     {
-      id: 'overdue-demands',
-      title: 'Demandas em Andamento',
-      iconId: 'clock',
-      path: '/dashboard/comunicacao/consultar-demandas',
-      color: 'orange' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      isCustom: false,
-      isOverdueDemands: true,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 5
-    },
-    {
-      id: 'pending-actions',
-      title: 'Você precisa agir',
-      iconId: 'alert-triangle',
-      path: '',
-      color: 'orange-light' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      isCustom: false,
-      isPendingActions: true,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 6
-    },
-    {
-      id: '3',
-      title: 'Consultar Demandas',
-      iconId: 'list-filter',
-      path: '/dashboard/comunicacao/consultar-demandas',
-      color: 'green' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 3
-    },
-    {
-      id: '4',
+      id: 'notas',
       title: 'Consultar Notas',
-      iconId: 'file-text',
-      path: '/dashboard/comunicacao/consultar-notas',
-      color: 'blue-dark' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 4
-    },
-    {
-      id: '5',
-      title: 'Ranking de Zeladoria',
-      iconId: 'bar-chart-2',
-      path: '/dashboard/zeladoria/ranking-subs',
-      color: 'orange' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 7
-    },
-    {
-      id: 'new-card',
-      title: 'Novo Card',
-      iconId: 'plus-circle',
-      path: '',
-      color: 'orange-light' as CardColor,
-      width: '25' as CardWidth,
+      iconId: 'FileText',
+      path: '/notas',
+      color: 'green' as CardColor,
+      width: '1' as CardWidth,
       height: '1' as CardHeight,
       isCustom: false,
-      isNewCardButton: true,
       type: 'standard' as CardType,
       displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 2
     }
   ];
 
-  // Add communication team specific cards
+  // Comunicação department specific cards
   if (coordenacaoId === 'comunicacao') {
     return [
-      ...baseCards,
       {
-        id: '1',
-        title: 'Nova Demanda',
-        iconId: 'clipboard-list',
+        id: 'nova-solicitacao',
+        title: 'Nova Solicitação',
+        iconId: 'Plus',
         path: '/dashboard/comunicacao/cadastrar',
-        color: 'blue' as CardColor,
-        width: '25' as CardWidth,
+        color: 'orange-600' as CardColor,
+        width: '1' as CardWidth,
         height: '1' as CardHeight,
+        isCustom: false,
+        type: 'standard' as CardType,
+        displayMobile: true,
+        mobileOrder: 1
+      },
+      {
+        id: 'criar-nota',
+        title: 'Criar Nota Oficial',
+        iconId: 'FileEdit',
+        path: '/dashboard/notas/criar',
+        color: 'lime' as CardColor,
+        width: '1' as CardWidth,
+        height: '1' as CardHeight,
+        isCustom: false,
         type: 'standard' as CardType,
         displayMobile: true,
         mobileOrder: 2
       },
-      {
-        id: '2',
-        title: 'Criar Nota Oficial',
-        iconId: 'file-text',
-        path: '/dashboard/comunicacao/criar-nota',
-        color: 'lime' as CardColor,
-        width: '25' as CardWidth,
-        height: '1' as CardHeight,
-        type: 'standard' as CardType,
-        displayMobile: true,
-        mobileOrder: 3
-      }
+      ...cpduBaseCards
     ];
   }
-  
-  return baseCards;
+
+  return cpduBaseCards;
 };

@@ -7,7 +7,7 @@ import { DashboardStateReturn } from './dashboard/types';
 import { getDefaultCards } from './dashboard/defaultCards';
 import { useState, useEffect } from 'react';
 import { ActionCardItem, DataSourceKey } from '@/types/dashboard';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client'; 
 
 export const useDashboardState = (userId?: string): DashboardStateReturn => {
   const [defaultCards, setDefaultCards] = useState<ActionCardItem[]>([]);
