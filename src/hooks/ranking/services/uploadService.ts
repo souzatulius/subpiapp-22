@@ -159,6 +159,9 @@ export const handleFileUpload = async (
     toast.success(`Planilha SGZ processada com sucesso! ${ordensParaInserir.length} novas ordens inseridas e ${ordensAtualizadas} atualizadas.`);
     
     return {
+      success: true,
+      recordCount: excelData.length,
+      message: 'Upload processado com sucesso',
       id: uploadId,
       data: excelData
     };
@@ -172,7 +175,11 @@ export const handleFileUpload = async (
       errorMessage: error.message || 'Falha no processamento'
     });
     toast.error(`Erro ao processar a planilha SGZ: ${error.message || 'Falha no processamento'}`);
-    return null;
+    return {
+      success: false,
+      recordCount: 0,
+      message: error.message || 'Falha no processamento'
+    };
   }
 };
 
@@ -278,6 +285,9 @@ export const handlePainelZeladoriaUpload = async (
     );
     
     return {
+      success: true,
+      recordCount: dadosParaInserir.length,
+      message: 'Planilha do Painel processada com sucesso',
       id: uploadId,
       data: dadosParaInserir
     };
@@ -290,6 +300,10 @@ export const handlePainelZeladoriaUpload = async (
       recordCount: 0
     });
     toast.error(`Erro ao processar planilha do Painel: ${error.message || 'Falha no processamento'}`);
-    return null;
+    return {
+      success: false,
+      recordCount: 0,
+      message: error.message || 'Falha no processamento'
+    };
   }
 };

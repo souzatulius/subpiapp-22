@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 
 // Re-export the types from the main dashboard types file with proper 'export type' syntax

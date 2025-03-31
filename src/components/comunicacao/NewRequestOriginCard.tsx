@@ -57,8 +57,8 @@ const NewRequestOriginCard: React.FC<NewRequestOriginCardProps> = ({ baseUrl = '
     // Convert string to Lucide icon format (first letter uppercase, rest lowercase)
     const formattedIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1).toLowerCase();
     
-    // Check if icon exists in Lucide library
-    const LucideIcon = (LucideIcons as Record<string, React.ComponentType<{ className?: string }>>)[formattedIconName];
+    // Check if icon exists in Lucide library using type assertion
+    const LucideIcon = (LucideIcons as any)[formattedIconName];
     
     if (LucideIcon) {
       return <LucideIcon className="h-5 w-5" />;

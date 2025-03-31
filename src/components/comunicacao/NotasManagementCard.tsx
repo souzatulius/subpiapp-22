@@ -44,7 +44,8 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             titulo, 
             status, 
             criado_em,
-            autor:autor_id (nome_completo)
+            autor_id,
+            usuarios!autor_id (nome_completo)
           `);
         
         // Apply filters based on role
@@ -59,10 +60,14 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             .order('criado_em', { ascending: false });
         }
         
-        // Get count first
-        const countResult = await query;
-        const count = countResult.data?.length || 0;
-        setTotalNotas(count);
+        // Get count
+        const { data: countData, error: countError } = await query;
+        if (countError) {
+          console.error('Error fetching notas count:', countError);
+          return;
+        }
+        
+        setTotalNotas(countData?.length || 0);
         
         // Then get limited data 
         const { data, error } = await query.limit(5);
@@ -72,7 +77,18 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
           return;
         }
         
-        setNotas(data as Nota[]);
+        // Transform the data to match the Nota interface
+        const formattedNotas: Nota[] = data.map((nota: any) => ({
+          id: nota.id,
+          titulo: nota.titulo,
+          status: nota.status,
+          criado_em: nota.criado_em,
+          autor: {
+            nome_completo: nota.usuarios?.nome_completo || 'Desconhecido'
+          }
+        }));
+        
+        setNotas(formattedNotas);
       } catch (err) {
         console.error('Failed to fetch notas:', err);
       } finally {
