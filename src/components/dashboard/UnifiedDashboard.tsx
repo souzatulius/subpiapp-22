@@ -37,7 +37,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Separate visible and hidden cards
   const visibleCards = useMemo(() => {
     return cards.filter(card => !card.hidden);
   }, [cards]);
@@ -46,7 +45,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     return cards.filter(card => card.hidden === true);
   }, [cards]);
   
-  // Function to toggle card visibility
   const toggleCardVisibility = (cardId: string) => {
     setCards(currentCards => {
       return currentCards.map(card => {
@@ -58,27 +56,22 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     });
   };
   
-  // Function to delete a card
   const handleDeleteCard = (id: string) => {
     setCards(currentCards => currentCards.filter(card => card.id !== id));
   };
   
-  // Function to edit a card
   const handleEditCard = (editedCard: ActionCardItem) => {
     setCards(currentCards => 
       currentCards.map(card => card.id === editedCard.id ? editedCard : card)
     );
   };
   
-  // Function to add a new card (redirects to card customization)
   const handleAddNewCard = () => {
     navigate('/settings/dashboard-management');
   };
   
-  // Function to save the dashboard state to the database
   const saveDashboard = async (): Promise<boolean> => {
     try {
-      // Add version field to all cards that don't have it
       const cardsWithVersion = cards.map(card => ({
         ...card,
         version: card.version || CURRENT_DASHBOARD_VERSION
@@ -92,8 +85,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
           cards_config: JSON.stringify(cardsWithVersion),
           version: CURRENT_DASHBOARD_VERSION,
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,dashboard_type'
         });
       
       if (error) throw error;
@@ -115,12 +106,10 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     }
   };
   
-  // Load the dashboard from the database
   const loadDashboard = async () => {
     setLoading(true);
     
     try {
-      // Fetch the user's dashboard from the database
       const { data, error } = await supabase
         .from('user_dashboard')
         .select('cards_config')
@@ -128,11 +117,10 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         .eq('dashboard_type', dashboardType)
         .single();
       
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found"
+      if (error && error.code !== 'PGRST116') {
         throw error;
       }
       
-      // If dashboard exists in the database, use it
       if (data && data.cards_config) {
         let parsedCards;
         try {
@@ -143,7 +131,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         }
         setCards(parsedCards);
       } 
-      // Otherwise, use the fallback cards
       else {
         const defaultDashboardCards = fallbackCards.map(card => ({
           ...card,
@@ -152,7 +139,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         
         setCards(defaultDashboardCards);
         
-        // Automatically save the default dashboard for this user
         const { error: saveError } = await supabase
           .from('user_dashboard')
           .upsert({
@@ -172,7 +158,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     } catch (error) {
       console.error("Erro ao carregar dashboard:", error);
       
-      // Use fallback cards if there's an error
       setCards(fallbackCards.map(card => ({
         ...card,
         version: CURRENT_DASHBOARD_VERSION
@@ -182,14 +167,12 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     }
   };
   
-  // Load the dashboard on component mount
   useEffect(() => {
     if (userId) {
       loadDashboard();
     }
   }, [userId, dashboardType]);
   
-  // Handle showing empty state
   if (!loading && cards.length === 0) {
     return (
       <div className="space-y-6">
@@ -214,7 +197,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         <WelcomeMessage firstName="" title={title} description={description} />
       ) : null}
       
-      {/* Hidden Cards Tray */}
       {hiddenCards.length > 0 && (
         <HiddenCardsTray 
           hiddenCards={hiddenCards} 
@@ -222,7 +204,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         />
       )}
       
-      {/* Card Grid */}
       <UnifiedCardGrid
         cards={visibleCards}
         setCards={setCards}

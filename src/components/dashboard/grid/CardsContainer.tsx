@@ -21,6 +21,7 @@ interface CardsContainerProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   isMobileView?: boolean;
+  isEditMode?: boolean; // Added isEditMode property
 }
 
 const CardsContainer: React.FC<CardsContainerProps> = ({

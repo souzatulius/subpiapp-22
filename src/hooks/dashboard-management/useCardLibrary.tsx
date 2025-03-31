@@ -43,10 +43,11 @@ export const useCardLibrary = () => {
             if (Array.isArray(dashboardCards)) {
               dashboardCards.forEach(card => {
                 // Store department and dashboard information with the card
+                const dashboardType = dashboard.view_type || dashboard.dashboard_type || 'dashboard';
                 const cardWithMeta = {
                   ...card,
                   _departmentId: dashboard.department,
-                  _dashboardType: dashboard.dashboard_type || 'dashboard'
+                  _dashboardType: dashboardType
                 };
                 
                 // Only add if not already added (based on title + type + icon)

@@ -26,11 +26,16 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     setCards, 
     handleDeleteCard, 
     handleEditCard,
-    saveCards
+    saveCards,
+    reorderCards // Make sure this exists in the useDefaultDashboardState hook
   } = useDefaultDashboardState(department);
 
   const handleCardsChange = (newCards: ActionCardItem[]) => {
-    setCards(newCards);
+    if (reorderCards) {
+      reorderCards(newCards);
+    } else {
+      setCards(newCards);
+    }
   };
 
   const handleEditCardClick = (card: ActionCardItem) => {

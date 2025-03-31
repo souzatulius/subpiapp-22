@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardPreview from './DashboardPreview';
@@ -6,7 +5,7 @@ import DashboardControls from './DashboardControls';
 import CardLibrary from './CardLibrary';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, Plus, Import, Export, RotateCcw } from 'lucide-react';
+import { Loader2, Save, Plus, Import, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import { ActionCardItem } from '@/types/dashboard';
@@ -15,6 +14,13 @@ import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 const DashboardManagementContent: React.FC = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
@@ -36,7 +42,6 @@ const DashboardManagementContent: React.FC = () => {
     isSaving,
   } = useDefaultDashboardConfig(selectedDepartment);
   
-  // Load departments
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
@@ -48,7 +53,6 @@ const DashboardManagementContent: React.FC = () => {
         if (error) throw error;
         setDepartments(data || []);
         
-        // Set first department as default if none selected
         if (!selectedDepartment && data && data.length > 0) {
           setSelectedDepartment(data[0].id);
         }
@@ -60,9 +64,7 @@ const DashboardManagementContent: React.FC = () => {
     fetchDepartments();
   }, [selectedDepartment]);
 
-  // Function to add a card to the current dashboard
   const handleAddCardToDashboard = (card: ActionCardItem) => {
-    // Implementation will be handled by the DashboardPreview component
     toast({
       title: "Card adicionado",
       description: "O card foi adicionado ao dashboard.",
@@ -70,7 +72,6 @@ const DashboardManagementContent: React.FC = () => {
     });
   };
   
-  // Handle duplicate dashboard configuration
   const handleDuplicateDashboard = async () => {
     if (!selectedDepartment || !targetDepartment) {
       toast({
@@ -82,7 +83,6 @@ const DashboardManagementContent: React.FC = () => {
     }
     
     try {
-      // Fetch source dashboard configuration
       const { data: sourceData, error: sourceError } = await supabase
         .from('department_dashboards')
         .select('cards_config')
@@ -101,7 +101,6 @@ const DashboardManagementContent: React.FC = () => {
         return;
       }
       
-      // Save to target department
       const { error: saveError } = await supabase
         .from('department_dashboards')
         .upsert({
@@ -110,8 +109,6 @@ const DashboardManagementContent: React.FC = () => {
           cards_config: sourceData.cards_config,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'department,dashboard_type'
         });
       
       if (saveError) throw saveError;
@@ -133,7 +130,6 @@ const DashboardManagementContent: React.FC = () => {
     }
   };
   
-  // Handle export dashboard configuration
   const handleExportDashboard = async () => {
     try {
       const { data, error } = await supabase
@@ -172,17 +168,14 @@ const DashboardManagementContent: React.FC = () => {
     }
   };
   
-  // Handle import dashboard configuration
   const handleImportDashboard = async () => {
     try {
-      // Parse and validate the imported JSON
       const importedData = JSON.parse(importData);
       
       if (!importedData.cards_config || !Array.isArray(importedData.cards_config)) {
         throw new Error("Formato inválido. É necessário um array 'cards_config'.");
       }
       
-      // Save the imported configuration to the selected department
       const { error } = await supabase
         .from('department_dashboards')
         .upsert({
@@ -204,11 +197,9 @@ const DashboardManagementContent: React.FC = () => {
       
       setIsImportModalOpen(false);
       
-      // Reload the page to reflect changes
       setTimeout(() => {
         window.location.reload();
       }, 1500);
-      
     } catch (error) {
       console.error("Error importing dashboard:", error);
       toast({
@@ -219,10 +210,8 @@ const DashboardManagementContent: React.FC = () => {
     }
   };
   
-  // Handle restore default dashboard
   const handleRestoreDefault = async () => {
     try {
-      // Delete the current configuration to reset to default
       await supabase
         .from('department_dashboards')
         .delete()
@@ -235,7 +224,6 @@ const DashboardManagementContent: React.FC = () => {
         variant: "success"
       });
       
-      // Reload the page to reflect changes
       setTimeout(() => {
         window.location.reload();
       }, 1500);
@@ -252,7 +240,6 @@ const DashboardManagementContent: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left sidebar with controls and card library */}
         <div className="lg:col-span-3 space-y-4">
           <DashboardControls
             selectedDepartment={selectedDepartment}
@@ -281,7 +268,6 @@ const DashboardManagementContent: React.FC = () => {
             </Button>
           </div>
           
-          {/* Card Library */}
           <div className="h-full mt-4">
             <CardLibrary 
               onAddCard={handleAddCardToDashboard}
@@ -291,7 +277,6 @@ const DashboardManagementContent: React.FC = () => {
           </div>
         </div>
         
-        {/* Main preview area */}
         <div className="lg:col-span-9">
           <Card className="border rounded-lg overflow-hidden bg-white h-full">
             {isLoading ? (
@@ -310,18 +295,15 @@ const DashboardManagementContent: React.FC = () => {
         </div>
       </div>
       
-      {/* Modals */}
       <CardCustomizationModal
         isOpen={isCreateCardModalOpen}
         onClose={() => setIsCreateCardModalOpen(false)}
         onSave={(cardData) => {
-          // This will be handled by DashboardPreview
           setIsCreateCardModalOpen(false);
         }}
         initialData={null}
       />
       
-      {/* Duplicate Dashboard Modal */}
       <Dialog open={isDuplicateModalOpen} onOpenChange={setIsDuplicateModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogTitle>Duplicar Dashboard</DialogTitle>
@@ -367,7 +349,6 @@ const DashboardManagementContent: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Export Dashboard Modal */}
       <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-auto">
           <DialogTitle>Exportar Dashboard</DialogTitle>
@@ -403,7 +384,6 @@ const DashboardManagementContent: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Import Dashboard Modal */}
       <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-auto">
           <DialogTitle>Importar Dashboard</DialogTitle>
@@ -437,12 +417,10 @@ const DashboardManagementContent: React.FC = () => {
   );
 };
 
-// Helper component for the duplicate modal
 const Label = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
   <div className={`text-sm font-medium ${className}`}>{children}</div>
 );
 
-// Helper component for the duplicate modal
 const Copy = (props: any) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
