@@ -28,18 +28,20 @@ const NotasContent: React.FC = () => {
     deleteNota,
     deleteLoading,
     isAdmin,
-    updateNotaStatus
+    updateNotaStatus,
+    statusLoading
   } = useNotasData();
   
   const { handleExportPDF } = useExportPDF();
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
-  const handleApproveNota = (notaId: string) => {
-    updateNotaStatus(notaId, 'aprovado');
+  // Modify these functions to return promises to match the expected type
+  const handleApproveNota = async (notaId: string): Promise<void> => {
+    await updateNotaStatus(notaId, 'aprovado');
   };
 
-  const handleRejectNota = (notaId: string) => {
-    updateNotaStatus(notaId, 'rejeitado');
+  const handleRejectNota = async (notaId: string): Promise<void> => {
+    await updateNotaStatus(notaId, 'rejeitado');
   };
 
   return (

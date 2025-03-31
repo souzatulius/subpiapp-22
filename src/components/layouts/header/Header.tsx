@@ -75,8 +75,13 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
             const formattedPath = routeNames[path] || (path.charAt(0).toUpperCase() + path.slice(1));
             
             // Build the correct URL path
-            // If this is a section like "comunicacao/comunicacao", create a proper link
-            const href = `/${paths.slice(0, index + 1).join('/')}`;
+            // Ensure proper path for comunicacao section
+            let href = `/${paths.slice(0, index + 1).join('/')}`;
+            
+            // Special handling for "comunicacao" to ensure correct link
+            if (path === 'comunicacao' && index > 0 && paths[index-1] === 'dashboard') {
+              href = '/dashboard/comunicacao/comunicacao';
+            }
             
             return (
               <React.Fragment key={index}>

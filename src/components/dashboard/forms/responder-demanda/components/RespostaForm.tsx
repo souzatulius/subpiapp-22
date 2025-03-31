@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, SendHorizontal, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Demanda } from '../types';
 import RespostaFormHeader from './RespostaFormHeader';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import QuestionsAnswersSection from './QuestionsAnswersSection';
-import CommentsSection from './CommentsSection';
 import { normalizeQuestions } from '@/utils/questionFormatUtils';
 import FormFooter from './FormFooter';
+import DemandaMetadataSection from './sections/DemandaMetadataSection';
+import QuestionsAnswersSection from './QuestionsAnswersSection';
+import CommentsSection from './CommentsSection';
+import { Separator } from '@/components/ui/separator';
 
 interface RespostaFormProps {
   selectedDemanda: Demanda;
@@ -34,9 +35,6 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
   onSubmit,
   handleRespostaChange,
 }) => {
-  const [activeTab, setActiveTab] = React.useState<string>('details');
-  const perguntas = selectedDemanda.perguntas || {};
-  
   // Check if all questions have been answered
   const normalizedQuestions = React.useMemo(() => 
     normalizeQuestions(selectedDemanda.perguntas || {}),
@@ -67,83 +65,49 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       
       <RespostaFormHeader selectedDemanda={selectedDemanda} />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="details">Detalhes</TabsTrigger>
-          <TabsTrigger value="questions">Perguntas</TabsTrigger>
-          <TabsTrigger value="comments">Comentários</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="details" className="pt-4">
-          <Card className="border border-gray-200">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold mb-4">Detalhes da Solicitação</h2>
-                
-                {selectedDemanda.detalhes_solicitacao ? (
-                  <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                    <p className="text-sm text-gray-700 whitespace-pre-line">
-                      {selectedDemanda.detalhes_solicitacao}
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 italic">
-                    Nenhum detalhe fornecido para esta solicitação.
-                  </p>
-                )}
-                
-                {/* Exibir outras informações relevantes da demanda */}
-                {selectedDemanda.protocolo && (
-                  <div className="text-sm">
-                    <span className="font-medium">Protocolo:</span> {selectedDemanda.protocolo}
-                  </div>
-                )}
-                
-                {selectedDemanda.origem_id && selectedDemanda.origens_demandas && (
-                  <div className="text-sm">
-                    <span className="font-medium">Origem:</span> {selectedDemanda.origens_demandas.descricao}
-                  </div>
-                )}
-                
-                {selectedDemanda.prioridade && (
-                  <div className="text-sm">
-                    <span className="font-medium">Prioridade:</span> {selectedDemanda.prioridade}
-                  </div>
-                )}
-                
-                {selectedDemanda.problema && (
-                  <div className="text-sm">
-                    <span className="font-medium">Área/Tema:</span> {selectedDemanda.problema.descricao}
-                  </div>
-                )}
+      <Card className="border border-gray-200">
+        <CardContent className="p-6 space-y-8">
+          {/* Seção de metadados da demanda */}
+          <DemandaMetadataSection selectedDemanda={selectedDemanda} />
+          
+          <Separator />
+          
+          {/* Seção de detalhes da solicitação */}
+          {selectedDemanda.detalhes_solicitacao && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-subpi-blue">Detalhes da Solicitação</h3>
+              <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {selectedDemanda.detalhes_solicitacao}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="questions" className="pt-4">
-          <Card className="border border-gray-200">
-            <CardContent className="p-6">
-              <QuestionsAnswersSection
-                perguntas={selectedDemanda.perguntas}
-                resposta={resposta}
-                onRespostaChange={handleRespostaChange}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="comments" className="pt-4">
-          <Card className="border border-gray-200">
-            <CardContent className="p-6">
-              <CommentsSection
-                comentarios={comentarios}
-                onChange={setComentarios}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          )}
+          
+          <Separator />
+          
+          {/* Seção de perguntas e respostas */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-subpi-blue">Perguntas e Respostas</h3>
+            <QuestionsAnswersSection
+              perguntas={selectedDemanda.perguntas}
+              resposta={resposta}
+              onRespostaChange={handleRespostaChange}
+            />
+          </div>
+          
+          <Separator />
+          
+          {/* Seção de comentários */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-subpi-blue">Comentários Internos</h3>
+            <CommentsSection
+              comentarios={comentarios}
+              onChange={setComentarios}
+            />
+          </div>
+        </CardContent>
+      </Card>
       
       <div className="flex justify-end pt-4 border-t">
         <FormFooter 
