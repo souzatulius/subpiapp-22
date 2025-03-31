@@ -6,7 +6,7 @@ import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 export interface ActionCardProps {
   id: string;
   title: string;
-  iconId: string; // ✅ Alterado
+  iconId: string;
   path: string;
   color: CardColor;
   isDraggable?: boolean;
@@ -22,7 +22,6 @@ export interface ActionCardProps {
   children?: React.ReactNode;
 }
 
-// Function to get background color based on the color prop
 const getBackgroundColor = (color: CardColor): string => {
   switch (color) {
     case 'blue': return 'bg-blue-500';
@@ -53,14 +52,11 @@ const ActionCard = ({
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
+  const Icon = getIconComponentFromId(iconId);
 
   const handleClick = () => {
-    if (path) {
-      navigate(path);
-    }
+    if (path) navigate(path);
   };
-
-  const Icon = getIconComponentFromId(iconId);
 
   return (
     <div 
@@ -84,7 +80,7 @@ const ActionCard = ({
         ) : (
           <>
             <div className="text-white mb-4">
-              <Icon className="w-6 h-6" />
+              {Icon && <Icon className="w-6 h-6" />}
             </div>
             <h3 className="text-lg font-semibold text-white">{title}</h3>
           </>
