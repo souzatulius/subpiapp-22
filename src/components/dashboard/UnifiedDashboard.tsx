@@ -7,7 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 import { PlusCircle, Settings } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import HiddenCardsTray from '@/components/dashboard/HiddenCardsTray';
@@ -32,7 +32,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   headerComponent
 }) => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,11 +40,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   
   // Use non-generic filter to avoid excessive type instantiation
   const visibleCards = useMemo(() => {
-    return cards.filter(card => !card.hidden);
+    return cards.filter((card: ActionCardItem) => !card.hidden);
   }, [cards]);
   
   const hiddenCards = useMemo(() => {
-    return cards.filter(card => card.hidden === true);
+    return cards.filter((card: ActionCardItem) => card.hidden === true);
   }, [cards]);
   
   // Simple function to toggle card visibility

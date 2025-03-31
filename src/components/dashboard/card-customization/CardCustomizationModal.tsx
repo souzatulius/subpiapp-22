@@ -87,14 +87,14 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     // Get the proper React element for the icon (not the raw component)
     const iconComponent = getIconComponentById(data.iconId);
     onSave({
-      title: data.title, 
+      title: data.title,
       type: data.type,
       path: data.path,
       color: data.color, // Ensuring color is always passed
       width: data.width,
       height: data.height,
       icon: iconComponent,
-      iconId: data.iconId,
+      iconId: data.iconId, // Pass iconId separately
       dataSourceKey: data.dataSourceKey,
       displayMobile: data.displayMobile,
       allowedDepartments: data.allowedDepartments,

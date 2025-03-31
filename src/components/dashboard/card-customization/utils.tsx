@@ -83,20 +83,23 @@ export function getColorClass(color: CardColor): string {
 // Função para obter o componente de ícone a partir do ID
 export function getIconComponentById(iconId: string): React.ReactElement {
   try {
-    const IconComponent = LucideIcons[iconId as keyof typeof LucideIcons];
-    
-    if (IconComponent) {
-      return React.createElement(IconComponent, {
-        className: "h-8 w-8 text-white",
-        strokeWidth: 1.5
-      });
+    // Check if iconId is a valid key in LucideIcons
+    if (iconId && typeof iconId === 'string' && iconId in LucideIcons) {
+      const IconComponent = (LucideIcons as any)[iconId];
+      
+      if (typeof IconComponent === 'function') {
+        return React.createElement(IconComponent, {
+          className: "h-8 w-8 text-white",
+          strokeWidth: 1.5
+        });
+      }
     }
   } catch (error) {
     console.error(`Erro ao carregar ícone ${iconId}:`, error);
   }
   
   // Fallback para ícone padrão se não encontrar
-  return React.createElement(LucideIcons.Layout, {
+  return React.createElement((LucideIcons as any).Layout, {
     className: "h-8 w-8 text-white",
     strokeWidth: 1.5
   });
@@ -111,9 +114,16 @@ export function identifyIconComponent(iconComponent: React.ReactElement | string
   
   // Try to identify the icon from its type or props
   if (iconComponent && iconComponent.type) {
-    const iconName = iconComponent.type.displayName || iconComponent.type.name;
-    if (iconName && LucideIcons[iconName as keyof typeof LucideIcons]) {
-      return iconName;
+    const iconType = iconComponent.type;
+    // Check for displayName or name safely
+    let iconName: string | undefined;
+    
+    if (typeof iconType === 'object' || typeof iconType === 'function') {
+      iconName = iconType.displayName || iconType.name;
+      
+      if (iconName && typeof iconName === 'string' && iconName in LucideIcons) {
+        return iconName;
+      }
     }
   }
   
@@ -123,9 +133,9 @@ export function identifyIconComponent(iconComponent: React.ReactElement | string
 
 // Lista de ícones para seleção (transformed for IconSelector component)
 export const iconsData = Object.keys(LucideIcons)
-  .filter(key => typeof LucideIcons[key as keyof typeof LucideIcons] === 'function' && key !== 'Icon' && key !== 'createLucideIcon')
+  .filter(key => typeof (LucideIcons as any)[key] === 'function' && key !== 'Icon' && key !== 'createLucideIcon')
   .map(key => {
-    const IconComponent = LucideIcons[key as keyof typeof LucideIcons];
+    const IconComponent = (LucideIcons as any)[key];
     return {
       id: key,
       label: key.replace(/([A-Z])/g, ' $1').trim(),
@@ -138,11 +148,11 @@ export const iconsData = Object.keys(LucideIcons)
 
 // Lista de ícones para seleção (original version for backward compatibility)
 export const iconOptions = Object.keys(LucideIcons)
-  .filter(key => typeof LucideIcons[key as keyof typeof LucideIcons] === 'function' && key !== 'Icon' && key !== 'createLucideIcon')
+  .filter(key => typeof (LucideIcons as any)[key] === 'function' && key !== 'Icon' && key !== 'createLucideIcon')
   .map(key => ({
     value: key,
     label: key.replace(/([A-Z])/g, ' $1').trim(),
-    icon: React.createElement(LucideIcons[key as keyof typeof LucideIcons], {
+    icon: React.createElement((LucideIcons as any)[key], {
       className: "h-4 w-4 mr-2",
       strokeWidth: 1.5
     })

@@ -17,7 +17,11 @@ export const formSchema = z.object({
   allowedRoles: z.array(z.string()).optional(),
   customProperties: z.object({
     description: z.string().optional(),
-    gradient: z.string().optional()
+    gradient: z.string().optional(),
+    isQuickDemand: z.boolean().optional(),
+    isSearch: z.boolean().optional(),
+    isOverdueDemands: z.boolean().optional(),
+    isPendingActions: z.boolean().optional()
   }).optional()
 });
 
@@ -30,6 +34,7 @@ export interface CardCustomizationModalProps {
     title: string;
     type?: "standard" | "data_dynamic" | "quickDemand" | "search" | "overdueDemands" | "pendingActions" | "welcome_card";
     icon: ReactNode;
+    iconId: string;
     path?: string;
     color: "blue" | "green" | "orange" | "gray-light" | "gray-dark" | "blue-dark" | "orange-light" | "gray-ultra-light" | "lime" | "orange-600";
     width?: "25" | "50" | "75" | "100";
@@ -42,6 +47,10 @@ export interface CardCustomizationModalProps {
     customProperties?: {
       description?: string;
       gradient?: string;
+      isQuickDemand?: boolean;
+      isSearch?: boolean;
+      isOverdueDemands?: boolean;
+      isPendingActions?: boolean;
     };
   }) => void;
   initialData?: any;

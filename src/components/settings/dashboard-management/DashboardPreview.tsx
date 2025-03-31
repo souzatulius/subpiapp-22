@@ -7,6 +7,7 @@ import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/components/ui/use-toast';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import { v4 as uuidv4 } from 'uuid';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -62,23 +63,49 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     setIsCustomizationModalOpen(true);
   };
 
-  const handleSaveCard = (cardData: ActionCardItem) => {
+  const handleSaveCard = (cardData: any) => {
     try {
       console.log("Salvando card:", cardData);
       
       if (editingCard) {
         console.log("Atualizando card existente:", editingCard.id);
         const updatedCards = cards.map(card => 
-          card.id === editingCard.id ? { ...card, ...cardData } : card
+          card.id === editingCard.id ? { 
+            ...card, 
+            title: cardData.title,
+            type: cardData.type || 'standard',
+            path: cardData.path,
+            color: cardData.color,
+            iconId: cardData.iconId,
+            width: cardData.width || '25',
+            height: cardData.height || '1',
+            dataSourceKey: cardData.dataSourceKey,
+            displayMobile: cardData.displayMobile,
+            allowedDepartments: cardData.allowedDepartments,
+            allowedRoles: cardData.allowedRoles,
+            customProperties: cardData.customProperties
+          } : card
         );
         console.log("Cards após atualização:", updatedCards);
         setCards(updatedCards);
       } else {
         // Criação de um novo card
         const newCard: ActionCardItem = {
-          ...cardData,
-          id: `card-${Date.now()}`, // Garantir ID único
-          isCustom: true
+          id: `card-${uuidv4()}`,
+          title: cardData.title,
+          type: cardData.type || 'standard',
+          path: cardData.path || '',
+          color: cardData.color,
+          iconId: cardData.iconId,
+          width: cardData.width || '25',
+          height: cardData.height || '1',
+          isCustom: true,
+          dataSourceKey: cardData.dataSourceKey,
+          displayMobile: cardData.displayMobile,
+          mobileOrder: cards.length,
+          allowedDepartments: cardData.allowedDepartments,
+          allowedRoles: cardData.allowedRoles,
+          customProperties: cardData.customProperties
         };
         console.log("Novo card criado:", newCard);
         setCards([...cards, newCard]);
@@ -101,7 +128,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       console.error("Erro ao salvar card:", error);
       toast({
         title: "Erro ao salvar card",
-        description: "Ocorreu um erro ao tentar salvar o card. Tente novamente.",
+        description: "Não foi possível salvar o card. Tente novamente.",
         variant: "destructive"
       });
     }

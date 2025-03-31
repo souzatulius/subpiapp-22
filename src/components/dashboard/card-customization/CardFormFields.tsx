@@ -11,6 +11,7 @@ import IconSelector from './IconSelector';
 import ColorOptions from './ColorOptions';
 import DimensionOptions from './DimensionOptions';
 import { cardTypes, dashboardPages, dataSources, gradientOptions } from './utils';
+import { CardColor } from '@/types/dashboard';
 
 interface CardFormFieldsProps {
   isNewCard?: boolean;
@@ -38,28 +39,32 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
     // Se for um card especial, configurar propriedades
     if (watchType === 'quickDemand') {
       form.setValue('title', 'Nova Demanda Rápida');
-      form.setValue('customProperties', {
-        ...form.getValues('customProperties'),
-        isQuickDemand: true
-      });
+      // Initialize customProperties if it doesn't exist yet
+      if (!form.getValues('customProperties')) {
+        form.setValue('customProperties', {});
+      }
+      form.setValue('customProperties.isQuickDemand', true);
     } else if (watchType === 'search') {
       form.setValue('title', 'Pesquisar');
-      form.setValue('customProperties', {
-        ...form.getValues('customProperties'),
-        isSearch: true
-      });
+      // Initialize customProperties if it doesn't exist yet
+      if (!form.getValues('customProperties')) {
+        form.setValue('customProperties', {});
+      }
+      form.setValue('customProperties.isSearch', true);
     } else if (watchType === 'overdueDemands') {
       form.setValue('title', 'Demandas Atrasadas');
-      form.setValue('customProperties', {
-        ...form.getValues('customProperties'),
-        isOverdueDemands: true
-      });
+      // Initialize customProperties if it doesn't exist yet
+      if (!form.getValues('customProperties')) {
+        form.setValue('customProperties', {});
+      }
+      form.setValue('customProperties.isOverdueDemands', true);
     } else if (watchType === 'pendingActions') {
       form.setValue('title', 'Ações Pendentes');
-      form.setValue('customProperties', {
-        ...form.getValues('customProperties'),
-        isPendingActions: true
-      });
+      // Initialize customProperties if it doesn't exist yet
+      if (!form.getValues('customProperties')) {
+        form.setValue('customProperties', {});
+      }
+      form.setValue('customProperties.isPendingActions', true);
     }
   }, [watchType, form]);
 
@@ -190,7 +195,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
               <Label>Cor do Card</Label>
               <ColorOptions 
                 value={form.watch('color')} 
-                onChange={(color) => form.setValue('color', color)} 
+                onChange={(color) => form.setValue('color', color as CardColor)} 
               />
             </div>
           </TabsContent>
@@ -200,8 +205,8 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
               <DimensionOptions 
                 width={form.watch('width')} 
                 height={form.watch('height')}
-                onWidthChange={(width) => form.setValue('width', width)}
-                onHeightChange={(height) => form.setValue('height', height)}
+                onWidthChange={(width) => form.setValue('width', width as "25" | "50" | "75" | "100")}
+                onHeightChange={(height) => form.setValue('height', height as "1" | "2")}
               />
             </div>
           </TabsContent>
