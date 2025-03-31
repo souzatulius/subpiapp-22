@@ -66,7 +66,7 @@ export const getMinimumHeight = (type?: string): string => {
   return '1'; // Default height (1 row)
 };
 
-export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean) => {
+export const useGridOccupancy = (cards: CardDimensions[] = [], isMobileView: boolean = false) => {
   // Always initialize state regardless of cards array
   const [occupiedSlots, setOccupiedSlots] = useState<boolean[][]>([]);
   
@@ -203,5 +203,3 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
     totalColumns
   };
 };
-
-export default useGridOccupancy;

@@ -72,11 +72,13 @@ const CardGrid: React.FC<CardGridProps> = ({
   };
 
   // Process the displayed cards - do this outside any conditional
-  const displayedCards = isMobileView
-    ? cards
-        .filter((card) => card.displayMobile !== false)
-        .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
-    : cards;
+  const displayedCards = React.useMemo(() => {
+    return isMobileView
+      ? cards
+          .filter((card) => card.displayMobile !== false)
+          .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
+      : cards;
+  }, [cards, isMobileView]);
 
   // Always prepare card dimensions for the grid occupancy system
   const cardDimensions = React.useMemo(() => {
