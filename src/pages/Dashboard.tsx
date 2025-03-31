@@ -10,10 +10,9 @@ import { useDashboardState } from '@/hooks/useDashboardState';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Home, PlusCircle } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { ActionCardItem } from '@/types/dashboard';
+import { ActionCardItem } from '@/hooks/dashboard/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
-import { OverviewCards } from '@/components/dashboard/overview/OverviewCards';
 
 const Dashboard = () => {
   // Start with sidebar collapsed
@@ -85,7 +84,7 @@ const Dashboard = () => {
         <main className="flex-1 overflow-auto p-6 pb-20 md:pb-6">
           <div className="max-w-7xl mx-auto">
             <WelcomeCard
-              title={`Olá, ${firstName || 'usuário'}!`}
+              title={`Olá, ${firstName}!`}
               description="Organize esta área do seu jeito, movendo ou ocultando os cards."
               icon={<Home className="h-6 w-6 mr-2" />}
               showButton={true}
@@ -99,27 +98,21 @@ const Dashboard = () => {
             <div className="mt-6">
               <DashboardHeader firstName={firstName} />
               
-              <div className="mt-6">
-                <OverviewCards />
-              </div>
-              
-              <div className="mt-6">
-                <CardGrid 
-                  cards={actionCards}
-                  onCardsChange={setActionCards}
-                  onEditCard={handleEditCard}
-                  onDeleteCard={handleDeleteCard}
-                  onAddNewCard={handleAddNewCard}
-                  specialCardsData={specialCardsData}
-                  // Add the missing props
-                  quickDemandTitle={newDemandTitle}
-                  onQuickDemandTitleChange={setNewDemandTitle}
-                  onQuickDemandSubmit={handleQuickDemandSubmit}
-                  onSearchSubmit={handleSearchSubmit}
-                  usuarioId={user?.id || ''}
-                  isMobileView={isMobile}
-                />
-              </div>
+              <CardGrid 
+                cards={actionCards}
+                onCardsChange={setActionCards}
+                onEditCard={handleEditCard}
+                onDeleteCard={handleDeleteCard}
+                onAddNewCard={handleAddNewCard}
+                specialCardsData={specialCardsData}
+                // Add the missing props
+                quickDemandTitle={newDemandTitle}
+                onQuickDemandTitleChange={setNewDemandTitle}
+                onQuickDemandSubmit={handleQuickDemandSubmit}
+                onSearchSubmit={handleSearchSubmit}
+                usuarioId={user?.id || ''}
+                isMobileView={isMobile}
+              />
             </div>
           </div>
         </main>

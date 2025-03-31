@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   DndContext,
   closestCenter,
@@ -67,28 +67,27 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     }
   };
 
-  // Filter cards for mobile view - do this outside any conditional rendering
-  const displayedCards = useMemo(() => {
-    return isMobileView
-      ? cards.filter((card) => card.displayMobile !== false)
-          .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
-      : cards;
-  }, [cards, isMobileView]);
+  // Filter cards for mobile view
+  const displayedCards = isMobileView
+    ? cards.filter((card) => card.displayMobile !== false)
+        .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
+    : cards;
 
-  // Calculate card dimensions consistently
-  const cardDimensions = useMemo(() => {
-    return displayedCards.map(card => ({ 
+  // Calculate total columns based on mobile view
+  const totalColumns = isMobileView ? 2 : 4;
+  
+  // Always call useGridOccupancy with displayedCards, even if empty
+  // We moved this outside the conditional render to avoid the hooks error
+  const { occupiedSlots } = useGridOccupancy(
+    displayedCards.map(card => ({ 
       id: card.id,
       width: card.width || '25', 
       height: card.height || '1',
       type: card.type
-    }));
-  }, [displayedCards]);
-  
-  // Always call useGridOccupancy with cardDimensions, even if empty
-  const { occupiedSlots } = useGridOccupancy(cardDimensions, isMobileView);
+    })), 
+    isMobileView
+  );
 
-  // Only after all hooks have been called, we can do this check
   if (!displayedCards || displayedCards.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
