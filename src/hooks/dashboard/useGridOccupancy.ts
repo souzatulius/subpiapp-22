@@ -77,6 +77,11 @@ export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean)
     // Initialize a new empty grid
     const newOccupiedSlots: boolean[][] = [];
     
+    if (!cards || cards.length === 0) {
+      setOccupiedSlots([]);
+      return;
+    }
+    
     // Sort cards to ensure consistent placement
     const sortedCards = [...cards];
     

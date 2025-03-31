@@ -79,7 +79,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     );
   }
   
-  // Use our grid occupancy hook
+  // Always call the hook, even if there are no cards to display
   const { totalColumns } = useGridOccupancy(
     displayedCards.map(card => ({ 
       id: card.id,
@@ -105,7 +105,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
             >
               <SortableUnifiedActionCard
                 {...card}
-                isDraggable={true}
+                isDraggable={isEditMode}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {
                   const cardToEdit = cards.find(c => c.id === id);
