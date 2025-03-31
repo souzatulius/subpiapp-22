@@ -1,53 +1,45 @@
 
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AvatarDisplayProps } from './types';
-import { UserProfile } from '@/types/common';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
-interface ExtendedAvatarDisplayProps extends AvatarDisplayProps {
-  userProfile?: UserProfile;
-  previewUrl?: string;
+interface AvatarDisplayProps {
+  nome: string;
+  imageSrc?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
-// This component can accept both old and new prop patterns for compatibility
-const AvatarDisplay: React.FC<ExtendedAvatarDisplayProps> = ({
-  nome,
-  imageSrc,
-  size = 'md',
-  className = '',
-  userProfile,
-  previewUrl
-}) => {
-  // Support both old and new prop patterns
-  const displayName = nome || userProfile?.nome_completo || '';
-  const imageSource = previewUrl || imageSrc || userProfile?.foto_perfil_url || userProfile?.avatar_url || '';
-
-  // Generate initials from name
+const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ nome, imageSrc, size = 'md' }) => {
   const getInitials = (name: string) => {
-    if (!name) return '';
     return name
       .split(' ')
       .map(part => part[0])
       .join('')
       .toUpperCase()
-      .slice(0, 2);
+      .substring(0, 2);
   };
-
-  const initials = getInitials(displayName);
   
-  const sizeClasses = {
-    'sm': 'h-8 w-8 text-xs',
-    'md': 'h-10 w-10 text-sm',
-    'lg': 'h-16 w-16 text-lg',
-    'xl': 'h-24 w-24 text-xl'
+  const getSizeClasses = (size: string) => {
+    switch(size) {
+      case 'xs': return 'h-6 w-6 text-xs';
+      case 'sm': return 'h-8 w-8 text-sm';
+      case 'md': return 'h-10 w-10 text-base';
+      case 'lg': return 'h-12 w-12 text-lg';
+      case 'xl': return 'h-16 w-16 text-xl';
+      default: return 'h-10 w-10 text-base';
+    }
   };
-
+  
+  const sizeClasses = getSizeClasses(size);
+  
   return (
-    <Avatar className={`${sizeClasses[size]} ${className}`}>
-      <AvatarImage src={imageSource} alt={displayName} />
-      <AvatarFallback className="bg-indigo-100 text-indigo-700">
-        {initials}
-      </AvatarFallback>
+    <Avatar className={`${sizeClasses}`}>
+      {imageSrc ? (
+        <AvatarImage src={imageSrc} alt={nome} />
+      ) : (
+        <AvatarFallback className="bg-blue-100 text-blue-600">
+          {getInitials(nome)}
+        </AvatarFallback>
+      )}
     </Avatar>
   );
 };

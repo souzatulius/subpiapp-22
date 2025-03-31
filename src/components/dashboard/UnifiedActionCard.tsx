@@ -80,11 +80,14 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
     }
   };
   
+  // Only add the wiggle animation class if the card is in edit mode
+  const wiggleClass = isEditing ? 'animate-wiggle' : '';
+  
   const cardContent = (
     <div 
       className={`w-full h-full rounded-xl shadow-md overflow-hidden cursor-pointer 
       transition-all duration-300 hover:shadow-lg hover:-translate-y-1 active:scale-95 
-      ${bgColor} ${isEditing ? 'animate-wiggle' : ''}`}
+      ${bgColor} ${wiggleClass}`}
       onClick={handleClick}
     >
       <div className="relative p-6 h-full flex flex-col items-center justify-center text-center group">

@@ -1,11 +1,13 @@
 
-import { UserProfile } from '@/types/common';
-
 export interface ProfileData {
   nome_completo: string;
   whatsapp?: string;
   aniversario?: Date | string;
+  foto_perfil_url?: string;
 }
 
-// Re-export UserProfile for convenience
-export type { UserProfile };
+export interface AccountSettingsData {
+  notificar_demandas?: boolean;
+  notificar_comunicados?: boolean;
+  email_notificacoes?: boolean;
+}
