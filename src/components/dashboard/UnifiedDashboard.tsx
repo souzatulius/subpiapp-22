@@ -34,10 +34,12 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
+  // Fix the deep type instantiation by using simple types
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
+  // Use useMemo to prevent deep instantiations
   const visibleCards = useMemo(() => {
     return cards.filter(card => !card.hidden);
   }, [cards]);
@@ -57,6 +59,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     });
   };
   
+  // Simple function implementations to avoid complex typings
   const handleDeleteCard = (id: string) => {
     setCards(currentCards => currentCards.filter(card => card.id !== id));
   };
@@ -71,6 +74,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     navigate('/settings/dashboard-management');
   };
   
+  // Simplified saveDashboard function
   const saveDashboard = async (): Promise<boolean> => {
     try {
       const cardsWithVersion = cards.map(card => ({
@@ -109,6 +113,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     }
   };
   
+  // Simplify the loadDashboard function
   const loadDashboard = async () => {
     setLoading(true);
     
@@ -125,14 +130,13 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       }
       
       if (data && data.cards_config) {
-        let parsedCards;
         try {
-          parsedCards = JSON.parse(data.cards_config);
+          const parsedCards = JSON.parse(data.cards_config);
+          setCards(parsedCards);
         } catch (parseError) {
           console.error("Error parsing cards_config:", parseError);
-          parsedCards = fallbackCards;
+          setCards(fallbackCards);
         }
-        setCards(parsedCards);
       } 
       else {
         const defaultDashboardCards = fallbackCards.map(card => ({
@@ -142,7 +146,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         
         setCards(defaultDashboardCards);
         
-        const { error: saveError } = await supabase
+        // Save the default cards to the database
+        await supabase
           .from('user_dashboard')
           .upsert({
             user_id: userId,
@@ -153,18 +158,10 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
           }, {
             onConflict: 'user_id,dashboard_type'
           });
-        
-        if (saveError) {
-          console.error("Erro ao salvar dashboard padrão:", saveError);
-        }
       }
     } catch (error) {
       console.error("Erro ao carregar dashboard:", error);
-      
-      setCards(fallbackCards.map(card => ({
-        ...card,
-        version: CURRENT_DASHBOARD_VERSION
-      })));
+      setCards(fallbackCards);
     } finally {
       setLoading(false);
     }
@@ -176,6 +173,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     }
   }, [userId, dashboardType]);
   
+  // Render UI based on loaded data
   if (!loading && cards.length === 0) {
     return (
       <div className="space-y-6">

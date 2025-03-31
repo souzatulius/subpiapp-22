@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { FormSchema } from '@/components/dashboard/card-customization/types';
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/hooks/use-toast';
 
 export const useDefaultDashboardState = (departmentId: string) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
@@ -134,6 +135,45 @@ export const useDefaultDashboardState = (departmentId: string) => {
     setIsCustomizationModalOpen(false);
   };
 
+  // Add the saveCards function to fix the error in DashboardPreview.tsx
+  const saveCards = async (): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('department_dashboards')
+        .upsert({
+          department: departmentId,
+          view_type: 'dashboard',
+          cards_config: JSON.stringify(cards),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'department,view_type'
+        });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Dashboard salvo com sucesso",
+        description: "As alterações no dashboard foram salvas.",
+        variant: "success"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Erro ao salvar dashboard:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar suas alterações. Tente novamente mais tarde.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  // Add the reorderCards function
+  const reorderCards = (newCards: ActionCardItem[]) => {
+    setCards(newCards);
+  };
+
   return {
     cards,
     setCards,
@@ -152,6 +192,8 @@ export const useDefaultDashboardState = (departmentId: string) => {
     handleQuickDemandSubmit: () => setNewDemandTitle(''),
     searchQuery,
     setSearchQuery,
-    handleSearchSubmit: (q: string) => console.log('Searching for:', q)
+    handleSearchSubmit: (q: string) => console.log('Searching for:', q),
+    saveCards,
+    reorderCards
   };
 };
