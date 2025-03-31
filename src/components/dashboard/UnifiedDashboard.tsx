@@ -38,13 +38,13 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Use non-generic filter to avoid excessive type instantiation
+  // Use explicit array types to avoid excessive type instantiation
   const visibleCards = useMemo(() => {
-    return cards.filter((card: ActionCardItem) => !card.hidden);
+    return cards.filter((card) => !card.hidden);
   }, [cards]);
   
   const hiddenCards = useMemo(() => {
-    return cards.filter((card: ActionCardItem) => card.hidden === true);
+    return cards.filter((card) => card.hidden === true);
   }, [cards]);
   
   // Simple function to toggle card visibility
