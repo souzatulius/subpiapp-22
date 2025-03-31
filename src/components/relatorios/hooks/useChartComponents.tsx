@@ -16,6 +16,9 @@ export interface ChartData {
 }
 
 export const useChartComponents = () => {
+  // New color palette
+  const chartColors = ['#f97316', '#0ea5e9', '#1e40af', '#71717a', '#27272a'];
+  
   // Sample chart data
   const pieChartData = [
     { name: 'Pendentes', value: 30 },
@@ -89,7 +92,7 @@ export const useChartComponents = () => {
         data={barChartData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
@@ -98,7 +101,7 @@ export const useChartComponents = () => {
         data={areaChartData}
         xAxisDataKey="name"
         areas={[
-          { dataKey: 'Notas', name: 'Notas', color: '#a1a1aa' }
+          { dataKey: 'Notas', name: 'Notas', color: chartColors[1] }
         ]}
       />
     ),
@@ -107,7 +110,7 @@ export const useChartComponents = () => {
         data={lineChartData}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Demandas', name: 'Tempo (dias)', color: '#a1a1aa' }
+          { dataKey: 'Demandas', name: 'Tempo (dias)', color: chartColors[0] }
         ]}
       />
     ),
@@ -116,7 +119,7 @@ export const useChartComponents = () => {
         data={barChartData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Eficiência', color: '#a1a1aa' }
+          { dataKey: 'Quantidade', name: 'Eficiência', color: chartColors[1] }
         ]}
       />
     ),
@@ -125,14 +128,14 @@ export const useChartComponents = () => {
         data={areaChartData}
         xAxisDataKey="name"
         areas={[
-          { dataKey: 'Notas', name: 'Quantidade', color: '#a1a1aa' }
+          { dataKey: 'Notas', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
     'notasPorTema': (
       <PieChart 
         data={pieChartData}
-        colors={['#d4d4d8', '#a1a1aa', '#71717a', '#52525b']}
+        colors={chartColors}
       />
     ),
     'evolucaoMensal': (
@@ -140,7 +143,7 @@ export const useChartComponents = () => {
         data={lineChartData}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Demandas', name: 'Demandas', color: '#a1a1aa' }
+          { dataKey: 'Demandas', name: 'Demandas', color: chartColors[1] }
         ]}
       />
     ),
@@ -149,7 +152,7 @@ export const useChartComponents = () => {
         data={barChartData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
@@ -159,14 +162,14 @@ export const useChartComponents = () => {
         data={timelineChartData}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Respostas', name: 'Respostas', color: '#a1a1aa' }
+          { dataKey: 'Respostas', name: 'Respostas', color: chartColors[2] }
         ]}
       />
     ),
     'distribuicaoImpacto': (
       <PieChart 
         data={impactChartData}
-        colors={['#d4d4d8', '#a1a1aa', '#71717a', '#52525b']}
+        colors={chartColors}
       />
     ),
     'origemDemandas': (
@@ -174,7 +177,7 @@ export const useChartComponents = () => {
         data={originChartData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Solicitações', name: 'Solicitações', color: '#a1a1aa' }
+          { dataKey: 'Solicitações', name: 'Solicitações', color: chartColors[1] }
         ]}
       />
     ),
@@ -183,7 +186,7 @@ export const useChartComponents = () => {
         data={satisfactionChartData}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Satisfação', name: 'Índice', color: '#a1a1aa' }
+          { dataKey: 'Satisfação', name: 'Índice', color: chartColors[0] }
         ]}
       />
     ),
@@ -252,7 +255,7 @@ export const useChartComponents = () => {
         data={serviceDiversityData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
@@ -261,7 +264,7 @@ export const useChartComponents = () => {
         data={servicesByDistrictData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
@@ -270,7 +273,7 @@ export const useChartComponents = () => {
         data={serviceTypesData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
@@ -279,7 +282,7 @@ export const useChartComponents = () => {
         data={statusDistributionData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: '#a1a1aa' }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
         ]}
       />
     ),
@@ -288,7 +291,7 @@ export const useChartComponents = () => {
         data={timeComparisonData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Dias', name: 'Dias', color: '#a1a1aa' }
+          { dataKey: 'Dias', name: 'Dias', color: chartColors[0] }
         ]}
       />
     ),
@@ -297,7 +300,7 @@ export const useChartComponents = () => {
         data={topCompaniesData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Concluídas', name: 'Concluídas', color: '#a1a1aa' }
+          { dataKey: 'Concluídas', name: 'Concluídas', color: chartColors[0] }
         ]}
       />
     ),
@@ -306,9 +309,9 @@ export const useChartComponents = () => {
         data={statusTransitionData}
         xAxisDataKey="name"
         lines={[
-          { dataKey: 'Aberto', name: 'Aberto', color: '#f97316' },
-          { dataKey: 'EmAndamento', name: 'Em Andamento', color: '#fb923c' },
-          { dataKey: 'Concluído', name: 'Concluído', color: '#fdba74' }
+          { dataKey: 'Aberto', name: 'Aberto', color: chartColors[2] },
+          { dataKey: 'EmAndamento', name: 'Em Andamento', color: chartColors[1] },
+          { dataKey: 'Concluído', name: 'Concluído', color: chartColors[0] }
         ]}
       />
     ),

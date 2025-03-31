@@ -18,8 +18,8 @@ export const PieChart: React.FC<PieChartProps> = ({
   data, 
   colors 
 }) => {
-  // Default gray color palette if colors are not provided
-  const defaultColors = ['#d4d4d8', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
+  // Define a palette with orange, blue, dark blue, gray and dark gray
+  const defaultColors = ['#f97316', '#0ea5e9', '#1e40af', '#71717a', '#27272a'];
   const chartColors = colors || defaultColors;
 
   // Validate input data
@@ -44,7 +44,7 @@ export const PieChart: React.FC<PieChartProps> = ({
             cy="50%"
             labelLine={false}
             outerRadius={80}
-            fill="#8884d8"
+            fill="#f97316"
             dataKey="value"
             nameKey="name"
             label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
@@ -63,7 +63,7 @@ export const PieChart: React.FC<PieChartProps> = ({
             layout="vertical" 
             verticalAlign="middle" 
             align="right"
-            wrapperStyle={{ color: '#d4d4d8' }}
+            wrapperStyle={{ color: '#71717a' }}
           />
         </RechartsBarChart>
       </ResponsiveContainer>

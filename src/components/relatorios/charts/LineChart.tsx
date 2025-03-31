@@ -30,10 +30,13 @@ export const LineChart: React.FC<LineChartProps> = ({
   if (!isDataValid || !areLinesValid) {
     return (
       <div className={`h-full flex items-center justify-center ${className}`}>
-        <p className="text-blue-200">Dados não disponíveis</p>
+        <p className="text-orange-200">Dados não disponíveis</p>
       </div>
     );
   }
+  
+  // Default colors if not provided
+  const defaultColors = ['#f97316', '#0ea5e9', '#1e40af', '#71717a', '#27272a'];
   
   return (
     <div className={`h-full w-full ${className}`}>
@@ -47,23 +50,23 @@ export const LineChart: React.FC<LineChartProps> = ({
             bottom: 5,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#4a5568" />
-          <XAxis dataKey={xAxisDataKey} stroke="#e2e8f0" />
-          <YAxis stroke="#e2e8f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#71717a" />
+          <XAxis dataKey={xAxisDataKey} stroke="#71717a" />
+          <YAxis stroke="#71717a" />
           <Tooltip 
-            contentStyle={{ backgroundColor: '#1e3a8a', borderColor: '#2563eb', color: '#ffffff' }} 
+            contentStyle={{ backgroundColor: '#1e40af', borderColor: '#0ea5e9', color: '#ffffff' }} 
             labelStyle={{ color: '#ffffff' }}
           />
-          <Legend wrapperStyle={{ color: '#e2e8f0' }} />
+          <Legend wrapperStyle={{ color: '#71717a' }} />
           {lines.map((line, index) => (
             <Line
               key={index}
               type="monotone"
               dataKey={line.dataKey}
               name={line.name}
-              stroke={line.color || '#3b82f6'}
+              stroke={line.color || defaultColors[index % defaultColors.length]}
               strokeWidth={line.strokeWidth || 2}
-              activeDot={{ r: 8, fill: '#93c5fd' }}
+              activeDot={{ r: 8, fill: '#f97316' }}
             />
           ))}
         </RechartsLineChart>
