@@ -21,16 +21,14 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
   handleChange,
   errors
 }) => {
-  // Function to determine button variant based on selection
-  const getButtonVariant = (isSelected: boolean, currentValue?: boolean) => {
-    if (currentValue === undefined) return "outline";
-    return isSelected === currentValue ? "default" : "outline";
-  };
-
-  // Function to determine button class based on selection
-  const getButtonClass = (isSelected: boolean, currentValue?: boolean) => {
-    if (currentValue === undefined) return "";
-    return isSelected === currentValue ? "bg-orange-500 text-white" : "";
+  // Allow deselection of protocol option
+  const handleProtocolClick = (value: boolean) => {
+    if (temProtocolo156 === value) {
+      // Set to undefined to deselect
+      handleSelectChange(undefined as any);
+    } else {
+      handleSelectChange(value);
+    }
   };
 
   return (
@@ -45,23 +43,23 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
       <div className="flex gap-3">
         <Button
           type="button"
-          variant={getButtonVariant(true, temProtocolo156)}
-          className={`selection-button ${getButtonClass(true, temProtocolo156)}`}
-          onClick={() => handleSelectChange(true)}
+          variant={temProtocolo156 === true ? "default" : "outline"}
+          className={`selection-button ${temProtocolo156 === true ? "bg-orange-500 text-white" : ""}`}
+          onClick={() => handleProtocolClick(true)}
         >
           Sim
         </Button>
         <Button
           type="button"
-          variant={getButtonVariant(false, temProtocolo156)}
-          className={`selection-button ${getButtonClass(false, temProtocolo156)}`}
-          onClick={() => handleSelectChange(false)}
+          variant={temProtocolo156 === false ? "default" : "outline"}
+          className={`selection-button ${temProtocolo156 === false ? "bg-orange-500 text-white" : ""}`}
+          onClick={() => handleProtocolClick(false)}
         >
           Não
         </Button>
       </div>
       
-      {temProtocolo156 && (
+      {temProtocolo156 === true && (
         <div className="animate-fadeIn">
           <Label
             htmlFor="numero_protocolo_156"

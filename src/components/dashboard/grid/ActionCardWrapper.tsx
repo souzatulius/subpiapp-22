@@ -7,6 +7,7 @@ import OverdueDemandsCard from '../cards/OverdueDemandsCard';
 import PendingActionsCard from '../cards/PendingActionsCard';
 import NewCardButton from '../cards/NewCardButton';
 import { ActionCardItem } from '@/types/dashboard';
+import { useNavigate } from 'react-router-dom';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -39,6 +40,13 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   isMobileView = false,
   specialCardsData
 }) => {
+  const navigate = useNavigate();
+
+  // Function to handle origin selection and navigate to form
+  const handleOriginSelect = (originId: string) => {
+    navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
+  };
+
   // Map specific card types to their respective components
   if (card.isQuickDemand) {
     return (

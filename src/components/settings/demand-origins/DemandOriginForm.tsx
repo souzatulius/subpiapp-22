@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import DataEntryForm from '../DataEntryForm';
 import { z } from 'zod';
+import * as LucideIcons from 'lucide-react';
 import IconSelector from '../IconSelector';
 
 // Schema for demand origin validation
@@ -26,7 +27,7 @@ const DemandOriginForm: React.FC<DemandOriginFormProps> = ({
   onSubmit,
   onCancel,
   defaultValue = '',
-  defaultIcon = '',
+  defaultIcon = 'MessageCircle',
   isSubmitting,
   submitText = 'Salvar'
 }) => {
@@ -37,6 +38,9 @@ const DemandOriginForm: React.FC<DemandOriginFormProps> = ({
     setSelectedIcon(iconName);
     setIsIconSelectorOpen(false);
   };
+
+  // Render icon component
+  const IconComponent = selectedIcon ? (LucideIcons as any)[selectedIcon] : null;
 
   return (
     <DataEntryForm
@@ -64,17 +68,7 @@ const DemandOriginForm: React.FC<DemandOriginFormProps> = ({
             <Label>Ícone</Label>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center border">
-                {selectedIcon && (
-                  <img 
-                    src={`/icons/${selectedIcon}.svg`}
-                    alt="Ícone selecionado"
-                    className="w-6 h-6"
-                    onError={(e) => {
-                      // Se não for uma imagem válida, tenta renderizar como ícone Lucide
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                )}
+                {IconComponent && <IconComponent className="h-6 w-6" />}
               </div>
               <Button 
                 type="button"
@@ -96,6 +90,7 @@ const DemandOriginForm: React.FC<DemandOriginFormProps> = ({
               isOpen={isIconSelectorOpen}
               onClose={() => setIsIconSelectorOpen(false)}
               onSelect={handleIconSelect}
+              currentIcon={selectedIcon}
             />
           )}
         </div>

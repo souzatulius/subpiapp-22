@@ -49,6 +49,15 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     }
   };
 
+  // Add ability to deselect priority
+  const handlePriorityClick = (priority: string) => {
+    if (formData.prioridade === priority) {
+      handleSelectChange('prioridade', ''); // Deselect if clicking the same priority
+    } else {
+      handleSelectChange('prioridade', priority);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -65,7 +74,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             className={`selection-button rounded-xl ${
               formData.prioridade === 'baixa' ? "bg-green-500 text-white hover:bg-green-600" : "hover:bg-green-500 hover:text-white"
             }`}
-            onClick={() => handleSelectChange('prioridade', 'baixa')}
+            onClick={() => handlePriorityClick('baixa')}
           >
             Baixa
           </Button>
@@ -75,7 +84,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             className={`selection-button rounded-xl ${
               formData.prioridade === 'media' ? "bg-yellow-500 text-white hover:bg-yellow-600" : "hover:bg-yellow-500 hover:text-white"
             }`}
-            onClick={() => handleSelectChange('prioridade', 'media')}
+            onClick={() => handlePriorityClick('media')}
           >
             Média
           </Button>
@@ -85,7 +94,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             className={`selection-button rounded-xl ${
               formData.prioridade === 'alta' ? "bg-red-500 text-white hover:bg-red-600" : "hover:bg-red-500 hover:text-white"
             }`}
-            onClick={() => handleSelectChange('prioridade', 'alta')}
+            onClick={() => handlePriorityClick('alta')}
           >
             Alta
           </Button>

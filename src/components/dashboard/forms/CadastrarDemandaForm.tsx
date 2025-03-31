@@ -11,6 +11,7 @@ import { useDemandForm } from '@/hooks/demandForm';
 import { ValidationError, validateDemandForm, getErrorSummary } from '@/lib/formValidationUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 interface CadastrarDemandaFormProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showValidationAlert, setShowValidationAlert] = useState(false);
+  const location = useLocation();
   
   const {
     formData,
@@ -50,6 +52,16 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     filteredServicos,
     handleServiceSearch
   } = useDemandForm(user?.id, onClose);
+
+  useEffect(() => {
+    // Extract origine_id from URL if present
+    const searchParams = new URLSearchParams(location.search);
+    const origemId = searchParams.get('origem_id');
+    
+    if (origemId && origens.some(origem => origem.id === origemId)) {
+      handleSelectChange('origem_id', origemId);
+    }
+  }, [location.search, origens]);
 
   const handleStepClick = (stepIndex: number) => {
     setActiveStep(stepIndex);

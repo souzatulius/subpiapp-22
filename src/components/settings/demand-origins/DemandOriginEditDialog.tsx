@@ -1,19 +1,13 @@
 
 import React from 'react';
-import EditModal from '../EditModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import DemandOriginForm from './DemandOriginForm';
-
-export interface DemandOrigin {
-  id: string;
-  descricao: string;
-  criado_em: string;
-  icone?: string;
-}
+import { DemandOrigin } from '@/hooks/useDemandOrigins';
 
 interface DemandOriginEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  demandOrigin: DemandOrigin | null;
+  demandOrigin: DemandOrigin;
   onSubmit: (data: { descricao: string, icone: string }) => Promise<void>;
   isSubmitting: boolean;
 }
@@ -25,23 +19,22 @@ const DemandOriginEditDialog: React.FC<DemandOriginEditDialogProps> = ({
   onSubmit,
   isSubmitting
 }) => {
-  if (!isOpen || !demandOrigin) return null;
-
   return (
-    <EditModal 
-      isOpen={isOpen} 
-      onClose={onClose}
-      title="Editar Origem de Demanda"
-    >
-      <DemandOriginForm
-        onSubmit={onSubmit}
-        onCancel={onClose}
-        defaultValue={demandOrigin.descricao}
-        defaultIcon={demandOrigin.icone}
-        isSubmitting={isSubmitting}
-        submitText="Salvar Alterações"
-      />
-    </EditModal>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Editar Origem de Demanda</DialogTitle>
+        </DialogHeader>
+        <DemandOriginForm
+          onSubmit={onSubmit}
+          onCancel={onClose}
+          defaultValue={demandOrigin.descricao}
+          defaultIcon={demandOrigin.icone || 'MessageCircle'} 
+          isSubmitting={isSubmitting}
+          submitText="Atualizar"
+        />
+      </DialogContent>
+    </Dialog>
   );
 };
 
