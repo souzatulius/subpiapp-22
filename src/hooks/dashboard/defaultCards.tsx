@@ -2,9 +2,10 @@
 // hooks/dashboard/defaultCards.tsx
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
+import React from 'react';
 
 // Retorna o componente React correspondente ao iconId
-export const getIconComponentFromId = (iconId: string) => {
+export const getIconComponentFromId = (iconId: string): React.ElementType => {
   const iconMap: Record<string, keyof typeof LucideIcons> = {
     'clipboard-list': 'ClipboardList',
     'message-square-reply': 'MessageSquareReply',
@@ -20,7 +21,7 @@ export const getIconComponentFromId = (iconId: string) => {
   };
 
   const componentName = iconMap[iconId] || 'ClipboardList';
-  return LucideIcons[componentName] || LucideIcons['ClipboardList'];
+  return LucideIcons[componentName] as React.ElementType || LucideIcons.ClipboardList;
 };
 
 // Cards padrão sem JSX nos dados

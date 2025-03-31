@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -12,6 +11,7 @@ import {
 import CardsContainer from './grid/CardsContainer';
 import { ActionCardItem } from '@/types/dashboard';
 import DynamicDataCard from './DynamicDataCard';
+import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
 interface CardGridProps {
   cards: ActionCardItem[];
@@ -69,7 +69,6 @@ const CardGrid: React.FC<CardGridProps> = ({
     }
   };
 
-  // Filter cards for mobile view
   const displayedCards = isMobileView
     ? cards
         .filter((card) => card.displayMobile !== false)
@@ -84,7 +83,6 @@ const CardGrid: React.FC<CardGridProps> = ({
     );
   }
 
-  // Separate cards into dynamic data cards and regular cards
   const dynamicDataCards = displayedCards.filter(
     (card) => card.type === 'data_dynamic' && card.dataSourceKey
   );
@@ -100,7 +98,6 @@ const CardGrid: React.FC<CardGridProps> = ({
       onDragEnd={modoAdmin ? handleDragEnd : undefined}
     >
       <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
-        {/* Special search cards should appear first */}
         {regularCards
           .filter(card => card.isSearch)
           .map(card => (
@@ -122,7 +119,6 @@ const CardGrid: React.FC<CardGridProps> = ({
             </div>
           ))}
           
-        {/* Dynamic data cards */}
         {dynamicDataCards.map(card => (
           <div 
             key={card.id}
@@ -131,7 +127,7 @@ const CardGrid: React.FC<CardGridProps> = ({
             <DynamicDataCard
               key={card.id}
               title={card.title}
-              icon={card.icon}
+              icon={getIconComponentFromId(card.iconId)}
               color={card.color}
               dataSourceKey={card.dataSourceKey as any}
               coordenacaoId={coordenacaoId}
@@ -140,7 +136,6 @@ const CardGrid: React.FC<CardGridProps> = ({
           </div>
         ))}
         
-        {/* Regular cards */}
         {regularCards
           .filter(card => !card.isSearch)
           .map(card => (
@@ -166,31 +161,28 @@ const CardGrid: React.FC<CardGridProps> = ({
   );
 };
 
-// Utility functions for determining class names based on card dimensions
 export const getWidthClass = (width?: string, isMobileView: boolean = false): string => {
   if (isMobileView) {
-    // In mobile view, we have only 2 columns
     switch (width) {
       case '25':
-        return 'col-span-1'; // 1/2 of mobile width
+        return 'col-span-1';
       case '50':
       case '75':
       case '100':
-        return 'col-span-2'; // Full mobile width
+        return 'col-span-2';
       default:
         return 'col-span-1';
     }
   } else {
-    // In desktop view, we have 4 columns
     switch (width) {
       case '25':
-        return 'col-span-1'; // 1/4 of desktop width
+        return 'col-span-1';
       case '50':
-        return 'col-span-2'; // 2/4 of desktop width
+        return 'col-span-2';
       case '75':
-        return 'col-span-3'; // 3/4 of desktop width
+        return 'col-span-3';
       case '100':
-        return 'col-span-4'; // Full desktop width
+        return 'col-span-4';
       default:
         return 'col-span-1';
     }
@@ -200,9 +192,9 @@ export const getWidthClass = (width?: string, isMobileView: boolean = false): st
 export const getHeightClass = (height?: string): string => {
   switch (height) {
     case '1':
-      return 'h-40'; // Standard height
+      return 'h-40';
     case '2':
-      return 'h-80'; // Double height
+      return 'h-80';
     default:
       return 'h-40';
   }

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { CardColor } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -24,6 +25,7 @@ export interface UnifiedActionCardProps {
   mobileOrder?: number;
   width?: string;
   height?: string;
+  type?: string;
 }
 
 const getBackgroundColor = (color: CardColor): string => {

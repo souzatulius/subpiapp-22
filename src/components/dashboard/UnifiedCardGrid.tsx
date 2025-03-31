@@ -12,18 +12,21 @@ import {
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass } from './CardGrid';
+import { ActionCardItem, CardType } from '@/types/dashboard';
 
+// Make sure UnifiedCardItem includes all required properties from ActionCardItem
 interface UnifiedCardItem extends UnifiedActionCardProps {
-  width?: string; 
+  width?: string;
   height?: string;
   displayMobile?: boolean;
   mobileOrder?: number;
+  type: CardType;
 }
 
 interface UnifiedCardGridProps {
-  cards: UnifiedCardItem[];
-  onCardsChange: (cards: UnifiedCardItem[]) => void;
-  onEditCard?: (card: UnifiedCardItem) => void;
+  cards: ActionCardItem[] | UnifiedCardItem[];
+  onCardsChange: (cards: ActionCardItem[] | UnifiedCardItem[]) => void;
+  onEditCard?: (card: ActionCardItem | UnifiedCardItem) => void;
   onDeleteCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;

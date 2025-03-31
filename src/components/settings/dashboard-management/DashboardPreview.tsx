@@ -5,6 +5,7 @@ import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaul
 import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Smartphone, Monitor } from 'lucide-react';
+import { ActionCardItem } from '@/types/dashboard';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -28,6 +29,11 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
   const { user } = useAuth();
   const [modoAdmin, setModoAdmin] = React.useState(true);
+
+  // Handle cards change in a type-safe way
+  const handleCardsChange = (newCards: ActionCardItem[] | any[]) => {
+    setCards(newCards as ActionCardItem[]);
+  };
 
   // Create device frame classes based on preview mode
   const deviceFrameClasses = isMobilePreview 
@@ -62,7 +68,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           <div className="p-4">
             <UnifiedCardGrid
               cards={cards}
-              onCardsChange={setCards}
+              onCardsChange={handleCardsChange}
               onEditCard={handleEditCard}
               onDeleteCard={handleDeleteCard}
               isMobileView={isMobilePreview}

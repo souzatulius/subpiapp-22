@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -11,11 +12,11 @@ interface SimpleCardData {
   title: string;
   path: string;
   color: CardColor;
-  width: string;
-  height: string;
   iconId: string;
   type: string;
-  displayMobile: boolean;
+  width?: string;
+  height?: string;
+  displayMobile?: boolean;
   dataSourceKey?: string;
   allowedDepartments?: string[];
   allowedRoles?: string[];

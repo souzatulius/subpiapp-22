@@ -7,6 +7,7 @@ import { MessageSquareReply, Loader2, PlusCircle } from 'lucide-react';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import { ActionCardItem } from '@/types/dashboard';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -40,6 +41,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     setSearchQuery,
     handleSearchSubmit
   } = useDefaultDashboardState(department);
+
+  // Handle cards change in a type-safe way
+  const handleCardsChange = (newCards: ActionCardItem[] | any[]) => {
+    setCards(newCards as ActionCardItem[]);
+  };
 
   // Adapter for CardCustomizationModal to work with our card format
   const handleSaveCardAdapter = (data: any) => {
@@ -80,7 +86,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         /* Card Grid - Usando UnifiedCardGrid em vez de CardGrid */
         <UnifiedCardGrid
           cards={cards}
-          onCardsChange={setCards}
+          onCardsChange={handleCardsChange}
           onEditCard={handleEditCard}
           onDeleteCard={handleDeleteCard}
           isEditMode={!isPreview}
