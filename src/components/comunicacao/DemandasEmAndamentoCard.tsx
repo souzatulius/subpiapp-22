@@ -67,9 +67,9 @@ const DemandasEmAndamentoCard: React.FC<DemandasEmAndamentoCardProps> = ({
     navigate(`/dashboard/comunicacao/consultar-demandas?search=${encodeURIComponent(searchTerm)}`);
   };
 
-  // Updated to navigate directly to the specific demand
+  // Updated to navigate directly to the specific demand with correct path
   const handleDemandaClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/responder-demandas?id=${id}`);
+    navigate(`/dashboard/comunicacao/responder?id=${id}`);
   };
 
   const handleViewAllClick = () => {
