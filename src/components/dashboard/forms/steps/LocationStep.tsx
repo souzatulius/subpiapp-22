@@ -47,6 +47,11 @@ const LocationStep: React.FC<LocationStepProps> = ({
 }) => {
   // Show address field only if bairro is selected
   const showAddressField = formData.bairro_id !== '';
+  
+  // Only show distrito selection after problem and service are selected
+  const showDistritoSelection = 
+    formData.problema_id !== '' && 
+    (formData.servico_id !== '' || formData.nao_sabe_servico === true);
 
   return (
     <div className="space-y-6">
@@ -65,29 +70,31 @@ const LocationStep: React.FC<LocationStepProps> = ({
         errors={errors}
       />
 
-      <div>
-        <Label 
-          className={`form-question-title ${hasFieldError('distrito', errors) ? 'text-orange-500 font-semibold' : ''}`}
-        >
-          Distrito {hasFieldError('distrito', errors) && <span className="text-orange-500">*</span>}
-        </Label>
-        <div className="flex flex-wrap gap-2">
-          {distritos.map(distrito => (
-            <Button 
-              key={distrito.id} 
-              type="button" 
-              variant={selectedDistrito === distrito.id ? "default" : "outline"} 
-              className={`selection-button ${selectedDistrito === distrito.id ? "bg-orange-500 text-white" : ""}`}
-              onClick={() => setSelectedDistrito(distrito.id)}
-            >
-              {distrito.nome}
-            </Button>
-          ))}
+      {showDistritoSelection && (
+        <div className="animate-fadeIn">
+          <Label 
+            className={`form-question-title ${hasFieldError('distrito', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Distrito {hasFieldError('distrito', errors) && <span className="text-orange-500">*</span>}
+          </Label>
+          <div className="flex flex-wrap gap-2">
+            {distritos.map(distrito => (
+              <Button 
+                key={distrito.id} 
+                type="button" 
+                variant={selectedDistrito === distrito.id ? "default" : "outline"} 
+                className={`selection-button ${selectedDistrito === distrito.id ? "bg-orange-500 text-white" : ""}`}
+                onClick={() => setSelectedDistrito(distrito.id)}
+              >
+                {distrito.nome}
+              </Button>
+            ))}
+          </div>
+          {hasFieldError('distrito', errors) && (
+            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('distrito', errors)}</p>
+          )}
         </div>
-        {hasFieldError('distrito', errors) && (
-          <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('distrito', errors)}</p>
-        )}
-      </div>
+      )}
       
       {selectedDistrito && filteredBairros.length > 0 && (
         <div className="animate-fadeIn">

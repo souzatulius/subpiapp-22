@@ -132,7 +132,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         {/* Card 1: Nova Solicitação - only for Comunicação */}
         {isComunicacao && (
           <div className="col-span-1 md:col-span-1">
-            <NewRequestOriginCard />
+            <NewRequestOriginCard baseUrl="dashboard/comunicacao" />
           </div>
         )}
         
@@ -140,7 +140,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         <div className="col-span-1 md:col-span-1">
           <PendingDemandsCard 
             coordenacaoId={userDepartment || ''} 
-            isComunicacao={isComunicacao} 
+            isComunicacao={isComunicacao}
+            baseUrl="dashboard/comunicacao"
           />
         </div>
         
@@ -148,15 +149,17 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         <div className="col-span-1 md:col-span-1">
           <NotasManagementCard 
             coordenacaoId={userDepartment || ''} 
-            isComunicacao={isComunicacao} 
+            isComunicacao={isComunicacao}
+            baseUrl="dashboard/comunicacao/notas"
           />
         </div>
         
-        {/* Card 4: Demandas em Andamento - for all - Spans 2 columns when Comunicação has New Request card */}
+        {/* Card 4: Demandas em Andamento - for all */}
         <div className={`col-span-1 md:col-span-${isComunicacao ? 3 : 1}`}>
           <DemandasEmAndamentoCard 
             coordenacaoId={userDepartment || ''} 
-            isComunicacao={isComunicacao} 
+            isComunicacao={isComunicacao}
+            baseUrl="dashboard/comunicacao" 
           />
         </div>
       </div>
@@ -166,7 +169,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         <h2 className="text-xl font-semibold mb-4">Ações rápidas</h2>
         <ActionCards 
           coordenacaoId={userDepartment || ''} 
-          isComunicacao={isComunicacao} 
+          isComunicacao={isComunicacao}
+          baseUrl="dashboard/comunicacao" 
         />
       </div>
       

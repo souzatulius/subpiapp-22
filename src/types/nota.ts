@@ -1,3 +1,4 @@
+
 export interface NotaOficial {
   id: string;
   titulo: string;
@@ -78,4 +79,6 @@ export interface UseNotasDataReturn {
   deleteNota: (id: string) => Promise<void>;
   deleteLoading: boolean;
   isAdmin: boolean;
+  updateNotaStatus: (notaId: string, newStatus: string) => Promise<boolean>;
+  statusLoading: boolean;
 }

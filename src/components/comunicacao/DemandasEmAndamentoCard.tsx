@@ -1,153 +1,94 @@
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React from 'react';
+import { CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-
-interface Demanda {
-  id: string;
-  titulo: string;
-  status: string;
-  coordenacao_id: string;
-}
+import { Link } from 'react-router-dom';
+import { Clock, ArrowRight } from 'lucide-react';
+import ComunicacaoCard from './ComunicacaoCard';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DemandasEmAndamentoCardProps {
   coordenacaoId: string;
   isComunicacao: boolean;
+  baseUrl?: string;
 }
 
 const DemandasEmAndamentoCard: React.FC<DemandasEmAndamentoCardProps> = ({ 
   coordenacaoId, 
-  isComunicacao 
+  isComunicacao,
+  baseUrl = 'dashboard/comunicacao'
 }) => {
-  const [demandas, setDemandas] = useState<Demanda[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    async function fetchDemandas() {
+  const { data: demandsCounts, isLoading } = useQuery({
+    queryKey: ['demands_counts', coordenacaoId],
+    queryFn: async () => {
       try {
-        setIsLoading(true);
+        // Build initial query base on user role
         let query = supabase
           .from('demandas')
-          .select('id, titulo, status, coordenacao_id')
-          .not('status', 'eq', 'finalizada');
-        
-        if (!isComunicacao) {
+          .select('status');
+          
+        if (!isComunicacao && coordenacaoId) {
+          // If not communication, filter by user's area
           query = query.eq('coordenacao_id', coordenacaoId);
         }
         
-        const { data, error } = await query
-          .order('horario_publicacao', { ascending: false })
-          .limit(5);
-
-        if (error) {
-          console.error('Error fetching demandas:', error);
-          return;
-        }
-
-        setDemandas(data || []);
-      } catch (err) {
-        console.error('Failed to fetch demandas:', err);
-      } finally {
-        setIsLoading(false);
+        const { data, error } = await query;
+        
+        if (error) throw error;
+        
+        // Count demands by status
+        const counts = {
+          total: data.length,
+          respondidas: data.filter(d => d.status === 'respondida').length,
+          aguardandoNota: data.filter(d => d.status === 'aguardando_nota').length,
+          emAprovacao: data.filter(d => d.status === 'em_aprovacao').length
+        };
+        
+        return counts;
+      } catch (error) {
+        console.error('Error fetching demands counts:', error);
+        return { total: 0, respondidas: 0, aguardandoNota: 0, emAprovacao: 0 };
       }
-    }
-
-    fetchDemandas();
-  }, [coordenacaoId, isComunicacao]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate(`/dashboard/comunicacao/consultar-demandas?search=${encodeURIComponent(searchTerm)}`);
-  };
-
-  // Updated to navigate directly to the specific demand with correct path
-  const handleDemandaClick = (id: string) => {
-    navigate(`/dashboard/comunicacao/responder?id=${id}`);
-  };
-
-  const handleViewAllClick = () => {
-    navigate(`/dashboard/comunicacao/consultar-demandas`);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pendente':
-        return <Badge variant="outline" className="text-[10px]">Pendente</Badge>;
-      case 'respondida':
-        return <Badge variant="secondary" className="text-[10px] bg-green-100 text-green-800">Respondida</Badge>;
-      case 'em_analise':
-        return <Badge variant="secondary" className="text-[10px] bg-blue-100 text-blue-800">Em análise</Badge>;
-      default:
-        return <Badge variant="secondary" className="text-[10px]">{status}</Badge>;
-    }
-  };
+    },
+    refetchInterval: 60000 // Refetch every minute
+  });
 
   return (
-    <Card className="h-full overflow-hidden">
-      <CardHeader className="bg-green-600 text-white pb-3">
-        <CardTitle className="text-lg">Demandas em Andamento</CardTitle>
-        <CardDescription className="text-green-100">
-          {isComunicacao ? "Todas as demandas ativas" : "Suas demandas ativas"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-3">
-        <form onSubmit={handleSearch} className="mb-3 flex">
-          <Input
-            placeholder="Buscar demandas..."
-            className="text-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Button variant="ghost" size="icon" type="submit" className="ml-1">
-            <Search className="h-4 w-4" />
-          </Button>
-        </form>
-
-        <div className="overflow-y-auto max-h-[220px]">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-32">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-            </div>
-          ) : demandas.length > 0 ? (
-            <div className="space-y-2">
-              {demandas.map((demanda) => (
-                <div 
-                  key={demanda.id} 
-                  className="p-2 border rounded-md cursor-pointer hover:bg-green-50 transition-colors"
-                  onClick={() => handleDemandaClick(demanda.id)}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="font-medium text-sm line-clamp-1">{demanda.titulo}</div>
-                    {getStatusBadge(demanda.status)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-32 text-center">
-              <p className="text-gray-600">Nenhuma demanda em andamento.</p>
-            </div>
-          )}
+    <ComunicacaoCard
+      title="Demandas em Andamento"
+      icon={<Clock size={18} />}
+      loading={isLoading}
+    >
+      <CardContent className="p-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Total</p>
+            <p className="text-2xl font-bold">{demandsCounts?.total || 0}</p>
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Respondidas</p>
+            <p className="text-2xl font-bold">{demandsCounts?.respondidas || 0}</p>
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Aguardando Nota</p>
+            <p className="text-2xl font-bold">{demandsCounts?.aguardandoNota || 0}</p>
+          </div>
         </div>
-      </CardContent>
-      <CardFooter className="p-3 pt-0">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-between hover:bg-green-100"
-          onClick={handleViewAllClick}
+        
+        <Button
+          variant="default"
+          size="sm"
+          className="w-full"
+          asChild
         >
-          <span>Ver todas as demandas</span>
-          <ArrowRight className="h-4 w-4" />
+          <Link to={`/${baseUrl}/demandas`}>
+            Visualizar todas
+            <ArrowRight size={16} className="ml-2" />
+          </Link>
         </Button>
-      </CardFooter>
-    </Card>
+      </CardContent>
+    </ComunicacaoCard>
   );
 };
 
