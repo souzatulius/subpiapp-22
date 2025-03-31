@@ -26,27 +26,9 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     setCards, 
     handleDeleteCard, 
     handleEditCard,
-    saveCards: stateSaveCards,
+    saveCards,
+    reorderCards,
   } = useDefaultDashboardState(department);
-
-  // Define saveCards function using the state function or a fallback
-  const saveCards = async () => {
-    if (stateSaveCards) {
-      return stateSaveCards();
-    } else {
-      toast({
-        title: "Alterações salvas",
-        description: "As alterações no dashboard foram salvas com sucesso.",
-        variant: "success"
-      });
-      return true;
-    }
-  };
-
-  // Define reorderCards function
-  const reorderCards = (newCards: ActionCardItem[]) => {
-    setCards(newCards);
-  };
 
   const handleCardsChange = (newCards: ActionCardItem[]) => {
     if (reorderCards) {

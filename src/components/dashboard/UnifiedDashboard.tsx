@@ -34,17 +34,17 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Fix the deep type instantiation by using simple types
-  const [cards, setCards] = useState<ActionCardItem[]>([]);
+  // Fix type instantiation issue by using explicit types and simple state
+  const [cards, setCards] = useState<ReadonlyArray<ActionCardItem>>([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Use useMemo to prevent deep instantiations
-  const visibleCards = useMemo(() => {
+  // Use explicit typing in useMemo to prevent deep type instantiation
+  const visibleCards = useMemo((): ReadonlyArray<ActionCardItem> => {
     return cards.filter(card => !card.hidden);
   }, [cards]);
   
-  const hiddenCards = useMemo(() => {
+  const hiddenCards = useMemo((): ReadonlyArray<ActionCardItem> => {
     return cards.filter(card => card.hidden === true);
   }, [cards]);
   
@@ -77,7 +77,9 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   // Simplified saveDashboard function
   const saveDashboard = async (): Promise<boolean> => {
     try {
-      const cardsWithVersion = cards.map(card => ({
+      // Use spread operator to create a new array instead of mapping
+      // This helps break potential circular references
+      const cardsToSave = [...cards].map(card => ({
         ...card,
         version: card.version || CURRENT_DASHBOARD_VERSION
       }));
@@ -87,7 +89,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         .upsert({
           user_id: userId,
           dashboard_type: dashboardType,
-          cards_config: JSON.stringify(cardsWithVersion),
+          cards_config: JSON.stringify(cardsToSave),
           version: CURRENT_DASHBOARD_VERSION,
           updated_at: new Date().toISOString()
         }, {
@@ -131,7 +133,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       
       if (data && data.cards_config) {
         try {
-          const parsedCards = JSON.parse(data.cards_config);
+          const parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
           setCards(parsedCards);
         } catch (parseError) {
           console.error("Error parsing cards_config:", parseError);
@@ -139,7 +141,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         }
       } 
       else {
-        const defaultDashboardCards = fallbackCards.map(card => ({
+        // Create a new array of defaultDashboardCards to avoid reference issues
+        const defaultDashboardCards = [...fallbackCards].map(card => ({
           ...card,
           version: CURRENT_DASHBOARD_VERSION
         }));
@@ -200,13 +203,13 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       
       {hiddenCards.length > 0 && (
         <HiddenCardsTray 
-          hiddenCards={hiddenCards} 
+          hiddenCards={hiddenCards as ActionCardItem[]} 
           onShowCard={(cardId) => toggleCardVisibility(cardId)} 
         />
       )}
       
       <UnifiedCardGrid
-        cards={visibleCards}
+        cards={visibleCards as ActionCardItem[]}
         setCards={setCards}
         loading={loading}
         handleDeleteCard={handleDeleteCard}
