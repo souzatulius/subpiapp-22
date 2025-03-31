@@ -1,33 +1,78 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Eye, EyeOff, Search } from 'lucide-react';
 
 interface ChartCardProps {
   title: string;
   value: string | number;
   isLoading: boolean;
   children: ReactNode;
+  onToggleVisibility?: () => void;
+  onToggleAnalysis?: () => void;
+  className?: string;
+  isDraggable?: boolean;
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
   title, 
   value, 
   isLoading, 
-  children 
+  children,
+  onToggleVisibility,
+  onToggleAnalysis,
+  className = '',
+  isDraggable = true
 }) => {
+  const [isHovering, setIsHovering] = useState(false);
+
   return (
-    <Card className="overflow-hidden border border-orange-200 hover:shadow-md transition-all bg-white">
+    <Card 
+      className={`overflow-hidden border border-orange-200 hover:shadow-md transition-all bg-white ${className} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <CardContent className="p-0">
-        <div className="p-4 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-white">
-          <h3 className="text-sm sm:text-base font-medium text-orange-700">{title}</h3>
-          {isLoading ? (
-            <Skeleton className="h-6 w-28 mt-1 bg-orange-100" />
-          ) : (
-            <p className="text-lg sm:text-xl font-semibold text-orange-600">
-              {value}
-            </p>
-          )}
+        <div className="p-4 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-white flex justify-between items-center">
+          <div>
+            <h3 className="text-sm sm:text-base font-medium text-orange-700">{title}</h3>
+            {isLoading ? (
+              <Skeleton className="h-6 w-28 mt-1 bg-orange-100" />
+            ) : (
+              <p className="text-lg sm:text-xl font-semibold text-orange-600">
+                {value}
+              </p>
+            )}
+          </div>
+          
+          {/* Action buttons that appear on hover */}
+          <div className={`flex space-x-2 transition-opacity duration-200 ${isHovering ? 'opacity-100' : 'opacity-0'}`}>
+            {onToggleAnalysis && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleAnalysis();
+                }}
+                className="p-1.5 rounded-full bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors"
+                title="Mostrar análise"
+              >
+                <Search size={16} />
+              </button>
+            )}
+            {onToggleVisibility && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleVisibility();
+                }}
+                className="p-1.5 rounded-full bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors"
+                title="Ocultar card"
+              >
+                <EyeOff size={16} />
+              </button>
+            )}
+          </div>
         </div>
         <div className="p-4 h-[250px] flex items-center justify-center">
           {isLoading ? (

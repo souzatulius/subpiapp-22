@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import UploadSection from './UploadSection';
 import FilterDialog from './filters/FilterDialog';
-import { ChartVisibility, FilterOptions } from './types';
 import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Card } from '@/components/ui/card';
@@ -130,15 +129,6 @@ const RankingContent: React.FC<RankingContentProps> = ({
           isUploading={isUploading}
           user={user}
         />
-      </Card>
-      
-      {/* Mensagem informando sobre os dados de demonstração */}
-      <Card className="p-4 bg-green-50 border-green-200 shadow-sm">
-        <h2 className="text-lg font-semibold text-green-700 mb-2">Dados de Demonstração Carregados</h2>
-        <p className="text-green-600">
-          Dados fictícios foram carregados automaticamente para permitir visualização dos gráficos sem necessidade de upload.
-          Você ainda pode fazer upload de seus próprios dados usando a seção acima.
-        </p>
       </Card>
       
       {/* AI Insights Cards Section */}

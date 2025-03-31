@@ -129,16 +129,6 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({
           isSimulated={isSimulationActive}
         />
       </div>
-      
-      {dadosPainel && dadosPainel.length > 0 && (
-        <div className="mt-4 text-sm text-gray-600 bg-orange-50 p-3 rounded-md border border-orange-200">
-          <span className="font-medium">Análise Comparativa:</span> {
-            isSimulationActive 
-              ? "Os indicadores simulados mostram a projeção ideal considerando o tratamento adequado das OS externas."
-              : "Os dados do Painel da Zeladoria foram carregados e estão sendo considerados na análise."
-          }
-        </div>
-      )}
     </div>
   );
 };

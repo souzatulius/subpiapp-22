@@ -17,6 +17,10 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
   const location = useLocation();
   const { user } = useAuth();
   
+  // Check if current page is a public page
+  const isPublicPage = ['/login', '/register', '/forgot-password', '/email-verified', '/'].includes(location.pathname) || 
+                      location.pathname.includes('/404');
+  
   // Map of route paths to friendly names
   const routeNames: Record<string, string> = {
     'dashboard': 'Dashboard',
@@ -37,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
   // Generate breadcrumbs based on current path
   const generateBreadcrumbs = () => {
     // Don't show breadcrumbs on public pages
-    if (!user || ['/login', '/register', '/forgot-password', '/email-verified'].includes(location.pathname)) {
+    if (!user || isPublicPage) {
       return null;
     }
     
@@ -108,11 +112,12 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
       {/* Main header row with logo and user controls */}
       <div className="h-16 flex items-center justify-between px-4">
         <div className="flex items-center">
-          {showControls && toggleSidebar && (
+          {/* Only show the menu toggle button if not on a public page */}
+          {showControls && toggleSidebar && !isPublicPage && (
             <Button 
               variant="ghost" 
               size="icon" 
-              className="mr-2" 
+              className="mr-2 hidden md:flex" /* Hide on mobile */
               onClick={toggleSidebar}
             >
               <Menu className="h-5 w-5" />
@@ -130,13 +135,18 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
         </div>
         
         <div className="flex items-center space-x-2">
-          <NotificationsPopover />
-          <ProfileMenu />
+          {/* Only show user controls if not on a public page */}
+          {!isPublicPage && (
+            <>
+              <NotificationsPopover />
+              <ProfileMenu />
+            </>
+          )}
         </div>
       </div>
       
       {/* Breadcrumb row below the main header */}
-      {user && (
+      {user && !isPublicPage && (
         <div className="px-4 py-2 border-t bg-gray-25">
           {generateBreadcrumbs()}
         </div>
