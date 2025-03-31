@@ -34,20 +34,21 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Fix type instantiation issue by using explicit types and simple state
-  const [cards, setCards] = useState<ReadonlyArray<ActionCardItem>>([]);
+  // Fix type instantiation issue by using explicit types
+  const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
   // Use explicit typing in useMemo to prevent deep type instantiation
-  const visibleCards = useMemo((): ReadonlyArray<ActionCardItem> => {
-    return cards.filter(card => !card.hidden);
+  const visibleCards = useMemo(() => {
+    return cards.filter(card => !card.hidden) as ActionCardItem[];
   }, [cards]);
   
-  const hiddenCards = useMemo((): ReadonlyArray<ActionCardItem> => {
-    return cards.filter(card => card.hidden === true);
+  const hiddenCards = useMemo(() => {
+    return cards.filter(card => card.hidden === true) as ActionCardItem[];
   }, [cards]);
   
+  // Simple function to toggle card visibility
   const toggleCardVisibility = (cardId: string) => {
     setCards(currentCards => {
       return currentCards.map(card => {
@@ -59,17 +60,19 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     });
   };
   
-  // Simple function implementations to avoid complex typings
+  // Simple function implementation for deleting a card
   const handleDeleteCard = (id: string) => {
     setCards(currentCards => currentCards.filter(card => card.id !== id));
   };
   
+  // Simple function implementation for editing a card
   const handleEditCard = (editedCard: ActionCardItem) => {
     setCards(currentCards => 
       currentCards.map(card => card.id === editedCard.id ? editedCard : card)
     );
   };
   
+  // Function to add a new card
   const handleAddNewCard = () => {
     navigate('/settings/dashboard-management');
   };
@@ -77,9 +80,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   // Simplified saveDashboard function
   const saveDashboard = async (): Promise<boolean> => {
     try {
-      // Use spread operator to create a new array instead of mapping
-      // This helps break potential circular references
-      const cardsToSave = [...cards].map(card => ({
+      // Create a new array to avoid potential circular references
+      const cardsToSave = cards.map(card => ({
         ...card,
         version: card.version || CURRENT_DASHBOARD_VERSION
       }));
@@ -115,7 +117,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     }
   };
   
-  // Simplify the loadDashboard function
+  // Load dashboard data
   const loadDashboard = async () => {
     setLoading(true);
     
@@ -142,7 +144,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       } 
       else {
         // Create a new array of defaultDashboardCards to avoid reference issues
-        const defaultDashboardCards = [...fallbackCards].map(card => ({
+        const defaultDashboardCards = fallbackCards.map(card => ({
           ...card,
           version: CURRENT_DASHBOARD_VERSION
         }));
@@ -203,13 +205,13 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       
       {hiddenCards.length > 0 && (
         <HiddenCardsTray 
-          hiddenCards={hiddenCards as ActionCardItem[]} 
-          onShowCard={(cardId) => toggleCardVisibility(cardId)} 
+          hiddenCards={hiddenCards} 
+          onShowCard={toggleCardVisibility} 
         />
       )}
       
       <UnifiedCardGrid
-        cards={visibleCards as ActionCardItem[]}
+        cards={visibleCards}
         setCards={setCards}
         loading={loading}
         handleDeleteCard={handleDeleteCard}

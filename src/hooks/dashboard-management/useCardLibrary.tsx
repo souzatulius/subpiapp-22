@@ -5,10 +5,23 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-export const useCardLibrary = (onAddCard: (card: ActionCardItem) => void) => {
+export interface CardLibraryFilters {
+  type: string;
+  tag: string;
+  dashboard: string;
+  department: string;
+}
+
+export const useCardLibrary = (onAddCard?: (card: ActionCardItem) => void) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<CardLibraryFilters>({
+    type: 'all',
+    tag: 'all',
+    dashboard: 'all',
+    department: 'all'
+  });
 
   useEffect(() => {
     fetchLibraryCards();
@@ -77,20 +90,63 @@ export const useCardLibrary = (onAddCard: (card: ActionCardItem) => void) => {
       )
     : cards;
 
-  const handleAddToLibrary = (card: ActionCardItem) => {
+  // Filter cards based on selected filters
+  const applyFilters = (cards: ActionCardItem[]) => {
+    return cards.filter(card => {
+      const typeMatch = filters.type === 'all' || card.type === filters.type;
+      const dashboardMatch = filters.dashboard === 'all' || card._dashboardType === filters.dashboard;
+      const departmentMatch = filters.department === 'all' || card._departmentId === filters.department;
+      
+      // Tag filter
+      let tagMatch = filters.tag === 'all';
+      if (filters.tag === 'quickDemand' && card.isQuickDemand) tagMatch = true;
+      if (filters.tag === 'search' && card.isSearch) tagMatch = true;
+      if (filters.tag === 'overdueDemands' && card.isOverdueDemands) tagMatch = true;
+      if (filters.tag === 'pendingActions' && card.isPendingActions) tagMatch = true;
+      
+      return typeMatch && dashboardMatch && departmentMatch && tagMatch;
+    });
+  };
+
+  // Create a card from a template
+  const createCardFromTemplate = (card: ActionCardItem): ActionCardItem => {
     const newCard: ActionCardItem = {
       ...card,
       id: `card-${uuidv4()}`, // Generate new ID to avoid conflicts
     };
-    
-    onAddCard(newCard);
+    return newCard;
+  };
+
+  // Create a blank card
+  const createBlankCard = (): ActionCardItem => {
+    return {
+      id: `card-${uuidv4()}`,
+      title: "Novo Card",
+      iconId: "clipboard",
+      path: "/",
+      color: "blue",
+      type: "standard",
+      width: "25",
+      height: "1",
+    };
+  };
+
+  const handleAddToLibrary = (card: ActionCardItem) => {
+    if (onAddCard) {
+      const newCard = createCardFromTemplate(card);
+      onAddCard(newCard);
+    }
   };
 
   return {
-    cards: filteredCards,
+    cards: applyFilters(filteredCards),
     loading,
     searchQuery,
     setSearchQuery,
     handleAddToLibrary,
+    filters,
+    setFilters,
+    createCardFromTemplate,
+    createBlankCard
   };
 };

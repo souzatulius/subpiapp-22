@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
-import { useCardLibrary, CardLibraryFilters } from '@/hooks/dashboard-management/useCardLibrary';
+import React, { useState, useEffect } from 'react';
+import { useCardLibrary } from '@/hooks/dashboard-management/useCardLibrary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ActionCardItem, CardType } from '@/types/dashboard';
+import { ActionCardItem } from '@/types/dashboard';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -31,13 +31,21 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
   selectedDepartment, 
   selectedDashboardType 
 }) => {
-  const { cards, loading, filters, setFilters, createCardFromTemplate, createBlankCard } = useCardLibrary();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { 
+    cards, 
+    loading, 
+    searchQuery, 
+    setSearchQuery, 
+    filters, 
+    setFilters,
+    createCardFromTemplate, 
+    createBlankCard 
+  } = useCardLibrary(onAddCard);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   
   // Load departments for the filter
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchDepartments = async () => {
       try {
         const { data, error } = await supabase
@@ -55,14 +63,8 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
     fetchDepartments();
   }, []);
   
-  // Filter cards by search query
-  const filteredCards = cards.filter(card => {
-    if (!searchQuery) return true;
-    return card.title.toLowerCase().includes(searchQuery.toLowerCase());
-  });
-  
   // Handle filter changes
-  const handleFilterChange = (key: keyof CardLibraryFilters, value: string) => {
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters({
       ...filters,
       [key]: value
@@ -197,7 +199,7 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
               </div>
             </div>
           ))
-        ) : filteredCards.length === 0 ? (
+        ) : cards.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <p>Nenhum card encontrado.</p>
             <Button className="mt-2" variant="outline" size="sm" onClick={handleAddNewCard}>
@@ -206,7 +208,7 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
             </Button>
           </div>
         ) : (
-          filteredCards.map((card) => {
+          cards.map((card) => {
             const IconComponent = getIconComponentFromId(card.iconId);
             
             return (
