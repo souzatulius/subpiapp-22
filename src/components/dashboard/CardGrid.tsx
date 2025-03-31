@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -59,6 +59,17 @@ const CardGrid: React.FC<CardGridProps> = ({
     useSensor(KeyboardSensor)
   );
 
+  // Always initialize this state regardless of card presence
+  const { totalColumns } = useGridOccupancy(
+    cards.map(card => ({ 
+      id: card.id,
+      width: card.width || '25', 
+      height: card.height || '1',
+      type: card.type
+    })), 
+    isMobileView
+  );
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -71,13 +82,7 @@ const CardGrid: React.FC<CardGridProps> = ({
     }
   };
 
-  const displayedCards = isMobileView
-    ? cards
-        .filter((card) => card.displayMobile !== false)
-        .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
-    : cards;
-
-  if (!displayedCards || displayedCards.length === 0) {
+  if (!cards || cards.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
         Nenhum card disponível para exibir.
@@ -85,16 +90,12 @@ const CardGrid: React.FC<CardGridProps> = ({
     );
   }
 
-  // Use our grid occupancy system
-  const { totalColumns } = useGridOccupancy(
-    displayedCards.map(card => ({ 
-      id: card.id,
-      width: card.width || '25', 
-      height: card.height || '1',
-      type: card.type
-    })), 
-    isMobileView
-  );
+  // Filter cards based on mobile view
+  const displayedCards = isMobileView
+    ? cards
+        .filter((card) => card.displayMobile !== false)
+        .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
+    : cards;
 
   const dynamicDataCards = displayedCards.filter(
     (card) => card.type === 'data_dynamic' && card.dataSourceKey
