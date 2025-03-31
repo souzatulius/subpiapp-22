@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,8 +108,10 @@ export const useDemandFormState = (
     }
   }, [formData.problema_id, problemas]);
 
+  // Enhanced title generation logic
   useEffect(() => {
     if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
+      // Generate title automatically when reaching step 4 (review step) or when we don't have a title yet
       if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 3) {
         const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
         if (suggestedTitle) {
