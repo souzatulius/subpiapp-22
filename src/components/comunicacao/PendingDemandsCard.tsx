@@ -42,7 +42,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
             titulo, 
             status, 
             horario_publicacao,
-            requerente:requerente_id (nome)
+            nome_solicitante
           `);
         
         // Apply filters based on role
@@ -89,7 +89,7 @@ const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({
             id: item.id,
             titulo: item.titulo,
             criado_em: item.horario_publicacao, // Using horario_publicacao instead of criado_em
-            requerente: item.requerente
+            requerente: { nome: item.nome_solicitante || "Sem requerente" }
           }));
           
           setDemandas(formattedDemandas);

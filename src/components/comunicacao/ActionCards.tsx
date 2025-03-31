@@ -13,7 +13,7 @@ interface ActionCardsProps {
 const ActionCards: React.FC<ActionCardsProps> = ({ 
   coordenacaoId, 
   isComunicacao,
-  baseUrl = 'dashboard/comunicacao'
+  baseUrl = ''
 }) => {
   const cards = [
     {
@@ -21,28 +21,28 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       description: 'Registre novas solicitações da imprensa',
       icon: <PlusCircle className="h-4 w-4 text-blue-500" />,
       iconBg: 'bg-blue-50',
-      link: `/${baseUrl}/cadastrar`
+      link: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar`
     },
     {
       title: 'Responder Demanda',
       description: 'Responda às demandas pendentes',
       icon: <MessageSquare className="h-4 w-4 text-green-500" />,
       iconBg: 'bg-green-50',
-      link: `/${baseUrl}/responder`
+      link: `${baseUrl ? `/${baseUrl}` : ''}/responder`
     },
     {
       title: 'Criar Nota Oficial',
       description: 'Elabore notas oficiais',
       icon: <FileText className="h-4 w-4 text-orange-500" />,
       iconBg: 'bg-orange-50',
-      link: `/${baseUrl}/criar-nota`
+      link: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota`
     },
     {
       title: 'Aprovar Notas',
       description: 'Revise e aprove notas oficiais',
       icon: <CheckCircle className="h-4 w-4 text-purple-500" />,
       iconBg: 'bg-purple-50',
-      link: `/${baseUrl}/aprovar-nota`
+      link: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`
     }
   ];
 

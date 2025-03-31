@@ -60,19 +60,19 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
             .order('criado_em', { ascending: false });
         }
         
-        // Get count using separate query
+        // Get count using separate query with count: 'exact'
         const countQuery = isComunicacao 
           ? supabase.from('notas_oficiais').select('*', { count: 'exact', head: true })
           : supabase.from('notas_oficiais').select('*', { count: 'exact', head: true }).eq('coordenacao_id', coordenacaoId);
         
-        const { count, error: countError } = await countQuery;
+        const { count: notasCount, error: countError } = await countQuery;
         
         if (countError) {
           console.error('Error fetching notas count:', countError);
           return;
         }
         
-        setTotalNotas(count || 0);
+        setTotalNotas(notasCount || 0);
         
         // Then get limited data 
         const { data, error } = await query.limit(5);
@@ -83,8 +83,8 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
         }
         
         if (data) {
-          // Ensure data formatting is correct
-          const formattedNotas = data.map(nota => ({
+          // Format the data to match the Nota interface
+          const formattedNotas: Nota[] = data.map(nota => ({
             id: nota.id,
             titulo: nota.titulo,
             status: nota.status,
@@ -164,7 +164,7 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
                   </div>
                   <div className="mt-1 flex justify-between">
                     <span className="text-xs text-gray-500">
-                      {nota.autor?.nome_completo}
+                      {nota.autor?.nome_completo || "Desconhecido"}
                     </span>
                     <span className="text-xs text-orange-600">
                       {formatDate(nota.criado_em)}
