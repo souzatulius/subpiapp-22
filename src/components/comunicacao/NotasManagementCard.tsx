@@ -1,12 +1,10 @@
 
-import React from 'react';
-import { CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { FileText, ArrowRight, Clock } from 'lucide-react';
-import ComunicacaoCard from './ComunicacaoCard';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { Loader2, FileText, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface NotasManagementCardProps {
   coordenacaoId: string;
@@ -14,132 +12,163 @@ interface NotasManagementCardProps {
   baseUrl?: string;
 }
 
+interface Nota {
+  id: string;
+  titulo: string;
+  status: string;
+  criado_em: string;
+  autor: {
+    nome_completo: string;
+  };
+}
+
 const NotasManagementCard: React.FC<NotasManagementCardProps> = ({ 
   coordenacaoId, 
   isComunicacao,
-  baseUrl = 'dashboard/comunicacao/notas'
+  baseUrl = ''
 }) => {
-  const { data: pendingNotas, isLoading } = useQuery({
-    queryKey: ['pending_notas_list', coordenacaoId],
-    queryFn: async () => {
+  const [notas, setNotas] = useState<Nota[]>([]);
+  const [totalNotas, setTotalNotas] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchNotas = async () => {
       try {
-        // For Communication team, show all pending notes
-        // For other departments, show notes related to their area
+        setIsLoading(true);
+        
         let query = supabase
           .from('notas_oficiais')
           .select(`
             id, 
             titulo, 
             status, 
-            criado_em, 
-            autor_id,
+            criado_em,
             autor:autor_id (nome_completo)
-          `)
-          .order('criado_em', { ascending: false })
-          .limit(5);
-          
+          `);
+        
+        // Apply filters based on role
         if (isComunicacao) {
-          query = query.eq('status', 'pendente');
-        } else {
+          // For communication team, show all notes
           query = query
-            .eq('status', 'pendente')
-            .eq('supervisao_tecnica_id', coordenacaoId);
+            .order('criado_em', { ascending: false });
+        } else {
+          // For other areas, show only notes for their coordination
+          query = query
+            .eq('coordenacao_id', coordenacaoId)
+            .order('criado_em', { ascending: false });
         }
         
-        const { data, error } = await query;
+        // Get count first
+        const { count, error: countError } = await query.count();
         
-        if (error) throw error;
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching pending notas:', error);
-        return [];
+        if (countError) {
+          console.error('Error counting notas:', countError);
+        } else {
+          setTotalNotas(count || 0);
+        }
+        
+        // Then get limited data 
+        const { data, error } = await query.limit(5);
+        
+        if (error) {
+          console.error('Error fetching notas:', error);
+          return;
+        }
+        
+        setNotas(data || []);
+      } catch (err) {
+        console.error('Failed to fetch notas:', err);
+      } finally {
+        setIsLoading(false);
       }
-    },
-    refetchInterval: 60000 // Refetch every minute
-  });
+    };
+    
+    if (coordenacaoId || isComunicacao) {
+      fetchNotas();
+    }
+  }, [coordenacaoId, isComunicacao]);
 
-  const pendingNotasCount = pendingNotas?.length || 0;
-
-  // Format date to readable format
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+  const handleCardClick = () => {
+    navigate(`${baseUrl ? `/${baseUrl}` : ''}`);
+  };
+  
+  const handleNotaClick = (id: string) => {
+    navigate(`${baseUrl ? `/${baseUrl}` : ''}/${id}`);
+  };
+  
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+  
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'aprovada': return 'bg-green-100 text-green-800';
+      case 'pendente': return 'bg-yellow-100 text-yellow-800';
+      case 'rejeitada': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
-    <ComunicacaoCard
-      title="Notas Oficiais"
-      icon={<FileText size={18} />}
-      badgeCount={pendingNotasCount}
-      loading={isLoading}
-    >
-      <CardContent className="p-4">
-        {pendingNotasCount === 0 ? (
-          <p className="text-sm text-gray-500 mb-4">
-            Não há notas pendentes de aprovação.
-          </p>
-        ) : (
-          <div className="space-y-2 mb-4">
-            <p className="text-sm text-gray-500 mb-2">
-              {pendingNotasCount} nota{pendingNotasCount !== 1 ? 's' : ''} aguardando aprovação:
-            </p>
-            <ul className="divide-y divide-gray-100">
-              {pendingNotas?.map((nota: any) => (
-                <li key={nota.id} className="py-2">
-                  <Link 
-                    to={`/${baseUrl}/consultar?id=${nota.id}`}
-                    className="block hover:bg-gray-50 rounded p-2 transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium line-clamp-1">{nota.titulo}</span>
-                      <span className="text-xs text-gray-500">
-                        {formatDate(nota.criado_em)}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Autor: {nota.autor?.nome_completo || 'Não especificado'}
-                    </div>
-                  </Link>
+    <Card className="h-full">
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardTitle className="text-lg flex items-center">
+          <FileText className="mr-2 h-5 w-5 text-orange-500" />
+          Notas Oficiais
+        </CardTitle>
+        <Badge className="bg-orange-500 hover:bg-orange-600">{totalNotas}</Badge>
+      </CardHeader>
+      
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center items-center p-6">
+            <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+          </div>
+        ) : notas.length > 0 ? (
+          <>
+            <ul className="space-y-2">
+              {notas.map((nota) => (
+                <li 
+                  key={nota.id}
+                  className="p-2 hover:bg-orange-50 rounded-md cursor-pointer"
+                  onClick={() => handleNotaClick(nota.id)}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="text-sm font-medium text-gray-700 truncate flex-1">
+                      {nota.titulo}
+                    </span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full ml-2 ${getStatusColor(nota.status)}`}>
+                      {nota.status}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex justify-between">
+                    <span className="text-xs text-gray-500">
+                      {nota.autor?.nome_completo}
+                    </span>
+                    <span className="text-xs text-orange-600">
+                      {formatDate(nota.criado_em)}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
+            
+            <button
+              onClick={handleCardClick}
+              className="w-full mt-3 flex items-center justify-center p-2 rounded-md bg-orange-100 hover:bg-orange-200 text-orange-700 text-sm"
+            >
+              Ver todas <ArrowRight className="ml-1 h-4 w-4" />
+            </button>
+          </>
+        ) : (
+          <div className="p-4 text-center text-gray-500">
+            Não há notas oficiais disponíveis.
           </div>
         )}
-        
-        <div className="space-y-2">
-          <Button
-            variant="default"
-            size="sm"
-            className="w-full"
-            asChild
-          >
-            <Link to={`/${baseUrl}/consultar`}>
-              Consultar notas
-              <ArrowRight size={16} className="ml-2" />
-            </Link>
-          </Button>
-          
-          {isComunicacao && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              asChild
-            >
-              <Link to={`/${baseUrl}/aprovar`}>
-                Aprovar notas
-                <ArrowRight size={16} className="ml-2" />
-              </Link>
-            </Button>
-          )}
-        </div>
       </CardContent>
-    </ComunicacaoCard>
+    </Card>
   );
 };
 

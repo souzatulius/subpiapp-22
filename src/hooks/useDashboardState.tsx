@@ -10,37 +10,112 @@ import { ActionCardItem, DataSourceKey } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useDashboardState = (userId?: string): DashboardStateReturn => {
-  const defaultCards = getDefaultCards();
-  const [actionCards, setActionCards] = useState<ActionCardItem[]>(defaultCards);
+  const [defaultCards, setDefaultCards] = useState<ActionCardItem[]>([]);
+  const [actionCards, setActionCards] = useState<ActionCardItem[]>([]);
   const [firstName, setFirstName] = useState('');
+  const [userCoordenaticaoId, setUserCoordenaticaoId] = useState<string | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
   
-  // Fetch user's first name
+  // Fetch user's info and coordenação
   useEffect(() => {
-    const fetchUserName = async () => {
-      if (!userId) return;
-      
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('nome_completo')
-        .eq('id', userId)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching user name:', error);
+    const fetchUserInfo = async () => {
+      if (!userId) {
+        setIsLoadingUser(false);
         return;
       }
       
-      if (data && data.nome_completo) {
-        // Extract first name
-        const firstName = data.nome_completo.split(' ')[0];
-        setFirstName(firstName);
-      } else {
-        setFirstName('Usuário');
+      setIsLoadingUser(true);
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('nome_completo, coordenacao_id')
+          .eq('id', userId)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching user info:', error);
+          return;
+        }
+        
+        if (data) {
+          // Extract first name
+          const firstName = data.nome_completo.split(' ')[0];
+          setFirstName(firstName);
+          setUserCoordenaticaoId(data.coordenacao_id);
+          
+          // Load default cards based on the user's department
+          const defaultCardsList = getDefaultCards(data.coordenacao_id);
+          setDefaultCards(defaultCardsList);
+          
+          // Set initial action cards
+          setActionCards(defaultCardsList);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user info:', err);
+      } finally {
+        setIsLoadingUser(false);
       }
     };
     
-    fetchUserName();
+    fetchUserInfo();
   }, [userId]);
+  
+  // Then try to load custom dashboard if available
+  useEffect(() => {
+    const fetchCustomDashboard = async () => {
+      if (!userId) return;
+      
+      try {
+        // First check user's custom dashboard
+        const { data: userDashboard, error: userError } = await supabase
+          .from('user_dashboard')
+          .select('cards_config')
+          .eq('user_id', userId)
+          .single();
+        
+        if (!userError && userDashboard?.cards_config) {
+          try {
+            const customCards = JSON.parse(userDashboard.cards_config);
+            setActionCards(customCards);
+            return;
+          } catch (e) {
+            console.error('Error parsing user dashboard config:', e);
+          }
+        }
+        
+        // If no user-specific dashboard, check if there's a default for the user's department
+        if (userCoordenaticaoId) {
+          const { data: deptDashboard, error: deptError } = await supabase
+            .from('department_dashboards')
+            .select('cards_config')
+            .eq('department', userCoordenaticaoId)
+            .eq('view_type', 'dashboard')
+            .single();
+          
+          if (!deptError && deptDashboard?.cards_config) {
+            try {
+              const deptCards = JSON.parse(deptDashboard.cards_config);
+              setActionCards(deptCards);
+              return;
+            } catch (e) {
+              console.error('Error parsing department dashboard config:', e);
+            }
+          }
+        }
+        
+        // If no custom dashboards found, use the default cards
+        setActionCards(defaultCards);
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+        setActionCards(defaultCards);
+      }
+    };
+    
+    // Only fetch custom dashboard if user data is loaded
+    if (!isLoadingUser) {
+      fetchCustomDashboard();
+    }
+  }, [userId, userCoordenaticaoId, isLoadingUser, defaultCards]);
   
   // Try to load data if userId is provided
   useDashboardData(
@@ -90,6 +165,7 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
     searchQuery,
     setSearchQuery,
     handleSearchSubmit,
-    specialCardsData
+    specialCardsData,
+    userCoordenaticaoId,
   };
 };

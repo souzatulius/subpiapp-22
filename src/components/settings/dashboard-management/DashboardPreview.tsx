@@ -73,6 +73,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               onDeleteCard={handleDeleteCard}
               isMobileView={isMobilePreview}
               isEditMode={modoAdmin}
+              disableWiggleEffect={true} // Add this to disable wiggle effect in preview
             />
           </div>
         </div>

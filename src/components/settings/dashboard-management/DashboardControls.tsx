@@ -1,25 +1,23 @@
 
 import React, { useEffect, useState } from 'react';
-import { 
-  Card, 
-  CardContent,
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Plus, Save, Smartphone, Monitor } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
+import { LayoutDashboard, MessageSquareReply, Smartphone, Monitor, Loader2, Save } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client'; 
 
-interface Coordination {
+interface Department {
   id: string;
   descricao: string;
-  sigla?: string;
+  sigla?: string | null;
 }
 
 interface DashboardControlsProps {
@@ -45,151 +43,141 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
   onSaveDashboard,
   isSaving
 }) => {
-  const [coordinations, setCoordinations] = useState<Coordination[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
+  // Fetch departments with sigla from Supabase
   useEffect(() => {
-    async function fetchCoordinations() {
+    const fetchDepartments = async () => {
       try {
         setIsLoading(true);
-        
-        // Fetch coordinations from coordenacoes table
         const { data, error } = await supabase
           .from('coordenacoes')
           .select('id, descricao, sigla')
-          .order('descricao');
+          .order('descricao', { ascending: true });
         
         if (error) {
-          console.error('Error fetching coordinations:', error);
+          console.error('Error fetching departments:', error);
           return;
         }
         
-        setCoordinations(data || []);
+        // Add a default "all" option
+        const allDepartments = [
+          { id: 'default', descricao: 'Padrão (Todos)', sigla: 'ALL' },
+          ...data
+        ];
         
-        // If no department is selected yet, select the first one
-        if (!selectedDepartment && data && data.length > 0) {
-          setSelectedDepartment(data[0].id);
+        setDepartments(allDepartments);
+        
+        if (!selectedDepartment && allDepartments.length > 0) {
+          setSelectedDepartment(allDepartments[0].id);
         }
       } catch (error) {
-        console.error('Failed to fetch coordinations:', error);
+        console.error('Failed to fetch departments:', error);
       } finally {
         setIsLoading(false);
       }
-    }
+    };
     
-    fetchCoordinations();
-  }, []);
+    fetchDepartments();
+  }, [selectedDepartment, setSelectedDepartment]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Configurações</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-3">
-          <Label>Visualizar como</Label>
-          {isLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : (
+    <Card className="w-full">
+      <CardContent className="p-4 space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Configurações</h3>
+          
+          {/* Department Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="department">Coordenação</Label>
             <Select 
               value={selectedDepartment} 
-              onValueChange={(value) => setSelectedDepartment(value)}
+              onValueChange={setSelectedDepartment}
+              disabled={isLoading}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
-                {coordinations.map((coordination) => (
-                  <SelectItem key={coordination.id} value={coordination.id}>
-                    {coordination.descricao}
-                    {coordination.sigla ? ` (${coordination.sigla})` : ''}
+                {departments.map((dept) => (
+                  <SelectItem key={dept.id} value={dept.id}>
+                    {dept.sigla ? dept.sigla : dept.descricao}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          )}
-        </div>
+            {isLoading && <p className="text-xs text-gray-500">Carregando coordenações...</p>}
+          </div>
 
-        <div className="space-y-3">
-          <Label>Tipo de visualização</Label>
-          <RadioGroup 
-            value={selectedViewType} 
-            onValueChange={(value) => setSelectedViewType(value as 'dashboard' | 'communication')}
-            className="flex flex-col space-y-3"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="dashboard" id="dashboard" />
-              <Label htmlFor="dashboard" className="cursor-pointer">Dashboard Inicial</Label>
+          {/* Dashboard Type Selection */}
+          <div className="space-y-2">
+            <Label>Tipo de Dashboard</Label>
+            <div className="flex space-x-2">
+              <Button 
+                variant={selectedViewType === 'dashboard' ? 'default' : 'outline'}
+                onClick={() => setSelectedViewType('dashboard')}
+                className="flex-1"
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Padrão
+              </Button>
+              <Button 
+                variant={selectedViewType === 'communication' ? 'default' : 'outline'}
+                onClick={() => setSelectedViewType('communication')}
+                className="flex-1"
+              >
+                <MessageSquareReply className="h-4 w-4 mr-2" />
+                Comunicação
+              </Button>
             </div>
+          </div>
+          
+          {/* Device Preview Toggle */}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="mobile-preview">Visualização Mobile</Label>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="communication" id="communication" />
-              <Label htmlFor="communication" className="cursor-pointer">Página de Comunicação</Label>
-            </div>
-          </RadioGroup>
-        </div>
-        
-        <Separator />
-        
-        <div className="space-y-3">
-          <Label>Formato da Tela</Label>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="mobile-preview"
-              checked={isMobilePreview}
-              onCheckedChange={setIsMobilePreview}
-              className="data-[state=checked]:bg-orange-500"
-            />
-            <div className="flex items-center justify-between flex-1">
-              <Label htmlFor="mobile-preview" className="flex items-center text-sm text-gray-600">
-                {isMobilePreview ? (
-                  <>
-                    <Smartphone className="h-4 w-4 mr-1" /> 
-                    Mobile
-                  </>
-                ) : (
-                  <>
-                    <Monitor className="h-4 w-4 mr-1" /> 
-                    Desktop
-                  </>
-                )}
-              </Label>
+              <Monitor className={`h-4 w-4 ${!isMobilePreview ? 'text-blue-600' : 'text-gray-400'}`} />
+              <Switch 
+                id="mobile-preview" 
+                checked={isMobilePreview}
+                onCheckedChange={setIsMobilePreview}
+              />
+              <Smartphone className={`h-4 w-4 ${isMobilePreview ? 'text-blue-600' : 'text-gray-400'}`} />
             </div>
           </div>
         </div>
         
-        <Separator />
-        
-        <Button 
-          onClick={onAddNewCard}
-          className="w-full bg-gradient-to-r from-orange-500 to-orange-600"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Card
-        </Button>
-        
-        <Button 
-          onClick={onSaveDashboard} 
-          disabled={isSaving}
-          className="w-full mt-2 bg-gradient-to-r from-blue-600 to-blue-700"
-        >
-          {isSaving ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Salvando
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Salvar Padrão
-            </>
-          )}
-        </Button>
+        {selectedViewType === 'dashboard' && (
+          <div className="pt-4 border-t border-gray-200">
+            <Button 
+              variant="outline" 
+              className="w-full mb-2"
+              onClick={onAddNewCard}
+            >
+              + Adicionar Card
+            </Button>
+            
+            <Button 
+              variant="default" 
+              className="w-full"
+              onClick={onSaveDashboard}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Salvar Dashboard
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

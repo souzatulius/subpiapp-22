@@ -8,6 +8,8 @@ import PendingActionsCard from '../cards/PendingActionsCard';
 import NewCardButton from '../cards/NewCardButton';
 import { ActionCardItem } from '@/types/dashboard';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -41,7 +43,45 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   specialCardsData
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [userDepartment, setUserDepartment] = React.useState<string | null>(null);
+  const [isComunicacao, setIsComunicacao] = React.useState<boolean>(false);
+  
+  React.useEffect(() => {
+    const fetchUserDepartment = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('coordenacao_id')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching user department:', error);
+          return;
+        }
+        
+        if (data) {
+          setUserDepartment(data.coordenacao_id);
+          setIsComunicacao(data.coordenacao_id === 'comunicacao');
+        }
+      } catch (error) {
+        console.error('Failed to fetch user department:', error);
+      }
+    };
+    
+    fetchUserDepartment();
+  }, [user]);
 
+  // Handle card click - navigate to the path if defined
+  const handleCardClick = () => {
+    if (card.path) {
+      navigate(card.path);
+    }
+  };
+  
   // Function to handle origin selection and navigate to form
   const handleOriginSelect = (originId: string) => {
     navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
@@ -96,6 +136,8 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
           id={card.id}
           overdueCount={specialCardsData.overdueCount}
           overdueItems={specialCardsData.overdueItems}
+          isComunicacao={isComunicacao}
+          userDepartmentId={userDepartment || ''}
         />
       </SortableActionCard>
     );
@@ -114,6 +156,8 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
           id={card.id}
           notesToApprove={specialCardsData.notesToApprove}
           responsesToDo={specialCardsData.responsesToDo}
+          isComunicacao={isComunicacao}
+          userDepartmentId={userDepartment || ''}
         />
       </SortableActionCard>
     );
@@ -133,15 +177,33 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     );
   }
   
-  // Default case - standard card
+  // For standard cards, make the entire card clickable by attaching the navigate function
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card} 
+      card={{
+        ...card,
+        path: '' // Remove path to prevent default click behavior
+      }} 
       onEdit={onEdit}
       onDelete={onDelete}
       isMobileView={isMobileView}
-    />
+    >
+      <div 
+        className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+        onClick={handleCardClick}
+      >
+        <div className="flex flex-col items-center justify-center h-full">
+          {React.createElement(
+            card.iconId ? card.iconId : 'div',
+            { 
+              className: isMobileView ? 'h-12 w-12 mb-4 text-white' : 'h-16 w-16 mb-4 text-white' 
+            }
+          )}
+          <h3 className="text-lg font-semibold text-white text-center">{card.title}</h3>
+        </div>
+      </div>
+    </SortableActionCard>
   );
 };
 

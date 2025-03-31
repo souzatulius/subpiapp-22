@@ -1,12 +1,10 @@
 
-import React from 'react';
-import { CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { AlertCircle, ArrowRight, Clock } from 'lucide-react';
-import ComunicacaoCard from './ComunicacaoCard';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { Loader2, Clock, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface PendingDemandsCardProps {
   coordenacaoId: string;
@@ -14,116 +12,153 @@ interface PendingDemandsCardProps {
   baseUrl?: string;
 }
 
+interface Demanda {
+  id: string;
+  titulo: string;
+  prazo_resposta: string;
+  status: string;
+  prioridade: string;
+}
+
 const PendingDemandsCard: React.FC<PendingDemandsCardProps> = ({ 
   coordenacaoId, 
   isComunicacao,
-  baseUrl = 'dashboard/comunicacao' 
+  baseUrl = ''
 }) => {
-  // Use this query to fetch pending demands with details
-  const { data: pendingDemands, isLoading } = useQuery({
-    queryKey: ['pending_demands_list', coordenacaoId],
-    queryFn: async () => {
+  const [demandas, setDemandas] = useState<Demanda[]>([]);
+  const [totalDemandas, setTotalDemandas] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchDemandas = async () => {
       try {
-        // Build query based on department role
+        setIsLoading(true);
+        
         let query = supabase
           .from('demandas')
-          .select('id, titulo, status, prazo_resposta')
-          .order('prazo_resposta', { ascending: true })
-          .limit(5);
-          
+          .select('id, titulo, prazo_resposta, status, prioridade');
+        
+        // Apply filters based on role
         if (isComunicacao) {
-          // If user is from communication, show all pending demands
-          query = query.eq('status', 'pendente');
-        } else if (coordenacaoId) {
-          // For other departments, show only demands assigned to their area
+          // For communication team, show all pending demands
           query = query
-            .eq('status', 'pendente')
-            .eq('coordenacao_id', coordenacaoId);
+            .in('status', ['pendente', 'em_analise'])
+            .order('prazo_resposta', { ascending: true });
+        } else {
+          // For other areas, show only demands assigned to them
+          query = query
+            .eq('coordenacao_id', coordenacaoId)
+            .eq('status', 'em_analise')
+            .order('prazo_resposta', { ascending: true });
         }
         
-        const { data, error } = await query;
+        // Get count first
+        const { count, error: countError } = await query.count();
         
-        if (error) throw error;
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching pending demands:', error);
-        return [];
+        if (countError) {
+          console.error('Error counting demands:', countError);
+        } else {
+          setTotalDemandas(count || 0);
+        }
+        
+        // Then get limited data
+        const { data, error } = await query.limit(5);
+        
+        if (error) {
+          console.error('Error fetching demands:', error);
+          return;
+        }
+        
+        setDemandas(data || []);
+      } catch (err) {
+        console.error('Failed to fetch demands:', err);
+      } finally {
+        setIsLoading(false);
       }
-    },
-    refetchInterval: 60000 // Refetch every minute
-  });
+    };
+    
+    if (coordenacaoId || isComunicacao) {
+      fetchDemandas();
+    }
+  }, [coordenacaoId, isComunicacao]);
 
-  const pendingCount = pendingDemands?.length || 0;
-
-  // Format due date to readable format
-  const formatDueDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+  const handleCardClick = () => {
+    navigate(`${baseUrl ? `/${baseUrl}` : ''}/responder`);
   };
-
-  // Check if demand is overdue
-  const isOverdue = (dateStr: string) => {
-    const dueDate = new Date(dateStr);
-    return dueDate < new Date();
+  
+  const handleDemandaClick = (id: string) => {
+    navigate(`${baseUrl ? `/${baseUrl}` : ''}/responder/${id}`);
+  };
+  
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+  
+  const getPriorityColor = (prioridade: string) => {
+    switch (prioridade.toLowerCase()) {
+      case 'alta': return 'bg-red-100 text-red-800';
+      case 'media': return 'bg-yellow-100 text-yellow-800';
+      case 'baixa': return 'bg-green-100 text-green-800';
+      case 'urgente': return 'bg-red-200 text-red-900 font-bold';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
-    <ComunicacaoCard
-      title="Responder Demandas"
-      icon={<AlertCircle size={18} />}
-      badgeCount={pendingCount}
-      loading={isLoading}
-    >
-      <CardContent className="p-4">
-        {pendingCount === 0 ? (
-          <p className="text-sm text-gray-500 mb-4">
-            Não há demandas pendentes no momento.
-          </p>
-        ) : (
-          <div className="space-y-2 mb-4">
-            <p className="text-sm text-gray-500 mb-2">
-              {pendingCount} demanda{pendingCount !== 1 ? 's' : ''} aguardando resposta:
-            </p>
-            <ul className="divide-y divide-gray-100">
-              {pendingDemands?.map((demand) => (
-                <li key={demand.id} className="py-2">
-                  <Link 
-                    to={`/${baseUrl}/responder?id=${demand.id}`}
-                    className="block hover:bg-gray-50 rounded p-2 transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium line-clamp-1">{demand.titulo}</span>
-                      <div className={`flex items-center text-xs ${isOverdue(demand.prazo_resposta) ? 'text-red-500' : 'text-gray-500'}`}>
-                        <Clock size={12} className="mr-1" />
-                        {formatDueDate(demand.prazo_resposta)}
-                      </div>
-                    </div>
-                  </Link>
+    <Card className="h-full">
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardTitle className="text-lg flex items-center">
+          <Clock className="mr-2 h-5 w-5 text-orange-500" />
+          Responder Demandas
+        </CardTitle>
+        <Badge className="bg-orange-500 hover:bg-orange-600">{totalDemandas}</Badge>
+      </CardHeader>
+      
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center items-center p-6">
+            <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+          </div>
+        ) : demandas.length > 0 ? (
+          <>
+            <ul className="space-y-2">
+              {demandas.map((demanda) => (
+                <li 
+                  key={demanda.id}
+                  className="p-2 hover:bg-orange-50 rounded-md cursor-pointer"
+                  onClick={() => handleDemandaClick(demanda.id)}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="text-sm font-medium text-gray-700 truncate flex-1">
+                      {demanda.titulo}
+                    </span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full ml-2 ${getPriorityColor(demanda.prioridade)}`}>
+                      {demanda.prioridade}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-xs text-orange-600">
+                    Prazo: {formatDate(demanda.prazo_resposta)}
+                  </div>
                 </li>
               ))}
             </ul>
+            
+            <button
+              onClick={handleCardClick}
+              className="w-full mt-3 flex items-center justify-center p-2 rounded-md bg-orange-100 hover:bg-orange-200 text-orange-700 text-sm"
+            >
+              Ver todas <ArrowRight className="ml-1 h-4 w-4" />
+            </button>
+          </>
+        ) : (
+          <div className="p-4 text-center text-gray-500">
+            Não há demandas pendentes de resposta.
           </div>
         )}
-        
-        <Button
-          variant="default"
-          size="sm"
-          className="w-full"
-          asChild
-          disabled={pendingCount === 0}
-        >
-          <Link to={`/${baseUrl}/responder`}>
-            Ver todas
-            <ArrowRight size={16} className="ml-2" />
-          </Link>
-        </Button>
       </CardContent>
-    </ComunicacaoCard>
+    </Card>
   );
 };
 

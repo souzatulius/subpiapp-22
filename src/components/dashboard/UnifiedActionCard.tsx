@@ -26,6 +26,7 @@ export interface UnifiedActionCardProps {
   width?: string;
   height?: string;
   type?: string;
+  disableWiggleEffect?: boolean;
 }
 
 const getBackgroundColor = (color: CardColor): string => {
@@ -68,7 +69,8 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   onDelete,
   isCustom = false,
   onClick,
-  children
+  children,
+  disableWiggleEffect = false
 }) => {
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
@@ -80,8 +82,8 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
     }
   };
   
-  // Only add the wiggle animation class if the card is in edit mode
-  const wiggleClass = isEditing ? 'animate-wiggle' : '';
+  // Only add the wiggle animation class if the card is in edit mode and wiggle effect is not disabled
+  const wiggleClass = (isEditing && !disableWiggleEffect) ? 'animate-wiggle' : '';
   
   const cardContent = (
     <div 

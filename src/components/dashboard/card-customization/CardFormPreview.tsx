@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CardFormPreviewProps } from './types';
 import { getColorClass, getIconComponentById, dashboardPages } from './utils';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { FormSchema } from './types';
 import DynamicDataCard from '@/components/dashboard/DynamicDataCard';
 import { CardColor } from '@/types/dashboard';
@@ -17,6 +17,18 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
   const form = useFormContext<FormSchema>();
   const cardType = form.watch('type');
   const dataSourceKey = form.watch('dataSourceKey');
+  const [dynamicColor, setDynamicColor] = useState<CardColor>(color as CardColor);
+  
+  // Watch for cardType changes to adjust color automatically for data cards
+  useEffect(() => {
+    if (cardType === 'data_dynamic') {
+      // Use a blue shade for data cards by default
+      setDynamicColor('blue-dark');
+    } else {
+      // Reset to selected color for standard cards
+      setDynamicColor(color as CardColor);
+    }
+  }, [cardType, color]);
   
   // Get the icon component properly
   const IconComponent = getIconComponentById(iconId);
@@ -51,7 +63,7 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
             <DynamicDataCard 
               title={title || 'Título do Card'}
               icon={IconComponent}
-              color={color as CardColor}
+              color={dynamicColor}
               dataSourceKey={dataSourceKey || 'no_data'}
               coordenacaoId="preview"
               usuarioId="preview"
@@ -60,7 +72,7 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
           </div>
         ) : (
           <div 
-            className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden h-[200px] w-[200px] ${getColorClass(color as CardColor)}`}
+            className={`transition-all duration-300 border rounded-xl shadow-md p-4 flex flex-col items-center justify-center overflow-hidden h-[200px] w-[200px] ${getColorClass(dynamicColor)}`}
           >
             <div className="mb-3">
               {IconComponent}

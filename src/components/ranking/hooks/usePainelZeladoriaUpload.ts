@@ -45,68 +45,169 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
       
       // Ler e processar arquivo Excel
       const dadosPainel = await processarPlanilhaPainel(file);
+      setUploadProgress(30);
+      
+      // Verificar se os dados foram processados corretamente
+      if (!dadosPainel || dadosPainel.length === 0) {
+        toast.error('Não foi possível processar os dados do arquivo');
+        setIsLoading(false);
+        setUploadProgress(0);
+        setProcessamentoPainel({
+          status: 'error',
+          message: 'Falha ao processar dados',
+          recordCount: 0
+        });
+        return null;
+      }
+      
       setUploadProgress(50);
       
-      // Criar registro de upload
+      // Registrar o upload
       const { data: uploadData, error: uploadError } = await supabase
         .from('painel_zeladoria_uploads')
         .insert({
-          nome_arquivo: file.name,
-          usuario_email: user.email || '',
+          usuario_email: user.email,
+          nome_arquivo: file.name
         })
-        .select()
+        .select('id')
         .single();
-      
-      if (uploadError) throw uploadError;
+
+      if (uploadError) {
+        console.error('Erro ao registrar upload:', uploadError);
+        toast.error('Erro ao registrar upload');
+        setIsLoading(false);
+        setUploadProgress(0);
+        return null;
+      }
       
       const uploadId = uploadData.id;
+      setUploadProgress(70);
       
-      // Inserir dados na tabela painel_zeladoria_dados
-      const dadosParaInserir = dadosPainel.map(row => ({
-        id_os: row.id_os || row.Protocolo || '',
-        status: row.status || row.Status || '',
-        tipo_servico: row.tipo_servico || row['Tipo'] || '',
-        data_abertura: row.data_abertura || row['Data de entrada'] || null,
-        data_fechamento: row.data_fechamento || row['Data de fechamento'] || null,
-        distrito: row.distrito || row.Distrito || '',
-        departamento: row.departamento || row.Departamento || '',
-        responsavel_real: row.responsavel_real || row['Responsável'] || '',
-        upload_id: uploadId
-      }));
-      
+      // Inserir dados processados
       const { error: insertError } = await supabase
         .from('painel_zeladoria_dados')
-        .insert(dadosParaInserir);
-      
-      if (insertError) throw insertError;
+        .insert(dadosPainel.map(item => ({
+          ...item,
+          upload_id: uploadId
+        })));
+        
+      if (insertError) {
+        console.error('Erro ao inserir dados:', insertError);
+        toast.error('Erro ao salvar dados no banco');
+        setIsLoading(false);
+        setUploadProgress(0);
+        return null;
+      }
       
       setUploadProgress(100);
+      
+      // Atualizar status de processamento
       setProcessamentoPainel({
         status: 'success',
-        message: 'Dados do Painel processados com sucesso!',
-        recordCount: dadosParaInserir.length
+        message: `${dadosPainel.length} registros processados com sucesso`,
+        recordCount: dadosPainel.length
       });
       
-      toast.success(`Planilha do Painel da Zeladoria processada com sucesso! ${dadosParaInserir.length} registros importados.`);
+      toast.success(`Upload concluído: ${dadosPainel.length} registros processados`);
       
       return {
-        id: uploadId,
-        data: dadosParaInserir
+        success: true,
+        recordCount: dadosPainel.length,
+        message: 'Upload realizado com sucesso'
       };
-    } catch (error: any) {
-      console.error('Erro ao processar planilha do Painel:', error);
-      setUploadProgress(0);
+    } catch (error) {
+      console.error('Erro no processamento do upload:', error);
+      toast.error('Erro ao processar arquivo');
       setProcessamentoPainel({
         status: 'error',
-        message: error.message || 'Falha no processamento',
+        message: 'Erro ao processar arquivo',
         recordCount: 0
       });
-      toast.error(`Erro ao processar planilha do Painel: ${error.message || 'Falha no processamento'}`);
-      return null;
+      return {
+        success: false,
+        recordCount: 0,
+        message: 'Erro ao processar arquivo'
+      };
     } finally {
       setIsLoading(false);
     }
   }, [user]);
+
+  // Processamento da planilha
+  const processarPlanilhaPainel = async (file: File) => {
+    return new Promise<any[]>((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          // Converter para JSON
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
+          
+          if (!jsonData || jsonData.length === 0) {
+            reject(new Error('Planilha vazia ou com formato inválido'));
+            return;
+          }
+          
+          // Validar e mapear campos
+          const dadosFormatados = jsonData.map((row: any, index: number) => {
+            // Verificar existência de campos obrigatórios
+            // NOTE: Using "Ordem de Serviço" as the protocol field
+            const protocolField = row["Ordem de Serviço"] || row["Protocolo"] || "";
+            
+            if (!protocolField) {
+              console.warn(`Linha ${index + 1}: Sem número de protocolo/OS`);
+            }
+            
+            // Mapear campos e converter datas
+            return {
+              id_os: protocolField,
+              tipo_servico: row["Tipo de Serviço"] || row["Serviço"] || "",
+              status: row["Status"] || "",
+              distrito: row["Distrito"] || "",
+              departamento: row["Departamento"] || row["Setor"] || "",
+              data_abertura: parseExcelDate(row["Data de Abertura"] || ""),
+              data_fechamento: parseExcelDate(row["Data de Fechamento"] || ""),
+              responsavel_real: row["Responsável"] || ""
+            };
+          });
+          
+          resolve(dadosFormatados.filter((item: any) => item.id_os));
+        } catch (error) {
+          console.error("Erro ao processar a planilha:", error);
+          reject(error);
+        }
+      };
+      
+      reader.onerror = (error) => reject(error);
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  // Helper para converter datas do Excel
+  const parseExcelDate = (dateString: string) => {
+    if (!dateString) return null;
+    
+    try {
+      // Tentar converter primeiro como data brasileira (DD/MM/YYYY)
+      const parts = dateString.split('/');
+      if (parts.length === 3) {
+        const [day, month, year] = parts;
+        return new Date(`${year}-${month}-${day}`).toISOString();
+      }
+      
+      // Caso contrário, tentar como ISO ou outro formato reconhecido
+      const date = new Date(dateString);
+      return !isNaN(date.getTime()) ? date.toISOString() : null;
+    } catch (error) {
+      console.error("Erro ao converter data:", error);
+      return null;
+    }
+  };
 
   return {
     isLoading,
@@ -115,48 +216,3 @@ export const usePainelZeladoriaUpload = (user: User | null) => {
     handleUploadPainel
   };
 };
-
-// Função interna para processar a planilha do Painel da Zeladoria
-async function processarPlanilhaPainel(file: File): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = async (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        
-        // Assume primeira planilha
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Converter para JSON
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
-        
-        if (!jsonData || jsonData.length === 0) {
-          throw new Error('A planilha está vazia ou em formato inválido.');
-        }
-        
-        // Validar estrutura mínima da planilha
-        const firstRow = jsonData[0] as any;
-        const requiredKeys = ['Protocolo', 'Data de entrada', 'Tipo'];
-        
-        for (const key of requiredKeys) {
-          if (!Object.keys(firstRow).some(k => k.includes(key))) {
-            throw new Error(`Coluna obrigatória não encontrada: ${key}`);
-          }
-        }
-        
-        resolve(jsonData);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    
-    reader.onerror = (error) => {
-      reject(error);
-    };
-    
-    reader.readAsArrayBuffer(file);
-  });
-}

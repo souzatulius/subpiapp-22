@@ -35,6 +35,7 @@ interface UnifiedCardGridProps {
   onDeleteCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
+  disableWiggleEffect?: boolean;
 }
 
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
@@ -44,6 +45,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onDeleteCard,
   isMobileView = false,
   isEditMode = false,
+  disableWiggleEffect = false,
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -117,6 +119,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 } : undefined}
                 onDelete={onDeleteCard}
                 iconSize={isMobileView ? 'lg' : 'xl'}
+                disableWiggleEffect={disableWiggleEffect}
               />
             </div>
           ))}

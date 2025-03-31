@@ -86,7 +86,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }, [user, isPreview, department]);
 
   const fetchDepartmentName = async (deptId: string) => {
-    if (deptId) {
+    if (deptId && deptId !== 'default') {
       try {
         const { data, error } = await supabase
           .from('coordenacoes')
@@ -102,6 +102,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       } catch (err) {
         console.error('Failed to fetch department name:', err);
       }
+    } else {
+      setDepartmentName(deptId === 'default' ? 'Padrão (Todos)' : '');
     }
   };
 
@@ -124,9 +126,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
       
-      {/* Action Cards - Moved to top */}
+      {/* Action Cards - Moved to top without title */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Ações rápidas</h2>
         <ActionCards 
           coordenacaoId={userDepartment || ''} 
           isComunicacao={isComunicacao}
