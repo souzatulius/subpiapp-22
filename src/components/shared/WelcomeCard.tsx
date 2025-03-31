@@ -1,87 +1,63 @@
 
 import React from 'react';
-import { Settings } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import StatCard from '@/components/settings/components/StatCard';
+import { Button } from "@/components/ui/button";
 
-interface WelcomeCardProps {
+export interface WelcomeCardProps {
   title: string;
   description: string;
   icon?: React.ReactNode;
-  statTitle?: string;
-  statValue?: number;
-  statIcon?: React.ReactNode;
-  statDescription?: string;
-  statSection?: string;
-  statHighlight?: boolean;
-  statUnreadCount?: number;
-  statOnClick?: () => void;
   showButton?: boolean;
   buttonText?: string;
-  buttonIcon?: React.ReactNode;
-  buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
   onButtonClick?: () => void;
+  secondaryButtonText?: string;
+  onSecondaryButtonClick?: () => void;
   color?: string;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
-  icon = <Settings className="h-6 w-6 mr-2" />,
-  statTitle,
-  statValue,
-  statIcon,
-  statDescription,
-  statSection,
-  statHighlight = true,
-  statUnreadCount = 0,
-  statOnClick,
-  color = "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800", // Updated gradient
+  icon,
   showButton = false,
-  buttonText = "Filtros e Configurações",
-  buttonIcon,
-  buttonVariant = "outline",
-  onButtonClick
+  buttonText = "Começar",
+  onButtonClick,
+  secondaryButtonText,
+  onSecondaryButtonClick,
+  color = "bg-gradient-to-r from-blue-600 to-blue-800"
 }) => {
   return (
-    <Card className={`${color} text-white shadow-lg overflow-hidden`}>
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className={`${color} rounded-xl p-6 text-white shadow-lg mb-6`}>
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+        <div className="flex items-center mb-4 md:mb-0">
+          {icon && <div className="mr-3">{icon}</div>}
           <div>
-            <h2 className="text-2xl font-bold mb-2 flex items-center">
-              {icon}
-              {title}
-            </h2>
-            <p className="text-blue-100">
-              {description}
-            </p>
-          </div>
-          <div className="flex space-x-4 w-full md:w-auto">
-            {statTitle && !showButton && (
-              <StatCard 
-                title={statTitle} 
-                value={statValue || 0} 
-                icon={statIcon}
-                description={statDescription || ""} 
-                section={statSection || ""}
-                highlight={statHighlight}
-                unreadCount={statUnreadCount}
-                onClick={statOnClick}
-              />
-            )}
-            {showButton && (
-              <StatCard 
-                showButton={true}
-                buttonText={buttonText}
-                buttonIcon={buttonIcon}
-                buttonVariant={buttonVariant}
-                onButtonClick={onButtonClick}
-              />
-            )}
+            <h1 className="text-xl md:text-2xl font-bold">{title}</h1>
+            <p className="mt-1 md:mt-2 text-sm md:text-base text-white/90">{description}</p>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        
+        {showButton && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={onButtonClick}
+              className="bg-white text-blue-800 hover:bg-blue-50"
+            >
+              {buttonText}
+            </Button>
+            
+            {secondaryButtonText && (
+              <Button
+                onClick={onSecondaryButtonClick}
+                variant="outline"
+                className="border-white text-white hover:bg-white/10"
+              >
+                {secondaryButtonText}
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

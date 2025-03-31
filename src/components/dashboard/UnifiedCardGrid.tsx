@@ -1,131 +1,136 @@
 
-import React from 'react';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from '@dnd-kit/core';
-import { SortableContext, arrayMove } from '@dnd-kit/sortable';
-import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActionCard';
-import { getWidthClass, getHeightClass } from './CardGrid';
-import { ActionCardItem, CardType, CardColor } from '@/types/dashboard';
-import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+import React, { useState, useEffect } from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { ActionCardItem, CardType, DashboardState } from '@/types/dashboard';
+import SortableActionCard from '@/components/dashboard/SortableActionCard';
+import DashboardActions from '@/components/dashboard/DashboardActions';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useGridOccupancy, CardDimensions } from '@/hooks/dashboard/useGridOccupancy';
 
-// Make sure UnifiedCardItem includes all required properties from ActionCardItem
-export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color'> {
-  width?: string;
-  height?: string;
-  displayMobile?: boolean;
-  mobileOrder?: number;
-  type: CardType;
-  path: string; // Make path required to match ActionCardItem
-  iconId: string; // Make iconId required
-  color: CardColor; // Use CardColor type explicitly
-  isCustom?: boolean;
-}
-
-interface UnifiedCardGridProps {
-  cards: ActionCardItem[] | UnifiedCardItem[];
-  onCardsChange: (cards: ActionCardItem[] | UnifiedCardItem[]) => void;
-  onEditCard?: (card: ActionCardItem | UnifiedCardItem) => void;
-  onDeleteCard?: (id: string) => void;
-  isMobileView?: boolean;
-  isEditMode?: boolean;
-  disableWiggleEffect?: boolean;
-}
-
-const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
-  cards = [],
-  onCardsChange,
-  onEditCard,
-  onDeleteCard,
-  isMobileView = false,
-  isEditMode = false,
-  disableWiggleEffect = false,
+const UnifiedCardGrid: React.FC<DashboardState> = ({
+  cards,
+  setCards,
+  loading,
+  handleDeleteCard,
+  handleEditCard,
+  handleAddNewCard,
+  saveDashboard,
+  isEditMode,
+  setIsEditMode
 }) => {
+  const isMobile = useIsMobile();
+  const [isDragging, setIsDragging] = useState(false);
+  
+  // Configure DnD sensors
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor)
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  // Calculate grid occupancy
+  const cardDimensions = cards.map(card => ({
+    id: card.id,
+    width: card.width || '25',
+    height: card.height || '1',
+    type: card.type
+  })) as CardDimensions[];
+  
+  const { gridMap } = useGridOccupancy({ cards: cardDimensions });
+  
+  // Handle drag events
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = (event: any) => {
+    setIsDragging(false);
+    
     const { active, over } = event;
     
-    if (over && active.id !== over.id) {
-      const oldIndex = cards.findIndex((item) => item.id === active.id);
-      const newIndex = cards.findIndex((item) => item.id === over.id);
-      
-      if (oldIndex !== -1 && newIndex !== -1) {
-        // Use type assertion to ensure the array is recognized as the right type
-        const newCards = arrayMove([...cards], oldIndex, newIndex);
-        onCardsChange(newCards);
-      }
+    if (active.id !== over?.id) {
+      setCards((items) => {
+        const activeIndex = items.findIndex(item => item.id === active.id);
+        const overIndex = items.findIndex(item => item.id === over?.id);
+        
+        const newItems = [...items];
+        const [reorderedItem] = newItems.splice(activeIndex, 1);
+        newItems.splice(overIndex, 0, reorderedItem);
+        
+        return newItems;
+      });
     }
   };
 
-  // Filter cards for mobile view
-  const displayedCards = isMobileView
-    ? cards.filter((card) => card.displayMobile !== false)
-        .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
-    : cards;
-
-  // Calculate total columns based on mobile view
-  const totalColumns = isMobileView ? 2 : 4;
+  // Determine card size for mobile
+  const getCardWidthForMobile = (card: ActionCardItem) => {
+    return isMobile ? '50' : card.width || '25';
+  };
   
-  // Always call useGridOccupancy with displayedCards, even if empty
-  // We moved this outside the conditional render to avoid the hooks error
-  const { occupiedSlots } = useGridOccupancy(
-    displayedCards.map(card => ({ 
-      id: card.id,
-      width: card.width || '25', 
-      height: card.height || '1',
-      type: card.type
-    })), 
-    isMobileView
-  );
-
-  if (!displayedCards || displayedCards.length === 0) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        Nenhum card disponível para exibir.
-      </div>
-    );
-  }
+  // Filter out cards that shouldn't be displayed on mobile
+  const displayCards = isMobile 
+    ? cards.filter(card => card.displayMobile !== false)
+    : cards;
+  
+  // Sort cards for mobile view based on mobileOrder
+  const sortedCards = isMobile
+    ? [...displayCards].sort((a, b) => {
+        const orderA = a.mobileOrder !== undefined ? a.mobileOrder : 999;
+        const orderB = b.mobileOrder !== undefined ? b.mobileOrder : 999;
+        return orderA - orderB;
+      })
+    : displayCards;
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
-        <SortableContext items={displayedCards.map(card => card.id)}>
-          {displayedCards.map(card => (
-            <div 
-              key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
-            >
-              <SortableUnifiedActionCard
-                {...card}
-                isDraggable={isEditMode}
-                isEditing={isEditMode}
-                onEdit={onEditCard ? (id) => {
-                  const cardToEdit = cards.find(c => c.id === id);
-                  if (cardToEdit && onEditCard) onEditCard(cardToEdit);
-                } : undefined}
-                onDelete={onDeleteCard}
-                iconSize={isMobileView ? 'lg' : 'xl'}
-                disableWiggleEffect={disableWiggleEffect}
+    <div className="relative">
+      {setIsEditMode && (
+        <DashboardActions 
+          isEditMode={Boolean(isEditMode)} 
+          setIsEditMode={setIsEditMode} 
+          onSave={saveDashboard} 
+          onAddNew={handleAddNewCard} 
+        />
+      )}
+      
+      <div className={`grid grid-cols-4 gap-4 pb-4 ${isMobile ? 'grid-cols-2' : ''}`}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToWindowEdges]}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          {loading ? (
+            // Loading skeleton
+            Array(4).fill(0).map((_, i) => (
+              <div key={`skeleton-${i}`} className="bg-gray-100 rounded-lg animate-pulse h-32" />
+            ))
+          ) : (
+            // Render actual cards
+            sortedCards.map((card) => (
+              <SortableActionCard
+                key={card.id}
+                card={{
+                  ...card,
+                  width: getCardWidthForMobile(card)
+                }}
+                isEditMode={Boolean(isEditMode)}
+                onDelete={handleDeleteCard}
+                onEdit={handleEditCard}
+                isDraggable={Boolean(isEditMode)}
               />
-            </div>
-          ))}
-        </SortableContext>
+            ))
+          )}
+        </DndContext>
       </div>
-    </DndContext>
+    </div>
   );
 };
 

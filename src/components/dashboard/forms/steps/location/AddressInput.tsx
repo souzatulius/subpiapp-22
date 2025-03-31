@@ -101,16 +101,16 @@ const AddressInput: React.FC<AddressInputProps> = ({
         // Format the address to "Rua, Número - Bairro"
         let formattedAddress = place.formatted_address;
         
-        // Create an event to update the input value
-        const inputEvent = {
+        // Create a synthetic event to update the input value
+        const syntheticEvent = {
           target: {
             name: 'endereco',
             value: formattedAddress
           }
         } as React.ChangeEvent<HTMLInputElement>;
         
-        // Update the form state
-        onChange(inputEvent);
+        // Update the form state through the onChange prop
+        onChange(syntheticEvent);
         
         // Call the optional callback
         if (onAddressSelect) {
@@ -122,20 +122,26 @@ const AddressInput: React.FC<AddressInputProps> = ({
     }
   }, [isGoogleLoaded, onChange, onAddressSelect]);
   
+  // Handle regular input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Pass the change event up to the parent component
+    onChange(e);
+  };
+  
   return (
     <div>
       <Label 
         htmlFor="endereco" 
         className={`block mb-2 ${hasFieldError('endereco', errors) ? 'text-orange-500 font-semibold' : ''}`}
       >
-        Endereço
+        Endereço {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
       </Label>
       <Input 
         id="endereco" 
         name="endereco" 
         ref={inputRef}
         value={value} 
-        onChange={onChange} 
+        onChange={handleInputChange}
         className={`rounded-xl ${hasFieldError('endereco', errors) ? 'border-orange-500' : ''}`}
         placeholder="Digite o endereço (Ex: Rua, Número - Bairro)"
         disabled={disabled || !isGoogleLoaded}

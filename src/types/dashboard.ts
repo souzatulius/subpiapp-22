@@ -11,6 +11,14 @@ export type CardHeight = '1' | '2';
 export type CardType = 'standard' | 'data_dynamic' | 'quickDemand' | 'search' | 'overdueDemands' | 'pendingActions';
 export type DataSourceKey = string;
 
+// Interface de dimensões dos cards (específica para ocupação de grid)
+export interface CardDimensions {
+  id: string;
+  width: CardWidth;
+  height: CardHeight;
+  type: CardType; // Atualizamos para aceitar todos os tipos de card
+}
+
 export interface ActionCardItem {
   id: string;
   title: string;
@@ -33,6 +41,10 @@ export interface ActionCardItem {
   isPendingActions?: boolean;
   hidden?: boolean;
   version?: string;
+}
+
+export interface UnifiedCardItem extends ActionCardItem {
+  version: string;
 }
 
 export interface DashboardState {
