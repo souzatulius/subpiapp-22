@@ -118,7 +118,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             disabled={loadingOptions}
           >
             <SelectTrigger 
-              className={`${errors.role ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
+              className={`${errors.role ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200 data-[state=open]:border-gray-300 border-gray-300`}
             >
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
@@ -163,7 +163,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
             disabled={loadingOptions}
           >
             <SelectTrigger 
-              className={`${errors.coordenacao ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
+              className={`${errors.coordenacao ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200 data-[state=open]:border-gray-300 border-gray-300`}
             >
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
@@ -210,7 +210,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
               disabled={loadingOptions || !coordenacao || coordenacao === 'select-coordenacao' || filteredAreas.length === 0}
             >
               <SelectTrigger 
-                className={`${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200`}
+                className={`${errors.area ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-[#003570] focus:border-transparent transition-all duration-200 data-[state=open]:border-gray-300 border-gray-300`}
               >
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
