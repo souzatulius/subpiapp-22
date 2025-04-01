@@ -6,11 +6,13 @@ import { useNavigate } from 'react-router-dom';
 interface SmartSearchCardProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
+  isEditMode?: boolean; // Added this prop to match usage
 }
 
 const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   placeholder = "O que você deseja fazer?",
-  onSearch
+  onSearch,
+  isEditMode = false // Default to false
 }) => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -28,9 +30,16 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     }
   };
 
+  // Stop propagation to avoid triggering drag when in edit mode
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isEditMode) {
+      e.stopPropagation();
+    }
+  };
+
   return (
     <div className="w-full h-full bg-gray-50 rounded-xl border border-gray-200 flex items-center p-2 shadow-sm">
-      <form onSubmit={handleSubmit} className="w-full flex items-center">
+      <form onSubmit={handleSubmit} className="w-full flex items-center" onMouseDown={handleMouseDown}>
         <div className="relative w-full h-full flex items-center">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
@@ -39,10 +48,12 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
             placeholder={placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onMouseDown={handleMouseDown}
           />
           <button
             type="submit"
             className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onMouseDown={handleMouseDown}
           >
             Buscar
           </button>

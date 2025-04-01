@@ -16,17 +16,8 @@ import { ActionCardItem, CardType, CardColor, CardWidth, CardHeight } from '@/ty
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
 // Make sure UnifiedCardItem includes all required properties from ActionCardItem
-export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color' | 'width' | 'height'> {
-  width?: CardWidth;
-  height?: CardHeight;
-  displayMobile?: boolean;
-  mobileOrder?: number;
-  type: CardType;
-  path: string; // Make path required to match ActionCardItem
-  iconId: string; // Make iconId required
-  color: CardColor; // Use CardColor type explicitly
-  isCustom?: boolean;
-  isHidden?: boolean;
+export interface UnifiedCardItem extends ActionCardItem {
+  // Any additional props specific to UnifiedCardItem can go here
 }
 
 interface UnifiedCardGridProps {
@@ -129,7 +120,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
               className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
             >
               <SortableUnifiedActionCard
-                {...card as UnifiedActionCardProps}
+                id={card.id}
+                title={card.title}
+                subtitle={card.subtitle}
+                iconId={card.iconId}
+                path={card.path}
+                color={card.color}
+                width={card.width}
+                height={card.height}
                 isDraggable={isEditMode}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {
@@ -141,12 +139,19 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 iconSize={isMobileView ? 'lg' : 'xl'}
                 disableWiggleEffect={disableWiggleEffect}
                 // Pass through properties for special cards
+                type={card.type}
+                isQuickDemand={card.isQuickDemand}
+                isSearch={card.isSearch}
                 showSpecialFeatures={showSpecialFeatures}
                 quickDemandTitle={quickDemandTitle}
                 onQuickDemandTitleChange={onQuickDemandTitleChange}
                 onQuickDemandSubmit={onQuickDemandSubmit}
                 onSearchSubmit={onSearchSubmit}
                 specialCardsData={specialCardsData}
+                isCustom={card.isCustom}
+                hasBadge={card.hasBadge}
+                badgeValue={card.badgeValue}
+                hasSubtitle={!!card.subtitle}
               />
             </div>
           ))}

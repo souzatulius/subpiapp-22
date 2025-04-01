@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
+import { useSpecialCardActions } from '@/hooks/dashboard/useSpecialCardActions';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -26,21 +27,21 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     handleEditCard,
     handleSaveCard,
     specialCardsData,
+  } = useDefaultDashboardState(department);
+
+  // Use the special card actions hook for quick demand and search functionality
+  const {
     newDemandTitle,
     setNewDemandTitle,
     handleQuickDemandSubmit,
     searchQuery,
     setSearchQuery,
     handleSearchSubmit
-  } = useDefaultDashboardState(department);
+  } = useSpecialCardActions();
 
   return (
     <div className="p-4">
       <div className="p-4 bg-gray-100 rounded-lg">
-        <h3 className="text-lg font-medium mb-4">
-          {dashboardType === 'dashboard' ? 'Visualização do Dashboard' : 'Visualização da Comunicação'}
-        </h3>
-        
         {cards.length === 0 ? (
           <div className="text-center p-6 text-gray-500">
             Nenhum card configurado. Adicione cards para visualizar o dashboard.

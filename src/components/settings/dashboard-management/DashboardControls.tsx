@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -86,6 +87,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
     fetchDepartments();
   }, [setSelectedDepartment, selectedDepartment]);
 
+  // Fixed function to avoid recursive type definition
   const handleResetDashboard = async () => {
     setIsResetting(true);
     try {
