@@ -16,7 +16,7 @@ export const useAvailableCards = () => {
         iconId: 'Search',
         path: '/demandas',
         color: 'blue-dark',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -29,7 +29,7 @@ export const useAvailableCards = () => {
         iconId: 'FileText',
         path: '/notas',
         color: 'green',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -42,7 +42,7 @@ export const useAvailableCards = () => {
         iconId: 'Plus',
         path: '/dashboard/comunicacao/cadastrar',
         color: 'orange-600',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -55,7 +55,7 @@ export const useAvailableCards = () => {
         iconId: 'FileEdit',
         path: '/dashboard/notas/criar',
         color: 'lime',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -68,7 +68,7 @@ export const useAvailableCards = () => {
         iconId: 'BarChart3',
         path: '/relatorios',
         color: 'blue',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -81,7 +81,7 @@ export const useAvailableCards = () => {
         iconId: 'Settings',
         path: '/settings',
         color: 'gray-dark',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -94,7 +94,7 @@ export const useAvailableCards = () => {
         iconId: 'User',
         path: '/perfil',
         color: 'orange-light',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -107,7 +107,7 @@ export const useAvailableCards = () => {
         iconId: 'Bell',
         path: '/notificacoes',
         color: 'orange',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -120,7 +120,7 @@ export const useAvailableCards = () => {
         iconId: 'Clock',
         path: '/demandas/pendentes',
         color: 'blue-dark',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -134,7 +134,7 @@ export const useAvailableCards = () => {
         iconId: 'AlertTriangle',
         path: '/demandas/atrasadas',
         color: 'orange-600',
-        width: '1',
+        width: '25' as CardWidth, // Changed from '1' to '25'
         height: '1',
         isCustom: false,
         type: 'standard',

@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import { DragIcon, MoveHorizontal, ArrowRight } from 'lucide-react';
+import { MoveHorizontal, ArrowRight } from 'lucide-react';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
-import { getBackgroundColor } from '@/components/dashboard/ActionCard';
 
+// Import getBackgroundColor function directly from the ActionCard file
+// since it's exported as a named export
 interface CardLibraryProps {
   availableCards: ActionCardItem[];
   onAddCardToDashboard: (card: ActionCardItem) => void;
@@ -21,6 +22,23 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
       </div>
     );
   }
+
+  // Function to get background color based on card color
+  const getBackgroundColor = (color: string): string => {
+    switch (color) {
+      case 'blue': return 'bg-blue-500';
+      case 'green': return 'bg-green-500';
+      case 'orange': return 'bg-orange-500';
+      case 'gray-light': return 'bg-gray-200';
+      case 'gray-dark': return 'bg-gray-700';
+      case 'blue-dark': return 'bg-blue-700';
+      case 'orange-light': return 'bg-orange-300';
+      case 'gray-ultra-light': return 'bg-gray-100';
+      case 'lime': return 'bg-lime-500';
+      case 'orange-600': return 'bg-orange-600';
+      default: return 'bg-blue-500';
+    }
+  };
 
   return (
     <div className="space-y-4">
