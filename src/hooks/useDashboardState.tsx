@@ -1,3 +1,4 @@
+
 import { useDashboardData } from './dashboard/useDashboardData';
 import { useCardActions } from './dashboard/useCardActions';
 import { useSpecialCardActions } from './dashboard/useSpecialCardActions';
@@ -22,9 +23,10 @@ export interface DashboardState {
   handleQuickDemandSubmit: () => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
-  handleSearchSubmit: () => void;
+  handleSearchSubmit: (query: string) => void; // Updated signature to accept a parameter
   specialCardsData: ReturnType<typeof useSpecialCardsData>;
   userCoordenaticaoId: string | null;
+  isLoading: boolean; // Added isLoading property
 }
 
 export const useDashboardState = (userId?: string): DashboardState => {
@@ -53,7 +55,11 @@ export const useDashboardState = (userId?: string): DashboardState => {
 
         setFirstName(data.nome_completo.split(' ')[0]);
         setUserCoordenaticaoId(data.coordenacao_id);
+        
+        // Import and use the function from hooks/dashboard/defaultCards
+        const { getDefaultCards } = require('./dashboard/defaultCards');
         const defaultCardsList = getDefaultCards(data.coordenacao_id);
+        
         setDefaultCards(defaultCardsList);
         setActionCards(defaultCardsList);
       } catch (err) {
@@ -151,6 +157,7 @@ export const useDashboardState = (userId?: string): DashboardState => {
     setSearchQuery,
     handleSearchSubmit,
     specialCardsData,
-    userCoordenaticaoId
+    userCoordenaticaoId,
+    isLoading: isLoadingUser
   };
 };

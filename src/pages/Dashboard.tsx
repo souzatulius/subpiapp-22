@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -16,7 +17,6 @@ const Dashboard = () => {
   const {
     firstName,
     actionCards,
-    setActionCards,
     isLoading
   } = useDashboardState(user?.id);
 
@@ -43,7 +43,6 @@ const Dashboard = () => {
                 title={`Olá, ${firstName || 'Usuário'}!`}
                 description="Organize esta área do seu jeito, movendo ou ocultando os cards."
                 fallbackCards={actionCards}
-                setCards={setActionCards}
               />
             )}
           </div>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
@@ -38,25 +38,24 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Use explicit array types to avoid excessive type instantiation
-  const visibleCards = useMemo(() => {
-    return cards.filter((card) => !card.hidden);
-  }, [cards]);
+  // Fixed the excessive type instantiation by using Array.filter with explicit types
+  const visibleCards = React.useMemo(() => 
+    cards.filter(card => !card.hidden),
+    [cards]
+  );
   
-  const hiddenCards = useMemo(() => {
-    return cards.filter((card) => card.hidden === true);
-  }, [cards]);
+  const hiddenCards = React.useMemo(() => 
+    cards.filter(card => card.hidden === true),
+    [cards]
+  );
   
   // Simple function to toggle card visibility
   const toggleCardVisibility = (cardId: string) => {
-    setCards(currentCards => {
-      return currentCards.map(card => {
-        if (card.id === cardId) {
-          return { ...card, hidden: !card.hidden };
-        }
-        return card;
-      });
-    });
+    setCards(currentCards => 
+      currentCards.map(card => 
+        card.id === cardId ? { ...card, hidden: !card.hidden } : card
+      )
+    );
   };
   
   // Simple function implementation for deleting a card

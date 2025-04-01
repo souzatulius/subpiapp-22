@@ -1,10 +1,11 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
-import { useCardActions } from './dashboard/useCardActions';
-import { useSpecialCardActions } from './dashboard/useSpecialCardActions';
-import { useSpecialCardsData } from './dashboard/useSpecialCardsData';
-import { getDefaultCards } from './dashboard/defaultCards';
+import { useCardActions } from '../dashboard/useCardActions';
+import { useSpecialCardActions } from '../dashboard/useSpecialCardActions';
+import { useSpecialCardsData } from '../dashboard/useSpecialCardsData';
+import { getDefaultCards } from '../dashboard/defaultCards';
 
 interface UseDashboardStateResult {
   firstName: string;
@@ -25,7 +26,7 @@ interface UseDashboardStateResult {
   handleQuickDemandSubmit: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  handleSearchSubmit: () => void;
+  handleSearchSubmit: (query: string) => void;
 }
 
 export const useDashboardState = (userId?: string): UseDashboardStateResult => {

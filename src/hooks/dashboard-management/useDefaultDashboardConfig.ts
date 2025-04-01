@@ -11,6 +11,7 @@ interface UseDefaultDashboardConfigResult {
   config: ActionCardItem[];
   defaultConfig: ActionCardItem[];
   loading: boolean;
+  isLoading: boolean; // Added this property to match usage in DashboardManagementContent
   saveConfig: (cards: ActionCardItem[], deptId?: string) => Promise<boolean>;
   selectedDepartment: string;
   setSelectedDepartment: (v: string) => void;
@@ -228,6 +229,7 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
     config: config[currentDept] || defaultConfig,
     defaultConfig,
     loading,
+    isLoading: loading, // Add this to match the expected interface
     saveConfig,
     selectedDepartment,
     setSelectedDepartment,
