@@ -27,6 +27,7 @@ const DashboardManagementContent: React.FC = () => {
     isSaving,
     saveConfig,
     saveDefaultDashboard,
+    resetAllDashboards,
   } = useDefaultDashboardConfig();
   
   const { availableCards } = useAvailableCards();
@@ -138,6 +139,22 @@ const DashboardManagementContent: React.FC = () => {
       return false;
     }
   };
+  
+  // Handle resetting dashboards
+  const handleResetDashboards = async () => {
+    try {
+      const result = await resetAllDashboards();
+      return result;
+    } catch (error) {
+      console.error('Error resetting dashboards:', error);
+      toast({
+        title: "Erro ao resetar",
+        description: "Ocorreu um erro ao resetar os dashboards. Tente novamente.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -152,6 +169,7 @@ const DashboardManagementContent: React.FC = () => {
             setIsMobilePreview={setIsMobilePreview}
             onAddNewCard={handleOpenCreateCardModal}
             onSaveDashboard={handleSaveDashboard}
+            onResetDashboards={handleResetDashboards}
             isSaving={isSaving}
           />
           

@@ -249,20 +249,46 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     try {
       setIsSaving(true);
       
-      // Instead of using rpc function, directly update the default_dashboard table
+      // Fix: Use a custom query instead since the table might not be in the typed schema
       const { error } = await supabase
         .from('default_dashboard')
         .upsert({
           id: 'default',
           cards_config: JSON.stringify(cards),
           updated_at: new Date().toISOString()
-        });
+        }, { onConflict: 'id' });
       
       if (error) throw error;
       
       return true;
     } catch (err) {
       console.error('Failed to save default dashboard:', err);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Function to reset all dashboards
+  const resetAllDashboards = async () => {
+    try {
+      setIsSaving(true);
+      
+      // Delete all department dashboards for the selected view type
+      const { error } = await supabase
+        .from('department_dashboards')
+        .delete()
+        .eq('view_type', selectedViewType);
+      
+      if (error) throw error;
+      
+      // Reload the default configuration
+      const defaultCards = getDefaultCards(selectedDepartment, selectedViewType);
+      setConfig(defaultCards);
+      
+      return true;
+    } catch (err) {
+      console.error('Failed to reset dashboards:', err);
       return false;
     } finally {
       setIsSaving(false);
@@ -282,5 +308,6 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     isSaving,
     saveConfig,
     saveDefaultDashboard,
+    resetAllDashboards,
   };
 };
