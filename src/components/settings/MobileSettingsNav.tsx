@@ -1,10 +1,7 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Users, Building, Settings, 
-  Map, Bell 
-} from 'lucide-react';
+import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const MobileSettingsNav = () => {
@@ -13,43 +10,33 @@ const MobileSettingsNav = () => {
   const isMobile = useIsMobile();
   
   if (!isMobile) return null;
-
-  const navItems = [
-    { 
-      id: 'dashboard', 
-      label: 'Início', 
-      path: '/settings',
-      icon: <Settings className="h-5 w-5" />
-    },
-    { 
-      id: 'usuarios', 
-      label: 'Usuários', 
-      path: '/settings?tab=usuarios',
-      icon: <Users className="h-5 w-5" /> 
-    },
-    { 
-      id: 'coordenacoes', 
-      label: 'Coord.', 
-      path: '/settings?tab=coordenacoes_lista',
-      icon: <Building className="h-5 w-5" /> 
-    },
-    { 
-      id: 'distritos', 
-      label: 'Distritos', 
-      path: '/settings?tab=distritos_bairros',
-      icon: <Map className="h-5 w-5" /> 
-    },
-    { 
-      id: 'comunicados', 
-      label: 'Avisos', 
-      path: '/settings?tab=comunicados',
-      icon: <Bell className="h-5 w-5" /> 
-    }
-  ];
   
-  // Find current active tab
-  const query = new URLSearchParams(location.search);
-  const activeTab = query.get('tab') || 'dashboard';
+  // Get the same navigation items used in dashboard
+  const navItems = getNavigationSections().map(item => {
+    // Rename "Ranking das Subs" to just "Ranking"
+    if (item.id === 'ranking') {
+      return { ...item, label: 'Ranking' };
+    }
+    return item;
+  });
+  
+  // Custom isActive function for navigation items
+  const isLinkActive = (itemPath: string) => {
+    // For Dashboard, only highlight if it's exactly the dashboard path
+    if (itemPath === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    
+    // For settings page, special handling
+    if (itemPath === '/settings') {
+      return location.pathname === '/settings' || 
+        location.pathname.startsWith('/settings/');
+    }
+    
+    // For other items, highlight if the path matches exactly or if it's a subpath
+    return location.pathname === itemPath || 
+      location.pathname.startsWith(itemPath + '/');
+  };
   
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] border-t border-gray-800 shadow-lg z-50">
@@ -59,9 +46,7 @@ const MobileSettingsNav = () => {
             key={item.id}
             onClick={() => navigate(item.path)}
             className={`flex flex-col items-center justify-center py-2 px-1 flex-1 ${
-              (activeTab === item.id || 
-               (item.id === 'dashboard' && !activeTab)) ? 
-               'bg-white text-white rounded-t-xl' : 'text-gray-400'
+              isLinkActive(item.path) ? 'bg-white text-white' : 'text-gray-400'
             }`}
           >
             <div className="text-[#f57737]">

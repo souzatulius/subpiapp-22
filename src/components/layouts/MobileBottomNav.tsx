@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 
 interface MobileBottomNavProps {
@@ -8,7 +8,15 @@ interface MobileBottomNavProps {
 }
 
 const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
-  const navItems = getNavigationSections();
+  const navItems = getNavigationSections().map(item => {
+    // Rename "Ranking das Subs" to just "Ranking"
+    if (item.id === 'ranking') {
+      return { ...item, label: 'Ranking' };
+    }
+    return item;
+  });
+  
+  const location = useLocation();
 
   return (
     <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] border-t border-gray-800 shadow-lg z-50 ${className}`}>
@@ -24,7 +32,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
                 : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
                 
               return `flex flex-col items-center justify-center w-full h-full py-1 
-                ${active ? 'bg-white text-white rounded-t-xl' : 'text-gray-400'}`
+                ${active ? 'bg-white text-white' : 'text-gray-400'}`
             }}
           >
             <div className="text-[#f57737]">
