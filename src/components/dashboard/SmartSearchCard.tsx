@@ -6,13 +6,13 @@ import { useNavigate } from 'react-router-dom';
 interface SmartSearchCardProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
-  isEditMode?: boolean; // Added this prop to match usage
+  isEditMode?: boolean;
 }
 
 const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   placeholder = "O que você deseja fazer?",
   onSearch,
-  isEditMode = false // Default to false
+  isEditMode = false
 }) => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();

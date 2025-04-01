@@ -27,17 +27,13 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     handleEditCard,
     handleSaveCard,
     specialCardsData,
-  } = useDefaultDashboardState(department);
-
-  // Use the special card actions hook for quick demand and search functionality
-  const {
     newDemandTitle,
     setNewDemandTitle,
     handleQuickDemandSubmit,
     searchQuery,
     setSearchQuery,
     handleSearchSubmit
-  } = useSpecialCardActions();
+  } = useDefaultDashboardState(department);
 
   return (
     <div className="p-4">

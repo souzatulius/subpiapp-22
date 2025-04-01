@@ -193,18 +193,21 @@ const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
         <>
           {isQuickDemand && (
             <QuickDemandCard
+              value={quickDemandTitle || ''}
+              onChange={onQuickDemandTitleChange || (() => {})}
+              onSubmit={onQuickDemandSubmit || (() => {})}
               title={title}
               demandTitle={quickDemandTitle || ''}
-              onDemandTitleChange={onQuickDemandTitleChange}
-              onSubmit={onQuickDemandSubmit}
+              onDemandTitleChange={onQuickDemandTitleChange || (() => {})}
               isEditMode={isEditing}
             />
           )}
           
           {isSearch && (
             <SmartSearchCard 
-              onSearch={onSearchSubmit}
+              onSearch={onSearchSubmit || (() => {})}
               isEditMode={isEditing}
+              placeholder={title}
             />
           )}
         </>
