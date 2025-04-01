@@ -1,151 +1,78 @@
 
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import { v4 as uuidv4 } from 'uuid';
 
 export const useAvailableCards = () => {
   const [availableCards, setAvailableCards] = useState<ActionCardItem[]>([]);
   
   useEffect(() => {
-    // Define all cards that can be added to dashboards
-    const cardTemplates: ActionCardItem[] = [
-      // Generic cards
+    // Template cards that can be added to the dashboard
+    const templateCards: ActionCardItem[] = [
       {
-        id: `template-${uuidv4()}`,
-        title: 'Consultar Demandas',
-        iconId: 'Search',
+        id: 'template-demandas',
+        title: 'Demandas',
+        iconId: 'ClipboardList',
         path: '/dashboard/demandas',
-        color: 'blue-dark',
+        color: 'blue',
         width: '25',
         height: '1',
-        isCustom: false,
-        type: 'standard',
-        displayMobile: true
+        type: 'standard'
       },
       {
-        id: `template-${uuidv4()}`,
-        title: 'Consultar Notas',
-        iconId: 'FileText',
-        path: '/dashboard/notas',
+        id: 'template-comunicacao',
+        title: 'Comunicação',
+        iconId: 'MessageSquare',
+        path: '/dashboard/comunicacao',
         color: 'green',
         width: '25',
         height: '1',
-        isCustom: false,
-        type: 'standard',
-        displayMobile: true
+        type: 'standard'
       },
       {
-        id: `template-${uuidv4()}`,
+        id: 'template-search',
         title: 'Pesquisa Rápida',
-        subtitle: 'Busca global',
         iconId: 'Search',
         path: '',
         color: 'gray-light',
         width: '100',
         height: '1',
-        isCustom: false,
-        isSearch: true,
         type: 'smart_search',
-        displayMobile: true
-      },
-      
-      // Communication specific cards
-      {
-        id: `template-${uuidv4()}`,
-        title: 'Cadastrar Demanda',
-        subtitle: 'Registre novas solicitações',
-        iconId: 'PlusCircle',
-        path: '/dashboard/comunicacao/cadastrar',
-        color: 'blue',
-        width: '25',
-        height: '1',
-        isCustom: false,
-        type: 'standard',
-        displayMobile: true
+        isSearch: true
       },
       {
-        id: `template-${uuidv4()}`,
-        title: 'Responder Demanda',
-        subtitle: 'Responda às solicitações',
-        iconId: 'MessageSquare',
-        path: '/dashboard/comunicacao/responder',
-        color: 'green',
-        width: '25',
-        height: '1',
-        isCustom: false,
-        type: 'standard',
-        displayMobile: true
-      },
-      {
-        id: `template-${uuidv4()}`,
-        title: 'Criar Nota Oficial',
-        subtitle: 'Elabore notas oficiais',
+        id: 'template-notas',
+        title: 'Notas Oficiais',
         iconId: 'FileText',
-        path: '/dashboard/comunicacao/criar-nota',
+        path: '/dashboard/comunicacao/consultar-notas',
         color: 'orange',
         width: '25',
         height: '1',
-        isCustom: false,
-        type: 'standard',
-        displayMobile: true
+        type: 'standard'
       },
       {
-        id: `template-${uuidv4()}`,
-        title: 'Aprovar Notas',
-        subtitle: 'Revise e aprove notas',
-        iconId: 'CheckCircle',
-        path: '/dashboard/comunicacao/aprovar-nota',
-        color: 'purple-light',
-        width: '25',
-        height: '1',
-        isCustom: false,
-        type: 'standard',
-        displayMobile: true
-      },
-      
-      // Dynamic data cards
-      {
-        id: `template-${uuidv4()}`,
-        title: 'Demandas Pendentes',
+        id: 'template-pendentes',
+        title: 'Tarefas Pendentes',
         iconId: 'AlertTriangle',
         path: '',
         color: 'orange-light',
         width: '25',
-        height: '2',
-        isCustom: false,
-        type: 'data_dynamic',
-        dataSourceKey: 'pendencias_por_coordenacao',
-        displayMobile: true
+        height: '1',
+        type: 'special',
+        isPendingActions: true
       },
       {
-        id: `template-${uuidv4()}`,
-        title: 'Notas Para Aprovação',
-        iconId: 'FileCheck',
-        path: '',
-        color: 'blue-light',
+        id: 'template-relatorios',
+        title: 'Relatórios',
+        iconId: 'BarChart2',
+        path: '/dashboard/relatorios',
+        color: 'purple-light',
         width: '25',
         height: '1',
-        isCustom: false,
-        type: 'data_dynamic',
-        dataSourceKey: 'notas_aguardando_aprovacao',
-        displayMobile: true
-      },
-      {
-        id: `template-${uuidv4()}`,
-        title: 'Demandas em Andamento',
-        iconId: 'Clock',
-        path: '/dashboard/comunicacao/consultar-demandas',
-        color: 'orange',
-        width: '25',
-        height: '2',
-        isCustom: false,
-        isOverdueDemands: true,
-        type: 'standard',
-        displayMobile: true
+        type: 'standard'
       }
     ];
     
-    setAvailableCards(cardTemplates);
+    setAvailableCards(templateCards);
   }, []);
   
   return { availableCards };

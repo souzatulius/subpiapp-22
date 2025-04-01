@@ -137,7 +137,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
       {
         id: 'card-demandas',
         title: 'Demandas',
-        iconId: 'clipboard-list',
+        iconId: 'ClipboardList',
         path: '/dashboard/demandas',
         color: 'blue',
         width: '25',
@@ -147,7 +147,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
       {
         id: 'card-comunicacao',
         title: 'Comunicação',
-        iconId: 'message-square',
+        iconId: 'MessageSquare',
         path: '/dashboard/comunicacao',
         color: 'green',
         width: '25',
@@ -157,7 +157,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
       {
         id: 'card-contratos',
         title: 'Contratos',
-        iconId: 'file-text',
+        iconId: 'FileText',
         path: '/dashboard/contratos',
         color: 'orange',
         width: '25',
@@ -167,7 +167,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
       {
         id: 'card-relatorios',
         title: 'Relatórios',
-        iconId: 'bar-chart-2',
+        iconId: 'BarChart2',
         path: '/dashboard/relatorios',
         color: 'gray-light',
         width: '25',
@@ -249,12 +249,12 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     try {
       setIsSaving(true);
       
+      // Use a raw query for the default_dashboard table since it's not in the typed schema
       const { error } = await supabase
-        .from('default_dashboard')
-        .upsert({
-          id: 'default',
-          cards_config: JSON.stringify(cards),
-          updated_at: new Date().toISOString()
+        .rpc('upsert_default_dashboard', {
+          dashboard_id: 'default',
+          cards_config_json: JSON.stringify(cards),
+          current_timestamp: new Date().toISOString()
         });
       
       if (error) throw error;

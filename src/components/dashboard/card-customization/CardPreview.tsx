@@ -8,6 +8,8 @@ interface CardPreviewProps {
   subtitle?: string;
   color: CardColor;
   iconId: string;
+  width?: string;
+  height?: string;
 }
 
 const getColorClasses = (color: CardColor): string => {
@@ -29,19 +31,42 @@ const getColorClasses = (color: CardColor): string => {
   }
 };
 
-const CardPreview: React.FC<CardPreviewProps> = ({ title, subtitle, color, iconId }) => {
+const getWidthClass = (width?: string): string => {
+  switch (width) {
+    case '25': return 'w-1/4';
+    case '33': return 'w-1/3';
+    case '50': return 'w-1/2';
+    case '75': return 'w-3/4';
+    case '100': return 'w-full';
+    default: return 'w-full';
+  }
+};
+
+const getHeightClass = (height?: string): string => {
+  switch (height) {
+    case '1': return 'h-40';
+    case '2': return 'h-80';
+    default: return 'h-40';
+  }
+};
+
+const CardPreview: React.FC<CardPreviewProps> = ({ title, subtitle, color, iconId, width, height }) => {
   const colorClasses = getColorClasses(color);
   const IconComponent = getIconComponentFromId(iconId);
+  const widthClass = getWidthClass(width);
+  const heightClass = getHeightClass(height);
 
   return (
     <div className="mt-4">
       <h3 className="text-sm font-medium mb-2">Pré-visualização</h3>
-      <div className={`rounded-lg p-6 ${colorClasses} flex flex-col items-center justify-center text-center h-[120px]`}>
-        <div className="mb-2">
-          {IconComponent && <IconComponent className="h-8 w-8" />}
+      <div className={`${widthClass} mx-auto`}>
+        <div className={`rounded-lg p-6 ${colorClasses} flex flex-col items-center justify-center text-center ${heightClass}`}>
+          <div className="mb-2">
+            {IconComponent && <IconComponent className="h-8 w-8" />}
+          </div>
+          <h3 className="text-lg font-semibold">{title || 'Título do Card'}</h3>
+          {subtitle && <p className="text-sm mt-1 opacity-90">{subtitle}</p>}
         </div>
-        <h3 className="text-lg font-semibold">{title || 'Título do Card'}</h3>
-        {subtitle && <p className="text-sm mt-1 opacity-90">{subtitle}</p>}
       </div>
     </div>
   );
