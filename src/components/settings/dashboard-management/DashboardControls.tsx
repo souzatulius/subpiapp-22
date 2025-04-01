@@ -70,10 +70,10 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
     fetchDepartments();
   }, []);
 
-  // Function to format department display text with acronym if available
+  // Function to format department display text, showing only the sigla if available
   const getDepartmentDisplayText = (dept: Department): string => {
     if (dept.sigla) {
-      return `${dept.descricao} (${dept.sigla})`;
+      return dept.sigla;
     }
     return dept.descricao;
   };

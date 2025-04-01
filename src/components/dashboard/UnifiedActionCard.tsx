@@ -9,6 +9,7 @@ import { CSS } from '@dnd-kit/utilities';
 export interface UnifiedActionCardProps {
   id: string;
   title: string;
+  subtitle?: string;
   iconId: string;
   path?: string;
   color: CardColor;
@@ -27,6 +28,9 @@ export interface UnifiedActionCardProps {
   height?: string;
   type?: string;
   disableWiggleEffect?: boolean;
+  hasSubmenu?: boolean;
+  hasBadge?: boolean;
+  badgeValue?: string;
 }
 
 const getBackgroundColor = (color: CardColor): string => {
@@ -41,6 +45,9 @@ const getBackgroundColor = (color: CardColor): string => {
     case 'gray-ultra-light': return 'bg-gray-100';
     case 'lime': return 'bg-lime-500';
     case 'orange-600': return 'bg-orange-600';
+    case 'blue-light': return 'bg-blue-400';
+    case 'green-light': return 'bg-green-400';
+    case 'purple-light': return 'bg-purple-400';
     default: return 'bg-blue-500';
   }
 };
@@ -58,6 +65,7 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
 export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   id,
   title,
+  subtitle,
   iconId,
   path,
   color,
@@ -70,7 +78,10 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   isCustom = false,
   onClick,
   children,
-  disableWiggleEffect = false
+  disableWiggleEffect = false,
+  hasSubmenu,
+  hasBadge,
+  badgeValue
 }) => {
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
@@ -110,6 +121,12 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
           </div>
         )}
         
+        {hasBadge && badgeValue && (
+          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {badgeValue}
+          </div>
+        )}
+        
         {children ? (
           <>{children}</>
         ) : (
@@ -118,7 +135,18 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <h3 className="text-lg font-semibold text-white">{title}</h3>
+            {subtitle && (
+              <p className="text-sm text-white opacity-90 mt-1">{subtitle}</p>
+            )}
           </>
+        )}
+        
+        {hasSubmenu && (
+          <div className="absolute bottom-0 left-0 w-full">
+            <div className="grid grid-cols-3 gap-2 p-2 bg-white/10 rounded-b-xl">
+              {/* Placeholder for submenu items */}
+            </div>
+          </div>
         )}
       </div>
     </div>

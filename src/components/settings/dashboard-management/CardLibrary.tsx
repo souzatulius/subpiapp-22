@@ -4,8 +4,6 @@ import { ActionCardItem } from '@/types/dashboard';
 import { MoveHorizontal, ArrowRight } from 'lucide-react';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
-// Import getBackgroundColor function directly from the ActionCard file
-// since it's exported as a named export
 interface CardLibraryProps {
   availableCards: ActionCardItem[];
   onAddCardToDashboard: (card: ActionCardItem) => void;
@@ -36,8 +34,17 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
       case 'gray-ultra-light': return 'bg-gray-100';
       case 'lime': return 'bg-lime-500';
       case 'orange-600': return 'bg-orange-600';
+      case 'blue-light': return 'bg-blue-400';
+      case 'green-light': return 'bg-green-400';
+      case 'purple-light': return 'bg-purple-400';
       default: return 'bg-blue-500';
     }
+  };
+
+  // Function to get text color based on background
+  const getTextColor = (color: string): string => {
+    const darkColors = ['blue-dark', 'gray-dark'];
+    return darkColors.includes(color) ? 'text-white' : 'text-gray-800';
   };
 
   return (
@@ -51,6 +58,7 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
           {availableCards.map((card) => {
             const IconComponent = getIconComponentFromId(card.iconId);
             const bgColorClass = getBackgroundColor(card.color);
+            const textColorClass = getTextColor(card.color);
             
             return (
               <div 
@@ -66,8 +74,13 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
                   {IconComponent && <IconComponent className="h-5 w-5 text-white" />}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">{card.title}</p>
-                  <p className="text-xs text-gray-500 truncate">{card.path}</p>
+                  <p className={`text-sm font-medium ${textColorClass}`}>{card.title}</p>
+                  {card.subtitle && (
+                    <p className="text-xs text-gray-500">{card.subtitle}</p>
+                  )}
+                  {!card.subtitle && card.path && (
+                    <p className="text-xs text-gray-500 truncate">{card.path}</p>
+                  )}
                 </div>
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <ArrowRight className="h-4 w-4 text-gray-400" />
@@ -75,6 +88,11 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
                 {card.type === 'data_dynamic' && (
                   <div className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
                     Dinâmico
+                  </div>
+                )}
+                {card.hasBadge && (
+                  <div className="ml-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded-full">
+                    {card.badgeValue}
                   </div>
                 )}
               </div>

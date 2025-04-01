@@ -10,7 +10,114 @@ export const useAvailableCards = () => {
   useEffect(() => {
     // Define a comprehensive list of available cards for the library
     const libraryCards: ActionCardItem[] = [
-      // Search card - new addition
+      // Cards da página de comunicação (da imagem)
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Cadastrar Demanda',
+        subtitle: 'Registre novas solicitações da imprensa',
+        iconId: 'PlusCircle',
+        path: '/dashboard/comunicacao/cadastrar',
+        color: 'blue-light',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 1
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Responder Demanda',
+        subtitle: 'Responda às demandas pendentes',
+        iconId: 'MessageSquare',
+        path: '/dashboard/comunicacao/responder',
+        color: 'green-light',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 2
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Criar Nota Oficial',
+        subtitle: 'Elabore notas oficiais',
+        iconId: 'FileText',
+        path: '/dashboard/comunicacao/criar-nota',
+        color: 'orange-light',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 3
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Aprovar Notas',
+        subtitle: 'Revise e aprove notas oficiais',
+        iconId: 'CheckCircle',
+        path: '/dashboard/comunicacao/aprovar',
+        color: 'purple-light',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 4
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Nova Solicitação',
+        subtitle: 'Escolha a origem da solicitação',
+        iconId: 'Plus',
+        path: '',
+        color: 'blue-light',
+        width: '33' as CardWidth,
+        height: '2',
+        isCustom: false,
+        type: 'special',
+        displayMobile: true,
+        mobileOrder: 5,
+        hasSubmenu: true,
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Demandas Pendentes',
+        subtitle: 'Veja as demandas aguardando resposta',
+        iconId: 'MessageSquare',
+        path: '',
+        color: 'blue',
+        width: '33' as CardWidth,
+        height: '2',
+        isCustom: false,
+        type: 'data_dynamic',
+        dataSourceKey: 'pending_demands',
+        displayMobile: true,
+        mobileOrder: 6,
+        hasBadge: true,
+        badgeValue: '0'
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Notas Oficiais',
+        subtitle: 'Gerencie as notas da sua coordenação',
+        iconId: 'FileText',
+        path: '',
+        color: 'orange',
+        width: '33' as CardWidth,
+        height: '2',
+        isCustom: false,
+        type: 'data_dynamic',
+        dataSourceKey: 'official_notes',
+        displayMobile: true,
+        mobileOrder: 7,
+        hasBadge: true,
+        badgeValue: '1'
+      },
+      
+      // Search card
       {
         id: `template-${uuidv4()}`,
         title: 'O que você deseja fazer?',
@@ -31,7 +138,7 @@ export const useAvailableCards = () => {
         iconId: 'Search',
         path: '/demandas',
         color: 'blue-dark',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth, 
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -44,7 +151,7 @@ export const useAvailableCards = () => {
         iconId: 'FileText',
         path: '/notas',
         color: 'green',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -57,7 +164,7 @@ export const useAvailableCards = () => {
         iconId: 'Plus',
         path: '/dashboard/comunicacao/cadastrar',
         color: 'orange-600',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -70,7 +177,7 @@ export const useAvailableCards = () => {
         iconId: 'FileEdit',
         path: '/dashboard/notas/criar',
         color: 'lime',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -83,7 +190,7 @@ export const useAvailableCards = () => {
         iconId: 'BarChart3',
         path: '/relatorios',
         color: 'blue',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -96,7 +203,7 @@ export const useAvailableCards = () => {
         iconId: 'Settings',
         path: '/settings',
         color: 'gray-dark',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -109,7 +216,7 @@ export const useAvailableCards = () => {
         iconId: 'User',
         path: '/perfil',
         color: 'orange-light',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -122,7 +229,7 @@ export const useAvailableCards = () => {
         iconId: 'Bell',
         path: '/notificacoes',
         color: 'orange',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -135,7 +242,7 @@ export const useAvailableCards = () => {
         iconId: 'Clock',
         path: '/demandas/pendentes',
         color: 'blue-dark',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
@@ -149,7 +256,7 @@ export const useAvailableCards = () => {
         iconId: 'AlertTriangle',
         path: '/demandas/atrasadas',
         color: 'orange-600',
-        width: '25' as CardWidth, // Changed from '1' to '25'
+        width: '25' as CardWidth,
         height: '1',
         isCustom: false,
         type: 'standard',
