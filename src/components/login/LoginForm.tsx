@@ -34,15 +34,26 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError(false);
+    setPasswordError(false);
 
+    let hasError = false;
+    
     if (!email.trim()) {
       setEmailError(true);
-      return;
+      hasError = true;
     }
+
+    if (!password.trim()) {
+      setPasswordError(true);
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     setLoading(true);
 
@@ -119,7 +130,6 @@ const LoginForm = () => {
               id="email"
               value={email}
               onChange={setEmail}
-              suffix="@smsub.prefeitura.sp.gov.br"
               error={emailError}
               placeholder="Apenas o usuário"
             />
@@ -135,7 +145,7 @@ const LoginForm = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 onFocus={() => setShowRequirements(true)}
-                className={`pr-10 ${password === '' && errors ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`}
+                className={`pr-10 ${passwordError ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`}
                 placeholder="••••••••"
               />
               <button

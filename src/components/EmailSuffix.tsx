@@ -1,13 +1,13 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from "@/lib/utils";
 
 interface EmailSuffixProps {
   id?: string;
   value: string;
   onChange: (value: string) => void;
-  suffix: string;
+  suffix?: string;
   error?: boolean;
   placeholder?: string;
   className?: string;
@@ -18,7 +18,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   id,
   value,
   onChange,
-  suffix,
+  suffix = "@smsub.prefeitura.sp.gov.br",
   error = false,
   placeholder = '',
   className = '',
@@ -27,7 +27,6 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useIsMobile();
 
   // Handle outside click
   useEffect(() => {
@@ -46,6 +45,20 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
     onChange(e.target.value);
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Prevent cursor from going beyond the end of the user input
+    if (e.key === "ArrowRight") {
+      const input = inputRef.current;
+      if (input) {
+        const selectionStart = input.selectionStart || 0;
+        if (selectionStart >= value.length) {
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  // Style classes for the container
   const containerBorderColor = error 
     ? 'border-[#f57b35]' 
     : isFocused
@@ -53,75 +66,38 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
       : isHovered
         ? 'border-gray-600' 
         : 'border-gray-300';
-  
-  const dividerColor = isFocused 
-    ? 'border-[#003570]' 
-    : 'border-gray-300';
 
-  // Layout para desktop (horizontal)
-  if (!isMobile) {
-    return (
-      <div 
-        className={`flex w-full overflow-hidden border ${containerBorderColor} transition-all duration-200 rounded-xl ${className}`} 
-        onClick={() => {
-          setIsFocused(true);
-          inputRef.current?.focus();
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <input 
-          id={id} 
-          ref={inputRef} 
-          type="text" 
-          value={value} 
-          onChange={handleChange} 
-          onFocus={() => setIsFocused(true)} 
-          placeholder={placeholder || "usuario"} 
-          className="px-4 py-2 w-full border-0 focus:outline-none transition-all duration-200"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          {...registerField} 
-        />
-        <div 
-          className={`bg-gray-100 w-full px-4 py-2 border-0 border-l ${dividerColor} transition-all duration-200 pr-1`}
-        >
-          {suffix}
-        </div>
-      </div>
-    );
-  }
-
-  // Layout para mobile (vertical)
   return (
-    <div className="w-full space-y-2">
-      <div 
-        className={`flex w-full overflow-hidden border ${containerBorderColor} transition-all duration-200 rounded-xl ${className}`} 
-        onClick={() => {
-          setIsFocused(true);
-          inputRef.current?.focus();
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+    <div 
+      className={cn(
+        `relative flex h-12 w-full rounded-xl border ${containerBorderColor} bg-white shadow-sm transition-all duration-300`,
+        className
+      )}
+      onClick={() => {
+        setIsFocused(true);
+        inputRef.current?.focus();
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative flex-grow">
         <input 
           id={id} 
           ref={inputRef} 
           type="text" 
           value={value} 
-          onChange={handleChange} 
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)} 
           placeholder={placeholder || "usuario"} 
-          className="px-4 py-2 w-full border-0 focus:outline-none transition-all duration-200"
+          className="h-full w-full border-0 bg-transparent px-4 py-3 text-base focus:outline-none focus:ring-0"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          {...registerField} 
+          {...registerField}
         />
-      </div>
-      <div 
-        className={`bg-gray-100 w-full px-4 py-2 border ${containerBorderColor} rounded-xl text-center text-gray-600 text-sm`}
-      >
-        {suffix}
+        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-gray-400">
+          {suffix}
+        </span>
       </div>
     </div>
   );

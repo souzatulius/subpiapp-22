@@ -109,8 +109,7 @@ const ForgotPassword = () => {
                   <EmailSuffix 
                     id="email" 
                     value={email} 
-                    onChange={setEmail} 
-                    suffix="@smsub.prefeitura.sp.gov.br" 
+                    onChange={setEmail}
                     error={emailError} 
                     placeholder="Apenas o usuário" 
                   />

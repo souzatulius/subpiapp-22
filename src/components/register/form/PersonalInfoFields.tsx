@@ -2,6 +2,7 @@
 import React from 'react';
 import EmailSuffix from '@/components/EmailSuffix';
 import { Input } from '@/components/ui/input';
+import { formatPhoneNumber, formatDateInput } from '@/lib/inputFormatting';
 
 interface PersonalInfoFieldsProps {
   name: string;
@@ -20,6 +21,32 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
   errors, 
   handleChange 
 }) => {
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'whatsapp',
+        value: formatted
+      }
+    };
+    handleChange(syntheticEvent);
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatDateInput(e.target.value);
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'birthday',
+        value: formatted
+      }
+    };
+    handleChange(syntheticEvent);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -45,7 +72,6 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
           id="email"
           value={email}
           onChange={(value) => handleChange({ target: { name: 'email', value } } as React.ChangeEvent<HTMLInputElement>)}
-          suffix="@smsub.prefeitura.sp.gov.br"
           error={errors.email}
           placeholder="Apenas o usuário"
         />
@@ -61,9 +87,10 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
           id="birthday"
           name="birthday"
           value={birthday}
-          onChange={handleChange}
+          onChange={handleDateChange}
           className={errors.birthday ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}
           placeholder="DD/MM/AAAA"
+          maxLength={10}
         />
         {errors.birthday && <p className="mt-1 text-sm text-[#f57b35]">Data de aniversário é obrigatória</p>}
       </div>
@@ -77,9 +104,10 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
           id="whatsapp"
           name="whatsapp"
           value={whatsapp}
-          onChange={handleChange}
+          onChange={handlePhoneChange}
           className={errors.whatsapp ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}
           placeholder="(11) 99999-9999"
+          maxLength={15}
         />
         {errors.whatsapp && <p className="mt-1 text-sm text-[#f57b35]">WhatsApp é obrigatório</p>}
       </div>
