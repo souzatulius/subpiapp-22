@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 interface SubSection {
   id: string;
@@ -46,6 +46,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   
   // Track if sidebar is currently being toggled
   const [isTogglingOpen, setIsTogglingOpen] = useState(false);
+  const location = useLocation();
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -85,11 +86,26 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
     }
   }, [isOpen, isTogglingOpen]);
 
+  // Custom isActive function for NavLink
+  const isLinkActive = (itemPath: string) => {
+    // For Dashboard, only highlight if it's exactly the dashboard path
+    if (itemPath === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    
+    // For other items, highlight if the path matches exactly or if it's a subpath
+    return location.pathname === itemPath || location.pathname.startsWith(itemPath + '/');
+  };
+
   if (!isSection) {
     return (
       <NavLink 
         to={path || '#'} 
-        className={({isActive}) => `flex items-center px-4 py-3 rounded-xl mb-1 ${isActive ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'} transition-colors`}
+        className={({isActive}) => {
+          // Override isActive with our custom logic
+          const active = path ? isLinkActive(path) : false;
+          return `flex items-center px-4 py-3 rounded-xl mb-1 ${active ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'} transition-colors`;
+        }}
       >
         <div className="flex-shrink-0 text-[#f57737]">{icon}</div>
         <span className={`ml-3 text-base ${isOpen ? 'block' : 'hidden'}`}>{label}</span>
@@ -127,7 +143,11 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                     <li key={`${subSection.id}-item-${index}`}>
                       <NavLink 
                         to={item.path} 
-                        className={({isActive}) => `flex items-center py-2 px-3 ${isActive ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`}
+                        className={({isActive}) => {
+                          // Override isActive with our custom logic
+                          const active = isLinkActive(item.path);
+                          return `flex items-center py-2 px-3 ${active ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
+                        }}
                       >
                         <div className="flex-shrink-0 mr-2 text-[#f57737]">{item.icon}</div>
                         <span>{item.label}</span>
@@ -147,7 +167,11 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
             <li key={`${id}-item-${index}`}>
               <NavLink 
                 to={item.path} 
-                className={({isActive}) => `flex items-center py-2 px-3 ${isActive ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`}
+                className={({isActive}) => {
+                  // Override isActive with our custom logic
+                  const active = isLinkActive(item.path);
+                  return `flex items-center py-2 px-3 ${active ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
+                }}
               >
                 <div className="flex-shrink-0 mr-2 text-[#f57737]">{item.icon}</div>
                 <span>{item.label}</span>
