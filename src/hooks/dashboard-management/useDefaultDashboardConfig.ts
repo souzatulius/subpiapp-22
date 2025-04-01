@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,28 +21,35 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
       setLoading(true);
       
       try {
-        if (!user) {
-          console.log('No user found');
+        if (!selectedDepartment && !departmentId && !user) {
+          console.log('No department or user found');
           setLoading(false);
           return;
         }
 
         // Get the default config for the department
+        const deptId = selectedDepartment || departmentId || (user ? user.coordenacao_id : null);
+        
+        if (!deptId) {
+          setLoading(false);
+          return;
+        }
+
         let { data: depConfig, error: depError } = await supabase
           .from('department_dashboards')
           .select('*')
-          .eq('department', departmentId || user.coordenacao_id)
+          .eq('department', deptId)
           .eq('view_type', selectedViewType)
           .single();
 
         // If there's no config for this department
         if (depError || !depConfig) {
-          console.log('No department config found, using default');
+          console.log(`No ${selectedViewType} config found for ${deptId}, using default`);
           
-          const defaultCards = generateDefaultCards(departmentId || user.coordenacao_id);
+          const defaultCards = generateDefaultCards(deptId, selectedViewType);
           setDefaultConfig(defaultCards);
           setConfig({
-            [departmentId || user.coordenacao_id]: defaultCards
+            [deptId]: defaultCards
           });
           setLoading(false);
           return;
@@ -52,28 +58,27 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
         // Parse the config
         const parsedConfig = depConfig.cards_config ? 
           JSON.parse(depConfig.cards_config) : 
-          generateDefaultCards(departmentId || user.coordenacao_id);
+          generateDefaultCards(deptId, selectedViewType);
         
         setDefaultConfig(parsedConfig);
         setConfig({
-          [departmentId || user.coordenacao_id]: parsedConfig
+          [deptId]: parsedConfig
         });
       } catch (error) {
         console.error('Error fetching dashboard config:', error);
-        const defaultCards = generateDefaultCards(departmentId || user.coordenacao_id);
+        const deptId = selectedDepartment || departmentId || (user ? user.coordenacao_id : '');
+        const defaultCards = generateDefaultCards(deptId, selectedViewType);
         setDefaultConfig(defaultCards);
         setConfig({
-          [departmentId || user.coordenacao_id]: defaultCards
+          [deptId]: defaultCards
         });
       } finally {
         setLoading(false);
       }
     };
 
-    if (user || departmentId) {
-      fetchConfig();
-    }
-  }, [user, departmentId, selectedViewType]);
+    fetchConfig();
+  }, [user, departmentId, selectedDepartment, selectedViewType]);
 
   const saveDefaultDashboard = async () => {
     try {
@@ -227,53 +232,90 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     setSelectedViewType,
     isLoading: loading,
     isSaving,
-    saveDefaultDashboard
+    saveDefaultDashboard: saveConfig
   };
 };
 
 // Helper function to generate default cards for a department
-const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
+const generateDefaultCards = (departmentId: string, viewType: 'dashboard' | 'communication' = 'dashboard'): ActionCardItem[] => {
   const isComunicacao = departmentId === 'comunicacao';
   
-  const cards: ActionCardItem[] = [
-    // Default cards for all departments
-    {
-      id: uuidv4(),
-      title: 'Consultar Demandas',
-      iconId: 'Search',
-      path: '/demandas',
-      color: 'blue-dark' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      isCustom: false,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 3
-    },
-    {
-      id: uuidv4(),
-      title: 'Consultar Notas',
-      iconId: 'FileText',
-      path: '/notas',
-      color: 'green' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      isCustom: false,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 4
-    }
-  ];
-
-  // Comunicação department specific cards
-  if (isComunicacao) {
-    cards.unshift(
+  // Generate standard dashboard cards
+  if (viewType === 'dashboard') {
+    const cards: ActionCardItem[] = [
+      // Default cards for all departments
       {
         id: uuidv4(),
-        title: 'Nova Solicitação',
-        iconId: 'Plus',
+        title: 'Consultar Demandas',
+        iconId: 'Search',
+        path: '/demandas',
+        color: 'blue-dark' as CardColor,
+        width: '25' as CardWidth,
+        height: '1' as CardHeight,
+        isCustom: false,
+        type: 'standard' as CardType,
+        displayMobile: true,
+        mobileOrder: 3
+      },
+      {
+        id: uuidv4(),
+        title: 'Consultar Notas',
+        iconId: 'FileText',
+        path: '/notas',
+        color: 'green' as CardColor,
+        width: '25' as CardWidth,
+        height: '1' as CardHeight,
+        isCustom: false,
+        type: 'standard' as CardType,
+        displayMobile: true,
+        mobileOrder: 4
+      }
+    ];
+
+    // Comunicação department specific cards
+    if (isComunicacao) {
+      cards.unshift(
+        {
+          id: uuidv4(),
+          title: 'Nova Solicitação',
+          iconId: 'Plus',
+          path: '/dashboard/comunicacao/cadastrar',
+          color: 'orange-600' as CardColor,
+          width: '25' as CardWidth,
+          height: '1' as CardHeight,
+          isCustom: false,
+          type: 'standard' as CardType,
+          displayMobile: true,
+          mobileOrder: 1
+        },
+        {
+          id: uuidv4(),
+          title: 'Criar Nota Oficial',
+          iconId: 'FileEdit',
+          path: '/dashboard/notas/criar',
+          color: 'lime' as CardColor,
+          width: '25' as CardWidth,
+          height: '1' as CardHeight,
+          isCustom: false,
+          type: 'standard' as CardType,
+          displayMobile: true,
+          mobileOrder: 2
+        }
+      );
+    }
+    
+    return cards;
+  } 
+  // Generate communication dashboard cards
+  else if (viewType === 'communication') {
+    return [
+      {
+        id: uuidv4(),
+        title: 'Cadastrar Demanda',
+        subtitle: 'Registre novas solicitações da imprensa',
+        iconId: 'PlusCircle',
         path: '/dashboard/comunicacao/cadastrar',
-        color: 'orange-600' as CardColor,
+        color: 'blue' as CardColor,
         width: '25' as CardWidth,
         height: '1' as CardHeight,
         isCustom: false,
@@ -283,19 +325,48 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
       },
       {
         id: uuidv4(),
-        title: 'Criar Nota Oficial',
-        iconId: 'FileEdit',
-        path: '/dashboard/notas/criar',
-        color: 'lime' as CardColor,
+        title: 'Responder Demanda',
+        subtitle: 'Responda às demandas pendentes',
+        iconId: 'MessageSquare',
+        path: '/dashboard/comunicacao/responder',
+        color: 'green' as CardColor,
         width: '25' as CardWidth,
         height: '1' as CardHeight,
         isCustom: false,
         type: 'standard' as CardType,
         displayMobile: true,
         mobileOrder: 2
+      },
+      {
+        id: uuidv4(),
+        title: 'Criar Nota Oficial',
+        subtitle: 'Elabore notas oficiais',
+        iconId: 'FileText',
+        path: '/dashboard/comunicacao/criar-nota',
+        color: 'orange' as CardColor,
+        width: '25' as CardWidth,
+        height: '1' as CardHeight,
+        isCustom: false,
+        type: 'standard' as CardType,
+        displayMobile: true,
+        mobileOrder: 3
+      },
+      {
+        id: uuidv4(),
+        title: 'Aprovar Notas',
+        subtitle: 'Revise e aprove notas oficiais',
+        iconId: 'CheckCircle',
+        path: '/dashboard/comunicacao/aprovar-nota',
+        color: 'purple-light' as CardColor,
+        width: '25' as CardWidth,
+        height: '1' as CardHeight,
+        isCustom: false,
+        type: 'standard' as CardType,
+        displayMobile: true,
+        mobileOrder: 4
       }
-    );
+    ];
   }
-
-  return cards;
+  
+  return [];
 };

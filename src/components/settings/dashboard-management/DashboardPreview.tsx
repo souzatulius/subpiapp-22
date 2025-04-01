@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import { useSpecialCardActions } from '@/hooks/dashboard/useSpecialCardActions';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';

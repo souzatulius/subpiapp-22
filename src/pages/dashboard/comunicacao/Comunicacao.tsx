@@ -11,6 +11,7 @@ import DemandasEmAndamentoCard from '@/components/comunicacao/DemandasEmAndament
 import ActionCards from '@/components/comunicacao/ActionCards';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
+import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -27,6 +28,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [departmentName, setDepartmentName] = useState<string>('');
   const isMobile = useIsMobile();
+  
+  // Use the dashboard config hook to get the dashboard configuration
+  const { config: dashboardConfig } = useDefaultDashboardConfig(
+    isPreview ? department : userDepartment || ''
+  );
 
   useEffect(() => {
     if (isPreview) {
@@ -118,7 +124,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 p-6 pb-20 md:pb-6">
-      {/* Welcome Card */}
+      {/* Welcome Card - Fixed */}
       <WelcomeCard
         title="Comunicação"
         description="Gerencie demandas e notas oficiais"
@@ -126,7 +132,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
       
-      {/* Action Cards - Moved to top without title */}
+      {/* Action Cards - Customizable through dashboard management */}
       <div>
         <ActionCards 
           coordenacaoId={userDepartment || ''} 
