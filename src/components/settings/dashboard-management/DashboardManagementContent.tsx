@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardPreview from './DashboardPreview';
 import DashboardControls from './DashboardControls';
+import CardLibrary from './CardLibrary';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, Plus } from 'lucide-react';
@@ -12,6 +13,8 @@ import { FormSchema } from '@/components/dashboard/card-customization/types';
 import { ActionCardItem } from '@/types/dashboard';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import { toast } from '@/hooks/use-toast';
+import { useAvailableCards } from '@/hooks/dashboard-management/useAvailableCards';
+import { v4 as uuidv4 } from 'uuid';
 
 const DashboardManagementContent: React.FC = () => {
   const {
@@ -25,9 +28,19 @@ const DashboardManagementContent: React.FC = () => {
     saveDefaultDashboard,
   } = useDefaultDashboardConfig();
   
+  const { availableCards } = useAvailableCards();
   const [departmentName, setDepartmentName] = useState('');
   const [isCreateCardModalOpen, setIsCreateCardModalOpen] = useState(false);
   const [isMobilePreview, setIsMobilePreview] = useState(false);
+  
+  // Get the current dashboard state
+  const {
+    cards,
+    setCards,
+    handleDeleteCard,
+    handleEditCard,
+    handleAddNewCard: openNewCardModal,
+  } = useDefaultDashboardState(selectedDepartment);
   
   useEffect(() => {
     const fetchDepartmentName = async () => {
@@ -76,10 +89,28 @@ const DashboardManagementContent: React.FC = () => {
     });
   };
 
+  const handleAddCardToDashboard = (templateCard: ActionCardItem) => {
+    // Create a new card with a unique ID based on the template card
+    const newCard: ActionCardItem = {
+      ...templateCard,
+      id: `card-${uuidv4()}`, // Generate a new unique ID
+      isCustom: false // Mark as not custom to prevent deletion
+    };
+    
+    // Add the new card to the dashboard
+    setCards([...cards, newCard]);
+    
+    toast({
+      title: "Card adicionado",
+      description: `O card "${newCard.title}" foi adicionado ao dashboard`,
+      variant: "success"
+    });
+  };
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 space-y-6">
           <DashboardControls
             selectedDepartment={selectedDepartment}
             setSelectedDepartment={setSelectedDepartment}
@@ -90,6 +121,11 @@ const DashboardManagementContent: React.FC = () => {
             onAddNewCard={handleOpenCreateCardModal}
             onSaveDashboard={saveDefaultDashboard}
             isSaving={isSaving}
+          />
+          
+          <CardLibrary 
+            availableCards={availableCards}
+            onAddCardToDashboard={handleAddCardToDashboard}
           />
         </div>
         

@@ -5,6 +5,8 @@ import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaul
 import ComunicacaoDashboard from '@/pages/dashboard/comunicacao/Comunicacao';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { ActionCardItem } from '@/types/dashboard';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/hooks/use-toast';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -47,12 +49,49 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     </div>
   );
 
+  // Handle drop event from card library
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    
+    try {
+      const cardData = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (cardData && cardData.id) {
+        // Create a new card with a unique ID
+        const newCard: ActionCardItem = {
+          ...cardData,
+          id: `card-${uuidv4()}` // Generate a new unique ID
+        };
+        
+        // Add the new card to the dashboard
+        setCards([...cards, newCard]);
+        
+        toast({
+          title: "Card adicionado",
+          description: `O card "${newCard.title}" foi adicionado ao dashboard`,
+          variant: "success"
+        });
+      }
+    } catch (error) {
+      console.error("Error processing dropped card:", error);
+    }
+  };
+
+  // Handle drag over to enable drop
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
   if (dashboardType === 'communication') {
     return (
       <div className="bg-gray-50 p-6 h-full">
         <div className={deviceFrameClasses}>
           {mobileNotch}
-          <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
+          <div 
+            className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+          >
             <ComunicacaoDashboard isPreview={true} department={department} />
           </div>
         </div>
@@ -64,7 +103,11 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     <div className="bg-gray-50 p-6 h-full">
       <div className={deviceFrameClasses}>
         {mobileNotch}
-        <div className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}>
+        <div 
+          className={`overflow-auto ${isMobilePreview ? 'h-[600px] pt-6' : 'h-[600px]'}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
           <div className="p-4">
             <UnifiedCardGrid
               cards={cards}
@@ -73,7 +116,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               onDeleteCard={handleDeleteCard}
               isMobileView={isMobilePreview}
               isEditMode={modoAdmin}
-              disableWiggleEffect={true} // Add this to disable wiggle effect in preview
+              disableWiggleEffect={true}
             />
           </div>
         </div>

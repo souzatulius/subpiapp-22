@@ -1,32 +1,21 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { LayoutDashboard, MessageSquareReply, Smartphone, Monitor, Loader2, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import { supabase } from '@/integrations/supabase/client'; 
-
-interface Department {
-  id: string;
-  descricao: string;
-  sigla?: string | null;
-}
+import { supabase } from '@/integrations/supabase/client';
+import { Separator } from '@/components/ui/separator';
+import { MoveHorizontal, Save, Plus, Smartphone, Monitor } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface DashboardControlsProps {
   selectedDepartment: string;
-  setSelectedDepartment: (department: string) => void;
+  setSelectedDepartment: (value: string) => void;
   selectedViewType: 'dashboard' | 'communication';
-  setSelectedViewType: (viewType: 'dashboard' | 'communication') => void;
+  setSelectedViewType: (value: 'dashboard' | 'communication') => void;
   isMobilePreview: boolean;
-  setIsMobilePreview: (isMobile: boolean) => void;
+  setIsMobilePreview: (value: boolean) => void;
   onAddNewCard: () => void;
   onSaveDashboard: () => void;
   isSaving: boolean;
@@ -43,143 +32,133 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
   onSaveDashboard,
   isSaving
 }) => {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [departments, setDepartments] = useState<{ id: string; descricao: string }[]>([]);
+  const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
 
-  // Fetch departments with sigla from Supabase
   useEffect(() => {
     const fetchDepartments = async () => {
+      setIsLoadingDepartments(true);
       try {
-        setIsLoading(true);
         const { data, error } = await supabase
           .from('coordenacoes')
-          .select('id, descricao, sigla')
-          .order('descricao', { ascending: true });
-        
+          .select('id, descricao')
+          .order('descricao');
+
         if (error) {
           console.error('Error fetching departments:', error);
           return;
         }
-        
-        // Add a default "all" option
-        const allDepartments = [
-          { id: 'default', descricao: 'Padrão (Todos)', sigla: 'ALL' },
-          ...data
-        ];
-        
-        setDepartments(allDepartments);
-        
-        if (!selectedDepartment && allDepartments.length > 0) {
-          setSelectedDepartment(allDepartments[0].id);
+
+        setDepartments(data || []);
+        // Set default department if none selected
+        if (!selectedDepartment && data && data.length > 0) {
+          setSelectedDepartment(data[0].id);
         }
       } catch (error) {
         console.error('Failed to fetch departments:', error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingDepartments(false);
       }
     };
-    
+
     fetchDepartments();
-  }, [selectedDepartment, setSelectedDepartment]);
+  }, []);
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-4 space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Configurações</h3>
-          
-          {/* Department Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="department">Coordenação</Label>
+    <div className="border rounded-lg bg-white p-4 space-y-6">
+      <h2 className="text-lg font-semibold mb-4">Controles do Dashboard</h2>
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="department">Coordenação</Label>
+          {isLoadingDepartments ? (
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm text-gray-500">Carregando coordenações...</span>
+            </div>
+          ) : (
             <Select 
               value={selectedDepartment} 
               onValueChange={setSelectedDepartment}
-              disabled={isLoading}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id="department" className="w-full">
                 <SelectValue placeholder="Selecione uma coordenação" />
               </SelectTrigger>
               <SelectContent>
                 {departments.map((dept) => (
                   <SelectItem key={dept.id} value={dept.id}>
-                    {dept.sigla ? dept.sigla : dept.descricao}
+                    {dept.descricao}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {isLoading && <p className="text-xs text-gray-500">Carregando coordenações...</p>}
-          </div>
-
-          {/* Dashboard Type Selection */}
-          <div className="space-y-2">
-            <Label>Tipo de Dashboard</Label>
-            <div className="flex space-x-2">
-              <Button 
-                variant={selectedViewType === 'dashboard' ? 'default' : 'outline'}
-                onClick={() => setSelectedViewType('dashboard')}
-                className="flex-1"
-              >
-                <LayoutDashboard className="h-4 w-4 mr-2" />
-                Padrão
-              </Button>
-              <Button 
-                variant={selectedViewType === 'communication' ? 'default' : 'outline'}
-                onClick={() => setSelectedViewType('communication')}
-                className="flex-1"
-              >
-                <MessageSquareReply className="h-4 w-4 mr-2" />
-                Comunicação
-              </Button>
-            </div>
-          </div>
-          
-          {/* Device Preview Toggle */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="mobile-preview">Visualização Mobile</Label>
-            <div className="flex items-center space-x-2">
-              <Monitor className={`h-4 w-4 ${!isMobilePreview ? 'text-blue-600' : 'text-gray-400'}`} />
-              <Switch 
-                id="mobile-preview" 
-                checked={isMobilePreview}
-                onCheckedChange={setIsMobilePreview}
-              />
-              <Smartphone className={`h-4 w-4 ${isMobilePreview ? 'text-blue-600' : 'text-gray-400'}`} />
-            </div>
-          </div>
+          )}
         </div>
-        
-        {selectedViewType === 'dashboard' && (
-          <div className="pt-4 border-t border-gray-200">
-            <Button 
-              variant="outline" 
-              className="w-full mb-2"
-              onClick={onAddNewCard}
-            >
-              + Adicionar Card
-            </Button>
-            
-            <Button 
-              variant="default" 
-              className="w-full"
-              onClick={onSaveDashboard}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar Dashboard
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+        <div className="space-y-2">
+          <Label htmlFor="viewType">Tipo de Visualização</Label>
+          <Select 
+            value={selectedViewType} 
+            onValueChange={(value) => setSelectedViewType(value as 'dashboard' | 'communication')}
+          >
+            <SelectTrigger id="viewType">
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dashboard">Dashboard Padrão</SelectItem>
+              <SelectItem value="communication">Comunicação</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-2 pt-2">
+          <Switch 
+            id="mobilePreview" 
+            checked={isMobilePreview}
+            onCheckedChange={setIsMobilePreview}
+          />
+          <Label htmlFor="mobilePreview" className="cursor-pointer flex items-center">
+            {isMobilePreview ? 
+              <Smartphone className="h-4 w-4 mr-2" /> : 
+              <Monitor className="h-4 w-4 mr-2" />
+            }
+            {isMobilePreview ? "Visualização Mobile" : "Visualização Desktop"}
+          </Label>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <Button 
+          onClick={onAddNewCard} 
+          variant="outline" 
+          size="sm"
+          className="w-full"
+        >
+          <Plus className="h-4 w-4 mr-2" /> Adicionar Novo Card
+        </Button>
+
+        <Button 
+          onClick={onSaveDashboard} 
+          variant="default" 
+          size="sm"
+          className="w-full"
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" /> Salvar Dashboard
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 };
 
