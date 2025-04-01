@@ -1,14 +1,14 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { CardColor, CardWidth, CardHeight, CardType, ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
-// Simplified config to avoid excessive type instantiation
-type ConfigType = Record<string, ActionCardItem[]>;
+type SaveConfigFn = (cards: ActionCardItem[], deptId?: string) => Promise<boolean>;
 
 export const useDefaultDashboardConfig = (departmentId?: string) => {
-  const [config, setConfig] = useState<ConfigType>({});
+  const [config, setConfig] = useState<Record<string, ActionCardItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [defaultConfig, setDefaultConfig] = useState<ActionCardItem[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>(departmentId || '');
@@ -144,7 +144,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     }
   };
 
-  const saveConfig = async (cards: ActionCardItem[], deptId?: string) => {
+  const saveConfig: SaveConfigFn = async (cards, deptId) => {
     try {
       setIsSaving(true);
       const departmentToUse = deptId || selectedDepartment || departmentId || (user ? user.coordenacao_id : null);

@@ -9,7 +9,7 @@ export type CardColor =
 
 export type CardWidth = '25' | '33' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
-export type CardType = 'standard' | 'data_dynamic' | 'special';
+export type CardType = 'standard' | 'data_dynamic' | 'special' | 'smart_search';
 export type DataSourceKey = string;
 
 export interface ActionCardItem {

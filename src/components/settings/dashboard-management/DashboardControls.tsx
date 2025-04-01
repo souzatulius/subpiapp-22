@@ -87,7 +87,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
     fetchDepartments();
   }, [setSelectedDepartment, selectedDepartment]);
 
-  // Fix the handleResetDashboard function to avoid recursive types
   const handleResetDashboard = async () => {
     setIsResetting(true);
     try {
