@@ -38,6 +38,13 @@ interface UnifiedCardGridProps {
   isMobileView?: boolean;
   isEditMode?: boolean;
   disableWiggleEffect?: boolean;
+  // Add properties to support special cards
+  showSpecialFeatures?: boolean;
+  quickDemandTitle?: string;
+  onQuickDemandTitleChange?: (value: string) => void;
+  onQuickDemandSubmit?: () => void;
+  onSearchSubmit?: (query: string) => void;
+  specialCardsData?: any;
 }
 
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
@@ -49,6 +56,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   isMobileView = false,
   isEditMode = false,
   disableWiggleEffect = false,
+  showSpecialFeatures = true,
+  quickDemandTitle,
+  onQuickDemandTitleChange,
+  onQuickDemandSubmit,
+  onSearchSubmit,
+  specialCardsData
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -89,7 +102,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       id: card.id,
       width: card.width || '25', 
       height: card.height || '1',
-      type: card.type
+      type: card.type as any
     })), 
     isMobileView
   );
@@ -127,6 +140,13 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 onHide={onHideCard}
                 iconSize={isMobileView ? 'lg' : 'xl'}
                 disableWiggleEffect={disableWiggleEffect}
+                // Pass through properties for special cards
+                showSpecialFeatures={showSpecialFeatures}
+                quickDemandTitle={quickDemandTitle}
+                onQuickDemandTitleChange={onQuickDemandTitleChange}
+                onQuickDemandSubmit={onQuickDemandSubmit}
+                onSearchSubmit={onSearchSubmit}
+                specialCardsData={specialCardsData}
               />
             </div>
           ))}

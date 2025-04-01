@@ -5,6 +5,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { ActionCardItem, CardColor, CardWidth, CardHeight } from '@/types/dashboard';
 import { getColorClasses } from './utils/cardColorUtils';
 import { X, Pencil, Eye, EyeOff } from 'lucide-react';
+import QuickDemandCard from './QuickDemandCard';
+import SmartSearchCard from './SmartSearchCard';
+import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
 export interface UnifiedActionCardProps {
   id: string;
@@ -28,6 +31,17 @@ export interface UnifiedActionCardProps {
   onHide?: (id: string) => void;
   isHidden?: boolean;
   isCustom?: boolean;
+  
+  // Special card properties
+  showSpecialFeatures?: boolean;
+  type?: string;
+  isQuickDemand?: boolean;
+  isSearch?: boolean;
+  quickDemandTitle?: string;
+  onQuickDemandTitleChange?: (value: string) => void;
+  onQuickDemandSubmit?: () => void;
+  onSearchSubmit?: (query: string) => void;
+  specialCardsData?: any;
 }
 
 // Card Controls Component
@@ -113,7 +127,18 @@ const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   onEdit,
   onDelete,
   onHide,
-  isCustom = false
+  isCustom = false,
+  
+  // Special card properties
+  showSpecialFeatures = true,
+  type,
+  isQuickDemand,
+  isSearch,
+  quickDemandTitle,
+  onQuickDemandTitleChange,
+  onQuickDemandSubmit,
+  onSearchSubmit,
+  specialCardsData
 }) => {
   const navigate = (e: React.MouseEvent) => {
     if (!isEditing && path) {
@@ -124,8 +149,7 @@ const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   // Get the icon component based on iconId
   let IconComponent;
   try {
-    const icons = require('lucide-react');
-    IconComponent = icons[iconId as keyof typeof icons];
+    IconComponent = getIconComponentFromId(iconId);
   } catch (error) {
     console.warn(`Icon '${iconId}' not found`, error);
   }
@@ -145,12 +169,15 @@ const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   const wiggleClass = !disableWiggleEffect && isEditing
     ? 'hover:animate-wiggle cursor-move'
     : '';
+    
+  // Check if this is a special card that has a custom implementation
+  const isSpecialCard = (isQuickDemand || isSearch) && showSpecialFeatures;
 
   return (
     <div
-      onClick={navigate}
+      onClick={!isSpecialCard ? navigate : undefined}
       className={`group relative flex flex-col h-full rounded-xl transition-all duration-200 
-        ${colorClasses} ${isEditing ? 'cursor-move' : 'cursor-pointer'} ${wiggleClass}`}
+        ${colorClasses} ${isEditing ? 'cursor-move' : isSpecialCard ? '' : 'cursor-pointer'} ${wiggleClass}`}
     >
       {isEditing && showControls && (
         <CardControls
@@ -162,25 +189,46 @@ const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
         />
       )}
 
-      <div className="flex flex-col items-center justify-center p-4 h-full text-center">
-        {hasBadge && badgeValue && (
-          <div className="absolute top-2 left-2 bg-white text-black text-xs font-bold px-2 py-1 rounded-full">
-            {badgeValue}
-          </div>
-        )}
+      {isSpecialCard ? (
+        <>
+          {isQuickDemand && (
+            <QuickDemandCard
+              title={title}
+              demandTitle={quickDemandTitle || ''}
+              onDemandTitleChange={onQuickDemandTitleChange}
+              onSubmit={onQuickDemandSubmit}
+              isEditMode={isEditing}
+            />
+          )}
+          
+          {isSearch && (
+            <SmartSearchCard 
+              onSearch={onSearchSubmit}
+              isEditMode={isEditing}
+            />
+          )}
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center p-4 h-full text-center">
+          {hasBadge && badgeValue && (
+            <div className="absolute top-2 left-2 bg-white text-black text-xs font-bold px-2 py-1 rounded-full">
+              {badgeValue}
+            </div>
+          )}
 
-        {IconComponent && (
-          <div className="mb-3">
-            <IconComponent className={getIconSizeClass()} />
-          </div>
-        )}
+          {IconComponent && (
+            <div className="mb-3">
+              <IconComponent className={getIconSizeClass()} />
+            </div>
+          )}
 
-        <h3 className="font-medium leading-tight">{title}</h3>
-        
-        {hasSubtitle && subtitle && (
-          <p className="text-sm opacity-90 mt-1">{subtitle}</p>
-        )}
-      </div>
+          <h3 className="font-medium leading-tight">{title}</h3>
+          
+          {hasSubtitle && subtitle && (
+            <p className="text-sm opacity-90 mt-1">{subtitle}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

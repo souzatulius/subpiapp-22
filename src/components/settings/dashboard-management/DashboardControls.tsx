@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -10,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, RotateCcw, PlusCircle } from 'lucide-react';
+import { Loader2, Save, RotateCcw, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -182,7 +181,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           </div>
           
           <div className="flex items-center space-x-2 pt-2">
-            <Label htmlFor="mobile-preview" className="cursor-pointer">Visualização</Label>
             <div className="flex-1"></div>
             <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-full">
               <button
@@ -212,8 +210,8 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
       
       <div className="space-y-4 pt-4">
         <Button onClick={onAddNewCard} variant="outline" className="w-full justify-start">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Adicionar Novo Card
+          <Plus className="mr-2 h-4 w-4" />
+          Adicionar
         </Button>
         
         <div className="flex flex-col space-y-2">
@@ -231,7 +229,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
                   ) : (
                     <RotateCcw className="mr-2 h-4 w-4" />
                   )}
-                  Resetar Dashboard
+                  Resetar
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -250,7 +248,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}
-            Salvar Dashboard
+            Salvar
           </Button>
         </div>
       </div>
