@@ -28,6 +28,16 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Clean the input value to ensure no suffix is included
+  useEffect(() => {
+    if (value && value.includes('@')) {
+      const username = value.split('@')[0];
+      if (username !== value) {
+        onChange(username);
+      }
+    }
+  }, [value, onChange]);
+
   // Handle outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -42,7 +52,10 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+    const inputValue = e.target.value;
+    // Clean any @ or domain that might have been pasted
+    const cleanedValue = inputValue.split('@')[0];
+    onChange(cleanedValue);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -89,13 +102,12 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)} 
-          placeholder={placeholder || "usuario"} 
           className="h-full w-full border-0 bg-transparent px-4 py-3 text-base focus:outline-none focus:ring-0"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           {...registerField}
         />
-        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-gray-400">
+        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400">
           {suffix}
         </span>
       </div>

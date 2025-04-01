@@ -111,7 +111,6 @@ const ForgotPassword = () => {
                     value={email} 
                     onChange={setEmail}
                     error={emailError} 
-                    placeholder="Apenas o usuário" 
                   />
                   {emailError && <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>}
                 </div>

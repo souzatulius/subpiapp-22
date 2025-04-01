@@ -131,7 +131,6 @@ const LoginForm = () => {
               value={email}
               onChange={setEmail}
               error={emailError}
-              placeholder="Apenas o usuário"
             />
             {emailError && <p className="text-sm text-[#f57b35]">E-mail é obrigatório</p>}
           </div>
