@@ -107,12 +107,12 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
   const saveDefaultDashboard = async (cards: ActionCardItem[] = config) => {
     try {
-      // Use RPC function instead of direct table access
+      // Usando uma chamada direta para a tabela ao invés da função RPC
       const { error } = await supabase
-        .rpc('save_default_dashboard', {
-          view_type: selectedViewType,
-          cards_config: JSON.stringify(cards)
-        });
+        .from('department_dashboards')
+        .update({ cards_config: JSON.stringify(cards) })
+        .eq('department', 'default')
+        .eq('view_type', selectedViewType);
 
       if (error) {
         console.error('Error saving default dashboard:', error);
@@ -129,14 +129,28 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
   const resetAllDashboards = async () => {
     setIsSaving(true);
     try {
-      // Use RPC function to reset all dashboards
-      const { error } = await supabase
-        .rpc('reset_all_dashboards', {
-          view_type_param: selectedViewType
-        });
+      // Buscar a configuração padrão
+      const { data: defaultConfig, error: fetchError } = await supabase
+        .from('department_dashboards')
+        .select('cards_config')
+        .eq('department', 'default')
+        .eq('view_type', selectedViewType)
+        .single();
 
-      if (error) {
-        console.error('Error resetting dashboards:', error);
+      if (fetchError) {
+        console.error('Error fetching default configuration:', fetchError);
+        return false;
+      }
+
+      // Atualizar todos os dashboards com a configuração padrão
+      const { error: updateError } = await supabase
+        .from('department_dashboards')
+        .update({ cards_config: defaultConfig.cards_config })
+        .neq('department', 'default')
+        .eq('view_type', selectedViewType);
+
+      if (updateError) {
+        console.error('Error resetting dashboards:', updateError);
         return false;
       }
 

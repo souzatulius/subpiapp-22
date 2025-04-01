@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Smartphone } from 'lucide-react';
 
@@ -11,7 +12,7 @@ const PWAButton: React.FC = () => {
   return (
     <div>
       <button 
-        className="fixed bottom-6 right-6 p-8 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center animate-pulse hover:scale-105"
+        className="fixed bottom-6 right-6 p-5 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center animate-pulse hover:scale-105"
         style={{
           animation: 'breathing 3s ease-in-out infinite',
         }}
