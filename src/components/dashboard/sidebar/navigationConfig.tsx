@@ -78,3 +78,17 @@ export const navigationConfig = {
     }
   ]
 };
+
+// Function to get flattened navigation items for mobile navigation
+export const getNavigationSections = () => {
+  return navigationConfig.sections.map(section => {
+    // For each section, return the first item as the representative for that section
+    const firstItem = section.items[0];
+    return {
+      id: section.id,
+      label: firstItem.label,
+      path: firstItem.path,
+      icon: firstItem.icon,
+    };
+  });
+};
