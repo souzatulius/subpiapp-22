@@ -12,11 +12,11 @@ const PWAButton: React.FC = () => {
   return (
     <>
       <button 
-        className="fixed bottom-6 right-6 p-6 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center hover:scale-105"
+        className="fixed bottom-6 right-6 p-8 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center hover:scale-105"
         onClick={toggleInstructions}
         aria-label="Adicionar à tela inicial"
       >
-        <Smartphone className="h-12 w-12" />
+        <Smartphone className="h-8 w-8" />
       </button>
 
       {isOpen && (

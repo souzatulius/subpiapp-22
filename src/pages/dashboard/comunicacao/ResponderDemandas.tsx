@@ -5,7 +5,6 @@ import { MessageCircle, FileText } from 'lucide-react';
 import ResponderDemandaForm from '@/components/dashboard/forms/ResponderDemandaForm';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useDashboardState } from '@/hooks/useDashboardState';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const ResponderDemandas = () => {
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ const ResponderDemandas = () => {
   const query = new URLSearchParams(location.search);
   const demandaId = query.get('id');
   const { firstName } = useDashboardState();
-  const isMobile = useIsMobile();
   
   const handleNavigateToConsultar = () => {
     navigate('/dashboard/comunicacao/consultar-demandas');
@@ -26,7 +24,7 @@ const ResponderDemandas = () => {
         description={`Olá ${firstName}, atenda às solicitações pendentes de comunicação`}
         icon={<MessageCircle className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-700 to-blue-800"
-        showButton={!isMobile} // Hide button on mobile
+        showButton={true}
         buttonText="Consultar Outras Demandas"
         buttonIcon={<FileText className="h-4 w-4" />}
         buttonVariant="outline"

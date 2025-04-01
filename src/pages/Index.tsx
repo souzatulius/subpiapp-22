@@ -3,11 +3,8 @@ import React from 'react';
 import PWAButton from '@/components/PWAButton';
 import Header from '@/components/layouts/Header';
 import LeftContentSection from '@/components/shared/LeftContentSection';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
-  const isMobile = useIsMobile();
-  
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header - explicitly pass showControls={false} */}
@@ -20,11 +17,11 @@ const Index = () => {
           <LeftContentSection />
         </div>
         
-        {/* Right side with blue background and background image (hidden on mobile) */}
+        {/* Right side with blue background and background image */}
         <div 
           className="w-full md:w-1/2 bg-[#003570] flex flex-col items-center justify-center p-8 relative animate-fade-right"
           style={{
-            backgroundImage: isMobile ? 'none' : 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
+            backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
             backgroundSize: 'cover',
             backgroundPosition: 'left center',
             backgroundRepeat: 'no-repeat'

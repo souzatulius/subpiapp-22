@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import SidebarSection from './sidebar/SidebarSection';
 import { getNavigationSections } from './sidebar/navigationConfig';
 import { useAdminCheck } from './sidebar/useAdminCheck';
-import { useLocation } from 'react-router-dom';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -15,38 +14,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 }) => {
   const { user } = useAuth();
   const { isAdmin } = useAdminCheck(user);
-  const location = useLocation();
   
   // Get navigation sections from config
   const navSections = getNavigationSections();
-
-  // Improved function to determine which navigation item is active
-  const getActiveSection = () => {
-    // First, check for exact matches
-    const exactMatch = navSections.find(section => section.path === location.pathname);
-    if (exactMatch) return exactMatch.id;
-    
-    // Check if we're on a child route of a section and handle nested routes properly
-    // Sort paths by length descending to check the most specific paths first
-    const sortedSections = [...navSections].sort(
-      (a, b) => (b.path?.length || 0) - (a.path?.length || 0)
-    );
-    
-    for (const section of sortedSections) {
-      // Skip the home/dashboard root path when checking child routes to avoid it always being active
-      if (section.path === '/dashboard' && location.pathname !== '/dashboard') {
-        continue;
-      }
-      
-      if (section.path && location.pathname.startsWith(section.path + '/')) {
-        return section.id;
-      }
-    }
-    
-    return null;
-  };
-
-  const activeSectionId = getActiveSection();
 
   return (
     <aside className={`bg-[#051b2c] transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'} flex-shrink-0 overflow-x-hidden`}>
@@ -61,7 +31,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 isSection={section.isSection}
                 isOpen={isOpen}
                 path={section.path}
-                isActive={section.id === activeSectionId}
               />
             </li>
           ))}

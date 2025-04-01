@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 interface SubSection {
   id: string;
@@ -27,7 +28,6 @@ interface SidebarSectionProps {
   subSections?: SubSection[];
   items?: SectionItem[];
   path?: string;
-  isActive?: boolean;
 }
 
 const SidebarSection: React.FC<SidebarSectionProps> = ({
@@ -38,10 +38,8 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
   isOpen,
   subSections,
   items,
-  path,
-  isActive = false
+  path
 }) => {
-  const location = useLocation();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     [id]: true
   });
@@ -87,58 +85,11 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
     }
   }, [isOpen, isTogglingOpen]);
 
-  // Improved function to check if a route is active
-  const isRouteActive = (itemPath: string) => {
-    if (!itemPath) return false;
-    
-    // Use the isActive prop passed from parent for top-level sections
-    if (itemPath === path) {
-      return isActive;
-    }
-    
-    const isExactMatch = location.pathname === itemPath;
-    const isChildRoute = location.pathname.startsWith(itemPath + '/');
-    
-    // If we're on a child route, we need to check if there's a more specific match
-    // among the other navigation items to avoid multiple active items
-    let isMoreSpecificMatch = false;
-    
-    if (isChildRoute) {
-      // Check subsections and their items
-      const allRoutes: string[] = [];
-      
-      // Collect all possible routes from subsections
-      subSections?.forEach(subSection => {
-        subSection.items?.forEach(item => {
-          if (item.path && item.path !== itemPath) {
-            allRoutes.push(item.path);
-          }
-        });
-      });
-      
-      // Collect all routes from direct items
-      items?.forEach(item => {
-        if (item.path && item.path !== itemPath) {
-          allRoutes.push(item.path);
-        }
-      });
-      
-      // Check if there's a more specific route that matches the current location
-      isMoreSpecificMatch = allRoutes.some(route => 
-        route.startsWith(itemPath + '/') && location.pathname.startsWith(route)
-      );
-    }
-    
-    return isExactMatch || (isChildRoute && !isMoreSpecificMatch);
-  };
-
   if (!isSection) {
     return (
       <NavLink 
         to={path || '#'} 
-        className={`flex items-center px-4 py-3 rounded-xl mb-1 ${
-          isActive ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'
-        } transition-colors`}
+        className={({isActive}) => `flex items-center px-4 py-3 rounded-xl mb-1 ${isActive ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'} transition-colors`}
       >
         <div className="flex-shrink-0 text-[#f57737]">{icon}</div>
         <span className={`ml-3 text-base ${isOpen ? 'block' : 'hidden'}`}>{label}</span>
@@ -176,11 +127,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                     <li key={`${subSection.id}-item-${index}`}>
                       <NavLink 
                         to={item.path} 
-                        className={({ isActive }) => {
-                          // Using our improved custom logic instead of NavLink's default logic
-                          const isActiveRoute = isRouteActive(item.path);
-                          return `flex items-center py-2 px-3 ${isActiveRoute ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
-                        }}
+                        className={({isActive}) => `flex items-center py-2 px-3 ${isActive ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`}
                       >
                         <div className="flex-shrink-0 mr-2 text-[#f57737]">{item.icon}</div>
                         <span>{item.label}</span>
@@ -200,11 +147,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
             <li key={`${id}-item-${index}`}>
               <NavLink 
                 to={item.path} 
-                className={({ isActive }) => {
-                  // Using our improved custom logic instead of NavLink's default logic
-                  const isActiveRoute = isRouteActive(item.path);
-                  return `flex items-center py-2 px-3 ${isActiveRoute ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`;
-                }}
+                className={({isActive}) => `flex items-center py-2 px-3 ${isActive ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-base`}
               >
                 <div className="flex-shrink-0 mr-2 text-[#f57737]">{item.icon}</div>
                 <span>{item.label}</span>

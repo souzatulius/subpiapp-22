@@ -13,7 +13,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   comentarios, 
   onChange,
   placeholder = "Insira seus comentários internos aqui...",
-  simplifiedText = true
+  simplifiedText = false
 }) => {
   return (
     <div className="space-y-2">
@@ -27,7 +27,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
         value={comentarios}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="min-h-[120px] border-gray-300 rounded-md"
+        className="min-h-[120px] border-gray-300"
       />
     </div>
   );

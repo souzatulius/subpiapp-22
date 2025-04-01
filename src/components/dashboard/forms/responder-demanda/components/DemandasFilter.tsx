@@ -19,8 +19,6 @@ interface DemandasFilterProps {
   areas: { id: string; nome: string }[];
   onBack?: () => void;
   showBackButton?: boolean;
-  showSearchIcon?: boolean;
-  onSearchClick?: () => void;
 }
 
 const DemandasFilter: React.FC<DemandasFilterProps> = ({
@@ -34,9 +32,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
   setViewMode,
   areas,
   onBack,
-  showBackButton,
-  showSearchIcon,
-  onSearchClick
+  showBackButton
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -67,27 +63,15 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           </Button>
         )}
 
-        {/* Desktop search field or Mobile search icon */}
-        {isMobile && showSearchIcon ? (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onSearchClick}
-            className="ml-auto"
-          >
-            <Search className="h-4 w-4" />
-          </Button>
-        ) : (
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar demanda..."
-              className="pl-9 pr-4 py-2"
-            />
-          </div>
-        )}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar demanda..."
+            className="pl-9 pr-4 py-2"
+          />
+        </div>
 
         <Button
           variant="outline"

@@ -88,10 +88,10 @@ const Settings = () => {
           {/* Somente mostrar sidebar no desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className="flex-1 overflow-hidden w-full">
+          <main className="flex-1 overflow-hidden">
             <div className="w-full h-full">
-              <div className="overflow-y-auto px-4 sm:px-6 py-6 pb-24 md:pb-6">
-                <div className="w-full mx-auto">
+              <div className="overflow-y-auto p-6 pb-24 md:pb-6">
+                <div className="max-w-7xl mx-auto">
                   {activeSection === 'dashboard' ? (
                     <div>
                       <SettingsDashboard searchQuery={searchQuery} />
