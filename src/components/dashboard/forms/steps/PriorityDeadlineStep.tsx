@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from '@/components/dashboard/forms/steps/identification/ValidationUtils';
 import { DatePicker } from '@/components/ui/date-picker';
 import { isValid } from 'date-fns';
+import { Input } from '@/components/ui/input';
+import { formatDateToString } from '@/lib/inputFormatting';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -36,6 +38,16 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     prazoDate = undefined;
   }
   
+  // Extract time from the date for the time input
+  const [timeValue, setTimeValue] = useState(() => {
+    if (prazoDate && isValid(prazoDate)) {
+      const hours = prazoDate.getHours().toString().padStart(2, '0');
+      const minutes = prazoDate.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+    return "00:00";
+  });
+  
   // Handle date selection from the DatePicker
   const handleDateChange = (date: Date | undefined) => {
     if (!date) {
@@ -44,8 +56,32 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     }
     
     if (isValid(date)) {
-      // Use the Date object directly with its time information
+      // Parse the current time value
+      const [hours, minutes] = timeValue.split(':').map(Number);
+      
+      // Set the time on the selected date
+      date.setHours(hours || 0);
+      date.setMinutes(minutes || 0);
+      
+      // Use the Date object with time information
       handleSelectChange('prazo_resposta', date.toISOString());
+    }
+  };
+
+  // Handle time input changes
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTimeValue = e.target.value;
+    setTimeValue(newTimeValue);
+    
+    // If we have a valid date, update the prazo_resposta with the new time
+    if (prazoDate && isValid(prazoDate)) {
+      const [hours, minutes] = newTimeValue.split(':').map(Number);
+      
+      const newDate = new Date(prazoDate);
+      newDate.setHours(hours || 0);
+      newDate.setMinutes(minutes || 0);
+      
+      handleSelectChange('prazo_resposta', newDate.toISOString());
     }
   };
 
@@ -112,14 +148,33 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
           >
             Prazo para resposta {hasFieldError('prazo_resposta', errors) && <span className="text-orange-500">*</span>}
           </Label>
-          <div className="mt-1">
-            <DatePicker
-              date={prazoDate}
-              setDate={handleDateChange}
-              placeholder="Selecione uma data"
-              className={hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}
-              showTimeSelect={true}
-            />
+          <div className="mt-1 space-y-2">
+            <div>
+              <Label htmlFor="prazo_data" className="text-sm text-gray-500">Data</Label>
+              <DatePicker
+                date={prazoDate}
+                setDate={handleDateChange}
+                placeholder="Selecione uma data"
+                className={hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="prazo_hora" className="text-sm text-gray-500">Horário</Label>
+              <Input
+                id="prazo_hora"
+                type="time"
+                value={timeValue}
+                onChange={handleTimeChange}
+                className={hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}
+              />
+            </div>
+            
+            {prazoDate && isValid(prazoDate) && (
+              <div className="text-sm text-gray-500 mt-1">
+                Data e hora selecionada: {formatDateToString(prazoDate)} às {timeValue}
+              </div>
+            )}
           </div>
           {hasFieldError('prazo_resposta', errors) && (
             <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('prazo_resposta', errors)}</p>
