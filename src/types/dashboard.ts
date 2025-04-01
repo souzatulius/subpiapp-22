@@ -36,4 +36,5 @@ export interface ActionCardItem {
   hasSubmenu?: boolean;
   hasBadge?: boolean;
   badgeValue?: string;
+  isHidden?: boolean; // Added this property
 }

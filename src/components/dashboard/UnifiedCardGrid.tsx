@@ -12,13 +12,13 @@ import {
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass } from './CardGrid';
-import { ActionCardItem, CardType, CardColor } from '@/types/dashboard';
+import { ActionCardItem, CardType, CardColor, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
 // Make sure UnifiedCardItem includes all required properties from ActionCardItem
-export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color'> {
-  width?: string;
-  height?: string;
+export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color' | 'width' | 'height'> {
+  width?: CardWidth;
+  height?: CardHeight;
   displayMobile?: boolean;
   mobileOrder?: number;
   type: CardType;
@@ -116,7 +116,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
               className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
             >
               <SortableUnifiedActionCard
-                {...card}
+                {...card as UnifiedActionCardProps}
                 isDraggable={isEditMode}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {

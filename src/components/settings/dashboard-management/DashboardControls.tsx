@@ -25,6 +25,12 @@ import {
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
 
+interface Department {
+  id: string;
+  descricao: string;
+  sigla: string | null;
+}
+
 interface DashboardControlsProps {
   selectedDepartment: string;
   setSelectedDepartment: (department: string) => void;
@@ -48,7 +54,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
   onSaveDashboard,
   isSaving
 }) => {
-  const [departments, setDepartments] = useState<{ id: string; descricao: string; sigla: string | null }[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isResetting, setIsResetting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -116,6 +122,12 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
     }
   };
 
+  // Find the current department name or acronym to display
+  const getDepartmentDisplay = () => {
+    const currentDept = departments.find(d => d.id === selectedDepartment);
+    return currentDept?.sigla || currentDept?.descricao || 'Selecione uma coordenação';
+  };
+
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg border shadow-sm">
       <div>
@@ -137,9 +149,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
                       <span>Carregando...</span>
                     </div>
                   ) : (
-                    departments.find(d => d.id === selectedDepartment)?.sigla || 
-                    departments.find(d => d.id === selectedDepartment)?.descricao || 
-                    'Selecione uma coordenação'
+                    getDepartmentDisplay()
                   )}
                 </SelectValue>
               </SelectTrigger>
