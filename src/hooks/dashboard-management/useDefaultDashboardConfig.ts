@@ -249,12 +249,13 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     try {
       setIsSaving(true);
       
-      // Use a raw query for the default_dashboard table since it's not in the typed schema
+      // Instead of using rpc function, directly update the default_dashboard table
       const { error } = await supabase
-        .rpc('upsert_default_dashboard', {
-          dashboard_id: 'default',
-          cards_config_json: JSON.stringify(cards),
-          current_timestamp: new Date().toISOString()
+        .from('default_dashboard')
+        .upsert({
+          id: 'default',
+          cards_config: JSON.stringify(cards),
+          updated_at: new Date().toISOString()
         });
       
       if (error) throw error;

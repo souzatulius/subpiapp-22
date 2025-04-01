@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,7 @@ import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { useState as useReactState } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
+import { toast } from '@/hooks/use-toast';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -143,6 +145,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     // Save changes if not in preview mode
     if (!isPreview && userDepartment) {
       saveConfig(updatedCards, userDepartment);
+      toast({
+        title: "Card ocultado",
+        description: "O card foi ocultado do dashboard",
+        variant: "success"
+      });
     }
   };
 
@@ -179,6 +186,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       // Save changes if not in preview mode
       if (!isPreview && userDepartment) {
         saveConfig(updatedCards, userDepartment);
+        toast({
+          title: "Card atualizado",
+          description: "O card foi atualizado com sucesso",
+          variant: "success"
+        });
       }
     }
     
