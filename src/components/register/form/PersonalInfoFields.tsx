@@ -43,7 +43,6 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
         </label>
         <EmailSuffix
           id="email"
-          name="email" 
           value={email}
           onChange={(value) => handleChange({ target: { name: 'email', value } } as React.ChangeEvent<HTMLInputElement>)}
           suffix="@smsub.prefeitura.sp.gov.br"

@@ -49,16 +49,7 @@ const RegisterForm = ({ roles, areas, coordenacoes, loadingOptions }) => {
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Cadastre-se</h2>
       <p className="text-[#6B7280] mb-6">Preencha seus dados para solicitar acesso à plataforma.</p>
 
-      {/* Botão de acesso rápido para mobile */}
-      {isMobile && (
-        <button
-          type="button"
-          onClick={scrollToForm}
-          className="w-full mb-6 bg-[#003570] text-white py-3 px-4 rounded-xl flex items-center justify-center"
-        >
-          Solicitar Acesso
-        </button>
-      )}
+      {/* Mobile button removed as requested */}
 
       {loadingOptions ? (
         <div className="flex items-center justify-center py-12">

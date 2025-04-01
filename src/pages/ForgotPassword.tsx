@@ -103,16 +103,7 @@ const ForgotPassword = () => {
               Digite seu e-mail para receber um link de recuperação de senha.
             </p>
             
-            {/* Botão de acesso rápido para mobile */}
-            {isMobile && (
-              <button
-                type="button"
-                onClick={scrollToForm}
-                className="w-full mb-6 bg-[#003570] text-white py-3 px-4 rounded-xl flex items-center justify-center"
-              >
-                Recuperar Senha
-              </button>
-            )}
+            {/* Mobile button removed as requested */}
             
             <form id="recovery-form" ref={formRef} onSubmit={handleResetPassword}>
               <div className="space-y-4">

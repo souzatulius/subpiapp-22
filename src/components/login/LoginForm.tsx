@@ -108,15 +108,7 @@ const LoginForm = () => {
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
       <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
 
-      {isMobile && (
-        <button
-          type="button"
-          onClick={scrollToForm}
-          className="w-full mb-6 bg-[#003570] text-white py-3 px-4 rounded-xl flex items-center justify-center"
-        >
-          <LogIn className="mr-2 h-5 w-5" /> Acessar
-        </button>
-      )}
+      {/* Mobile button removed as requested */}
 
       <form id="login-form" ref={formRef} onSubmit={handleLogin}>
         <div className="space-y-4">
