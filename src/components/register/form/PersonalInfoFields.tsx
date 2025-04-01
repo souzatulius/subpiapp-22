@@ -32,7 +32,6 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
           value={name}
           onChange={handleChange}
           className={`w-full px-4 py-2 border ${errors.name ? 'border-[#f57b35]' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-[#003570]`}
-          placeholder="Digite seu nome completo"
         />
         {errors.name && <p className="mt-1 text-sm text-[#f57b35]">Nome completo é obrigatório</p>}
       </div>

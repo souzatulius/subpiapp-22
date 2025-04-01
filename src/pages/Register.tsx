@@ -26,30 +26,13 @@ const Register = () => {
       navigate('/dashboard');
     }
   }, [session, navigate]);
-
-  // Map roles to the expected format
-  const formattedRoles = roles.map((role: SelectOption) => ({
-    id: role.id,
-    nome: role.value
-  }));
-
-  // Map areas and coordenacoes to the expected format
-  const formattedAreas = areas.map((area: SelectOption) => ({
-    id: area.id,
-    descricao: area.value
-  }));
-
-  const formattedCoordenacoes = coordenacoes.map((coord: SelectOption) => ({
-    id: coord.id,
-    descricao: coord.value
-  }));
   
   return (
     <AuthLayout>
       <RegisterForm 
-        roles={formattedRoles} 
-        areas={formattedAreas}
-        coordenacoes={formattedCoordenacoes}
+        roles={roles} 
+        areas={areas}
+        coordenacoes={coordenacoes}
         loadingOptions={loadingOptions} 
       />
     </AuthLayout>
