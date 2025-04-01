@@ -46,6 +46,10 @@ export interface ActionCardItem {
   customProperties?: {
     description?: string;
     gradient?: string;
+    isQuickDemand?: boolean; 
+    isSearch?: boolean;
+    isOverdueDemands?: boolean;
+    isPendingActions?: boolean;
     [key: string]: any;
   };
 }

@@ -22,7 +22,44 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
   const watchType = form.watch('type');
   const isWelcomeCard = watchType === 'welcome_card';
   const isDataCard = watchType === 'data_dynamic';
-  const isSpecialCard = ['quickDemand', 'search', 'overdueDemands', 'pendingActions'].includes(watchType);
+  const isSpecialCard = ['quickDemand', 'search', 'overdueDemands', 'pendingActions'].includes(watchType || '');
+
+  // Initialize default values for required fields
+  useEffect(() => {
+    // Ensure required fields have values
+    if (!form.getValues('title')) {
+      form.setValue('title', 'Novo Card');
+    }
+    
+    if (!form.getValues('color')) {
+      form.setValue('color', 'blue');
+    }
+    
+    if (!form.getValues('iconId')) {
+      form.setValue('iconId', 'Layout');
+    }
+    
+    if (!form.getValues('type')) {
+      form.setValue('type', 'standard');
+    }
+    
+    if (!form.getValues('width')) {
+      form.setValue('width', '25');
+    }
+    
+    if (!form.getValues('height')) {
+      form.setValue('height', '1');
+    }
+    
+    if (!form.getValues('path') && !isSpecialCard && !isDataCard && !isWelcomeCard) {
+      form.setValue('path', '/demandas');
+    }
+    
+    // Initialize customProperties
+    if (!form.getValues('customProperties')) {
+      form.setValue('customProperties', {});
+    }
+  }, []);
 
   // Quando o tipo de card muda, ajustar outros campos
   useEffect(() => {
@@ -36,35 +73,36 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
       form.setValue('dataSourceKey', 'pendencias_por_coordenacao');
     }
     
+    // Initialize customProperties if it doesn't exist yet
+    if (!form.getValues('customProperties')) {
+      form.setValue('customProperties', {});
+    }
+    
     // Se for um card especial, configurar propriedades
     if (watchType === 'quickDemand') {
       form.setValue('title', 'Nova Demanda Rápida');
-      // Initialize customProperties if it doesn't exist yet
-      if (!form.getValues('customProperties')) {
-        form.setValue('customProperties', {});
-      }
-      form.setValue('customProperties.isQuickDemand', true);
+      form.setValue('customProperties', {
+        ...(form.getValues('customProperties') || {}),
+        isQuickDemand: true
+      });
     } else if (watchType === 'search') {
       form.setValue('title', 'Pesquisar');
-      // Initialize customProperties if it doesn't exist yet
-      if (!form.getValues('customProperties')) {
-        form.setValue('customProperties', {});
-      }
-      form.setValue('customProperties.isSearch', true);
+      form.setValue('customProperties', {
+        ...(form.getValues('customProperties') || {}),
+        isSearch: true
+      });
     } else if (watchType === 'overdueDemands') {
       form.setValue('title', 'Demandas Atrasadas');
-      // Initialize customProperties if it doesn't exist yet
-      if (!form.getValues('customProperties')) {
-        form.setValue('customProperties', {});
-      }
-      form.setValue('customProperties.isOverdueDemands', true);
+      form.setValue('customProperties', {
+        ...(form.getValues('customProperties') || {}),
+        isOverdueDemands: true
+      });
     } else if (watchType === 'pendingActions') {
       form.setValue('title', 'Ações Pendentes');
-      // Initialize customProperties if it doesn't exist yet
-      if (!form.getValues('customProperties')) {
-        form.setValue('customProperties', {});
-      }
-      form.setValue('customProperties.isPendingActions', true);
+      form.setValue('customProperties', {
+        ...(form.getValues('customProperties') || {}),
+        isPendingActions: true
+      });
     }
   }, [watchType, form]);
 
@@ -180,7 +218,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
         <div>
           <Label htmlFor="iconId">Ícone</Label>
           <IconSelector 
-            value={form.watch('iconId')} 
+            value={form.watch('iconId') || 'Layout'} 
             onChange={(id) => form.setValue('iconId', id)} 
           />
         </div>
@@ -194,7 +232,7 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
             <div className="py-4">
               <Label>Cor do Card</Label>
               <ColorOptions 
-                value={form.watch('color')} 
+                value={form.watch('color') || 'blue'} 
                 onChange={(color) => form.setValue('color', color as CardColor)} 
               />
             </div>
@@ -203,8 +241,8 @@ const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) =>
             <div className="py-4">
               <Label>Tamanho do Card</Label>
               <DimensionOptions 
-                width={form.watch('width')} 
-                height={form.watch('height')}
+                width={form.watch('width') || '25'} 
+                height={form.watch('height') || '1'}
                 onWidthChange={(width) => form.setValue('width', width as "25" | "50" | "75" | "100")}
                 onHeightChange={(height) => form.setValue('height', height as "1" | "2")}
               />
