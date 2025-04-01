@@ -181,27 +181,29 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
             />
           </div>
 
-          <div className="flex justify-between pt-4">
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={onAddNewCard}>
-                <Plus className="h-4 w-4 mr-1" /> Adicionar
+          <div className="flex flex-col space-y-2 pt-4">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={onAddNewCard}
+            >
+              <Plus className="h-4 w-4 mr-2" /> Adicionar
+            </Button>
+            
+            {onResetDashboards && (
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setIsResetDialogOpen(true)}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" /> Resetar
               </Button>
-              
-              {onResetDashboards && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setIsResetDialogOpen(true)}
-                >
-                  <RefreshCw className="h-4 w-4 mr-1" /> Resetar
-                </Button>
-              )}
-            </div>
+            )}
             
             <Button 
               onClick={handleSave} 
               disabled={isSaving}
-              size="sm"
+              className="w-full justify-start"
             >
               {isSaving ? (
                 <>
@@ -209,7 +211,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4 mr-1" /> Salvar
+                  <Save className="h-4 w-4 mr-2" /> Salvar
                 </>
               )}
             </Button>

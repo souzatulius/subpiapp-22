@@ -191,6 +191,7 @@ const DashboardManagementContent: React.FC = () => {
                 dashboardType={selectedViewType} 
                 department={selectedDepartment}
                 isMobilePreview={isMobilePreview}
+                onAddCard={handleAddCardToDashboard}
               />
             )}
           </div>
