@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,18 +37,14 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Use type annotations to resolve the infinite type instantiation issue
-  const visibleCards = React.useMemo<ActionCardItem[]>(() => 
-    cards.filter(card => !card.hidden),
-    [cards]
-  );
+  const visibleCards = React.useMemo(() => {
+    return cards.filter(card => !card.hidden) as ActionCardItem[];
+  }, [cards]);
   
-  const hiddenCards = React.useMemo<ActionCardItem[]>(() => 
-    cards.filter(card => card.hidden === true),
-    [cards]
-  );
+  const hiddenCards = React.useMemo(() => {
+    return cards.filter(card => card.hidden === true) as ActionCardItem[];
+  }, [cards]);
   
-  // Simple function to toggle card visibility
   const toggleCardVisibility = (cardId: string) => {
     setCards(currentCards => 
       currentCards.map(card => 
@@ -58,27 +53,22 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     );
   };
   
-  // Simple function implementation for deleting a card
   const handleDeleteCard = (id: string) => {
     setCards(currentCards => currentCards.filter(card => card.id !== id));
   };
   
-  // Simple function implementation for editing a card
   const handleEditCard = (editedCard: ActionCardItem) => {
     setCards(currentCards => 
       currentCards.map(card => card.id === editedCard.id ? editedCard : card)
     );
   };
   
-  // Function to add a new card
   const handleAddNewCard = () => {
     navigate('/settings/dashboard-management');
   };
   
-  // Simplified saveDashboard function
   const saveDashboard = async (): Promise<boolean> => {
     try {
-      // Create a new array to avoid potential circular references
       const cardsToSave = cards.map(card => ({
         ...card,
         version: card.version || CURRENT_DASHBOARD_VERSION
@@ -115,7 +105,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     }
   };
   
-  // Load dashboard data
   const loadDashboard = async () => {
     setLoading(true);
     
@@ -130,7 +119,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         .single();
       
       if (error) {
-        if (error.code !== 'PGRST116') { // PGRST116 is "No rows returned" from postgREST
+        if (error.code !== 'PGRST116') {
           console.error("Erro ao carregar dashboard:", error);
           throw error;
         } else {
@@ -151,7 +140,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       } 
       else {
         console.log("Criando configuração inicial com fallback cards");
-        // Create a new array of defaultDashboardCards to avoid reference issues
         const defaultDashboardCards = fallbackCards.map(card => ({
           ...card,
           version: CURRENT_DASHBOARD_VERSION
@@ -159,7 +147,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         
         setCards(defaultDashboardCards);
         
-        // Save the default cards to the database
         await supabase
           .from('user_dashboard')
           .upsert({
@@ -188,7 +175,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
     }
   }, [userId, dashboardType]);
   
-  // Render UI based on loaded data
   if (!loading && cards.length === 0) {
     return (
       <div className="space-y-6">

@@ -4,9 +4,9 @@ import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import { useDashboardState } from '@/hooks/useDashboardState';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
-import { useUser } from '@/hooks/useUser';
+import { useUser } from '@/hooks/useUser'; // Now this import should work
 import { useMediaQuery } from '@/hooks/use-media-query';
-import PageContainer from '@/components/layouts/PageContainer';
+import PageContainer from '@/components/layouts/PageContainer'; // Now this import should work
 import { Skeleton } from '@/components/ui/skeleton';
 import UnifiedDashboard from '@/components/dashboard/UnifiedDashboard';
 import { Loader2 } from 'lucide-react';
@@ -17,7 +17,7 @@ const Dashboard = () => {
     firstName, 
     actionCards, 
     setActionCards, 
-    isLoading, // Using isLoading here
+    isLoading,
     editingCard,
     isCustomizationModalOpen,
     setIsCustomizationModalOpen,
@@ -43,7 +43,10 @@ const Dashboard = () => {
       <Header showControls={true} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} currentPath="/dashboard" />
+        <DashboardSidebar 
+          isOpen={sidebarOpen} 
+          currentPath="/dashboard" 
+        />
         
         <PageContainer>
           {isLoading ? (

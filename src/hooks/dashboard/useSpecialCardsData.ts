@@ -42,7 +42,7 @@ export const useSpecialCardsData = (): SpecialCardData => {
           }));
         }
         
-        // Fetch notes to approve
+        // Fetch notes to approve - using notas_oficiais instead of notas
         const { count: notesCount, error: notesError } = await supabase
           .from('notas_oficiais')
           .select('id', { count: 'exact', head: true })
@@ -52,7 +52,7 @@ export const useSpecialCardsData = (): SpecialCardData => {
           setData(prev => ({ ...prev, notesToApprove: notesCount || 0 }));
         }
         
-        // Fetch responses to do
+        // Fetch responses to do - using demandas instead of demandas_comunicacao
         const { count: responsesCount, error: responsesError } = await supabase
           .from('demandas')
           .select('id', { count: 'exact', head: true })

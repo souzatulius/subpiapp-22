@@ -1,72 +1,46 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import SidebarSection from './sidebar/SidebarSection';
-import { getNavigationSections } from './sidebar/navigationConfig';
+import { useNavigate } from 'react-router-dom';
 import { useAdminCheck } from './sidebar/useAdminCheck';
-import { useLocation } from 'react-router-dom';
+import SidebarSection from './sidebar/SidebarSection';
+import { navigationConfig } from './sidebar/navigationConfig';
 
-interface DashboardSidebarProps {
+export interface DashboardSidebarProps {
   isOpen: boolean;
+  currentPath?: string; // Make currentPath optional
 }
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
-  isOpen
+  isOpen,
+  currentPath = '/dashboard' // Default to dashboard path
 }) => {
-  const { user } = useAuth();
-  const { isAdmin } = useAdminCheck(user);
-  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAdmin } = useAdminCheck();
   
-  // Get navigation sections from config
-  const navSections = getNavigationSections();
-
-  // Improved function to determine which navigation item is active
-  const getActiveSection = () => {
-    // First, check for exact matches
-    const exactMatch = navSections.find(section => section.path === location.pathname);
-    if (exactMatch) return exactMatch.id;
-    
-    // Check if we're on a child route of a section and handle nested routes properly
-    // Sort paths by length descending to check the most specific paths first
-    const sortedSections = [...navSections].sort(
-      (a, b) => (b.path?.length || 0) - (a.path?.length || 0)
-    );
-    
-    for (const section of sortedSections) {
-      // Skip the home/dashboard root path when checking child routes to avoid it always being active
-      if (section.path === '/dashboard' && location.pathname !== '/dashboard') {
-        continue;
-      }
-      
-      if (section.path && location.pathname.startsWith(section.path + '/')) {
-        return section.id;
-      }
-    }
-    
-    return null;
-  };
-
-  const activeSectionId = getActiveSection();
-
+  // Filter sections based on admin status
+  const filteredSections = navigationConfig.sections.filter(
+    section => !section.adminOnly || isAdmin
+  );
+  
   return (
-    <aside className={`bg-[#051b2c] transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'} flex-shrink-0 overflow-x-hidden`}>
-      <nav className="py-6">
-        <ul className="space-y-2 px-3">
-          {navSections.map((section) => (
-            <li key={section.id} className="flex flex-col">
-              <SidebarSection
-                id={section.id}
-                icon={section.icon}
-                label={section.label}
-                isSection={section.isSection}
-                isOpen={isOpen}
-                path={section.path}
-                isActive={section.id === activeSectionId}
-              />
-            </li>
+    <aside 
+      className={`fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:relative md:translate-x-0 md:transition-none`}
+    >
+      <div className="flex flex-col h-full pt-16 overflow-y-auto">
+        <div className="flex-1 px-3 py-4 space-y-6">
+          {filteredSections.map((section) => (
+            <SidebarSection 
+              key={section.id}
+              title={section.title}
+              items={section.items}
+              currentPath={currentPath}
+              onNavigate={(path) => navigate(path)}
+            />
           ))}
-        </ul>
-      </nav>
+        </div>
+      </div>
     </aside>
   );
 };
