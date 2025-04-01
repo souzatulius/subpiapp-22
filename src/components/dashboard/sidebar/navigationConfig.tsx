@@ -4,7 +4,6 @@ import {
   Home, 
   MessageCircle, 
   BarChart2, 
-  Settings, 
   TrendingUp
 } from 'lucide-react';
 
@@ -41,13 +40,6 @@ export const getNavigationSections = () => [
     label: 'Ranking das Subs',
     path: '/dashboard/zeladoria/ranking-subs',
     isSection: false
-  },
-  // Seção 6: Ajustes - Removida a restrição adminOnly
-  {
-    id: 'ajustes',
-    icon: <Settings size={20} />,
-    label: 'Ajustes',
-    path: '/settings',
-    isSection: false
   }
+  // Settings removed from navigation
 ];
