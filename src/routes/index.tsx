@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import DashboardLayout from '@/components/layouts/DashboardLayout';
 import Login from '@/pages/Login';
@@ -43,7 +43,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
       
       {/* Protected routes with DashboardLayout */}
-      <Route element={<ProtectedRoute />}>
+      <Route element={<ProtectedRoute>{<Outlet />}</ProtectedRoute>}>
         <Route element={<DashboardLayout />}>
           {/* Dashboard */}
           <Route path="/dashboard" element={<Dashboard />} />
@@ -52,8 +52,9 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/comunicacao" element={<Comunicacao />} />
           
           {/* Protected Admin routes */}
-          <Route element={<AdminProtectedRoute />}>
+          <Route element={<AdminProtectedRoute>{<Outlet />}</AdminProtectedRoute>}>
             <Route path="/dashboard/comunicacao/cadastrar-demanda" element={<CadastrarDemanda />} />
+            <Route path="/dashboard/comunicacao/cadastrar" element={<CadastrarDemanda />} />
             <Route path="/dashboard/comunicacao/consultar-demandas" element={<ConsultarDemandas />} />
             <Route path="/dashboard/comunicacao/responder-demandas" element={<ResponderDemandas />} />
             <Route path="/dashboard/comunicacao/criar-nota-oficial" element={<CriarNotaOficial />} />
