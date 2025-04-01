@@ -16,7 +16,7 @@ const PWAButton: React.FC = () => {
         onClick={toggleInstructions}
         aria-label="Adicionar à tela inicial"
       >
-        <Smartphone className="h-8 w-8" />
+        <Smartphone className="h-10 w-10" />
       </button>
 
       {isOpen && (
