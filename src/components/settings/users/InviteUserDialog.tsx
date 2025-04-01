@@ -35,7 +35,7 @@ interface InviteUserDialogProps {
   onSubmit: (data: FormValues) => Promise<void>;
   areas: SupervisaoTecnica[];
   cargos: Cargo[];
-  coordenacoes: { coordenacao_id: string; coordenacao: string; sigla?: string }[];
+  coordenacoes: { coordenacao_id: string; coordenacao: string }[];
 }
 
 const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
@@ -105,16 +105,6 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Helper function to get display text for coordenação
-  const getCoordDisplayText = (coord: { coordenacao_id: string; coordenacao: string; sigla?: string }) => {
-    return coord.sigla || coord.coordenacao;
-  };
-  
-  // Helper function to get display text for supervisão técnica
-  const getAreaDisplayText = (area: SupervisaoTecnica) => {
-    return area.sigla || area.descricao;
   };
   
   return (
@@ -216,7 +206,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                           <SelectItem value="no-select-coord">Selecione uma coordenação</SelectItem>
                           {coordenacoes.map(coord => (
                             <SelectItem key={coord.coordenacao_id} value={coord.coordenacao_id}>
-                              {getCoordDisplayText(coord)}
+                              {coord.coordenacao}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -262,7 +252,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                               <SelectItem value="no-select-area">Selecione uma supervisão técnica</SelectItem>
                               {filteredAreas.map(area => (
                                 <SelectItem key={area.id} value={area.id}>
-                                  {getAreaDisplayText(area)}
+                                  {area.descricao}
                                 </SelectItem>
                               ))}
                             </>
