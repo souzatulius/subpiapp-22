@@ -106,8 +106,7 @@ const PWAButton: React.FC = () => {
         </div>
       )}
 
-      <style>
-        {`
+      <style jsx>{`
         @keyframes breathing {
           0% {
             box-shadow: 0 5px 15px rgba(240, 96, 0, 0.4);
@@ -122,8 +121,7 @@ const PWAButton: React.FC = () => {
             transform: scale(1);
           }
         }
-        `}
-      </style>
+      `}</style>
     </>
   );
 };
