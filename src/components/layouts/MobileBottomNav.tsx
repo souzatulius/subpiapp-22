@@ -11,16 +11,21 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   const navItems = getNavigationSections();
 
   return (
-    <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 ${className}`}>
+    <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] border-t border-gray-800 shadow-lg z-50 ${className}`}>
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => (
           <NavLink
             key={item.id}
             to={item.path}
-            className={({ isActive }) => 
-              `flex flex-col items-center justify-center w-full h-full py-1 
-              ${isActive ? 'text-[#174ba9]' : 'text-gray-500'}`
-            }
+            className={({ isActive }) => {
+              // For Dashboard, only highlight if it's exactly the dashboard path
+              const active = item.path === '/dashboard' 
+                ? location.pathname === '/dashboard'
+                : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+                
+              return `flex flex-col items-center justify-center w-full h-full py-1 
+                ${active ? 'text-white' : 'text-gray-400'}`
+            }}
           >
             <div className="text-[#f57737]">
               {item.icon}

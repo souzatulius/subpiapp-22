@@ -52,7 +52,7 @@ const MobileSettingsNav = () => {
   const activeTab = query.get('tab') || 'dashboard';
   
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] border-t border-gray-800 shadow-lg z-50">
       <div className="flex justify-around">
         {navItems.map((item) => (
           <button
@@ -61,7 +61,7 @@ const MobileSettingsNav = () => {
             className={`flex flex-col items-center justify-center py-2 px-1 flex-1 ${
               (activeTab === item.id || 
                (item.id === 'dashboard' && !activeTab)) ? 
-               'text-blue-600' : 'text-gray-500'
+               'text-white' : 'text-gray-400'
             }`}
           >
             <div className="text-[#f57737]">
