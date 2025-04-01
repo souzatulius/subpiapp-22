@@ -90,12 +90,9 @@ const PWAButton: React.FC = () => {
               </div>
 
               <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 rounded-full bg-subpi-blue text-white flex items-center justify-center text-sm font-medium">3</div>
-                  <p className="ml-2 text-sm">
-                    Após adicionar, você poderá acessar o sistema diretamente pelo ícone na tela inicial, como um aplicativo nativo.
-                  </p>
-                </div>
+                <p className="text-sm">
+                  Após adicionar, você poderá acessar o sistema diretamente pelo ícone na tela inicial, como um aplicativo nativo.
+                </p>
               </div>
 
               <div className="mt-6 flex justify-center pb-2">
