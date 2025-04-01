@@ -17,10 +17,9 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
   const location = useLocation();
   const { user } = useAuth();
   
-  // Check if current page is a public page or main dashboard page
+  // Check if current page is a public page
   const isPublicPage = ['/login', '/register', '/forgot-password', '/email-verified', '/'].includes(location.pathname) || 
                       location.pathname.includes('/404');
-  const isMainDashboardPage = location.pathname === '/dashboard';
   
   // Map of route paths to friendly names
   const routeNames: Record<string, string> = {
@@ -41,8 +40,8 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
   
   // Generate breadcrumbs based on current path
   const generateBreadcrumbs = () => {
-    // Don't show breadcrumbs on public pages or main dashboard page
-    if (!user || isPublicPage || isMainDashboardPage) {
+    // Don't show breadcrumbs on public pages
+    if (!user || isPublicPage) {
       return null;
     }
     
@@ -50,35 +49,14 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
     
     if (paths.length === 0) return null;
     
-    // Special case for settings - make settings breadcrumb clickable
-    if (paths.includes('settings')) {
+    // Special case for dashboard to avoid duplication
+    if (paths.length === 1 && paths[0] === 'dashboard') {
       return (
         <Breadcrumb className="w-full">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/dashboard">Dashboard</Link>
-              </BreadcrumbLink>
+              <span className="font-medium">Dashboard</span>
             </BreadcrumbItem>
-            
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              {/* Make "Configurações" clickable to return to settings dashboard */}
-              <BreadcrumbLink asChild>
-                <Link to="/settings">Configurações</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            
-            {paths.length > 1 && paths[0] === 'settings' && paths[1] && (
-              <>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <span className="font-medium">
-                    {routeNames[paths[1]] || (paths[1].charAt(0).toUpperCase() + paths[1].slice(1))}
-                  </span>
-                </BreadcrumbItem>
-              </>
-            )}
           </BreadcrumbList>
         </Breadcrumb>
       );
@@ -168,7 +146,7 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
       </div>
       
       {/* Breadcrumb row below the main header */}
-      {user && !isPublicPage && !isMainDashboardPage && (
+      {user && !isPublicPage && (
         <div className="px-4 py-2 border-t bg-gray-25">
           {generateBreadcrumbs()}
         </div>

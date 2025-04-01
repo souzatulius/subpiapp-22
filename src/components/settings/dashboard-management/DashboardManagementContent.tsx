@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardPreview from './DashboardPreview';
-import { DashboardControls } from './DashboardControls';
+import DashboardControls from './DashboardControls';
 import CardLibrary from './CardLibrary';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 import { Button } from '@/components/ui/button';
