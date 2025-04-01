@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,12 +33,10 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const [departmentName, setDepartmentName] = useState<string>('');
   const isMobile = useIsMobile();
   
-  // Use the dashboard config hook to get the dashboard configuration
   const { config: dashboardCards, isLoading: isLoadingConfig, saveConfig } = useDefaultDashboardConfig(
     isPreview ? department : userDepartment || ''
   );
 
-  // Add state for the card editing modal
   const [isEditModalOpen, setIsEditModalOpen] = useReactState(false);
   const [editingCard, setEditingCard] = useReactState<ActionCardItem | null>(null);
   const [allCards, setAllCards] = useReactState<ActionCardItem[]>([]);
@@ -52,7 +49,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   useEffect(() => {
     if (isPreview) {
-      // In preview mode, use the department provided as prop
       setUserDepartment(department);
       setIsComunicacao(department === 'comunicacao');
       fetchDepartmentName(department);
@@ -60,7 +56,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       return;
     }
 
-    // If not in preview mode, fetch the user's actual department
     async function fetchUserDepartment() {
       if (!user) return;
       
@@ -80,7 +75,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         if (data) {
           setUserDepartment(data.coordenacao_id);
           
-          // Check if user is from Comunicacao
           const { data: coordData, error: coordError } = await supabase
             .from('coordenacoes')
             .select('descricao')
@@ -129,20 +123,17 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     }
   };
 
-  // Handle card editing
   const handleEditCard = (card: ActionCardItem) => {
     setEditingCard(card);
     setIsEditModalOpen(true);
   };
 
-  // Handle card hiding
   const handleHideCard = (cardId: string) => {
     const updatedCards = allCards.map(card => 
       card.id === cardId ? { ...card, isHidden: true } : card
     );
     setAllCards(updatedCards);
     
-    // Save changes if not in preview mode
     if (!isPreview && userDepartment) {
       saveConfig(updatedCards, userDepartment);
       toast({
@@ -153,10 +144,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     }
   };
 
-  // Handle card save
   const handleSaveCard = (cardData: any) => {
     if (editingCard) {
-      // For special cards, only allow title and color changes
       const isSpecialCard = editingCard.isQuickDemand || 
                            editingCard.isSearch || 
                            editingCard.isOverdueDemands || 
@@ -166,10 +155,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         card.id === editingCard.id 
           ? { 
               ...card,
-              // Only update title and color for special cards
               title: cardData.title || card.title,
               color: cardData.color || card.color,
-              // Update other properties only for regular cards
               ...(isSpecialCard ? {} : {
                 subtitle: cardData.subtitle,
                 path: cardData.path || card.path,
@@ -183,7 +170,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       
       setAllCards(updatedCards);
       
-      // Save changes if not in preview mode
       if (!isPreview && userDepartment) {
         saveConfig(updatedCards, userDepartment);
         toast({
@@ -198,11 +184,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     setEditingCard(null);
   };
 
-  // Handle cards reordering
   const handleCardsChange = (newCards: ActionCardItem[]) => {
     setAllCards(newCards);
     
-    // Save changes if not in preview mode
     if (!isPreview && userDepartment) {
       saveConfig(newCards, userDepartment);
     }
@@ -217,7 +201,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     );
   }
 
-  // Get the special cards data for integration with the UnifiedCardGrid
   const specialCardsData = {
     overdueCount: 0,
     overdueItems: [],
@@ -228,7 +211,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 p-6 pb-20 md:pb-6">
-      {/* Welcome Card - Fixed */}
       <WelcomeCard
         title="Comunicação"
         description="Gerencie demandas e notas oficiais"
@@ -236,7 +218,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
       
-      {/* Action Cards - Customizable through dashboard management */}
       <div>
         {isPreview || !allCards || allCards.length === 0 ? (
           <ActionCards 
@@ -250,7 +231,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
             cards={allCards}
             onCardsChange={handleCardsChange}
             onEditCard={handleEditCard}
-            onDeleteCard={() => {}} // Not allowing card deletion
+            onDeleteCard={() => {}} 
             onHideCard={handleHideCard}
             isMobileView={isMobile}
             isEditMode={true}
@@ -260,16 +241,13 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         )}
       </div>
       
-      {/* Dynamic Content Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Card 1: Nova Solicitação - only for Comunicação */}
         {isComunicacao && (
           <div className="col-span-1 md:col-span-1">
             <NewRequestOriginCard baseUrl="dashboard/comunicacao" />
           </div>
         )}
         
-        {/* Card 2: Responder Demandas - for all */}
         <div className="col-span-1 md:col-span-1">
           <PendingDemandsCard 
             coordenacaoId={userDepartment || ''} 
@@ -278,7 +256,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           />
         </div>
         
-        {/* Card 3: Gerenciamento de Notas - for all */}
         <div className="col-span-1 md:col-span-1">
           <NotasManagementCard 
             coordenacaoId={userDepartment || ''} 
@@ -287,7 +264,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           />
         </div>
         
-        {/* Card 4: Demandas em Andamento - for all */}
         <div className={`col-span-1 md:col-span-${isComunicacao ? 3 : 1}`}>
           <DemandasEmAndamentoCard 
             coordenacaoId={userDepartment || ''} 
@@ -297,7 +273,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       </div>
       
-      {/* Card Customization Modal for editing cards */}
       <CardCustomizationModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -309,7 +284,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
                              editingCard?.isPendingActions}
       />
       
-      {/* Only add MobileBottomNav if this page is not in preview mode */}
       {!isPreview && isMobile && <MobileBottomNav />}
     </div>
   );

@@ -16,6 +16,7 @@ export interface ActionCardProps {
   type?: CardType;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onHide?: (id: string) => void;
   isCustom?: boolean;
   dataSourceKey?: string;
   displayMobile?: boolean;
@@ -60,6 +61,7 @@ const ActionCard = ({
   isDraggable = false,
   onEdit,
   onDelete,
+  onHide,
   isCustom = false,
   iconSize = 'xl',
   isMobileView = false,
@@ -83,12 +85,13 @@ const ActionCard = ({
       onClick={path ? handleClick : undefined}
     >
       <div className="relative p-6 h-full flex flex-col items-center justify-center text-center group">
-        {isDraggable && onEdit && (
+        {isDraggable && (onEdit || onHide) && (
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
             <Controls 
               cardId={id} 
-              onEdit={() => onEdit(id)} 
-              onDelete={onDelete} 
+              onEdit={onEdit ? onEdit : () => {}} 
+              onDelete={onDelete}
+              onHide={onHide}
               isCustom={isCustom}
             />
           </div>
