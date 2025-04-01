@@ -25,6 +25,7 @@ const DashboardManagementContent: React.FC = () => {
     setSelectedViewType,
     isLoading,
     isSaving,
+    saveConfig,
     saveDefaultDashboard,
   } = useDefaultDashboardConfig();
   
@@ -48,7 +49,7 @@ const DashboardManagementContent: React.FC = () => {
         try {
           const { data, error } = await supabase
             .from('coordenacoes')
-            .select('descricao')
+            .select('descricao, sigla')
             .eq('id', selectedDepartment)
             .single();
           
@@ -58,7 +59,7 @@ const DashboardManagementContent: React.FC = () => {
           }
           
           if (data) {
-            setDepartmentName(data.descricao);
+            setDepartmentName(data.sigla || data.descricao);
           }
         } catch (error) {
           console.error('Failed to fetch department name:', error);
@@ -107,6 +108,37 @@ const DashboardManagementContent: React.FC = () => {
     });
   };
 
+  // Handle saving the dashboard configuration
+  const handleSaveDashboard = async () => {
+    try {
+      const result = await saveConfig(cards);
+      
+      if (result) {
+        toast({
+          title: "Dashboard salvo",
+          description: `O dashboard para a coordenação "${departmentName}" foi salvo com sucesso. Todos os usuários verão essas configurações.`,
+          variant: "success"
+        });
+      } else {
+        toast({
+          title: "Erro ao salvar",
+          description: "Não foi possível salvar o dashboard. Tente novamente.",
+          variant: "destructive"
+        });
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error saving dashboard:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar o dashboard. Tente novamente.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -119,7 +151,7 @@ const DashboardManagementContent: React.FC = () => {
             isMobilePreview={isMobilePreview}
             setIsMobilePreview={setIsMobilePreview}
             onAddNewCard={handleOpenCreateCardModal}
-            onSaveDashboard={saveDefaultDashboard}
+            onSaveDashboard={handleSaveDashboard}
             isSaving={isSaving}
           />
           

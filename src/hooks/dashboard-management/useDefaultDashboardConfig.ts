@@ -33,6 +33,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
           .from('department_dashboards')
           .select('*')
           .eq('department', departmentId || user.coordenacao_id)
+          .eq('view_type', selectedViewType)
           .single();
 
         // If there's no config for this department
@@ -72,7 +73,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     if (user || departmentId) {
       fetchConfig();
     }
-  }, [user, departmentId]);
+  }, [user, departmentId, selectedViewType]);
 
   const saveDefaultDashboard = async () => {
     try {
@@ -91,6 +92,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
         .from('department_dashboards')
         .select('*')
         .eq('department', departmentToUse)
+        .eq('view_type', selectedViewType)
         .single();
 
       if (existingConfig) {
@@ -99,9 +101,11 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
           .from('department_dashboards')
           .update({
             cards_config: JSON.stringify(currentCards),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            updated_by: user?.id
           })
-          .eq('department', departmentToUse);
+          .eq('department', departmentToUse)
+          .eq('view_type', selectedViewType);
         
         if (error) throw error;
       } else {
@@ -111,8 +115,10 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
           .insert({
             department: departmentToUse,
             cards_config: JSON.stringify(currentCards),
+            view_type: selectedViewType,
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            updated_by: user?.id
           });
         
         if (error) throw error;
@@ -135,6 +141,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
 
   const saveConfig = async (cards: ActionCardItem[], deptId?: string) => {
     try {
+      setIsSaving(true);
       const departmentToUse = deptId || selectedDepartment || departmentId || (user ? user.coordenacao_id : null);
       
       if (!departmentToUse) {
@@ -147,6 +154,7 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
         .from('department_dashboards')
         .select('*')
         .eq('department', departmentToUse)
+        .eq('view_type', selectedViewType)
         .single();
 
       if (existingConfig) {
@@ -155,9 +163,11 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
           .from('department_dashboards')
           .update({
             cards_config: JSON.stringify(cards),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            updated_by: user?.id
           })
-          .eq('department', departmentToUse);
+          .eq('department', departmentToUse)
+          .eq('view_type', selectedViewType);
         
         if (error) throw error;
       } else {
@@ -167,11 +177,28 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
           .insert({
             department: departmentToUse,
             cards_config: JSON.stringify(cards),
+            view_type: selectedViewType,
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            updated_by: user?.id
           });
         
         if (error) throw error;
+      }
+
+      // Reset all user dashboard customizations for this department
+      // This makes the default dashboard take precedence
+      try {
+        const { error: deleteUserCustomsError } = await supabase
+          .from('user_dashboard')
+          .delete()
+          .eq('department_id', departmentToUse);
+
+        if (deleteUserCustomsError) {
+          console.warn('Could not reset user dashboards:', deleteUserCustomsError);
+        }
+      } catch (err) {
+        console.warn('Could not reset user dashboards:', err);
       }
 
       // Update local state
@@ -184,6 +211,8 @@ export const useDefaultDashboardConfig = (departmentId?: string) => {
     } catch (error) {
       console.error('Error saving dashboard config:', error);
       return false;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -214,7 +243,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
       iconId: 'Search',
       path: '/demandas',
       color: 'blue-dark' as CardColor,
-      width: '1' as CardWidth,
+      width: '25' as CardWidth,
       height: '1' as CardHeight,
       isCustom: false,
       type: 'standard' as CardType,
@@ -227,7 +256,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
       iconId: 'FileText',
       path: '/notas',
       color: 'green' as CardColor,
-      width: '1' as CardWidth,
+      width: '25' as CardWidth,
       height: '1' as CardHeight,
       isCustom: false,
       type: 'standard' as CardType,
@@ -245,7 +274,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
         iconId: 'Plus',
         path: '/dashboard/comunicacao/cadastrar',
         color: 'orange-600' as CardColor,
-        width: '1' as CardWidth,
+        width: '25' as CardWidth,
         height: '1' as CardHeight,
         isCustom: false,
         type: 'standard' as CardType,
@@ -258,7 +287,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
         iconId: 'FileEdit',
         path: '/dashboard/notas/criar',
         color: 'lime' as CardColor,
-        width: '1' as CardWidth,
+        width: '25' as CardWidth,
         height: '1' as CardHeight,
         isCustom: false,
         type: 'standard' as CardType,

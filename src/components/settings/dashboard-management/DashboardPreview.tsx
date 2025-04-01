@@ -24,8 +24,10 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     setCards,
     handleDeleteCard,
     handleEditCard,
+    handleHideCard,
     specialCardsData,
-    departmentName
+    departmentName,
+    isLoading
   } = useDefaultDashboardState(department);
 
   const { user } = useAuth();
@@ -114,6 +116,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               onCardsChange={handleCardsChange}
               onEditCard={handleEditCard}
               onDeleteCard={handleDeleteCard}
+              onHideCard={handleHideCard}
               isMobileView={isMobilePreview}
               isEditMode={modoAdmin}
               disableWiggleEffect={true}

@@ -133,7 +133,7 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
     handleAddNewCard,
     handleEditCard,
     handleSaveCard
-  } = useCardActions(actionCards, setActionCards);
+  } = useCardActions(actionCards, setActionCards, userCoordenaticaoId || '');
   
   // Special card actions (search and quick demand)
   const {

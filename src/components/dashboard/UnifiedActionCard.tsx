@@ -1,177 +1,185 @@
-import { useState } from 'react';
-import { CardColor } from '@/types/dashboard';
-import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
-import { Controls } from './SortableActionCard';
+import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { ActionCardItem, CardColor, CardWidth, CardHeight } from '@/types/dashboard';
+import { getColorClasses } from './utils/cardColorUtils';
+import { X, Pencil, Eye, EyeOff } from 'lucide-react';
 
 export interface UnifiedActionCardProps {
   id: string;
   title: string;
   subtitle?: string;
   iconId: string;
-  path?: string;
+  path: string;
   color: CardColor;
-  iconSize?: 'sm' | 'md' | 'lg' | 'xl';
-  badgeCount?: number;
-  isEditing?: boolean;
+  width?: CardWidth;
+  height?: CardHeight;
   isDraggable?: boolean;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-  isCustom?: boolean;
-  onClick?: () => void;
-  children?: React.ReactNode;
-  displayMobile?: boolean;
-  mobileOrder?: number;
-  width?: string;
-  height?: string;
-  type?: string;
+  isEditing?: boolean;
+  showControls?: boolean;
   disableWiggleEffect?: boolean;
-  hasSubmenu?: boolean;
+  hasSubtitle?: boolean;
   hasBadge?: boolean;
   badgeValue?: string;
+  iconSize?: 'sm' | 'md' | 'lg' | 'xl';
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onHide?: (id: string) => void;
+  isHidden?: boolean;
+  isCustom?: boolean;
 }
 
-const getBackgroundColor = (color: CardColor): string => {
-  switch (color) {
-    case 'blue': return 'bg-blue-500';
-    case 'green': return 'bg-green-500';
-    case 'orange': return 'bg-orange-500';
-    case 'gray-light': return 'bg-gray-200';
-    case 'gray-dark': return 'bg-gray-700';
-    case 'blue-dark': return 'bg-blue-700';
-    case 'orange-light': return 'bg-orange-300';
-    case 'gray-ultra-light': return 'bg-gray-100';
-    case 'lime': return 'bg-lime-500';
-    case 'orange-600': return 'bg-orange-600';
-    case 'blue-light': return 'bg-blue-400';
-    case 'green-light': return 'bg-green-400';
-    case 'purple-light': return 'bg-purple-400';
-    default: return 'bg-blue-500';
-  }
+// Card Controls Component
+const CardControls: React.FC<{
+  id: string;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onHide?: (id: string) => void;
+  isCustom?: boolean;
+}> = ({ id, onEdit, onDelete, onHide, isCustom }) => {
+  return (
+    <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      {onEdit && (
+        <button
+          className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-blue-500 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(id);
+          }}
+          aria-label="Editar card"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+      )}
+      {onHide && (
+        <button
+          className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-orange-500 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onHide(id);
+          }}
+          aria-label="Ocultar card"
+        >
+          <EyeOff className="h-4 w-4" />
+        </button>
+      )}
+      {onDelete && isCustom && (
+        <button
+          className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(id);
+          }}
+          aria-label="Remover card"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
 };
 
-const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
-  switch (size) {
-    case 'sm': return 'w-6 h-6';
-    case 'md': return 'w-8 h-8';
-    case 'lg': return 'w-12 h-12'; // Mobile size
-    case 'xl': return 'w-16 h-16'; // Desktop size
-    default: return 'w-16 h-16';
-  }
+export const SortableUnifiedActionCard: React.FC<UnifiedActionCardProps> = (props) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.id });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="h-full">
+      <UnifiedActionCard {...props} />
+    </div>
+  );
 };
 
-export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
+const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   id,
   title,
   subtitle,
   iconId,
   path,
   color,
-  iconSize = 'xl',
-  badgeCount,
-  isEditing = false,
   isDraggable = false,
+  isEditing = false,
+  showControls = true,
+  disableWiggleEffect = false,
+  hasSubtitle = false,
+  hasBadge = false,
+  badgeValue,
+  iconSize = 'xl',
   onEdit,
   onDelete,
-  isCustom = false,
-  onClick,
-  children,
-  disableWiggleEffect = false,
-  hasSubmenu,
-  hasBadge,
-  badgeValue
+  onHide,
+  isCustom = false
 }) => {
-  const bgColor = getBackgroundColor(color);
-  const IconComponent = getIconComponentFromId(iconId);
-  const iconSizeClass = getIconSize(iconSize);
-  
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
+  const navigate = (e: React.MouseEvent) => {
+    if (!isEditing && path) {
+      window.location.href = path;
     }
   };
-  
-  const wiggleClass = (isEditing && !disableWiggleEffect) ? 'animate-wiggle' : '';
-  
-  const cardContent = (
-    <div 
-      className={`w-full h-full rounded-xl shadow-md overflow-hidden cursor-pointer 
-      transition-all duration-300 hover:shadow-lg hover:-translate-y-1 active:scale-95 
-      ${bgColor} ${wiggleClass}`}
-      onClick={handleClick}
+
+  // Get the icon component based on iconId
+  let IconComponent;
+  try {
+    const icons = require('lucide-react');
+    IconComponent = icons[iconId as keyof typeof icons];
+  } catch (error) {
+    console.warn(`Icon '${iconId}' not found`, error);
+  }
+
+  const getIconSizeClass = () => {
+    switch (iconSize) {
+      case 'sm': return 'h-4 w-4';
+      case 'md': return 'h-6 w-6';
+      case 'lg': return 'h-8 w-8';
+      case 'xl': return 'h-10 w-10';
+      default: return 'h-10 w-10';
+    }
+  };
+
+  const colorClasses = getColorClasses(color);
+
+  const wiggleClass = !disableWiggleEffect && isEditing
+    ? 'hover:animate-wiggle cursor-move'
+    : '';
+
+  return (
+    <div
+      onClick={navigate}
+      className={`group relative flex flex-col h-full rounded-xl transition-all duration-200 
+        ${colorClasses} ${isEditing ? 'cursor-move' : 'cursor-pointer'} ${wiggleClass}`}
     >
-      <div className="relative p-6 h-full flex flex-col items-center justify-center text-center group">
-        {isDraggable && onEdit && (
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <Controls 
-              cardId={id} 
-              onEdit={() => onEdit(id)} 
-              onDelete={onDelete} 
-              isCustom={isCustom}
-            />
-          </div>
-        )}
-        
-        {badgeCount !== undefined && badgeCount > 0 && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {badgeCount > 99 ? '99+' : badgeCount}
-          </div>
-        )}
-        
+      {isEditing && showControls && (
+        <CardControls
+          id={id}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onHide={onHide}
+          isCustom={isCustom}
+        />
+      )}
+
+      <div className="flex flex-col items-center justify-center p-4 h-full text-center">
         {hasBadge && badgeValue && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <div className="absolute top-2 left-2 bg-white text-black text-xs font-bold px-2 py-1 rounded-full">
             {badgeValue}
           </div>
         )}
-        
-        {children ? (
-          <>{children}</>
-        ) : (
-          <>
-            <div className="text-white mb-4">
-              {IconComponent && <IconComponent className={iconSizeClass} />}
-            </div>
-            <h3 className="text-lg font-semibold text-white">{title}</h3>
-            {subtitle && (
-              <p className="text-sm text-white opacity-90 mt-1">{subtitle}</p>
-            )}
-          </>
-        )}
-        
-        {hasSubmenu && (
-          <div className="absolute bottom-0 left-0 w-full">
-            <div className="grid grid-cols-3 gap-2 p-2 bg-white/10 rounded-b-xl">
-              {/* Placeholder for submenu items */}
-            </div>
+
+        {IconComponent && (
+          <div className="mb-3">
+            <IconComponent className={getIconSizeClass()} />
           </div>
         )}
+
+        <h3 className="font-medium leading-tight">{title}</h3>
+        
+        {hasSubtitle && subtitle && (
+          <p className="text-sm opacity-90 mt-1">{subtitle}</p>
+        )}
       </div>
-    </div>
-  );
-
-  return cardContent;
-};
-
-export const SortableUnifiedActionCard: React.FC<UnifiedActionCardProps & { index?: number }> = (props) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.id });
-  
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    width: '100%',
-    height: '100%',
-  };
-
-  return (
-    <div 
-      ref={setNodeRef} 
-      style={style} 
-      {...attributes} 
-      {...listeners}
-      className="w-full h-full"
-    >
-      <UnifiedActionCard {...props} />
     </div>
   );
 };

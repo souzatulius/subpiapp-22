@@ -1,13 +1,14 @@
 
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { ActionCardItem } from './types';
+import { ActionCardItem } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export const useCardActions = (
   actionCards: ActionCardItem[],
-  setActionCards: React.Dispatch<React.SetStateAction<ActionCardItem[]>>
+  setActionCards: React.Dispatch<React.SetStateAction<ActionCardItem[]>>,
+  departmentId: string = ''
 ) => {
   const [isCustomizationModalOpen, setIsCustomizationModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
@@ -140,7 +141,8 @@ export const useCardActions = (
           .from('user_dashboard')
           .update({ 
             cards_config: JSON.stringify(updatedCards),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            department_id: departmentId || null
           })
           .eq('user_id', user.id);
       } else {
@@ -149,7 +151,8 @@ export const useCardActions = (
           .from('user_dashboard')
           .insert({ 
             user_id: user.id,
-            cards_config: JSON.stringify(updatedCards) 
+            cards_config: JSON.stringify(updatedCards),
+            department_id: departmentId || null
           });
       }
       

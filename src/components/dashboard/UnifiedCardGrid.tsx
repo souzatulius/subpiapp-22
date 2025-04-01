@@ -26,6 +26,7 @@ export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color'> {
   iconId: string; // Make iconId required
   color: CardColor; // Use CardColor type explicitly
   isCustom?: boolean;
+  isHidden?: boolean;
 }
 
 interface UnifiedCardGridProps {
@@ -33,6 +34,7 @@ interface UnifiedCardGridProps {
   onCardsChange: (cards: ActionCardItem[] | UnifiedCardItem[]) => void;
   onEditCard?: (card: ActionCardItem | UnifiedCardItem) => void;
   onDeleteCard?: (id: string) => void;
+  onHideCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
   disableWiggleEffect?: boolean;
@@ -43,6 +45,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onCardsChange,
   onEditCard,
   onDeleteCard,
+  onHideCard,
   isMobileView = false,
   isEditMode = false,
   disableWiggleEffect = false,
@@ -67,11 +70,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     }
   };
 
-  // Filter cards for mobile view
+  // Filter cards to show only visible ones (not hidden)
+  const visibleCards = cards.filter(card => !card.isHidden);
+
+  // Filter cards for mobile view from visible cards
   const displayedCards = isMobileView
-    ? cards.filter((card) => card.displayMobile !== false)
+    ? visibleCards.filter((card) => card.displayMobile !== false)
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
-    : cards;
+    : visibleCards;
 
   // Calculate total columns based on mobile view
   const totalColumns = isMobileView ? 2 : 4;
@@ -118,6 +124,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                   if (cardToEdit && onEditCard) onEditCard(cardToEdit);
                 } : undefined}
                 onDelete={onDeleteCard}
+                onHide={onHideCard}
                 iconSize={isMobileView ? 'lg' : 'xl'}
                 disableWiggleEffect={disableWiggleEffect}
               />

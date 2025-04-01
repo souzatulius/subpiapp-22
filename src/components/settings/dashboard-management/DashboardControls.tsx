@@ -1,30 +1,40 @@
 
-import React, { useState, useEffect } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React from 'react';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Loader2, Save, RotateCcw, PlusCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Separator } from '@/components/ui/separator';
-import { MoveHorizontal, Save, Plus, Smartphone, Monitor } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from '@/components/ui/alert-dialog';
 
 interface DashboardControlsProps {
   selectedDepartment: string;
-  setSelectedDepartment: (value: string) => void;
+  setSelectedDepartment: (department: string) => void;
   selectedViewType: 'dashboard' | 'communication';
-  setSelectedViewType: (value: 'dashboard' | 'communication') => void;
+  setSelectedViewType: (viewType: 'dashboard' | 'communication') => void;
   isMobilePreview: boolean;
-  setIsMobilePreview: (value: boolean) => void;
+  setIsMobilePreview: (isMobile: boolean) => void;
   onAddNewCard: () => void;
-  onSaveDashboard: () => void;
+  onSaveDashboard: () => Promise<boolean>;
   isSaving: boolean;
-}
-
-interface Department {
-  id: string;
-  descricao: string;
-  sigla?: string;
 }
 
 const DashboardControls: React.FC<DashboardControlsProps> = ({
@@ -38,141 +48,223 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
   onSaveDashboard,
   isSaving
 }) => {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
+  const [departments, setDepartments] = useState<{ id: string; descricao: string; sigla: string | null }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
     const fetchDepartments = async () => {
-      setIsLoadingDepartments(true);
+      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('coordenacoes')
           .select('id, descricao, sigla')
-          .order('descricao');
-
-        if (error) {
-          console.error('Error fetching departments:', error);
-          return;
-        }
-
-        setDepartments(data || []);
-        // Set default department if none selected
-        if (!selectedDepartment && data && data.length > 0) {
-          setSelectedDepartment(data[0].id);
+          .order('descricao', { ascending: true });
+        
+        if (error) throw error;
+        
+        if (data) {
+          setDepartments(data);
+          // Set default selection if none selected
+          if (!selectedDepartment && data.length > 0) {
+            setSelectedDepartment(data[0].id);
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch departments:', error);
+        console.error('Error fetching departments:', error);
       } finally {
-        setIsLoadingDepartments(false);
+        setIsLoading(false);
       }
     };
-
+    
     fetchDepartments();
-  }, []);
+  }, [setSelectedDepartment, selectedDepartment]);
 
-  // Function to format department display text, showing only the sigla if available
-  const getDepartmentDisplayText = (dept: Department): string => {
-    if (dept.sigla) {
-      return dept.sigla;
+  const handleResetDashboard = async () => {
+    setIsResetting(true);
+    try {
+      // Delete the department dashboard config first
+      const { error: deleteDashboardError } = await supabase
+        .from('department_dashboards')
+        .delete()
+        .eq('department', selectedDepartment)
+        .eq('view_type', selectedViewType);
+
+      if (deleteDashboardError) {
+        throw deleteDashboardError;
+      }
+
+      // Reset all user dashboard configs for this department
+      const { error: updateUserDashboardsError } = await supabase
+        .from('user_dashboard')
+        .delete()
+        .eq('department_id', selectedDepartment);
+
+      // Note: We're not reporting this error as it's non-critical
+      if (updateUserDashboardsError) {
+        console.warn('Could not reset user dashboards:', updateUserDashboardsError);
+      }
+
+      // Reload the page to reset the dashboard state
+      window.location.reload();
+    } catch (error) {
+      console.error('Error resetting dashboard:', error);
+    } finally {
+      setIsResetting(false);
+      setShowResetConfirm(false);
     }
-    return dept.descricao;
   };
 
   return (
-    <div className="border rounded-lg bg-white p-4 space-y-6">
-      <h2 className="text-lg font-semibold mb-4">Controles do Dashboard</h2>
-
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="department">Coordenação</Label>
-          {isLoadingDepartments ? (
-            <div className="flex items-center space-x-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm text-gray-500">Carregando coordenações...</span>
-            </div>
-          ) : (
+    <div className="space-y-6 p-6 bg-white rounded-lg border shadow-sm">
+      <div>
+        <h3 className="text-lg font-medium mb-4">Controles do Dashboard</h3>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="department">Coordenação</Label>
             <Select 
               value={selectedDepartment} 
               onValueChange={setSelectedDepartment}
+              disabled={isLoading}
             >
-              <SelectTrigger id="department" className="w-full">
-                <SelectValue placeholder="Selecione uma coordenação" />
+              <SelectTrigger id="department">
+                <SelectValue placeholder="Selecione uma coordenação">
+                  {isLoading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Carregando...</span>
+                    </div>
+                  ) : (
+                    departments.find(d => d.id === selectedDepartment)?.sigla || 
+                    departments.find(d => d.id === selectedDepartment)?.descricao || 
+                    'Selecione uma coordenação'
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {getDepartmentDisplayText(dept)}
+                {departments.map((department) => (
+                  <SelectItem key={department.id} value={department.id}>
+                    {department.sigla || department.descricao}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="view-type">Tipo de Visualização</Label>
+            <Select 
+              value={selectedViewType} 
+              onValueChange={(value) => setSelectedViewType(value as 'dashboard' | 'communication')}
+            >
+              <SelectTrigger id="view-type">
+                <SelectValue placeholder="Selecione um tipo">
+                  {selectedViewType === 'dashboard' ? 'Dashboard' : 'Comunicação'}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dashboard">Dashboard</SelectItem>
+                <SelectItem value="communication">Comunicação</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center space-x-2 pt-2">
+            <Label htmlFor="mobile-preview" className="cursor-pointer">Visualização</Label>
+            <div className="flex-1"></div>
+            <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-full">
+              <button
+                onClick={() => setIsMobilePreview(false)}
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  !isMobilePreview 
+                    ? 'bg-blue-500 text-white shadow-sm' 
+                    : 'text-gray-600'
+                }`}
+              >
+                Desktop
+              </button>
+              <button
+                onClick={() => setIsMobilePreview(true)}
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  isMobilePreview 
+                    ? 'bg-orange-500 text-white shadow-sm' 
+                    : 'text-gray-600'
+                }`}
+              >
+                Mobile
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
+      
+      <div className="space-y-4 pt-4">
+        <Button onClick={onAddNewCard} variant="outline" className="w-full justify-start">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Adicionar Novo Card
+        </Button>
+        
+        <div className="flex flex-col space-y-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  onClick={() => setShowResetConfirm(true)} 
+                  variant="outline" 
+                  className="w-full justify-start border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
+                  disabled={isResetting}
+                >
+                  {isResetting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                  )}
+                  Resetar Dashboard
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Restaura o dashboard padrão para todos os usuários desta coordenação</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-        <div className="space-y-2">
-          <Label htmlFor="viewType">Tipo de Visualização</Label>
-          <Select 
-            value={selectedViewType} 
-            onValueChange={(value) => setSelectedViewType(value as 'dashboard' | 'communication')}
+          <Button 
+            onClick={onSaveDashboard} 
+            disabled={isSaving}
+            className="w-full justify-start"
           >
-            <SelectTrigger id="viewType">
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="dashboard">Dashboard Padrão</SelectItem>
-              <SelectItem value="communication">Comunicação</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center space-x-2 pt-2">
-          <Switch 
-            id="mobilePreview" 
-            checked={isMobilePreview}
-            onCheckedChange={setIsMobilePreview}
-            className="data-[state=checked]:bg-orange-500 data-[state=unchecked]:bg-blue-500"
-          />
-          <Label htmlFor="mobilePreview" className="cursor-pointer flex items-center">
-            {isMobilePreview ? 
-              <Smartphone className="h-4 w-4 mr-2 text-orange-500" /> : 
-              <Monitor className="h-4 w-4 mr-2 text-blue-500" />
-            }
-            {isMobilePreview ? "Visualização Mobile" : "Visualização Desktop"}
-          </Label>
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            Salvar Dashboard
+          </Button>
         </div>
       </div>
 
-      <Separator />
-
-      <div className="space-y-4">
-        <Button 
-          onClick={onAddNewCard} 
-          variant="outline" 
-          size="sm"
-          className="w-full"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Adicionar Novo Card
-        </Button>
-
-        <Button 
-          onClick={onSaveDashboard} 
-          variant="default" 
-          size="sm"
-          className="w-full"
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Salvando...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 mr-2" /> Salvar Dashboard
-            </>
-          )}
-        </Button>
-      </div>
+      <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resetar Dashboard da Coordenação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação irá restaurar o dashboard padrão para todos os usuários desta coordenação. 
+              Todas as personalizações individuais serão perdidas. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleResetDashboard}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Resetar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { FormSchema } from '@/components/dashboard/card-customization/types';
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/hooks/use-toast';
 
 export const useDefaultDashboardState = (departmentId: string) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
@@ -59,8 +60,8 @@ export const useDefaultDashboardState = (departmentId: string) => {
       if (departmentId && departmentId !== 'default') {
         try {
           const { data, error } = await supabase
-            .from('areas_coordenacao')
-            .select('descricao')
+            .from('coordenacoes') 
+            .select('descricao, sigla')
             .eq('id', departmentId)
             .single();
 
@@ -70,7 +71,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
           }
 
           if (data) {
-            setDepartmentName(data.descricao);
+            setDepartmentName(data.sigla || data.descricao);
           }
         } catch (error) {
           console.error('Failed to fetch department name:', error);
@@ -91,6 +92,24 @@ export const useDefaultDashboardState = (departmentId: string) => {
 
   const handleDeleteCard = (cardId: string) => {
     setCards(cards.filter(card => card.id !== cardId));
+    toast({
+      title: "Card removido",
+      description: "O card foi removido do dashboard",
+      variant: "success"
+    });
+  };
+
+  const handleHideCard = (cardId: string) => {
+    setCards(cards.map(card => 
+      card.id === cardId 
+        ? { ...card, isHidden: true }
+        : card
+    ));
+    toast({
+      title: "Card ocultado",
+      description: "O card foi ocultado do dashboard",
+      variant: "success"
+    });
   };
 
   const handleAddNewCard = () => {
@@ -114,6 +133,12 @@ export const useDefaultDashboardState = (departmentId: string) => {
           iconId: cardData.iconId || card.iconId
         } : card
       ));
+      
+      toast({
+        title: "Card atualizado",
+        description: "O card foi atualizado com sucesso",
+        variant: "success"
+      });
     } else {
       // Create a new card with required properties
       const newCard: ActionCardItem = {
@@ -129,9 +154,16 @@ export const useDefaultDashboardState = (departmentId: string) => {
       };
       
       setCards([...cards, newCard]);
+      
+      toast({
+        title: "Card criado",
+        description: "O novo card foi adicionado ao dashboard",
+        variant: "success"
+      });
     }
     
     setIsCustomizationModalOpen(false);
+    setEditingCard(null);
   };
 
   return {
@@ -141,6 +173,7 @@ export const useDefaultDashboardState = (departmentId: string) => {
     setIsCustomizationModalOpen,
     editingCard,
     handleDeleteCard,
+    handleHideCard,
     handleAddNewCard,
     handleEditCard,
     handleSaveCard,
