@@ -61,7 +61,7 @@ const MobileSettingsNav = () => {
             className={`flex flex-col items-center justify-center py-2 px-1 flex-1 ${
               (activeTab === item.id || 
                (item.id === 'dashboard' && !activeTab)) ? 
-               'text-white' : 'text-gray-400'
+               'bg-white text-white rounded-t-xl' : 'text-gray-400'
             }`}
           >
             <div className="text-[#f57737]">

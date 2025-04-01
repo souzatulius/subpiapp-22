@@ -24,7 +24,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
                 : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
                 
               return `flex flex-col items-center justify-center w-full h-full py-1 
-                ${active ? 'text-white' : 'text-gray-400'}`
+                ${active ? 'bg-white text-white rounded-t-xl' : 'text-gray-400'}`
             }}
           >
             <div className="text-[#f57737]">
