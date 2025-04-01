@@ -1,15 +1,11 @@
-
 import React from 'react';
 import PWAButton from '@/components/PWAButton';
 import Header from '@/components/layouts/Header';
 import LeftContentSection from '@/components/shared/LeftContentSection';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 const Index = () => {
   const isMobile = useIsMobile();
-  
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       {/* Header - explicitly pass showControls={false} */}
       <Header showControls={false} />
 
@@ -21,23 +17,18 @@ const Index = () => {
         </div>
         
         {/* Right side with blue background and background image (only on desktop) */}
-        <div 
-          className="w-full md:w-1/2 bg-subpi-blue flex flex-col items-center justify-center p-8 relative animate-fade-right"
-          style={!isMobile ? {
-            backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'left center',
-            backgroundRepeat: 'no-repeat'
-          } : undefined}
-        >
+        <div style={!isMobile ? {
+        backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'left center',
+        backgroundRepeat: 'no-repeat'
+      } : undefined} className="w-full md:w-1/2 flex flex-col items-center justify-center p-8 relative animate-fade-right bg-slate-50">
           {/* No image here anymore */}
         </div>
       </div>
       
       {/* PWA Button */}
       <PWAButton />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
