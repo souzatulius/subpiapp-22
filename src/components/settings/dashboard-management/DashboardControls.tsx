@@ -21,6 +21,12 @@ interface DashboardControlsProps {
   isSaving: boolean;
 }
 
+interface Department {
+  id: string;
+  descricao: string;
+  sigla?: string;
+}
+
 const DashboardControls: React.FC<DashboardControlsProps> = ({
   selectedDepartment,
   setSelectedDepartment,
@@ -32,7 +38,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
   onSaveDashboard,
   isSaving
 }) => {
-  const [departments, setDepartments] = useState<{ id: string; descricao: string }[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
 
   useEffect(() => {
@@ -41,7 +47,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
       try {
         const { data, error } = await supabase
           .from('coordenacoes')
-          .select('id, descricao')
+          .select('id, descricao, sigla')
           .order('descricao');
 
         if (error) {
@@ -63,6 +69,14 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
 
     fetchDepartments();
   }, []);
+
+  // Function to format department display text with acronym if available
+  const getDepartmentDisplayText = (dept: Department): string => {
+    if (dept.sigla) {
+      return `${dept.descricao} (${dept.sigla})`;
+    }
+    return dept.descricao;
+  };
 
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6">
@@ -87,7 +101,7 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
               <SelectContent>
                 {departments.map((dept) => (
                   <SelectItem key={dept.id} value={dept.id}>
-                    {dept.descricao}
+                    {getDepartmentDisplayText(dept)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -116,11 +130,12 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
             id="mobilePreview" 
             checked={isMobilePreview}
             onCheckedChange={setIsMobilePreview}
+            className="data-[state=checked]:bg-orange-500 data-[state=unchecked]:bg-blue-500"
           />
           <Label htmlFor="mobilePreview" className="cursor-pointer flex items-center">
             {isMobilePreview ? 
-              <Smartphone className="h-4 w-4 mr-2" /> : 
-              <Monitor className="h-4 w-4 mr-2" />
+              <Smartphone className="h-4 w-4 mr-2 text-orange-500" /> : 
+              <Monitor className="h-4 w-4 mr-2 text-blue-500" />
             }
             {isMobilePreview ? "Visualização Mobile" : "Visualização Desktop"}
           </Label>

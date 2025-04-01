@@ -10,6 +10,21 @@ export const useAvailableCards = () => {
   useEffect(() => {
     // Define a comprehensive list of available cards for the library
     const libraryCards: ActionCardItem[] = [
+      // Search card - new addition
+      {
+        id: `template-${uuidv4()}`,
+        title: 'O que você deseja fazer?',
+        iconId: 'Search',
+        path: '',
+        color: 'gray-light',
+        width: '100' as CardWidth, 
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        isSearch: true,
+        displayMobile: true,
+        mobileOrder: 1
+      },
       {
         id: `template-${uuidv4()}`,
         title: 'Consultar Demandas',
