@@ -4,12 +4,13 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ActionCard from '@/components/dashboard/ActionCard';
 import { ActionCardItem } from '@/types/dashboard';
-import { X, Pencil } from 'lucide-react';
+import { X, Pencil, EyeOff } from 'lucide-react';
 
 interface SortableActionCardProps {
   card: ActionCardItem;
   onEdit: (card: ActionCardItem) => void;
   onDelete?: (id: string) => void;
+  onHide?: (id: string) => void;
   children?: React.ReactNode;
   isMobileView?: boolean;
 }
@@ -19,11 +20,13 @@ export const Controls = ({
   cardId,
   onEdit,
   onDelete,
+  onHide,
   isCustom,
 }: {
   cardId: string;
   onEdit: () => void;
   onDelete?: (id: string) => void;
+  onHide?: (id: string) => void;
   isCustom?: boolean;
 }) => {
   return (
@@ -38,6 +41,18 @@ export const Controls = ({
       >
         <Pencil className="h-4 w-4" />
       </button>
+      {onHide && (
+        <button 
+          className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-orange-500 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onHide(cardId);
+          }}
+          aria-label="Ocultar card"
+        >
+          <EyeOff className="h-4 w-4" />
+        </button>
+      )}
       {onDelete && isCustom && (
         <button 
           className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors"
@@ -58,6 +73,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
   card, 
   onEdit, 
   onDelete,
+  onHide,
   isMobileView = false,
   children
 }) => {
@@ -88,7 +104,8 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
             <Controls 
               cardId={card.id} 
               onEdit={handleEdit} 
-              onDelete={onDelete} 
+              onDelete={onDelete}
+              onHide={onHide}
               isCustom={card.isCustom}
             />
           </div>
@@ -104,6 +121,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
           isDraggable={true}
           onDelete={onDelete}
           onEdit={handleEdit}
+          onHide={onHide}
           width={card.width}
           height={card.height}
           isCustom={card.isCustom}
