@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Controls } from './SortableActionCard';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
@@ -70,7 +69,6 @@ const ActionCard = ({
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
-  // Use mobile size if specified or isMobileView is true
   const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
 
   const handleClick = () => {
@@ -89,7 +87,7 @@ const ActionCard = ({
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
             <Controls 
               cardId={id} 
-              onEdit={onEdit ? onEdit : () => {}} 
+              onEdit={() => onEdit ? onEdit(id) : undefined} 
               onDelete={onDelete}
               onHide={onHide}
               isCustom={isCustom}

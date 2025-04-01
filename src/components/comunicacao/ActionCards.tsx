@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -109,6 +108,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
             color={card.color}
             width={card.width || '25'}
             height={card.height || '1'}
+            type={card.type} 
             hasSubtitle={!!card.subtitle}
             iconSize="md"
           />
