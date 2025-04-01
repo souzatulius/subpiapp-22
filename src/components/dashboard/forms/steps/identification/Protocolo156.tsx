@@ -61,12 +61,6 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
       
       {temProtocolo156 === true && (
         <div className="animate-fadeIn">
-          <Label
-            htmlFor="numero_protocolo_156"
-            className={`block ${hasFieldError('numero_protocolo_156', errors) ? 'text-orange-500 font-semibold' : ''}`}
-          >
-            Número do protocolo {hasFieldError('numero_protocolo_156', errors) && <span className="text-orange-500">*</span>}
-          </Label>
           <Input
             id="numero_protocolo_156"
             name="numero_protocolo_156"

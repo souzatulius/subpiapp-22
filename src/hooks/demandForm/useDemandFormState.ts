@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,24 +109,25 @@ export const useDemandFormState = (
     }
   }, [formData.problema_id, problemas]);
 
+  // Auto-generate title based on selected problem, service, bairro and address
   useEffect(() => {
     if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
-      if (!formData.titulo || formData.titulo.trim() === '' || activeStep === 3) {
-        const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
-        if (suggestedTitle) {
-          setFormData(prev => ({
-            ...prev,
-            titulo: suggestedTitle
-          }));
-        }
+      // Generate title suggestion
+      const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
+      
+      // Only update if we have a suggestion and the current title is empty
+      if (suggestedTitle && (!formData.titulo || formData.titulo.trim() === '')) {
+        setFormData(prev => ({
+          ...prev,
+          titulo: suggestedTitle
+        }));
       }
     }
   }, [
     formData.problema_id, 
     formData.servico_id, 
     formData.bairro_id, 
-    formData.endereco, 
-    activeStep,
+    formData.endereco,
     problemas,
     servicos,
     filteredBairros

@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
@@ -28,6 +29,13 @@ export function DatePicker({
   className,
   showTimeSelect = false
 }: DatePickerProps) {
+  // Get today's date at midnight for date comparison
+  const today = React.useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  }, []);
+
   const [selectedHours, setSelectedHours] = React.useState<string>(date ? format(date, 'HH') : '12');
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
@@ -95,6 +103,7 @@ export function DatePicker({
           mode="single"
           selected={date}
           onSelect={handleDateSelect}
+          disabled={(date) => date < today}
           locale={ptBR}
           className={cn("p-3 pointer-events-auto")}
         />

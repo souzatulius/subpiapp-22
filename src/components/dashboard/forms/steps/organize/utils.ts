@@ -11,6 +11,7 @@ export const generateTitleSuggestion = (
   servicos: any[],
   filteredBairros: any[]
 ): string => {
+  // If there's already a manually entered title, don't override it
   if (formData.titulo && formData.titulo.trim() !== '') {
     return formData.titulo;
   }
