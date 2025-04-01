@@ -30,7 +30,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 
         {/* Right side - Dynamic content with background image apenas no desktop */}
         <div 
-          className="w-full md:w-1/2 bg-subpi-blue flex flex-col items-center justify-center p-8 relative"
+          className="w-full md:w-1/2 bg-slate-900 md:bg-subpi-blue flex flex-col items-center justify-center p-8 relative"
           style={!isMobile ? {
             backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
             backgroundSize: 'cover',
