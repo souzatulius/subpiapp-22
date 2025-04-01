@@ -45,7 +45,7 @@ const PasswordFields: React.FC<PasswordFieldsProps> = ({
             value={password} 
             onChange={e => setPassword(e.target.value)} 
             onFocus={() => setShowRequirements(true)} 
-            className={`pr-10 ${errors.password ? 'border-[#f57b35] ring-[#f57b35]' : ''}`} 
+            className={`pr-10 ${errors.password ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`} 
             placeholder="••••••••" 
           />
           <button 
@@ -77,7 +77,7 @@ const PasswordFields: React.FC<PasswordFieldsProps> = ({
             type={showConfirmPassword ? 'text' : 'password'} 
             value={confirmPassword} 
             onChange={handleChange} 
-            className={`pr-10 ${errors.confirmPassword ? 'border-[#f57b35] ring-[#f57b35]' : ''}`} 
+            className={`pr-10 ${errors.confirmPassword ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`} 
             placeholder="••••••••" 
           />
           <button 

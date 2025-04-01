@@ -47,11 +47,11 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   };
 
   const containerBorderColor = error 
-    ? 'border-red-500' 
+    ? 'border-[#f57b35]' 
     : isFocused
-      ? 'ring-2 ring-[#003570] border-transparent'
+      ? 'border-transparent ring-2 ring-[#003570]'
       : isHovered
-        ? 'border-gray-400' 
+        ? 'border-gray-600' 
         : 'border-gray-300';
   
   const dividerColor = isFocused 

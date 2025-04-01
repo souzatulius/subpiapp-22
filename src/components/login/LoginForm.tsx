@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/components/ui/input';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -128,13 +129,13 @@ const LoginForm = () => {
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-[#111827] mb-1">Senha</label>
             <div className="relative">
-              <input
+              <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 onFocus={() => setShowRequirements(true)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#003570]"
+                className={`pr-10 ${password === '' && errors ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`}
                 placeholder="••••••••"
               />
               <button
