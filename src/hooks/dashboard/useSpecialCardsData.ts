@@ -1,164 +1,80 @@
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 
-interface OverdueItem {
-  title: string;
-  id: string;
+export interface SpecialCardData {
+  overdueCount: number;
+  overdueItems: { title: string; id: string }[];
+  notesToApprove: number;
+  responsesToDo: number;
+  isLoading: boolean;
 }
 
-export const useSpecialCardsData = () => {
-  const [overdueCount, setOverdueCount] = useState<number>(0);
-  const [overdueItems, setOverdueItems] = useState<OverdueItem[]>([]);
-  const [notesToApprove, setNotesToApprove] = useState<number>(0);
-  const [responsesToDo, setResponsesToDo] = useState<number>(0);
-  const [demandsNeedingNota, setDemandsNeedingNota] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [userCoordenaticaoId, setUserCoordenaticaoId] = useState<string | null>(null);
-  const [isComunicacao, setIsComunicacao] = useState<boolean>(false);
-  
-  const { user } = useAuth();
-  
-  // First fetch user's coordination
+export const useSpecialCardsData = (): SpecialCardData => {
+  const [data, setData] = useState<SpecialCardData>({
+    overdueCount: 0,
+    overdueItems: [],
+    notesToApprove: 0,
+    responsesToDo: 0,
+    isLoading: false
+  });
+
   useEffect(() => {
-    const fetchUserCoordination = async () => {
-      if (!user) return;
+    const fetchData = async () => {
+      setData(prev => ({ ...prev, isLoading: true }));
       
       try {
-        const { data, error } = await supabase
-          .from('usuarios')
-          .select('coordenacao_id')
-          .eq('id', user.id)
-          .single();
+        // Fetch overdue demands
+        const { data: overdueData, error: overdueError } = await supabase
+          .from('demandas')
+          .select('id, titulo, status')
+          .eq('status', 'ATRASADA')
+          .limit(5);
           
-        if (error) {
-          console.error('Error fetching user coordination:', error);
-          return;
+        if (!overdueError && overdueData) {
+          setData(prev => ({ 
+            ...prev, 
+            overdueCount: overdueData.length,
+            overdueItems: overdueData.map(item => ({ 
+              title: item.titulo, 
+              id: item.id 
+            }))
+          }));
         }
         
-        if (data) {
-          setUserCoordenaticaoId(data.coordenacao_id);
-          setIsComunicacao(data.coordenacao_id === 'comunicacao');
+        // Fetch notes to approve
+        const { count: notesCount, error: notesError } = await supabase
+          .from('notas_oficiais')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'PENDENTE_APROVACAO');
+          
+        if (!notesError) {
+          setData(prev => ({ ...prev, notesToApprove: notesCount || 0 }));
         }
-      } catch (error) {
-        console.error('Failed to fetch user coordination:', error);
-      }
-    };
-    
-    fetchUserCoordination();
-  }, [user]);
-  
-  // Then fetch dashboard data based on the coordination
-  useEffect(() => {
-    const fetchSpecialCardsData = async () => {
-      try {
-        setIsLoading(true);
         
-        if (!user || !userCoordenaticaoId) return;
-        
-        // Different data gathering based on user department
-        if (isComunicacao) {
-          // 1. For communication team:
+        // Fetch responses to do
+        const { count: responsesCount, error: responsesError } = await supabase
+          .from('demandas')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'PENDENTE_RESPOSTA');
           
-          // Fetch demands in progress (for overdue demands card)
-          const { data: inProgressData, error: inProgressError } = await supabase
-            .from('demandas')
-            .select('id, titulo, prazo_resposta')
-            .in('status', ['pendente', 'em_analise', 'respondida'])
-            .order('criado_em', { ascending: false })
-            .limit(5);
-            
-          if (!inProgressError) {
-            setOverdueCount(inProgressData.length);
-            setOverdueItems(
-              inProgressData.map(item => ({ 
-                title: item.titulo, 
-                id: item.id 
-              }))
-            );
-          }
-          
-          // Fetch demands that need notes (for pending actions)
-          const { data: needsNotaData, error: needsNotaError } = await supabase
-            .from('demandas')
-            .select('id')
-            .eq('status', 'respondida')
-            .is('nota_oficial_id', null);
-            
-          if (!needsNotaError) {
-            setDemandsNeedingNota(needsNotaData.length);
-          }
-        } else {
-          // 2. For other departments:
-          
-          // Fetch demands assigned to this department
-          const { data: departmentDemands, error: departmentError } = await supabase
-            .from('demandas')
-            .select('id, titulo, prazo_resposta')
-            .eq('coordenacao_id', userCoordenaticaoId)
-            .order('prazo_resposta', { ascending: true })
-            .limit(5);
-            
-          if (!departmentError) {
-            setOverdueCount(departmentDemands.length);
-            setOverdueItems(
-              departmentDemands.map(item => ({ 
-                title: item.titulo, 
-                id: item.id 
-              }))
-            );
-          }
-          
-          // Fetch demands needing response from this department
-          const { data: responsesData, error: responsesError } = await supabase
-            .from('demandas')
-            .select('id')
-            .eq('coordenacao_id', userCoordenaticaoId)
-            .eq('status', 'em_analise')
-            .limit(10);
-            
-          if (!responsesError) {
-            setResponsesToDo(responsesData.length);
-          }
-          
-          // Fetch notes waiting for approval
-          const { data: notesData, error: notesError } = await supabase
-            .from('notas_oficiais')
-            .select('id')
-            .eq('status', 'pendente')
-            .eq('coordenacao_id', userCoordenaticaoId)
-            .limit(10);
-            
-          if (!notesError) {
-            setNotesToApprove(notesData.length);
-          }
+        if (!responsesError) {
+          setData(prev => ({ ...prev, responsesToDo: responsesCount || 0 }));
         }
       } catch (error) {
-        console.error('Error in fetching special cards data:', error);
+        console.error('Error fetching special card data:', error);
       } finally {
-        setIsLoading(false);
+        setData(prev => ({ ...prev, isLoading: false }));
       }
     };
     
-    if (userCoordenaticaoId) {
-      fetchSpecialCardsData();
-    }
+    fetchData();
     
-    // Setup refresh interval
-    const intervalId = setInterval(fetchSpecialCardsData, 5 * 60 * 1000); // Refresh every 5 minutes
+    // Set up a refresh interval
+    const interval = setInterval(fetchData, 60000); // Refresh every minute
     
-    return () => clearInterval(intervalId);
-  }, [user, userCoordenaticaoId, isComunicacao]);
+    return () => clearInterval(interval);
+  }, []);
   
-  return {
-    overdueCount,
-    overdueItems,
-    notesToApprove, 
-    responsesToDo,
-    demandsNeedingNota,
-    isLoading,
-    isComunicacao,
-    userCoordenaticaoId
-  };
+  return data;
 };

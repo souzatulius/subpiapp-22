@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
@@ -38,13 +38,13 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  // Fix excessive type instantiation with explicit typing
-  const visibleCards: ActionCardItem[] = useMemo(() => 
+  // Use type annotations to resolve the infinite type instantiation issue
+  const visibleCards = React.useMemo<ActionCardItem[]>(() => 
     cards.filter(card => !card.hidden),
     [cards]
   );
   
-  const hiddenCards: ActionCardItem[] = useMemo(() => 
+  const hiddenCards = React.useMemo<ActionCardItem[]>(() => 
     cards.filter(card => card.hidden === true),
     [cards]
   );

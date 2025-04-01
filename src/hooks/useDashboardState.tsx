@@ -2,7 +2,7 @@
 import { useDashboardData } from './dashboard/useDashboardData';
 import { useCardActions } from './dashboard/useCardActions';
 import { useSpecialCardActions } from './dashboard/useSpecialCardActions';
-import { useSpecialCardsData } from './dashboard/useSpecialCardsData';
+import { useSpecialCardsData } from './dashboard-management/dashboard/useSpecialCardsData';
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,7 @@ export interface DashboardState {
   handleQuickDemandSubmit: () => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
-  handleSearchSubmit: (query?: string) => void; // Fixed to accept optional parameter
+  handleSearchSubmit: (query?: string) => void; // Modified to accept optional parameter
   specialCardsData: ReturnType<typeof useSpecialCardsData>;
   userCoordenaticaoId: string | null;
   isLoading: boolean; 

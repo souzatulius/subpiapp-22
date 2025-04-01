@@ -2,55 +2,77 @@
 import React from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import UnifiedDashboard from '@/components/dashboard/UnifiedDashboard';
-import MobileBottomNav from '@/components/layouts/MobileBottomNav';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDashboardState } from '@/hooks/useDashboardState';
-import { useIsMobile } from '@/hooks/use-mobile';
+import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
+import { useUser } from '@/hooks/useUser';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import PageContainer from '@/components/layouts/PageContainer';
+import { Skeleton } from '@/components/ui/skeleton';
+import UnifiedDashboard from '@/components/dashboard/UnifiedDashboard';
+import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const isMobile = useIsMobile();
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-
-  const {
-    firstName,
-    actionCards,
-    isLoading
+  const { user } = useUser();
+  const { 
+    firstName, 
+    actionCards, 
+    setActionCards, 
+    isLoading, // Using isLoading here
+    editingCard,
+    isCustomizationModalOpen,
+    setIsCustomizationModalOpen,
+    handleDeleteCard,
+    handleAddNewCard,
+    handleEditCard,
+    handleSaveCard,
+    userCoordenaticaoId,
+    handleSearchSubmit,
+    handleQuickDemandSubmit,
+    newDemandTitle,
+    setNewDemandTitle,
+    searchQuery,
+    setSearchQuery,
+    specialCardsData
   } = useDashboardState(user?.id);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <Header showControls={true} toggleSidebar={toggleSidebar} />
+    <div className="flex flex-col min-h-screen">
+      <Header showControls={true} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex flex-1 overflow-hidden">
-        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+        <DashboardSidebar isOpen={sidebarOpen} currentPath="/dashboard" />
+        
+        <PageContainer>
+          {isLoading ? (
+            <div className="p-6 space-y-8">
+              <Skeleton className="h-12 w-64" />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <Skeleton key={i} className="h-40 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <UnifiedDashboard
+              userId={user?.id || ""}
+              dashboardType="dashboard"
+              title={`Olá, ${firstName}`}
+              description="Bem-vindo(a) ao seu painel do SaadPi!"
+              fallbackCards={actionCards}
+            />
+          )}
+        </PageContainer>
 
-        <main className="flex-1 overflow-auto p-6 pb-20 md:pb-6">
-          <div className="max-w-7xl mx-auto">
-            <DashboardHeader firstName={firstName} />
-
-            {user && !isLoading && (
-              <UnifiedDashboard
-                userId={user.id}
-                dashboardType="dashboard"
-                title={`Olá, ${firstName || 'Usuário'}!`}
-                description="Organize esta área do seu jeito, movendo ou ocultando os cards."
-                fallbackCards={actionCards}
-              />
-            )}
-          </div>
-        </main>
+        <CardCustomizationModal
+          isOpen={isCustomizationModalOpen} 
+          onClose={() => setIsCustomizationModalOpen(false)} 
+          onSave={handleSaveCard}
+          initialData={editingCard}
+        />
       </div>
-
-      {/* Barra inferior no mobile */}
-      {isMobile && <MobileBottomNav />}
     </div>
   );
 };

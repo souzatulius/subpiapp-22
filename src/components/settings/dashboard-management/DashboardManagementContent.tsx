@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import DashboardPreview from './DashboardPreview';
 import DashboardControls from './DashboardControls';
 import CardLibrary from './CardLibrary';
@@ -15,6 +16,8 @@ import ExportDashboardModal from './modals/ExportDashboardModal';
 import ImportDashboardModal from './modals/ImportDashboardModal';
 import DashboardActionButtons from './DashboardActionButtons';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
+import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 const DashboardManagementContent: React.FC = () => {
   const {
@@ -50,26 +53,98 @@ const DashboardManagementContent: React.FC = () => {
   
   const {
     saveDefaultDashboard,
-    isLoading,
     isSaving,
+    config: dashboardConfig,
+    loading: configLoading,
+    fetchConfig
   } = useDefaultDashboardConfig(selectedDepartment);
+
+  // Create local loading state to avoid TS error
+  const isLoading = configLoading;
   
   useEffect(() => {
     loadDepartments();
   }, []);
 
-  const handleAddCardToDashboard = (card: ActionCardItem) => {
-    const dashboardPreviewRef = document.getElementById('dashboard-preview-container');
-    if (dashboardPreviewRef) {
-      dashboardPreviewRef.classList.add('highlight-pulse');
-      setTimeout(() => dashboardPreviewRef.classList.remove('highlight-pulse'), 1000);
+  const handleAddCardToDashboard = async (card: ActionCardItem) => {
+    try {
+      // Fetch current dashboard configuration
+      const { data, error } = await supabase
+        .from('department_dashboards')
+        .select('cards_config')
+        .eq('department', selectedDepartment)
+        .eq('view_type', selectedViewType)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      // Create a new array with the existing cards (if any) and the new card
+      let existingCards: ActionCardItem[] = [];
+      if (data?.cards_config) {
+        try {
+          existingCards = JSON.parse(data.cards_config);
+        } catch (e) {
+          console.error('Error parsing cards_config:', e);
+          existingCards = [];
+        }
+      }
+
+      // Generate a new unique ID for the card
+      const newCard = {
+        ...card,
+        id: `card-${uuidv4()}`
+      };
+
+      // Add the new card to the array
+      const updatedCards = [...existingCards, newCard];
+
+      // Save the updated card array
+      const { error: saveError } = await supabase
+        .from('department_dashboards')
+        .upsert({
+          department: selectedDepartment,
+          view_type: selectedViewType,
+          cards_config: JSON.stringify(updatedCards),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'department,view_type'
+        });
+
+      if (saveError) throw saveError;
+
+      // Refresh the dashboard config
+      await fetchConfig();
+
+      // Force a refresh by temporarily changing and restoring the selected department
+      setTimeout(() => {
+        setSelectedDepartment(prev => {
+          const temp = prev;
+          setSelectedDepartment(temp);
+          return temp;
+        });
+      }, 100);
+
+      const dashboardPreviewRef = document.getElementById('dashboard-preview-container');
+      if (dashboardPreviewRef) {
+        dashboardPreviewRef.classList.add('highlight-pulse');
+        setTimeout(() => dashboardPreviewRef.classList.remove('highlight-pulse'), 1000);
+      }
+      
+      toast({
+        title: "Card adicionado",
+        description: "O card foi adicionado ao dashboard.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error('Error adding card to dashboard:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o card ao dashboard.",
+        variant: "destructive"
+      });
     }
-    
-    toast({
-      title: "Card adicionado",
-      description: "O card foi adicionado ao dashboard.",
-      variant: "success"
-    });
   };
 
   return (
