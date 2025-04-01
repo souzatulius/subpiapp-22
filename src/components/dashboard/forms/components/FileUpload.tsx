@@ -1,7 +1,6 @@
-
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Upload, X, FileText, ImageIcon, File, FileImage } from 'lucide-react';
+import { Upload, X, FileText, ImageIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,23 +28,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState('');
-  const [fileType, setFileType] = useState('');
-
-  // Set file name from URL when value changes
-  useEffect(() => {
-    if (value) {
-      try {
-        const name = decodeURIComponent(value.split('/').pop() || '');
-        setFileName(name);
-        setFileType(getFileTypeFromFileName(name));
-      } catch (error) {
-        console.error('Error parsing file URL:', error);
-      }
-    } else {
-      setFileName('');
-      setFileType('');
-    }
-  }, [value]);
 
   const handleUpload = async (file: File) => {
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -68,7 +50,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
 
     setIsUploading(true);
     setFileName(file.name);
-    setFileType(file.type);
 
     const filePath = `uploads/${Date.now()}-${file.name}`;
 
@@ -107,46 +88,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
   const handleRemove = () => {
     onChange('');
     setFileName('');
-    setFileType('');
   };
 
-  // Is this an image file?
-  const isImageFile = () => {
-    return fileType?.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp|heic|svg)$/i.test(value || '');
-  };
-
-  // Get proper file type from filename
-  const getFileTypeFromFileName = (filename: string): string => {
-    const ext = filename.split('.').pop()?.toLowerCase() || '';
-    
-    if (/^(jpg|jpeg|png|gif|bmp|webp|heic|svg)$/i.test(ext)) {
-      return `image/${ext}`;
-    } else if (ext === 'pdf') {
-      return 'application/pdf';
-    } else if (['doc', 'docx'].includes(ext)) {
-      return 'application/msword';
-    } else if (['xls', 'xlsx'].includes(ext)) {
-      return 'application/vnd.ms-excel';
+  const getIcon = () => {
+    if (value?.match(/\.(png|jpe?g|heic)$/i)) {
+      return <img src={value} alt="preview" className="w-10 h-10 object-cover rounded" />;
     }
-    
-    return 'application/octet-stream';
-  };
-
-  // Get appropriate file icon based on type
-  const getFileIcon = () => {
-    if (isImageFile()) {
-      return <FileImage className="h-8 w-8 text-blue-400" />;
-    } else if (fileType?.includes('pdf') || value?.toLowerCase().endsWith('.pdf')) {
-      return <File className="h-8 w-8 text-red-500" />;
-    } else if (fileType?.includes('word') || fileType?.includes('doc') || 
-               value?.toLowerCase().endsWith('.doc') || value?.toLowerCase().endsWith('.docx')) {
-      return <FileText className="h-8 w-8 text-blue-600" />;
-    } else if (fileType?.includes('excel') || fileType?.includes('sheet') ||
-               value?.toLowerCase().endsWith('.xls') || value?.toLowerCase().endsWith('.xlsx')) {
-      return <FileText className="h-8 w-8 text-green-600" />;
-    }
-    
-    return <FileText className="h-8 w-8 text-gray-500" />;
+    return <FileText className="w-6 h-6 text-gray-500" />;
   };
 
   return (
@@ -154,47 +102,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, value }) => {
       <Label>Anexar Arquivo</Label>
 
       {value ? (
-        <div className="mt-2 flex flex-col border border-gray-300 rounded-lg overflow-hidden">
-          <div className="relative bg-gray-100 p-2 flex justify-center items-center h-32">
-            {isImageFile() ? (
-              <img 
-                src={value} 
-                alt="preview" 
-                className="max-h-full max-w-full object-contain rounded"
-                onError={() => {
-                  // Fallback if image fails to load
-                  toast({
-                    title: "Erro ao carregar imagem",
-                    description: "Não foi possível carregar a miniatura da imagem",
-                    variant: "destructive"
-                  });
-                }}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center">
-                {getFileIcon()}
-                <span className="text-xs text-gray-500 mt-2">
-                  {value?.toLowerCase().endsWith('.pdf') ? 'PDF' : 
-                  value?.toLowerCase().endsWith('.doc') || value?.toLowerCase().endsWith('.docx') ? 'DOC' :
-                  value?.toLowerCase().endsWith('.xls') || value?.toLowerCase().endsWith('.xlsx') ? 'XLS' :
-                  'Arquivo'}
-                </span>
-              </div>
-            )}
-            
-            <button 
-              onClick={handleRemove} 
-              className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 hover:text-red-500"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          
-          <div className="p-2 bg-white border-t border-gray-200">
-            <span className="text-sm text-gray-700 flex-1 truncate">
-              {fileName || decodeURIComponent(value.split('/').pop() || '')}
-            </span>
-          </div>
+        <div className="mt-2 flex items-center gap-2 p-2 border border-gray-300 rounded-lg">
+          {getIcon()}
+          <span className="text-sm text-gray-700 flex-1 truncate">
+            {fileName || decodeURIComponent(value.split('/').pop() || '')}
+          </span>
+          <button onClick={handleRemove} className="hover:text-red-500">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       ) : (
         <div
