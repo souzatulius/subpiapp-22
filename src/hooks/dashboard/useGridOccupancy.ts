@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
+import { CardType } from '@/types/dashboard';
 
 // Type for card dimensions
 export interface CardDimensions {
   width: string; // '25', '50', '75', '100'
   height: string; // '1', '2'
-  type?: 'standard' | 'data_dynamic';
+  type?: string; // Changed from 'standard' | 'data_dynamic' to string to accept all CardType values
   id: string;
 }
 

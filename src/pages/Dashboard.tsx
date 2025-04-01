@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -52,7 +51,7 @@ const Dashboard = () => {
   const handleSaveCardAdapter = (data: { 
     title: string; 
     icon: React.ReactNode; 
-    path: string;
+    path?: string; // Make path optional to match CardCustomizationModalProps
     color: ActionCardItem['color'];
     width?: ActionCardItem['width'];
     height?: ActionCardItem['height'];
@@ -66,9 +65,10 @@ const Dashboard = () => {
     // Extract iconId from the icon component
     const iconComponent = data.icon;
     
-    // Pass the full data to the original handler
+    // Pass the full data to the original handler with a default path if not provided
     handleSaveCard({
       ...data,
+      path: data.path || '', // Provide default empty string for path if not specified
       iconId: editingCard?.iconId || 'clipboard-list', // Use existing or default
     });
   };

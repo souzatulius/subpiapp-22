@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CardColor } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -93,7 +92,6 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
     }
   };
   
-  // Only add the wiggle animation class if the card is in edit mode and wiggle effect is not disabled
   const wiggleClass = (isEditing && !disableWiggleEffect) ? 'animate-wiggle' : '';
   
   const cardContent = (
