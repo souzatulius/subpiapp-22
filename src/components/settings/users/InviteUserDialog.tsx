@@ -149,7 +149,6 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                         value={field.value} 
                         onChange={field.onChange} 
                         suffix="@smsub.prefeitura.sp.gov.br" 
-                        placeholder="email.usuario" 
                       />
                     </FormControl>
                     <FormMessage />
