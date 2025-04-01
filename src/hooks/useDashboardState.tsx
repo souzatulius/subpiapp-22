@@ -6,6 +6,7 @@ import { useSpecialCardsData } from './dashboard/useSpecialCardsData';
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
+import { getDefaultCards } from './dashboard/defaultCards';
 
 export interface DashboardState {
   firstName: string;
@@ -23,10 +24,10 @@ export interface DashboardState {
   handleQuickDemandSubmit: () => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
-  handleSearchSubmit: (query: string) => void; // Updated signature to accept a parameter
+  handleSearchSubmit: (query?: string) => void; // Fixed to accept optional parameter
   specialCardsData: ReturnType<typeof useSpecialCardsData>;
   userCoordenaticaoId: string | null;
-  isLoading: boolean; // Added isLoading property
+  isLoading: boolean; 
 }
 
 export const useDashboardState = (userId?: string): DashboardState => {
@@ -34,16 +35,16 @@ export const useDashboardState = (userId?: string): DashboardState => {
   const [actionCards, setActionCards] = useState<ActionCardItem[]>([]);
   const [firstName, setFirstName] = useState('');
   const [userCoordenaticaoId, setUserCoordenaticaoId] = useState<string | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (!userId) {
-        setIsLoadingUser(false);
+        setIsLoading(false);
         return;
       }
 
-      setIsLoadingUser(true);
+      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('usuarios')
@@ -51,13 +52,16 @@ export const useDashboardState = (userId?: string): DashboardState => {
           .eq('id', userId)
           .single();
 
-        if (error || !data) return;
+        if (error || !data) {
+          console.error("Error fetching user info:", error);
+          setIsLoading(false);
+          return;
+        }
 
         setFirstName(data.nome_completo.split(' ')[0]);
         setUserCoordenaticaoId(data.coordenacao_id);
         
-        // Import and use the function from hooks/dashboard/defaultCards
-        const { getDefaultCards } = require('./dashboard/defaultCards');
+        // Get default cards for this department
         const defaultCardsList = getDefaultCards(data.coordenacao_id);
         
         setDefaultCards(defaultCardsList);
@@ -65,7 +69,7 @@ export const useDashboardState = (userId?: string): DashboardState => {
       } catch (err) {
         console.error('Failed to fetch user info:', err);
       } finally {
-        setIsLoadingUser(false);
+        setIsLoading(false);
       }
     };
 
@@ -74,7 +78,7 @@ export const useDashboardState = (userId?: string): DashboardState => {
 
   useEffect(() => {
     const fetchCustomDashboard = async () => {
-      if (!userId) return;
+      if (!userId || isLoading) return;
 
       try {
         const { data: userDashboard } = await supabase
@@ -111,10 +115,10 @@ export const useDashboardState = (userId?: string): DashboardState => {
       }
     };
 
-    if (!isLoadingUser) {
+    if (!isLoading) {
       fetchCustomDashboard();
     }
-  }, [userId, userCoordenaticaoId, isLoadingUser, defaultCards]);
+  }, [userId, userCoordenaticaoId, isLoading, defaultCards]);
 
   useDashboardData('pendencias_por_coordenacao', userId || '', userId || '');
 
@@ -158,6 +162,6 @@ export const useDashboardState = (userId?: string): DashboardState => {
     handleSearchSubmit,
     specialCardsData,
     userCoordenaticaoId,
-    isLoading: isLoadingUser
+    isLoading
   };
 };

@@ -1,68 +1,41 @@
 
-// hooks/dashboard/defaultCards.tsx
-import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
-import * as LucideIcons from 'lucide-react';
 import React from 'react';
+import { ActionCardItem } from '@/types/dashboard';
+import { v4 as uuidv4 } from 'uuid';
+import * as icons from 'lucide-react';
+import type { LucideProps } from 'lucide-react';
 
-// Retorna o componente React correspondente ao iconId
-export const getIconComponentFromId = (iconId: string): React.ElementType => {
-  // First check if the iconId is directly a key in LucideIcons
-  if (iconId in LucideIcons) {
-    return LucideIcons[iconId as keyof typeof LucideIcons] as React.ElementType;
-  }
-  
-  // If not, use the mapping for legacy icon IDs
-  const iconMap: Record<string, keyof typeof LucideIcons> = {
-    'clipboard-list': 'ClipboardList',
-    'message-square-reply': 'MessageSquareReply',
-    'file-check': 'FileCheck',
-    'bar-chart-2': 'BarChart2',
-    'plus-circle': 'PlusCircle',
-    'search': 'Search',
-    'clock': 'Clock',
-    'alert-triangle': 'AlertTriangle',
-    'check-circle': 'CheckCircle',
-    'file-text': 'FileText',
-    'list-filter': 'ListFilter',
-    'Search': 'Search',
-    'FileText': 'FileText',
-    'Plus': 'Plus',
-    'FileEdit': 'FileEdit'
-  };
-
-  const componentName = iconMap[iconId] || 'ClipboardList';
-  return LucideIcons[componentName] as React.ElementType || LucideIcons.ClipboardList;
-};
-
-// Cards padrão sem JSX nos dados - agora usando a configuração CPDU como base
+// Returns default cards based on department ID
 export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
-  // CPDU focused cards that will be used as the standard default
-  const cpduBaseCards: ActionCardItem[] = [
+  // Base cards that will be used as the standard default
+  const baseCards: ActionCardItem[] = [
     {
-      id: 'search',
+      id: uuidv4(),
       title: 'Pesquisar',
       iconId: 'Search',
       path: '/demandas',
-      color: 'blue-dark' as CardColor,
-      width: '1' as CardWidth,
-      height: '1' as CardHeight,
+      color: 'blue-dark',
+      width: '25',
+      height: '1',
       isCustom: false,
-      type: 'standard' as CardType,
+      type: 'standard',
       displayMobile: true,
-      mobileOrder: 1
+      mobileOrder: 1,
+      version: '1.0'
     },
     {
-      id: 'notas',
+      id: uuidv4(),
       title: 'Consultar Notas',
       iconId: 'FileText',
       path: '/notas',
-      color: 'green' as CardColor,
-      width: '1' as CardWidth,
-      height: '1' as CardHeight,
+      color: 'green',
+      width: '25',
+      height: '1',
       isCustom: false,
-      type: 'standard' as CardType,
+      type: 'standard',
       displayMobile: true,
-      mobileOrder: 2
+      mobileOrder: 2,
+      version: '1.0'
     }
   ];
 
@@ -70,34 +43,43 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
   if (coordenacaoId === 'comunicacao') {
     return [
       {
-        id: 'nova-solicitacao',
+        id: uuidv4(),
         title: 'Nova Solicitação',
         iconId: 'Plus',
         path: '/dashboard/comunicacao/cadastrar',
-        color: 'orange-600' as CardColor,
-        width: '1' as CardWidth,
-        height: '1' as CardHeight,
+        color: 'orange-600',
+        width: '25',
+        height: '1',
         isCustom: false,
-        type: 'standard' as CardType,
+        type: 'standard',
         displayMobile: true,
-        mobileOrder: 1
+        mobileOrder: 1,
+        version: '1.0'
       },
       {
-        id: 'criar-nota',
+        id: uuidv4(),
         title: 'Criar Nota Oficial',
         iconId: 'FileEdit',
         path: '/dashboard/notas/criar',
-        color: 'lime' as CardColor,
-        width: '1' as CardWidth,
-        height: '1' as CardHeight,
+        color: 'lime',
+        width: '25',
+        height: '1',
         isCustom: false,
-        type: 'standard' as CardType,
+        type: 'standard',
         displayMobile: true,
-        mobileOrder: 2
+        mobileOrder: 2,
+        version: '1.0'
       },
-      ...cpduBaseCards
+      ...baseCards
     ];
   }
 
-  return cpduBaseCards;
+  return baseCards;
+};
+
+// Helper function to get icon component from ID
+export const getIconComponentFromId = (iconId: string): React.ComponentType<LucideProps> => {
+  // @ts-ignore - dynamically access the icon from lucide-react
+  const IconComponent = icons[iconId] || icons.Layout;
+  return IconComponent;
 };

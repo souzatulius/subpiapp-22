@@ -42,9 +42,9 @@ export const useSpecialCardsData = (): SpecialCardData => {
           }));
         }
         
-        // Fetch notes to approve
+        // Fetch notes to approve - changed from "notas" to "notas_oficiais"
         const { count: notesCount, error: notesError } = await supabase
-          .from('notas')
+          .from('notas_oficiais')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'PENDENTE_APROVACAO');
           
@@ -52,9 +52,9 @@ export const useSpecialCardsData = (): SpecialCardData => {
           setData(prev => ({ ...prev, notesToApprove: notesCount || 0 }));
         }
         
-        // Fetch responses to do
+        // Fetch responses to do - changed from "demandas_comunicacao" to "demandas"
         const { count: responsesCount, error: responsesError } = await supabase
-          .from('demandas_comunicacao')
+          .from('demandas')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'PENDENTE_RESPOSTA');
           

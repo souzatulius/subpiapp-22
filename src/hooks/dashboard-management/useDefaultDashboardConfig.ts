@@ -11,7 +11,7 @@ interface UseDefaultDashboardConfigResult {
   config: ActionCardItem[];
   defaultConfig: ActionCardItem[];
   loading: boolean;
-  isLoading: boolean; // Added this property to match usage in DashboardManagementContent
+  isLoading: boolean; // Added this property
   saveConfig: (cards: ActionCardItem[], deptId?: string) => Promise<boolean>;
   selectedDepartment: string;
   setSelectedDepartment: (v: string) => void;
@@ -36,13 +36,13 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
     setLoading(true);
 
     try {
-      const deptId = depId || selectedDepartment || departmentId || user?.coordenacao_id;
+      const deptId = depId || departmentId || user?.coordenacao_id;
       if (!deptId) {
         setLoading(false);
         return;
       }
 
-      console.log(`Fetching dashboard config for department: ${deptId}, viewType: ${selectedViewType}`);
+      console.log(`Fetching dashboard config for department: ${deptId}`);
 
       const { data, error } = await supabase
         .from('department_dashboards')
@@ -65,9 +65,9 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
       setConfig(prev => ({ ...prev, [deptId]: parsed }));
     } catch (error) {
       console.error('Error fetching dashboard config:', error);
-      const fallback = generateDefaultCards(selectedDepartment || departmentId || user?.coordenacao_id || '');
+      const fallback = generateDefaultCards(departmentId || user?.coordenacao_id || '');
       setDefaultConfig(fallback);
-      setConfig({ [selectedDepartment || departmentId || user?.coordenacao_id || '']: fallback });
+      setConfig({ [departmentId || user?.coordenacao_id || '']: fallback });
     } finally {
       setLoading(false);
     }
@@ -75,15 +75,14 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
 
   // Load config on initial mount and when department or view type changes
   useEffect(() => {
-    if (selectedDepartment || departmentId || user?.coordenacao_id) {
+    if (user || departmentId) {
       fetchConfig();
     }
-  }, [selectedDepartment, selectedViewType]);
+  }, [user, departmentId, selectedViewType]);
 
   // Reload config - can be called after saving
   const reloadConfig = async () => {
-    console.log("Reloading config...");
-    await fetchConfig();
+    await fetchConfig(selectedDepartment);
   };
 
   const saveDefaultDashboard = async (): Promise<boolean> => {
@@ -93,8 +92,7 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
       if (!dept) return false;
 
       const cards = config[dept] || defaultConfig;
-
-      console.log(`Saving ${cards.length} cards for ${selectedViewType} dashboard of department ${dept}`);
+      console.log("Saving dashboard:", cards);
 
       const { data: existing } = await supabase
         .from('department_dashboards')
@@ -107,8 +105,7 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
         department: dept,
         view_type: selectedViewType,
         cards_config: JSON.stringify(cards),
-        updated_at: new Date().toISOString(),
-        updated_by: user?.id
+        updated_at: new Date().toISOString()
       };
 
       if (existing) {
@@ -119,7 +116,6 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
           .eq('view_type', selectedViewType);
         
         if (error) throw error;
-        console.log("Updated existing dashboard configuration");
       } else {
         const { error } = await supabase
           .from('department_dashboards')
@@ -129,17 +125,10 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
           });
         
         if (error) throw error;
-        console.log("Inserted new dashboard configuration");
       }
 
-      // Force reload after save using the quick solution mentioned
-      setTimeout(() => {
-        console.log("Triggering reload via selectedDepartment refresh");
-        setSelectedDepartment(prevDept => {
-          console.log(`Refreshing department from ${prevDept} to trigger reload`);
-          return prevDept;
-        });
-      }, 100);
+      // Force reload after save to ensure we have the latest data
+      setTimeout(() => reloadConfig(), 100);
       
       return true;
     } catch (error) {
@@ -156,18 +145,7 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
       const dept = deptId || selectedDepartment || departmentId || user?.coordenacao_id;
       if (!dept) return false;
 
-      // Make sure all cards have required fields
-      const validatedCards = cards.map(card => ({
-        ...card,
-        id: card.id || uuidv4(),
-        iconId: card.iconId || 'Layout',
-        title: card.title || 'Card sem título',
-        color: card.color || 'blue',
-        type: card.type || 'standard',
-        version: card.version || '1.0'
-      }));
-
-      console.log(`Saving ${validatedCards.length} cards for department ${dept}`);
+      console.log(`Saving ${cards.length} cards for department ${dept}`);
 
       const { data: existing } = await supabase
         .from('department_dashboards')
@@ -179,9 +157,8 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
       const payload = {
         department: dept,
         view_type: selectedViewType,
-        cards_config: JSON.stringify(validatedCards),
-        updated_at: new Date().toISOString(),
-        updated_by: user?.id
+        cards_config: JSON.stringify(cards),
+        updated_at: new Date().toISOString()
       };
 
       if (existing) {
@@ -203,17 +180,10 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
         if (error) throw error;
       }
 
-      // Update local state
-      setConfig(prev => ({ ...prev, [dept]: validatedCards }));
+      setConfig(prev => ({ ...prev, [dept]: cards }));
       
       // Force reload after save
-      setTimeout(() => {
-        console.log("Triggering reload via selectedDepartment refresh");
-        setSelectedDepartment(prevDept => {
-          console.log(`Refreshing department from ${prevDept} to trigger reload`);
-          return prevDept;
-        });
-      }, 100);
+      setTimeout(() => reloadConfig(), 100);
       
       return true;
     } catch (error) {
@@ -229,7 +199,7 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
     config: config[currentDept] || defaultConfig,
     defaultConfig,
     loading,
-    isLoading: loading, // Add this to match the expected interface
+    isLoading: loading, // Add isLoading alias for loading for backward compatibility
     saveConfig,
     selectedDepartment,
     setSelectedDepartment,
@@ -241,7 +211,7 @@ export const useDefaultDashboardConfig = (departmentId?: string): UseDefaultDash
   };
 };
 
-// Default cards generation with all required fields
+// Default card generation
 const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
   return [
     {
@@ -255,8 +225,7 @@ const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
       isCustom: false,
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 1,
-      version: '1.0'
+      mobileOrder: 1
     }
   ];
 };
