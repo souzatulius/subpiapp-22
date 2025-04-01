@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,10 @@ import ActionCards from '@/components/comunicacao/ActionCards';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
+import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
+import { useState as useReactState } from 'react';
+import { ActionCardItem } from '@/types/dashboard';
+import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -30,9 +33,20 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const isMobile = useIsMobile();
   
   // Use the dashboard config hook to get the dashboard configuration
-  const { config: dashboardConfig } = useDefaultDashboardConfig(
+  const { config: dashboardCards, isLoading: isLoadingConfig, saveConfig } = useDefaultDashboardConfig(
     isPreview ? department : userDepartment || ''
   );
+
+  // Add state for the card editing modal
+  const [isEditModalOpen, setIsEditModalOpen] = useReactState(false);
+  const [editingCard, setEditingCard] = useReactState<ActionCardItem | null>(null);
+  const [allCards, setAllCards] = useReactState<ActionCardItem[]>([]);
+
+  useEffect(() => {
+    if (dashboardCards && dashboardCards.length > 0) {
+      setAllCards(dashboardCards);
+    }
+  }, [dashboardCards]);
 
   useEffect(() => {
     if (isPreview) {
@@ -113,7 +127,76 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     }
   };
 
-  if (isLoading) {
+  // Handle card editing
+  const handleEditCard = (card: ActionCardItem) => {
+    setEditingCard(card);
+    setIsEditModalOpen(true);
+  };
+
+  // Handle card hiding
+  const handleHideCard = (cardId: string) => {
+    const updatedCards = allCards.map(card => 
+      card.id === cardId ? { ...card, isHidden: true } : card
+    );
+    setAllCards(updatedCards);
+    
+    // Save changes if not in preview mode
+    if (!isPreview && userDepartment) {
+      saveConfig(updatedCards, userDepartment);
+    }
+  };
+
+  // Handle card save
+  const handleSaveCard = (cardData: any) => {
+    if (editingCard) {
+      // For special cards, only allow title and color changes
+      const isSpecialCard = editingCard.isQuickDemand || 
+                           editingCard.isSearch || 
+                           editingCard.isOverdueDemands || 
+                           editingCard.isPendingActions;
+      
+      const updatedCards = allCards.map(card =>
+        card.id === editingCard.id 
+          ? { 
+              ...card,
+              // Only update title and color for special cards
+              title: cardData.title || card.title,
+              color: cardData.color || card.color,
+              // Update other properties only for regular cards
+              ...(isSpecialCard ? {} : {
+                subtitle: cardData.subtitle,
+                path: cardData.path || card.path,
+                iconId: cardData.iconId || card.iconId,
+                width: cardData.width || card.width,
+                height: cardData.height || card.height
+              })
+            } 
+          : card
+      );
+      
+      setAllCards(updatedCards);
+      
+      // Save changes if not in preview mode
+      if (!isPreview && userDepartment) {
+        saveConfig(updatedCards, userDepartment);
+      }
+    }
+    
+    setIsEditModalOpen(false);
+    setEditingCard(null);
+  };
+
+  // Handle cards reordering
+  const handleCardsChange = (newCards: ActionCardItem[]) => {
+    setAllCards(newCards);
+    
+    // Save changes if not in preview mode
+    if (!isPreview && userDepartment) {
+      saveConfig(newCards, userDepartment);
+    }
+  };
+
+  if (isLoading || isLoadingConfig) {
     return (
       <div className="max-w-7xl mx-auto p-6 flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -121,6 +204,15 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       </div>
     );
   }
+
+  // Get the special cards data for integration with the UnifiedCardGrid
+  const specialCardsData = {
+    overdueCount: 0,
+    overdueItems: [],
+    notesToApprove: 0,
+    responsesToDo: 0,
+    isLoading: false
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 p-6 pb-20 md:pb-6">
@@ -134,11 +226,26 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       
       {/* Action Cards - Customizable through dashboard management */}
       <div>
-        <ActionCards 
-          coordenacaoId={userDepartment || ''} 
-          isComunicacao={isComunicacao}
-          baseUrl="dashboard/comunicacao" 
-        />
+        {isPreview || !allCards || allCards.length === 0 ? (
+          <ActionCards 
+            coordenacaoId={userDepartment || ''} 
+            isComunicacao={isComunicacao}
+            baseUrl="dashboard/comunicacao"
+            isEditMode={isPreview}
+          />
+        ) : (
+          <UnifiedCardGrid
+            cards={allCards}
+            onCardsChange={handleCardsChange}
+            onEditCard={handleEditCard}
+            onDeleteCard={() => {}} // Not allowing card deletion
+            onHideCard={handleHideCard}
+            isMobileView={isMobile}
+            isEditMode={true}
+            showSpecialFeatures={true}
+            specialCardsData={specialCardsData}
+          />
+        )}
       </div>
       
       {/* Dynamic Content Cards */}
@@ -177,6 +284,18 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           />
         </div>
       </div>
+      
+      {/* Card Customization Modal for editing cards */}
+      <CardCustomizationModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleSaveCard}
+        initialData={editingCard}
+        limitToBasicEditing={editingCard?.isQuickDemand || 
+                             editingCard?.isSearch || 
+                             editingCard?.isOverdueDemands || 
+                             editingCard?.isPendingActions}
+      />
       
       {/* Only add MobileBottomNav if this page is not in preview mode */}
       {!isPreview && isMobile && <MobileBottomNav />}
