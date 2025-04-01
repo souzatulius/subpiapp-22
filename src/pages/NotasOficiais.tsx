@@ -10,11 +10,15 @@ import CadastrarDemandaForm from '@/components/dashboard/forms/CadastrarDemandaF
 import ResponderDemandaForm from '@/components/dashboard/forms/ResponderDemandaForm';
 import CriarNotaForm from '@/components/dashboard/forms/CriarNotaForm';
 import AprovarNotaForm from '@/components/dashboard/forms/AprovarNotaForm';
+import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 
 const NotasOficiais = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeForm, setActiveForm] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -156,12 +160,17 @@ const NotasOficiais = () => {
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
         <div className="flex flex-1 overflow-hidden">
-          <DashboardSidebar isOpen={sidebarOpen} />
+          {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <Layout>
-            {renderForm()}
-          </Layout>
+          <div className="flex-1 overflow-auto">
+            <BreadcrumbBar />
+            <Layout>
+              {renderForm()}
+            </Layout>
+          </div>
         </div>
+        
+        {isMobile && <MobileBottomNav />}
       </div>
     </AdminProtectedRoute>
   );

@@ -6,10 +6,7 @@ import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import SettingsContent from '@/components/settings/SettingsContent';
 import SettingsDashboard from '@/components/settings/SettingsDashboard';
 import MobileSettingsNav from '@/components/settings/MobileSettingsNav';
-import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -39,45 +36,6 @@ const Settings = () => {
     navigate('/settings');
     setActiveSection('dashboard');
   };
-
-  const getSectionCategory = (section: string) => {
-    if (section === 'dashboard') return 'Dashboard';
-    if (['usuarios', 'permissoes', 'cargos'].includes(section)) return 'Gestão de Usuários e Permissões';
-    if (['coordenacoes_lista', 'areas', 'servicos', 'dashboard_management'].includes(section)) return 'Gestão Organizacional';
-    if (['origens_demanda', 'problemas', 'tipos_midia', 'distritos_bairros', 'notificacoes', 'comunicados'].includes(section)) return 'Gestão Operacional';
-    return '';
-  };
-
-  const getSectionTitle = (section: string) => {
-    switch (section) {
-      case 'dashboard': return 'Dashboard';
-      case 'usuarios': return 'Usuários e Permissões';
-      case 'cargos': return 'Cargos';
-      case 'coordenacoes_lista': return 'Coordenações';
-      case 'areas': return 'Supervisões Técnicas';
-      case 'servicos': return 'Serviços';
-      case 'origens_demanda': return 'Origem das Demandas';
-      case 'problemas': return 'Problemas/Temas';
-      case 'tipos_midia': return 'Tipos de Mídia';
-      case 'distritos_bairros': return 'Distritos e Bairros';
-      case 'notificacoes': return 'Notificações';
-      case 'comunicados': return 'Avisos e Comunicados';
-      case 'dashboard_management': return 'Gerenciamento de Dashboards';
-      default: return '';
-    }
-  };
-
-  const getSectionColor = (section: string) => {
-    const category = getSectionCategory(section);
-    if (category === 'Gestão de Usuários e Permissões') return 'text-amber-600';
-    if (category === 'Gestão Organizacional') return 'text-blue-600';
-    if (category === 'Gestão Operacional') return 'text-green-600';
-    return 'text-gray-800';
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
   
   return (
     <AdminProtectedRoute>
@@ -89,6 +47,7 @@ const Settings = () => {
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
           <main className="flex-1 overflow-hidden">
+            <BreadcrumbBar />
             <div className="w-full h-full">
               <div className="overflow-y-auto p-6 pb-24 md:pb-6">
                 <div className="max-w-7xl mx-auto">
@@ -115,6 +74,26 @@ const Settings = () => {
       </div>
     </AdminProtectedRoute>
   );
+};
+
+// Helper functions for section names
+const getSectionTitle = (section: string) => {
+  switch (section) {
+    case 'dashboard': return 'Dashboard';
+    case 'usuarios': return 'Usuários e Permissões';
+    case 'cargos': return 'Cargos';
+    case 'coordenacoes_lista': return 'Coordenações';
+    case 'areas': return 'Supervisões Técnicas';
+    case 'servicos': return 'Serviços';
+    case 'origens_demanda': return 'Origem das Demandas';
+    case 'problemas': return 'Problemas/Temas';
+    case 'tipos_midia': return 'Tipos de Mídia';
+    case 'distritos_bairros': return 'Distritos e Bairros';
+    case 'notificacoes': return 'Notificações';
+    case 'comunicados': return 'Avisos e Comunicados';
+    case 'dashboard_management': return 'Gerenciamento de Dashboards';
+    default: return '';
+  }
 };
 
 export default Settings;
