@@ -50,19 +50,6 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
     
     if (paths.length === 0) return null;
     
-    // Special case for dashboard to avoid duplication
-    if (paths.length === 1 && paths[0] === 'dashboard') {
-      return (
-        <Breadcrumb className="w-full">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <span className="font-medium">Dashboard</span>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      );
-    }
-    
     // Special case for settings - make settings breadcrumb clickable
     if (paths.includes('settings')) {
       return (
