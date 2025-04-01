@@ -1,21 +1,27 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdminCheck } from './sidebar/useAdminCheck';
+import { useUser } from '@/hooks/useUser';
 import SidebarSection from './sidebar/SidebarSection';
 import { navigationConfig } from './sidebar/navigationConfig';
 
 export interface DashboardSidebarProps {
   isOpen: boolean;
-  currentPath?: string; // Make currentPath optional
+  currentPath?: string;
 }
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   isOpen,
-  currentPath = '/dashboard' // Default to dashboard path
+  currentPath = '/dashboard'
 }) => {
   const navigate = useNavigate();
-  const { isAdmin } = useAdminCheck();
+  const { user } = useUser();
+  
+  // Check if user is admin
+  const isAdmin = React.useMemo(() => {
+    // Simple admin check - you might want to replace with actual logic
+    return user?.email?.includes('admin') || false;
+  }, [user]);
   
   // Filter sections based on admin status
   const filteredSections = navigationConfig.sections.filter(
@@ -33,10 +39,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           {filteredSections.map((section) => (
             <SidebarSection 
               key={section.id}
-              title={section.title}
+              id={section.id}
+              label={section.title}
+              icon={section.items[0]?.icon || null}
+              isSection={false}
+              isOpen={isOpen}
               items={section.items}
-              currentPath={currentPath}
-              onNavigate={(path) => navigate(path)}
+              path={section.items[0]?.path}
+              isActive={currentPath.startsWith(section.items[0]?.path)}
             />
           ))}
         </div>

@@ -129,7 +129,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
       
       if (data && data.cards_config) {
         try {
-          const parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
+          const parsedCards: ActionCardItem[] = JSON.parse(data.cards_config);
           console.log("Cards carregados do banco:", parsedCards.length);
           setCards(parsedCards);
         } catch (parseError) {
