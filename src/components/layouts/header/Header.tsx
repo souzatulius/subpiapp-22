@@ -21,6 +21,9 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
   const isPublicPage = ['/login', '/register', '/forgot-password', '/email-verified', '/'].includes(location.pathname) || 
                       location.pathname.includes('/404');
   
+  // Check if current page is the main dashboard page
+  const isMainDashboard = location.pathname === '/dashboard';
+  
   // Map of route paths to friendly names
   const routeNames: Record<string, string> = {
     'dashboard': 'Dashboard',
@@ -40,8 +43,8 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
   
   // Generate breadcrumbs based on current path
   const generateBreadcrumbs = () => {
-    // Don't show breadcrumbs on public pages
-    if (!user || isPublicPage) {
+    // Don't show breadcrumbs on public pages or main dashboard page
+    if (!user || isPublicPage || isMainDashboard) {
       return null;
     }
     
@@ -85,6 +88,20 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
             // Special handling for "comunicacao" to ensure correct link
             if (path === 'comunicacao' && index > 0 && paths[index-1] === 'dashboard') {
               href = '/dashboard/comunicacao/comunicacao';
+            }
+            
+            // Make "Configurações" in settings section clickable
+            if (path === 'settings' && paths.length > 1) {
+              return (
+                <React.Fragment key={index}>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to="/settings">Configurações</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </React.Fragment>
+              );
             }
             
             return (

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ValidationError } from '@/lib/formValidationUtils';
@@ -47,6 +47,15 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     }
     return "00:00";
   });
+
+  // Update the time value whenever the date changes
+  useEffect(() => {
+    if (prazoDate && isValid(prazoDate)) {
+      const hours = prazoDate.getHours().toString().padStart(2, '0');
+      const minutes = prazoDate.getMinutes().toString().padStart(2, '0');
+      setTimeValue(`${hours}:${minutes}`);
+    }
+  }, [formData.prazo_resposta]);
   
   // Handle date selection from the DatePicker
   const handleDateChange = (date: Date | undefined) => {

@@ -12,7 +12,10 @@ const PWAButton: React.FC = () => {
   return (
     <>
       <button 
-        className="fixed bottom-6 right-6 p-8 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center hover:scale-105"
+        className="fixed bottom-6 right-6 p-8 bg-subpi-orange text-white rounded-full shadow-lg hover:bg-orange-600 focus:outline-none transition-all z-50 flex items-center justify-center animate-pulse hover:scale-105"
+        style={{
+          animation: 'breathing 3s ease-in-out infinite',
+        }}
         onClick={toggleInstructions}
         aria-label="Adicionar à tela inicial"
       >
@@ -102,6 +105,23 @@ const PWAButton: React.FC = () => {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes breathing {
+          0% {
+            box-shadow: 0 5px 15px rgba(240, 96, 0, 0.4);
+            transform: scale(1);
+          }
+          50% {
+            box-shadow: 0 5px 25px rgba(240, 96, 0, 0.6);
+            transform: scale(1.05);
+          }
+          100% {
+            box-shadow: 0 5px 15px rgba(240, 96, 0, 0.4);
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </>
   );
 };
