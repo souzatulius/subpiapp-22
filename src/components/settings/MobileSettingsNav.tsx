@@ -45,8 +45,8 @@ const MobileSettingsNav = () => {
           <button
             key={item.id}
             onClick={() => navigate(item.path)}
-            className={`flex flex-col items-center justify-center py-2 px-1 flex-1 ${
-              isLinkActive(item.path) ? 'bg-white text-white' : 'text-gray-400'
+            className={`flex flex-col items-center justify-center py-2 px-1 flex-1 h-16 ${
+              isLinkActive(item.path) ? 'bg-white text-gray-600' : 'text-gray-400'
             }`}
           >
             <div className="text-[#f57737]">

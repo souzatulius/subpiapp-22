@@ -31,8 +31,8 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
                 ? location.pathname === '/dashboard'
                 : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
                 
-              return `flex flex-col items-center justify-center w-full h-full py-1 
-                ${active ? 'bg-white text-white' : 'text-gray-400'}`
+              return `flex flex-col items-center justify-center w-full h-full py-2 
+                ${active ? 'bg-white text-gray-600' : 'text-gray-400'}`
             }}
           >
             <div className="text-[#f57737]">
