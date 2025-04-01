@@ -70,6 +70,8 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
+  hasSubtitle?: boolean;
+  isMobileView?: boolean;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -107,6 +109,11 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
   );
 }
 
+export interface SortableProps {
+  attributes: ReturnType<typeof useSortable>['attributes']; 
+  listeners: ReturnType<typeof useSortable>['listeners'];
+}
+
 export function UnifiedActionCard({
   id,
   title,
@@ -126,7 +133,7 @@ export function UnifiedActionCard({
   isCustom,
   isQuickDemand,
   isSearch,
-  isMobileView,
+  isMobileView = false,
   showSpecialFeatures,
   quickDemandTitle,
   onQuickDemandTitleChange,
@@ -137,12 +144,7 @@ export function UnifiedActionCard({
   hasBadge,
   badgeValue,
   hasSubtitle,
-}: UnifiedActionCardProps & { 
-  sortableProps?: { 
-    attributes: ReturnType<typeof useSortable>['attributes']; 
-    listeners: ReturnType<typeof useSortable>['listeners']; 
-  };
-}) {
+}: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   
   return (
     <div

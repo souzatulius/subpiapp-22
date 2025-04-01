@@ -152,6 +152,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 hasBadge={card.hasBadge}
                 badgeValue={card.badgeValue}
                 hasSubtitle={!!card.subtitle}
+                isMobileView={isMobileView}
               />
             </div>
           ))}

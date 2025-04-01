@@ -3,7 +3,7 @@ import React from 'react';
 import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import UnifiedActionCard from '@/components/dashboard/UnifiedActionCard';
+import { UnifiedActionCard } from '@/components/dashboard/UnifiedActionCard';
 import { ActionCardItem } from '@/types/dashboard';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 
@@ -109,7 +109,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
             color={card.color}
             width={card.width || '25'}
             height={card.height || '1'}
-            hasSubtitle={true}
+            hasSubtitle={!!card.subtitle}
             iconSize="md"
           />
         </Link>
