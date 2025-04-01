@@ -9,7 +9,6 @@ interface EmailSuffixProps {
   onChange: (value: string) => void;
   suffix?: string;
   error?: boolean;
-  placeholder?: string;
   className?: string;
   registerField?: UseFormRegisterReturn;
 }
@@ -20,7 +19,6 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   onChange,
   suffix = "@smsub.prefeitura.sp.gov.br",
   error = false,
-  placeholder = '',
   className = '',
   registerField
 }) => {
