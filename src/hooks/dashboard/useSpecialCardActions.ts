@@ -4,39 +4,36 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 
 export const useSpecialCardActions = () => {
-  const navigate = useNavigate();
   const [newDemandTitle, setNewDemandTitle] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  
+  const navigate = useNavigate();
+
+  // Quick demand submission
   const handleQuickDemandSubmit = () => {
     if (!newDemandTitle.trim()) {
       toast({
-        title: "Campo obrigatório",
-        description: "Por favor, insira um título para a demanda.",
-        variant: "destructive"
+        title: "Título não pode estar vazio",
+        description: "Por favor, informe um título para a demanda.",
+        variant: "destructive",
       });
       return;
     }
-    
-    // Navigate to new demand form with the prefilled title
+
+    // Navigate to demand creation with the title as a query parameter
     navigate(`/dashboard/comunicacao/cadastrar?title=${encodeURIComponent(newDemandTitle)}`);
+    setNewDemandTitle('');
   };
-  
-  const handleSearchSubmit = (query?: string) => {
-    const queryToUse = query || searchQuery;
-    if (!queryToUse.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Por favor, digite um termo para pesquisar.",
-        variant: "destructive"
-      });
-      return;
-    }
+
+  // Search submission
+  const handleSearchSubmit = (query: string) => {
+    if (!query.trim()) return;
     
-    // Navigate to search results with the query parameter
-    navigate(`/demandas?q=${encodeURIComponent(queryToUse)}`);
+    // For now, we'll just log the search query
+    // The actual search functionality is now implemented in the SmartSearchCard component
+    console.log('Search submitted:', query);
+    setSearchQuery(query);
   };
-  
+
   return {
     newDemandTitle,
     setNewDemandTitle,

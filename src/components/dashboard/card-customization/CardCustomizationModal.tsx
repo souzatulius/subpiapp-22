@@ -4,8 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { FormSchema, CardCustomizationModalProps, formSchema } from './types';
-import { identifyIconComponent, getIconComponentById } from './utils';
+import { identifyIconComponent } from './utils';
 import CardFormMain from './CardFormMain';
+import { getIconComponentById } from './utils';
 
 const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   isOpen,
@@ -13,7 +14,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   onSave,
   initialData
 }) => {
-  const [selectedIconId, setSelectedIconId] = useState<string>('Layout');
+  const [selectedIconId, setSelectedIconId] = useState<string>('clipboard-list');
 
   // Set up form with validation
   const form = useForm<FormSchema>({
@@ -23,26 +24,21 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       type: 'standard',
       path: '',
       color: 'blue',
-      iconId: 'Layout',
+      iconId: 'clipboard-list',
       width: '25',
       height: '1',
       allowedDepartments: [],
       allowedRoles: [],
       displayMobile: true,
-      dataSourceKey: '',
-      customProperties: {
-        description: '',
-        gradient: 'bg-gradient-to-r from-blue-600 to-blue-800'
-      }
+      dataSourceKey: ''
     }
   });
 
   // Update form when initialData changes
   useEffect(() => {
     if (initialData) {
-      // Find the icon ID based on the component type if available
-      const iconId = initialData.iconId || (initialData.icon ? identifyIconComponent(initialData.icon) : 'Layout');
-      
+      // Find the icon ID based on the component type
+      const iconId = identifyIconComponent(initialData.icon);
       form.reset({
         title: initialData.title,
         type: initialData.type || 'standard',
@@ -54,11 +50,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
         dataSourceKey: initialData.dataSourceKey,
         allowedDepartments: initialData.allowedDepartments || [],
         allowedRoles: initialData.allowedRoles || [],
-        displayMobile: initialData.displayMobile ?? true,
-        customProperties: initialData.customProperties || {
-          description: '',
-          gradient: 'bg-gradient-to-r from-blue-600 to-blue-800'
-        }
+        displayMobile: initialData.displayMobile ?? true
       });
       setSelectedIconId(iconId);
     } else {
@@ -67,19 +59,15 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
         type: 'standard',
         path: '',
         color: 'blue',
-        iconId: 'Layout',
+        iconId: 'clipboard-list',
         width: '25',
         height: '1',
         allowedDepartments: [],
         allowedRoles: [],
         displayMobile: true,
-        dataSourceKey: '',
-        customProperties: {
-          description: '',
-          gradient: 'bg-gradient-to-r from-blue-600 to-blue-800'
-        }
+        dataSourceKey: ''
       });
-      setSelectedIconId('Layout');
+      setSelectedIconId('clipboard-list');
     }
   }, [initialData, form, isOpen]);
 
@@ -87,19 +75,17 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     // Get the proper React element for the icon (not the raw component)
     const iconComponent = getIconComponentById(data.iconId);
     onSave({
-      title: data.title,
+      title: data.title, 
       type: data.type,
       path: data.path,
       color: data.color, // Ensuring color is always passed
       width: data.width,
       height: data.height,
       icon: iconComponent,
-      iconId: data.iconId, // Pass iconId separately
       dataSourceKey: data.dataSourceKey,
       displayMobile: data.displayMobile,
       allowedDepartments: data.allowedDepartments,
-      allowedRoles: data.allowedRoles,
-      customProperties: data.customProperties
+      allowedRoles: data.allowedRoles
     });
   };
 

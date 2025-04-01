@@ -8,16 +8,8 @@ export type CardColor =
 
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
-export type CardType = 'standard' | 'data_dynamic' | 'quickDemand' | 'search' | 'overdueDemands' | 'pendingActions' | 'welcome_card';
+export type CardType = 'standard' | 'data_dynamic';
 export type DataSourceKey = string;
-
-// Interface de dimensões dos cards (específica para ocupação de grid)
-export interface CardDimensions {
-  id: string;
-  width: CardWidth;
-  height: CardHeight;
-  type: CardType; // Updated to accept all card types
-}
 
 export interface ActionCardItem {
   id: string;
@@ -39,33 +31,4 @@ export interface ActionCardItem {
   isNewCardButton?: boolean;
   isOverdueDemands?: boolean;
   isPendingActions?: boolean;
-  hidden?: boolean;
-  version?: string;
-  _departmentId?: string; // Used for card library
-  _dashboardType?: 'dashboard' | 'communication'; // Used for card library
-  customProperties?: {
-    description?: string;
-    gradient?: string;
-    isQuickDemand?: boolean; 
-    isSearch?: boolean;
-    isOverdueDemands?: boolean;
-    isPendingActions?: boolean;
-    [key: string]: any;
-  };
-}
-
-export interface UnifiedCardItem extends ActionCardItem {
-  version: string;
-}
-
-export interface DashboardState {
-  cards: ActionCardItem[];
-  setCards: (cards: ActionCardItem[] | ((prevCards: ActionCardItem[]) => ActionCardItem[])) => void;
-  loading: boolean;
-  handleDeleteCard: (id: string) => void;
-  handleEditCard: (card: ActionCardItem) => void;
-  handleAddNewCard?: () => void;
-  saveDashboard?: () => Promise<boolean>;
-  isEditMode?: boolean;
-  setIsEditMode?: (value: boolean) => void;
 }

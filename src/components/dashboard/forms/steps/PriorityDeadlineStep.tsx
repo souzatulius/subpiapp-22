@@ -44,18 +44,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
     }
     
     if (isValid(date)) {
-      // Set time to current time if it's 00:00
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-      
-      // If time is midnight (00:00), set to current time
-      if (hours === 0 && minutes === 0) {
-        const now = new Date();
-        date.setHours(now.getHours());
-        date.setMinutes(now.getMinutes());
-      }
-      
-      // Use the Date object with updated time information
+      // Use the Date object directly with its time information
       handleSelectChange('prazo_resposta', date.toISOString());
     }
   };

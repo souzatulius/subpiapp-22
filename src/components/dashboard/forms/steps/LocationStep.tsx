@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { hasFieldError, getFieldErrorMessage } from './identification/ValidationUtils';
 import ProblemStep from './ProblemStep';
-import AddressInput from './location/AddressInput';
 
 interface LocationStepProps {
   formData: {
@@ -124,11 +125,23 @@ const LocationStep: React.FC<LocationStepProps> = ({
       
       {showAddressField && (
         <div className="animate-fadeIn">
-          <AddressInput
+          <Label 
+            htmlFor="endereco" 
+            className={`form-question-title ${hasFieldError('endereco', errors) ? 'text-orange-500 font-semibold' : ''}`}
+          >
+            Endereço {hasFieldError('endereco', errors) && <span className="text-orange-500">*</span>}
+          </Label>
+          <Input
+            id="endereco"
+            name="endereco"
             value={formData.endereco}
             onChange={handleChange}
-            errors={errors}
+            placeholder="Ex: Av. São João, 473"
+            className={hasFieldError('endereco', errors) ? 'border-orange-500' : ''}
           />
+          {hasFieldError('endereco', errors) && (
+            <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('endereco', errors)}</p>
+          )}
         </div>
       )}
     </div>

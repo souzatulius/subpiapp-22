@@ -1,49 +1,30 @@
+
 import { useState, useEffect } from 'react';
+import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/hooks/use-toast';
+import { FormSchema } from '@/components/dashboard/card-customization/types';
 import { v4 as uuidv4 } from 'uuid';
 
-interface SpecialCardsData {
-  overdueCount: number;
-  overdueItems: { title: string; id: string }[];
-  notesToApprove: number;
-  responsesToDo: number;
-  isLoading: boolean;
-  version?: string;
-}
-
-interface UseDefaultDashboardStateResult {
-  cards: ActionCardItem[];
-  setCards: (cards: ActionCardItem[]) => void;
-  handleDeleteCard: (cardId: string) => void;
-  handleEditCard: (card: ActionCardItem) => void;
-  hideCard: (cardId: string) => void;
-  showCard: (cardId: string) => void;
-  reorderCards: (reordered: ActionCardItem[]) => void;
-  saveCards: () => Promise<boolean>;
-  loading: boolean;
-  departmentName: string;
-  specialCardsData: SpecialCardsData;
-}
-
-export const useDefaultDashboardState = (departmentId: string): UseDefaultDashboardStateResult => {
+export const useDefaultDashboardState = (departmentId: string) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [departmentName, setDepartmentName] = useState('');
-  const [specialCardsData, setSpecialCardsData] = useState<SpecialCardsData>({
+  const [isCustomizationModalOpen, setIsCustomizationModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<ActionCardItem | null>(null);
+  const [specialCardsData, setSpecialCardsData] = useState({
     overdueCount: 0,
-    overdueItems: [],
+    overdueItems: [] as { title: string; id: string }[],
     notesToApprove: 0,
     responsesToDo: 0,
-    isLoading: false,
-    version: '1.0'
+    isLoading: false
   });
+  const [departmentName, setDepartmentName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [newDemandTitle, setNewDemandTitle] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Load cards from Supabase
   useEffect(() => {
-    const fetchCards = async () => {
-      setLoading(true);
+    const fetchDashboardCards = async () => {
+      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('department_dashboards')
@@ -52,148 +33,125 @@ export const useDefaultDashboardState = (departmentId: string): UseDefaultDashbo
           .eq('view_type', 'dashboard')
           .maybeSingle();
 
-        if (error && error.code !== 'PGRST116') throw error;
-
-        const parsed: ActionCardItem[] = data?.cards_config
-          ? JSON.parse(data.cards_config)
-          : generateDefaultCards();
-
-        // Ensure version field is present
-        const withVersion = parsed.map(card => ({
-          ...card,
-          version: card.version || '1.0'
-        }));
-
-        setCards(withVersion);
-      } catch (err) {
-        console.error('Erro ao carregar cards:', err);
-        setCards(generateDefaultCards());
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCards();
-  }, [departmentId]);
-
-  // Load department name
-  useEffect(() => {
-    const fetchDepartmentName = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('coordenacoes')
-          .select('descricao')
-          .eq('id', departmentId)
-          .single();
-
-        if (!error && data) {
-          setDepartmentName(data.descricao);
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching dashboard config:', error);
+          setCards(getDefaultCards());
+        } else if (data && data.cards_config) {
+          try {
+            const parsedCards = JSON.parse(data.cards_config);
+            setCards(parsedCards);
+          } catch (parseError) {
+            console.error('Error parsing cards config JSON:', parseError);
+            setCards(getDefaultCards());
+          }
+        } else {
+          setCards(getDefaultCards());
         }
       } catch (err) {
-        console.error('Erro ao carregar nome da coordenação:', err);
+        console.error('Failed to fetch dashboard cards:', err);
+        setCards(getDefaultCards());
+      } finally {
+        setIsLoading(false);
       }
     };
 
+    const fetchDepartmentName = async () => {
+      if (departmentId && departmentId !== 'default') {
+        try {
+          const { data, error } = await supabase
+            .from('areas_coordenacao')
+            .select('descricao')
+            .eq('id', departmentId)
+            .single();
+
+          if (error) {
+            console.error('Error fetching department name:', error);
+            return;
+          }
+
+          if (data) {
+            setDepartmentName(data.descricao);
+          }
+        } catch (error) {
+          console.error('Failed to fetch department name:', error);
+        }
+      } else {
+        setDepartmentName(departmentId === 'default' ? 'Padrão (Todos)' : '');
+      }
+    };
+
+    fetchDashboardCards();
     fetchDepartmentName();
   }, [departmentId]);
 
-  const saveCards = async (): Promise<boolean> => {
-    try {
-      const cardsToSave = cards.map(card => ({
-        ...card,
-        version: card.version || '1.0'
-      }));
-
-      const { error } = await supabase
-        .from('department_dashboards')
-        .upsert({
-          department: departmentId,
-          view_type: 'dashboard',
-          cards_config: JSON.stringify(cardsToSave),
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'department,view_type'
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Dashboard salvo',
-        description: 'As alterações foram salvas com sucesso.',
-        variant: 'success'
-      });
-
-      return true;
-    } catch (err) {
-      console.error('Erro ao salvar dashboard:', err);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível salvar as alterações.',
-        variant: 'destructive'
-      });
-      return false;
-    }
+  const handleEditCard = (card: ActionCardItem) => {
+    setEditingCard(card);
+    setIsCustomizationModalOpen(true);
   };
 
   const handleDeleteCard = (cardId: string) => {
-    setCards(prev => prev.filter(card => card.id !== cardId));
+    setCards(cards.filter(card => card.id !== cardId));
   };
 
-  const handleEditCard = (card: ActionCardItem) => {
-    // Aqui você pode abrir um modal ou setar `editingCard`, se necessário
-    console.log('Editar card:', card);
+  const handleAddNewCard = () => {
+    setEditingCard(null);
+    setIsCustomizationModalOpen(true);
   };
 
-  const hideCard = (cardId: string) => {
-    setCards(prev =>
-      prev.map(card =>
-        card.id === cardId ? { ...card, hidden: true } : card
-      )
-    );
-  };
+  const handleSaveCard = (cardData: any) => {
+    const newCardDefaults = {
+      displayMobile: true,
+      mobileOrder: cards.length,
+      isCustom: true
+    };
 
-  const showCard = (cardId: string) => {
-    setCards(prev =>
-      prev.map(card =>
-        card.id === cardId ? { ...card, hidden: false } : card
-      )
-    );
-  };
-
-  const reorderCards = (reordered: ActionCardItem[]) => {
-    setCards(reordered);
+    if (editingCard) {
+      setCards(cards.map(card =>
+        card.id === editingCard.id ? { 
+          ...card, 
+          ...cardData,
+          // Ensure iconId is set correctly
+          iconId: cardData.iconId || card.iconId
+        } : card
+      ));
+    } else {
+      // Create a new card with required properties
+      const newCard: ActionCardItem = {
+        id: `card-${uuidv4()}`,
+        title: cardData.title || 'Novo Card',
+        path: cardData.path || '',
+        color: cardData.color,
+        width: cardData.width,
+        height: cardData.height,
+        iconId: cardData.iconId || 'clipboard-list',
+        type: cardData.type || 'standard',
+        ...newCardDefaults
+      };
+      
+      setCards([...cards, newCard]);
+    }
+    
+    setIsCustomizationModalOpen(false);
   };
 
   return {
     cards,
     setCards,
+    isCustomizationModalOpen,
+    setIsCustomizationModalOpen,
+    editingCard,
     handleDeleteCard,
+    handleAddNewCard,
     handleEditCard,
-    hideCard,
-    showCard,
-    reorderCards,
-    saveCards,
-    loading,
+    handleSaveCard,
+    specialCardsData,
     departmentName,
-    specialCardsData
+    isLoading,
+    newDemandTitle,
+    setNewDemandTitle,
+    handleQuickDemandSubmit: () => setNewDemandTitle(''),
+    searchQuery,
+    setSearchQuery,
+    handleSearchSubmit: (q: string) => console.log('Searching for:', q)
   };
-};
-
-// Gerador básico de cards padrão
-const generateDefaultCards = (): ActionCardItem[] => {
-  return [
-    {
-      id: uuidv4(),
-      title: 'Consultar Demandas',
-      iconId: 'Search',
-      path: '/demandas',
-      color: 'blue',
-      width: '25',
-      height: '1',
-      type: 'standard',
-      isCustom: false,
-      displayMobile: true,
-      mobileOrder: 1
-    }
-  ];
 };

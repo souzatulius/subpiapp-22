@@ -4,13 +4,13 @@ import { iconsData } from './utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface IconSelectorProps {
-  value: string;
-  onChange: (id: string) => void;
+  selectedIconId: string;
+  onSelectIcon: (id: string) => void;
 }
 
 const IconSelector: React.FC<IconSelectorProps> = ({ 
-  value, 
-  onChange 
+  selectedIconId, 
+  onSelectIcon 
 }) => {
   return (
     <div className="border rounded-md h-48 overflow-hidden">
@@ -20,9 +20,9 @@ const IconSelector: React.FC<IconSelectorProps> = ({
             return (
               <div
                 key={icon.id}
-                onClick={() => onChange(icon.id)}
+                onClick={() => onSelectIcon(icon.id)}
                 className={`flex items-center justify-center p-2 rounded-md cursor-pointer transition-all hover:bg-gray-50
-                  ${value === icon.id ? 'bg-blue-50 border border-blue-200 shadow-sm' : ''}
+                  ${selectedIconId === icon.id ? 'bg-blue-50 border border-blue-200 shadow-sm' : ''}
                 `}
                 title={icon.label}
               >

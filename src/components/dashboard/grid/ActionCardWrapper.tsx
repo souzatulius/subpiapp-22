@@ -1,3 +1,4 @@
+
 import React from 'react';
 import SortableActionCard from '../SortableActionCard';
 import QuickDemandCard from '../QuickDemandCard';
@@ -20,7 +21,6 @@ interface ActionCardWrapperProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   isMobileView?: boolean;
-  isEditMode?: boolean;
   specialCardsData: {
     overdueCount: number;
     overdueItems: { title: string; id: string }[];
@@ -40,7 +40,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   onQuickDemandSubmit = () => {},
   onSearchSubmit = () => {},
   isMobileView = false,
-  isEditMode = false,
   specialCardsData
 }) => {
   const navigate = useNavigate();
@@ -76,16 +75,19 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     fetchUserDepartment();
   }, [user]);
 
+  // Handle card click - navigate to the path if defined
   const handleCardClick = () => {
     if (card.path) {
       navigate(card.path);
     }
   };
   
+  // Function to handle origin selection and navigate to form
   const handleOriginSelect = (originId: string) => {
     navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
   };
 
+  // Map specific card types to their respective components
   if (card.isQuickDemand) {
     return (
       <SortableActionCard 
@@ -94,7 +96,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         isMobileView={isMobileView}
-        isEditMode={isEditMode}
       >
         <QuickDemandCard 
           value={quickDemandTitle}
@@ -113,7 +114,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         isMobileView={isMobileView}
-        isEditMode={isEditMode}
       >
         <SmartSearchCard
           placeholder={card.title}
@@ -131,7 +131,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         isMobileView={isMobileView}
-        isEditMode={isEditMode}
       >
         <OverdueDemandsCard
           id={card.id}
@@ -152,7 +151,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         isMobileView={isMobileView}
-        isEditMode={isEditMode}
       >
         <PendingActionsCard
           id={card.id}
@@ -173,24 +171,23 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         isMobileView={isMobileView}
-        isEditMode={isEditMode}
       >
         <NewCardButton onClick={onAddNewCard} />
       </SortableActionCard>
     );
   }
   
+  // For standard cards, make the entire card clickable by attaching the navigate function
   return (
     <SortableActionCard 
       key={card.id} 
       card={{
         ...card,
-        path: ''
+        path: '' // Remove path to prevent default click behavior
       }} 
       onEdit={onEdit}
       onDelete={onDelete}
       isMobileView={isMobileView}
-      isEditMode={isEditMode}
     >
       <div 
         className="w-full h-full flex flex-col items-center justify-center cursor-pointer"

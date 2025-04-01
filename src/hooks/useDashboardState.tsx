@@ -2,126 +2,129 @@
 import { useDashboardData } from './dashboard/useDashboardData';
 import { useCardActions } from './dashboard/useCardActions';
 import { useSpecialCardActions } from './dashboard/useSpecialCardActions';
-import { useSpecialCardsData } from './dashboard-management/dashboard/useSpecialCardsData';
-import { useState, useEffect } from 'react';
-import { ActionCardItem } from '@/types/dashboard';
-import { supabase } from '@/integrations/supabase/client';
+import { useSpecialCardsData } from './dashboard/useSpecialCardsData';
+import { DashboardStateReturn } from './dashboard/types';
 import { getDefaultCards } from './dashboard/defaultCards';
+import { useState, useEffect } from 'react';
+import { ActionCardItem, DataSourceKey } from '@/types/dashboard';
+import { supabase } from '@/integrations/supabase/client';
 
-export interface DashboardState {
-  firstName: string;
-  actionCards: ActionCardItem[];
-  setActionCards: React.Dispatch<React.SetStateAction<ActionCardItem[]>>;
-  isCustomizationModalOpen: boolean;
-  setIsCustomizationModalOpen: (v: boolean) => void;
-  editingCard: ActionCardItem | null;
-  handleDeleteCard: (id: string) => void;
-  handleAddNewCard: () => void;
-  handleEditCard: (card: ActionCardItem) => void;
-  handleSaveCard: (data: Partial<ActionCardItem>) => void;
-  newDemandTitle: string;
-  setNewDemandTitle: (title: string) => void;
-  handleQuickDemandSubmit: () => void;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
-  handleSearchSubmit: (query?: string) => void; // Modified to accept optional parameter
-  specialCardsData: ReturnType<typeof useSpecialCardsData>;
-  userCoordenaticaoId: string | null;
-  isLoading: boolean; 
-}
-
-export const useDashboardState = (userId?: string): DashboardState => {
+export const useDashboardState = (userId?: string): DashboardStateReturn => {
   const [defaultCards, setDefaultCards] = useState<ActionCardItem[]>([]);
   const [actionCards, setActionCards] = useState<ActionCardItem[]>([]);
   const [firstName, setFirstName] = useState('');
   const [userCoordenaticaoId, setUserCoordenaticaoId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  
+  // Fetch user's info and coordenação
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (!userId) {
-        setIsLoading(false);
+        setIsLoadingUser(false);
         return;
       }
-
-      setIsLoading(true);
+      
+      setIsLoadingUser(true);
       try {
         const { data, error } = await supabase
           .from('usuarios')
           .select('nome_completo, coordenacao_id')
           .eq('id', userId)
           .single();
-
-        if (error || !data) {
-          console.error("Error fetching user info:", error);
-          setIsLoading(false);
+        
+        if (error) {
+          console.error('Error fetching user info:', error);
           return;
         }
-
-        setFirstName(data.nome_completo.split(' ')[0]);
-        setUserCoordenaticaoId(data.coordenacao_id);
         
-        // Get default cards for this department
-        const defaultCardsList = getDefaultCards(data.coordenacao_id);
-        
-        setDefaultCards(defaultCardsList);
-        setActionCards(defaultCardsList);
+        if (data) {
+          // Extract first name
+          const firstName = data.nome_completo.split(' ')[0];
+          setFirstName(firstName);
+          setUserCoordenaticaoId(data.coordenacao_id);
+          
+          // Load default cards based on the user's department
+          const defaultCardsList = getDefaultCards(data.coordenacao_id);
+          setDefaultCards(defaultCardsList);
+          
+          // Set initial action cards
+          setActionCards(defaultCardsList);
+        }
       } catch (err) {
         console.error('Failed to fetch user info:', err);
       } finally {
-        setIsLoading(false);
+        setIsLoadingUser(false);
       }
     };
-
+    
     fetchUserInfo();
   }, [userId]);
-
+  
+  // Then try to load custom dashboard if available
   useEffect(() => {
     const fetchCustomDashboard = async () => {
-      if (!userId || isLoading) return;
-
+      if (!userId) return;
+      
       try {
-        const { data: userDashboard } = await supabase
+        // First check user's custom dashboard
+        const { data: userDashboard, error: userError } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', userId)
           .single();
-
-        if (userDashboard?.cards_config) {
-          const parsed = JSON.parse(userDashboard.cards_config) as ActionCardItem[];
-          setActionCards(parsed);
-          return;
+        
+        if (!userError && userDashboard?.cards_config) {
+          try {
+            const customCards = JSON.parse(userDashboard.cards_config);
+            setActionCards(customCards);
+            return;
+          } catch (e) {
+            console.error('Error parsing user dashboard config:', e);
+          }
         }
-
+        
+        // If no user-specific dashboard, check if there's a default for the user's department
         if (userCoordenaticaoId) {
-          const { data: deptDashboard } = await supabase
+          const { data: deptDashboard, error: deptError } = await supabase
             .from('department_dashboards')
             .select('cards_config')
             .eq('department', userCoordenaticaoId)
             .eq('view_type', 'dashboard')
             .single();
-
-          if (deptDashboard?.cards_config) {
-            const parsed = JSON.parse(deptDashboard.cards_config) as ActionCardItem[];
-            setActionCards(parsed);
-            return;
+          
+          if (!deptError && deptDashboard?.cards_config) {
+            try {
+              const deptCards = JSON.parse(deptDashboard.cards_config);
+              setActionCards(deptCards);
+              return;
+            } catch (e) {
+              console.error('Error parsing department dashboard config:', e);
+            }
           }
         }
-
+        
+        // If no custom dashboards found, use the default cards
         setActionCards(defaultCards);
       } catch (err) {
         console.error('Error loading dashboard:', err);
         setActionCards(defaultCards);
       }
     };
-
-    if (!isLoading) {
+    
+    // Only fetch custom dashboard if user data is loaded
+    if (!isLoadingUser) {
       fetchCustomDashboard();
     }
-  }, [userId, userCoordenaticaoId, isLoading, defaultCards]);
-
-  useDashboardData('pendencias_por_coordenacao', userId || '', userId || '');
-
+  }, [userId, userCoordenaticaoId, isLoadingUser, defaultCards]);
+  
+  // Try to load data if userId is provided
+  useDashboardData(
+    'pendencias_por_coordenacao',
+    userId || '',
+    userId || ''
+  );
+  
+  // Card manipulation actions
   const {
     isCustomizationModalOpen,
     setIsCustomizationModalOpen,
@@ -131,7 +134,8 @@ export const useDashboardState = (userId?: string): DashboardState => {
     handleEditCard,
     handleSaveCard
   } = useCardActions(actionCards, setActionCards);
-
+  
+  // Special card actions (search and quick demand)
   const {
     newDemandTitle,
     setNewDemandTitle,
@@ -140,7 +144,8 @@ export const useDashboardState = (userId?: string): DashboardState => {
     setSearchQuery,
     handleSearchSubmit
   } = useSpecialCardActions();
-
+  
+  // Fetch data for special cards
   const specialCardsData = useSpecialCardsData();
 
   return {
@@ -162,6 +167,5 @@ export const useDashboardState = (userId?: string): DashboardState => {
     handleSearchSubmit,
     specialCardsData,
     userCoordenaticaoId,
-    isLoading
   };
 };

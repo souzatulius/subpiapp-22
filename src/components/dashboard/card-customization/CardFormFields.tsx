@@ -1,268 +1,344 @@
 
-import React, { useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { FormSchema } from './types';
-import { Label } from '@/components/ui/label';
+import React, { useEffect, useState } from 'react';
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import IconSelector from './IconSelector';
+import { UseFormReturn } from 'react-hook-form';
+import { FormSchema } from './types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import ColorOptions from './ColorOptions';
-import DimensionOptions from './DimensionOptions';
-import { cardTypes, dashboardPages, dataSources, gradientOptions } from './utils';
+import IconSelector from './IconSelector';
+import { MultiSelect } from '@/components/ui/multiselect';
+import { dashboardPages } from './utils';
 import { CardColor } from '@/types/dashboard';
+import { supabase } from '@/integrations/supabase/client';
 
-interface CardFormFieldsProps {
-  isNewCard?: boolean;
+interface Props {
+  form: UseFormReturn<FormSchema>;
+  selectedIconId: string;
+  setSelectedIconId: (id: string) => void;
 }
 
-const CardFormFields: React.FC<CardFormFieldsProps> = ({ isNewCard = false }) => {
-  const form = useFormContext<FormSchema>();
-  const watchType = form.watch('type');
-  const isWelcomeCard = watchType === 'welcome_card';
-  const isDataCard = watchType === 'data_dynamic';
-  const isSpecialCard = ['quickDemand', 'search', 'overdueDemands', 'pendingActions'].includes(watchType || '');
+const dataSourceOptions = [
+  { label: 'Pendências da Coordenação', value: 'pendencias_por_coordenacao' },
+  { label: 'Notas aguardando aprovação', value: 'notas_aguardando_aprovacao' },
+  { label: 'Respostas atrasadas', value: 'respostas_atrasadas' },
+  { label: 'Demandas aguardando nota', value: 'demandas_aguardando_nota' },
+  { label: 'Últimas ações da coordenação', value: 'ultimas_acoes_coordenacao' },
+  { label: 'Comunicados por cargo', value: 'comunicados_por_cargo' }
+];
 
-  // Initialize default values for required fields
+interface Coordination {
+  id: string;
+  descricao: string;
+}
+
+interface Cargo {
+  id: string;
+  descricao: string;
+}
+
+const CardFormFields: React.FC<Props> = ({
+  form,
+  selectedIconId,
+  setSelectedIconId
+}) => {
+  const watchType = form.watch('type');
+  const [coordinations, setCoordinations] = useState<{label: string, value: string}[]>([]);
+  const [cargos, setCargos] = useState<{label: string, value: string}[]>([]);
+  const [isLoadingCoordinations, setIsLoadingCoordinations] = useState(false);
+  const [isLoadingCargos, setIsLoadingCargos] = useState(false);
+
   useEffect(() => {
-    // Ensure required fields have values
-    if (!form.getValues('title')) {
-      form.setValue('title', 'Novo Card');
-    }
-    
-    if (!form.getValues('color')) {
-      form.setValue('color', 'blue');
-    }
-    
-    if (!form.getValues('iconId')) {
-      form.setValue('iconId', 'Layout');
-    }
-    
-    if (!form.getValues('type')) {
-      form.setValue('type', 'standard');
-    }
-    
-    if (!form.getValues('width')) {
-      form.setValue('width', '25');
-    }
-    
-    if (!form.getValues('height')) {
-      form.setValue('height', '1');
-    }
-    
-    if (!form.getValues('path') && !isSpecialCard && !isDataCard && !isWelcomeCard) {
-      form.setValue('path', '/demandas');
-    }
-    
-    // Initialize customProperties
-    if (!form.getValues('customProperties')) {
-      form.setValue('customProperties', {});
-    }
+    const fetchCoordinations = async () => {
+      setIsLoadingCoordinations(true);
+      try {
+        const { data, error } = await supabase
+          .from('coordenacoes')
+          .select('id, descricao')
+          .order('descricao');
+        
+        if (error) {
+          console.error('Error fetching coordinations:', error);
+          return;
+        }
+        
+        const formattedCoordinations = (data || []).map((coord: Coordination) => ({
+          label: coord.descricao,
+          value: coord.id
+        }));
+        
+        setCoordinations(formattedCoordinations);
+      } catch (error) {
+        console.error('Failed to fetch coordinations:', error);
+      } finally {
+        setIsLoadingCoordinations(false);
+      }
+    };
+
+    const fetchCargos = async () => {
+      setIsLoadingCargos(true);
+      try {
+        const { data, error } = await supabase
+          .from('cargos')
+          .select('id, descricao')
+          .order('descricao');
+        
+        if (error) {
+          console.error('Error fetching cargos:', error);
+          return;
+        }
+        
+        const formattedCargos = (data || []).map((cargo: Cargo) => ({
+          label: cargo.descricao,
+          value: cargo.id
+        }));
+        
+        setCargos(formattedCargos);
+      } catch (error) {
+        console.error('Failed to fetch cargos:', error);
+      } finally {
+        setIsLoadingCargos(false);
+      }
+    };
+
+    fetchCoordinations();
+    fetchCargos();
   }, []);
 
-  // Quando o tipo de card muda, ajustar outros campos
-  useEffect(() => {
-    // Se for um card de boas-vindas, definir largura como 100%
-    if (isWelcomeCard) {
-      form.setValue('width', '100');
-    }
-    
-    // Se for um card dinâmico, ajustar campos específicos
-    if (isDataCard && !form.getValues('dataSourceKey')) {
-      form.setValue('dataSourceKey', 'pendencias_por_coordenacao');
-    }
-    
-    // Initialize customProperties if it doesn't exist yet
-    if (!form.getValues('customProperties')) {
-      form.setValue('customProperties', {});
-    }
-    
-    // Se for um card especial, configurar propriedades
-    if (watchType === 'quickDemand') {
-      form.setValue('title', 'Nova Demanda Rápida');
-      form.setValue('customProperties', {
-        ...(form.getValues('customProperties') || {}),
-        isQuickDemand: true
-      });
-    } else if (watchType === 'search') {
-      form.setValue('title', 'Pesquisar');
-      form.setValue('customProperties', {
-        ...(form.getValues('customProperties') || {}),
-        isSearch: true
-      });
-    } else if (watchType === 'overdueDemands') {
-      form.setValue('title', 'Demandas Atrasadas');
-      form.setValue('customProperties', {
-        ...(form.getValues('customProperties') || {}),
-        isOverdueDemands: true
-      });
-    } else if (watchType === 'pendingActions') {
-      form.setValue('title', 'Ações Pendentes');
-      form.setValue('customProperties', {
-        ...(form.getValues('customProperties') || {}),
-        isPendingActions: true
-      });
-    }
-  }, [watchType, form]);
-
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4">
-        <div>
-          <Label htmlFor="type">Tipo de Card</Label>
-          <Select
-            onValueChange={(value) => form.setValue('type', value as FormSchema['type'])}
-            defaultValue={form.watch('type')}
-            value={form.watch('type')}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um tipo de card" />
-            </SelectTrigger>
-            <SelectContent>
-              {cardTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-4">
+      <FormField
+        control={form.control}
+        name="title"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Título</FormLabel>
+            <FormControl>
+              <Input placeholder="Título do card" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <div>
-          <Label htmlFor="title">Título</Label>
-          <Input
-            id="title"
-            placeholder="Título do card"
-            {...form.register('title')}
-          />
-        </div>
-
-        {isWelcomeCard && (
-          <>
-            <div>
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                placeholder="Descrição do card de boas-vindas"
-                rows={3}
-                {...form.register('customProperties.description')}
-              />
-            </div>
-            <div>
-              <Label htmlFor="gradient">Cor do Gradiente</Label>
-              <Select
-                onValueChange={(value) => form.setValue('customProperties.gradient', value)}
-                value={form.watch('customProperties.gradient') || "bg-gradient-to-r from-blue-600 to-blue-800"}
-              >
+      <FormField
+        control={form.control}
+        name="type"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo</FormLabel>
+            <FormControl>
+              <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma cor de gradiente" />
+                  <SelectValue placeholder="Selecione tipo de card" />
                 </SelectTrigger>
                 <SelectContent>
-                  {gradientOptions.map((gradient) => (
-                    <SelectItem key={gradient.value} value={gradient.value}>
-                      <div className="flex items-center">
-                        <div className={`w-5 h-5 mr-2 rounded ${gradient.value}`} />
-                        <span>{gradient.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="standard">Padrão</SelectItem>
+                  <SelectItem value="data_dynamic">Com dados</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          </>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         )}
+      />
 
-        {!isWelcomeCard && !isSpecialCard && !isDataCard && (
-          <div>
-            <Label htmlFor="path">Redirecionamento</Label>
-            <Select
-              onValueChange={(value) => form.setValue('path', value)}
-              value={form.watch('path')}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma página" />
-              </SelectTrigger>
-              <SelectContent>
-                {dashboardPages.map((page) => (
-                  <SelectItem key={page.value} value={page.value}>
-                    {page.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        {isDataCard && (
-          <div>
-            <Label htmlFor="dataSourceKey">Fonte de Dados</Label>
-            <Select
-              onValueChange={(value) => form.setValue('dataSourceKey', value)}
-              value={form.watch('dataSourceKey') || ""}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma fonte de dados" />
-              </SelectTrigger>
-              <SelectContent>
-                {dataSources.map((source) => (
-                  <SelectItem key={source.value} value={source.value}>
-                    {source.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        <div>
-          <Label htmlFor="iconId">Ícone</Label>
-          <IconSelector 
-            value={form.watch('iconId') || 'Layout'} 
-            onChange={(id) => form.setValue('iconId', id)} 
-          />
-        </div>
-
-        <Tabs defaultValue="appearance" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="appearance">Aparência</TabsTrigger>
-            <TabsTrigger value="dimensions" disabled={isWelcomeCard}>Dimensões</TabsTrigger>
-          </TabsList>
-          <TabsContent value="appearance">
-            <div className="py-4">
-              <Label>Cor do Card</Label>
-              <ColorOptions 
-                value={form.watch('color') || 'blue'} 
-                onChange={(color) => form.setValue('color', color as CardColor)} 
-              />
-            </div>
-          </TabsContent>
-          <TabsContent value="dimensions">
-            <div className="py-4">
-              <Label>Tamanho do Card</Label>
-              <DimensionOptions 
-                width={form.watch('width') || '25'} 
-                height={form.watch('height') || '1'}
-                onWidthChange={(width) => form.setValue('width', width as "25" | "50" | "75" | "100")}
-                onHeightChange={(height) => form.setValue('height', height as "1" | "2")}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {isNewCard && (
-        <div className="text-sm text-gray-500 mt-4">
-          {isWelcomeCard ? 
-            "Este card será exibido no topo do dashboard com largura total." :
-            isDataCard ? 
-              "Este card exibirá dados dinâmicos conforme a fonte selecionada." :
-              isSpecialCard ? 
-                "Este é um card com funcionalidade especial." :
-                "Este card redirecionará para a página selecionada quando clicado."
-          }
-        </div>
+      {watchType === 'data_dynamic' && (
+        <FormField
+          control={form.control}
+          name="dataSourceKey"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fonte de Dados</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a fonte" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dataSourceOptions.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       )}
+
+      {watchType === 'standard' && (
+        <FormField
+          control={form.control}
+          name="path"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Direcionamento</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione página" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dashboardPages.map(p => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      <FormField
+        control={form.control}
+        name="color"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cor</FormLabel>
+            <FormControl>
+              <ColorOptions
+                selectedColor={field.value as CardColor}
+                onSelectColor={(color: CardColor) => form.setValue('color', color)}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="iconId"
+        render={() => (
+          <FormItem>
+            <FormLabel>Ícone</FormLabel>
+            <FormControl>
+              <IconSelector
+                selectedIconId={selectedIconId}
+                onSelectIcon={id => {
+                  setSelectedIconId(id);
+                  form.setValue('iconId', id);
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="width"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Largura</FormLabel>
+            <FormControl>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Tamanho do card" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="25">25%</SelectItem>
+                  <SelectItem value="50">50%</SelectItem>
+                  <SelectItem value="75">75%</SelectItem>
+                  <SelectItem value="100">100%</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="height"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Altura</FormLabel>
+            <FormControl>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Altura do card" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Padrão</SelectItem>
+                  <SelectItem value="2">Alta</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="displayMobile"
+        render={({ field }) => (
+          <FormItem className="flex items-center gap-3">
+            <FormLabel>Exibir no mobile</FormLabel>
+            <FormControl>
+              <Switch checked={field.value} onCheckedChange={field.onChange} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="allowedDepartments"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Departamentos Permitidos</FormLabel>
+            <FormControl>
+              <MultiSelect
+                selected={field.value || []}
+                onChange={field.onChange}
+                placeholder={isLoadingCoordinations ? "Carregando..." : "Selecione departamentos"}
+                options={coordinations}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="allowedRoles"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cargos Permitidos</FormLabel>
+            <FormControl>
+              <MultiSelect
+                selected={field.value || []}
+                onChange={field.onChange}
+                placeholder={isLoadingCargos ? "Carregando..." : "Selecione cargos"}
+                options={cargos}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
     </div>
   );
 };

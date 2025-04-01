@@ -40,7 +40,7 @@ export const generateTitleSuggestion = (
     const shortAddress = formData.endereco.length > 30 
       ? formData.endereco.substring(0, 30) + '...' 
       : formData.endereco;
-    suggestedTitle += ` – ${shortAddress}`;
+    suggestedTitle += ` - ${shortAddress}`;
   }
   
   return suggestedTitle.trim();

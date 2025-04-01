@@ -1,163 +1,132 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Edit, Save, X } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import CardGrid from '@/components/dashboard/CardGrid';
-import { ActionCardItem } from '@/types/dashboard';
-import WelcomeCard from '@/components/shared/WelcomeCard';
+import React from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import { SortableContext, arrayMove } from '@dnd-kit/sortable';
+import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActionCard';
+import { getWidthClass, getHeightClass } from './CardGrid';
+import { ActionCardItem, CardType, CardColor } from '@/types/dashboard';
+import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+
+// Make sure UnifiedCardItem includes all required properties from ActionCardItem
+export interface UnifiedCardItem extends Omit<UnifiedActionCardProps, 'color'> {
+  width?: string;
+  height?: string;
+  displayMobile?: boolean;
+  mobileOrder?: number;
+  type: CardType;
+  path: string; // Make path required to match ActionCardItem
+  iconId: string; // Make iconId required
+  color: CardColor; // Use CardColor type explicitly
+  isCustom?: boolean;
+}
 
 interface UnifiedCardGridProps {
-  cards: ActionCardItem[];
-  setCards: React.Dispatch<React.SetStateAction<ActionCardItem[]>>;
-  loading: boolean;
-  handleDeleteCard: (id: string) => void;
-  handleEditCard: (card: ActionCardItem) => void;
-  handleAddNewCard?: () => void;
-  saveDashboard?: () => Promise<boolean>;
+  cards: ActionCardItem[] | UnifiedCardItem[];
+  onCardsChange: (cards: ActionCardItem[] | UnifiedCardItem[]) => void;
+  onEditCard?: (card: ActionCardItem | UnifiedCardItem) => void;
+  onDeleteCard?: (id: string) => void;
+  isMobileView?: boolean;
   isEditMode?: boolean;
-  setIsEditMode?: (value: boolean) => void;
+  disableWiggleEffect?: boolean;
 }
 
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
-  cards,
-  setCards,
-  loading,
-  handleDeleteCard,
-  handleEditCard,
-  handleAddNewCard,
-  saveDashboard,
+  cards = [],
+  onCardsChange,
+  onEditCard,
+  onDeleteCard,
+  isMobileView = false,
   isEditMode = false,
-  setIsEditMode = () => {},
+  disableWiggleEffect = false,
 }) => {
-  const isDesktop = useMediaQuery('(min-width: 768px)');
-  const [isSaving, setIsSaving] = useState(false);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor)
+  );
 
-  const handleSave = async () => {
-    try {
-      setIsSaving(true);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = cards.findIndex((item) => item.id === active.id);
+      const newIndex = cards.findIndex((item) => item.id === over.id);
       
-      if (saveDashboard) {
-        const success = await saveDashboard();
-        if (success) {
-          setIsEditMode(false);
-          toast({
-            title: 'Dashboard salvo!',
-            description: 'Suas alterações foram salvas com sucesso.',
-          });
-        }
+      if (oldIndex !== -1 && newIndex !== -1) {
+        // Use type assertion to ensure the array is recognized as the right type
+        const newCards = arrayMove([...cards], oldIndex, newIndex);
+        onCardsChange(newCards);
       }
-    } catch (error) {
-      console.error('Erro ao salvar dashboard:', error);
-      toast({
-        title: 'Erro ao salvar',
-        description: 'Ocorreu um problema ao salvar suas alterações. Tente novamente.',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  const handleToggleEditMode = () => {
-    if (isEditMode && saveDashboard) {
-      handleSave();
-    } else {
-      setIsEditMode(true);
-    }
-  };
+  // Filter cards for mobile view
+  const displayedCards = isMobileView
+    ? cards.filter((card) => card.displayMobile !== false)
+        .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
+    : cards;
 
-  // Separar Welcome Cards dos cards normais
-  const welcomeCards = cards.filter(card => card.type === 'welcome_card');
-  const standardCards = cards.filter(card => card.type !== 'welcome_card');
+  // Calculate total columns based on mobile view
+  const totalColumns = isMobileView ? 2 : 4;
+  
+  // Always call useGridOccupancy with displayedCards, even if empty
+  // We moved this outside the conditional render to avoid the hooks error
+  const { occupiedSlots } = useGridOccupancy(
+    displayedCards.map(card => ({ 
+      id: card.id,
+      width: card.width || '25', 
+      height: card.height || '1',
+      type: card.type
+    })), 
+    isMobileView
+  );
 
-  if (loading) {
+  if (!displayedCards || displayedCards.length === 0) {
     return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-48 bg-gray-200 rounded"></div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded"></div>
-          ))}
-        </div>
+      <div className="p-6 text-center text-gray-500">
+        Nenhum card disponível para exibir.
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {isDesktop && saveDashboard && (
-        <div className="flex justify-end items-center">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-lg shadow-sm p-2"
-          >
-            <Button
-              variant={isEditMode ? "default" : "outline"}
-              onClick={handleToggleEditMode}
-              disabled={isSaving}
-              className="gap-1"
-              size="sm"
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+        <SortableContext items={displayedCards.map(card => card.id)}>
+          {displayedCards.map(card => (
+            <div 
+              key={card.id}
+              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
             >
-              {isEditMode ? (
-                <>
-                  <Save className="h-4 w-4" /> {isSaving ? 'Salvando...' : 'Salvar'}
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4" /> Editar
-                </>
-              )}
-            </Button>
-            
-            {isEditMode && (
-              <Button
-                variant="ghost"
-                onClick={() => setIsEditMode(false)}
-                className="ml-2 text-muted-foreground"
-                size="sm"
-              >
-                <X className="h-4 w-4 mr-1" /> Cancelar
-              </Button>
-            )}
-          </motion.div>
-        </div>
-      )}
-      
-      {/* Welcome Cards */}
-      {welcomeCards.map(card => (
-        <WelcomeCard
-          key={card.id}
-          title={card.title}
-          description={card.customProperties?.description || ''}
-          color={card.customProperties?.gradient || 'bg-gradient-to-r from-blue-600 to-blue-800'}
-          icon={React.createElement(getIconComponentFromId(card.iconId), { className: "h-6 w-6" })}
-          showButton={false}
-        />
-      ))}
-      
-      {/* Regular Cards Grid */}
-      <CardGrid
-        cards={standardCards}
-        onCardsChange={setCards}
-        onEditCard={handleEditCard}
-        onDeleteCard={handleDeleteCard}
-        onAddNewCard={handleAddNewCard}
-        isEditMode={isEditMode}
-      />
-    </div>
+              <SortableUnifiedActionCard
+                {...card}
+                isDraggable={isEditMode}
+                isEditing={isEditMode}
+                onEdit={onEditCard ? (id) => {
+                  const cardToEdit = cards.find(c => c.id === id);
+                  if (cardToEdit && onEditCard) onEditCard(cardToEdit);
+                } : undefined}
+                onDelete={onDeleteCard}
+                iconSize={isMobileView ? 'lg' : 'xl'}
+                disableWiggleEffect={disableWiggleEffect}
+              />
+            </div>
+          ))}
+        </SortableContext>
+      </div>
+    </DndContext>
   );
-};
-
-// Helper para obter componente de ícone
-const getIconComponentFromId = (iconId: string) => {
-  // Importações dinâmicas não são fáceis em um ambiente Lovable, então vamos usar um fallback simples
-  return function DefaultIcon(props: any) {
-    return <span {...props}>📋</span>;
-  };
 };
 
 export default UnifiedCardGrid;

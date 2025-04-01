@@ -1,151 +1,272 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/components/ui/use-toast';
-import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
+import { v4 as uuidv4 } from 'uuid';
+import { CardColor, CardWidth, CardHeight, CardType, ActionCardItem } from '@/types/dashboard';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
-export interface UseDefaultDashboardConfigResult {
-  config: ActionCardItem[] | null;
-  loading: boolean;
-  saveConfig: (cards: ActionCardItem[], departmentId: string) => Promise<boolean>;
-  fetchConfig: () => Promise<void>;
-  saveDefaultDashboard: () => Promise<boolean>;
-  isSaving: boolean;
-  isLoading: boolean; // Add this to fix the TS error
-}
+// Simplified config to avoid excessive type instantiation
+type ConfigType = Record<string, ActionCardItem[]>;
 
-export const useDefaultDashboardConfig = (departmentId: string): UseDefaultDashboardConfigResult => {
-  const [config, setConfig] = useState<ActionCardItem[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  
-  const fetchConfig = useCallback(async () => {
-    setLoading(true);
-    
-    try {
-      console.log("Fetching dashboard configuration for department:", departmentId);
-      
-      // If no department is selected, use default cards
-      if (!departmentId) {
-        setConfig([]);
-        setLoading(false);
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('department_dashboards')
-        .select('cards_config')
-        .eq('department', departmentId)
-        .eq('view_type', 'dashboard')
-        .single();
-      
-      if (error) {
-        // If no config found, use default cards
-        if (error.code === 'PGRST116') {
-          console.log("No configuration found, using default cards");
-          const defaultCards = getDefaultCards(departmentId);
-          setConfig(defaultCards);
-        } else {
-          console.error("Error fetching dashboard config:", error);
-          toast({
-            title: "Erro",
-            description: "Não foi possível carregar a configuração do dashboard",
-            variant: "destructive"
-          });
-          setConfig([]);
-        }
-      } else if (data && data.cards_config) {
-        try {
-          const parsedConfig = JSON.parse(data.cards_config);
-          console.log("Loaded dashboard configuration:", parsedConfig);
-          setConfig(parsedConfig);
-        } catch (e) {
-          console.error("Error parsing dashboard config:", e);
-          setConfig([]);
-        }
-      } else {
-        setConfig([]);
-      }
-    } catch (e) {
-      console.error("Failed to fetch dashboard config:", e);
-      setConfig([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [departmentId]);
-  
+export const useDefaultDashboardConfig = (departmentId?: string) => {
+  const [config, setConfig] = useState<ConfigType>({});
+  const [loading, setLoading] = useState(true);
+  const [defaultConfig, setDefaultConfig] = useState<ActionCardItem[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>(departmentId || '');
+  const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
+  const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuth();
+
   useEffect(() => {
-    fetchConfig();
-  }, [fetchConfig]);
-  
-  const saveConfig = async (cards: ActionCardItem[], deptId: string): Promise<boolean> => {
-    setIsSaving(true);
-    
+    const fetchConfig = async () => {
+      setLoading(true);
+      
+      try {
+        if (!user) {
+          console.log('No user found');
+          setLoading(false);
+          return;
+        }
+
+        // Get the default config for the department
+        let { data: depConfig, error: depError } = await supabase
+          .from('department_dashboards')
+          .select('*')
+          .eq('department', departmentId || user.coordenacao_id)
+          .single();
+
+        // If there's no config for this department
+        if (depError || !depConfig) {
+          console.log('No department config found, using default');
+          
+          const defaultCards = generateDefaultCards(departmentId || user.coordenacao_id);
+          setDefaultConfig(defaultCards);
+          setConfig({
+            [departmentId || user.coordenacao_id]: defaultCards
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Parse the config
+        const parsedConfig = depConfig.cards_config ? 
+          JSON.parse(depConfig.cards_config) : 
+          generateDefaultCards(departmentId || user.coordenacao_id);
+        
+        setDefaultConfig(parsedConfig);
+        setConfig({
+          [departmentId || user.coordenacao_id]: parsedConfig
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard config:', error);
+        const defaultCards = generateDefaultCards(departmentId || user.coordenacao_id);
+        setDefaultConfig(defaultCards);
+        setConfig({
+          [departmentId || user.coordenacao_id]: defaultCards
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user || departmentId) {
+      fetchConfig();
+    }
+  }, [user, departmentId]);
+
+  const saveDefaultDashboard = async () => {
     try {
-      console.log("Saving dashboard configuration for department:", deptId);
+      setIsSaving(true);
+      const departmentToUse = selectedDepartment || departmentId || (user ? user.coordenacao_id : null);
       
-      const { error } = await supabase
-        .from('department_dashboards')
-        .upsert({
-          department: deptId,
-          view_type: 'dashboard',
-          cards_config: JSON.stringify(cards),
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'department,view_type'
-        });
-      
-      if (error) {
-        console.error("Error saving dashboard config:", error);
-        toast({
-          title: "Error",
-          description: "Falha ao salvar a configuração do dashboard",
-          variant: "destructive"
-        });
+      if (!departmentToUse) {
+        console.error('No department ID provided for saving config');
         return false;
       }
-      
-      // Force a refresh of the configuration after saving
-      await fetchConfig();
-      
-      // Force a re-render by temporarily changing the department ID
-      setTimeout(() => {}, 100);
-      
-      toast({
-        title: "Salvo",
-        description: "Configuração do dashboard salva com sucesso"
-      });
+
+      const currentCards = config[departmentToUse] || defaultConfig;
+
+      // Check if config already exists
+      const { data: existingConfig } = await supabase
+        .from('department_dashboards')
+        .select('*')
+        .eq('department', departmentToUse)
+        .single();
+
+      if (existingConfig) {
+        // Update existing config
+        const { error } = await supabase
+          .from('department_dashboards')
+          .update({
+            cards_config: JSON.stringify(currentCards),
+            updated_at: new Date().toISOString()
+          })
+          .eq('department', departmentToUse);
+        
+        if (error) throw error;
+      } else {
+        // Insert new config
+        const { error } = await supabase
+          .from('department_dashboards')
+          .insert({
+            department: departmentToUse,
+            cards_config: JSON.stringify(currentCards),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        
+        if (error) throw error;
+      }
+
+      // Update local state
+      setConfig(prevConfig => ({
+        ...prevConfig,
+        [departmentToUse]: currentCards
+      }));
       
       return true;
-    } catch (e) {
-      console.error("Failed to save dashboard config:", e);
+    } catch (error) {
+      console.error('Error saving dashboard config:', error);
       return false;
     } finally {
       setIsSaving(false);
     }
   };
-  
-  const saveDefaultDashboard = async (): Promise<boolean> => {
-    if (!config) {
-      toast({
-        title: "Erro",
-        description: "Não há configuração para salvar",
-        variant: "destructive"
-      });
+
+  const saveConfig = async (cards: ActionCardItem[], deptId?: string) => {
+    try {
+      const departmentToUse = deptId || selectedDepartment || departmentId || (user ? user.coordenacao_id : null);
+      
+      if (!departmentToUse) {
+        console.error('No department ID provided for saving config');
+        return false;
+      }
+
+      // Check if config already exists
+      const { data: existingConfig } = await supabase
+        .from('department_dashboards')
+        .select('*')
+        .eq('department', departmentToUse)
+        .single();
+
+      if (existingConfig) {
+        // Update existing config
+        const { error } = await supabase
+          .from('department_dashboards')
+          .update({
+            cards_config: JSON.stringify(cards),
+            updated_at: new Date().toISOString()
+          })
+          .eq('department', departmentToUse);
+        
+        if (error) throw error;
+      } else {
+        // Insert new config
+        const { error } = await supabase
+          .from('department_dashboards')
+          .insert({
+            department: departmentToUse,
+            cards_config: JSON.stringify(cards),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        
+        if (error) throw error;
+      }
+
+      // Update local state
+      setConfig(prevConfig => ({
+        ...prevConfig,
+        [departmentToUse]: cards
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving dashboard config:', error);
       return false;
     }
-    
-    return saveConfig(config, departmentId);
   };
-  
-  return { 
-    config, 
-    loading, 
-    saveConfig, 
-    fetchConfig,
-    saveDefaultDashboard,
+
+  return {
+    config: config[selectedDepartment || departmentId || (user ? user.coordenacao_id : '')] || defaultConfig,
+    defaultConfig,
+    loading,
+    saveConfig,
+    selectedDepartment,
+    setSelectedDepartment,
+    selectedViewType,
+    setSelectedViewType,
+    isLoading: loading,
     isSaving,
-    isLoading: loading // Add isLoading as an alias for loading
+    saveDefaultDashboard
   };
+};
+
+// Helper function to generate default cards for a department
+const generateDefaultCards = (departmentId: string): ActionCardItem[] => {
+  const isComunicacao = departmentId === 'comunicacao';
+  
+  const cards: ActionCardItem[] = [
+    // Default cards for all departments
+    {
+      id: uuidv4(),
+      title: 'Consultar Demandas',
+      iconId: 'Search',
+      path: '/demandas',
+      color: 'blue-dark' as CardColor,
+      width: '1' as CardWidth,
+      height: '1' as CardHeight,
+      isCustom: false,
+      type: 'standard' as CardType,
+      displayMobile: true,
+      mobileOrder: 3
+    },
+    {
+      id: uuidv4(),
+      title: 'Consultar Notas',
+      iconId: 'FileText',
+      path: '/notas',
+      color: 'green' as CardColor,
+      width: '1' as CardWidth,
+      height: '1' as CardHeight,
+      isCustom: false,
+      type: 'standard' as CardType,
+      displayMobile: true,
+      mobileOrder: 4
+    }
+  ];
+
+  // Comunicação department specific cards
+  if (isComunicacao) {
+    cards.unshift(
+      {
+        id: uuidv4(),
+        title: 'Nova Solicitação',
+        iconId: 'Plus',
+        path: '/dashboard/comunicacao/cadastrar',
+        color: 'orange-600' as CardColor,
+        width: '1' as CardWidth,
+        height: '1' as CardHeight,
+        isCustom: false,
+        type: 'standard' as CardType,
+        displayMobile: true,
+        mobileOrder: 1
+      },
+      {
+        id: uuidv4(),
+        title: 'Criar Nota Oficial',
+        iconId: 'FileEdit',
+        path: '/dashboard/notas/criar',
+        color: 'lime' as CardColor,
+        width: '1' as CardWidth,
+        height: '1' as CardHeight,
+        isCustom: false,
+        type: 'standard' as CardType,
+        displayMobile: true,
+        mobileOrder: 2
+      }
+    );
+  }
+
+  return cards;
 };
