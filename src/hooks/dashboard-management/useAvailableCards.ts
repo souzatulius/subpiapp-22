@@ -141,6 +141,75 @@ export const useAvailableCards = () => {
         displayMobile: true,
         mobileOrder: 10,
         isOverdueDemands: true
+      },
+      // Add dynamic data cards from Comunicacao dashboard
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Nova Demanda',
+        iconId: 'Plus',
+        path: '/dashboard/comunicacao/cadastrar',
+        color: 'blue',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 11
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Responder Demandas',
+        iconId: 'MessageSquareReply',
+        path: '/dashboard/comunicacao/responder',
+        color: 'green',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 12
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Gerenciar Notas',
+        iconId: 'FileText',
+        path: '/dashboard/comunicacao/notas',
+        color: 'orange-light',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 13
+      },
+      // Dynamic data cards
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Demandas Pendentes (Dinâmico)',
+        iconId: 'Clock',
+        path: '',
+        color: 'orange-600',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'data_dynamic',
+        dataSourceKey: 'pending_demands',
+        displayMobile: true,
+        mobileOrder: 14
+      },
+      {
+        id: `template-${uuidv4()}`,
+        title: 'Demandas em Andamento (Dinâmico)',
+        iconId: 'BarChart3',
+        path: '',
+        color: 'blue-dark',
+        width: '25' as CardWidth,
+        height: '1',
+        isCustom: false,
+        type: 'data_dynamic',
+        dataSourceKey: 'ongoing_demands',
+        displayMobile: true,
+        mobileOrder: 15
       }
     ];
     

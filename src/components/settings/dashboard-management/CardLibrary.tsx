@@ -72,6 +72,11 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <ArrowRight className="h-4 w-4 text-gray-400" />
                 </div>
+                {card.type === 'data_dynamic' && (
+                  <div className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                    Dinâmico
+                  </div>
+                )}
               </div>
             );
           })}
