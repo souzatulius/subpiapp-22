@@ -10,7 +10,7 @@ const PROFILE_PHOTOS_FOLDER = 'fotos_perfil';
 
 export const usePhotoUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
-  const { user, refreshSession } = useAuth();
+  const { user } = useAuth();
 
   const uploadProfilePhoto = async (file: File): Promise<string | null> => {
     if (!user?.id) {
@@ -65,10 +65,7 @@ export const usePhotoUpload = () => {
         throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
       }
       
-      // Refresh the user session to get updated metadata
-      if (refreshSession) {
-        await refreshSession();
-      }
+      // No refresh session call needed, we'll handle the profile update elsewhere
       
       toast({
         title: "Foto atualizada",
