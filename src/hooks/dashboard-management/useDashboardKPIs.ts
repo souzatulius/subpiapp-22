@@ -55,48 +55,62 @@ export const useDashboardKPIs = () => {
         const yesterdayStr = yesterday.toISOString().split('T')[0];
 
         // Fetch press requests data for today - using a different approach to avoid type issues
-        const { count: todayCount, error: todayError } = await supabase
+        const { data: todayData, error: todayError } = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${todayStr}T00:00:00`)
           .lt('horario_publicacao', `${todayStr}T23:59:59`);
           
+        const todayCount = todayData?.length || 0;
+          
         // Fetch press requests data for yesterday
-        const { count: yesterdayCount, error: yesterdayError } = await supabase
+        const { data: yesterdayData, error: yesterdayError } = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${yesterdayStr}T00:00:00`)
           .lt('horario_publicacao', `${yesterdayStr}T23:59:59`);
           
+        const yesterdayCount = yesterdayData?.length || 0;
+          
         // Fetch pending approvals
-        const { count: pendingCount, error: pendingError } = await supabase
+        const { data: pendingData, error: pendingError } = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .in('status', ['aguardando_aprovacao', 'aguardando_resposta']);
           
+        const pendingCount = pendingData?.length || 0;
+          
         // Count how many are specifically awaiting response
-        const { count: awaitingCount, error: awaitingError } = await supabase
+        const { data: awaitingData, error: awaitingError } = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .eq('status', 'aguardando_resposta');
           
+        const awaitingCount = awaitingData?.length || 0;
+          
         // Fetch notes data
-        const { count: totalNotesCount, error: totalNotesError } = await supabase
+        const { data: totalNotesData, error: totalNotesError } = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true });
+          .select('id');
+          
+        const totalNotesCount = totalNotesData?.length || 0;
           
         // Count approved and rejected notes
-        const { count: approvedCount, error: approvedError } = await supabase
+        const { data: approvedData, error: approvedError } = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .eq('status', 'aprovada');
           
-        const { count: rejectedCount, error: rejectedError } = await supabase
+        const approvedCount = approvedData?.length || 0;
+          
+        const { data: rejectedData, error: rejectedError } = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .eq('status', 'rejeitada');
+          
+        const rejectedCount = rejectedData?.length || 0;
           
         // Log any errors
         if (todayError || yesterdayError || pendingError || 
@@ -128,14 +142,14 @@ export const useDashboardKPIs = () => {
             loading: false
           },
           pendingApproval: {
-            total: pendingCount || 0,
-            awaitingResponse: awaitingCount || 0,
+            total: pendingCount,
+            awaitingResponse: awaitingCount,
             loading: false
           },
           notesProduced: {
-            total: totalNotesCount || 0,
-            approved: approvedCount || 0,
-            rejected: rejectedCount || 0,
+            total: totalNotesCount,
+            approved: approvedCount,
+            rejected: rejectedCount,
             loading: false
           }
         });

@@ -16,8 +16,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header - explicitly pass showControls={false} for auth pages */}
-      <Header showControls={false} />
+      {/* Header - explicitly pass hideUserMenu={true} for auth pages */}
+      <Header showControls={false} hideUserMenu={true} />
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">

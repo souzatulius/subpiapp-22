@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import ProfileMenu from './ProfileMenu';
 import NotificationsPopover from './NotificationsPopover';
@@ -16,6 +16,11 @@ const Header: React.FC<HeaderProps> = ({
   toggleSidebar,
   hideUserMenu = false
 }) => {
+  const location = useLocation();
+  
+  // Check if current page is an auth page where we should hide user controls
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
+  
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="flex justify-between items-center px-4 py-2 max-w-screen-2xl mx-auto">
@@ -45,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({
         
         {/* Right section - User controls */}
         <div className="flex items-center justify-end space-x-3 w-1/3">
-          {!hideUserMenu && (
+          {!hideUserMenu && !isAuthPage && (
             <>
               <NotificationsPopover />
               <ProfileMenu />
