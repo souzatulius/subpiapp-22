@@ -1,6 +1,6 @@
 
 import { useNavigate } from 'react-router-dom';
-import { Controls } from './SortableActionCard';
+import { Controls } from './UnifiedActionCard';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
