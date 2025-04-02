@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import KPICard from './KPICard';
 import DynamicListCard from './DynamicListCard';
 import OriginSelectionCard from './OriginSelectionCard';
@@ -22,7 +22,7 @@ import {
   SelectValue, 
   SelectContent, 
   SelectItem 
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import { Plus } from 'lucide-react';
 
 const DashboardManagementContent: React.FC = () => {
@@ -34,6 +34,7 @@ const DashboardManagementContent: React.FC = () => {
   
   const {
     config,
+    setConfig,
     selectedDepartment,
     setSelectedDepartment,
     selectedViewType,
@@ -41,10 +42,17 @@ const DashboardManagementContent: React.FC = () => {
     isLoading,
     isSaving,
     saveConfig,
-    resetAllDashboards
+    resetAllDashboards,
+    fetchDashboardConfig
   } = useDefaultDashboardConfig();
 
+  // Refresh the dashboard config when component mounts and when dependencies change
+  useEffect(() => {
+    fetchDashboardConfig();
+  }, [selectedDepartment, selectedViewType, fetchDashboardConfig]);
+
   const handleSaveConfig = async () => {
+    console.log('Saving dashboard config:', config);
     const success = await saveConfig(config);
     if (success) {
       toast({
@@ -174,6 +182,15 @@ const DashboardManagementContent: React.FC = () => {
     isSearch: true
   };
 
+  const handleAddCard = (card: ActionCardItem) => {
+    const newCard = {
+      ...card,
+      id: `card-${uuidv4()}`,
+    };
+    
+    setConfig([...config, newCard]);
+  };
+
   return (
     <div className="space-y-6">
       <div className="w-full h-20">
@@ -242,7 +259,7 @@ const DashboardManagementContent: React.FC = () => {
       
       <div className="mt-8 space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2 md:mb-0">Gerenciar Dashboard de Comunicação</h2>
+          <h2 className="text-lg font-semibold mb-2 md:mb-0">Gerenciamento de Dashboards</h2>
           
           <div className="flex gap-2">
             <Select
@@ -261,7 +278,7 @@ const DashboardManagementContent: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => standardCards.length > 0 && onAddCard(standardCards[0])}
+              onClick={() => standardCards.length > 0 && handleAddCard(standardCards[0])}
               className="h-9"
             >
               <Plus className="h-4 w-4 mr-1" /> Adicionar
@@ -386,6 +403,8 @@ const DashboardManagementContent: React.FC = () => {
                   onReset={handleResetDashboards}
                   onSave={handleSaveConfig}
                   isSaving={isSaving}
+                  cards={config}
+                  onCardsChange={setConfig}
                 />
               </div>
             </div>
@@ -394,17 +413,6 @@ const DashboardManagementContent: React.FC = () => {
       </div>
     </div>
   );
-  
-  function onAddCard(card: ActionCardItem) {
-    const newCard = {
-      ...card,
-      id: `card-${uuidv4()}`,
-    };
-    
-    if (saveConfig) {
-      saveConfig([...config, newCard]);
-    }
-  }
 };
 
 export default DashboardManagementContent;

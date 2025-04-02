@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -26,6 +28,8 @@ interface DashboardPreviewProps {
   onReset?: () => Promise<boolean>;
   onSave?: () => Promise<boolean>;
   isSaving?: boolean;
+  onCardsChange?: (cards: ActionCardItem[]) => void;
+  cards?: ActionCardItem[];
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
@@ -37,10 +41,12 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   onViewTypeChange,
   onReset,
   onSave,
-  isSaving = false
+  isSaving = false,
+  onCardsChange,
+  cards: externalCards
 }) => {
   const {
-    cards,
+    cards: internalCards,
     setCards,
     isCustomizationModalOpen,
     setIsCustomizationModalOpen,
@@ -56,8 +62,20 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     searchQuery,
     setSearchQuery,
     handleSearchSubmit,
-    isLoading
+    isLoading: isLoadingInternal
   } = useDefaultDashboardState(department);
+
+  // Use either external cards (from parent) or internal cards
+  const cards = externalCards || internalCards;
+  const isLoading = isLoadingInternal && !externalCards;
+
+  const handleCardsChange = (updatedCards: ActionCardItem[]) => {
+    if (onCardsChange) {
+      onCardsChange(updatedCards);
+    } else {
+      setCards(updatedCards);
+    }
+  };
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const { departments } = useDepartments();
@@ -162,7 +180,8 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           newCard.type = cardData.type;
         }
         
-        setCards([...cards, newCard]);
+        const updatedCards = [...cards, newCard];
+        handleCardsChange(updatedCards);
         
         // Notify parent component if callback exists
         if (onAddCard) {
@@ -198,6 +217,91 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           onDepartmentChange('communication');
         }
       }
+    }
+  };
+
+  // Handle manual save to make sure data is persisted
+  const handleManualSave = async () => {
+    if (onSave) {
+      return onSave();
+    }
+    
+    // Fallback save implementation if no onSave provided
+    try {
+      const viewTypeToSave = dashboardType;
+      
+      // Check if there's an existing config
+      const { data: existingConfig, error: checkError } = await supabase
+        .from('department_dashboards')
+        .select('id')
+        .eq('department', department)
+        .eq('view_type', viewTypeToSave)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing dashboard config:', checkError);
+        toast({
+          title: "Erro ao verificar dashboard",
+          description: "Não foi possível verificar a configuração existente",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      const cardsJson = JSON.stringify(cards);
+
+      if (existingConfig) {
+        // Update existing config
+        const { error: updateError } = await supabase
+          .from('department_dashboards')
+          .update({ cards_config: cardsJson })
+          .eq('id', existingConfig.id);
+
+        if (updateError) {
+          console.error('Error updating dashboard config:', updateError);
+          toast({
+            title: "Erro ao salvar dashboard",
+            description: "Não foi possível salvar a configuração do dashboard",
+            variant: "destructive"
+          });
+          return false;
+        }
+      } else {
+        // Insert new config
+        const { error: insertError } = await supabase
+          .from('department_dashboards')
+          .insert({
+            department: department,
+            view_type: viewTypeToSave,
+            cards_config: cardsJson
+          });
+
+        if (insertError) {
+          console.error('Error inserting dashboard config:', insertError);
+          toast({
+            title: "Erro ao criar dashboard",
+            description: "Não foi possível criar a configuração do dashboard",
+            variant: "destructive"
+          });
+          return false;
+        }
+      }
+      
+      toast({
+        title: "Dashboard salvo",
+        description: "Configuração do dashboard salva com sucesso",
+        variant: "success"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving dashboard:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar a configuração",
+        variant: "destructive"
+      });
+      return false;
     }
   };
 
@@ -257,21 +361,19 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             </Button>
           )}
           
-          {onSave && (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={onSave}
-              disabled={isSaving}
-              className="h-9"
-            >
-              {isSaving ? (
-                <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Salvando...</>
-              ) : (
-                <>Salvar</>
-              )}
-            </Button>
-          )}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleManualSave}
+            disabled={isSaving}
+            className="h-9"
+          >
+            {isSaving ? (
+              <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Salvando...</>
+            ) : (
+              <>Salvar</>
+            )}
+          </Button>
         </div>
       </div>
       
@@ -298,7 +400,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           ) : (
             <UnifiedCardGrid 
               cards={cards}
-              onCardsChange={setCards}
+              onCardsChange={handleCardsChange}
               onEditCard={handleEditCard}
               onDeleteCard={handleDeleteCard}
               onHideCard={handleHideCard}

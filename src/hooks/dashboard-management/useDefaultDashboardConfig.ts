@@ -1,7 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
+import { toast } from '@/hooks/use-toast';
 
 export const useDefaultDashboardConfig = (initialDepartment: string = 'default') => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>(initialDepartment);
@@ -10,13 +11,10 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    fetchDashboardConfig();
-  }, [selectedDepartment, selectedViewType]);
-
-  const fetchDashboardConfig = async () => {
+  const fetchDashboardConfig = useCallback(async () => {
     setIsLoading(true);
     try {
+      console.log(`Fetching config for department: ${selectedDepartment}, view type: ${selectedViewType}`);
       const { data, error } = await supabase
         .from('department_dashboards')
         .select('cards_config')
@@ -30,12 +28,14 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
       } else if (data && data.cards_config) {
         try {
           const parsedCards = JSON.parse(data.cards_config);
+          console.log('Loaded config:', parsedCards);
           setConfig(parsedCards);
         } catch (parseError) {
           console.error('Error parsing cards config JSON:', parseError);
           setConfig([]);
         }
       } else {
+        console.log('No config found, using empty array');
         setConfig([]);
       }
     } catch (err) {
@@ -44,10 +44,16 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedDepartment, selectedViewType]);
+
+  useEffect(() => {
+    fetchDashboardConfig();
+  }, [fetchDashboardConfig]);
 
   const saveConfig = async (cards: ActionCardItem[], departmentId: string = selectedDepartment) => {
     setIsSaving(true);
+    console.log(`Saving config for department: ${departmentId}, view type: ${selectedViewType}`, cards);
+    
     try {
       // First, check if there's an existing config
       const { data: existingConfig, error: checkError } = await supabase
@@ -73,6 +79,11 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
         if (updateError) {
           console.error('Error updating dashboard config:', updateError);
+          toast({
+            title: "Erro ao salvar dashboard",
+            description: "Não foi possível salvar a configuração do dashboard",
+            variant: "destructive"
+          });
           return false;
         }
       } else {
@@ -87,6 +98,11 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
         if (insertError) {
           console.error('Error inserting dashboard config:', insertError);
+          toast({
+            title: "Erro ao criar dashboard",
+            description: "Não foi possível criar a configuração do dashboard",
+            variant: "destructive"
+          });
           return false;
         }
       }
@@ -96,9 +112,20 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
         await saveDefaultDashboard(cards);
       }
 
+      toast({
+        title: "Dashboard salvo",
+        description: "As configurações do dashboard foram salvas com sucesso",
+        variant: "success"
+      });
+      
       return true;
     } catch (err) {
       console.error('Failed to save dashboard config:', err);
+      toast({
+        title: "Erro ao salvar",
+        description: "Houve um erro ao salvar as configurações do dashboard",
+        variant: "destructive"
+      });
       return false;
     } finally {
       setIsSaving(false);
@@ -167,6 +194,7 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
   return {
     config,
+    setConfig,
     selectedDepartment,
     setSelectedDepartment,
     selectedViewType,
@@ -176,5 +204,6 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
     saveConfig,
     saveDefaultDashboard,
     resetAllDashboards,
+    fetchDashboardConfig
   };
 };
