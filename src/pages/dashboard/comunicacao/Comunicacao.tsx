@@ -1,13 +1,13 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { MessageSquareReply, Loader2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import { toast } from '@/components/ui/use-toast';
-import { useQuery } from '@tanstack/react-query';
 import PendingDemandsCard from '@/components/comunicacao/PendingDemandsCard';
 import NotasManagementCard from '@/components/comunicacao/NotasManagementCard';
 import DemandasEmAndamentoCard from '@/components/comunicacao/DemandasEmAndamentoCard';
@@ -24,8 +24,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const { user } = useAuth();
   const isMobile = useIsMobile();
 
-  // Use React Query for better caching, loading states and error handling
-  const { data: userData, isLoading: isUserDataLoading, error: userDataError } = useQuery({
+  // Use React Query with prefetch and low staleTime for better caching
+  const { data: userData, isLoading, error } = useQuery({
     queryKey: ['user_department', user?.id, isPreview],
     queryFn: async () => {
       if (isPreview) {
@@ -38,72 +38,83 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       
       if (!user) return null;
       
-      // Fetch user's department
-      const { data: userDept, error: userDeptError } = await supabase
-        .from('usuarios')
-        .select('coordenacao_id')
-        .eq('id', user.id)
-        .single();
-      
-      if (userDeptError) {
-        console.error('Error fetching user department:', userDeptError);
-        throw userDeptError;
-      }
-      
-      if (!userDept?.coordenacao_id) {
+      try {
+        // Fetch user's department with a single query to improve performance
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select(`
+            coordenacao_id,
+            coordenacoes:coordenacao_id (descricao)
+          `)
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (!data?.coordenacao_id) {
+          return {
+            coordenacaoId: 'default',
+            isComunicacao: false,
+            departmentName: 'Padrão'
+          };
+        }
+        
+        const isComunicacao = 
+          (data?.coordenacoes?.descricao || '').toLowerCase().includes('comunica') || 
+          data.coordenacao_id === 'comunicacao';
+        
         return {
-          coordenacaoId: 'default',
-          isComunicacao: false,
-          departmentName: 'Padrão'
+          coordenacaoId: data.coordenacao_id,
+          isComunicacao,
+          departmentName: data?.coordenacoes?.descricao || 'Departamento'
         };
+      } catch (err) {
+        console.error('Error fetching user department data:', err);
+        throw err;
       }
-      
-      // Fetch department name
-      const { data: coordData, error: coordError } = await supabase
-        .from('coordenacoes')
-        .select('descricao')
-        .eq('id', userDept.coordenacao_id)
-        .single();
-      
-      if (coordError) {
-        console.error('Error fetching coordination info:', coordError);
-        throw coordError;
-      }
-      
-      const isComunicacao = 
-        coordData?.descricao.toLowerCase().includes('comunica') || 
-        userDept.coordenacao_id === 'comunicacao';
-      
-      return {
-        coordenacaoId: userDept.coordenacao_id,
-        isComunicacao,
-        departmentName: coordData?.descricao || 'Departamento'
-      };
     },
     enabled: !isPreview && !!user,
-    retry: 1,
-    refetchOnWindowFocus: false
+    staleTime: 5 * 60 * 1000, // 5 minutes before refetch
+    retry: 1
   });
   
-  useEffect(() => {
-    if (userDataError) {
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
+        <span className="text-blue-600 font-medium text-lg">Carregando informações do departamento...</span>
+      </div>
+    );
+  }
+  
+  // Show error state
+  if (error) {
+    // Display error toast only once
+    React.useEffect(() => {
       toast({
         title: "Erro ao carregar informações",
         description: "Não foi possível carregar as informações do departamento.",
         variant: "destructive"
       });
-    }
-  }, [userDataError]);
-
-  if (isUserDataLoading) {
+    }, []);
+    
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-blue-600 font-medium">Carregando dashboard...</span>
+      <div className="space-y-6">
+        <WelcomeCard
+          title="Comunicação"
+          description="Gerencie demandas e notas oficiais"
+          icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
+          color="bg-gradient-to-r from-blue-500 to-blue-700"
+        />
+        <div className="p-4 border border-red-200 bg-red-50 rounded-lg text-red-800">
+          Ocorreu um erro ao carregar os dados. Por favor, recarregue a página.
+        </div>
       </div>
     );
   }
 
+  // Main content with cards
   return (
     <div className="space-y-6">
       <WelcomeCard
@@ -112,6 +123,32 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
+      
+      {!isPreview && userData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* Only render what's needed and with proper display loading states */}
+          {userData.coordenacaoId && (
+            <PendingDemandsCard 
+              coordenacaoId={userData.coordenacaoId} 
+              isComunicacao={userData.isComunicacao || false} 
+            />
+          )}
+          
+          {userData.coordenacaoId && (
+            <NotasManagementCard 
+              coordenacaoId={userData.coordenacaoId} 
+              isComunicacao={userData.isComunicacao || false}
+            />
+          )}
+          
+          {userData.coordenacaoId && (
+            <DemandasEmAndamentoCard 
+              coordenacaoId={userData.coordenacaoId} 
+              isComunicacao={userData.isComunicacao || false}
+            />
+          )}
+        </div>
+      )}
       
       {!isPreview && isMobile && <MobileBottomNav />}
     </div>
