@@ -38,6 +38,16 @@ export const usePhotoUpload = () => {
       const fileExt = file.name.split('.').pop() || 'jpg';
       const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
+      // Check if storage bucket exists, create if not
+      const { data: buckets } = await supabase.storage.listBuckets();
+      if (!buckets?.find(bucket => bucket.name === PROFILE_PHOTOS_BUCKET)) {
+        console.log('Creating storage bucket for user photos...');
+        await supabase.storage.createBucket(PROFILE_PHOTOS_BUCKET, {
+          public: true,
+          fileSizeLimit: 5242880 // 5MB
+        });
+      }
+      
       const { error: uploadError } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, file, {
@@ -46,6 +56,7 @@ export const usePhotoUpload = () => {
         });
       
       if (uploadError) {
+        console.error('Error uploading photo:', uploadError);
         throw new Error(`Erro no upload: ${uploadError.message}`);
       }
       
@@ -54,9 +65,9 @@ export const usePhotoUpload = () => {
         .from(PROFILE_PHOTOS_BUCKET)
         .getPublicUrl(filePath);
       
-      // Update user profile with new photo URL
+      // Update user profile with new photo URL - use 'usuarios' table
       const { error: updateError } = await supabase
-        .from('usuarios')  // This is already the correct table name
+        .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       
@@ -70,6 +81,11 @@ export const usePhotoUpload = () => {
         description: "Sua foto de perfil foi atualizada com sucesso!",
         variant: "success"
       });
+      
+      // Force refresh to update UI with new image
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage')); // Trigger storage event to refresh user profile data
+      }, 500);
       
       return publicUrl;
     } catch (error: any) {

@@ -126,10 +126,11 @@ export const useDashboardKPIs = () => {
           });
         }
 
-        // Calculate percentage change
+        // Calculate percentage change - simplified to fix the infinite type error
         let percentageChange = 0;
         if (yesterdayCount > 0) {
-          percentageChange = ((todayCount - yesterdayCount) / yesterdayCount) * 100;
+          const diff = todayCount - yesterdayCount;
+          percentageChange = (diff / yesterdayCount) * 100;
         }
 
         // Update KPIs state

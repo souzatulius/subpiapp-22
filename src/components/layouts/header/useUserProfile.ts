@@ -31,7 +31,9 @@ export const useUserProfile = () => {
           whatsapp,
           aniversario,
           foto_perfil_url,
-          cargos:cargo_id (descricao)
+          cargos:cargo_id (descricao),
+          coordenacoes:coordenacao_id (descricao),
+          supervisoes_tecnicas:supervisao_tecnica_id (descricao)
         `)
         .eq('id', user.id)
         .single();
@@ -49,7 +51,9 @@ export const useUserProfile = () => {
         whatsapp: data.whatsapp || '',
         aniversario: data.aniversario,
         foto_perfil_url: data.foto_perfil_url,
-        cargo: data.cargos?.descricao
+        cargo: data.cargos?.descricao,
+        coordenacao: data.coordenacoes?.descricao,
+        supervisao_tecnica: data.supervisoes_tecnicas?.descricao
       };
       
       setUserProfile(transformedData);
@@ -61,9 +65,39 @@ export const useUserProfile = () => {
     }
   }, [user]);
 
+  // Listen for changes to the profile
   useEffect(() => {
     fetchUserProfile();
-  }, [fetchUserProfile]);
+    
+    // Listen for storage events as a way to trigger profile refreshes
+    const handleStorageChange = () => {
+      fetchUserProfile();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Set up a subscription to real-time changes on the user's profile
+    let subscription: any;
+    
+    if (user?.id) {
+      subscription = supabase
+        .channel('profile-changes')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'usuarios',
+          filter: `id=eq.${user.id}`
+        }, () => {
+          fetchUserProfile();
+        })
+        .subscribe();
+    }
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      if (subscription) supabase.removeChannel(subscription);
+    };
+  }, [fetchUserProfile, user?.id]);
 
   const refreshUserProfile = useCallback(async (): Promise<void> => {
     return fetchUserProfile();

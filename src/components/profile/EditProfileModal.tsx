@@ -45,40 +45,40 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }
   });
 
-  // Carregar os dados do usuário quando o diálogo abrir
+  // Load user data when dialog opens
   useEffect(() => {
     if (userData) {
       setValue('nome_completo', userData.nome_completo || '');
       
-      // Formatar whatsapp com máscara
+      // Format whatsapp with mask
       const formattedWhatsapp = userData.whatsapp ? formatPhoneNumber(userData.whatsapp) : '';
       setWhatsappValue(formattedWhatsapp);
       
-      // Processar a data de aniversário se existir
+      // Process birthday date if it exists
       if (userData.aniversario) {
         try {
           let formattedDate = '';
           if (typeof userData.aniversario === 'string') {
-            // Formatar string de data para DD/MM/YYYY
+            // Format date string to DD/MM/YYYY
             const dateObj = new Date(userData.aniversario);
             if (!isNaN(dateObj.getTime())) {
               formattedDate = formatDateToString(dateObj);
             }
           } else if (userData.aniversario instanceof Date) {
-            // Já é um objeto Date
+            // Already a Date object
             formattedDate = formatDateToString(userData.aniversario);
           }
           
           setDateInputValue(formattedDate);
         } catch (error) {
-          console.error('Erro ao processar data:', error);
+          console.error('Error processing date:', error);
           setDateInputValue('');
         }
       } else {
         setDateInputValue('');
       }
 
-      // Os campos que o usuário não pode editar
+      // Fields that user cannot edit
       setValue('cargo_id', userData.cargo_id);
       setValue('coordenacao_id', userData.coordenacao_id);
       setValue('supervisao_tecnica_id', userData.supervisao_tecnica_id);
@@ -109,7 +109,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     
     setIsSubmitting(true);
     try {
-      // Processar a data formatada para um objeto Date
+      // Process formatted date to a Date object
       let parsedDate = null;
       let aniversarioISO = null;
       
@@ -127,26 +127,26 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         aniversarioISO = parsedDate.toISOString();
       }
       
-      // Limpar a entrada de whatsapp (remover máscara)
+      // Clean whatsapp input (remove mask)
       const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
       
-      // Dados para atualização com tipos corretos
+      // Data for update with correct types
       const updateData = {
         nome_completo: data.nome_completo,
         whatsapp: cleanWhatsapp || null,
         aniversario: aniversarioISO
       };
       
-      console.log('Atualizando com os dados:', updateData);
+      console.log('Updating with data:', updateData);
       
-      // Atualizar o perfil
+      // Update profile - IMPORTANT: Use the 'usuarios' table instead of 'users'
       const { error } = await supabase
         .from('usuarios')
         .update(updateData)
         .eq('id', user.id);
       
       if (error) {
-        console.error('Erro ao atualizar perfil:', error);
+        console.error('Error updating profile:', error);
         throw error;
       }
       
@@ -159,7 +159,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       onClose();
       
     } catch (error: any) {
-      console.error('Erro ao atualizar perfil:', error);
+      console.error('Error updating profile:', error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar as informações. Por favor, tente novamente.",
@@ -221,7 +221,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             />
           </div>
 
-          {/* Mostrar os campos de coordenação, supervisão e cargo como somente leitura */}
+          {/* Read-only fields for coordination, supervision and role */}
           {userData?.coordenacao && (
             <div className="space-y-2">
               <Label htmlFor="coordenacao">Coordenação</Label>

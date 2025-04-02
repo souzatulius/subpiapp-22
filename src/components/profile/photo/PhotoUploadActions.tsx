@@ -8,15 +8,13 @@ interface PhotoUploadActionsProps {
   handlePhotoChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   uploadError: string | null;
   isUploading: boolean;
-  handleUpload: (file: File) => Promise<void>;
 }
 
 const PhotoUploadActions: React.FC<PhotoUploadActionsProps> = ({
   photoPreview,
   handlePhotoChange,
   uploadError,
-  isUploading,
-  handleUpload
+  isUploading
 }) => {
   // Create a hidden file input element that we can trigger programmatically
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -26,11 +24,12 @@ const PhotoUploadActions: React.FC<PhotoUploadActionsProps> = ({
     fileInputRef.current?.click();
   };
   
-  const handleFileSelected = () => {
-    const files = fileInputRef.current?.files;
-    if (files && files.length > 0) {
-      handleUpload(files[0]);
+  const handleRemovePhoto = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
+    // Trigger the change event with an empty input to clear the preview
+    handlePhotoChange({ target: { files: null } } as React.ChangeEvent<HTMLInputElement>);
   };
   
   return (
@@ -71,14 +70,14 @@ const PhotoUploadActions: React.FC<PhotoUploadActionsProps> = ({
           className="flex items-center"
         >
           <ImageIcon className="mr-2 h-4 w-4" />
-          {isUploading ? 'Enviando...' : 'Escolher foto'}
+          Escolher foto
         </Button>
         
         {photoPreview && (
           <Button 
             type="button" 
             variant="outline" 
-            onClick={() => fileInputRef.current?.click()}
+            onClick={handleRemovePhoto}
             disabled={isUploading}
             className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
           >

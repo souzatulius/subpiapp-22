@@ -1,15 +1,22 @@
 
 import React from 'react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface AvatarDisplayProps {
   nome: string;
   imageSrc?: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
 }
 
-const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ nome, imageSrc, size = 'md' }) => {
-  const getInitials = (name: string) => {
+const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ 
+  nome, 
+  imageSrc, 
+  size = 'md',
+  className = ''
+}) => {
+  // Generate initials from name
+  const getInitials = (name: string): string => {
     return name
       .split(' ')
       .map(part => part[0])
@@ -17,29 +24,43 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ nome, imageSrc, size = 'm
       .toUpperCase()
       .substring(0, 2);
   };
-  
-  const getSizeClasses = (size: string) => {
-    switch(size) {
-      case 'xs': return 'h-6 w-6 text-xs';
-      case 'sm': return 'h-8 w-8 text-sm';
-      case 'md': return 'h-10 w-10 text-base';
-      case 'lg': return 'h-12 w-12 text-lg';
-      case 'xl': return 'h-16 w-16 text-xl';
-      default: return 'h-10 w-10 text-base';
+
+  // Get avatar size class
+  const getSizeClass = (): string => {
+    switch (size) {
+      case 'sm': return 'h-8 w-8 text-xs';
+      case 'md': return 'h-10 w-10 text-sm';
+      case 'lg': return 'h-14 w-14 text-lg';
+      case 'xl': return 'h-24 w-24 text-2xl';
+      default: return 'h-10 w-10 text-sm';
     }
   };
   
-  const sizeClasses = getSizeClasses(size);
-  
+  // Add a timestamp to the image URL to prevent caching issues
+  const getImageUrl = (): string => {
+    if (!imageSrc) return '';
+    
+    const url = new URL(imageSrc);
+    url.searchParams.set('t', Date.now().toString());
+    return url.toString();
+  };
+
   return (
-    <Avatar className={`${sizeClasses}`}>
-      {imageSrc ? (
-        <AvatarImage src={imageSrc} alt={nome} />
-      ) : (
-        <AvatarFallback className="bg-blue-100 text-blue-600">
-          {getInitials(nome)}
-        </AvatarFallback>
+    <Avatar className={`${getSizeClass()} ${className}`}>
+      {imageSrc && (
+        <AvatarImage 
+          src={getImageUrl()} 
+          alt={nome} 
+          className="object-cover"
+          onError={(e) => {
+            console.error('Avatar image failed to load:', e);
+            // The AvatarFallback will be shown automatically
+          }}
+        />
       )}
+      <AvatarFallback className="bg-primary/10 text-primary">
+        {getInitials(nome)}
+      </AvatarFallback>
     </Avatar>
   );
 };
