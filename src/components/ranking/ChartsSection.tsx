@@ -18,7 +18,6 @@ import ResponsibilityChart from './charts/ResponsibilityChart';
 
 // Import chart registration
 import './charts/ChartRegistration';
-import { Card } from '@/components/ui/card';
 
 interface ChartsSectionProps {
   chartData: any;
@@ -70,7 +69,16 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         {
           id: 'evolution-chart',
           title: 'Serviços em Andamento',
-          component: <EvolutionChart data={chartData.evolution || {}} sgzData={sgzData} painelData={painelData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
+          component: (
+            // Render the chart directly without container card
+            <EvolutionChart 
+              data={chartData.evolution || {}} 
+              sgzData={sgzData} 
+              painelData={painelData} 
+              isLoading={isLoading} 
+              isSimulationActive={isSimulationActive} 
+            />
+          ),
           isVisible: true,
           analysis: 'Análise da evolução diária e semanal das porcentagens de OS Fechadas, Pendentes e Canceladas.',
           isAnalysisExpanded: false,
@@ -169,11 +177,12 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
                 isVisible={!hiddenCharts.includes(item.id)}
                 isAnalysisExpanded={expandedAnalyses.includes(item.id)}
                 showAnalysisOnly={analysisOnlyCharts.includes(item.id)}
-                title={item.title}
+                title={disableCardContainers ? "" : item.title} // Don't show title if containers are disabled
                 analysis={item.analysis}
                 onToggleVisibility={() => handleToggleVisibility(item.id)}
                 onToggleAnalysis={() => handleToggleAnalysis(item.id)}
                 onToggleView={() => handleToggleView(item.id)}
+                disableCardContainer={disableCardContainers} 
               />
             ))}
           </div>

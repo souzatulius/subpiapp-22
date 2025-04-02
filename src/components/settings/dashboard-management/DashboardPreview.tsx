@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
 import { v4 as uuidv4 } from 'uuid';
-import { Loader2, Smartphone, Monitor, Info } from 'lucide-react';
+import { Loader2, Smartphone, Monitor, Info, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Select,
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 
@@ -52,8 +53,8 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     isCustomizationModalOpen,
     setIsCustomizationModalOpen,
     editingCard,
-    handleDeleteCard,
-    handleHideCard,
+    handleDeleteCard: internalDeleteCard,
+    handleHideCard: internalHideCard,
     handleEditCard,
     handleSaveCard,
     specialCardsData,
@@ -63,8 +64,9 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     searchQuery,
     setSearchQuery,
     handleSearchSubmit,
-    isLoading: isLoadingInternal
-  } = useDefaultDashboardState(department);
+    isLoading: isLoadingInternal,
+    configSource
+  } = useDefaultDashboardState(department, dashboardType === 'dashboard' ? 'dashboard' : 'communication');
 
   const cards = externalCards || internalCards;
   const isLoading = isLoadingInternal && !externalCards;
@@ -74,6 +76,60 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       onCardsChange(updatedCards);
     } else {
       setCards(updatedCards);
+    }
+  };
+
+  // Enhanced handlers with proper logging and error handling
+  const handleDeleteCard = (id: string) => {
+    console.log(`Deleting card with ID: ${id}`);
+    try {
+      const updatedCards = cards.filter(card => card.id !== id);
+      console.log(`Cards before deletion: ${cards.length}, after: ${updatedCards.length}`);
+      handleCardsChange(updatedCards);
+      
+      // Show confirmation toast
+      toast({
+        title: "Card removido",
+        description: "O card foi removido com sucesso do dashboard",
+        variant: "default"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      toast({
+        title: "Erro ao remover card",
+        description: "Não foi possível remover o card. Tente novamente.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const handleHideCard = (id: string) => {
+    console.log(`Hiding card with ID: ${id}`);
+    try {
+      const updatedCards = cards.map(card => 
+        card.id === id ? { ...card, isHidden: true } : card
+      );
+      handleCardsChange(updatedCards);
+      
+      // Show confirmation toast
+      toast({
+        title: "Card ocultado",
+        description: "O card foi ocultado do dashboard",
+        variant: "default"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error hiding card:', error);
+      toast({
+        title: "Erro ao ocultar card",
+        description: "Não foi possível ocultar o card. Tente novamente.",
+        variant: "destructive"
+      });
+      return false;
     }
   };
 
@@ -339,18 +395,18 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge variant="outline" className="cursor-help bg-white/80 hover:bg-white">
-                  <Info className="h-3 w-3 mr-1" /> Debug
+                <Badge variant={configSource === 'default' ? 'secondary' : 'success'} className="cursor-help">
+                  <Info className="h-3 w-3 mr-1" /> {configSource === 'custom' ? 'Personalizado' : 'Padrão'}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-md bg-black/90 text-white p-3">
                 <div className="space-y-2 text-xs">
-                  <p><strong>Selected Page Type:</strong> {selectedPageType}</p>
-                  <p><strong>Dashboard Type:</strong> {dashboardType}</p>
-                  <p><strong>Department ID:</strong> {department}</p>
-                  <p><strong>Saving to:</strong> department_dashboards table</p>
-                  <p><strong>View Type:</strong> {selectedPageType === 'inicial' ? 'dashboard' : 'communication'}</p>
-                  <p className="text-yellow-300 font-medium">Make sure page type matches the actual dashboard you want to customize!</p>
+                  <p><strong>Tipo de Página:</strong> {selectedPageType}</p>
+                  <p><strong>Tipo de Dashboard:</strong> {dashboardType}</p>
+                  <p><strong>ID Departamento:</strong> {department}</p>
+                  <p><strong>Salvando em:</strong> tabela department_dashboards</p>
+                  <p><strong>Tipo de Visualização:</strong> {selectedPageType === 'inicial' ? 'dashboard' : 'communication'}</p>
+                  <p className="text-yellow-300 font-medium">Certifique-se de que o tipo de página corresponde ao dashboard que deseja personalizar!</p>
                 </div>
               </TooltipContent>
             </Tooltip>
