@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -91,6 +90,18 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
     // For Dashboard, only highlight if it's exactly the dashboard path
     if (itemPath === '/dashboard') {
       return location.pathname === '/dashboard';
+    }
+    
+    // Special case for "Comunicação" - only active on exact match or non-relatorios paths
+    if (itemPath === '/dashboard/comunicacao') {
+      return location.pathname === '/dashboard/comunicacao' || 
+             (location.pathname.startsWith('/dashboard/comunicacao/') && 
+              !location.pathname.includes('/relatorios'));
+    }
+    
+    // Special case for "Relatórios"
+    if (itemPath === '/dashboard/comunicacao/relatorios') {
+      return location.pathname.includes('/relatorios');
     }
     
     // For other items, highlight if the path matches exactly or if it's a subpath

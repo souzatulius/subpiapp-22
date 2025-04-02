@@ -27,15 +27,26 @@ const MobileSettingsNav = () => {
       return location.pathname === '/dashboard';
     }
     
+    // Special case for "Comunicação" - only active on exact match or non-relatorios paths
+    if (itemPath === '/dashboard/comunicacao') {
+      return location.pathname === '/dashboard/comunicacao' || 
+             (location.pathname.startsWith('/dashboard/comunicacao/') && 
+              !location.pathname.includes('/relatorios'));
+    }
+    
+    // Special case for "Relatórios"
+    if (itemPath === '/dashboard/comunicacao/relatorios') {
+      return location.pathname.includes('/relatorios');
+    }
+    
     // For settings page, special handling
     if (itemPath === '/settings') {
       return location.pathname === '/settings' || 
         location.pathname.startsWith('/settings/');
     }
     
-    // For other items, highlight if the path matches exactly or if it's a subpath
-    return location.pathname === itemPath || 
-      location.pathname.startsWith(itemPath + '/');
+    // For other items, standard behavior
+    return location.pathname === itemPath || location.pathname.startsWith(itemPath + '/');
   };
   
   return (
