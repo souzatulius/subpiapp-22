@@ -1,108 +1,88 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpIcon, ArrowDownIcon, FileTextIcon, ClockIcon, BarChartIcon, PercentIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { CardStats } from '../hooks/reports/types';
 
-interface StatsCardProps {
-  title: string;
-  value: string | number;
-  description?: string;
-  icon: React.ReactNode;
-  trend?: number;
-  isLoading?: boolean;
+interface StatsCardsProps {
+  cardStats: CardStats;
+  isLoading: boolean;
 }
 
-export const StatsCard: React.FC<StatsCardProps> = ({
-  title,
-  value,
-  description,
-  icon,
-  trend = 0,
-  isLoading = false
-}) => {
-  return (
-    <Card className="shadow-sm hover:shadow-md transition-all duration-300 bg-white">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-gray-700">{title}</CardTitle>
-        <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
-          {icon}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-orange-700">
-          {isLoading ? 
-            <div className="h-8 w-24 bg-orange-50 animate-pulse rounded"></div>
-            : value
-          }
-        </div>
-        <div className="flex items-center text-xs">
-          {trend !== 0 && (
-            <span className={`flex items-center ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {trend > 0 ? 
-                <ArrowUpIcon className="h-3 w-3 mr-1" /> : 
-                <ArrowDownIcon className="h-3 w-3 mr-1" />
-              }
-              {Math.abs(trend)}%
-            </span>
-          )}
-          {description && (
-            <CardDescription className="text-xs text-gray-500 ml-1">
-              {description}
-            </CardDescription>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
+  const stats = [
+    {
+      title: "Total de demandas",
+      value: cardStats.totalDemandas,
+      change: cardStats.demandasVariacao,
+      unit: "",
+    },
+    {
+      title: "Notas emitidas",
+      value: cardStats.totalNotas,
+      change: cardStats.notasVariacao,
+      unit: "",
+    },
+    {
+      title: "Tempo médio de resposta",
+      value: cardStats.tempoMedioResposta,
+      change: cardStats.tempoRespostaVariacao,
+      unit: " dias",
+    },
+    {
+      title: "Taxa de aprovação",
+      value: cardStats.taxaAprovacao,
+      change: cardStats.aprovacaoVariacao,
+      unit: "%",
+    }
+  ];
 
-export const StatsCards: React.FC<{
-  cardStats: {
-    totalDemandas: number;
-    demandasVariacao: number;
-    totalNotas: number;
-    notasVariacao: number;
-    tempoMedioResposta: number;
-    tempoRespostaVariacao: number;
-    taxaAprovacao: number;
-    aprovacaoVariacao: number;
+  const renderChangeIndicator = (change: number, isTimeResponse: boolean = false) => {
+    // Para o tempo de resposta, negativo é bom (resposta mais rápida)
+    const isPositive = isTimeResponse ? change < 0 : change > 0;
+    const absoluteChange = Math.abs(change);
+    
+    // Se a variação for zero, não mostramos indicador
+    if (change === 0) return null;
+    
+    return (
+      <div className={`flex items-center ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+        {isPositive ? 
+          <ArrowUpIcon className="h-4 w-4 mr-1" /> : 
+          <ArrowDownIcon className="h-4 w-4 mr-1" />
+        }
+        <span className="text-xs font-medium">{absoluteChange}% {isPositive ? 'aumento' : 'redução'}</span>
+      </div>
+    );
   };
-  isLoading: boolean;
-}> = ({ cardStats, isLoading }) => {
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <StatsCard
-        title="Total de Demandas"
-        value={cardStats.totalDemandas || 0}
-        trend={cardStats.demandasVariacao || 0}
-        description="vs. mês anterior"
-        icon={<BarChartIcon className="h-4 w-4 text-orange-600" />}
-        isLoading={isLoading}
-      />
-      <StatsCard
-        title="Notas Oficiais"
-        value={cardStats.totalNotas || 0}
-        trend={cardStats.notasVariacao || 0}
-        description="vs. mês anterior"
-        icon={<FileTextIcon className="h-4 w-4 text-orange-600" />}
-        isLoading={isLoading}
-      />
-      <StatsCard
-        title="Tempo Médio Resposta"
-        value={`${(cardStats.tempoMedioResposta || 0).toFixed(1)} dias`}
-        trend={cardStats.tempoRespostaVariacao || 0}
-        description="vs. mês anterior"
-        icon={<ClockIcon className="h-4 w-4 text-orange-600" />}
-        isLoading={isLoading}
-      />
-      <StatsCard
-        title="Taxa de Aprovação"
-        value={`${cardStats.taxaAprovacao || 0}%`}
-        trend={cardStats.aprovacaoVariacao || 0}
-        description="vs. mês anterior"
-        icon={<PercentIcon className="h-4 w-4 text-orange-600" />}
-        isLoading={isLoading}
-      />
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat, index) => (
+        <Card key={index} className="border border-orange-200 hover:shadow-md transition-all">
+          <CardContent className="p-4">
+            <div className="flex flex-col">
+              <div className="text-xs font-medium text-orange-800">
+                {stat.title}
+              </div>
+              {isLoading ? (
+                <div className="mt-2">
+                  <Skeleton className="h-7 w-24 bg-orange-100" />
+                  <Skeleton className="h-4 w-16 mt-1 bg-orange-50" />
+                </div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-orange-700">
+                    {stat.value}{stat.unit}
+                  </div>
+                  {renderChangeIndicator(stat.change, index === 2)}
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };

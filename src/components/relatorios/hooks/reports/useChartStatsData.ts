@@ -2,12 +2,27 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ReportsData } from './types';
+import { ReportFilters } from '../useReportsData';
 
 export const useChartStatsData = () => {
   const [reportsData, setReportsData] = useState<ReportsData | null>(null);
+  const [isLoadingCharts, setIsLoadingCharts] = useState(false);
 
-  const fetchChartData = useCallback(async () => {
+  const fetchChartData = useCallback(async (filters: ReportFilters = {}) => {
+    setIsLoadingCharts(true);
     try {
+      // Construir filtros para as consultas
+      let dateFilter = {};
+      if (filters.dateRange) {
+        const { from, to } = filters.dateRange;
+        dateFilter = {
+          horario_publicacao: { 
+            gte: from.toISOString(),
+            lte: to.toISOString()
+          }
+        };
+      }
+
       // Buscar distribuição de demandas por distritos
       const { data: districtData, error: districtError } = await supabase
         .from('demandas')
@@ -33,7 +48,7 @@ export const useChartStatsData = () => {
       const districts = Object.entries(districtCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 4);
+        .slice(0, 6);
       
       // Buscar demandas por bairro
       const neighborhoodCounts: Record<string, {value: number, district: string}> = {};
@@ -51,51 +66,7 @@ export const useChartStatsData = () => {
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
 
-      // Buscar dados a partir dos hooks específicos
-      const origins = await fetchOriginData();
-      const mediaTypes = await fetchMediaTypeData();
-      const responseTimes = await fetchResponseTimeData();
-      const services = await fetchServiceData();
-      const coordinations = await fetchCoordinationData();
-      const statuses = await fetchStatusData();
-      const responsibles = await fetchUserData();
-      const approvals = await fetchApprovalData();
-
-      // Montar objeto final com todos os dados
-      setReportsData({
-        districts,
-        neighborhoods,
-        origins,
-        mediaTypes,
-        responseTimes,
-        services,
-        coordinations,
-        statuses,
-        responsibles,
-        approvals
-      });
-      
-    } catch (error) {
-      console.error('Erro ao buscar dados para os gráficos:', error);
-      // Em caso de erro, usar dados vazios para evitar erros de renderização
-      setReportsData({
-        districts: [],
-        neighborhoods: [],
-        origins: [],
-        mediaTypes: [],
-        responseTimes: [],
-        services: [],
-        coordinations: [],
-        statuses: [],
-        responsibles: [],
-        approvals: []
-      });
-    }
-  }, []);
-
-  // Funções auxiliares para buscar dados específicos
-  const fetchOriginData = async () => {
-    try {
+      // Buscar dados de origem das demandas
       const { data: origemData, error: origemError } = await supabase
         .from('demandas')
         .select(`
@@ -113,18 +84,12 @@ export const useChartStatsData = () => {
         }
       });
       
-      return Object.entries(originCounts)
+      const origins = Object.entries(originCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
-    } catch (error) {
-      console.error('Erro ao buscar dados de origem:', error);
-      return [];
-    }
-  };
 
-  const fetchMediaTypeData = async () => {
-    try {
+      // Buscar dados de tipos de mídia
       const { data: midiaData, error: midiaError } = await supabase
         .from('demandas')
         .select(`
@@ -143,18 +108,12 @@ export const useChartStatsData = () => {
         }
       });
       
-      return Object.entries(mediaCounts)
+      const mediaTypes = Object.entries(mediaCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 3);
-    } catch (error) {
-      console.error('Erro ao buscar dados de mídia:', error);
-      return [];
-    }
-  };
+        .slice(0, 5);
 
-  const fetchResponseTimeData = async () => {
-    try {
+      // Buscar dados de tempo de resposta por mês
       const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear();
@@ -194,50 +153,38 @@ export const useChartStatsData = () => {
         }
       });
       
-      return Object.entries(responseTimesByMonth)
+      const responseTimes = Object.entries(responseTimesByMonth)
         .map(([name, times]) => {
           const avgTime = times.length > 0 ? times.reduce((sum, time) => sum + time, 0) / times.length : 0;
           return { name, value: Math.round(avgTime) };
         })
         .filter(item => item.value > 0)
         .reverse();
-    } catch (error) {
-      console.error('Erro ao buscar dados de tempo de resposta:', error);
-      return [];
-    }
-  };
 
-  const fetchServiceData = async () => {
-    try {
-      const { data: servicosData, error: servicosError } = await supabase
+      // Buscar dados de problemas mais frequentes
+      const { data: problemasData, error: problemasError } = await supabase
         .from('demandas')
         .select(`
           problema_id,
           problema:problemas!inner(descricao)
         `);
       
-      if (servicosError) throw servicosError;
+      if (problemasError) throw problemasError;
       
-      const serviceCounts: Record<string, number> = {};
-      servicosData?.forEach(item => {
+      const problemaCounts: Record<string, number> = {};
+      problemasData?.forEach(item => {
         if (item.problema) {
-          const servico = item.problema.descricao;
-          serviceCounts[servico] = (serviceCounts[servico] || 0) + 1;
+          const problema = item.problema.descricao;
+          problemaCounts[problema] = (problemaCounts[problema] || 0) + 1;
         }
       });
       
-      return Object.entries(serviceCounts)
+      const problemas = Object.entries(problemaCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 3);
-    } catch (error) {
-      console.error('Erro ao buscar dados de serviços:', error);
-      return [];
-    }
-  };
+        .slice(0, 6);
 
-  const fetchCoordinationData = async () => {
-    try {
+      // Buscar dados de coordenações
       const { data: coordData, error: coordError } = await supabase
         .from('demandas')
         .select(`
@@ -256,18 +203,12 @@ export const useChartStatsData = () => {
         }
       });
       
-      return Object.entries(coordCounts)
+      const coordinations = Object.entries(coordCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 3);
-    } catch (error) {
-      console.error('Erro ao buscar dados de coordenação:', error);
-      return [];
-    }
-  };
+        .slice(0, 5);
 
-  const fetchStatusData = async () => {
-    try {
+      // Buscar dados de status das demandas
       const { data: statusData, error: statusError } = await supabase
         .from('demandas')
         .select('status');
@@ -288,16 +229,10 @@ export const useChartStatsData = () => {
         statusCounts[statusLabel] = (statusCounts[statusLabel] || 0) + 1;
       });
       
-      return Object.entries(statusCounts)
+      const statuses = Object.entries(statusCounts)
         .map(([name, value]) => ({ name, value }));
-    } catch (error) {
-      console.error('Erro ao buscar dados de status:', error);
-      return [];
-    }
-  };
 
-  const fetchUserData = async () => {
-    try {
+      // Buscar dados de autores das demandas
       const { data: userData, error: userError } = await supabase
         .from('demandas')
         .select(`
@@ -315,18 +250,12 @@ export const useChartStatsData = () => {
         }
       });
       
-      return Object.entries(userCounts)
+      const responsibles = Object.entries(userCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 3);
-    } catch (error) {
-      console.error('Erro ao buscar dados de usuários:', error);
-      return [];
-    }
-  };
+        .slice(0, 5);
 
-  const fetchApprovalData = async () => {
-    try {
+      // Buscar dados de aprovação de notas
       const { data: approvalData, error: approvalError } = await supabase
         .from('notas_oficiais')
         .select('status');
@@ -334,31 +263,62 @@ export const useChartStatsData = () => {
       if (approvalError) throw approvalError;
       
       const approvalCounts: Record<string, number> = {
-        'Aprovadas pelo Subprefeito': 0,
-        'Rejeitadas e reeditadas': 0,
-        'Aprovadas sem edição': 0
+        'Aprovadas': 0,
+        'Pendentes': 0,
+        'Rejeitadas': 0
       };
       
       approvalData?.forEach(item => {
         if (item.status === 'aprovada') {
-          approvalCounts['Aprovadas pelo Subprefeito']++;
+          approvalCounts['Aprovadas']++;
         } else if (item.status === 'rejeitada') {
-          approvalCounts['Rejeitadas e reeditadas']++;
+          approvalCounts['Rejeitadas']++;
         } else if (item.status === 'pendente') {
-          approvalCounts['Aprovadas sem edição']++;
+          approvalCounts['Pendentes']++;
         }
       });
       
-      return Object.entries(approvalCounts)
-        .map(([name, value]) => ({ name, value }));
+      const approvals = Object.entries(approvalCounts)
+        .map(([name, value]) => ({ name, value }))
+        .filter(item => item.value > 0);
+
+      // Montar objeto final com todos os dados
+      setReportsData({
+        districts,
+        neighborhoods,
+        origins,
+        mediaTypes,
+        responseTimes,
+        problemas,
+        coordinations,
+        statuses,
+        responsibles,
+        approvals
+      });
+      
     } catch (error) {
-      console.error('Erro ao buscar dados de aprovações:', error);
-      return [];
+      console.error('Erro ao buscar dados para os gráficos:', error);
+      // Em caso de erro, usar dados vazios para evitar erros de renderização
+      setReportsData({
+        districts: [],
+        neighborhoods: [],
+        origins: [],
+        mediaTypes: [],
+        responseTimes: [],
+        problemas: [],
+        coordinations: [],
+        statuses: [],
+        responsibles: [],
+        approvals: []
+      });
+    } finally {
+      setIsLoadingCharts(false);
     }
-  };
+  }, []);
 
   return {
     reportsData,
-    fetchChartData
+    fetchChartData,
+    isLoadingCharts
   };
 };

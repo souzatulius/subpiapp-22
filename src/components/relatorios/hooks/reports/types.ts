@@ -10,29 +10,21 @@ export interface CardStats {
   aprovacaoVariacao: number;
 }
 
-export interface ChartData {
+export interface ChartDataItem {
   name: string;
   value: number;
-  district?: string;
+  district?: string; // Para itens com relação distrito/bairro
 }
 
 export interface ReportsData {
-  districts: ChartData[];
-  neighborhoods: ChartData[];
-  origins: ChartData[];
-  mediaTypes: ChartData[];
-  responseTimes: ChartData[];
-  services: ChartData[];
-  coordinations: ChartData[];
-  statuses: ChartData[];
-  responsibles: ChartData[];
-  approvals: ChartData[];
-}
-
-export interface TempoRespostaData {
-  id: number;
-  criado_em: string;
-  respostas: {
-    criado_em: string;
-  }[];
+  districts: ChartDataItem[];
+  neighborhoods: ChartDataItem[];
+  origins: ChartDataItem[];
+  mediaTypes: ChartDataItem[];
+  responseTimes: ChartDataItem[];
+  problemas: ChartDataItem[];
+  coordinations: ChartDataItem[];
+  statuses: ChartDataItem[];
+  responsibles: ChartDataItem[];
+  approvals: ChartDataItem[];
 }

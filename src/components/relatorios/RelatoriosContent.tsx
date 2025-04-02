@@ -4,29 +4,32 @@ import { motion } from 'framer-motion';
 import { useRelatorioItemsState } from './hooks/useRelatorioItemsState';
 import { createRelatorioItems } from './utils/relatorioItemsFactory';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { useChartData } from './hooks/useChartData';
 import { useChartComponents } from './hooks/useChartComponents';
 import TemasTecnicos from './sections/TemasTecnicos';
 import TempoDesempenho from './sections/TempoDesempenho';
 import NotasOficiais from './sections/NotasOficiais';
 import Tendencias from './sections/Tendencias';
-import { useReportsData } from './hooks/useReportsData';
+import { useReportsData, ReportFilters } from './hooks/useReportsData';
 import StatsCards from './components/StatsCards';
+import { DateRange } from "react-day-picker";
 
 interface RelatoriosContentProps {
   filterDialogOpen?: boolean;
   setFilterDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  filters?: ReportFilters;
 }
 
-export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
-  const [dateRange] = React.useState<{
-    from: Date;
-    to: Date;
-  }>({
-    from: new Date(2023, 0, 1),
+export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({ 
+  filterDialogOpen, 
+  setFilterDialogOpen,
+  filters = {}
+}) => {
+  const defaultDateRange = {
+    from: new Date(new Date().setMonth(new Date().getMonth() - 3)),
     to: new Date(),
-  });
+  };
   
+  const [dateRange, setDateRange] = React.useState<DateRange>(defaultDateRange);
   const [isLoading, setIsLoading] = useState(true);
   
   const sensors = useSensors(
@@ -35,24 +38,23 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = () => {
     })
   );
   
-  const { reportsData, cardStats, isLoading: dataLoading } = useReportsData({
-    dateRange
-  });
+  const currentFilters = {
+    ...filters,
+    dateRange: dateRange
+  };
   
-  const { chartData } = useChartData();
+  const { reportsData, cardStats, isLoading: dataLoading } = useReportsData(currentFilters);
   
-  const {
-    chartComponents
-  } = useChartComponents();
+  const { chartComponents } = useChartComponents();
 
   const initialItems = React.useMemo(() => createRelatorioItems({
-    chartData,
+    chartData: {},
     chartComponents,
     isLoading: isLoading || dataLoading,
     hiddenItems: [],
     expandedAnalyses: [],
     analysisOnlyItems: []
-  }), [chartComponents, chartData, isLoading, dataLoading]);
+  }), [chartComponents, isLoading, dataLoading]);
 
   const {
     items,

@@ -1,184 +1,143 @@
 
 import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { SlidersHorizontal, BarChart, RefreshCw } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { Label } from '@/components/ui/label';
+import { ReportFilters } from '../hooks/useReportsData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { DateRange } from 'react-day-picker';
 
 interface FilterDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onFiltersChange?: (filters: ReportFilters) => void;
 }
 
-const FilterDialog: React.FC<FilterDialogProps> = ({
-  open,
+const FilterDialog: React.FC<FilterDialogProps> = ({ 
+  open, 
   onOpenChange,
+  onFiltersChange = () => {}
 }) => {
-  const [activeTab, setActiveTab] = useState('filtros');
+  const defaultDateRange = {
+    from: new Date(new Date().setMonth(new Date().getMonth() - 3)),
+    to: new Date(),
+  };
 
-  const handleResetFilters = () => {
-    // Implement filter reset functionality
+  const [date, setDate] = useState<DateRange>(defaultDateRange);
+  const [coordenacao, setCoordenacao] = useState<string>('');
+  const [problema, setProblema] = useState<string>('');
+  const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
+  const [problemas, setProblemas] = useState<{id: string, descricao: string}[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch coordenacoes and problemas when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          // Fetch coordenacoes
+          const { data: coordData, error: coordError } = await supabase
+            .from('coordenacoes')
+            .select('id, descricao');
+          
+          if (coordError) throw coordError;
+          setCoordenacoes(coordData || []);
+          
+          // Fetch problemas
+          const { data: probData, error: probError } = await supabase
+            .from('problemas')
+            .select('id, descricao');
+          
+          if (probError) throw probError;
+          setProblemas(probData || []);
+          
+        } catch (error) {
+          console.error('Erro ao buscar dados para os filtros:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchData();
+    }
+  }, [open]);
+
+  const handleApplyFilters = () => {
+    const filters: ReportFilters = {
+      dateRange: date,
+      coordenacao: coordenacao || undefined,
+      problema: problema || undefined
+    };
+    
+    onFiltersChange(filters);
     onOpenChange(false);
   };
 
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg md:max-w-xl overflow-y-auto">
-        <SheetHeader className="mb-4 pb-2 border-b">
-          <SheetTitle className="text-teal-700 flex items-center gap-2">
-            <SlidersHorizontal className="h-5 w-5" />
-            Filtros e Gerenciamento de Visualização
-          </SheetTitle>
-          <SheetDescription>
-            Configure os filtros para análise e selecione quais gráficos deseja visualizar
-          </SheetDescription>
-        </SheetHeader>
-        
-        <Tabs defaultValue="filtros" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2 mb-6 bg-teal-50">
-            <TabsTrigger 
-              value="filtros"
-              className="data-[state=active]:bg-teal-500 data-[state=active]:text-white"
-            >
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filtros
-            </TabsTrigger>
-            <TabsTrigger 
-              value="graficos"
-              className="data-[state=active]:bg-teal-500 data-[state=active]:text-white"
-            >
-              <BarChart className="h-4 w-4 mr-2" />
-              Gráficos
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="filtros" className="space-y-6">
-            {/* Filtros por Data, Coordenação e Tema */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FilterCard title="Período" description="Selecione o período de tempo para análise" />
-              <FilterCard title="Coordenação" description="Filtre por coordenação específica" />
-              <FilterCard title="Tema / Serviço" description="Filtre por tema ou serviço" />
-              <FilterCard title="Status" description="Filtre por status de demandas/notas" />
-            </div>
-            
-            {/* Filtros Ativos */}
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium mb-2">Filtros Ativos</h3>
-              <div className="flex flex-wrap gap-2">
-                {/* Aqui seriam mostrados os filtros ativos */}
-              </div>
-            </div>
-            
-            <div className="flex justify-end">
-              <Button 
-                onClick={handleResetFilters} 
-                className="bg-teal-600 hover:bg-teal-700"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Resetar Filtros e Fechar
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="graficos">
-            <div className="space-y-4">
-              <CategorySection 
-                title="Visão Geral" 
-                items={[
-                  { id: 'statusDistribution', label: 'Distribuição de Status', checked: true },
-                  { id: 'tempoResposta', label: 'Tempo de Resposta', checked: true },
-                  { id: 'volumeDemandas', label: 'Volume de Demandas', checked: true },
-                ]}
-              />
-              
-              <CategorySection 
-                title="Temas Técnicos" 
-                items={[
-                  { id: 'distribuicaoTemas', label: 'Distribuição por Temas', checked: true },
-                  { id: 'complexidadePorTema', label: 'Complexidade por Tema', checked: false },
-                  { id: 'servicosMaisFrequentes', label: 'Serviços Mais Frequentes', checked: true },
-                ]}
-              />
-              
-              <CategorySection 
-                title="Tempo e Desempenho" 
-                items={[
-                  { id: 'tempoMedioResposta', label: 'Tempo Médio de Resposta', checked: true },
-                  { id: 'respostasForaPrazo', label: 'Respostas Fora do Prazo', checked: false },
-                  { id: 'performancePorArea', label: 'Performance por Área', checked: true },
-                ]}
-              />
-              
-              <CategorySection 
-                title="Notas Oficiais" 
-                items={[
-                  { id: 'notasEmitidas', label: 'Notas Emitidas', checked: true },
-                  { id: 'tempoAprovacao', label: 'Tempo de Aprovação', checked: false },
-                  { id: 'notasPorTema', label: 'Notas por Tema', checked: true },
-                ]}
-              />
-              
-              <CategorySection 
-                title="Tendências" 
-                items={[
-                  { id: 'evolucaoMensal', label: 'Evolução Mensal', checked: true },
-                  { id: 'comparativoAnual', label: 'Comparativo Anual', checked: false },
-                  { id: 'previsaoProximoMes', label: 'Previsão Próximo Mês', checked: false },
-                ]}
-              />
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <Button 
-                onClick={() => onOpenChange(false)} 
-                variant="outline" 
-                className="border-teal-300"
-              >
-                Fechar
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </SheetContent>
-    </Sheet>
-  );
-};
+  const handleResetFilters = () => {
+    setDate(defaultDateRange);
+    setCoordenacao('');
+    setProblema('');
+  };
 
-// Helper components
-const FilterCard = ({ title, description }: { title: string, description: string }) => {
   return (
-    <div className="border rounded-lg p-3 bg-white shadow-sm">
-      <h3 className="font-medium text-sm">{title}</h3>
-      <p className="text-xs text-gray-500">{description}</p>
-    </div>
-  );
-};
-
-const CategorySection = ({ 
-  title, 
-  items 
-}: { 
-  title: string; 
-  items: Array<{ id: string; label: string; checked: boolean }> 
-}) => {
-  return (
-    <div className="border rounded-lg p-4 bg-white">
-      <h3 className="font-medium mb-3">{title}</h3>
-      <div className="space-y-2">
-        {items.map(item => (
-          <div key={item.id} className="flex items-center space-x-2">
-            <input 
-              type="checkbox"
-              id={item.id}
-              checked={item.checked}
-              onChange={() => {}}
-              className="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
-            />
-            <label htmlFor={item.id} className="text-sm">{item.label}</label>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Filtros de relatório</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-6 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="date-range">Período</Label>
+            <DatePickerWithRange date={date} setDate={setDate} />
           </div>
-        ))}
-      </div>
-    </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="coordenacao">Coordenação</Label>
+            <Select value={coordenacao} onValueChange={setCoordenacao} disabled={loading}>
+              <SelectTrigger id="coordenacao">
+                <SelectValue placeholder="Selecione uma coordenação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todas as coordenações</SelectItem>
+                {coordenacoes.map((coord) => (
+                  <SelectItem key={coord.id} value={coord.id}>
+                    {coord.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="problema">Problema</Label>
+            <Select value={problema} onValueChange={setProblema} disabled={loading}>
+              <SelectTrigger id="problema">
+                <SelectValue placeholder="Selecione um problema" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos os problemas</SelectItem>
+                {problemas.map((prob) => (
+                  <SelectItem key={prob.id} value={prob.id}>
+                    {prob.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleResetFilters}>
+            Limpar filtros
+          </Button>
+          <Button onClick={handleApplyFilters}>
+            Aplicar filtros
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

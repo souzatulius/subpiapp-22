@@ -3,17 +3,29 @@ import { useState, useEffect } from 'react';
 import { useCardStatsData } from './reports/useCardStatsData';
 import { useChartStatsData } from './reports/useChartStatsData';
 import { CardStats } from './reports/types';
+import { supabase } from '@/integrations/supabase/client';
 
-export const useReportsData = (filters: any) => {
+export interface ReportFilters {
+  dateRange?: {
+    from: Date;
+    to: Date;
+  };
+  coordenacao?: string;
+  problema?: string;
+}
+
+export const useReportsData = (filters: ReportFilters = {}) => {
   const [isLoading, setIsLoading] = useState(true);
   const { 
     cardStats, 
-    fetchCardStats 
+    fetchCardStats,
+    isLoadingCards
   } = useCardStatsData();
   
   const {
     reportsData,
-    fetchChartData
+    fetchChartData,
+    isLoadingCharts
   } = useChartStatsData();
 
   useEffect(() => {
@@ -21,14 +33,14 @@ export const useReportsData = (filters: any) => {
       setIsLoading(true);
       try {
         // Primeiro, buscamos os dados dos cards
-        await fetchCardStats();
+        await fetchCardStats(filters);
         
         // Em seguida, buscamos os dados para os gráficos
-        await fetchChartData();
+        await fetchChartData(filters);
         
-        setIsLoading(false);
       } catch (error) {
         console.error('Erro ao buscar dados de relatórios:', error);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -38,7 +50,7 @@ export const useReportsData = (filters: any) => {
 
   return {
     reportsData,
-    isLoading,
+    isLoading: isLoading || isLoadingCards || isLoadingCharts,
     cardStats
   };
 };

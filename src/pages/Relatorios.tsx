@@ -10,16 +10,22 @@ import { motion } from 'framer-motion';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
+import { ReportFilters } from '@/components/relatorios/hooks/useReportsData';
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
 
 const Relatorios = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [filters, setFilters] = useState<ReportFilters>({});
   const isMobile = useIsMobile();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleFiltersChange = (newFilters: ReportFilters) => {
+    setFilters(newFilters);
   };
 
   return (
@@ -51,12 +57,17 @@ const Relatorios = () => {
                 />
                
                 <div className="mt-6">
-                  <RelatoriosContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
+                  <RelatoriosContent 
+                    filterDialogOpen={filterDialogOpen} 
+                    setFilterDialogOpen={setFilterDialogOpen} 
+                    filters={filters}
+                  />
                 </div>
 
                 <FilterDialog 
                   open={filterDialogOpen} 
                   onOpenChange={setFilterDialogOpen} 
+                  onFiltersChange={handleFiltersChange}
                 />
               </motion.div>
             </div>
