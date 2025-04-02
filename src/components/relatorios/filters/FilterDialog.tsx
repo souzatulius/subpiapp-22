@@ -4,18 +4,26 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 import RelatoriosFilters from './RelatoriosFilters';
 import { useReportsData, ReportFilters } from '../hooks/useReportsData';
-import { DateRange } from 'react-day-picker';
 
 interface FilterDialogProps {
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  onFiltersChange?: (newFilters: ReportFilters) => void;
 }
 
-export const FilterDialog: React.FC<FilterDialogProps> = ({ open, onOpenChange }) => {
+export const FilterDialog: React.FC<FilterDialogProps> = ({ 
+  open, 
+  onOpenChange, 
+  onFiltersChange 
+}) => {
   const { filters, setFilters, resetFilters } = useReportsData();
   
   const handleFiltersChange = (newFilters: ReportFilters) => {
     setFilters(newFilters);
+    // Call the external handler if provided
+    if (onFiltersChange) {
+      onFiltersChange(newFilters);
+    }
   };
   
   return (

@@ -66,8 +66,7 @@ const Relatorios = () => {
 
                 <FilterDialog 
                   open={filterDialogOpen} 
-                  onOpenChange={setFilterDialogOpen} 
-                  onFiltersChange={handleFiltersChange}
+                  onOpenChange={setFilterDialogOpen}
                 />
               </motion.div>
             </div>
