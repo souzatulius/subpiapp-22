@@ -18,59 +18,59 @@ import {
   Send
 } from "lucide-react";
 
-// Tipos para garantir a padronização
+// Types for standardization
 export interface StatusConfig {
   label: string;
-  color: string;
-  bgColor: string;
+  text: string;
+  bg: string;
   borderColor: string;
   iconName: keyof typeof statusIcons;
 }
 
 export type StatusMapType = Record<string, StatusConfig>;
 
-// Cores definidas conforme a identidade visual
+// Colors defined according to the visual identity
 const colors = {
   azulClaro: {
     text: 'text-blue-700',
     bg: 'bg-blue-50',
-    border: 'border-blue-200'
+    borderColor: 'border-blue-200'
   },
   azulMedio: {
     text: 'text-blue-800',
     bg: 'bg-blue-100',
-    border: 'border-blue-300'
+    borderColor: 'border-blue-300'
   },
   azulEscuro: {
     text: 'text-blue-900',
     bg: 'bg-blue-200',
-    border: 'border-blue-400'
+    borderColor: 'border-blue-400'
   },
   laranja: {
     text: 'text-orange-700',
     bg: 'bg-orange-50',
-    border: 'border-orange-200'
+    borderColor: 'border-orange-200'
   },
   cinzaClaro: {
     text: 'text-gray-500',
     bg: 'bg-gray-50',
-    border: 'border-gray-200'
+    borderColor: 'border-gray-200'
   },
   cinzaMedio: {
     text: 'text-gray-600',
     bg: 'bg-gray-100',
-    border: 'border-gray-300'
+    borderColor: 'border-gray-300'
   },
   cinzaEscuro: {
     text: 'text-gray-700',
     bg: 'bg-gray-200',
-    border: 'border-gray-400'
+    borderColor: 'border-gray-400'
   }
 };
 
-// Mapeamento dos ícones do lucide-react (usados em vez dos emojis para melhor integração)
+// Mapping of lucide-react icons (used instead of emojis for better integration)
 export const statusIcons = {
-  // Demandas
+  // Demands
   Clock,
   Search,
   AlarmClock,
@@ -83,7 +83,7 @@ export const statusIcons = {
   Ban,
   Archive,
   
-  // Notas
+  // Notes
   FileClock,
   CheckCircle2: CheckCircle,
   AlertTriangle,
@@ -91,7 +91,7 @@ export const statusIcons = {
   Send
 };
 
-// Mapeamento dos status de demandas para os rótulos de UI
+// Mapping demand statuses to UI labels
 export const demandaStatusMap: StatusMapType = {
   'pendente': {
     label: 'Nova',
@@ -150,7 +150,7 @@ export const demandaStatusMap: StatusMapType = {
   }
 };
 
-// Mapeamento dos status de notas para os rótulos de UI
+// Mapping note statuses to UI labels
 export const notaStatusMap: StatusMapType = {
   'pendente': {
     label: 'Aguardando aprovação',
@@ -179,7 +179,7 @@ export const notaStatusMap: StatusMapType = {
   }
 };
 
-// Função utilitária para obter a configuração de um status de demanda
+// Utility function to get config for a demand status
 export const getDemandaStatusConfig = (status: string): StatusConfig => {
   return demandaStatusMap[status] || {
     label: status.charAt(0).toUpperCase() + status.slice(1),
@@ -188,7 +188,7 @@ export const getDemandaStatusConfig = (status: string): StatusConfig => {
   };
 };
 
-// Função utilitária para obter a configuração de um status de nota
+// Utility function to get config for a note status
 export const getNotaStatusConfig = (status: string): StatusConfig => {
   return notaStatusMap[status] || {
     label: status.charAt(0).toUpperCase() + status.slice(1),

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { StatusConfig, statusIcons } from '@/utils/statusLabels';
+import { StatusConfig, statusIcons, getDemandaStatusConfig, getNotaStatusConfig } from '@/utils/statusLabels';
 
 interface StatusBadgeProps {
   status: string;
@@ -60,7 +60,6 @@ export function DemandaStatusBadge({
   showIcon?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }) {
-  const { getDemandaStatusConfig } = require('@/utils/statusLabels');
   const config = getDemandaStatusConfig(status);
   
   return (
@@ -85,7 +84,6 @@ export function NotaStatusBadge({
   showIcon?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }) {
-  const { getNotaStatusConfig } = require('@/utils/statusLabels');
   const config = getNotaStatusConfig(status);
   
   return (

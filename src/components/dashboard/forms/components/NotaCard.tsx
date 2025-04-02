@@ -29,8 +29,11 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   // Garantir que temos nome do autor mesmo quando opcional
   const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
   
-  // Get coordination name from the problem
-  const coordenacao = nota.problema?.coordenacao?.descricao || 'Coordenação não informada';
+  // Get coordination information from problem or other attributes
+  const coordenacao = 
+    nota.problema?.coordenacao?.descricao || 
+    (nota as any).coordenacao?.descricao || 
+    'Coordenação não informada';
   
   // Use criado_em consistently
   const dataCreated = nota.criado_em;
