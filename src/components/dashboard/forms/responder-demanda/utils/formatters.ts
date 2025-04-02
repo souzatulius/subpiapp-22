@@ -1,56 +1,62 @@
 
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { AlertCircle, Clock } from 'lucide-react';
 
-// Return className and text for prioridade formatting
 export const formatPrioridade = (prioridade: string) => {
-  switch (prioridade.toLowerCase()) {
+  switch (prioridade) {
     case 'alta':
-      return { className: "px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs", label: "Alta" };
-    case 'média':
+      return {
+        label: 'Alta',
+        className: 'text-red-600 font-medium'
+      };
     case 'media':
-      return { className: "px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs", label: "Média" };
-    case 'baixa':
-      return { className: "px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs", label: "Baixa" };
+      return {
+        label: 'Média',
+        className: 'text-yellow-600 font-medium'
+      };
     default:
-      return { className: "px-2 py-1 rounded-full bg-gray-100 text-gray-800 text-xs", label: prioridade };
-  }
-};
-
-// Return className and components for tempo restante
-export const calcularTempoRestante = (prazo: string) => {
-  const prazoDate = new Date(prazo);
-  const agora = new Date();
-  const diffMs = prazoDate.getTime() - agora.getTime();
-  const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-  
-  if (diffHoras < 0) {
-    return { 
-      className: "text-red-600 flex items-center", 
-      iconName: "AlertCircle",
-      iconClassName: "h-3 w-3 mr-1",
-      label: "Atrasado" 
-    };
-  } else if (diffHoras < 24) {
-    return { 
-      className: "text-orange-600 flex items-center", 
-      iconName: "Clock",
-      iconClassName: "h-3 w-3 mr-1",
-      label: `${diffHoras}h restantes` 
-    };
-  } else {
-    const diffDias = Math.floor(diffHoras / 24);
-    return { 
-      className: "text-green-600 flex items-center", 
-      iconName: "Clock",
-      iconClassName: "h-3 w-3 mr-1",
-      label: `${diffDias}d restantes` 
-    };
+      return {
+        label: 'Baixa',
+        className: 'text-green-600 font-medium'
+      };
   }
 };
 
 export const formatarData = (dataString: string) => {
-  return format(new Date(dataString), "dd/MM/yyyy 'às' HH:mm", {
-    locale: ptBR
-  });
+  const data = new Date(dataString);
+  return new Intl.DateTimeFormat('pt-BR').format(data);
+};
+
+export const calcularTempoRestante = (prazoResposta: string) => {
+  const diffTime = new Date(prazoResposta).getTime() - new Date().getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) {
+    return {
+      label: `Atrasada há ${Math.abs(diffDays)} dia(s)`,
+      className: 'text-red-600 font-medium flex items-center gap-1',
+      iconName: 'AlertCircle',
+      iconClassName: 'text-red-500'
+    };
+  } else if (diffDays === 0) {
+    return {
+      label: 'Vence hoje',
+      className: 'text-orange-600 font-medium flex items-center gap-1',
+      iconName: 'AlertCircle',
+      iconClassName: 'text-orange-500'
+    };
+  } else if (diffDays <= 2) {
+    return {
+      label: `Vence em ${diffDays} dia(s)`,
+      className: 'text-orange-600 font-medium flex items-center gap-1',
+      iconName: 'Clock',
+      iconClassName: 'text-orange-500'
+    };
+  } else {
+    return {
+      label: `Vence em ${diffDays} dia(s)`,
+      className: 'text-green-600 font-medium flex items-center gap-1',
+      iconName: 'Clock',
+      iconClassName: 'text-green-500'
+    };
+  }
 };

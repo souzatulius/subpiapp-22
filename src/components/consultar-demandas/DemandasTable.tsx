@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Eye, Trash } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { DemandaStatusBadge } from '@/components/ui/status-badge';
 import { Demand } from '@/hooks/consultar-demandas';
 import { LoadingState } from './LoadingState';
+import { getPriorityColor } from '@/utils/priorityUtils';
+import { Badge } from '@/components/ui/badge';
 
 interface DemandasTableProps {
   demandas: Demand[];
@@ -77,19 +79,6 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
     );
   }
 
-  const formatStatus = (status: string) => {
-    const statusMap: Record<string, { label: string, class: string }> = {
-      'pendente': { label: 'Pendente', class: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-      'em_andamento': { label: 'Em andamento', class: 'bg-blue-100 text-blue-800 border-blue-200' },
-      'respondida': { label: 'Respondida', class: 'bg-green-100 text-green-800 border-green-200' },
-      'concluida': { label: 'Concluída', class: 'bg-green-100 text-green-800 border-green-200' },
-      'arquivada': { label: 'Arquivada', class: 'bg-gray-100 text-gray-800 border-gray-200' },
-      'cancelada': { label: 'Cancelada', class: 'bg-red-100 text-red-800 border-red-200' },
-    };
-
-    return statusMap[status] || { label: status, class: 'bg-gray-100 text-gray-800' };
-  };
-
   const formatPriority = (priority: string) => {
     const priorityMap: Record<string, { label: string, class: string }> = {
       'alta': { label: 'Alta', class: 'bg-red-100 text-red-800 border-red-200' },
@@ -130,7 +119,6 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
         </TableHeader>
         <TableBody>
           {demandas.map((demand) => {
-            const statusInfo = formatStatus(demand.status);
             const priorityInfo = formatPriority(demand.prioridade);
             const coordination = getCoordination(demand);
 
@@ -138,12 +126,7 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
               <TableRow key={demand.id}>
                 <TableCell className="font-medium">{demand.titulo}</TableCell>
                 <TableCell>
-                  <Badge 
-                    variant="outline" 
-                    className={`${statusInfo.class} rounded-full`}
-                  >
-                    {statusInfo.label}
-                  </Badge>
+                  <DemandaStatusBadge status={demand.status} size="sm" />
                 </TableCell>
                 <TableCell>
                   <Badge 

@@ -5,6 +5,7 @@ import { User, Calendar, Building } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotaOficial } from '@/types/nota';
+import { NotaStatusBadge } from '@/components/ui/status-badge';
 
 interface NotaCardProps {
   nota: NotaOficial;
@@ -34,32 +35,6 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
   // Use criado_em consistently
   const dataCreated = nota.criado_em;
 
-  // Mapear status técnico do banco para descrições amigáveis ao usuário
-  const getStatusDescription = (status: string) => {
-    const statusMap: Record<string, string> = {
-      'pendente': 'Aguardando aprovação',
-      'aprovada': 'Aprovada',
-      'concluido': 'Concluída',
-      'concluido_editado': 'Editada após aprovação',
-      'rejeitada': 'Recusada',
-      'excluida': 'Excluída'
-    };
-    return statusMap[status] || status;
-  };
-
-  // Mapear status para cores
-  const getStatusColor = (status: string) => {
-    const statusColorMap: Record<string, string> = {
-      'pendente': 'bg-blue-50 text-blue-700',
-      'aprovada': 'bg-green-50 text-green-700',
-      'concluido': 'bg-green-50 text-green-700',
-      'concluido_editado': 'bg-purple-50 text-purple-700',
-      'rejeitada': 'bg-red-50 text-red-700',
-      'excluida': 'bg-gray-50 text-gray-700'
-    };
-    return statusColorMap[status] || 'bg-gray-50 text-gray-700';
-  };
-
   return (
     <Card 
       key={nota.id} 
@@ -87,9 +62,7 @@ const NotaCard: React.FC<NotaCardProps> = ({ nota, isSelected, onClick }) => {
           </div>
           
           <div className="flex flex-col items-end justify-start">
-            <div className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(nota.status)}`}>
-              {getStatusDescription(nota.status)}
-            </div>
+            <NotaStatusBadge status={nota.status} size="sm" />
             
             <div className="mt-2 text-xs text-gray-500 flex items-center">
               <Calendar className="h-3 w-3 mr-1" />

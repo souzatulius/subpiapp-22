@@ -7,6 +7,7 @@ import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
 import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
 import { NotaOficial } from '@/types/nota';
+import { NotaStatusBadge } from '@/components/ui/status-badge';
 
 interface NotasCardsProps {
   notas: NotaOficial[];
@@ -47,23 +48,6 @@ const NotasCards: React.FC<NotasCardsProps> = ({
 
   const handleExportPDF = (nota: NotaOficial) => {
     exportNotaToPDF(nota);
-  };
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'aprovado':
-        return 'bg-green-100 text-green-800';
-      case 'pendente':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'rascunho':
-        return 'bg-gray-100 text-gray-800';
-      case 'publicado':
-        return 'bg-blue-100 text-blue-800';
-      case 'rejeitado':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
   };
 
   if (loading) {
@@ -111,9 +95,7 @@ const NotasCards: React.FC<NotasCardsProps> = ({
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-lg font-semibold line-clamp-1">{nota.titulo}</CardTitle>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(nota.status)}`}>
-                    {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
-                  </span>
+                  <NotaStatusBadge status={nota.status} size="sm" />
                 </div>
                 <CardDescription className="flex items-center text-sm text-gray-500">
                   {nota.demanda_id ? (

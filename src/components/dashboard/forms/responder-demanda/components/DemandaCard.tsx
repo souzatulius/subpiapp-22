@@ -2,7 +2,9 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Demanda } from '../types';
-import { formatPrioridade, calcularTempoRestante, formatarData } from '../utils/formatters';
+import { formatarData } from '../utils/formatters';
+import { DemandaStatusBadge } from '@/components/ui/status-badge';
+import { formatPriority, getPriorityColor } from '@/utils/priorityUtils';
 import { AlertCircle, Clock } from 'lucide-react';
 
 interface DemandaCardProps {
@@ -13,21 +15,47 @@ interface DemandaCardProps {
 }
 
 const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, className }) => {
-  const prioridadeInfo = formatPrioridade(demanda.prioridade);
-  
   const renderTempoRestante = () => {
     if (!demanda.prazo_resposta) return null;
     
-    const tempoInfo = calcularTempoRestante(demanda.prazo_resposta);
-    const Icon = tempoInfo.iconName === 'AlertCircle' ? AlertCircle : Clock;
+    const diffTime = new Date(demanda.prazo_resposta).getTime() - new Date().getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let iconName, iconClassName, label, className;
+    
+    if (diffDays < 0) {
+      iconName = 'AlertCircle';
+      iconClassName = 'text-red-500';
+      label = `Atrasada há ${Math.abs(diffDays)} dia(s)`;
+      className = 'text-red-600 font-medium flex items-center gap-1';
+    } else if (diffDays === 0) {
+      iconName = 'AlertCircle';
+      iconClassName = 'text-orange-500';
+      label = 'Vence hoje';
+      className = 'text-orange-600 font-medium flex items-center gap-1';
+    } else if (diffDays <= 2) {
+      iconName = 'Clock';
+      iconClassName = 'text-orange-500';
+      label = `Vence em ${diffDays} dia(s)`;
+      className = 'text-orange-600 font-medium flex items-center gap-1';
+    } else {
+      iconName = 'Clock';
+      iconClassName = 'text-green-500';
+      label = `Vence em ${diffDays} dia(s)`;
+      className = 'text-green-600 font-medium flex items-center gap-1';
+    }
+    
+    const Icon = iconName === 'AlertCircle' ? AlertCircle : Clock;
     
     return (
-      <span className={tempoInfo.className}>
-        <Icon className={tempoInfo.iconClassName} />
-        {tempoInfo.label}
+      <span className={className}>
+        <Icon className={`h-3.5 w-3.5 ${iconClassName}`} />
+        <span>{label}</span>
       </span>
     );
   };
+
+  const priorityColors = getPriorityColor(demanda.prioridade);
 
   return (
     <Card 
@@ -40,8 +68,8 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, c
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-medium">{demanda.titulo}</h3>
           <div className="flex space-x-2">
-            <span className={prioridadeInfo.className}>
-              {prioridadeInfo.label}
+            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${priorityColors.bg} ${priorityColors.text} border ${priorityColors.border}`}>
+              {formatPriority(demanda.prioridade)}
             </span>
           </div>
         </div>

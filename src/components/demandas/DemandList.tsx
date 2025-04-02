@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -10,8 +11,9 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { AlertCircle, Clock, CheckCircle2, Archive, XCircle, FileText, Clock3, FileCheck } from 'lucide-react';
 import { Demand } from '@/types/demand';
+import { DemandaStatusBadge } from '@/components/ui/status-badge';
+import { formatPriority, getPriorityColor } from '@/utils/priorityUtils';
 
 interface DemandListProps {
   demandas: Demand[];
@@ -20,76 +22,10 @@ interface DemandListProps {
 }
 
 const DemandList: React.FC<DemandListProps> = ({ demandas, isLoading, onSelectDemand }) => {
-  // Helper function to get status icon - updated with new status icons
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pendente':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'em_andamento':
-        return <Clock3 className="h-4 w-4 text-blue-500" />;
-      case 'respondida':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case 'aguardando_nota':
-        return <AlertCircle className="h-4 w-4 text-purple-500" />;
-      case 'nota_criada':
-        return <FileText className="h-4 w-4 text-indigo-500" />;
-      case 'pendente_aprovacao':
-        return <FileCheck className="h-4 w-4 text-orange-500" />;
-      case 'aprovada':
-        return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
-      case 'editada':
-        return <FileText className="h-4 w-4 text-cyan-500" />;
-      case 'recusada':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'arquivada':
-        return <Archive className="h-4 w-4 text-gray-500" />;
-      case 'cancelada':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return null;
-    }
-  };
-
-  // Helper function to get status text - updated with new status text
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case 'pendente': return 'Nova';
-      case 'em_andamento': return 'Aguardando Respostas';
-      case 'respondida': return 'Respondida';
-      case 'aguardando_nota': return 'Aguardando Nota';
-      case 'nota_criada': return 'Nota Criada';
-      case 'pendente_aprovacao': return 'Pendente de Aprovação';
-      case 'aprovada': return 'Aprovada';
-      case 'editada': return 'Editada';
-      case 'recusada': return 'Recusada';
-      case 'arquivada': return 'Arquivada';
-      case 'cancelada': return 'Cancelada';
-      default: return status;
-    }
-  };
-
   // Helper function to get priority badge color
-  const getPriorityColor = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'media':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'baixa':
-        return 'bg-green-100 text-green-800 border-green-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  // Helper function to format priority text
-  const formatPriority = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta': return 'Alta';
-      case 'media': return 'Média';
-      case 'baixa': return 'Baixa';
-      default: return prioridade;
-    }
+  const getPriorityBadgeClasses = (prioridade: string) => {
+    const colors = getPriorityColor(prioridade);
+    return `${colors.bg} ${colors.text} border ${colors.border}`;
   };
 
   if (isLoading) {
@@ -158,13 +94,10 @@ const DemandList: React.FC<DemandListProps> = ({ demandas, isLoading, onSelectDe
               <TableCell className="font-medium">{demanda.titulo}</TableCell>
               <TableCell>{demanda.area_coordenacao?.descricao}</TableCell>
               <TableCell>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  {getStatusIcon(demanda.status)}
-                  {formatStatus(demanda.status)}
-                </Badge>
+                <DemandaStatusBadge status={demanda.status} size="sm" />
               </TableCell>
               <TableCell>
-                <Badge variant="outline" className={`${getPriorityColor(demanda.prioridade)}`}>
+                <Badge variant="outline" className={getPriorityBadgeClasses(demanda.prioridade)}>
                   {formatPriority(demanda.prioridade)}
                 </Badge>
               </TableCell>
