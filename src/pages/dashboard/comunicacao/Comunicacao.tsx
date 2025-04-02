@@ -195,7 +195,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   if (isLoading || isLoadingConfig) {
     return (
-      <div className="max-w-7xl mx-auto p-6 flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         <span className="ml-2 text-blue-600 font-medium">Carregando dashboard...</span>
       </div>
@@ -211,7 +211,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 p-6 pb-20 md:pb-6">
+    <div className="space-y-6">
       <WelcomeCard
         title="Comunicação"
         description="Gerencie demandas e notas oficiais"
@@ -269,7 +269,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           <DemandasEmAndamentoCard 
             coordenacaoId={userDepartment || ''} 
             isComunicacao={isComunicacao}
-            baseUrl="dashboard/comunicacao" 
+            baseUrl="dashboard/comunicacao"
           />
         </div>
       </div>

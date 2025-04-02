@@ -23,9 +23,9 @@ const DashboardLayout: React.FC = () => {
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto w-full">
           <BreadcrumbBar />
-          <div className="p-6 pb-20 md:pb-6">
+          <div className="p-6 pb-20 md:pb-6 max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>

@@ -32,7 +32,10 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   };
   
   const handleClick = (index: number) => {
-    if (pathSegments[index] === 'settings' && onSettingsClick) {
+    const segment = pathSegments[index];
+    
+    // Verificar se é a seção de configurações e há um manipulador especial
+    if (segment === 'settings' && onSettingsClick) {
       onSettingsClick();
       return;
     }
