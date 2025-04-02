@@ -13,36 +13,36 @@ interface StatsCardsProps {
 const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
   const stats = [
     {
-      title: "Total de demandas",
+      title: "Demandas",
       value: cardStats.totalDemandas,
       change: cardStats.demandasVariacao,
       unit: "",
       icon: <MessageSquare className="h-4 w-4" />,
-      description: "Demandas cadastradas hoje"
+      description: "Hoje"
     },
     {
-      title: "Notas emitidas",
+      title: "Notas",
       value: cardStats.totalNotas,
       change: cardStats.notasVariacao,
       unit: "",
       icon: <FileText className="h-4 w-4" />,
-      description: `${cardStats.notasAguardando || 0} aguardando aprovação`
+      description: `${cardStats.notasAguardando || 0} enviadas para imprensa`
     },
     {
-      title: "Tempo médio de resposta",
+      title: "Resposta",
       value: cardStats.tempoMedioResposta,
       change: cardStats.tempoRespostaVariacao,
       unit: " dias",
       icon: <Clock className="h-4 w-4" />,
-      description: "Comparado ao período anterior"
+      description: "Média de resposta"
     },
     {
-      title: "Taxa de aprovação",
+      title: "Aprovação",
       value: `${cardStats.taxaAprovacao}%`,
       change: cardStats.aprovacaoVariacao,
       unit: "",
       icon: <Percent className="h-4 w-4" />,
-      description: `${cardStats.notasEditadas || 0}% das notas foram editadas`
+      description: `${cardStats.notasAprovadas || 0} Notas aprovadas`
     }
   ];
 

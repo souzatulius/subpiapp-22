@@ -1,76 +1,89 @@
 
 import React from 'react';
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  ResponsiveContainer, 
+  LineChart as RechartsLineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend 
+} from 'recharts';
+
+interface LineProps {
+  dataKey: string;
+  name: string;
+  color: string;
+  strokeWidth?: number;
+  dot?: boolean;
+}
 
 interface LineChartProps {
-  data: Array<Record<string, any>>;
-  title?: string;
+  data: any[];
   xAxisDataKey: string;
-  lines: Array<{
-    dataKey: string;
-    name: string;
-    color: string;
-    strokeWidth?: number;
-  }>;
-  className?: string;
-  insight?: string;
+  lines: LineProps[];
+  yAxisTicks?: number[];
 }
 
 export const LineChart: React.FC<LineChartProps> = ({ 
   data, 
-  xAxisDataKey, 
-  lines,  
-  className
+  xAxisDataKey,
+  lines,
+  yAxisTicks
 }) => {
-  // Validate input data
-  const isDataValid = Array.isArray(data) && data.length > 0;
-  const areLinesValid = Array.isArray(lines) && lines.length > 0;
-
-  // If data or lines are invalid, render placeholder
-  if (!isDataValid || !areLinesValid) {
+  if (!data || data.length === 0) {
     return (
-      <div className={`h-full flex items-center justify-center ${className}`}>
-        <p className="text-orange-200">Dados não disponíveis</p>
+      <div className="flex items-center justify-center h-full w-full">
+        <p className="text-gray-400">Sem dados disponíveis</p>
       </div>
     );
   }
-  
-  // Default colors if not provided
-  const defaultColors = ['#f97316', '#0ea5e9', '#1e40af', '#71717a', '#27272a'];
-  
+
   return (
-    <div className={`h-full w-full ${className}`}>
-      <ResponsiveContainer width="100%" height="100%">
-        <RechartsLineChart
-          data={data}
-          margin={{
-            top: 5,
-            right: 10,
-            left: 0,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#71717a" />
-          <XAxis dataKey={xAxisDataKey} stroke="#71717a" />
-          <YAxis stroke="#71717a" />
-          <Tooltip 
-            contentStyle={{ backgroundColor: '#1e40af', borderColor: '#0ea5e9', color: '#ffffff' }} 
-            labelStyle={{ color: '#ffffff' }}
+    <ResponsiveContainer width="100%" height="100%">
+      <RechartsLineChart
+        data={data}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+        <XAxis 
+          dataKey={xAxisDataKey} 
+          tick={{ fontSize: 12 }} 
+          axisLine={false} 
+          tickLine={false} 
+        />
+        <YAxis 
+          tick={{ fontSize: 12 }} 
+          axisLine={false} 
+          tickLine={false}
+          ticks={yAxisTicks}
+        />
+        <Tooltip 
+          wrapperStyle={{ fontSize: '12px' }}
+          formatter={(value: number, name: string) => [`${value} min`, name]}
+        />
+        <Legend 
+          wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+        />
+        {lines.map((line, index) => (
+          <Line
+            key={`line-${index}`}
+            type="monotone"
+            dataKey={line.dataKey}
+            name={line.name}
+            stroke={line.color}
+            strokeWidth={line.strokeWidth || 2}
+            dot={line.dot !== false}
+            activeDot={{ r: 6 }}
           />
-          <Legend wrapperStyle={{ color: '#71717a' }} />
-          {lines.map((line, index) => (
-            <Line
-              key={index}
-              type="monotone"
-              dataKey={line.dataKey}
-              name={line.name}
-              stroke={line.color || defaultColors[index % defaultColors.length]}
-              strokeWidth={line.strokeWidth || 2}
-              activeDot={{ r: 8, fill: '#f97316' }}
-            />
-          ))}
-        </RechartsLineChart>
-      </ResponsiveContainer>
-    </div>
+        ))}
+      </RechartsLineChart>
+    </ResponsiveContainer>
   );
 };

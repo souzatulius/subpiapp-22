@@ -27,14 +27,17 @@ export const useChartComponents = () => {
           <PieChart 
             data={[]}
             colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+            showOnlyPercentage={true}
           />
         ),
         tempoMedioResposta: (
           <LineChart 
             data={[]}
             xAxisDataKey="name"
+            yAxisTicks={[10, 20, 50, 60, 90]}
             lines={[
-              { dataKey: 'value', name: 'Dias até resposta', color: '#0ea5e9' }
+              { dataKey: 'value', name: 'Respostas da coordenação', color: '#f97316' },
+              { dataKey: 'aprovacao', name: 'Aprovação da nota', color: '#0ea5e9' }
             ]}
           />
         ),
@@ -43,7 +46,7 @@ export const useChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'value', name: 'Demandas atendidas', color: '#0ea5e9' }
+              { dataKey: 'value', name: 'Demandas no mês', color: '#0ea5e9' }
             ]}
             horizontal={true}
           />
@@ -56,29 +59,7 @@ export const useChartComponents = () => {
               { dataKey: 'value', name: 'Quantidade', color: '#0ea5e9' }
             ]}
           />
-        ),
-        notasPorTema: (
-          <PieChart 
-            data={[]}
-            colors={['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe']}
-          />
-        ),
-        evolucaoMensal: (
-          <LineChart 
-            data={[]}
-            xAxisDataKey="name"
-            lines={[
-              { dataKey: 'demandas', name: 'Demandas', color: '#f97316' },
-              { dataKey: 'respostas', name: 'Respostas', color: '#0ea5e9' }
-            ]}
-          />
-        ),
-        indiceSatisfacao: (
-          <PieChart 
-            data={[]}
-            colors={['#22c55e', '#f97316', '#ef4444']}
-          />
-        ),
+        )
       };
     }
 
@@ -100,48 +81,23 @@ export const useChartComponents = () => {
         { name: 'Presencial', value: 20 }
       ],
       tempoResposta: [
-        { name: 'Jan', value: 7.2 },
-        { name: 'Fev', value: 6.8 },
-        { name: 'Mar', value: 5.9 },
-        { name: 'Abr', value: 5.2 },
-        { name: 'Mai', value: 4.8 },
-        { name: 'Jun', value: 4.3 }
+        { name: 'Jan', value: 45, aprovacao: 60 },
+        { name: 'Fev', value: 38, aprovacao: 55 },
+        { name: 'Mar', value: 30, aprovacao: 40 },
+        { name: 'Abr', value: 25, aprovacao: 35 }
       ],
       coordenacoes: [
-        { name: 'Manutenção', value: 92 },
-        { name: 'Zeladoria', value: 87 },
-        { name: 'Urbanismo', value: 82 },
-        { name: 'Segurança', value: 75 },
-        { name: 'Obras', value: 68 }
+        { name: 'STLP', value: 92 },
+        { name: 'STM', value: 87 },
+        { name: 'GAB', value: 82 },
+        { name: 'CAF', value: 75 },
+        { name: 'PR', value: 68 }
       ],
       notasEmitidas: [
         { name: 'Jan', value: 12 },
         { name: 'Fev', value: 15 },
         { name: 'Mar', value: 18 },
-        { name: 'Abr', value: 22 },
-        { name: 'Mai', value: 24 },
-        { name: 'Jun', value: 28 }
-      ],
-      temas: [
-        { name: 'Eventos', value: 28 },
-        { name: 'Obras', value: 22 },
-        { name: 'Saúde', value: 18 },
-        { name: 'Educação', value: 15 },
-        { name: 'Serviços', value: 12 },
-        { name: 'Outros', value: 5 }
-      ],
-      evolucao: [
-        { name: 'Jan', demandas: 150, respostas: 120 },
-        { name: 'Fev', demandas: 180, respostas: 155 },
-        { name: 'Mar', demandas: 220, respostas: 190 },
-        { name: 'Abr', demandas: 200, respostas: 180 },
-        { name: 'Mai', demandas: 240, respostas: 220 },
-        { name: 'Jun', demandas: 260, respostas: 240 }
-      ],
-      satisfacao: [
-        { name: 'Satisfeito', value: 78 },
-        { name: 'Neutro', value: 15 },
-        { name: 'Insatisfeito', value: 7 }
+        { name: 'Abr', value: 22 }
       ]
     };
 
@@ -160,14 +116,20 @@ export const useChartComponents = () => {
         <PieChart 
           data={reportsData?.origins?.length ? reportsData.origins : sampleData.origens}
           colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+          showOnlyPercentage={true}
         />
       ),
       tempoMedioResposta: (
         <LineChart 
-          data={reportsData?.responseTimes?.length ? reportsData.responseTimes : sampleData.tempoResposta}
+          data={reportsData?.responseTimes?.length ? reportsData.responseTimes.map(item => ({
+            ...item,
+            aprovacao: Math.round(item.value * 1.2) // Example calculation for approval time
+          })) : sampleData.tempoResposta}
           xAxisDataKey="name"
+          yAxisTicks={[10, 20, 50, 60, 90]}
           lines={[
-            { dataKey: 'value', name: 'Dias até resposta', color: '#0ea5e9' }
+            { dataKey: 'value', name: 'Respostas da coordenação', color: '#f97316' },
+            { dataKey: 'aprovacao', name: 'Aprovação da nota', color: '#0ea5e9' }
           ]}
         />
       ),
@@ -176,42 +138,20 @@ export const useChartComponents = () => {
           data={reportsData?.coordinations?.length ? reportsData.coordinations : sampleData.coordenacoes}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'value', name: 'Demandas atendidas', color: '#0ea5e9' }
+            { dataKey: 'value', name: 'Demandas no mês', color: '#0ea5e9' }
           ]}
           horizontal={true}
         />
       ),
       notasEmitidas: (
         <AreaChart 
-          data={sampleData.notasEmitidas}
+          data={reportsData?.mediaTypes?.length ? reportsData.mediaTypes : sampleData.notasEmitidas}
           xAxisDataKey="name"
           areas={[
             { dataKey: 'value', name: 'Quantidade', color: '#0ea5e9', fillOpacity: 0.6 }
           ]}
         />
-      ),
-      notasPorTema: (
-        <PieChart 
-          data={reportsData?.statuses?.length ? reportsData.statuses : sampleData.temas}
-          colors={['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe']}
-        />
-      ),
-      evolucaoMensal: (
-        <LineChart 
-          data={sampleData.evolucao}
-          xAxisDataKey="name"
-          lines={[
-            { dataKey: 'demandas', name: 'Demandas', color: '#f97316' },
-            { dataKey: 'respostas', name: 'Respostas', color: '#0ea5e9' }
-          ]}
-        />
-      ),
-      indiceSatisfacao: (
-        <PieChart 
-          data={reportsData?.approvals?.length ? reportsData.approvals : sampleData.satisfacao}
-          colors={['#22c55e', '#f97316', '#ef4444']}
-        />
-      ),
+      )
     };
   }, [reportsData, isLoading]);
 

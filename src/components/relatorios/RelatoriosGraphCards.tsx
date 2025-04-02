@@ -32,12 +32,12 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   
   const [visibleCards, setVisibleCards] = useLocalStorage<string[]>('relatorios-graph-visible', [
     'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas', 'notasPorTema', 'evolucaoMensal', 'indiceSatisfacao'
+    'notasEmitidas'
   ]);
   
   const [cardsOrder, setCardsOrder] = useLocalStorage<string[]>('relatorios-graph-order', [
     'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas', 'notasPorTema', 'evolucaoMensal', 'indiceSatisfacao'
+    'notasEmitidas'
   ]);
   
   const [analysisCards, setAnalysisCards] = useLocalStorage<string[]>('relatorios-graph-analysis', []);
@@ -45,8 +45,8 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   const cardsData: Record<string, GraphCardItem> = {
     distribuicaoPorTemas: {
       id: 'distribuicaoPorTemas',
-      title: 'Distribuição por Temas',
-      description: 'Visualização da distribuição de demandas por temas',
+      title: 'Problemas mais frequentes',
+      description: 'Temas das solicitações no mês atual',
       visible: true,
       showAnalysis: analysisCards.includes('distribuicaoPorTemas'),
       analysis: 'Os temas com maior volume de demandas são Serviços Urbanos e Meio Ambiente.'
@@ -69,43 +69,19 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     },
     performanceArea: {
       id: 'performanceArea',
-      title: 'Performance por Área',
-      description: 'Desempenho comparativo entre áreas',
+      title: 'Áreas mais acionadas',
+      description: 'Coordenações mais envolvidas nas solicitações',
       visible: true,
       showAnalysis: analysisCards.includes('performanceArea'),
       analysis: 'As áreas de Comunicação e Planejamento têm os melhores índices de resposta.'
     },
     notasEmitidas: {
       id: 'notasEmitidas',
-      title: 'Notas Emitidas',
-      description: 'Evolução mensal de notas emitidas',
+      title: 'Notas de Imprensa',
+      description: 'Evolução de posicionamentos no mês',
       visible: true,
       showAnalysis: analysisCards.includes('notasEmitidas'),
       analysis: 'Houve um aumento de 15% na emissão de notas oficiais no último trimestre.'
-    },
-    notasPorTema: {
-      id: 'notasPorTema',
-      title: 'Notas por Tema',
-      description: 'Distribuição de notas oficiais por tema',
-      visible: true,
-      showAnalysis: analysisCards.includes('notasPorTema'),
-      analysis: 'Temas relacionados a obras e infraestrutura representam 40% das notas emitidas.'
-    },
-    evolucaoMensal: {
-      id: 'evolucaoMensal',
-      title: 'Evolução Mensal',
-      description: 'Tendência de demandas ao longo dos meses',
-      visible: true,
-      showAnalysis: analysisCards.includes('evolucaoMensal'),
-      analysis: 'Observa-se um padrão sazonal com aumento de demandas no início e final do ano.'
-    },
-    indiceSatisfacao: {
-      id: 'indiceSatisfacao',
-      title: 'Índice de Satisfação',
-      description: 'Avaliação das respostas pelos solicitantes',
-      visible: true,
-      showAnalysis: analysisCards.includes('indiceSatisfacao'),
-      analysis: 'O índice de satisfação está em 82%, um aumento de 5% em relação ao período anterior.'
     }
   };
 
@@ -154,9 +130,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Jan', Demandas: 12, Respostas: 10 },
     { name: 'Fev', Demandas: 15, Respostas: 14 },
     { name: 'Mar', Demandas: 18, Respostas: 16 },
-    { name: 'Abr', Demandas: 22, Respostas: 19 },
-    { name: 'Mai', Demandas: 20, Respostas: 18 },
-    { name: 'Jun', Demandas: 25, Respostas: 22 },
+    { name: 'Abr', Demandas: 22, Respostas: 19 }
   ];
 
   const mockPieData = [

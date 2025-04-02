@@ -1,88 +1,126 @@
 
 import React from 'react';
-import { PieChart as RechartsBarChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { useChartConfigs } from '../hooks/charts/useChartConfigs';
-
-interface DataItem {
-  name: string;
-  value?: number;  // Changed to optional for compatibility with ChartData
-}
+import { Cell, Legend, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface PieChartProps {
-  data: DataItem[];
-  title?: string;
-  insight?: string;
+  data: Array<{ name: string; value: number }>;
   colors?: string[];
-  colorSet?: 'default' | 'orange' | 'blue' | 'status';
+  colorSet?: 'blue' | 'orange' | 'green' | 'status';
+  showLabels?: boolean;
+  showOnlyPercentage?: boolean;
 }
 
 export const PieChart: React.FC<PieChartProps> = ({ 
   data, 
-  colors,
-  colorSet = 'default'
+  colors, 
+  colorSet = 'blue',
+  showLabels = true,
+  showOnlyPercentage = false
 }) => {
-  const { pieChartColors } = useChartConfigs();
-  
-  // Use either provided colors, a predefined color set, or default colors
-  const chartColors = colors || pieChartColors[colorSet] || pieChartColors.default;
+  const getColorPalette = () => {
+    if (colors) return colors;
+    
+    switch (colorSet) {
+      case 'blue':
+        return ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'];
+      case 'orange':
+        return ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'];
+      case 'green':
+        return ['#22c55e', '#4ade80', '#86efac', '#bbf7d0', '#dcfce7'];
+      case 'status':
+        return ['#22c55e', '#f97316', '#ef4444', '#64748b', '#94a3b8'];
+      default:
+        return ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'];
+    }
+  };
 
-  // Validate input data
-  const isDataValid = Array.isArray(data) && data.length > 0;
+  const defaultColors = getColorPalette();
+  const totalValue = data.reduce((sum, item) => sum + item.value, 0);
 
-  // If data is invalid, render placeholder
-  if (!isDataValid) {
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const percentage = ((payload[0].value / totalValue) * 100).toFixed(1);
+      return (
+        <div className="custom-tooltip bg-white p-2 border border-gray-200 rounded shadow-sm">
+          {!showOnlyPercentage && (
+            <p className="font-medium">{payload[0].name}</p>
+          )}
+          <p className="text-sm">
+            {showOnlyPercentage 
+              ? `${percentage}%` 
+              : `${percentage}% (${payload[0].value})`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+
+    // Only show labels for segments with more than 5% of the total
+    if (percent < 0.05) return null;
+
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-gray-400">Dados não disponíveis</p>
-      </div>
+      <text 
+        x={x} 
+        y={y} 
+        fill="#fff" 
+        textAnchor="middle" 
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight="bold"
+      >
+        {showOnlyPercentage 
+          ? `${(percent * 100).toFixed(0)}%` 
+          : `${name}: ${(percent * 100).toFixed(0)}%`}
+      </text>
     );
-  }
+  };
 
-  // Filter out items without a value property
-  const validData = data.filter(item => typeof item.value === 'number');
-
-  // If no valid data remains after filtering, show placeholder
-  if (validData.length === 0) {
+  if (!data || data.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-gray-400">Dados não disponíveis</p>
+      <div className="flex items-center justify-center h-full w-full">
+        <p className="text-gray-400">Sem dados disponíveis</p>
       </div>
     );
   }
 
   return (
-    <div className="h-full w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <RechartsBarChart>
-          <Pie
-            data={validData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            outerRadius={80}
-            fill="#f97316"
-            dataKey="value"
-            nameKey="name"
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-          >
-            {validData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-            ))}
-          </Pie>
-          <Tooltip
-            formatter={(value: number) => [`${value}`, 'Quantidade']}
-            labelFormatter={(label) => `${label}`}
-            contentStyle={{ backgroundColor: '#27272a', borderColor: '#3f3f46', color: '#ffffff' }}
-            labelStyle={{ color: '#ffffff' }}
-          />
+    <ResponsiveContainer width="100%" height="100%">
+      <RechartsPieChart>
+        <Pie
+          data={data}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={80}
+          fill="#8884d8"
+          paddingAngle={2}
+          label={showLabels ? CustomLabel : false}
+        >
+          {data.map((entry, index) => (
+            <Cell 
+              key={`cell-${index}`} 
+              fill={defaultColors[index % defaultColors.length]} 
+            />
+          ))}
+        </Pie>
+        <Tooltip content={<CustomTooltip />} />
+        {!showOnlyPercentage && (
           <Legend 
-            layout="vertical" 
-            verticalAlign="middle" 
-            align="right"
-            wrapperStyle={{ color: '#71717a' }}
+            layout="horizontal" 
+            verticalAlign="bottom" 
+            align="center" 
+            wrapperStyle={{ fontSize: '12px' }}
           />
-        </RechartsBarChart>
-      </ResponsiveContainer>
-    </div>
+        )}
+      </RechartsPieChart>
+    </ResponsiveContainer>
   );
 };
