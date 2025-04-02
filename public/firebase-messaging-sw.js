@@ -21,13 +21,31 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message:', payload);
 
+  // Check if this is a silent notification
+  if (payload.data && payload.data.silent === 'true') {
+    // For silent notifications, notify the client but don't show a notification
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clients) => {
+        if (clients && clients.length) {
+          // Send the payload to the client
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'SILENT_NOTIFICATION',
+              payload: payload.data
+            });
+          });
+        }
+      });
+    return;
+  }
+
   // Customize notification here
-  const notificationTitle = payload.notification.title || 'Nova notificação';
+  const notificationTitle = payload.notification?.title || 'Nova notificação';
   const notificationOptions = {
-    body: payload.notification.body || 'Você recebeu uma nova notificação',
+    body: payload.notification?.body || 'Você recebeu uma nova notificação',
     icon: '/lovable-uploads/d4df5a3e-a086-485b-8ba6-b4d4fdc22bbf.png',
     badge: '/lovable-uploads/d4df5a3e-a086-485b-8ba6-b4d4fdc22bbf.png',
-    tag: 'notification',
+    tag: payload.data?.type || 'notification',
     data: payload.data
   };
 
@@ -40,22 +58,55 @@ self.addEventListener('notificationclick', (event) => {
   
   event.notification.close();
   
+  // Get notification data
+  const notificationData = event.notification.data || {};
+  let targetUrl = '/dashboard';
+  
+  // Determine target URL based on notification type
+  if (notificationData.demandaId) {
+    targetUrl = `/demandas/${notificationData.demandaId}`;
+  } else if (notificationData.notaId) {
+    targetUrl = `/notas/${notificationData.notaId}`;
+  } else if (notificationData.url) {
+    targetUrl = notificationData.url;
+  }
+  
   // This looks to see if the current is already open and focuses if it is
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
         for (let i = 0; i < clientList.length; i++) {
           const client = clientList[i];
-          if (client.url.includes('/dashboard') && 'focus' in client) {
+          const url = new URL(client.url);
+          
+          if (url.pathname === targetUrl && 'focus' in client) {
             return client.focus();
           }
         }
         
         if (clients.openWindow) {
-          return clients.openWindow('/dashboard');
+          return clients.openWindow(targetUrl);
         }
       })
   );
+});
+
+// Listen for messages from the client
+self.addEventListener('message', (event) => {
+  console.log('[firebase-messaging-sw.js] Message received from client:', event.data);
+  
+  // Add any message handling logic here
+  if (event.data && event.data.type === 'SYNC_NOTIFICATIONS') {
+    // Handle notification sync request
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'NOTIFICATIONS_SYNCED',
+          timestamp: new Date().toISOString()
+        });
+      });
+    });
+  }
 });
 
 // Force the service worker to activate immediately

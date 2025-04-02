@@ -1,10 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 import { toast } from '@/components/ui/use-toast';
 import { firebaseConfig, vapidKey } from '@/integrations/firebase/config';
 import { useServiceWorker } from './useServiceWorker';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
@@ -16,6 +18,7 @@ export const useFirebaseMessaging = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { serviceWorkerRegistration, waitForServiceWorkerActive } = useServiceWorker();
+  const { user } = useAuth();
 
   // Check if notifications are supported
   useEffect(() => {
@@ -38,6 +41,59 @@ export const useFirebaseMessaging = () => {
       setNotificationsPermission(Notification.permission);
     }
   }, [isNotificationsSupported]);
+
+  // Setup message listener to receive notifications from service worker
+  useEffect(() => {
+    if (!navigator.serviceWorker || !navigator.serviceWorker.addEventListener) return;
+
+    const messageHandler = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'SILENT_NOTIFICATION') {
+        console.log('Silent notification received from service worker:', event.data.payload);
+        
+        // Handle silent notification (update UI, refresh data, etc.)
+        if (event.data.payload.notificacaoId) {
+          // Fetch the notification data if needed
+          fetchNotificationDetails(event.data.payload.notificacaoId)
+            .then(notificationData => {
+              if (notificationData) {
+                // Show a toast notification
+                toast({
+                  title: notificationData.title || 'Nova notificação',
+                  description: notificationData.mensagem,
+                  duration: 5000,
+                });
+              }
+            })
+            .catch(err => console.error('Error fetching notification details:', err));
+        }
+      }
+    };
+
+    // Add the event listener
+    navigator.serviceWorker.addEventListener('message', messageHandler);
+
+    // Cleanup
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', messageHandler);
+    };
+  }, []);
+
+  // Fetch notification details from the database
+  const fetchNotificationDetails = async (notificationId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('notificacoes')
+        .select('*')
+        .eq('id', notificationId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Error fetching notification details:', err);
+      return null;
+    }
+  };
 
   // Request permission and get FCM token
   const requestPermissionAndGetToken = async (): Promise<string | null> => {
@@ -79,7 +135,30 @@ export const useFirebaseMessaging = () => {
       onMessage(messaging, (payload) => {
         console.log('Message received in foreground:', payload);
         
-        // Display notification using toast
+        // Check if this is a silent notification
+        if (payload.data && payload.data.silent === 'true') {
+          console.log('Silent notification received in foreground');
+          
+          // Handle silent notification (update UI, refresh data, etc.)
+          if (payload.data.notificacaoId) {
+            fetchNotificationDetails(payload.data.notificacaoId)
+              .then(notificationData => {
+                if (notificationData) {
+                  // Show a toast notification
+                  toast({
+                    title: notificationData.title || 'Nova notificação',
+                    description: notificationData.mensagem,
+                    duration: 5000,
+                  });
+                }
+              })
+              .catch(err => console.error('Error fetching notification details:', err));
+          }
+          
+          return;
+        }
+        
+        // Display regular notification using toast
         toast({
           title: payload.notification?.title || 'Nova notificação',
           description: payload.notification?.body,
@@ -95,6 +174,16 @@ export const useFirebaseMessaging = () => {
     }
   };
 
+  // Send a sync request to the service worker
+  const syncNotifications = useCallback(() => {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SYNC_NOTIFICATIONS',
+        userId: user?.id,
+      });
+    }
+  }, [user]);
+
   return {
     fcmToken,
     isNotificationsSupported,
@@ -102,6 +191,7 @@ export const useFirebaseMessaging = () => {
     isLoading,
     error,
     requestPermissionAndGetToken,
+    syncNotifications,
     setIsLoading,
     setError
   };
