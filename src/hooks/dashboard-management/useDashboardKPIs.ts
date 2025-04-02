@@ -54,75 +54,67 @@ export const useDashboardKPIs = () => {
         const todayStr = today.toISOString().split('T')[0];
         const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-        // Fetch press requests data - fixing the type issue
-        const todayResult = await supabase
+        // Fetch press requests data
+        // Fix: Remove the type annotation that's causing excessive recursion
+        const { count: todayCount, error: todayError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${todayStr}T00:00:00`)
           .lt('horario_publicacao', `${todayStr}T23:59:59`);
 
-        const yesterdayResult = await supabase
+        const { count: yesterdayCount, error: yesterdayError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${yesterdayStr}T00:00:00`)
           .lt('horario_publicacao', `${yesterdayStr}T23:59:59`);
 
         // Fetch pending approvals
-        const pendingResult = await supabase
+        const { count: pendingCount, error: pendingError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .in('status', ['aguardando_aprovacao', 'aguardando_resposta']);
 
         // Count how many are specifically awaiting response
-        const awaitingResult = await supabase
+        const { count: awaitingCount, error: awaitingError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'aguardando_resposta');
 
         // Fetch notes data
-        const totalNotesResult = await supabase
+        const { count: totalNotesCount, error: totalNotesError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
 
         // Count approved and rejected notes
-        const approvedResult = await supabase
+        const { count: approvedCount, error: approvedError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'aprovada');
 
-        const rejectedResult = await supabase
+        const { count: rejectedCount, error: rejectedError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'rejeitada');
 
-        // Extract counts safely with fallbacks to 0
-        const todayCount = todayResult.count ?? 0;
-        const yesterdayCount = yesterdayResult.count ?? 0;
-        const pendingCount = pendingResult.count ?? 0;
-        const awaitingCount = awaitingResult.count ?? 0;
-        const totalNotesCount = totalNotesResult.count ?? 0;
-        const approvedCount = approvedResult.count ?? 0;
-        const rejectedCount = rejectedResult.count ?? 0;
-
         // Log any errors
-        if (todayResult.error || yesterdayResult.error || pendingResult.error || 
-            awaitingResult.error || totalNotesResult.error || approvedResult.error || rejectedResult.error) {
+        if (todayError || yesterdayError || pendingError || 
+            awaitingError || totalNotesError || approvedError || rejectedError) {
           console.error("Error fetching KPIs", { 
-            todayError: todayResult.error, 
-            yesterdayError: yesterdayResult.error,
-            pendingError: pendingResult.error,
-            awaitingError: awaitingResult.error,
-            notesError: totalNotesResult.error,
-            approvedError: approvedResult.error,
-            rejectedError: rejectedResult.error
+            todayError, 
+            yesterdayError,
+            pendingError,
+            awaitingError,
+            notesError: totalNotesError,
+            approvedError,
+            rejectedError
           });
         }
 
         // Calculate percentage change
-        const todayValue = todayCount;
-        const yesterdayValue = yesterdayCount;
+        const todayValue = todayCount ?? 0;
+        const yesterdayValue = yesterdayCount ?? 0;
         const percentageChange = yesterdayValue === 0 
           ? 0 
           : ((todayValue - yesterdayValue) / yesterdayValue) * 100;
@@ -136,14 +128,14 @@ export const useDashboardKPIs = () => {
             loading: false
           },
           pendingApproval: {
-            total: pendingCount,
-            awaitingResponse: awaitingCount,
+            total: pendingCount ?? 0,
+            awaitingResponse: awaitingCount ?? 0,
             loading: false
           },
           notesProduced: {
-            total: totalNotesCount,
-            approved: approvedCount,
-            rejected: rejectedCount,
+            total: totalNotesCount ?? 0,
+            approved: approvedCount ?? 0,
+            rejected: rejectedCount ?? 0,
             loading: false
           }
         });
