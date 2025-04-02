@@ -65,7 +65,7 @@ const NeighborhoodAddForm: React.FC<NeighborhoodAddFormProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {districts.length === 0 ? (
-                  <SelectItem value="no-districts">Nenhum distrito disponível</SelectItem>
+                  <SelectItem value="no-districts-available">Nenhum distrito disponível</SelectItem>
                 ) : (
                   districts.map((district) => (
                     <SelectItem key={district.id} value={district.id}>

@@ -42,7 +42,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
   };
 
   const prioridades = [
-    { id: '', nome: 'Todas as prioridades' },
+    { id: 'todos', nome: 'Todas as prioridades' },
     { id: 'alta', nome: 'Alta' },
     { id: 'media', nome: 'Média' },
     { id: 'baixa', nome: 'Baixa' }
@@ -110,7 +110,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
                 <SelectValue placeholder="Filtrar por área" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas as áreas</SelectItem>
+                <SelectItem value="todos">Todas as áreas</SelectItem>
                 {areas.map((area) => (
                   <SelectItem key={area.id} value={area.id}>
                     {area.nome}

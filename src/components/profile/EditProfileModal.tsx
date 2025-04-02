@@ -131,7 +131,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
       
       // Dados para atualização com tipos corretos
-      // Mantém os campos restritos com os valores atuais
       const updateData = {
         nome_completo: data.nome_completo,
         whatsapp: cleanWhatsapp || null,
