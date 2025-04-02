@@ -13,6 +13,10 @@ import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefau
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Save, RefreshCcw, Trash2 } from 'lucide-react';
+import DraggableCard from './DraggableCard';
+import { ActionCardItem } from '@/types/dashboard';
+import { CardTitle, CardContent } from '@/components/ui/card';
+import { v4 as uuidv4 } from 'uuid';
 
 const DashboardManagementContent: React.FC = () => {
   const { kpis } = useDashboardKPIs();
@@ -63,6 +67,101 @@ const DashboardManagementContent: React.FC = () => {
         });
       }
     }
+  };
+
+  // Define dynamic cards for dragging
+  const kpiCards: ActionCardItem[] = [
+    {
+      id: `kpi-press-requests-${uuidv4()}`,
+      title: "Solicitações de imprensa",
+      subtitle: `${kpis.pressRequests.today} hoje (${kpis.pressRequests.percentageChange > 0 ? '+' : ''}${kpis.pressRequests.percentageChange.toFixed(0)}%)`,
+      iconId: "newspaper",
+      path: "/dashboard/comunicacao/demandas",
+      color: "blue",
+      width: "25",
+      height: "1",
+      type: "data_dynamic",
+      hasBadge: true,
+      badgeValue: `${kpis.pressRequests.today}`
+    },
+    {
+      id: `kpi-pending-approval-${uuidv4()}`,
+      title: "Demandas em aprovação",
+      subtitle: `${kpis.pendingApproval.total} total (${kpis.pendingApproval.awaitingResponse} aguardando)`,
+      iconId: "clock",
+      path: "/dashboard/comunicacao/responder",
+      color: "orange",
+      width: "25",
+      height: "1",
+      type: "data_dynamic",
+      hasBadge: true,
+      badgeValue: `${kpis.pendingApproval.total}`
+    },
+    {
+      id: `kpi-notes-produced-${uuidv4()}`,
+      title: "Notas produzidas",
+      subtitle: `${kpis.notesProduced.approved} aprovadas, ${kpis.notesProduced.rejected} recusadas`,
+      iconId: "file-text",
+      path: "/dashboard/comunicacao/notas",
+      color: "green",
+      width: "25",
+      height: "1",
+      type: "data_dynamic",
+      hasBadge: true,
+      badgeValue: `${kpis.notesProduced.total}`
+    }
+  ];
+
+  // Create dynamic list cards
+  const listCards: ActionCardItem[] = [
+    {
+      id: `list-demands-${uuidv4()}`,
+      title: "Demandas em andamento",
+      subtitle: "Últimas demandas em processamento",
+      iconId: "list",
+      path: "/dashboard/comunicacao/demandas",
+      color: "blue-light",
+      width: "50",
+      height: "2",
+      type: "in_progress_demands"
+    },
+    {
+      id: `list-notes-${uuidv4()}`,
+      title: "Notas de imprensa",
+      subtitle: "Últimas notas produzidas",
+      iconId: "file-text",
+      path: "/dashboard/comunicacao/notas",
+      color: "orange-light",
+      width: "50",
+      height: "2",
+      type: "recent_notes"
+    }
+  ];
+
+  // Create origin selection card
+  const originCard: ActionCardItem = {
+    id: `origin-selection-${uuidv4()}`,
+    title: "De onde vem a demanda?",
+    subtitle: "Selecione a origem para registrar",
+    iconId: "help-circle",
+    path: "/dashboard/comunicacao/cadastrar",
+    color: "lime",
+    width: "50",
+    height: "2",
+    type: "origin_selection"
+  };
+
+  // Create smart search card
+  const searchCard: ActionCardItem = {
+    id: `smart-search-${uuidv4()}`,
+    title: "O que vamos fazer?",
+    iconId: "search",
+    path: "",
+    color: "gray-ultra-light",
+    width: "100",
+    height: "1",
+    type: "smart_search",
+    isSearch: true
   };
 
   return (
@@ -167,42 +266,107 @@ const DashboardManagementContent: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-3 space-y-4">
             <div className="bg-white p-4 rounded-lg border">
-              <h3 className="font-medium mb-3">Cards disponíveis</h3>
-              <div className="space-y-2 max-h-[500px] overflow-y-auto p-1">
-                {dynamicCards.map(card => (
-                  <div 
-                    key={card.id}
-                    className="p-2 bg-gray-50 rounded border border-gray-200 cursor-grab hover:border-blue-300 transition-colors"
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData('application/json', JSON.stringify(card));
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-700">D</span>
-                      </div>
-                      <span className="text-sm font-medium">{card.title}</span>
-                    </div>
-                  </div>
-                ))}
+              <h3 className="font-medium mb-3">Cards padrão</h3>
+              <div className="space-y-2 max-h-[250px] overflow-y-auto p-1">
                 {standardCards.map(card => (
-                  <div 
+                  <DraggableCard 
                     key={card.id}
-                    className="p-2 bg-gray-50 rounded border border-gray-200 cursor-grab hover:border-blue-300 transition-colors"
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData('application/json', JSON.stringify(card));
-                    }}
+                    card={card}
+                    className="mb-2"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="p-3 flex items-center gap-2">
                       <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                         <span className="text-green-700">S</span>
                       </div>
                       <span className="text-sm font-medium">{card.title}</span>
                     </div>
-                  </div>
+                  </DraggableCard>
                 ))}
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border">
+              <h3 className="font-medium mb-3">Cards dinâmicos</h3>
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-500 mb-1">KPIs</h4>
+                
+                {/* KPI Dynamic Cards */}
+                <div className="space-y-2 mb-4">
+                  {kpiCards.map(card => (
+                    <DraggableCard 
+                      key={card.id}
+                      card={card}
+                      isDynamic={true}
+                      className="mb-2"
+                    >
+                      <div className="p-3 flex items-center gap-2">
+                        <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-blue-700">K</span>
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm font-medium block">{card.title}</span>
+                          <span className="text-xs text-gray-500">{card.subtitle}</span>
+                        </div>
+                      </div>
+                    </DraggableCard>
+                  ))}
+                </div>
+                
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Listas</h4>
+                {/* List Dynamic Cards */}
+                <div className="space-y-2 mb-4">
+                  {listCards.map(card => (
+                    <DraggableCard 
+                      key={card.id}
+                      card={card}
+                      isDynamic={true}
+                      className="mb-2"
+                    >
+                      <div className="p-3 flex items-center gap-2">
+                        <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                          <span className="text-orange-700">L</span>
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm font-medium block">{card.title}</span>
+                          <span className="text-xs text-gray-500">{card.subtitle}</span>
+                        </div>
+                      </div>
+                    </DraggableCard>
+                  ))}
+                </div>
+                
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Seleção de Origem</h4>
+                {/* Origin Selection Card */}
+                <DraggableCard 
+                  card={originCard}
+                  isDynamic={true}
+                  className="mb-2"
+                >
+                  <div className="p-3 flex items-center gap-2">
+                    <div className="flex-shrink-0 w-8 h-8 bg-lime-100 rounded-full flex items-center justify-center">
+                      <span className="text-lime-700">O</span>
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-medium block">{originCard.title}</span>
+                      <span className="text-xs text-gray-500">{originCard.subtitle}</span>
+                    </div>
+                  </div>
+                </DraggableCard>
+                
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Busca Inteligente</h4>
+                {/* Smart Search Card */}
+                <DraggableCard 
+                  card={searchCard}
+                  isDynamic={true}
+                  className="mb-2"
+                >
+                  <div className="p-3 flex items-center gap-2">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-gray-700">B</span>
+                    </div>
+                    <span className="text-sm font-medium">{searchCard.title}</span>
+                  </div>
+                </DraggableCard>
               </div>
             </div>
           </div>
