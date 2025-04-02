@@ -136,56 +136,50 @@ function gerarInsightsEstatisticos(dados: any[]) {
   const distritoMaisOS = distritosOrdenados[0]?.distrito || 'Não disponível';
   const qtdDistritoMaisOS = distritosOrdenados[0]?.qtd || 0;
   
-  // Retornar insights estruturados
+  // Retornar insights estruturados com as novas descrições solicitadas
   return {
     fechadas: {
       valor: `${porcentagemFechadas.toFixed(1)}%`,
       comentario: `${osFechadas} de ${totalOS} OS foram concluídas. ${
         porcentagemFechadas > 70 
-          ? "Excelente taxa de conclusão!"
+          ? "Ordens de serviço finalizadas oficialmente."
           : porcentagemFechadas > 50 
-            ? "Taxa de conclusão moderada."
-            : "Há oportunidade para melhorar a taxa de conclusão."
+            ? "Ordens de serviço finalizadas oficialmente."
+            : "Ordens de serviço finalizadas oficialmente."
       }`
     },
     pendentes: {
       valor: `${porcentagemPendentes.toFixed(1)}%`,
       comentario: `${osPendentes} OS ainda estão pendentes de atendimento. ${
         porcentagemPendentes < 20 
-          ? "Baixa quantidade de pendências!"
+          ? "Ainda em aberto, aguardando solução."
           : porcentagemPendentes < 40 
-            ? "Volume moderado de pendências."
-            : "Alto volume de pendências a resolver."
+            ? "Ainda em aberto, aguardando solução."
+            : "Ainda em aberto, aguardando solução."
       }`
     },
     canceladas: {
       valor: `${porcentagemCanceladas.toFixed(1)}%`,
       comentario: `${osCanceladas} OS foram canceladas. ${
         porcentagemCanceladas < 10 
-          ? "Baixa taxa de cancelamento."
+          ? "Solicitações encerradas sem execução."
           : porcentagemCanceladas < 20 
-            ? "Taxa de cancelamento dentro do esperado."
-            : "Taxa de cancelamento elevada, verificar causas."
+            ? "Solicitações encerradas sem execução."
+            : "Solicitações encerradas sem execução."
       }`
     },
     prazo_medio: {
       valor: `${tempoMedioAtendimento.toFixed(1)} dias`,
-      comentario: `Tempo médio para atendimento das OS. ${
-        tempoMedioAtendimento < 15 
-          ? "Prazo bastante satisfatório!"
-          : tempoMedioAtendimento < 30 
-            ? "Prazo de atendimento adequado."
-            : "Prazo médio elevado, verificar gargalos."
-      }`
+      comentario: `Média de dias entre abertura e execução das ordens.`
     },
     fora_do_prazo: {
       valor: `${osForaPrazo} OS`,
-      comentario: `OS pendentes há mais de 30 dias. ${
+      comentario: `${
         osForaPrazo === 0 
-          ? "Não há OS fora do prazo!"
+          ? "Ultrapassaram o prazo de atendimento."
           : osForaPrazo < 10 
-            ? "Poucos casos fora do prazo."
-            : "Quantidade significativa de OS fora do prazo."
+            ? "Ultrapassaram o prazo de atendimento."
+            : "Ultrapassaram o prazo de atendimento."
       }`
     },
     tipo_frequente: {

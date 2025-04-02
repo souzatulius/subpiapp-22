@@ -19,6 +19,15 @@ const InsightCard: React.FC<InsightCardProps> = ({
   isLoading,
   isSimulated = false
 }) => {
+  // Function to format numbers with comma as decimal separator
+  const formatValue = (val: string): string => {
+    // Check if the value contains a decimal point
+    if (val.includes('.')) {
+      return val.replace('.', ',');
+    }
+    return val;
+  };
+
   return (
     <Card className={`p-4 border ${isSimulated ? 'border-orange-300 bg-orange-50/50' : 'border-gray-200'} hover:shadow-md transition-all`}>
       <div className="flex items-center justify-between mb-2">
@@ -34,7 +43,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
         </>
       ) : (
         <>
-          <p className="text-2xl font-bold text-gray-900 mb-2">{value}</p>
+          <p className="text-2xl font-bold text-gray-900 mb-2">{formatValue(value)}</p>
           <p className="text-xs text-gray-600 line-clamp-2" title={comment}>
             {comment}
           </p>
