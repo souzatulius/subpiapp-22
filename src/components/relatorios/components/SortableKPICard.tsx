@@ -41,13 +41,14 @@ export const SortableKPICard: React.FC<SortableKPICardProps> = ({
     isDragging,
   } = useSortable({
     id,
-    disabled: !isEditMode,
+    // We no longer disable based on isEditMode
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+    cursor: 'grab',
   };
 
   const getStatusColor = () => {
@@ -75,7 +76,9 @@ export const SortableKPICard: React.FC<SortableKPICardProps> = ({
     <Card
       ref={setNodeRef}
       style={style}
-      className="relative group"
+      className="relative hover:shadow-md transition-all duration-300 border-orange-100"
+      {...attributes}
+      {...listeners}
     >
       <CardContent className="p-6">
         {isLoading ? (
@@ -87,26 +90,14 @@ export const SortableKPICard: React.FC<SortableKPICardProps> = ({
         ) : (
           <>
             <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2 text-slate-600">
+              <div className="flex items-center gap-2 text-orange-700">
                 {icon}
                 <span className="font-medium">{title}</span>
               </div>
-              
-              {isEditMode && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 absolute top-2 right-2 cursor-grab"
-                  {...attributes}
-                  {...listeners}
-                >
-                  <GripVertical className="h-4 w-4" />
-                </Button>
-              )}
             </div>
             
             <div className="flex items-end gap-2 mb-1">
-              <div className="text-2xl font-bold">{value}</div>
+              <div className="text-2xl font-bold text-orange-800">{value}</div>
               {change !== undefined && (
                 <div className={`flex items-center gap-1 text-sm ${getStatusColor()}`}>
                   {getStatusIcon()}
@@ -115,7 +106,7 @@ export const SortableKPICard: React.FC<SortableKPICardProps> = ({
               )}
             </div>
             
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-orange-600">
               <p>{description}</p>
               {secondary && <p className="mt-1">{secondary}</p>}
             </div>

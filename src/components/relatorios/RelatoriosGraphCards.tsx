@@ -6,7 +6,11 @@ import { useChartComponents } from './hooks/useChartComponents';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, BarChart3, PieChart, LineChart, TrendingUp, Clock, Users, MessageSquare, ThumbsUp } from 'lucide-react';
+import { BarChart } from './charts/BarChart';
+import { LineChart as LineChartComponent } from './charts/LineChart';
+import { PieChart as PieChartComponent } from './charts/PieChart';
+import { AreaChart } from './charts/AreaChart';
 
 interface GraphCardItem {
   id: string;
@@ -68,6 +72,40 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
         : [...prev, cardId]
     );
   };
+
+  // Dados fictícios para os gráficos
+  const mockBarData = [
+    { name: 'Tema 1', Quantidade: 45 },
+    { name: 'Tema 2', Quantidade: 32 },
+    { name: 'Tema 3', Quantidade: 18 },
+    { name: 'Tema 4', Quantidade: 25 },
+    { name: 'Tema 5', Quantidade: 15 },
+  ];
+
+  const mockLineData = [
+    { name: 'Jan', Demandas: 12, Respostas: 10 },
+    { name: 'Fev', Demandas: 15, Respostas: 14 },
+    { name: 'Mar', Demandas: 18, Respostas: 16 },
+    { name: 'Abr', Demandas: 22, Respostas: 19 },
+    { name: 'Mai', Demandas: 20, Respostas: 18 },
+    { name: 'Jun', Demandas: 25, Respostas: 22 },
+  ];
+
+  const mockPieData = [
+    { name: 'Concluídas', value: 35 },
+    { name: 'Em andamento', value: 25 },
+    { name: 'Pendentes', value: 15 },
+    { name: 'Canceladas', value: 5 },
+  ];
+
+  const mockAreaData = [
+    { name: 'Jan', Quantidade: 10, Meta: 12 },
+    { name: 'Fev', Quantidade: 15, Meta: 12 },
+    { name: 'Mar', Quantidade: 12, Meta: 12 },
+    { name: 'Abr', Quantidade: 18, Meta: 15 },
+    { name: 'Mai', Quantidade: 22, Meta: 15 },
+    { name: 'Jun', Quantidade: 20, Meta: 18 },
+  ];
 
   // Card definitions
   const cardsData: Record<string, GraphCardItem> = {
@@ -137,31 +175,28 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     }
   };
 
-  // Function to check if there's enough data for a specific chart
-  const hasEnoughData = (cardId: string) => {
-    if (!reportsData) return false;
-    
-    switch (cardId) {
-      case 'distribuicaoPorTemas':
-        return reportsData.problemas && reportsData.problemas.length > 1;
-      case 'origemDemandas':
-        return reportsData.origins && reportsData.origins.length > 1;
-      case 'tempoMedioResposta':
-        return reportsData.responseTimes && reportsData.responseTimes.length > 1;
-      case 'performanceArea':
-        return reportsData.coordinations && reportsData.coordinations.length > 1;
-      case 'notasEmitidas':
-        return reportsData.mediaTypes && reportsData.mediaTypes.length > 1;
-      case 'notasPorTema':
-        return reportsData.statuses && reportsData.statuses.length > 1;
-      case 'evolucaoMensal':
-        // This uses evolucao in the sample data, may need adjustment based on actual data structure
-        return true;
-      case 'indiceSatisfacao':
-        return reportsData.approvals && reportsData.approvals.length > 1;
-      default:
-        return false;
-    }
+  // Componentes de gráfico baseados nos dados de exemplo
+  const demoChartComponents: Record<string, React.ReactNode> = {
+    distribuicaoPorTemas: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }]} />,
+    origemDemandas: <PieChartComponent data={mockPieData} colors={['#f97316', '#fb923c', '#fdba74', '#fff7ed']} />,
+    tempoMedioResposta: <LineChartComponent data={mockLineData} xAxisDataKey="name" lines={[{ dataKey: 'Demandas', name: 'Demandas', color: '#f97316' }, { dataKey: 'Respostas', name: 'Respostas', color: '#7c2d12' }]} />,
+    performanceArea: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Taxa (%)', color: '#f97316' }]} />,
+    notasEmitidas: <LineChartComponent data={mockLineData} xAxisDataKey="name" lines={[{ dataKey: 'Demandas', name: 'Quantidade', color: '#f97316' }]} />,
+    notasPorTema: <PieChartComponent data={mockPieData} colors={['#f97316', '#fb923c', '#fdba74', '#fff7ed']} />,
+    evolucaoMensal: <AreaChart data={mockAreaData} xAxisDataKey="name" areas={[{ dataKey: 'Quantidade', name: 'Quantidade', color: '#fdba74', fillOpacity: 0.6 }, { dataKey: 'Meta', name: 'Meta', color: '#f97316', fillOpacity: 0.3 }]} />,
+    indiceSatisfacao: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Satisfação (%)', color: '#f97316' }]} />,
+  };
+
+  // Icons for the cards
+  const cardIcons: Record<string, React.ReactNode> = {
+    distribuicaoPorTemas: <BarChart3 className="h-5 w-5 text-orange-500" />,
+    origemDemandas: <PieChart className="h-5 w-5 text-orange-500" />,
+    tempoMedioResposta: <Clock className="h-5 w-5 text-orange-500" />,
+    performanceArea: <TrendingUp className="h-5 w-5 text-orange-500" />,
+    notasEmitidas: <LineChart className="h-5 w-5 text-orange-500" />,
+    notasPorTema: <MessageSquare className="h-5 w-5 text-orange-500" />,
+    evolucaoMensal: <TrendingUp className="h-5 w-5 text-orange-500" />,
+    indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-orange-500" />,
   };
 
   // Render a placeholder message when there's not enough data
@@ -185,12 +220,12 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
         items={cardsOrder}
         strategy={rectSortingStrategy}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {cardsOrder
             .filter(cardId => visibleCards.includes(cardId))
             .map((cardId) => {
               const card = cardsData[cardId];
-              const hasData = !isLoading && hasEnoughData(cardId);
+              const chartComponent = demoChartComponents[cardId] || chartComponents[cardId];
               
               return (
                 <SortableGraphCard
@@ -202,7 +237,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                   showAnalysis={card.showAnalysis}
                   analysis={card.analysis}
                   isLoading={isLoading}
-                  isEditMode={isEditMode}
                   onToggleVisibility={() => handleToggleVisibility(card.id)}
                   onToggleAnalysis={() => handleToggleAnalysis(card.id)}
                 >
@@ -210,8 +244,10 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                     <div className="h-[250px] flex items-center justify-center">
                       <div className="h-8 w-8 border-4 border-t-orange-500 border-r-transparent border-b-orange-300 border-l-transparent rounded-full animate-spin"></div>
                     </div>
-                  ) : hasData ? (
-                    chartComponents[card.id] || <div className="h-[250px] flex items-center justify-center text-slate-400">Gráfico não disponível</div>
+                  ) : chartComponent ? (
+                    <div className="h-[250px] p-2">
+                      {chartComponent}
+                    </div>
                   ) : (
                     renderEmptyDataMessage(card.id)
                   )}

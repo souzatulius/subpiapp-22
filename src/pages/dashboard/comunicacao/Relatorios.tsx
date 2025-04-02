@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { PieChart, SlidersHorizontal, Printer, FileDown, Eye, Search } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from "@/components/ui/button";
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { RelatoriosKPICards } from '@/components/relatorios/RelatoriosKPICards';
 import { RelatoriosGraphCards } from '@/components/relatorios/RelatoriosGraphCards';
 import FilterDialog from '@/components/relatorios/filters/FilterDialog';
@@ -11,8 +11,14 @@ import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 import '@/components/ranking/charts/ChartRegistration';
 
 const RelatoriosPage = () => {
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    })
+  );
 
   const handlePrint = () => {
     window.print();
@@ -39,7 +45,7 @@ const RelatoriosPage = () => {
           variant="outline" 
           size="icon"
           onClick={handlePrint}
-          className="h-9 w-9"
+          className="h-9 w-9 shadow-sm hover:shadow transition-all"
           title="Imprimir"
         >
           <Printer className="h-4 w-4" />
@@ -49,7 +55,7 @@ const RelatoriosPage = () => {
           variant="outline"
           size="icon"
           onClick={handleExportPDF}
-          className="h-9 w-9"
+          className="h-9 w-9 shadow-sm hover:shadow transition-all"
           title="Exportar PDF"
         >
           <FileDown className="h-4 w-4" />
@@ -59,20 +65,10 @@ const RelatoriosPage = () => {
           variant="default" 
           size="icon"
           onClick={() => setIsFilterOpen(true)}
-          className="h-9 w-9"
+          className="h-9 w-9 bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow transition-all"
           title="Filtros"
         >
           <SlidersHorizontal className="h-4 w-4" />
-        </Button>
-        
-        <Button
-          variant={isEditMode ? "secondary" : "outline"}
-          size="icon"
-          onClick={() => setIsEditMode(!isEditMode)}
-          className="h-9 w-9"
-          title={isEditMode ? "Finalizar edição" : "Organizar cards"}
-        >
-          {isEditMode ? <Eye className="h-4 w-4" /> : <Search className="h-4 w-4" />}
         </Button>
 
         {/* Filter dialog */}
@@ -83,12 +79,26 @@ const RelatoriosPage = () => {
       </div>
 
       {/* Conteúdo principal com apenas visualização de gráficos */}
-      <div className="mt-4">
-        <DndContext>
-          <div className="space-y-6">
-            <RelatoriosKPICards isEditMode={isEditMode} />
-            <RelatoriosGraphCards isEditMode={isEditMode} />
+      <div className="mt-6">
+        <DndContext
+          sensors={sensors}
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={() => setIsDragging(false)}
+          onDragCancel={() => setIsDragging(false)}
+        >
+          <div className="space-y-8">
+            <RelatoriosKPICards />
+            <RelatoriosGraphCards />
           </div>
+          
+          <DragOverlay>
+            {isDragging ? (
+              <div className="w-64 h-32 bg-orange-50 border border-orange-200 rounded-lg opacity-80 flex items-center justify-center text-orange-600">
+                <SlidersHorizontal className="h-5 w-5 mr-2" />
+                Movendo card...
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       </div>
     </div>

@@ -43,7 +43,7 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
     isDragging,
   } = useSortable({
     id,
-    disabled: !isEditMode,
+    // We no longer disable based on isEditMode
   });
 
   const style = {
@@ -51,54 +51,51 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
     transition,
     opacity: isDragging ? 0.5 : 1,
     position: 'relative' as const,
+    cursor: 'grab',
   };
 
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      className="overflow-hidden group"
+      className="overflow-hidden group border-orange-200 hover:shadow-md transition-all"
+      {...attributes}
+      {...listeners}
     >
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 bg-gradient-to-r from-orange-50 to-white">
         <div>
-          <CardTitle className="text-lg">{title}</CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
+          <CardTitle className="text-lg text-orange-800">{title}</CardTitle>
+          {description && <CardDescription className="text-orange-600">{description}</CardDescription>}
         </div>
-        {isEditMode ? (
-          <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onToggleVisibility && (
             <Button 
               variant="ghost" 
               size="icon" 
               className="h-8 w-8" 
-              onClick={onToggleVisibility}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleVisibility();
+              }}
             >
               {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
+          )}
+          {onToggleAnalysis && (
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 cursor-grab"
-              {...attributes}
-              {...listeners}
+              className="h-8 w-8" 
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleAnalysis();
+              }}
+              title={showAnalysis ? "Ocultar análise" : "Ver análise"}
             >
-              <GripVertical className="h-4 w-4" />
+              <Search className="h-4 w-4" />
             </Button>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            {onToggleAnalysis && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8" 
-                onClick={onToggleAnalysis}
-                title={showAnalysis ? "Ocultar análise" : "Ver análise"}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </CardHeader>
       
       <CardContent className="p-0">
@@ -110,9 +107,9 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
           <>
             {children}
             {showAnalysis && analysis && (
-              <div className="p-4 bg-slate-50 border-t">
-                <h4 className="text-sm font-medium text-slate-700 mb-1">Análise</h4>
-                <p className="text-sm text-slate-600">{analysis}</p>
+              <div className="p-4 bg-orange-50 border-t border-orange-100">
+                <h4 className="text-sm font-medium text-orange-800 mb-1">Análise</h4>
+                <p className="text-sm text-orange-700">{analysis}</p>
               </div>
             )}
           </>
