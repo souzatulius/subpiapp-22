@@ -1,13 +1,19 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Permission } from './types';
+import { Permission } from './types';
 import { toast } from 'sonner';
 
+export interface Coordenacao {
+  id: string;
+  descricao: string;
+  sigla?: string;
+}
+
 export const useAccessControlData = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [coordenacoes, setCoordenacoes] = useState<Coordenacao[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [userPermissions, setUserPermissions] = useState<Record<string, string[]>>({});
+  const [coordinationPermissions, setCoordinationPermissions] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalUsers, setTotalUsers] = useState<number>(0);
@@ -17,18 +23,13 @@ export const useAccessControlData = () => {
     setError(null);
     
     try {
-      // Fetch all coordenações and supervisões técnicas
-      const { data: coordenacoes, error: coordError } = await supabase
+      // Fetch all coordenações
+      const { data: coordenacoesData, error: coordError } = await supabase
         .from('coordenacoes')
-        .select('id, descricao');
+        .select('id, descricao, sigla')
+        .order('descricao');
       
       if (coordError) throw coordError;
-      
-      const { data: supervisoes, error: supError } = await supabase
-        .from('supervisoes_tecnicas')
-        .select('id, descricao, coordenacao_id');
-        
-      if (supError) throw supError;
       
       // Fetch permissions from paginas_sistema table
       const { data: pagesData, error: pagesError } = await supabase
@@ -37,7 +38,7 @@ export const useAccessControlData = () => {
       
       if (pagesError) {
         console.error('Error fetching pages:', pagesError);
-        // If error, use default permissions
+        // Default permissions if there's an error
         setPermissions([
           { id: 'criar_demanda', name: 'Criar Demanda', description: 'Acesso para criar novas demandas', nivel_acesso: 50 },
           { id: 'consultar_demandas', name: 'Consultar Demandas', description: 'Acesso para consultar demandas', nivel_acesso: 10 },
@@ -61,53 +62,35 @@ export const useAccessControlData = () => {
         setPermissions(formattedPermissions);
       }
       
-      // Fetch all permission assignments
+      // Fetch all permission assignments - only for coordenações now
       const { data: permissionsData, error: permError } = await supabase
         .from('permissoes_acesso')
-        .select('*');
+        .select('*')
+        .not('coordenacao_id', 'is', null); // Only get permissions assigned to coordenações
       
       if (permError && permError.code !== 'PGRST116') {
-        // PGRST116 is "relation does not exist" - we'll handle this by assuming no permissions exist yet
         throw permError;
       }
       
-      // Format users data - we'll use both coordenações and supervisões técnicas as "users"
-      const formattedUsers: User[] = [
-        ...coordenacoes.map((coord: any) => ({
-          id: coord.id,
-          nome_completo: coord.descricao,
-          email: '',
-          coordenacao_id: coord.id,
-          type: 'coordenacao' as const
-        })),
-        ...supervisoes.map((sup: any) => ({
-          id: sup.id,
-          nome_completo: sup.descricao,
-          email: '',
-          supervisao_tecnica_id: sup.id,
-          coordenacao_id: sup.coordenacao_id,
-          type: 'supervisao_tecnica' as const
-        }))
-      ];
+      setCoordenacoes(coordenacoesData || []);
+      setTotalUsers(coordenacoesData?.length || 0);
       
-      setUsers(formattedUsers);
-      setTotalUsers(formattedUsers.length);
-      
-      // Format permissions data
+      // Format permissions data for coordenações
       const formattedPermissions: Record<string, string[]> = {};
       
       if (permissionsData) {
         permissionsData.forEach((perm: any) => {
-          const entityId = perm.coordenacao_id || perm.supervisao_tecnica_id;
-          if (!formattedPermissions[entityId]) {
-            formattedPermissions[entityId] = [];
+          if (perm.coordenacao_id) {
+            if (!formattedPermissions[perm.coordenacao_id]) {
+              formattedPermissions[perm.coordenacao_id] = [];
+            }
+            
+            formattedPermissions[perm.coordenacao_id].push(perm.pagina_id);
           }
-          
-          formattedPermissions[entityId].push(perm.pagina_id);
         });
       }
       
-      setUserPermissions(formattedPermissions);
+      setCoordinationPermissions(formattedPermissions);
     } catch (err: any) {
       console.error('Error fetching data:', err);
       setError(err.message || 'Failed to load data');
@@ -122,11 +105,11 @@ export const useAccessControlData = () => {
   }, []);
 
   return {
-    users,
-    setUsers,
+    coordenacoes,
+    setCoordenacoes,
     permissions,
-    userPermissions,
-    setUserPermissions,
+    coordinationPermissions,
+    setCoordinationPermissions,
     loading,
     error,
     fetchData,

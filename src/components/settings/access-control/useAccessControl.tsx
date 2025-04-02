@@ -1,17 +1,16 @@
+
 import { useState } from 'react';
-import { useAccessControlData } from './useAccessControlData';
+import { useAccessControlData, Coordenacao } from './useAccessControlData';
 import { usePermissionsManagement } from './usePermissionsManagement';
-import { User } from './types';
 
 export const useAccessControl = () => {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentCoordination, setCurrentCoordination] = useState<Coordenacao | null>(null);
 
   const {
-    users,
+    coordenacoes,
     permissions,
-    userPermissions,
-    setUserPermissions,
+    coordinationPermissions,
+    setCoordinationPermissions,
     loading,
     error,
     fetchData
@@ -21,24 +20,17 @@ export const useAccessControl = () => {
     saving,
     handleAddPermission,
     handleRemovePermission
-  } = usePermissionsManagement(userPermissions, setUserPermissions, fetchData);
-
-  const openEditDialog = (user: User) => {
-    setCurrentUser(user);
-    setIsEditDialogOpen(true);
-  };
+  } = usePermissionsManagement(coordinationPermissions, setCoordinationPermissions, fetchData);
 
   return {
-    users,
+    coordenacoes,
     permissions,
-    userPermissions,
+    coordinationPermissions,
     loading,
     error,
     saving,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    currentUser,
-    openEditDialog,
+    currentCoordination,
+    setCurrentCoordination,
     handleAddPermission,
     handleRemovePermission
   };

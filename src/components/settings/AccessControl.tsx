@@ -1,34 +1,30 @@
+
 import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { User } from './access-control/types';
 import { useAccessControl } from './access-control/useAccessControl'; 
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 const AccessControl: React.FC = () => {
-  const [selectedTab, setSelectedTab] = useState<'coordenadores' | 'supervisores'>('coordenadores');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
-    users,
+    coordenacoes,
     permissions,
-    userPermissions,
+    coordinationPermissions,
     loading,
     saving,
     handleAddPermission,
     handleRemovePermission
   } = useAccessControl();
   
-  const coordenadores = users.filter(user => user.type === 'coordenacao');
-  const supervisores = users.filter(user => user.type === 'supervisao_tecnica');
-
-  const handleAddPermissionAdapter = (userId: string, permissionId: string) => {
-    return handleAddPermission(userId, permissionId, selectedTab === 'supervisores');
-  };
-
-  const handleRemovePermissionAdapter = (userId: string, permissionId: string) => {
-    return handleRemovePermission(userId, permissionId, selectedTab === 'supervisores');
-  };
+  // Filtra coordenações com base no termo de busca
+  const filteredCoordenacoes = coordenacoes.filter(coordenacao => 
+    coordenacao.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -41,44 +37,72 @@ const AccessControl: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Controle de Acesso</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Controle de Acesso</h1>
+        
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Buscar coordenação..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
       
       <Card>
         <CardContent className="p-6">
-          <Tabs
-            value={selectedTab}
-            onValueChange={(value) => setSelectedTab(value as 'coordenadores' | 'supervisores')}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="coordenadores">Coordenadores</TabsTrigger>
-              <TabsTrigger value="supervisores">Supervisores Técnicos</TabsTrigger>
-            </TabsList>
+          <div className="space-y-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[200px]">Coordenação</TableHead>
+                  <TableHead>Permissões</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredCoordenacoes.map(coordenacao => (
+                  <TableRow key={coordenacao.id}>
+                    <TableCell className="font-medium">{coordenacao.descricao}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {permissions.map(permission => {
+                          const hasPermission = coordinationPermissions[coordenacao.id]?.includes(permission.id);
+                          
+                          return (
+                            <Button
+                              key={permission.id}
+                              size="sm"
+                              variant={hasPermission ? "default" : "outline"}
+                              className={`text-xs py-1 h-7 ${saving ? 'opacity-50' : ''}`}
+                              onClick={() => {
+                                if (hasPermission) {
+                                  handleRemovePermission(coordenacao.id, permission.id);
+                                } else {
+                                  handleAddPermission(coordenacao.id, permission.id);
+                                }
+                              }}
+                              disabled={saving}
+                            >
+                              {permission.name}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
             
-            <TabsContent value="coordenadores" className="mt-6">
-              <AccessControlTable 
-                users={coordenadores}
-                permissions={permissions}
-                userPermissions={userPermissions}
-                isLoading={loading}
-                onAddPermission={handleAddPermissionAdapter}
-                onRemovePermission={handleRemovePermissionAdapter}
-                isSaving={saving}
-              />
-            </TabsContent>
-            
-            <TabsContent value="supervisores" className="mt-6">
-              <AccessControlTable 
-                users={supervisores}
-                permissions={permissions}
-                userPermissions={userPermissions}
-                isLoading={loading}
-                onAddPermission={handleAddPermissionAdapter}
-                onRemovePermission={handleRemovePermissionAdapter}
-                isSaving={saving}
-              />
-            </TabsContent>
-          </Tabs>
+            {filteredCoordenacoes.length === 0 && (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">Nenhuma coordenação encontrada.</p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -86,68 +110,3 @@ const AccessControl: React.FC = () => {
 };
 
 export default AccessControl;
-
-interface AccessControlTableProps {
-  users: User[];
-  permissions: any[];
-  userPermissions: Record<string, string[]>;
-  isLoading: boolean;
-  onAddPermission: (userId: string, permissionId: string) => Promise<void>;
-  onRemovePermission: (userId: string, permissionId: string) => Promise<void>;
-  isSaving: boolean;
-}
-
-const AccessControlTable: React.FC<AccessControlTableProps> = ({
-  users,
-  permissions,
-  userPermissions,
-  onAddPermission,
-  onRemovePermission,
-  isSaving
-}) => {
-  return (
-    <div className="space-y-6">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-muted">
-            <th className="text-left p-2 border-b">Nome</th>
-            <th className="text-left p-2 border-b">Permissões</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(user => (
-            <tr key={user.id} className="border-b">
-              <td className="p-2 font-medium">{user.nome_completo}</td>
-              <td className="p-2">
-                <div className="flex flex-wrap gap-1">
-                  {permissions.map(permission => {
-                    const hasPermission = userPermissions[user.id]?.includes(permission.id);
-                    
-                    return (
-                      <Button
-                        key={permission.id}
-                        size="sm"
-                        variant={hasPermission ? "default" : "outline"}
-                        className={`text-xs py-1 h-7 ${isSaving ? 'opacity-50' : ''}`}
-                        onClick={() => {
-                          if (hasPermission) {
-                            onRemovePermission(user.id, permission.id);
-                          } else {
-                            onAddPermission(user.id, permission.id);
-                          }
-                        }}
-                        disabled={isSaving}
-                      >
-                        {permission.name}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};

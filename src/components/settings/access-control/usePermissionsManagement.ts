@@ -3,53 +3,50 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// This hook handles adding and removing permissions for users
+// Este hook gerencia a adição e remoção de permissões para coordenações
 export const usePermissionsManagement = (
-  userPermissions: Record<string, string[]>,
-  setUserPermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>,
+  coordinationPermissions: Record<string, string[]>,
+  setCoordinationPermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>,
   refreshData: () => Promise<void>
 ) => {
   const [saving, setSaving] = useState(false);
 
-  // Add a permission to a user
+  // Adicionar uma permissão a uma coordenação
   const handleAddPermission = async (
-    userId: string,
-    permissionId: string,
-    isSupervisaoTecnica: boolean
+    coordenacaoId: string,
+    permissionId: string
   ) => {
     setSaving(true);
     try {
-      // First check if this permission already exists
+      // Primeiro verificar se a permissão já existe
       const { data, error } = await supabase
         .from('permissoes_acesso')
         .select('*')
         .eq('pagina_id', permissionId)
-        .eq(isSupervisaoTecnica ? 'supervisao_tecnica_id' : 'coordenacao_id', userId);
+        .eq('coordenacao_id', coordenacaoId);
 
       if (error) throw error;
 
-      // If the permission doesn't exist yet, insert it
+      // Se a permissão não existe, inserir
       if (!data || data.length === 0) {
         const { error: insertError } = await supabase
           .from('permissoes_acesso')
           .insert({
             pagina_id: permissionId,
-            ...(isSupervisaoTecnica
-              ? { supervisao_tecnica_id: userId }
-              : { coordenacao_id: userId }),
+            coordenacao_id: coordenacaoId
           });
 
         if (insertError) throw insertError;
       }
 
-      // Update the local state with the new permission
-      setUserPermissions(prev => {
+      // Atualizar o estado local com a nova permissão
+      setCoordinationPermissions(prev => {
         const updatedPermissions = { ...prev };
-        if (!updatedPermissions[userId]) {
-          updatedPermissions[userId] = [];
+        if (!updatedPermissions[coordenacaoId]) {
+          updatedPermissions[coordenacaoId] = [];
         }
-        if (!updatedPermissions[userId].includes(permissionId)) {
-          updatedPermissions[userId] = [...updatedPermissions[userId], permissionId];
+        if (!updatedPermissions[coordenacaoId].includes(permissionId)) {
+          updatedPermissions[coordenacaoId] = [...updatedPermissions[coordenacaoId], permissionId];
         }
         return updatedPermissions;
       });
@@ -63,11 +60,10 @@ export const usePermissionsManagement = (
     }
   };
 
-  // Remove a permission from a user
+  // Remover uma permissão de uma coordenação
   const handleRemovePermission = async (
-    userId: string,
-    permissionId: string,
-    isSupervisaoTecnica: boolean
+    coordenacaoId: string,
+    permissionId: string
   ) => {
     setSaving(true);
     try {
@@ -75,15 +71,15 @@ export const usePermissionsManagement = (
         .from('permissoes_acesso')
         .delete()
         .eq('pagina_id', permissionId)
-        .eq(isSupervisaoTecnica ? 'supervisao_tecnica_id' : 'coordenacao_id', userId);
+        .eq('coordenacao_id', coordenacaoId);
 
       if (error) throw error;
 
-      // Update the local state by removing the permission
-      setUserPermissions(prev => {
+      // Atualizar o estado local removendo a permissão
+      setCoordinationPermissions(prev => {
         const updatedPermissions = { ...prev };
-        if (updatedPermissions[userId]) {
-          updatedPermissions[userId] = updatedPermissions[userId].filter(
+        if (updatedPermissions[coordenacaoId]) {
+          updatedPermissions[coordenacaoId] = updatedPermissions[coordenacaoId].filter(
             perm => perm !== permissionId
           );
         }

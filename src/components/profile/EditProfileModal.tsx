@@ -30,7 +30,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,
   userData,
-  refreshUserData = () => Promise.resolve() // Provide default empty function
+  refreshUserData = () => Promise.resolve()
 }) => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,37 +45,43 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }
   });
 
+  // Carregar os dados do usuário quando o diálogo abrir
   useEffect(() => {
     if (userData) {
       setValue('nome_completo', userData.nome_completo || '');
       
-      // Format whatsapp with mask
+      // Formatar whatsapp com máscara
       const formattedWhatsapp = userData.whatsapp ? formatPhoneNumber(userData.whatsapp) : '';
       setWhatsappValue(formattedWhatsapp);
       
-      // Parse aniversario from string to Date if it exists
+      // Processar a data de aniversário se existir
       if (userData.aniversario) {
         try {
           let formattedDate = '';
           if (typeof userData.aniversario === 'string') {
-            // Format date string to DD/MM/YYYY
+            // Formatar string de data para DD/MM/YYYY
             const dateObj = new Date(userData.aniversario);
             if (!isNaN(dateObj.getTime())) {
               formattedDate = formatDateToString(dateObj);
             }
           } else if (userData.aniversario instanceof Date) {
-            // Already a Date object
+            // Já é um objeto Date
             formattedDate = formatDateToString(userData.aniversario);
           }
           
           setDateInputValue(formattedDate);
         } catch (error) {
-          console.error('Error parsing date:', error);
+          console.error('Erro ao processar data:', error);
           setDateInputValue('');
         }
       } else {
         setDateInputValue('');
       }
+
+      // Os campos que o usuário não pode editar
+      setValue('cargo_id', userData.cargo_id);
+      setValue('coordenacao_id', userData.coordenacao_id);
+      setValue('supervisao_tecnica_id', userData.supervisao_tecnica_id);
     }
   }, [userData, setValue, isOpen]);
 
@@ -103,7 +109,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     
     setIsSubmitting(true);
     try {
-      // Parse the formatted date into a Date object
+      // Processar a data formatada para um objeto Date
       let parsedDate = null;
       let aniversarioISO = null;
       
@@ -121,19 +127,22 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         aniversarioISO = parsedDate.toISOString();
       }
       
-      // Clean whatsapp input (remove mask)
+      // Limpar a entrada de whatsapp (remover máscara)
       const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
       
-      // Prepare data for update with correct types
+      // Dados para atualização com tipos corretos
+      // Mantém os campos restritos com os valores atuais
       const updateData = {
         nome_completo: data.nome_completo,
         whatsapp: cleanWhatsapp || null,
-        aniversario: aniversarioISO
+        aniversario: aniversarioISO,
+        // NÃO incluir os campos restritos:
+        // cargo_id, coordenacao_id, supervisao_tecnica_id
       };
       
-      console.log('Updating with data:', updateData);
+      console.log('Atualizando com os dados:', updateData);
       
-      // Atualizar o perfil diretamente usando service role para bypasses RLS
+      // Atualizar o perfil
       const { error } = await supabase
         .from('usuarios')
         .update(updateData)
@@ -214,6 +223,49 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               maxLength={10}
             />
           </div>
+
+          {/* Mostrar os campos de coordenação, supervisão e cargo como somente leitura */}
+          {userData?.coordenacao && (
+            <div className="space-y-2">
+              <Label htmlFor="coordenacao">Coordenação</Label>
+              <Input
+                id="coordenacao"
+                value={userData.coordenacao}
+                disabled
+                readOnly
+                className="bg-gray-100"
+              />
+              <p className="text-xs text-muted-foreground">Este campo só pode ser alterado pelo administrador.</p>
+            </div>
+          )}
+
+          {userData?.supervisao_tecnica && (
+            <div className="space-y-2">
+              <Label htmlFor="supervisao_tecnica">Supervisão Técnica</Label>
+              <Input
+                id="supervisao_tecnica"
+                value={userData.supervisao_tecnica}
+                disabled
+                readOnly
+                className="bg-gray-100"
+              />
+              <p className="text-xs text-muted-foreground">Este campo só pode ser alterado pelo administrador.</p>
+            </div>
+          )}
+
+          {userData?.cargo && (
+            <div className="space-y-2">
+              <Label htmlFor="cargo">Cargo</Label>
+              <Input
+                id="cargo"
+                value={userData.cargo}
+                disabled
+                readOnly
+                className="bg-gray-100"
+              />
+              <p className="text-xs text-muted-foreground">Este campo só pode ser alterado pelo administrador.</p>
+            </div>
+          )}
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
