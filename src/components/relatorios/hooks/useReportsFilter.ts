@@ -18,7 +18,7 @@ export const useReportsFilter = () => {
       from: subDays(today, 30),
       to: today
     },
-    coordenacao: 'todos',
+    coordenacao: 'toda',
     tema: 'todos'
   });
 
@@ -40,7 +40,7 @@ export const useReportsFilter = () => {
         from: subDays(new Date(), 30),
         to: new Date()
       },
-      coordenacao: 'todos',
+      coordenacao: 'toda',
       tema: 'todos'
     });
   }, []);

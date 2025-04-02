@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -115,7 +114,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {filters.dataInicio ? (
-                            format(new Date(filters.dataInicio), "dd/MM/yyyy", { locale: ptBR })
+                            format(new Date(filters.dataInicio), "d MMM/yy", { locale: ptBR })
                           ) : (
                             <span>Selecione a data</span>
                           )}
@@ -148,7 +147,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {filters.dataFim ? (
-                            format(new Date(filters.dataFim), "dd/MM/yyyy", { locale: ptBR })
+                            format(new Date(filters.dataFim), "d MMM/yy", { locale: ptBR })
                           ) : (
                             <span>Selecione a data</span>
                           )}

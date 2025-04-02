@@ -95,24 +95,10 @@ export const SortableKPICard = forwardRef<HTMLDivElement, SortableKPICardProps>(
             </div>
           ) : (
             <>
-              <div className="mt-2 flex items-end">
+              <div className="mt-2">
                 <span className="text-[2.25rem] leading-tight font-bold text-orange-500">
                   {value}
                 </span>
-                {typeof change === 'number' && (
-                  <div className="flex items-center ml-2 mb-1.5 text-orange-500">
-                    {change > 0 ? (
-                      <ArrowUpIcon className="h-3 w-3 mr-0.5" />
-                    ) : change < 0 ? (
-                      <ArrowDownIcon className="h-3 w-3 mr-0.5" />
-                    ) : (
-                      <Minus className="h-3 w-3 mr-0.5" />
-                    )}
-                    <span className="text-[0.9rem] font-medium">
-                      {Math.abs(change)}%
-                    </span>
-                  </div>
-                )}
               </div>
               <p className="text-[0.95rem] text-gray-700 mt-1">{description}</p>
               {secondary && (

@@ -82,7 +82,7 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
       value: `${cardStats.tempoMedioResposta} horas`,
       change: cardStats.tempoRespostaVariacao,
       status: cardStats.tempoRespostaVariacao <= 0 ? 'positive' : 'negative', // Menor tempo é melhor
-      description: 'Comparado ao período anterior',
+      description: 'Comparado ao mês',
       secondary: `${Math.abs(cardStats.tempoRespostaVariacao)}% ${cardStats.tempoRespostaVariacao <= 0 ? 'mais rápido' : 'mais lento'}`
     },
     aprovacao: {
