@@ -10,8 +10,8 @@ export const useAvailableCards = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get all default cards
-    const allCards = getDefaultCards(true);
+    // Get all default cards - passing 'comunicacao' as string instead of boolean
+    const allCards = getDefaultCards('comunicacao');
     
     // Separate dynamic and standard cards
     const dynamic = allCards.filter(card => card.type === 'data_dynamic');
