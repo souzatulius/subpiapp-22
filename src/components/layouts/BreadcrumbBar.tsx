@@ -70,11 +70,6 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     // Remover segmentos que devem ser ocultados
     if (hiddenSegments.includes(segment)) return false;
     
-    // Remover duplicatas consecutivas (como comunicacao/comunicacao), exceto para o caso especial
-    if (index > 0 && segment === pathSegments[index - 1] && segment !== 'comunicacao') {
-      return false;
-    }
-    
     return true;
   });
   

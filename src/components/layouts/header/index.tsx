@@ -1,5 +1,6 @@
 
-import HeaderComponent from './Header';
+import Header from './Header';
 import ProfileMenu from './ProfileMenu';
 
-export { HeaderComponent as Header, ProfileMenu };
+export { Header, ProfileMenu };
+export default Header;

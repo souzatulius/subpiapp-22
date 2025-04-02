@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from '@/components/layouts/Header';
+import Header from '@/components/layouts/header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';

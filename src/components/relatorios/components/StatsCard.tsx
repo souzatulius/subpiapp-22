@@ -1,57 +1,62 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowDownIcon, ArrowUpIcon, TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowUpIcon, ArrowDownIcon, ArrowRightIcon } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface StatsCardProps {
   title: string;
-  value: number | string;
-  description: string;
-  icon: React.ReactNode;
-  change?: number;
-  changeLabel?: string;
-  className?: string;
-  formatter?: (value: number | string) => string;
+  value: string | number;
+  comparison?: string;
+  trend?: 'up' | 'down' | 'neutral';
+  isLoading?: boolean;
 }
 
 export const StatsCard: React.FC<StatsCardProps> = ({
   title,
   value,
-  description,
-  icon,
-  change,
-  changeLabel,
-  className = '',
-  formatter = (val) => String(val)
+  comparison,
+  trend,
+  isLoading = false
 }) => {
-  // Determine if the change is positive or negative
-  const isPositive = change !== undefined ? change >= 0 : undefined;
-  const formattedValue = typeof value === 'number' ? formatter(value) : value;
+  const getTrendIcon = () => {
+    if (!trend) return null;
+    
+    switch (trend) {
+      case 'up':
+        return <ArrowUpIcon className="h-4 w-4 text-orange-500" />;
+      case 'down':
+        return <ArrowDownIcon className="h-4 w-4 text-orange-500" />;
+      case 'neutral':
+        return <ArrowRightIcon className="h-4 w-4 text-orange-500" />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className="h-5 w-5 text-muted-foreground">{icon}</div>
+    <Card className="transition-all duration-300 border-orange-200 hover:shadow-md">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 bg-gradient-to-r from-orange-50 to-white">
+        <CardTitle className="text-sm font-medium text-gray-700">
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formattedValue}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
-        {change !== undefined && (
-          <div className="mt-2 flex items-center gap-1 text-xs">
-            {isPositive ? (
-              <TrendingUpIcon className="h-3 w-3 text-green-500" />
-            ) : (
-              <TrendingDownIcon className="h-3 w-3 text-red-500" />
+        {isLoading ? (
+          <>
+            <Skeleton className="h-8 w-20 bg-orange-50 mb-2" />
+            <Skeleton className="h-3 w-32 bg-orange-50" />
+          </>
+        ) : (
+          <>
+            <div className="text-2xl font-bold text-orange-500">{value}</div>
+            {comparison && (
+              <p className="text-xs text-orange-500 flex items-center gap-1 mt-1">
+                {getTrendIcon()}
+                {comparison}
+              </p>
             )}
-            <span
-              className={
-                isPositive ? "text-green-500" : "text-red-500"
-              }
-            >
-              {isPositive ? '+' : ''}{change}% {changeLabel || 'em relação ao período anterior'}
-            </span>
-          </div>
+          </>
         )}
       </CardContent>
     </Card>
