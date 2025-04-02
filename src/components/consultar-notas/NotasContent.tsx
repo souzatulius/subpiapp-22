@@ -8,6 +8,7 @@ import { useExportPDF } from '@/hooks/consultar-notas/useExportPDF';
 import { Button } from '@/components/ui/button';
 import { List, Grid } from 'lucide-react';
 import { NotaOficial } from '@/types/nota';
+import DeleteNotaDialog from './DeleteNotaDialog';
 
 const NotasContent: React.FC = () => {
   const {
@@ -33,8 +34,10 @@ const NotasContent: React.FC = () => {
     statusLoading
   } = useNotasData();
   
-  const { handleExportPDF } = useExportPDF();
+  const { handleExportPDF, exporting } = useExportPDF();
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [selectedNote, setSelectedNote] = useState<NotaOficial | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Modify these functions to return promises to match the expected type
   const handleApproveNota = async (notaId: string): Promise<void> => {
@@ -43,6 +46,24 @@ const NotasContent: React.FC = () => {
 
   const handleRejectNota = async (notaId: string): Promise<void> => {
     await updateNotaStatus(notaId, 'rejeitado');
+  };
+
+  const handleDeleteClick = (nota: NotaOficial) => {
+    setSelectedNote(nota);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedNote) {
+      await deleteNota(selectedNote.id);
+      setIsDeleteDialogOpen(false);
+      setSelectedNote(null);
+    }
+  };
+
+  const handleViewNota = (nota: NotaOficial) => {
+    // Implement view functionality
+    console.log("View nota:", nota.id);
   };
 
   // For debug purposes, log the filtered notes
@@ -108,7 +129,10 @@ const NotasContent: React.FC = () => {
             notas={filteredNotas as NotaOficial[]}
             loading={isLoading}
             formatDate={formatDate}
-            onDeleteNota={deleteNota}
+            onViewNota={handleViewNota}
+            onExportPDF={handleExportPDF}
+            onDeleteClick={handleDeleteClick}
+            exporting={exporting}
             deleteLoading={deleteLoading}
             onApproveNota={isAdmin ? handleApproveNota : undefined}
             onRejectNota={isAdmin ? handleRejectNota : undefined}
@@ -119,11 +143,22 @@ const NotasContent: React.FC = () => {
             notas={filteredNotas as NotaOficial[]}
             loading={isLoading}
             formatDate={formatDate}
-            onDeleteNota={deleteNota}
+            onDeleteNota={handleDeleteClick}
             deleteLoading={deleteLoading}
           />
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      {selectedNote && (
+        <DeleteNotaDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          notaTitle={selectedNote.titulo}
+          hasDemanda={!!selectedNote.demanda_id}
+        />
+      )}
     </div>
   );
 };
