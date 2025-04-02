@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { DateRange } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
 
 type FilterKey = 'dateRange' | 'district' | 'status' | 'origin';
 
