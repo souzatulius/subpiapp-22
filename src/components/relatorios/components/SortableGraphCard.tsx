@@ -69,7 +69,7 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
         )}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 pt-3 px-4 bg-gradient-to-r from-orange-200 to-orange-300">
             <h3 className="text-base font-medium text-orange-900">{title} - Análise</h3>
-            <div className="flex space-x-1">
+            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -98,7 +98,7 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
         </Card>
       ) : (
         <Card className={cn(
-          "border border-slate-200 hover:shadow-md transition-all rounded-xl overflow-hidden",
+          "border border-slate-200 hover:shadow-md transition-all rounded-xl overflow-hidden group",
           "bg-gradient-to-b from-white to-slate-50",
           isDragging && "ring-2 ring-blue-500"
         )}>
@@ -107,7 +107,7 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
               <h3 className="text-base font-medium text-white">{title}</h3>
               {description && <p className="text-xs text-blue-100">{description}</p>}
             </div>
-            <div className="flex space-x-1">
+            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               {analysis && (
                 <button 
                   onClick={(e) => {
