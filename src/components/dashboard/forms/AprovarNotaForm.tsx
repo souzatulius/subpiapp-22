@@ -108,14 +108,13 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
     );
   }
 
-  // Render list view UI
+  // Render list view UI - Fix the hideHeaderButton prop
   return (
     <NotasListView 
       notas={notas || []} 
       isLoading={isLoading}
       onSelectNota={handleSelectNota}
       selectedNota={selectedNota}
-      hideHeaderButton={true}
     />
   );
 };

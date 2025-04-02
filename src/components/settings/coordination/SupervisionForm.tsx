@@ -38,6 +38,14 @@ const SupervisionForm: React.FC<SupervisionFormProps> = ({
   submitText = 'Salvar',
   coordinations = []
 }) => {
+  // Function to get the display text for coordination (sigla or full name)
+  const getCoordinationDisplayText = (coord: Coordination) => {
+    if (coord.sigla && coord.sigla.trim() !== '') {
+      return coord.sigla;
+    }
+    return coord.descricao;
+  };
+  
   return (
     <DataEntryForm
       schema={areaSchema}
@@ -88,7 +96,7 @@ const SupervisionForm: React.FC<SupervisionFormProps> = ({
                 <SelectItem value="none">Nenhuma</SelectItem>
                 {coordinations.map((coordination) => (
                   <SelectItem key={coordination.id} value={coordination.id}>
-                    {coordination.descricao}
+                    {getCoordinationDisplayText(coordination)}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -53,7 +53,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     }
     
     // Se for comunicacao, garantir que o caminho tenha comunicacao duplicado
-    if (segment === 'comunicacao' && index === 1) {
+    if (segment === 'comunicacao') {
       navigate('/dashboard/comunicacao/comunicacao');
       return;
     }

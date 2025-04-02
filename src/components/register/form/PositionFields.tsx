@@ -59,7 +59,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           // Fetch technical supervisions for this coordination
           const { data, error } = await supabase
             .from('supervisoes_tecnicas')
-            .select('id, descricao')
+            .select('id, descricao, sigla')
             .eq('coordenacao_id', coordenacao);
             
           if (error) throw error;
@@ -67,7 +67,8 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
           if (data && data.length > 0) {
             const formattedAreas = data.map(area => ({
               id: area.id,
-              value: area.descricao
+              value: area.descricao,
+              sigla: area.sigla
             }));
             console.log(`Found ${formattedAreas.length} supervisions for coordination ${coordenacao}`);
             setFilteredAreas(formattedAreas);
@@ -100,14 +101,28 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
     }
   }, [isCoordinationRole, isManagerRole, area, handleChange]);
 
-  // Função para obter o texto de exibição para coordenação (sigla ou nome completo)
+  // Function to get the display text for coordination (sigla or full name)
   const getCoordinationDisplayText = (coord: SelectOption) => {
-    // Verificar se o valor contém a sigla entre parênteses
+    // Check if the value contains a sigla in parentheses
+    if (coord.sigla && coord.sigla.trim() !== '') {
+      return coord.sigla; // Return just the sigla if available
+    }
+    
+    // Check if the value contains a sigla in parentheses (legacy format)
     const match = coord.value.match(/\(([^)]+)\)/);
     if (match && match[1]) {
-      return match[1]; // Retornar apenas a sigla se estiver disponível
+      return match[1]; // Return just the sigla if available
     }
-    return coord.value; // Retornar o nome completo se não tiver sigla
+    
+    return coord.value; // Return the full name if no sigla
+  };
+
+  // Function to get the display text for supervision (sigla or full name)
+  const getAreaDisplayText = (area: SelectOption) => {
+    if (area.sigla && area.sigla.trim() !== '') {
+      return area.sigla;
+    }
+    return area.value;
   };
 
   return (
@@ -238,7 +253,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                     <SelectItem value="select-area" disabled>Selecione uma supervisão técnica</SelectItem>
                     {filteredAreas.map(area => (
                       <SelectItem key={area.id} value={area.id}>
-                        {area.value}
+                        {getAreaDisplayText(area)}
                       </SelectItem>
                     ))}
                   </>

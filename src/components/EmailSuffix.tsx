@@ -113,10 +113,11 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
         />
         {showSuffix && (
           <span 
-            className="pointer-events-none absolute top-1/2 transform -translate-y-1/2"
+            className="pointer-events-none absolute top-1/2 transform -translate-y-1/2 text-base"
             style={{ 
-              left: `${4 + (value.length * 0.6)}em`,
-              transition: 'left 0.1s ease-out'
+              left: `calc(${4 + value.length * 0.6}em - 0.25em)`,
+              transition: 'left 0.1s ease-out',
+              color: 'inherit' // Match the text color of the input
             }}
           >
             {suffix}

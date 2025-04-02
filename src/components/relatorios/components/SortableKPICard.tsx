@@ -100,11 +100,7 @@ export const SortableKPICard = forwardRef<HTMLDivElement, SortableKPICardProps>(
                   {value}
                 </span>
                 {typeof change === 'number' && (
-                  <div 
-                    className={cn(
-                      "flex items-center ml-2 mb-1.5 text-orange-500"
-                    )}
-                  >
+                  <div className="flex items-center ml-2 mb-1.5 text-orange-500">
                     {change > 0 ? (
                       <ArrowUpIcon className="h-3 w-3 mr-0.5" />
                     ) : change < 0 ? (
