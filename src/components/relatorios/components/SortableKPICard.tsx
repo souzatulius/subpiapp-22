@@ -92,23 +92,23 @@ export const SortableKPICard: React.FC<SortableKPICardProps> = ({
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2 text-orange-700">
                 {icon}
-                <span className="font-medium">{title}</span>
+                <span className="font-medium text-sm">{title}</span>
               </div>
             </div>
             
             <div className="flex items-end gap-2 mb-1">
               <div className="text-2xl font-bold text-orange-800">{value}</div>
               {change !== undefined && (
-                <div className={`flex items-center gap-1 text-sm ${getStatusColor()}`}>
+                <div className={`flex items-center gap-1 text-xs ${getStatusColor()}`}>
                   {getStatusIcon()}
                   <span>{Math.abs(change)}%</span>
                 </div>
               )}
             </div>
             
-            <div className="text-xs text-orange-600">
+            <div className="text-xs text-gray-500">
               <p>{description}</p>
-              {secondary && <p className="mt-1">{secondary}</p>}
+              {secondary && <p className="mt-1 text-gray-400 text-[10px]">{secondary}</p>}
             </div>
           </>
         )}

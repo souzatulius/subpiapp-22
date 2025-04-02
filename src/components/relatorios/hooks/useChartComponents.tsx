@@ -1,13 +1,24 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BarChart } from '../charts/BarChart';
 import { LineChart } from '../charts/LineChart';
 import { PieChart } from '../charts/PieChart';
 import { AreaChart } from '../charts/AreaChart';
 import { useReportsData } from './useReportsData';
+import { useChartConfigs } from './charts/useChartConfigs';
 
-export const useChartComponents = () => {
+interface UseChartComponentsProps {
+  currentTheme?: string;
+}
+
+export const useChartComponents = ({ currentTheme = 'mixed' }: UseChartComponentsProps = {}) => {
   const { reportsData, isLoading } = useReportsData();
+  const { themes } = useChartConfigs();
+  
+  // Select theme colors based on the current theme
+  const themeColors = themes[currentTheme as keyof typeof themes]?.colors || themes.mixed.colors;
+  const blueThemeColors = themes.blue.colors;
+  const orangeThemeColors = themes.orange.colors;
 
   // Prepare chart components based on the available data
   const chartComponents = React.useMemo(() => {
@@ -19,14 +30,14 @@ export const useChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'value', name: 'Quantidade', color: '#f97316' }
+              { dataKey: 'value', name: 'Quantidade', color: themeColors[0] }
             ]}
           />
         ),
         origemDemandas: (
           <PieChart 
             data={[]}
-            colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+            colors={themeColors}
           />
         ),
         tempoMedioResposta: (
@@ -34,7 +45,7 @@ export const useChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             lines={[
-              { dataKey: 'value', name: 'Dias até resposta', color: '#0ea5e9' }
+              { dataKey: 'value', name: 'Dias até resposta', color: themeColors[1] }
             ]}
           />
         ),
@@ -43,7 +54,7 @@ export const useChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'value', name: 'Demandas atendidas', color: '#0ea5e9' }
+              { dataKey: 'value', name: 'Demandas atendidas', color: themeColors[1] }
             ]}
             horizontal={true}
           />
@@ -53,14 +64,14 @@ export const useChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             areas={[
-              { dataKey: 'value', name: 'Quantidade', color: '#0ea5e9' }
+              { dataKey: 'value', name: 'Quantidade', color: themeColors[1] }
             ]}
           />
         ),
         notasPorTema: (
           <PieChart 
             data={[]}
-            colors={['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe']}
+            colors={blueThemeColors}
           />
         ),
         evolucaoMensal: (
@@ -68,15 +79,15 @@ export const useChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             lines={[
-              { dataKey: 'demandas', name: 'Demandas', color: '#f97316' },
-              { dataKey: 'respostas', name: 'Respostas', color: '#0ea5e9' }
+              { dataKey: 'demandas', name: 'Demandas', color: themeColors[0] },
+              { dataKey: 'respostas', name: 'Respostas', color: themeColors[1] }
             ]}
           />
         ),
         indiceSatisfacao: (
           <PieChart 
             data={[]}
-            colors={['#22c55e', '#f97316', '#ef4444']}
+            colors={['#22c55e', themeColors[0], '#ef4444']}
           />
         ),
       };
@@ -108,11 +119,11 @@ export const useChartComponents = () => {
         { name: 'Jun', value: 4.3 }
       ],
       coordenacoes: [
-        { name: 'Manutenção', value: 92 },
-        { name: 'Zeladoria', value: 87 },
-        { name: 'Urbanismo', value: 82 },
-        { name: 'Segurança', value: 75 },
-        { name: 'Obras', value: 68 }
+        { name: 'MAN', value: 92 },
+        { name: 'ZEL', value: 87 },
+        { name: 'URB', value: 82 },
+        { name: 'SEG', value: 75 },
+        { name: 'OBR', value: 68 }
       ],
       notasEmitidas: [
         { name: 'Jan', value: 12 },
@@ -152,14 +163,14 @@ export const useChartComponents = () => {
           data={reportsData?.problemas?.length ? reportsData.problemas : sampleData.problemas}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'value', name: 'Quantidade', color: '#f97316' }
+            { dataKey: 'value', name: 'Quantidade', color: themeColors[0] }
           ]}
         />
       ),
       origemDemandas: (
         <PieChart 
           data={reportsData?.origins?.length ? reportsData.origins : sampleData.origens}
-          colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+          colors={orangeThemeColors}
         />
       ),
       tempoMedioResposta: (
@@ -167,7 +178,7 @@ export const useChartComponents = () => {
           data={reportsData?.responseTimes?.length ? reportsData.responseTimes : sampleData.tempoResposta}
           xAxisDataKey="name"
           lines={[
-            { dataKey: 'value', name: 'Dias até resposta', color: '#0ea5e9' }
+            { dataKey: 'value', name: 'Dias até resposta', color: themeColors[1] }
           ]}
         />
       ),
@@ -176,7 +187,7 @@ export const useChartComponents = () => {
           data={reportsData?.coordinations?.length ? reportsData.coordinations : sampleData.coordenacoes}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'value', name: 'Demandas atendidas', color: '#0ea5e9' }
+            { dataKey: 'value', name: 'Demandas atendidas', color: themeColors[1] }
           ]}
           horizontal={true}
         />
@@ -186,14 +197,14 @@ export const useChartComponents = () => {
           data={sampleData.notasEmitidas}
           xAxisDataKey="name"
           areas={[
-            { dataKey: 'value', name: 'Quantidade', color: '#0ea5e9', fillOpacity: 0.6 }
+            { dataKey: 'value', name: 'Quantidade', color: themeColors[1], fillOpacity: 0.6 }
           ]}
         />
       ),
       notasPorTema: (
         <PieChart 
           data={reportsData?.statuses?.length ? reportsData.statuses : sampleData.temas}
-          colors={['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe']}
+          colors={blueThemeColors}
         />
       ),
       evolucaoMensal: (
@@ -201,19 +212,19 @@ export const useChartComponents = () => {
           data={sampleData.evolucao}
           xAxisDataKey="name"
           lines={[
-            { dataKey: 'demandas', name: 'Demandas', color: '#f97316' },
-            { dataKey: 'respostas', name: 'Respostas', color: '#0ea5e9' }
+            { dataKey: 'demandas', name: 'Demandas', color: themeColors[0] },
+            { dataKey: 'respostas', name: 'Respostas', color: themeColors[1] }
           ]}
         />
       ),
       indiceSatisfacao: (
         <PieChart 
           data={reportsData?.approvals?.length ? reportsData.approvals : sampleData.satisfacao}
-          colors={['#22c55e', '#f97316', '#ef4444']}
+          colors={['#22c55e', themeColors[0], '#ef4444']}
         />
       ),
     };
-  }, [reportsData, isLoading]);
+  }, [reportsData, isLoading, themeColors, blueThemeColors, orangeThemeColors]);
 
   return { chartComponents };
 };

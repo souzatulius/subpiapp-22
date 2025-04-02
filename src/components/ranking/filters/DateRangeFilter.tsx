@@ -14,6 +14,14 @@ interface DateRangeFilterProps {
   onDateRangeChange: (dateRange: FilterOptions['dateRange']) => void;
 }
 
+// Format dates as DD MMM/YY
+const formatDateShort = (date: Date): string => {
+  const day = format(date, "d", { locale: ptBR });
+  const month = format(date, "MMM", { locale: ptBR });
+  const year = format(date, "yy", { locale: ptBR });
+  return `${day} ${month}/${year}`;
+};
+
 const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRangeChange }) => {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -30,11 +38,10 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ dateRange, onDateRang
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {format(dateRange.from, 'PP', { locale: ptBR })} -{' '}
-                  {format(dateRange.to, 'PP', { locale: ptBR })}
+                  {formatDateShort(dateRange.from)} - {formatDateShort(dateRange.to)}
                 </>
               ) : (
-                format(dateRange.from, 'PP', { locale: ptBR })
+                formatDateShort(dateRange.from)
               )
             ) : (
               <span>Selecione um período</span>
