@@ -25,6 +25,10 @@ const DistrictPerformanceChart: React.FC<DistrictPerformanceChartProps> = ({
     
     sgzData.forEach(order => {
       const district = order.sgz_distrito || 'Não informado';
+      
+      // Skip "Pinheiros" district as requested
+      if (district.toLowerCase() === 'pinheiros') return;
+      
       if (!districts[district]) {
         districts[district] = { count: 0, totalDays: 0, fechados: 0 };
       }
@@ -107,7 +111,7 @@ const DistrictPerformanceChart: React.FC<DistrictPerformanceChartProps> = ({
     
     const uniqueDistricts = new Set<string>();
     sgzData.forEach(order => {
-      if (order.sgz_distrito) {
+      if (order.sgz_distrito && order.sgz_distrito.toLowerCase() !== 'pinheiros') {
         uniqueDistricts.add(order.sgz_distrito);
       }
     });
@@ -115,10 +119,14 @@ const DistrictPerformanceChart: React.FC<DistrictPerformanceChartProps> = ({
     return `${uniqueDistricts.size} distritos`;
   }, [sgzData]);
 
+  // Format with comma instead of dot
+  const formattedStats = stats.replace('.', ',');
+
   return (
     <ChartCard
-      title="Performance por Distrito"
-      value={stats}
+      title="Distritos incluídos indevidamente"
+      subtitle="Outras regiões administrativas entre as OS de Pinheiros"
+      value={formattedStats}
       isLoading={isLoading}
     >
       {chartData && (

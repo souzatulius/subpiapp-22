@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SortableGraphCard } from './components/SortableGraphCard';
 import { useReportsData } from './hooks/useReportsData';
@@ -136,7 +137,8 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   const mockPieData = [
     { name: 'Imprensa', value: 35 },
     { name: 'SMSUB', value: 45 },
-    { name: 'Internas', value: 20 },
+    { name: 'Secom', value: 12 },
+    { name: 'Internas', value: 8 },
   ];
 
   const mockAreasData = [
@@ -158,7 +160,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
 
   const demoChartComponents: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
-    origemDemandas: <PieChartComponent data={mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3]]} showOnlyPercentage={true} showLabels={false} />,
+    origemDemandas: <PieChartComponent data={mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3], chartColors[4]]} showOnlyPercentage={false} showLabels={true} />,
     tempoMedioResposta: <LineChartComponent data={mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Respostas', name: 'Aprovação da nota', color: chartColors[2] }]} />,
     performanceArea: <BarChart data={mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} />,
     notasEmitidas: <LineChartComponent data={mockLineData} xAxisDataKey="name" lines={[{ dataKey: 'Demandas', name: 'Quantidade', color: chartColors[1] }]} />,

@@ -199,10 +199,14 @@ const EvolutionChart: React.FC<EvolutionChartProps> = ({
     return `${percentConcluido.toFixed(1)}%`;
   }, [sgzData, isSimulationActive]);
 
+  // Format with comma instead of dot
+  const formattedStats = stats.replace('.', ',');
+
   return (
     <ChartCard
-      title="Evolução de Status (Últimos 7 dias)"
-      value={stats}
+      title="Serviços em Andamento"
+      subtitle="Evolução do status das ordens de serviço na semana"
+      value={formattedStats}
       isLoading={isLoading}
     >
       {chartData && (

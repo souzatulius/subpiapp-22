@@ -1,302 +1,255 @@
 
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Filter, LayoutDashboard, RotateCcw, Eye } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DateRange } from 'react-day-picker';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ComboboxForm } from '@/components/ui/combobox-form';
+import { subDays } from 'date-fns';
 import { ReportFilters } from '../hooks/useReportsData';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface FilterDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  filters?: ReportFilters;
   onFiltersChange?: (filters: ReportFilters) => void;
+  filters?: ReportFilters;
+  chartVisibility?: Record<string, boolean>;
+  onChartVisibilityChange?: (chartId: string, visible: boolean) => void;
   onResetFilters?: () => void;
-}
-
-interface ChartVisibility {
-  distribuicaoPorTemas: boolean;
-  origemDemandas: boolean;
-  tempoMedioResposta: boolean;
-  performanceArea: boolean;
-  notasEmitidas: boolean;
 }
 
 const FilterDialog: React.FC<FilterDialogProps> = ({
   open,
   onOpenChange,
+  onFiltersChange,
   filters = {},
-  onFiltersChange = () => {},
-  onResetFilters = () => {}
+  chartVisibility = {},
+  onChartVisibilityChange,
+  onResetFilters
 }) => {
-  const [visibleCharts, setVisibleCharts] = useLocalStorage<string[]>(
-    'relatorios-graph-visible', 
-    ['distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea', 'notasEmitidas']
+  const [dateRange, setDateRange] = React.useState({
+    from: filters.dateRange?.from || subDays(new Date(), 90),
+    to: filters.dateRange?.to || new Date()
+  });
+
+  const [selectedProblema, setSelectedProblema] = React.useState<string | undefined>(
+    filters.problema
   );
-  
-  const handleChartVisibilityChange = (chartId: string, isVisible: boolean) => {
-    if (isVisible) {
-      setVisibleCharts(prev => [...prev, chartId]);
-    } else {
-      setVisibleCharts(prev => prev.filter(id => id !== chartId));
+
+  const [selectedCoordenacao, setSelectedCoordenacao] = React.useState<string | undefined>(
+    filters.coordenacao
+  );
+
+  const [visibilitySettings, setVisibilitySettings] = React.useState<Record<string, boolean>>(
+    chartVisibility || {
+      origemDemandas: true,
+      distribuicaoPorTemas: true,
+      tempoMedioResposta: true,
+      performanceArea: true,
+      notasEmitidas: true
+    }
+  );
+
+  const handleDateFromChange = (date: Date | undefined) => {
+    setDateRange(prev => ({ ...prev, from: date || prev.from }));
+  };
+
+  const handleDateToChange = (date: Date | undefined) => {
+    setDateRange(prev => ({ ...prev, to: date || prev.to }));
+  };
+
+  const handleToggleChart = (chartId: string) => {
+    const newSettings = {
+      ...visibilitySettings,
+      [chartId]: !visibilitySettings[chartId]
+    };
+    
+    setVisibilitySettings(newSettings);
+    
+    if (onChartVisibilityChange) {
+      onChartVisibilityChange(chartId, newSettings[chartId]);
     }
   };
-  
+
+  const handleApplyFilters = () => {
+    if (onFiltersChange) {
+      onFiltersChange({
+        dateRange: { from: dateRange.from, to: dateRange.to },
+        problema: selectedProblema,
+        coordenacao: selectedCoordenacao
+      });
+    }
+    onOpenChange(false);
+  };
+
+  const handleResetFilters = () => {
+    if (onResetFilters) {
+      onResetFilters();
+    }
+    setDateRange({ from: subDays(new Date(), 90), to: new Date() });
+    setSelectedProblema(undefined);
+    setSelectedCoordenacao(undefined);
+    
+    // Reset visibility to defaults
+    const defaultVisibility = {
+      origemDemandas: true,
+      distribuicaoPorTemas: true,
+      tempoMedioResposta: true,
+      performanceArea: true,
+      notasEmitidas: true
+    };
+    
+    setVisibilitySettings(defaultVisibility);
+    
+    if (onChartVisibilityChange) {
+      Object.entries(defaultVisibility).forEach(([chartId, isVisible]) => {
+        onChartVisibilityChange(chartId, isVisible);
+      });
+    }
+  };
+
+  const problemaOptions = [
+    { value: 'poda', label: 'Poda de Árvores' },
+    { value: 'bueiros', label: 'Bueiros' },
+    { value: 'remocao', label: 'Remoção de Galhos' },
+    { value: 'lixo', label: 'Lixo' },
+    { value: 'parques', label: 'Parques e Praças' }
+  ];
+
+  const coordenacaoOptions = [
+    { value: 'comunicacao', label: 'Comunicação' },
+    { value: 'atendimento', label: 'Atendimento ao Cidadão' },
+    { value: 'planejamento', label: 'Planejamento' },
+    { value: 'gabinete', label: 'Gabinete' }
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl flex items-center gap-2 text-orange-700">
-            <Filter className="h-5 w-5" />
-            Filtros e Visualização
-          </DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Filtros e Visualização</DialogTitle>
         </DialogHeader>
-
-        <Tabs defaultValue="filters">
-          <TabsList className="w-full mb-6 bg-orange-50">
-            <TabsTrigger value="filters" className="flex-1">
-              <Filter className="h-4 w-4 mr-2" />
-              Filtros
-            </TabsTrigger>
-            <TabsTrigger value="visibility" className="flex-1">
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              Visualização
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="filters" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Filtro de data */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Período</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col space-y-1">
-                    <Label className="text-xs text-gray-500">Data Início</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "justify-start text-left font-normal",
-                            !filters.dateRange?.from && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {filters.dateRange?.from ? (
-                            format(new Date(filters.dateRange.from), "d MMM/yy", { locale: ptBR })
-                          ) : (
-                            <span>Selecione a data</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={filters.dateRange?.from}
-                          onSelect={date => {
-                            const newDateRange: DateRange = {
-                              ...filters.dateRange,
-                              from: date
-                            };
-                            onFiltersChange({ ...filters, dateRange: newDateRange });
-                          }}
-                          initialFocus
-                          locale={ptBR}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="flex flex-col space-y-1">
-                    <Label className="text-xs text-gray-500">Data Fim</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "justify-start text-left font-normal",
-                            !filters.dateRange?.to && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {filters.dateRange?.to ? (
-                            format(new Date(filters.dateRange.to), "d MMM/yy", { locale: ptBR })
-                          ) : (
-                            <span>Selecione a data</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={filters.dateRange?.to}
-                          onSelect={date => {
-                            const newDateRange: DateRange = {
-                              ...filters.dateRange,
-                              to: date
-                            };
-                            onFiltersChange({ ...filters, dateRange: newDateRange });
-                          }}
-                          initialFocus
-                          locale={ptBR}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-              </div>
-
-              {/* Filtro de coordenação */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Coordenação</Label>
-                <Select 
-                  value={filters.coordenacao || 'todos'} 
-                  onValueChange={value => onFiltersChange({ ...filters, coordenacao: value === 'todos' ? undefined : value })}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione a coordenação" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todas</SelectItem>
-                    <SelectItem value="coord1">CPDU</SelectItem>
-                    <SelectItem value="coord2">CPO</SelectItem>
-                    <SelectItem value="coord3">Governo Local</SelectItem>
-                    <SelectItem value="coord4">Jurídico</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Filtro de tema/problema */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Tema / Problema</Label>
-                <Select 
-                  value={filters.problema || 'todos'} 
-                  onValueChange={value => onFiltersChange({ ...filters, problema: value === 'todos' ? undefined : value })}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o tema" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="prob1">Bueiros</SelectItem>
-                    <SelectItem value="prob2">Poda de Árvores</SelectItem>
-                    <SelectItem value="prob3">Remoção de galhos</SelectItem>
-                    <SelectItem value="prob4">Lixo</SelectItem>
-                    <SelectItem value="prob5">Parques e praças</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="visibility" className="space-y-6">
-            <div className="grid grid-cols-1 gap-3">
-              <h3 className="font-medium text-gray-700">Visibilidade de gráficos</h3>
-              <div className="bg-orange-50 p-4 rounded-md text-orange-800 text-sm">
-                Ative ou desative a exibição dos gráficos no painel. Você poderá reativá-los a qualquer momento.
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                <div className="flex items-center justify-between p-3 border rounded-md">
-                  <Label htmlFor="chart-problemas" className="font-medium cursor-pointer text-sm">
-                    Problemas mais frequentes
-                  </Label>
-                  <Switch
-                    id="chart-problemas"
-                    checked={visibleCharts.includes('distribuicaoPorTemas')}
-                    onCheckedChange={(checked) => 
-                      handleChartVisibilityChange('distribuicaoPorTemas', checked)
-                    }
-                    className="data-[state=checked]:bg-orange-500"
+        
+        <ScrollArea className="max-h-[70vh] pr-4">
+          <div className="space-y-6 py-2">
+            {/* Date Range */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-800">Período</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date-from">Data Início</Label>
+                  <DatePicker
+                    id="date-from"
+                    date={dateRange.from}
+                    onSelect={handleDateFromChange}
+                    placeholder="Selecione"
                   />
                 </div>
-                
-                <div className="flex items-center justify-between p-3 border rounded-md">
-                  <Label htmlFor="chart-origem" className="font-medium cursor-pointer text-sm">
-                    Origem das Demandas
-                  </Label>
-                  <Switch
-                    id="chart-origem"
-                    checked={visibleCharts.includes('origemDemandas')}
-                    onCheckedChange={(checked) => 
-                      handleChartVisibilityChange('origemDemandas', checked)
-                    }
-                    className="data-[state=checked]:bg-orange-500"
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between p-3 border rounded-md">
-                  <Label htmlFor="chart-tempo" className="font-medium cursor-pointer text-sm">
-                    Tempo Médio de Resposta
-                  </Label>
-                  <Switch
-                    id="chart-tempo"
-                    checked={visibleCharts.includes('tempoMedioResposta')}
-                    onCheckedChange={(checked) => 
-                      handleChartVisibilityChange('tempoMedioResposta', checked)
-                    }
-                    className="data-[state=checked]:bg-orange-500"
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between p-3 border rounded-md">
-                  <Label htmlFor="chart-areas" className="font-medium cursor-pointer text-sm">
-                    Áreas mais acionadas
-                  </Label>
-                  <Switch
-                    id="chart-areas"
-                    checked={visibleCharts.includes('performanceArea')}
-                    onCheckedChange={(checked) => 
-                      handleChartVisibilityChange('performanceArea', checked)
-                    }
-                    className="data-[state=checked]:bg-orange-500"
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between p-3 border rounded-md">
-                  <Label htmlFor="chart-notas" className="font-medium cursor-pointer text-sm">
-                    Notas de Imprensa
-                  </Label>
-                  <Switch
-                    id="chart-notas"
-                    checked={visibleCharts.includes('notasEmitidas')}
-                    onCheckedChange={(checked) => 
-                      handleChartVisibilityChange('notasEmitidas', checked)
-                    }
-                    className="data-[state=checked]:bg-orange-500"
+                <div className="space-y-2">
+                  <Label htmlFor="date-to">Data Fim</Label>
+                  <DatePicker
+                    id="date-to"
+                    date={dateRange.to}
+                    onSelect={handleDateToChange}
+                    placeholder="Selecione"
                   />
                 </div>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
-
-        <DialogFooter className="mt-6">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={onResetFilters} className="gap-2">
-              <RotateCcw className="h-4 w-4" />
-              Resetar
-            </Button>
-            <Button onClick={() => onOpenChange(false)} className="bg-orange-500 hover:bg-orange-600">
-              Aplicar
-            </Button>
+          
+            <Separator />
+            
+            {/* Filters */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-800">Filtros</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Tipo de Problema</Label>
+                  <ComboboxForm
+                    options={problemaOptions}
+                    value={selectedProblema}
+                    placeholder="Selecione o problema"
+                    onChange={setSelectedProblema}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Coordenação</Label>
+                  <ComboboxForm
+                    options={coordenacaoOptions}
+                    value={selectedCoordenacao}
+                    placeholder="Selecione a coordenação"
+                    onChange={setSelectedCoordenacao}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            {/* Visualization Controls */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-800">Visualização dos Gráficos</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="origem-demandas" className="cursor-pointer">Origem das Demandas</Label>
+                  <Checkbox
+                    id="origem-demandas"
+                    checked={visibilitySettings.origemDemandas}
+                    onCheckedChange={() => handleToggleChart('origemDemandas')}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="distribuicao-temas" className="cursor-pointer">Problemas mais frequentes</Label>
+                  <Checkbox
+                    id="distribuicao-temas"
+                    checked={visibilitySettings.distribuicaoPorTemas}
+                    onCheckedChange={() => handleToggleChart('distribuicaoPorTemas')}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="tempo-resposta" className="cursor-pointer">Tempo Médio de Resposta</Label>
+                  <Checkbox
+                    id="tempo-resposta"
+                    checked={visibilitySettings.tempoMedioResposta}
+                    onCheckedChange={() => handleToggleChart('tempoMedioResposta')}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="performance-area" className="cursor-pointer">Áreas mais acionadas</Label>
+                  <Checkbox
+                    id="performance-area"
+                    checked={visibilitySettings.performanceArea}
+                    onCheckedChange={() => handleToggleChart('performanceArea')}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="notas-emitidas" className="cursor-pointer">Notas de Imprensa</Label>
+                  <Checkbox
+                    id="notas-emitidas"
+                    checked={visibilitySettings.notasEmitidas}
+                    onCheckedChange={() => handleToggleChart('notasEmitidas')}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
+        </ScrollArea>
+        
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={handleResetFilters} className="w-full sm:w-auto">
+            Limpar Filtros
+          </Button>
+          <Button onClick={handleApplyFilters} className="w-full sm:w-auto">
+            Aplicar Filtros
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

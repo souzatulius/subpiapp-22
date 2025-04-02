@@ -42,9 +42,7 @@ export const PieChart: React.FC<PieChartProps> = ({
       const percentage = ((payload[0].value / totalValue) * 100).toFixed(1);
       return (
         <div className="custom-tooltip bg-white p-2 border border-gray-200 rounded shadow-sm">
-          {!showOnlyPercentage && (
-            <p className="font-medium">{payload[0].name}</p>
-          )}
+          <p className="font-medium">{payload[0].name}</p>
           <p className="text-sm">
             {showOnlyPercentage 
               ? `${percentage}%` 
@@ -81,6 +79,24 @@ export const PieChart: React.FC<PieChartProps> = ({
     );
   };
 
+  const renderCustomizedLegend = (props: any) => {
+    const { payload } = props;
+    
+    return (
+      <ul className="flex flex-wrap justify-center gap-4 mt-2">
+        {payload.map((entry: any, index: number) => (
+          <li key={`item-${index}`} className="flex items-center">
+            <div
+              className="w-3 h-3 mr-1 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="text-xs text-gray-700">{entry.value}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-full w-full">
@@ -98,7 +114,7 @@ export const PieChart: React.FC<PieChartProps> = ({
           nameKey="name"
           cx="50%"
           cy="50%"
-          innerRadius={60}
+          innerRadius={50}
           outerRadius={80}
           fill="#8884d8"
           paddingAngle={2}
@@ -112,14 +128,12 @@ export const PieChart: React.FC<PieChartProps> = ({
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
-        {!showOnlyPercentage && (
-          <Legend 
-            layout="horizontal" 
-            verticalAlign="bottom" 
-            align="center" 
-            wrapperStyle={{ fontSize: '12px' }}
-          />
-        )}
+        <Legend 
+          content={renderCustomizedLegend}
+          layout="horizontal" 
+          verticalAlign="bottom" 
+          align="center" 
+        />
       </RechartsPieChart>
     </ResponsiveContainer>
   );

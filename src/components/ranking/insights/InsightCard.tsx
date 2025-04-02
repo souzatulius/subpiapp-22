@@ -25,6 +25,12 @@ const InsightCard: React.FC<InsightCardProps> = ({
     if (val.includes('.')) {
       return val.replace('.', ',');
     }
+    
+    // Special case for "OS Fora do Prazo" - remove "OS" suffix
+    if (title === "OS Fora do Prazo" && val.endsWith(" OS")) {
+      return val.replace(" OS", "");
+    }
+    
     return val;
   };
 

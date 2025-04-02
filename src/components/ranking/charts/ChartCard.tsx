@@ -6,6 +6,7 @@ import { Eye, EyeOff, Search } from 'lucide-react';
 
 interface ChartCardProps {
   title: string;
+  subtitle?: string;
   value: string | number;
   isLoading: boolean;
   children: ReactNode;
@@ -17,6 +18,7 @@ interface ChartCardProps {
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
   title, 
+  subtitle,
   value, 
   isLoading, 
   children,
@@ -26,6 +28,12 @@ const ChartCard: React.FC<ChartCardProps> = ({
   isDraggable = true
 }) => {
   const [isHovering, setIsHovering] = useState(false);
+
+  // Format value - replace dot with comma for decimal numbers
+  const formatDisplayValue = (val: string | number): string => {
+    const stringVal = val.toString();
+    return stringVal.replace('.', ',');
+  };
 
   return (
     <Card 
@@ -37,11 +45,14 @@ const ChartCard: React.FC<ChartCardProps> = ({
         <div className="p-4 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-white flex justify-between items-center">
           <div>
             <h3 className="text-sm sm:text-base font-medium text-orange-700">{title}</h3>
+            {subtitle && (
+              <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+            )}
             {isLoading ? (
               <Skeleton className="h-6 w-28 mt-1 bg-orange-100" />
             ) : (
               <p className="text-lg sm:text-xl font-semibold text-orange-600">
-                {value}
+                {formatDisplayValue(value)}
               </p>
             )}
           </div>

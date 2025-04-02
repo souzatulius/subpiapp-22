@@ -1,147 +1,146 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
-import { getDefaultCards } from './defaultCards';
 
 export interface DashboardConfigResult {
-  actionCards: ActionCardItem[];
-  setActionCards: (cards: ActionCardItem[]) => void;
-  isLoadingDashboard: boolean;
-  viewType: 'dashboard' | 'communication';
+  config: ActionCardItem[];
+  isLoading: boolean;
+  isSaving: boolean;
+  saveConfig: (cards: ActionCardItem[], departmentId?: string) => Promise<boolean>;
 }
 
 export const useDashboardConfig = (
-  userId: string | undefined, 
-  userCoordenaticaoId: string | null, 
-  isLoadingUser: boolean
+  department: string = 'default',
+  viewType: 'dashboard' | 'communication' = 'dashboard'
 ): DashboardConfigResult => {
-  const [defaultCards, setDefaultCards] = useState<ActionCardItem[]>([]);
-  const [actionCards, setActionCards] = useState<ActionCardItem[]>([]);
-  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
-  const [viewType, setViewType] = useState<'dashboard' | 'communication'>('dashboard');
-  
-  // Determine view type based on URL
-  useEffect(() => {
-    const pathname = window.location.pathname;
-    if (pathname.includes('comunicacao')) {
-      setViewType('communication');
-    } else {
-      setViewType('dashboard');
-    }
-    console.log(`Current view type: ${pathname.includes('comunicacao') ? 'communication' : 'dashboard'}`);
-  }, []);
+  const [config, setConfig] = useState<ActionCardItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Load default cards when user data is ready
-  useEffect(() => {
-    if (!isLoadingUser && userCoordenaticaoId) {
-      const defaultCardsList = getDefaultCards(userCoordenaticaoId);
-      setDefaultCards(defaultCardsList);
-    }
-  }, [isLoadingUser, userCoordenaticaoId]);
-  
-  // Load dashboard configuration
-  useEffect(() => {
-    const fetchCustomDashboard = async () => {
-      if (!userId || !userCoordenaticaoId) return;
-      
-      setIsLoadingDashboard(true);
-      console.log(`Loading dashboard for user: ${userId}, department: ${userCoordenaticaoId}, view type: ${viewType}`);
-      
-      try {
-        // First check if there's a department dashboard
-        const { data: deptDashboard, error: deptError } = await supabase
-          .from('department_dashboards')
-          .select('cards_config')
-          .eq('department', userCoordenaticaoId)
-          .eq('view_type', viewType)
-          .maybeSingle();
-        
-        if (!deptError && deptDashboard?.cards_config) {
-          try {
-            const deptCards = JSON.parse(deptDashboard.cards_config);
-            console.log('Loaded department dashboard:', deptCards);
-            setActionCards(deptCards);
-            setIsLoadingDashboard(false);
-            return;
-          } catch (e) {
-            console.error('Error parsing department dashboard config:', e);
-          }
-        } else {
-          console.log('No department dashboard found, checking user dashboard');
+  const fetchDashboardConfig = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      console.log(`Fetching config for department: ${department}, view type: ${viewType}`);
+      const { data, error } = await supabase
+        .from('department_dashboards')
+        .select('cards_config')
+        .eq('department', department)
+        .eq('view_type', viewType)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching dashboard config:', error);
+        setConfig([]);
+      } else if (data && data.cards_config) {
+        try {
+          const parsedCards = JSON.parse(data.cards_config);
+          console.log('Loaded config:', parsedCards);
+          setConfig(parsedCards);
+        } catch (parseError) {
+          console.error('Error parsing cards config JSON:', parseError);
+          setConfig([]);
         }
-        
-        // If no department dashboard, try user's custom dashboard
-        const { data: userDashboard, error: userError } = await supabase
-          .from('user_dashboard')
-          .select('cards_config')
-          .eq('user_id', userId)
-          .eq('view_type', viewType)
-          .maybeSingle();
-        
-        if (!userError && userDashboard?.cards_config) {
-          try {
-            const customCards = JSON.parse(userDashboard.cards_config);
-            console.log('Loaded user dashboard:', customCards);
-            setActionCards(customCards);
-            setIsLoadingDashboard(false);
-            return;
-          } catch (e) {
-            console.error('Error parsing user dashboard config:', e);
-          }
-        } else {
-          console.log('No user dashboard found, checking default dashboard');
-        }
-        
-        // If no custom dashboards found, check for default dashboard
-        const { data: defaultDept, error: defaultError } = await supabase
-          .from('department_dashboards')
-          .select('cards_config')
-          .eq('department', 'default')
-          .eq('view_type', viewType)
-          .maybeSingle();
-          
-        if (!defaultError && defaultDept?.cards_config) {
-          try {
-            const defaultCards = JSON.parse(defaultDept.cards_config);
-            console.log('Loaded default dashboard:', defaultCards);
-            setActionCards(defaultCards);
-            setIsLoadingDashboard(false);
-            return;
-          } catch (e) {
-            console.error('Error parsing default dashboard config:', e);
-          }
-        } else {
-          console.log('No default dashboard found, using fallback cards');
-        }
-        
-        // If all else fails, use the default cards
-        console.log('Using fallback default cards');
-        setActionCards(defaultCards);
-      } catch (err) {
-        console.error('Error loading dashboard:', err);
-        toast({
-          title: "Erro ao carregar dashboard",
-          description: "Não foi possível carregar a configuração do dashboard",
-          variant: "destructive"
-        });
-        setActionCards(defaultCards);
-      } finally {
-        setIsLoadingDashboard(false);
+      } else {
+        console.log('No config found, using empty array');
+        setConfig([]);
       }
-    };
-    
-    // Only fetch custom dashboard if user data is loaded
-    if (!isLoadingUser && defaultCards.length > 0) {
-      fetchCustomDashboard();
+    } catch (err) {
+      console.error('Failed to fetch dashboard config:', err);
+      setConfig([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [userId, userCoordenaticaoId, isLoadingUser, defaultCards, viewType]);
+  }, [department, viewType]);
+
+  useEffect(() => {
+    fetchDashboardConfig();
+  }, [fetchDashboardConfig]);
+
+  const saveConfig = async (cards: ActionCardItem[], departmentId: string = department) => {
+    setIsSaving(true);
+    console.log(`Saving config for department: ${departmentId}, view type: ${viewType}`, cards);
+    
+    try {
+      // First, check if there's an existing config
+      const { data: existingConfig, error: checkError } = await supabase
+        .from('department_dashboards')
+        .select('id')
+        .eq('department', departmentId)
+        .eq('view_type', viewType)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing dashboard config:', checkError);
+        setIsSaving(false);
+        return false;
+      }
+
+      const cardsJson = JSON.stringify(cards);
+
+      if (existingConfig) {
+        // Update existing config
+        const { error: updateError } = await supabase
+          .from('department_dashboards')
+          .update({ cards_config: cardsJson })
+          .eq('id', existingConfig.id);
+
+        if (updateError) {
+          console.error('Error updating dashboard config:', updateError);
+          toast({
+            title: "Erro ao salvar dashboard",
+            description: "Não foi possível salvar a configuração do dashboard",
+            variant: "destructive"
+          });
+          setIsSaving(false);
+          return false;
+        }
+      } else {
+        // Insert new config
+        const { error: insertError } = await supabase
+          .from('department_dashboards')
+          .insert({
+            department: departmentId,
+            view_type: viewType,
+            cards_config: cardsJson
+          });
+
+        if (insertError) {
+          console.error('Error inserting dashboard config:', insertError);
+          toast({
+            title: "Erro ao criar dashboard",
+            description: "Não foi possível criar a configuração do dashboard",
+            variant: "destructive"
+          });
+          setIsSaving(false);
+          return false;
+        }
+      }
+
+      toast({
+        title: "Dashboard salvo",
+        description: "As configurações do dashboard foram salvas com sucesso"
+      });
+      
+      setIsSaving(false);
+      return true;
+    } catch (err) {
+      console.error('Failed to save dashboard config:', err);
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar o dashboard",
+        variant: "destructive"
+      });
+      setIsSaving(false);
+      return false;
+    }
+  };
 
   return {
-    actionCards,
-    setActionCards,
-    isLoadingDashboard,
-    viewType
+    config,
+    isLoading,
+    isSaving,
+    saveConfig
   };
 };
