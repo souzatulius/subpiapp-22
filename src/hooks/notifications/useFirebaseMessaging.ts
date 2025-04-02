@@ -58,7 +58,7 @@ export const useFirebaseMessaging = () => {
               if (notificationData) {
                 // Show a toast notification
                 toast({
-                  title: notificationData.title || 'Nova notificação',
+                  title: notificationData.mensagem?.substring(0, 30) || 'Nova notificação',
                   description: notificationData.mensagem,
                   duration: 5000,
                 });
@@ -88,6 +88,12 @@ export const useFirebaseMessaging = () => {
         .single();
       
       if (error) throw error;
+      
+      // Add title property if it doesn't exist
+      if (data && !data.title) {
+        data.title = data.mensagem?.substring(0, 30) || 'Nova notificação';
+      }
+      
       return data;
     } catch (err) {
       console.error('Error fetching notification details:', err);
@@ -146,7 +152,7 @@ export const useFirebaseMessaging = () => {
                 if (notificationData) {
                   // Show a toast notification
                   toast({
-                    title: notificationData.title || 'Nova notificação',
+                    title: notificationData.mensagem?.substring(0, 30) || 'Nova notificação',
                     description: notificationData.mensagem,
                     duration: 5000,
                   });

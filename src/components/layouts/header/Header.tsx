@@ -1,19 +1,20 @@
 
-// Adicione o import para o NotificationsEnabler
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Menu, X } from 'lucide-react';
 import ProfileMenu from './ProfileMenu';
-import { Logo } from '../Logo';
+import { Logo } from '../../shared/Logo';
 import { NotificationsPopover } from './NotificationsPopover';
 import MobileMenu from './MobileMenu';
 import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
 
 interface HeaderProps {
   hideSearch?: boolean;
+  showControls?: boolean;
+  toggleSidebar?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ hideSearch = false }) => {
+const Header: React.FC<HeaderProps> = ({ hideSearch = false, showControls = true, toggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchValue, setSearchValue] = useState('');
@@ -72,18 +73,23 @@ const Header: React.FC<HeaderProps> = ({ hideSearch = false }) => {
           )}
 
           <div className="flex items-center space-x-2">
-            <NotificationsPopover />
-            <ProfileMenu />
-            <button
-              className="md:hidden text-[#003570]"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+            {showControls && <NotificationsPopover />}
+            {showControls && <ProfileMenu />}
+            {showControls && (
+              <button
+                className="md:hidden text-[#003570]"
+                onClick={() => {
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
+                  if (toggleSidebar) toggleSidebar();
+                }}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            )}
           </div>
         </div>
         
@@ -115,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({ hideSearch = false }) => {
       </div>
 
       {/* Mobile menu */}
-      <MobileMenu isOpen={isMobileMenuOpen} />
+      {showControls && <MobileMenu isOpen={isMobileMenuOpen} />}
     </header>
   );
 };
