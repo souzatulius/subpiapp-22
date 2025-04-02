@@ -6,20 +6,39 @@ import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Smartphone, Monitor } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
   department: string;
   isMobilePreview?: boolean;
   onAddCard?: (card: ActionCardItem) => void;
+  onDepartmentChange?: (department: string) => void;
+  onViewTypeChange?: (isMobile: boolean) => void;
+  onReset?: () => Promise<boolean>;
+  onSave?: () => Promise<boolean>;
+  isSaving?: boolean;
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
   dashboardType, 
   department,
   isMobilePreview = false,
-  onAddCard
+  onAddCard,
+  onDepartmentChange,
+  onViewTypeChange,
+  onReset,
+  onSave,
+  isSaving = false
 }) => {
   const {
     cards,
@@ -42,6 +61,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   } = useDefaultDashboardState(department);
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const { departments } = useDepartments();
   
   // Mock data for dynamic cards in preview
   const [mockData, setMockData] = useState({
@@ -157,47 +177,125 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     }
   };
 
+  const handleViewChange = (isMobile: boolean) => {
+    if (onViewTypeChange) {
+      onViewTypeChange(isMobile);
+    }
+  };
+
+  const handleDepartmentSelect = (value: string) => {
+    if (onDepartmentChange) {
+      onDepartmentChange(value);
+    }
+  };
+
   return (
-    <div 
-      className={`p-4 transition-all duration-300 ${isDraggingOver ? 'bg-blue-50 border-2 border-blue-300 border-dashed' : ''}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <div className={`p-4 bg-gray-100 rounded-lg min-h-[400px] ${isDraggingOver ? 'opacity-70' : ''}`}>
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
-            <p className="text-gray-600">Carregando configuração do dashboard...</p>
-          </div>
-        ) : cards.length === 0 ? (
-          <div className="text-center p-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-            {isDraggingOver ? 
-              "Solte aqui para adicionar o card ao dashboard" : 
-              "Nenhum card configurado. Arraste cards para este espaço para começar a personalizar o dashboard."
-            }
-          </div>
-        ) : (
-          <UnifiedCardGrid 
-            cards={cards}
-            onCardsChange={setCards}
-            onEditCard={handleEditCard}
-            onDeleteCard={handleDeleteCard}
-            onHideCard={handleHideCard}
-            isMobileView={isMobilePreview}
-            isEditMode={true}
-            // Enable special features
-            showSpecialFeatures={true}
-            quickDemandTitle={newDemandTitle}
-            onQuickDemandTitleChange={setNewDemandTitle}
-            onQuickDemandSubmit={handleQuickDemandSubmit}
-            onSearchSubmit={handleSearchSubmit}
-            specialCardsData={{
-              ...specialCardsData,
-              ...mockData // Add mock data for dynamic card previews
-            }}
-          />
-        )}
+    <div className="space-y-4">
+      {/* Controls bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg border">
+        {/* Department selection */}
+        <div className="flex items-center gap-2 flex-grow">
+          <Select value={department} onValueChange={handleDepartmentSelect}>
+            <SelectTrigger className="w-[200px] h-9 text-sm">
+              <SelectValue placeholder="Selecione a coordenação" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Padrão (Todos)</SelectItem>
+              {departments.map(dept => (
+                <SelectItem key={dept.id} value={dept.id}>
+                  {dept.sigla || dept.descricao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleViewChange(!isMobilePreview)}
+            className="h-9"
+          >
+            {isMobilePreview ? (
+              <><Smartphone className="h-4 w-4 mr-1" /> Mobile</>
+            ) : (
+              <><Monitor className="h-4 w-4 mr-1" /> Desktop</>
+            )}
+          </Button>
+        </div>
+        
+        {/* Save/Reset buttons */}
+        <div className="flex items-center gap-2">
+          {onReset && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onReset}
+              className="h-9"
+            >
+              Resetar
+            </Button>
+          )}
+          
+          {onSave && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onSave}
+              disabled={isSaving}
+              className="h-9"
+            >
+              {isSaving ? (
+                <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Salvando...</>
+              ) : (
+                <>Salvar</>
+              )}
+            </Button>
+          )}
+        </div>
+      </div>
+      
+      {/* Dashboard preview area */}
+      <div 
+        className={`p-4 transition-all duration-300 ${isDraggingOver ? 'bg-blue-50 border-2 border-blue-300 border-dashed' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <div className={`p-4 bg-gray-100 rounded-lg min-h-[400px] ${isDraggingOver ? 'opacity-70' : ''}`}>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
+              <p className="text-gray-600">Carregando configuração do dashboard...</p>
+            </div>
+          ) : cards.length === 0 ? (
+            <div className="text-center p-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+              {isDraggingOver ? 
+                "Solte aqui para adicionar o card ao dashboard" : 
+                "Nenhum card configurado. Arraste cards para este espaço para começar a personalizar o dashboard."
+              }
+            </div>
+          ) : (
+            <UnifiedCardGrid 
+              cards={cards}
+              onCardsChange={setCards}
+              onEditCard={handleEditCard}
+              onDeleteCard={handleDeleteCard}
+              onHideCard={handleHideCard}
+              isMobileView={isMobilePreview}
+              isEditMode={true}
+              // Enable special features
+              showSpecialFeatures={true}
+              quickDemandTitle={newDemandTitle}
+              onQuickDemandTitleChange={setNewDemandTitle}
+              onQuickDemandSubmit={handleQuickDemandSubmit}
+              onSearchSubmit={handleSearchSubmit}
+              specialCardsData={{
+                ...specialCardsData,
+                ...mockData // Add mock data for dynamic card previews
+              }}
+            />
+          )}
+        </div>
       </div>
       
       {isDraggingOver && (

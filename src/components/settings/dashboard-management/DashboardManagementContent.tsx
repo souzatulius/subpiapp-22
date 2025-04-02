@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import KPICard from './KPICard';
 import DynamicListCard from './DynamicListCard';
 import OriginSelectionCard from './OriginSelectionCard';
@@ -15,16 +15,22 @@ import { Save, RefreshCcw } from 'lucide-react';
 import DraggableCard from './DraggableCard';
 import { ActionCardItem } from '@/types/dashboard';
 import { v4 as uuidv4 } from 'uuid';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@radix-ui/react-select';
+import { Plus } from 'lucide-react';
 
 const DashboardManagementContent: React.FC = () => {
   const { kpis } = useDashboardKPIs();
   const { lists } = useDashboardLists();
   const { originOptions } = useOriginOptions();
   const { availableCards, dynamicCards, standardCards } = useAvailableCards();
+  const [isMobilePreview, setIsMobilePreview] = useState(false);
+  
   const {
     config,
     selectedDepartment,
     setSelectedDepartment,
+    selectedViewType,
+    setSelectedViewType,
     isLoading,
     isSaving,
     saveConfig,
@@ -46,6 +52,7 @@ const DashboardManagementContent: React.FC = () => {
         variant: "destructive"
       });
     }
+    return success;
   };
 
   const handleResetDashboards = async () => {
@@ -64,10 +71,11 @@ const DashboardManagementContent: React.FC = () => {
           variant: "destructive"
         });
       }
+      return success;
     }
+    return false;
   };
 
-  // Define dynamic cards for dragging
   const kpiCards: ActionCardItem[] = [
     {
       id: `kpi-press-requests-${uuidv4()}`,
@@ -110,7 +118,6 @@ const DashboardManagementContent: React.FC = () => {
     }
   ];
 
-  // Create dynamic list cards
   const listCards: ActionCardItem[] = [
     {
       id: `list-demands-${uuidv4()}`,
@@ -136,7 +143,6 @@ const DashboardManagementContent: React.FC = () => {
     }
   ];
 
-  // Create origin selection card
   const originCard: ActionCardItem = {
     id: `origin-selection-${uuidv4()}`,
     title: "De onde vem a demanda?",
@@ -149,7 +155,6 @@ const DashboardManagementContent: React.FC = () => {
     type: "origin_selection"
   };
 
-  // Create smart search card
   const searchCard: ActionCardItem = {
     id: `smart-search-${uuidv4()}`,
     title: "O que vamos fazer?",
@@ -164,12 +169,10 @@ const DashboardManagementContent: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Smart Search */}
       <div className="w-full h-20">
         <SmartSearchCard placeholder="O que vamos fazer?" />
       </div>
       
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <KPICard 
           title="Solicitações de imprensa"
@@ -199,7 +202,6 @@ const DashboardManagementContent: React.FC = () => {
         />
       </div>
       
-      {/* Dynamic Lists and Origin Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="h-80">
           <DynamicListCard 
@@ -231,32 +233,32 @@ const DashboardManagementContent: React.FC = () => {
         </div>
       </div>
       
-      {/* Dashboard Preview and Management */}
       <div className="mt-8 space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded-lg">
           <h2 className="text-lg font-semibold mb-2 md:mb-0">Gerenciar Dashboard de Comunicação</h2>
           
           <div className="flex gap-2">
+            <Select
+              value={selectedViewType}
+              onValueChange={(value) => setSelectedViewType(value as 'dashboard' | 'communication')}
+              className="w-[160px]"
+            >
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Tipo de dashboard" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dashboard">Principal</SelectItem>
+                <SelectItem value="communication">Comunicação</SelectItem>
+              </SelectContent>
+            </Select>
+            
             <Button
               variant="outline"
               size="sm"
-              onClick={handleResetDashboards}
-              disabled={isSaving}
-              className="flex items-center gap-1"
+              onClick={() => standardCards.length > 0 && onAddCard(standardCards[0])}
+              className="h-9"
             >
-              <RefreshCcw className="h-4 w-4" />
-              <span>Redefinir todos</span>
-            </Button>
-            
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleSaveConfig}
-              disabled={isSaving}
-              className="flex items-center gap-1"
-            >
-              <Save className="h-4 w-4" />
-              <span>{isSaving ? "Salvando..." : "Salvar configuração"}</span>
+              <Plus className="h-4 w-4 mr-1" /> Adicionar
             </Button>
           </div>
         </div>
@@ -288,7 +290,6 @@ const DashboardManagementContent: React.FC = () => {
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-500 mb-1">KPIs</h4>
                 
-                {/* KPI Dynamic Cards */}
                 <div className="space-y-2 mb-4">
                   {kpiCards.map(card => (
                     <DraggableCard 
@@ -311,7 +312,6 @@ const DashboardManagementContent: React.FC = () => {
                 </div>
                 
                 <h4 className="text-sm font-medium text-gray-500 mb-1">Listas</h4>
-                {/* List Dynamic Cards */}
                 <div className="space-y-2 mb-4">
                   {listCards.map(card => (
                     <DraggableCard 
@@ -334,7 +334,6 @@ const DashboardManagementContent: React.FC = () => {
                 </div>
                 
                 <h4 className="text-sm font-medium text-gray-500 mb-1">Seleção de Origem</h4>
-                {/* Origin Selection Card */}
                 <DraggableCard 
                   card={originCard}
                   isDynamic={true}
@@ -352,7 +351,6 @@ const DashboardManagementContent: React.FC = () => {
                 </DraggableCard>
                 
                 <h4 className="text-sm font-medium text-gray-500 mb-1">Busca Inteligente</h4>
-                {/* Smart Search Card */}
                 <DraggableCard 
                   card={searchCard}
                   isDynamic={true}
@@ -372,10 +370,16 @@ const DashboardManagementContent: React.FC = () => {
           <div className="lg:col-span-9">
             <div className="bg-white p-4 rounded-lg border">
               <h3 className="font-medium mb-3">Preview do Dashboard</h3>
-              <div className="bg-gray-100 rounded-lg p-2">
+              <div className="bg-gray-100 rounded-lg">
                 <DashboardPreview 
-                  dashboardType="communication" 
+                  dashboardType={selectedViewType}
                   department={selectedDepartment}
+                  isMobilePreview={isMobilePreview}
+                  onDepartmentChange={setSelectedDepartment}
+                  onViewTypeChange={setIsMobilePreview}
+                  onReset={handleResetDashboards}
+                  onSave={handleSaveConfig}
+                  isSaving={isSaving}
                 />
               </div>
             </div>
@@ -384,6 +388,17 @@ const DashboardManagementContent: React.FC = () => {
       </div>
     </div>
   );
+  
+  function onAddCard(card: ActionCardItem) {
+    const newCard = {
+      ...card,
+      id: `card-${uuidv4()}`,
+    };
+    
+    if (saveConfig) {
+      saveConfig([...config, newCard]);
+    }
+  }
 };
 
 export default DashboardManagementContent;

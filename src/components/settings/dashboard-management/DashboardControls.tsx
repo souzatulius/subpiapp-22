@@ -1,10 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Save, Plus, Smartphone, Monitor, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Save, RefreshCw, Loader2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -12,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -25,19 +22,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface Department {
-  id: string;
-  descricao: string;
-  sigla: string;
-}
-
 interface DashboardControlsProps {
-  selectedDepartment: string;
-  setSelectedDepartment: (departmentId: string) => void;
   selectedViewType: 'dashboard' | 'communication';
   setSelectedViewType: (viewType: 'dashboard' | 'communication') => void;
-  isMobilePreview: boolean;
-  setIsMobilePreview: (isMobile: boolean) => void;
   onAddNewCard: () => void;
   onSaveDashboard: () => Promise<boolean>;
   onResetDashboards?: () => Promise<boolean>;
@@ -45,52 +32,15 @@ interface DashboardControlsProps {
 }
 
 const DashboardControls: React.FC<DashboardControlsProps> = ({
-  selectedDepartment,
-  setSelectedDepartment,
   selectedViewType,
   setSelectedViewType,
-  isMobilePreview,
-  setIsMobilePreview,
   onAddNewCard,
   onSaveDashboard,
   onResetDashboards,
   isSaving
 }) => {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('coordenacoes')
-          .select('id, descricao, sigla')
-          .order('descricao');
-
-        if (error) throw error;
-        setDepartments(data || []);
-
-        // If no department is selected yet, select the first one or default
-        if (!selectedDepartment && data && data.length > 0) {
-          setSelectedDepartment(data[0].id);
-        }
-      } catch (error) {
-        console.error('Error fetching departments:', error);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar as coordenações',
-          variant: 'destructive'
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDepartments();
-  }, []);
 
   const handleSave = async () => {
     const result = await onSaveDashboard();
@@ -125,28 +75,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="department">Coordenação</Label>
-            <Select
-              value={selectedDepartment}
-              onValueChange={setSelectedDepartment}
-              disabled={isLoading}
-            >
-              <SelectTrigger id="department">
-                <SelectValue placeholder="Selecione uma coordenação" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">Padrão (Todos)</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.sigla || dept.descricao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="viewType">Tipo de Dashboard</Label>
             <Select
               value={selectedViewType}
               onValueChange={(value) => setSelectedViewType(value as 'dashboard' | 'communication')}
@@ -161,26 +89,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
             </Select>
           </div>
 
-          <div className="flex items-center justify-between pt-2">
-            <Label htmlFor="mobilePreview" className="cursor-pointer">
-              <div className="flex items-center">
-                {isMobilePreview ? (
-                  <Smartphone className="mr-2 h-5 w-5 text-orange-500" />
-                ) : (
-                  <Monitor className="mr-2 h-5 w-5 text-blue-500" />
-                )}
-                <span>
-                  {isMobilePreview ? "Visualização Mobile" : "Visualização Desktop"}
-                </span>
-              </div>
-            </Label>
-            <Switch
-              id="mobilePreview"
-              checked={isMobilePreview}
-              onCheckedChange={setIsMobilePreview}
-            />
-          </div>
-
           <div className="flex flex-col space-y-2 pt-4">
             <Button 
               variant="outline" 
@@ -188,32 +96,6 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
               onClick={onAddNewCard}
             >
               <Plus className="h-4 w-4 mr-2" /> Adicionar
-            </Button>
-            
-            {onResetDashboards && (
-              <Button 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={() => setIsResetDialogOpen(true)}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" /> Resetar
-              </Button>
-            )}
-            
-            <Button 
-              onClick={handleSave} 
-              disabled={isSaving}
-              className="w-full justify-start"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" /> Salvar
-                </>
-              )}
             </Button>
           </div>
         </CardContent>

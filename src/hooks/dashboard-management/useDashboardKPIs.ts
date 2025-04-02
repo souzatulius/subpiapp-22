@@ -127,17 +127,16 @@ export const useDashboardKPIs = () => {
         }
 
         // Calculate percentage change
-        const todayValue = todayCount;
-        const yesterdayValue = yesterdayCount;
-        const percentageChange = yesterdayValue === 0 
-          ? 0 
-          : ((todayValue - yesterdayValue) / yesterdayValue) * 100;
+        let percentageChange = 0;
+        if (yesterdayCount > 0) {
+          percentageChange = ((todayCount - yesterdayCount) / yesterdayCount) * 100;
+        }
 
         // Update KPIs state
         setKpis({
           pressRequests: {
-            today: todayValue,
-            yesterday: yesterdayValue,
+            today: todayCount,
+            yesterday: yesterdayCount,
             percentageChange,
             loading: false
           },
