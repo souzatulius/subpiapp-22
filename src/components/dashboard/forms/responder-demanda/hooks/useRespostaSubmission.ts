@@ -10,7 +10,7 @@ import { useRespostaValidation } from './useRespostaValidation';
 interface SubmissionOptions {
   onSuccess?: () => void;
   onError?: (error: any) => void;
-  showSuccessToast?: boolean; // Added option to control toast display
+  showSuccessToast?: boolean; // Option to control toast display
 }
 
 export const useRespostaSubmission = (options?: SubmissionOptions) => {

@@ -17,7 +17,6 @@ export const useRespostaForm = (
   const { user } = useAuth();
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [comentarios, setComentarios] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
   
   // Initialize useRespostaSubmission hook with showSuccessToast=false
   // to prevent duplicate toasts as we'll show our own toast here
@@ -43,8 +42,6 @@ export const useRespostaForm = (
     }
     
     try {
-      setIsLoading(true);
-      
       // Use the submitResposta function from useRespostaSubmission
       const success = await submitResposta(selectedDemanda, resposta, comentarios);
       
@@ -69,8 +66,6 @@ export const useRespostaForm = (
         description: error.message || "Ocorreu um erro ao processar sua solicitação.",
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -79,7 +74,7 @@ export const useRespostaForm = (
     setResposta,
     comentarios,
     setComentarios,
-    isLoading: isLoading || isSubmitting,
+    isLoading: isSubmitting,
     handleSubmitResposta,
     handleRespostaChange
   };

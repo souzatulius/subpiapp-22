@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,7 +16,6 @@ interface NotaFormProps {
   setTitulo: (titulo: string) => void;
   texto: string;
   setTexto: (texto: string) => void;
-  handleBackToSelection: () => void;
   handleSubmit: () => void;
   isSubmitting: boolean;
   selectedDemanda?: Demand | null;
@@ -28,7 +27,6 @@ const NotaForm: React.FC<NotaFormProps> = ({
   setTitulo,
   texto,
   setTexto,
-  handleBackToSelection,
   handleSubmit,
   isSubmitting,
   selectedDemanda,
@@ -129,16 +127,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
   };
 
   return (
-    <>
-      <Button 
-        variant="ghost" 
-        onClick={handleBackToSelection}
-        className="mb-2 -ml-2 text-gray-600"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        Voltar para seleção
-      </Button>
-      
+    <>      
       <div className="flex justify-between items-center mt-6">
         <div className="flex-1">
           <Label htmlFor="titulo">Título da Nota Oficial</Label>
@@ -160,6 +149,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
           value={titulo} 
           onChange={(e) => setTitulo(e.target.value)} 
           placeholder="Informe um título claro e objetivo"
+          className="rounded-lg"
         />
       </div>
       
@@ -171,6 +161,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
           onChange={(e) => setTexto(e.target.value)} 
           placeholder="Digite o conteúdo da nota oficial..."
           rows={10}
+          className="rounded-lg"
         />
       </div>
       
@@ -178,7 +169,7 @@ const NotaForm: React.FC<NotaFormProps> = ({
         <Button 
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="bg-[#003570] hover:bg-[#002855]"
+          className="bg-[#003570] hover:bg-[#002855] rounded-lg"
         >
           {isSubmitting ? "Enviando..." : "Enviar para Aprovação"}
         </Button>

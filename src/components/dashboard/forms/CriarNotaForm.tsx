@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, X } from 'lucide-react';
 import { useDemandasData } from '@/components/dashboard/forms/criar-nota/useDemandasData';
 import { useNotaForm } from '@/hooks/dashboard/forms/criar-nota/useNotaForm';
 import DemandaSelection from './criar-nota/DemandaSelection';
@@ -31,7 +29,6 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
     step,
     formattedResponses,
     handleDemandaSelect,
-    handleBackToSelection,
     handleSubmit
   } = useNotaForm(onClose);
   
@@ -46,7 +43,7 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
           isLoading={isLoading} 
         />
       ) : (
-        <Card className="border border-gray-200">
+        <Card className="border border-gray-200 rounded-lg shadow-sm">
           <CardContent className="p-6">
             <div className="space-y-6">
               {selectedDemanda && (
@@ -61,7 +58,6 @@ const CriarNotaForm: React.FC<CriarNotaFormProps> = ({
                 setTitulo={setTitulo} 
                 texto={texto} 
                 setTexto={setTexto} 
-                handleBackToSelection={handleBackToSelection} 
                 handleSubmit={handleSubmit} 
                 isSubmitting={isSubmitting} 
                 selectedDemanda={selectedDemanda} 
