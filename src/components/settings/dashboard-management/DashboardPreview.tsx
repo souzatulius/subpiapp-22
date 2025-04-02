@@ -4,7 +4,7 @@ import CardCustomizationModal from '@/components/dashboard/card-customization/Ca
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
 import { v4 as uuidv4 } from 'uuid';
-import { Loader2, Smartphone, Monitor } from 'lucide-react';
+import { Loader2, Smartphone, Monitor, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Select,
@@ -16,6 +16,8 @@ import {
 import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -196,6 +198,10 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   const handlePageTypeSelect = (value: string) => {
     if (value === 'inicial' || value === 'comunicacao') {
       setSelectedPageType(value);
+      const newViewType = value === 'inicial' ? 'dashboard' : 'communication';
+      
+      console.log(`Changing page type to ${value}, viewType: ${newViewType}`);
+      
       if (value === 'inicial' && dashboardType !== 'dashboard') {
         if (onDepartmentChange) {
           onDepartmentChange('dashboard');
@@ -329,6 +335,26 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               <><Monitor className="h-4 w-4 mr-1" /> Desktop</>
             )}
           </Button>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="cursor-help bg-white/80 hover:bg-white">
+                  <Info className="h-3 w-3 mr-1" /> Debug
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-md bg-black/90 text-white p-3">
+                <div className="space-y-2 text-xs">
+                  <p><strong>Selected Page Type:</strong> {selectedPageType}</p>
+                  <p><strong>Dashboard Type:</strong> {dashboardType}</p>
+                  <p><strong>Department ID:</strong> {department}</p>
+                  <p><strong>Saving to:</strong> department_dashboards table</p>
+                  <p><strong>View Type:</strong> {selectedPageType === 'inicial' ? 'dashboard' : 'communication'}</p>
+                  <p className="text-yellow-300 font-medium">Make sure page type matches the actual dashboard you want to customize!</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         
         <div className="flex items-center gap-2">

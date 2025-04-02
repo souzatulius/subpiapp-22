@@ -10,11 +10,18 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
   const [config, setConfig] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [debugInfo, setDebugInfo] = useState({
+    lastFetched: '',
+    isDefault: true,
+    lastSaved: ''
+  });
 
   const fetchDashboardConfig = useCallback(async () => {
     setIsLoading(true);
     try {
       console.log(`Fetching config for department: ${selectedDepartment}, view type: ${selectedViewType}`);
+      
+      // First try to get department-specific config
       const { data, error } = await supabase
         .from('department_dashboards')
         .select('cards_config')
@@ -22,21 +29,39 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
         .eq('view_type', selectedViewType)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching dashboard config:', error);
-        setConfig([]);
-      } else if (data && data.cards_config) {
+      if (!error && data && data.cards_config) {
         try {
           const parsedCards = JSON.parse(data.cards_config);
-          console.log('Loaded config:', parsedCards);
+          console.log(`Loaded ${selectedDepartment} config for ${selectedViewType}:`, parsedCards.length, 'cards');
           setConfig(parsedCards);
+          setDebugInfo(prev => ({
+            ...prev,
+            lastFetched: `${selectedDepartment}/${selectedViewType}`,
+            isDefault: selectedDepartment === 'default'
+          }));
         } catch (parseError) {
           console.error('Error parsing cards config JSON:', parseError);
-          setConfig([]);
+          // If there's a parsing error, try to fall back to default config
+          if (selectedDepartment !== 'default') {
+            fetchDefaultConfig();
+          } else {
+            setConfig([]);
+          }
         }
       } else {
-        console.log('No config found, using empty array');
-        setConfig([]);
+        // If no department-specific config or error, fall back to default
+        // Only if we're not already trying to fetch the default
+        if (selectedDepartment !== 'default') {
+          fetchDefaultConfig();
+        } else {
+          console.log('No config found for default, using empty array');
+          setConfig([]);
+          setDebugInfo(prev => ({
+            ...prev,
+            lastFetched: 'none/empty',
+            isDefault: true
+          }));
+        }
       }
     } catch (err) {
       console.error('Failed to fetch dashboard config:', err);
@@ -46,13 +71,49 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
     }
   }, [selectedDepartment, selectedViewType]);
 
+  // Separate function to fetch default config when department-specific is not found
+  const fetchDefaultConfig = async () => {
+    try {
+      console.log(`Fetching default config for view type: ${selectedViewType}`);
+      
+      const { data, error } = await supabase
+        .from('department_dashboards')
+        .select('cards_config')
+        .eq('department', 'default')
+        .eq('view_type', selectedViewType)
+        .maybeSingle();
+
+      if (!error && data && data.cards_config) {
+        try {
+          const parsedCards = JSON.parse(data.cards_config);
+          console.log(`Loaded default config for ${selectedViewType}:`, parsedCards.length, 'cards');
+          setConfig(parsedCards);
+          setDebugInfo(prev => ({
+            ...prev,
+            lastFetched: `default/${selectedViewType}`,
+            isDefault: true
+          }));
+        } catch (parseError) {
+          console.error('Error parsing default config JSON:', parseError);
+          setConfig([]);
+        }
+      } else {
+        console.log(`No default config found for ${selectedViewType}, using empty array`);
+        setConfig([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch default dashboard config:', err);
+      setConfig([]);
+    }
+  };
+
   useEffect(() => {
     fetchDashboardConfig();
   }, [fetchDashboardConfig]);
 
   const saveConfig = async (cards: ActionCardItem[], departmentId: string = selectedDepartment) => {
     setIsSaving(true);
-    console.log(`Saving config for department: ${departmentId}, view type: ${selectedViewType}`, cards);
+    console.log(`Saving config for department: ${departmentId}, view type: ${selectedViewType}`, cards.length, 'cards');
     
     try {
       // First, check if there's an existing config
@@ -72,6 +133,7 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
       if (existingConfig) {
         // Update existing config
+        console.log(`Updating existing config: ${departmentId}/${selectedViewType}`);
         const { error: updateError } = await supabase
           .from('department_dashboards')
           .update({ cards_config: cardsJson })
@@ -88,6 +150,7 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
         }
       } else {
         // Insert new config
+        console.log(`Creating new config: ${departmentId}/${selectedViewType}`);
         const { error: insertError } = await supabase
           .from('department_dashboards')
           .insert({
@@ -107,10 +170,10 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
         }
       }
 
-      // If this is the default dashboard, also update the system_default flag
-      if (departmentId === 'default') {
-        await saveDefaultDashboard(cards);
-      }
+      setDebugInfo(prev => ({
+        ...prev,
+        lastSaved: `${departmentId}/${selectedViewType}`
+      }));
 
       toast({
         title: "Dashboard salvo",
@@ -134,7 +197,8 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
   const saveDefaultDashboard = async (cards: ActionCardItem[] = config) => {
     try {
-      // Usando uma chamada direta para a tabela ao invés da função RPC
+      // Explicitly saving to default department
+      console.log(`Saving default config for ${selectedViewType}`);
       const { error } = await supabase
         .from('department_dashboards')
         .update({ cards_config: JSON.stringify(cards) })
@@ -145,6 +209,11 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
         console.error('Error saving default dashboard:', error);
         return false;
       }
+
+      setDebugInfo(prev => ({
+        ...prev,
+        lastSaved: `default/${selectedViewType}`
+      }));
 
       return true;
     } catch (err) {
@@ -204,6 +273,7 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
     saveConfig,
     saveDefaultDashboard,
     resetAllDashboards,
-    fetchDashboardConfig
+    fetchDashboardConfig,
+    debugInfo
   };
 };

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -10,11 +10,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import { useEffect, useCallback } from 'react';
-import { useUserData } from '@/hooks/useUserData';
-import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 
 const Dashboard = () => {
   // Start with sidebar collapsed
@@ -22,42 +23,70 @@ const Dashboard = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const { firstName } = useDashboardState();
-  const { profile } = useUserData();
   
   const [dashboardCards, setDashboardCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userDepartment, setUserDepartment] = useState<string | null>(null);
+  const [configSource, setConfigSource] = useState<'default' | 'custom'>('default');
+  const [debugInfo, setDebugInfo] = useState({ viewType: 'dashboard', departmentId: '', isDefault: true });
+  
+  // Get user department from user profile
+  const getUserDepartment = useCallback(async () => {
+    if (!user) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('coordenacao_id')
+        .eq('id', user.id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching user department:', error);
+        return null;
+      }
+      
+      return data?.coordenacao_id || null;
+    } catch (e) {
+      console.error('Error in getUserDepartment:', e);
+      return null;
+    }
+  }, [user]);
   
   // Load dashboard configuration based on user's department
   const loadDashboardConfig = useCallback(async () => {
     setIsLoading(true);
     try {
       // Determine the user's department ID, fall back to default if not available
-      const departmentId = profile?.coordenacao_id || 'default';
-      console.log('Loading dashboard config for department:', departmentId);
+      const departmentId = userDepartment || 'default';
+      const viewType = 'dashboard';
       
+      console.log('Loading dashboard config for department:', departmentId, 'viewType:', viewType);
+      setDebugInfo({ viewType, departmentId, isDefault: departmentId === 'default' });
+      
+      // First try to get department-specific config
       const { data, error } = await supabase
         .from('department_dashboards')
         .select('cards_config')
         .eq('department', departmentId)
-        .eq('view_type', 'dashboard')
+        .eq('view_type', viewType)
         .maybeSingle();
         
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error loading dashboard config:', error);
-        setDashboardCards([]);
-      } else if (data && data.cards_config) {
+      if (!error && data && data.cards_config) {
         try {
           // Parse the configuration and set cards
           const config = JSON.parse(data.cards_config);
-          console.log('Loaded dashboard cards:', config.length);
+          console.log('Loaded department-specific dashboard cards:', config.length);
           setDashboardCards(config);
+          setConfigSource('custom');
+          setDebugInfo(prev => ({ ...prev, isDefault: false }));
         } catch (e) {
           console.error('Error parsing dashboard config:', e);
-          setDashboardCards([]);
+          fetchDefaultConfig();
         }
       } else {
-        console.log('No dashboard config found, using empty array');
-        setDashboardCards([]);
+        // If no department-specific config or error, fall back to default
+        fetchDefaultConfig();
       }
     } catch (e) {
       console.error('Error in loadDashboardConfig:', e);
@@ -65,17 +94,81 @@ const Dashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [profile?.coordenacao_id]);
+  }, [userDepartment]);
   
+  // Get default dashboard config as fallback
+  const fetchDefaultConfig = async () => {
+    try {
+      console.log('Fetching default dashboard config');
+      const { data, error } = await supabase
+        .from('department_dashboards')
+        .select('cards_config')
+        .eq('department', 'default')
+        .eq('view_type', 'dashboard')
+        .maybeSingle();
+        
+      if (!error && data && data.cards_config) {
+        try {
+          const config = JSON.parse(data.cards_config);
+          console.log('Loaded default dashboard cards:', config.length);
+          setDashboardCards(config);
+          setConfigSource('default');
+          setDebugInfo(prev => ({ ...prev, isDefault: true }));
+        } catch (e) {
+          console.error('Error parsing default dashboard config:', e);
+          setDashboardCards([]);
+        }
+      } else {
+        console.log('No default dashboard config found, using empty array');
+        setDashboardCards([]);
+      }
+    } catch (e) {
+      console.error('Error in fetchDefaultConfig:', e);
+      setDashboardCards([]);
+    }
+  };
+  
+  // Load user department when user is available
+  useEffect(() => {
+    const loadUserDepartment = async () => {
+      if (user) {
+        const department = await getUserDepartment();
+        setUserDepartment(department);
+      }
+    };
+    
+    loadUserDepartment();
+  }, [user, getUserDepartment]);
+  
+  // Load dashboard config when user department changes
   useEffect(() => {
     if (user) {
       loadDashboardConfig();
     }
-  }, [user, loadDashboardConfig]);
+  }, [user, loadDashboardConfig, userDepartment]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  const DebugBadge = () => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-white/50 hover:bg-white/80 cursor-help">
+            {configSource === 'custom' ? 'Custom' : 'Default'}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="left" className="max-w-sm bg-black/90 text-white p-3">
+          <div className="space-y-1 text-xs">
+            <p><strong>ViewType:</strong> {debugInfo.viewType}</p>
+            <p><strong>Department:</strong> {debugInfo.departmentId}</p>
+            <p><strong>Config:</strong> {debugInfo.isDefault ? 'Default' : 'Custom'}</p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -88,12 +181,15 @@ const Dashboard = () => {
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
-            <WelcomeCard
-              title={`Olá, ${firstName}!`}
-              description="Bem-vindo ao seu dashboard personalizado."
-              icon={<Home className="h-6 w-6 mr-2" />}
-              color="bg-gradient-to-r from-blue-800 to-blue-950"
-            />
+            <div className="relative">
+              <DebugBadge />
+              <WelcomeCard
+                title={`Olá, ${firstName}!`}
+                description="Bem-vindo ao seu dashboard personalizado."
+                icon={<Home className="h-6 w-6 mr-2" />}
+                color="bg-gradient-to-r from-blue-800 to-blue-950"
+              />
+            </div>
             
             {/* Display dashboard cards */}
             <div className="mt-6">
