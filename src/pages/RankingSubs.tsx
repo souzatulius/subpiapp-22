@@ -28,8 +28,8 @@ const RankingSubs = () => {
         
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
-          <div className="p-6">
-            <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="p-6">
               <h1 className="text-2xl font-bold text-gray-800 mb-6">Ranking das Subs</h1>
               <RankingContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
             </div>

@@ -3,7 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 
 interface SettingsSectionLayoutProps {
   title: string;

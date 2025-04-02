@@ -25,8 +25,10 @@ const DashboardLayout: React.FC = () => {
         
         <main className="flex-1 overflow-auto w-full">
           <BreadcrumbBar />
-          <div className="p-6 pb-20 md:pb-6 max-w-7xl mx-auto">
-            <Outlet />
+          <div className="max-w-7xl mx-auto">
+            <div className="p-6 pb-20 md:pb-6">
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>

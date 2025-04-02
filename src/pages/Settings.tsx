@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -48,22 +47,20 @@ const Settings = () => {
           
           <main className="flex-1 overflow-hidden">
             <BreadcrumbBar onSettingsClick={handleBackClick} />
-            <div className="w-full h-full">
+            <div className="max-w-7xl mx-auto">
               <div className="overflow-y-auto p-6 pb-24 md:pb-6">
-                <div className="max-w-7xl mx-auto">
-                  {activeSection === 'dashboard' ? (
-                    <div>
-                      <SettingsDashboard searchQuery={searchQuery} />
-                    </div>
-                  ) : (
-                    <div>
-                      <h1 className={`text-2xl font-bold mb-6`}>
-                        {getSectionTitle(activeSection)}
-                      </h1>
-                      <SettingsContent activeSection={activeSection} />
-                    </div>
-                  )}
-                </div>
+                {activeSection === 'dashboard' ? (
+                  <div>
+                    <SettingsDashboard searchQuery={searchQuery} />
+                  </div>
+                ) : (
+                  <div>
+                    <h1 className={`text-2xl font-bold mb-6`}>
+                      {getSectionTitle(activeSection)}
+                    </h1>
+                    <SettingsContent activeSection={activeSection} />
+                  </div>
+                )}
               </div>
             </div>
           </main>
