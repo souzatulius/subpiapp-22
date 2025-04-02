@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Session, User } from '@supabase/supabase-js';
@@ -14,7 +15,7 @@ export const signUp = async (email: string, password: string, userData: any) => 
           birthday: userData.aniversario,
           whatsapp: userData.whatsapp,
           role_id: userData.cargo_id, // Store the ID of the cargo
-          area_id: userData.area_coordenacao_id, // Store the ID of the area
+          area_id: userData.coordenacao_id, // Store the ID of the area
         },
         emailRedirectTo: `${window.location.origin}/email-verified`,
       }
