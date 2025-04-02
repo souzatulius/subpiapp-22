@@ -122,7 +122,7 @@ export const useChartComponents = () => {
         { name: 'Mai', value: 24 },
         { name: 'Jun', value: 28 }
       ],
-      temasTecnicos: [
+      temas: [
         { name: 'Eventos', value: 28 },
         { name: 'Obras', value: 22 },
         { name: 'Saúde', value: 18 },
@@ -192,7 +192,7 @@ export const useChartComponents = () => {
       ),
       notasPorTema: (
         <PieChart 
-          data={reportsData?.temasTecnicos?.length ? reportsData.temasTecnicos : sampleData.temasTecnicos}
+          data={reportsData?.statuses?.length ? reportsData.statuses : sampleData.temas}
           colors={['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe']}
         />
       ),
