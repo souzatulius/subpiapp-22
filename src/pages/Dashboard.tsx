@@ -16,7 +16,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   
-  const { firstName } = useDashboardState(user?.id);
+  const { firstName } = useDashboardState();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);

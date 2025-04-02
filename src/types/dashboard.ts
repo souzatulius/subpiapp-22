@@ -34,6 +34,7 @@ export interface ActionCardItem {
   isNewCardButton?: boolean;
   isOverdueDemands?: boolean;
   isPendingActions?: boolean;
+  isStandard?: boolean;
   hasSubmenu?: boolean;
   hasBadge?: boolean;
   badgeValue?: string;

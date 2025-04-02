@@ -1,15 +1,14 @@
 
 import React from 'react';
 import SortableActionCard from '../SortableActionCard';
-import QuickDemandCard from '../QuickDemandCard';
-import SmartSearchCard from '../SmartSearchCard';
-import OverdueDemandsCard from '../cards/OverdueDemandsCard';
-import PendingActionsCard from '../cards/PendingActionsCard';
-import NewCardButton from '../cards/NewCardButton';
 import { ActionCardItem } from '@/types/dashboard';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useDepartmentData } from './hooks/useDepartmentData';
+import StandardCard from './card-types/StandardCard';
+import OverdueDemandsCardWrapper from './card-types/OverdueDemandsCardWrapper';
+import PendingActionsCardWrapper from './card-types/PendingActionsCardWrapper';
+import SearchCard from './card-types/SearchCard';
+import QuickDemandCardWrapper from './card-types/QuickDemandCardWrapper';
+import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -42,167 +41,84 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   isMobileView = false,
   specialCardsData
 }) => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [userDepartment, setUserDepartment] = React.useState<string | null>(null);
-  const [isComunicacao, setIsComunicacao] = React.useState<boolean>(false);
-  
-  React.useEffect(() => {
-    const fetchUserDepartment = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('usuarios')
-          .select('coordenacao_id')
-          .eq('id', user.id)
-          .single();
-          
-        if (error) {
-          console.error('Error fetching user department:', error);
-          return;
-        }
-        
-        if (data) {
-          setUserDepartment(data.coordenacao_id);
-          setIsComunicacao(data.coordenacao_id === 'comunicacao');
-        }
-      } catch (error) {
-        console.error('Failed to fetch user department:', error);
-      }
-    };
-    
-    fetchUserDepartment();
-  }, [user]);
+  const { userDepartment, isComunicacao } = useDepartmentData();
 
-  // Handle card click - navigate to the path if defined
-  const handleCardClick = () => {
-    if (card.path) {
-      navigate(card.path);
-    }
-  };
-  
-  // Function to handle origin selection and navigate to form
-  const handleOriginSelect = (originId: string) => {
-    navigate(`/dashboard/comunicacao/cadastrar?origem_id=${originId}`);
-  };
-
-  // Map specific card types to their respective components
-  if (card.isQuickDemand) {
-    return (
-      <SortableActionCard 
-        key={card.id} 
-        card={card} 
-        onEdit={onEdit}
-        onDelete={onDelete}
-        isMobileView={isMobileView}
-      >
-        <QuickDemandCard 
+  // Render the appropriate card content based on the card type
+  const renderCardContent = () => {
+    if (card.isQuickDemand) {
+      return (
+        <QuickDemandCardWrapper 
+          card={card}
           value={quickDemandTitle}
           onChange={onQuickDemandTitleChange}
           onSubmit={onQuickDemandSubmit}
         />
-      </SortableActionCard>
-    );
-  }
-  
-  if (card.isSearch) {
-    return (
-      <SortableActionCard 
-        key={card.id} 
-        card={card} 
-        onEdit={onEdit}
-        onDelete={onDelete}
-        isMobileView={isMobileView}
-      >
-        <SmartSearchCard
-          placeholder={card.title}
-          onSearch={onSearchSubmit}
+      );
+    }
+    
+    if (card.isSearch) {
+      return (
+        <SearchCard
+          card={card}
+          onSearchSubmit={onSearchSubmit}
         />
-      </SortableActionCard>
-    );
-  }
-  
-  if (card.isOverdueDemands) {
-    return (
-      <SortableActionCard 
-        key={card.id} 
-        card={card} 
-        onEdit={onEdit}
-        onDelete={onDelete}
-        isMobileView={isMobileView}
-      >
-        <OverdueDemandsCard
-          id={card.id}
+      );
+    }
+    
+    if (card.isOverdueDemands) {
+      return (
+        <OverdueDemandsCardWrapper
+          card={card}
           overdueCount={specialCardsData.overdueCount}
           overdueItems={specialCardsData.overdueItems}
           isComunicacao={isComunicacao}
           userDepartmentId={userDepartment || ''}
         />
-      </SortableActionCard>
-    );
-  }
-  
-  if (card.isPendingActions) {
-    return (
-      <SortableActionCard 
-        key={card.id} 
-        card={card} 
-        onEdit={onEdit}
-        onDelete={onDelete}
-        isMobileView={isMobileView}
-      >
-        <PendingActionsCard
-          id={card.id}
+      );
+    }
+    
+    if (card.isPendingActions) {
+      return (
+        <PendingActionsCardWrapper
+          card={card}
           notesToApprove={specialCardsData.notesToApprove}
           responsesToDo={specialCardsData.responsesToDo}
           isComunicacao={isComunicacao}
           userDepartmentId={userDepartment || ''}
         />
-      </SortableActionCard>
-    );
-  }
-  
-  if (card.isNewCardButton) {
+      );
+    }
+    
+    if (card.isNewCardButton) {
+      return (
+        <NewCardButtonWrapper
+          card={card}
+          onAddNewCard={onAddNewCard}
+        />
+      );
+    }
+    
+    // Default to standard card
     return (
-      <SortableActionCard 
-        key={card.id} 
-        card={card} 
-        onEdit={onEdit}
-        onDelete={onDelete}
+      <StandardCard 
+        card={card}
         isMobileView={isMobileView}
-      >
-        <NewCardButton onClick={onAddNewCard} />
-      </SortableActionCard>
+      />
     );
-  }
+  };
   
-  // For standard cards, make the entire card clickable by attaching the navigate function
   return (
     <SortableActionCard 
       key={card.id} 
-      card={{
+      card={card.isSearch || card.isStandard ? {
         ...card,
         path: '' // Remove path to prevent default click behavior
-      }} 
+      } : card} 
       onEdit={onEdit}
       onDelete={onDelete}
       isMobileView={isMobileView}
     >
-      <div 
-        className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
-        onClick={handleCardClick}
-      >
-        <div className="flex flex-col items-center justify-center h-full">
-          {React.createElement(
-            card.iconId ? card.iconId : 'div',
-            { 
-              className: isMobileView ? 'h-12 w-12 mb-4 text-white' : 'h-16 w-16 mb-4 text-white' 
-            }
-          )}
-          <h3 className="text-lg font-semibold text-white text-center">{card.title}</h3>
-        </div>
-      </div>
+      {renderCardContent()}
     </SortableActionCard>
   );
 };
