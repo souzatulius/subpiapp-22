@@ -42,6 +42,73 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   
   const [analysisCards, setAnalysisCards] = useLocalStorage<string[]>('relatorios-graph-analysis', []);
 
+  const cardsData: Record<string, GraphCardItem> = {
+    distribuicaoPorTemas: {
+      id: 'distribuicaoPorTemas',
+      title: 'Distribuição por Temas',
+      description: 'Visualização da distribuição de demandas por temas',
+      visible: true,
+      showAnalysis: analysisCards.includes('distribuicaoPorTemas'),
+      analysis: 'Os temas com maior volume de demandas são Serviços Urbanos e Meio Ambiente.'
+    },
+    origemDemandas: {
+      id: 'origemDemandas',
+      title: 'Origem das Demandas',
+      description: 'De onde vêm as demandas recebidas',
+      visible: true,
+      showAnalysis: analysisCards.includes('origemDemandas'),
+      analysis: 'A maioria das demandas vem diretamente das coordenações, seguidas de imprensa e redes sociais.'
+    },
+    tempoMedioResposta: {
+      id: 'tempoMedioResposta',
+      title: 'Tempo Médio de Resposta',
+      description: 'Evolução do tempo médio de resposta',
+      visible: true,
+      showAnalysis: analysisCards.includes('tempoMedioResposta'),
+      analysis: 'O tempo médio de resposta tem diminuído nos últimos meses, indicando melhoria na eficiência.'
+    },
+    performanceArea: {
+      id: 'performanceArea',
+      title: 'Performance por Área',
+      description: 'Desempenho comparativo entre áreas',
+      visible: true,
+      showAnalysis: analysisCards.includes('performanceArea'),
+      analysis: 'As áreas de Comunicação e Planejamento têm os melhores índices de resposta.'
+    },
+    notasEmitidas: {
+      id: 'notasEmitidas',
+      title: 'Notas Emitidas',
+      description: 'Evolução mensal de notas emitidas',
+      visible: true,
+      showAnalysis: analysisCards.includes('notasEmitidas'),
+      analysis: 'Houve um aumento de 15% na emissão de notas oficiais no último trimestre.'
+    },
+    notasPorTema: {
+      id: 'notasPorTema',
+      title: 'Notas por Tema',
+      description: 'Distribuição de notas oficiais por tema',
+      visible: true,
+      showAnalysis: analysisCards.includes('notasPorTema'),
+      analysis: 'Temas relacionados a obras e infraestrutura representam 40% das notas emitidas.'
+    },
+    evolucaoMensal: {
+      id: 'evolucaoMensal',
+      title: 'Evolução Mensal',
+      description: 'Tendência de demandas ao longo dos meses',
+      visible: true,
+      showAnalysis: analysisCards.includes('evolucaoMensal'),
+      analysis: 'Observa-se um padrão sazonal com aumento de demandas no início e final do ano.'
+    },
+    indiceSatisfacao: {
+      id: 'indiceSatisfacao',
+      title: 'Índice de Satisfação',
+      description: 'Avaliação das respostas pelos solicitantes',
+      visible: true,
+      showAnalysis: analysisCards.includes('indiceSatisfacao'),
+      analysis: 'O índice de satisfação está em 82%, um aumento de 5% em relação ao período anterior.'
+    }
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -75,7 +142,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     );
   };
 
-  // Dados fictícios para os gráficos
   const mockBarData = [
     { name: 'Tema 1', Quantidade: 45 },
     { name: 'Tema 2', Quantidade: 32 },
@@ -109,7 +175,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Jun', Quantidade: 20, Meta: 18 },
   ];
 
-  // Componentes de gráfico baseados nos dados de exemplo
   const demoChartComponents: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
     origemDemandas: <PieChartComponent data={mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3], chartColors[4]]} />,
@@ -121,7 +186,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     indiceSatisfacao: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Satisfação (%)', color: chartColors[1] }]} />,
   };
 
-  // Icons for the cards
   const cardIcons: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart3 className="h-5 w-5 text-orange-500" />,
     origemDemandas: <PieChart className="h-5 w-5 text-orange-500" />,
@@ -133,7 +197,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-orange-500" />,
   };
 
-  // Render a placeholder message when there's not enough data
   const renderEmptyDataMessage = (cardId: string) => (
     <div className="h-[250px] flex flex-col items-center justify-center text-slate-400 p-4 text-center">
       <AlertCircle className="h-10 w-10 mb-3 text-orange-300" />
