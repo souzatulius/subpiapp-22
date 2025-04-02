@@ -14,7 +14,8 @@ export const useCardStatsData = () => {
     taxaAprovacao: 0,
     aprovacaoVariacao: 0,
     notasAguardando: 0,
-    notasEditadas: 0
+    notasEditadas: 0,
+    notasAprovadas: 0
   });
   const [isLoadingCards, setIsLoadingCards] = useState(false);
 
@@ -261,7 +262,8 @@ export const useCardStatsData = () => {
         tempoRespostaVariacao,
         taxaAprovacao,
         aprovacaoVariacao,
-        notasEditadasPerc
+        notasEditadasPerc,
+        notasAprovadas
       });
       
       // Atualizar os dados dos cards
@@ -275,7 +277,8 @@ export const useCardStatsData = () => {
         taxaAprovacao,
         aprovacaoVariacao,
         notasAguardando: notasAguardando || 0,
-        notasEditadas: notasEditadasPerc
+        notasEditadas: notasEditadasPerc,
+        notasAprovadas: notasAprovadas || 0
       });
     } catch (error) {
       console.error('Erro ao buscar dados para os cards:', error);

@@ -10,6 +10,7 @@ export interface CardStats {
   aprovacaoVariacao: number;
   notasAguardando?: number;
   notasEditadas?: number;
+  notasAprovadas?: number; // Add the missing property
 }
 
 export interface ChartDataItem {
