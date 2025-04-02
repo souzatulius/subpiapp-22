@@ -46,7 +46,7 @@ const UsersHeader: React.FC<UsersHeaderProps> = ({
           
           <Button onClick={onOpenInviteDialog}>
             <UserPlus className="h-4 w-4 mr-2" />
-            Convidar Usuário
+            Convidar
           </Button>
         </div>
       </div>

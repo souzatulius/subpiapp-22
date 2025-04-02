@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, SlidersHorizontal, PlusCircle } from 'lucide-react';
 import { RelatoriosContent } from '@/components/relatorios';
 import WelcomeCard from '@/components/shared/WelcomeCard';
@@ -9,6 +9,14 @@ import '@/components/ranking/charts/ChartRegistration';
 
 const RelatoriosPage = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('RelatoriosPage montado');
+    return () => {
+      console.log('RelatoriosPage desmontado');
+    };
+  }, []);
   
   return (
     <div className="max-w-7xl mx-auto">

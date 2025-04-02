@@ -100,6 +100,16 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
     }
   }, [isCoordinationRole, isManagerRole, area, handleChange]);
 
+  // Função para obter o texto de exibição para coordenação (sigla ou nome completo)
+  const getCoordinationDisplayText = (coord: SelectOption) => {
+    // Verificar se o valor contém a sigla entre parênteses
+    const match = coord.value.match(/\(([^)]+)\)/);
+    if (match && match[1]) {
+      return match[1]; // Retornar apenas a sigla se estiver disponível
+    }
+    return coord.value; // Retornar o nome completo se não tiver sigla
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -177,7 +187,7 @@ const PositionFields: React.FC<PositionFieldsProps> = ({
                   <SelectItem value="select-coordenacao" disabled>Selecione uma coordenação</SelectItem>
                   {coordenacoes.map(coord => (
                     <SelectItem key={coord.id} value={coord.id}>
-                      {coord.value}
+                      {getCoordinationDisplayText(coord)}
                     </SelectItem>
                   ))}
                 </>

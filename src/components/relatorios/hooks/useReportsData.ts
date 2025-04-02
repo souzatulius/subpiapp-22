@@ -13,6 +13,7 @@ export interface ReportFilters {
 }
 
 export const useReportsData = (filters: ReportFilters = {}) => {
+  console.log('useReportsData iniciando com filtros:', filters);
   const [isLoading, setIsLoading] = useState(true);
   const { 
     cardStats, 
@@ -27,31 +28,37 @@ export const useReportsData = (filters: ReportFilters = {}) => {
   } = useChartStatsData();
 
   // Log para debug
-  console.log('useReportsData - filters:', filters);
+  console.log('useReportsData - cardStats:', cardStats);
+  console.log('useReportsData - reportsData:', reportsData);
+  console.log('useReportsData - isLoadingCards:', isLoadingCards);
+  console.log('useReportsData - isLoadingCharts:', isLoadingCharts);
 
   // Utilizando useCallback para evitar recriação desnecessária da função
   const fetchData = useCallback(async () => {
-    console.log('Iniciando carregamento de dados para relatórios...');
+    console.log('Iniciando carregamento de dados para relatórios com filtros:', filters);
     setIsLoading(true);
     
     try {
       // Primeiro, buscamos os dados dos cards
+      console.log('Buscando dados para cards...');
       await fetchCardStats(filters);
       console.log('Dados dos cards carregados com sucesso');
       
       // Em seguida, buscamos os dados para os gráficos
+      console.log('Buscando dados para gráficos...');
       await fetchChartData(filters);
       console.log('Dados dos gráficos carregados com sucesso');
       
     } catch (error) {
       console.error('Erro ao buscar dados de relatórios:', error);
     } finally {
+      console.log('Finalizando carregamento de dados');
       setIsLoading(false);
-      console.log('Carregamento de dados concluído');
     }
   }, [filters, fetchCardStats, fetchChartData]);
 
   useEffect(() => {
+    console.log('useReportsData - useEffect disparado para buscar dados');
     fetchData();
   }, [fetchData]);
 

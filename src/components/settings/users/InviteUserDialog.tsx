@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -107,12 +106,10 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
     }
   };
 
-  // Helper function to get display text for coordenação
   const getCoordDisplayText = (coord: { coordenacao_id: string; coordenacao: string; sigla?: string }) => {
     return coord.sigla || coord.coordenacao;
   };
   
-  // Helper function to get display text for supervisão técnica
   const getAreaDisplayText = (area: SupervisaoTecnica) => {
     return area.sigla || area.descricao;
   };
