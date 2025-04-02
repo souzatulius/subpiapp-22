@@ -97,7 +97,7 @@ export const RelatoriosFilters: React.FC<RelatoriosFiltersProps> = ({
             <SelectValue placeholder="Selecione a coordenação" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todos">Todas as coordenações</SelectItem>
+            <SelectItem value="todos">Todas</SelectItem>
             {coordenacoes.map(coord => (
               <SelectItem key={coord.id} value={coord.id}>
                 {coord.descricao}
@@ -118,7 +118,7 @@ export const RelatoriosFilters: React.FC<RelatoriosFiltersProps> = ({
             <SelectValue placeholder="Selecione o tema" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todos">Todos os temas</SelectItem>
+            <SelectItem value="todos">Todos</SelectItem>
             {problemas.map(prob => (
               <SelectItem key={prob.id} value={prob.id}>
                 {prob.descricao}

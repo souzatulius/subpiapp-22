@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useCardStatsData } from './hooks/reports/useCardStatsData';
 import { SortableKPICard } from './components/SortableKPICard';
@@ -62,7 +63,7 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
       change: cardStats.demandasVariacao,
       status: cardStats.demandasVariacao >= 0 ? 'positive' : 'negative',
       description: 'Hoje',
-      secondary: `${Math.abs(cardStats.demandasVariacao)}% em relação a ontem`
+      secondary: `Ontem foram ${cardStats.totalDemandas - (cardStats.totalDemandas * cardStats.demandasVariacao / 100)}`
     },
     notas: {
       id: 'notas',
@@ -71,8 +72,8 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
       value: cardStats.totalNotas,
       change: cardStats.notasVariacao,
       status: cardStats.notasVariacao >= 0 ? 'positive' : 'negative',
-      description: `${cardStats.notasAguardando || 0} enviadas para imprensa`,
-      secondary: `${Math.abs(cardStats.notasVariacao)}% em relação ao mês anterior`
+      description: `Para a imprensa`,
+      secondary: `${Math.abs(cardStats.notasVariacao)}% ${cardStats.notasVariacao >= 0 ? 'maior' : 'menor'} que março`
     },
     tempo: {
       id: 'tempo',
@@ -81,7 +82,7 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
       value: `${cardStats.tempoMedioResposta} horas`,
       change: cardStats.tempoRespostaVariacao,
       status: cardStats.tempoRespostaVariacao <= 0 ? 'positive' : 'negative', // Menor tempo é melhor
-      description: 'Média de resposta',
+      description: 'Média de tempo',
       secondary: `${Math.abs(cardStats.tempoRespostaVariacao)}% ${cardStats.tempoRespostaVariacao <= 0 ? 'mais rápido' : 'mais lento'}`
     },
     aprovacao: {

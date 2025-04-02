@@ -54,7 +54,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     origemDemandas: {
       id: 'origemDemandas',
       title: 'Origem das Demandas',
-      description: 'De onde vêm as demandas recebidas',
+      description: 'De onde vêm as solicitações',
       visible: true,
       showAnalysis: analysisCards.includes('origemDemandas'),
       analysis: 'A maioria das demandas vem diretamente das coordenações, seguidas de imprensa e redes sociais.'
@@ -62,7 +62,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     tempoMedioResposta: {
       id: 'tempoMedioResposta',
       title: 'Tempo Médio de Resposta',
-      description: 'Evolução do tempo médio de resposta',
+      description: 'Evolução de agilidade de retorno para a imprensa',
       visible: true,
       showAnalysis: analysisCards.includes('tempoMedioResposta'),
       analysis: 'O tempo médio de resposta tem diminuído nos últimos meses, indicando melhoria na eficiência.'
@@ -119,11 +119,11 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   };
 
   const mockBarData = [
-    { name: 'Tema 1', Quantidade: 45 },
-    { name: 'Tema 2', Quantidade: 32 },
-    { name: 'Tema 3', Quantidade: 18 },
-    { name: 'Tema 4', Quantidade: 25 },
-    { name: 'Tema 5', Quantidade: 15 },
+    { name: 'Poda de Árvores', Quantidade: 45 },
+    { name: 'Bueiros', Quantidade: 32 },
+    { name: 'Remoção de galhos', Quantidade: 18 },
+    { name: 'Lixo', Quantidade: 25 },
+    { name: 'Parques e praças', Quantidade: 15 },
   ];
 
   const mockLineData = [
@@ -134,10 +134,17 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   ];
 
   const mockPieData = [
-    { name: 'Concluídas', value: 35 },
-    { name: 'Em andamento', value: 25 },
-    { name: 'Pendentes', value: 15 },
-    { name: 'Canceladas', value: 5 },
+    { name: 'Imprensa', value: 35 },
+    { name: 'SMSUB', value: 45 },
+    { name: 'Internas', value: 20 },
+  ];
+
+  const mockAreasData = [
+    { name: 'CPO', Quantidade: 92 },
+    { name: 'CPDU', Quantidade: 87 },
+    { name: 'Governo Local', Quantidade: 82 },
+    { name: 'Jurídico', Quantidade: 75 },
+    { name: 'Finanças', Quantidade: 68 },
   ];
 
   const mockAreaData = [
@@ -151,13 +158,10 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
 
   const demoChartComponents: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
-    origemDemandas: <PieChartComponent data={mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3], chartColors[4]]} />,
-    tempoMedioResposta: <LineChartComponent data={mockLineData} xAxisDataKey="name" lines={[{ dataKey: 'Demandas', name: 'Demandas', color: chartColors[0] }, { dataKey: 'Respostas', name: 'Respostas', color: chartColors[2] }]} />,
-    performanceArea: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Taxa (%)', color: chartColors[1] }]} />,
+    origemDemandas: <PieChartComponent data={mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3]]} showOnlyPercentage={true} showLabels={false} />,
+    tempoMedioResposta: <LineChartComponent data={mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Respostas', name: 'Aprovação da nota', color: chartColors[2] }]} />,
+    performanceArea: <BarChart data={mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} />,
     notasEmitidas: <LineChartComponent data={mockLineData} xAxisDataKey="name" lines={[{ dataKey: 'Demandas', name: 'Quantidade', color: chartColors[1] }]} />,
-    notasPorTema: <PieChartComponent data={mockPieData} colors={[chartColors[1], chartColors[2], chartColors[3], chartColors[4]]} />,
-    evolucaoMensal: <AreaChart data={mockAreaData} xAxisDataKey="name" areas={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0], fillOpacity: 0.6 }, { dataKey: 'Meta', name: 'Meta', color: chartColors[1], fillOpacity: 0.3 }]} />,
-    indiceSatisfacao: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Satisfação (%)', color: chartColors[1] }]} />,
   };
 
   const cardIcons: Record<string, React.ReactNode> = {

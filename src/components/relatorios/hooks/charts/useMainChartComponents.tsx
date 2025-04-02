@@ -86,6 +86,11 @@ export const useMainChartComponents = () => {
     const barCoordinationsData = transformCoordinationsToBarData(reportsData.coordinations);
     const barMediaTypesData = transformMediaTypesToBarData(reportsData.mediaTypes);
     
+    // Filter only needed origins - Imprensa, SMSUB, Internas
+    const filteredOrigins = reportsData.origins
+      .filter(item => ['Imprensa', 'SMSUB', 'Internas'].includes(item.name))
+      .map(item => ({ ...item, name: item.name }));
+    
     return {
       'distribuicaoPorTemas': (
         <BarChart 
@@ -98,7 +103,7 @@ export const useMainChartComponents = () => {
       ),
       'origemDemandas': (
         <PieChart 
-          data={reportsData.origins}
+          data={filteredOrigins.length > 0 ? filteredOrigins : reportsData.origins}
           colorSet="orange"
           showLabels={false}
           showOnlyPercentage={true}

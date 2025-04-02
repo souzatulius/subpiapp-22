@@ -26,15 +26,15 @@ const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
       change: cardStats.notasVariacao,
       unit: "",
       icon: <FileText className="h-4 w-4" />,
-      description: `${cardStats.notasAguardando || 0} enviadas para imprensa`
+      description: "Para a imprensa"
     },
     {
       title: "Resposta",
       value: cardStats.tempoMedioResposta,
       change: cardStats.tempoRespostaVariacao,
-      unit: " dias",
+      unit: " horas",
       icon: <Clock className="h-4 w-4" />,
-      description: "Média de resposta"
+      description: "Média de tempo"
     },
     {
       title: "Aprovação",
