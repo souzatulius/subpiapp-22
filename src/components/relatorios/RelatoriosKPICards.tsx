@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCardStatsData } from './hooks/reports/useCardStatsData';
 import { SortableKPICard } from './components/SortableKPICard';
-import { ArrowUpIcon, ArrowDownIcon, Clock, FileText, MessageSquare, Percent } from 'lucide-react';
+import { Clock, FileText, MessageSquare, Percent } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -58,27 +58,27 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
     demandas: {
       id: 'demandas',
       title: 'Demandas do Dia',
-      icon: <MessageSquare className="h-4 w-4" />,
+      icon: <MessageSquare className="h-5 w-5" />,
       value: cardStats.totalDemandas,
       change: cardStats.demandasVariacao,
       status: cardStats.demandasVariacao >= 0 ? 'positive' : 'negative',
       description: 'Demandas cadastradas hoje',
-      secondary: `${cardStats.demandasVariacao}% em relação a ontem`
+      secondary: `${Math.abs(cardStats.demandasVariacao)}% em relação a ontem`
     },
     notas: {
       id: 'notas',
       title: 'Notas de Imprensa',
-      icon: <FileText className="h-4 w-4" />,
+      icon: <FileText className="h-5 w-5" />,
       value: cardStats.totalNotas,
       change: cardStats.notasVariacao,
       status: cardStats.notasVariacao >= 0 ? 'positive' : 'negative',
       description: `${cardStats.notasAguardando || 0} aguardando aprovação`,
-      secondary: `${cardStats.notasVariacao}% em relação ao mês anterior`
+      secondary: `${Math.abs(cardStats.notasVariacao)}% em relação ao mês anterior`
     },
     tempo: {
       id: 'tempo',
       title: 'Tempo Médio de Resposta',
-      icon: <Clock className="h-4 w-4" />,
+      icon: <Clock className="h-5 w-5" />,
       value: `${cardStats.tempoMedioResposta} dias`,
       change: cardStats.tempoRespostaVariacao,
       status: cardStats.tempoRespostaVariacao <= 0 ? 'positive' : 'negative', // Menor tempo é melhor
@@ -88,7 +88,7 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
     aprovacao: {
       id: 'aprovacao',
       title: 'Taxa de Aprovação',
-      icon: <Percent className="h-4 w-4" />,
+      icon: <Percent className="h-5 w-5" />,
       value: `${cardStats.taxaAprovacao}%`,
       change: cardStats.aprovacaoVariacao,
       status: cardStats.aprovacaoVariacao >= 0 ? 'positive' : 'negative',

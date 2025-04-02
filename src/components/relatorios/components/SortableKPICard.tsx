@@ -1,118 +1,132 @@
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowDownIcon, ArrowUpIcon, GripVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowDownIcon, ArrowUpIcon, GripVertical } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface SortableKPICardProps {
   id: string;
   title: string;
   icon: React.ReactNode;
   value: string | number;
-  change?: number;
   status: 'positive' | 'negative' | 'neutral';
   description: string;
   secondary?: string;
+  change?: number;
   isLoading?: boolean;
   isEditMode?: boolean;
 }
 
-export const SortableKPICard: React.FC<SortableKPICardProps> = ({
+export const SortableKPICard = forwardRef<HTMLDivElement, SortableKPICardProps>(({
   id,
   title,
   icon,
   value,
-  change,
   status,
   description,
   secondary,
+  change,
   isLoading = false,
-  isEditMode = false,
-}) => {
+  isEditMode = false
+}, ref) => {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging,
-  } = useSortable({
-    id,
-    // We no longer disable based on isEditMode
-  });
+    isDragging
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    cursor: 'grab',
+    transition
   };
 
-  const getStatusColor = () => {
-    switch (status) {
-      case 'positive':
-        return 'text-green-500';
-      case 'negative':
-        return 'text-red-500';
-      default:
-        return 'text-gray-500';
+  const cardRef = React.useCallback((node: HTMLDivElement | null) => {
+    setNodeRef(node);
+    if (typeof ref === 'function') {
+      ref(node);
+    } else if (ref) {
+      ref.current = node;
     }
-  };
-
-  const getStatusIcon = () => {
-    if (!change) return null;
-    
-    return status === 'positive' ? (
-      <ArrowUpIcon className="h-4 w-4 text-green-500" />
-    ) : (
-      <ArrowDownIcon className="h-4 w-4 text-red-500" />
-    );
-  };
+  }, [setNodeRef, ref]);
 
   return (
-    <Card
-      ref={setNodeRef}
+    <motion.div
+      ref={cardRef}
       style={style}
-      className="relative hover:shadow-md transition-all duration-300 border-orange-100"
       {...attributes}
-      {...listeners}
+      {...(isEditMode ? listeners : {})}
+      className={cn(
+        "relative",
+        isDragging ? "z-10" : "z-0"
+      )}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <CardContent className="p-6">
-        {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-3 w-48" />
-          </div>
-        ) : (
-          <>
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2 text-orange-700">
-                {icon}
-                <span className="font-medium">{title}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-end gap-2 mb-1">
-              <div className="text-2xl font-bold text-orange-800">{value}</div>
-              {change !== undefined && (
-                <div className={`flex items-center gap-1 text-sm ${getStatusColor()}`}>
-                  {getStatusIcon()}
-                  <span>{Math.abs(change)}%</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="text-xs text-orange-600">
-              <p>{description}</p>
-              {secondary && <p className="mt-1">{secondary}</p>}
-            </div>
-          </>
+      <Card 
+        className={cn(
+          "border border-gray-200 overflow-hidden",
+          isDragging ? "shadow-lg" : "shadow-sm",
+          "transition-all duration-300 hover:shadow-md hover:-translate-y-[2px]"
         )}
-      </CardContent>
-    </Card>
+      >
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center">
+              <div className="mr-2 text-subpi-blue">{icon}</div>
+              <h3 className="text-base font-semibold text-subpi-blue">{title}</h3>
+            </div>
+            {isEditMode && (
+              <GripVertical className="h-4 w-4 cursor-grab text-gray-400 hover:text-gray-600" />
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className="mt-2 space-y-3">
+              <Skeleton className="h-8 w-24 bg-gray-100" />
+              <Skeleton className="h-3 w-32 bg-gray-100" />
+            </div>
+          ) : (
+            <>
+              <div className="mt-2 flex items-end">
+                <span className="text-[2.25rem] leading-tight font-bold text-subpi-blue">
+                  {value}
+                </span>
+                {typeof change === 'number' && change !== 0 && (
+                  <div 
+                    className={cn(
+                      "flex items-center ml-2 mb-1.5",
+                      status === 'positive' ? 'text-green-600' : 'text-red-600'
+                    )}
+                  >
+                    {status === 'positive' ? (
+                      <ArrowUpIcon className="h-3 w-3 mr-0.5" />
+                    ) : (
+                      <ArrowDownIcon className="h-3 w-3 mr-0.5" />
+                    )}
+                    <span className="text-[0.9rem] font-medium">
+                      {Math.abs(change)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+              <p className="text-[0.95rem] text-gray-700 mt-1">{description}</p>
+              {secondary && (
+                <p className="text-[0.8rem] text-gray-500 mt-0.5">{secondary}</p>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
-};
+});
+
+SortableKPICard.displayName = 'SortableKPICard';

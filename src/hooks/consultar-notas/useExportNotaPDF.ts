@@ -1,72 +1,72 @@
 
 import { useState } from 'react';
-import { jsPDF } from 'jspdf';
-import { toast } from '@/components/ui/use-toast';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { NotaOficial } from '@/types/nota';
 
-export const useExportNotaPDF = (formatDate: (dateStr: string) => string) => {
+export const useExportNotaPDF = (formatDate: (dateString: string) => string) => {
   const [exporting, setExporting] = useState(false);
 
   const exportNotaToPDF = async (nota: NotaOficial) => {
-    if (!nota) return;
-    
     setExporting(true);
     try {
-      // Criar um novo documento PDF
-      const doc = new jsPDF();
+      // Criar um elemento virtual para renderizar a nota
+      const element = document.createElement('div');
+      element.style.padding = '20px';
+      element.style.width = '800px';
+      element.style.background = 'white';
+      element.style.position = 'absolute';
+      element.style.left = '-9999px';
       
-      // Configurar estilo do documento
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
+      // Adicionar conteúdo da nota
+      const titulo = document.createElement('h1');
+      titulo.style.fontSize = '24px';
+      titulo.style.marginBottom = '10px';
+      titulo.style.color = '#003570';
+      titulo.textContent = nota.titulo || 'Nota Oficial';
       
-      // Título
-      doc.text('NOTA OFICIAL', 105, 20, { align: 'center' });
+      const dataElement = document.createElement('p');
+      dataElement.style.fontSize = '14px';
+      dataElement.style.color = '#666';
+      dataElement.textContent = `Data: ${formatDate(nota.criado_em || nota.created_at || '')}`;
       
-      // Configurar texto normal
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
+      const autorElement = document.createElement('p');
+      autorElement.style.fontSize = '14px';
+      autorElement.style.color = '#666';
+      autorElement.textContent = `Autor: ${nota.autor?.nome_completo || 'Não especificado'}`;
       
-      // Informações da nota
-      // Usar o valor efetivo ou um valor padrão quando a propriedade não existir
-      const autorNome = nota.autor?.nome_completo || 'Autor desconhecido';
-      const areaNome = nota.supervisao_tecnica?.descricao || 'Área não especificada';
-      const dataFormated = formatDate(nota.criado_em || '');
+      const textoElement = document.createElement('div');
+      textoElement.style.marginTop = '20px';
+      textoElement.style.fontSize = '14px';
+      textoElement.style.lineHeight = '1.6';
+      textoElement.innerHTML = nota.texto?.replace(/\n/g, '<br>') || '';
       
-      // Título da nota
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Título: ${nota.titulo}`, 20, 40);
+      // Adicionar os elementos ao container
+      element.appendChild(titulo);
+      element.appendChild(dataElement);
+      element.appendChild(autorElement);
+      element.appendChild(textoElement);
       
-      // Metadados
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Autor: ${autorNome}`, 20, 50);
-      doc.text(`Área: ${areaNome}`, 20, 60);
-      doc.text(`Data: ${dataFormated}`, 20, 70);
-      doc.text(`Status: ${nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}`, 20, 80);
+      // Adicionar à página para renderização
+      document.body.appendChild(element);
       
-      // Conteúdo
-      doc.setFont('helvetica', 'bold');
-      doc.text('Conteúdo:', 20, 100);
+      // Renderizar para canvas e exportar para PDF
+      const canvas = await html2canvas(element);
+      const imgData = canvas.toDataURL('image/png');
       
-      doc.setFont('helvetica', 'normal');
+      // Remover elemento da página
+      document.body.removeChild(element);
       
-      // Quebrar linhas longas para melhor formatação
-      const splitText = doc.splitTextToSize(nota.texto, 170);
-      doc.text(splitText, 20, 110);
+      // Gerar PDF
+      const pdf = new jsPDF();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      // Gerar o PDF
-      doc.save(`nota_oficial_${nota.id}.pdf`);
-      
-      toast({
-        title: "Exportação concluída",
-        description: "A nota foi exportada como PDF."
-      });
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`nota_oficial_${nota.id}.pdf`);
     } catch (error) {
-      console.error('Erro ao exportar PDF:', error);
-      toast({
-        title: "Erro na exportação",
-        description: "Não foi possível exportar a nota como PDF.",
-        variant: "destructive"
-      });
+      console.error('Erro ao exportar nota para PDF:', error);
     } finally {
       setExporting(false);
     }
