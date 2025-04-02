@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({
           {showControls && toggleSidebar && (
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+              className="p-2 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-500 md:hidden"
               data-sidebar="trigger"
             >
               <Menu size={24} />
