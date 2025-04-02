@@ -10,8 +10,8 @@ const Index = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header - explicitly pass showControls={false} */}
-      <Header showControls={false} />
+      {/* Header - explicitly hide user controls */}
+      <Header showControls={false} hideUserMenu={true} />
 
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">

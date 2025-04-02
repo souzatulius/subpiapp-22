@@ -1,4 +1,3 @@
-
 # Breadcrumb Implementation Documentation
 
 This document describes the current implementation of breadcrumbs throughout the application to establish a consistent pattern for future development.
@@ -34,7 +33,7 @@ The breadcrumb bar is implemented in `src/components/layouts/BreadcrumbBar.tsx`.
      - 'zeladoria'
      - 'dashboard/dashboard'
      - 'dashboard/comunicacao'
-     - 'comunicacao'
+   - Special handling for 'dashboard/comunicacao/comunicacao' which is displayed
 
 4. **Special Path Handling**:
    - Handles duplicated segments (e.g., only showing first 'dashboard')
@@ -101,6 +100,6 @@ The current implementation filters breadcrumb segments as follows:
 2. Removes segments explicitly listed in `hiddenSegments`
 3. Special handling for dashboard paths:
    - Keeps the first 'dashboard' segment when at index 0
-   - Hides 'comunicacao' when preceded by 'dashboard'
+   - Hides 'dashboard/comunicacao' but shows 'dashboard/comunicacao/comunicacao'
 
 This ensures a clean and consistent breadcrumb trail throughout the application.

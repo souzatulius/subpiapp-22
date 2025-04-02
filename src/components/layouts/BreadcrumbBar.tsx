@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
@@ -40,7 +41,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   };
 
   // Lista de segmentos que devem ser ocultados no breadcrumb
-  const hiddenSegments = ['zeladoria', 'dashboard/dashboard', 'dashboard/comunicacao', 'comunicacao'];
+  const hiddenSegments = ['zeladoria', 'dashboard/dashboard', 'dashboard/comunicacao'];
   
   const handleClick = (index: number) => {
     const segment = pathSegments[index];
@@ -51,8 +52,6 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       return;
     }
     
-    // Remove special case for comunicacao since it's now hidden
-    
     const path = '/' + pathSegments.slice(0, index + 1).join('/');
     navigate(path);
   };
@@ -62,8 +61,16 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     // Remover segmentos vazios
     if (!segment) return false;
     
+    // Special case for comunicacao/comunicacao path
+    const fullPath = pathSegments.slice(0, index + 1).join('/');
+    if (fullPath === 'dashboard/comunicacao/comunicacao') {
+      return true;
+    }
+    
     // Remover segmentos que devem ser ocultados
-    if (hiddenSegments.includes(segment)) return false;
+    if (hiddenSegments.includes(segment) || hiddenSegments.includes(fullPath)) {
+      return false;
+    }
     
     // Check for specific combinations to hide
     if (segment === 'dashboard' && index === 0) {

@@ -30,7 +30,6 @@ import ConsultarDemandas from './pages/dashboard/comunicacao/ConsultarDemandas';
 import ConsultarNotas from './pages/dashboard/comunicacao/ConsultarNotas';
 import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
-import NotasDashboard from './pages/dashboard/comunicacao/Notas';
 
 // Admin Pages
 import UserPermissionsList from './pages/admin/UserPermissionsList';
@@ -73,7 +72,6 @@ function App() {
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                 {/* Comunicação routes */}
                 <Route path="comunicacao/comunicacao" element={<ComunicacaoDashboard />} />
-                <Route path="comunicacao/notas" element={<NotasDashboard />} />
                 <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
                 <Route path="comunicacao/responder" element={<ResponderDemandas />} />
                 <Route path="comunicacao/consultar-demandas" element={<ConsultarDemandas />} />

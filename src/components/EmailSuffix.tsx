@@ -115,7 +115,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
           <span 
             className="pointer-events-none absolute top-1/2 transform -translate-y-1/2 text-base"
             style={{ 
-              left: `calc(${4 + value.length * 0.6}em - 0.25em)`,
+              left: `calc(${4 + value.length * 0.6}em)`,
               transition: 'left 0.1s ease-out',
               color: 'inherit' // Match the text color of the input
             }}
