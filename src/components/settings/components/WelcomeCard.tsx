@@ -13,6 +13,7 @@ interface WelcomeCardProps {
   buttonIcon?: React.ReactNode;
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
   onButtonClick?: () => void;
+  label?: string; // Added label prop
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({ 
@@ -23,7 +24,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   buttonText = "Gerenciar Dashboards",
   buttonIcon = <LayoutDashboard className="h-4 w-4" />,
   buttonVariant = "secondary",
-  onButtonClick
+  onButtonClick,
+  label = "usuários" // Default value for label
 }) => {
   return (
     <Card className={`${color} text-white shadow-lg overflow-hidden`}>
@@ -39,6 +41,15 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             </p>
           </div>
           <div className="flex space-x-4 w-full md:w-auto">
+            {userCount !== undefined && (
+              <StatCard 
+                title={`${userCount} ${label}`}
+                value={userCount}
+                description="no sistema" 
+                section="settings"
+                highlight={true}
+              />
+            )}
             {showButton && (
               <StatCard
                 showButton={true}
