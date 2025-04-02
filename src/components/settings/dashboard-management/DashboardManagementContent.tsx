@@ -46,7 +46,7 @@ const DashboardManagementContent: React.FC = () => {
   
   useEffect(() => {
     const fetchDepartmentName = async () => {
-      if (selectedDepartment && selectedDepartment !== 'default') {
+      if (selectedDepartment) {
         try {
           const { data, error } = await supabase
             .from('coordenacoes')
@@ -66,7 +66,7 @@ const DashboardManagementContent: React.FC = () => {
           console.error('Failed to fetch department name:', error);
         }
       } else {
-        setDepartmentName(selectedDepartment === 'default' ? 'Padrão (Todos)' : '');
+        setDepartmentName('');
       }
     };
     

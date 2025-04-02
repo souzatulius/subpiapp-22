@@ -208,8 +208,6 @@ export type Database = {
           descricao: string | null
           frequencia: string | null
           id: string
-          permite_silenciosa: boolean | null
-          prioridade: number | null
           tipo: string
           titulo: string
         }
@@ -220,8 +218,6 @@ export type Database = {
           descricao?: string | null
           frequencia?: string | null
           id?: string
-          permite_silenciosa?: boolean | null
-          prioridade?: number | null
           tipo: string
           titulo: string
         }
@@ -232,8 +228,6 @@ export type Database = {
           descricao?: string | null
           frequencia?: string | null
           id?: string
-          permite_silenciosa?: boolean | null
-          prioridade?: number | null
           tipo?: string
           titulo?: string
         }
@@ -704,8 +698,6 @@ export type Database = {
           id: string
           lida: boolean
           mensagem: string
-          metadados: Json | null
-          referencia_tipo: string | null
           tipo: string | null
           usuario_id: string
         }
@@ -715,8 +707,6 @@ export type Database = {
           id?: string
           lida?: boolean
           mensagem: string
-          metadados?: Json | null
-          referencia_tipo?: string | null
           tipo?: string | null
           usuario_id: string
         }
@@ -726,8 +716,6 @@ export type Database = {
           id?: string
           lida?: boolean
           mensagem?: string
-          metadados?: Json | null
-          referencia_tipo?: string | null
           tipo?: string | null
           usuario_id?: string
         }

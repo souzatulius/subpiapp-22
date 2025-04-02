@@ -1,127 +1,62 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X } from 'lucide-react';
+import React from 'react';
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import ProfileMenu from './ProfileMenu';
-import { Logo } from '../../shared/Logo';
+import { useLocation, Link } from 'react-router-dom';
 import { NotificationsPopover } from './NotificationsPopover';
-import MobileMenu from './MobileMenu';
-import NotificationsEnabler from '@/components/notifications/NotificationsEnabler';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface HeaderProps {
-  hideSearch?: boolean;
   showControls?: boolean;
   toggleSidebar?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ hideSearch = false, showControls = true, toggleSidebar }) => {
-  const navigate = useNavigate();
+const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) => {
   const location = useLocation();
-  const [searchValue, setSearchValue] = useState('');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Reset search value when route changes
-  useEffect(() => {
-    setSearchValue('');
-  }, [location.pathname]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Get the current path
-    const currentPath = location.pathname;
-
-    // Check if we're already on a search page
-    if (currentPath.includes('/dashboard')) {
-      // Navigate to search with the updated query
-      navigate(`/dashboard?q=${searchValue}`);
-    } else {
-      // Navigate to dashboard search
-      navigate(`/dashboard?q=${searchValue}`);
-    }
-  };
-
+  const { user } = useAuth();
+  
+  // Check if current page is a public page
+  const isPublicPage = ['/login', '/register', '/forgot-password', '/email-verified', '/'].includes(location.pathname) || 
+                      location.pathname.includes('/404');
+  
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <Logo />
-              <span className="text-lg font-bold ml-2 text-[#003570]">SubPI</span>
-            </Link>
-          </div>
-
-          {!hideSearch && (
-            <div className="hidden lg:block">
-              <form onSubmit={handleSearch} className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar demandas, notas..."
-                  className="bg-zinc-100 w-96 px-4 py-2 rounded-full border border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                  value={searchValue}
-                  onChange={e => setSearchValue(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <Search size={20} />
-                </button>
-              </form>
-            </div>
+    <header className="sticky top-0 bg-white border-b z-30 shadow-sm">
+      {/* Main header row with logo and user controls */}
+      <div className="h-16 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          {/* Only show the menu toggle button if not on a public page */}
+          {showControls && toggleSidebar && !isPublicPage && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mr-2 hidden md:flex" /* Hide on mobile */
+              onClick={toggleSidebar}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
           )}
-
-          <div className="flex items-center space-x-2">
-            {showControls && <NotificationsPopover />}
-            {showControls && <ProfileMenu />}
-            {showControls && (
-              <button
-                className="md:hidden text-[#003570]"
-                onClick={() => {
-                  setIsMobileMenuOpen(!isMobileMenuOpen);
-                  if (toggleSidebar) toggleSidebar();
-                }}
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </button>
-            )}
-          </div>
         </div>
         
-        {/* Mobile search (only shown if search is enabled) */}
-        {!hideSearch && (
-          <div className="mt-4 lg:hidden">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                placeholder="Buscar demandas, notas..."
-                className="bg-zinc-100 w-full px-4 py-2 rounded-full border border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                value={searchValue}
-                onChange={e => setSearchValue(e.target.value)}
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <Search size={20} />
-              </button>
-            </form>
-          </div>
-        )}
+        {/* Logo centered in the header */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 h-10 flex items-center">
+          <img 
+            src="/lovable-uploads/f0e9c688-4d13-4dee-aa68-f4ac4292ad11.png" 
+            alt="SUB-PI Logo" 
+            className="h-full object-contain"
+          />
+        </div>
         
-        {/* Notifications Enabler */}
-        <div className="mt-2">
-          <NotificationsEnabler />
+        <div className="flex items-center space-x-2">
+          {/* Only show user controls if not on a public page */}
+          {!isPublicPage && (
+            <>
+              <NotificationsPopover />
+              <ProfileMenu />
+            </>
+          )}
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {showControls && <MobileMenu isOpen={isMobileMenuOpen} />}
     </header>
   );
 };
