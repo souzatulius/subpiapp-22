@@ -10,6 +10,7 @@ export interface DashboardState {
   user: any; // Replace with proper type definition
   setActionCards: (cards: any[]) => void;
   toggleView: () => void;
+  firstName: string;
 }
 
 export const useDashboardState = (): DashboardState => {
@@ -19,12 +20,13 @@ export const useDashboardState = (): DashboardState => {
     setActionCards,
     isLoadingDashboard,
     viewType,
-    setViewType
+    setViewType,
+    firstName
   } = useDashboardConfig();
 
   const toggleView = useCallback(() => {
-    setViewType(prevType => prevType === 'grid' ? 'list' : 'grid');
-  }, [setViewType]);
+    setViewType(viewType === 'grid' ? 'list' : 'grid');
+  }, [viewType, setViewType]);
 
   return {
     viewType,
@@ -32,7 +34,8 @@ export const useDashboardState = (): DashboardState => {
     actionCards,
     setActionCards,
     user,
-    toggleView
+    toggleView,
+    firstName
   };
 };
 

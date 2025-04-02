@@ -162,7 +162,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
               <Label htmlFor="prazo_data" className="text-sm text-gray-500">Data</Label>
               <DatePicker
                 date={prazoDate}
-                setDate={handleDateChange}
+                onSelect={handleDateChange}
                 placeholder="Selecione uma data"
                 className={hasFieldError('prazo_resposta', errors) ? 'border-orange-500' : ''}
               />

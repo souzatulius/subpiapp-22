@@ -90,8 +90,8 @@ const NotasFilter: React.FC<NotasFilterProps> = ({
           <span className="text-sm text-gray-500">De:</span>
           <DatePicker 
             date={dataInicioFilter} 
-            setDate={setDataInicioFilter}
-            placeholder="Data inicial"
+            onSelect={setDataInicioFilter}
+            placeholder="Selecione"
           />
         </div>
         
@@ -99,8 +99,8 @@ const NotasFilter: React.FC<NotasFilterProps> = ({
           <span className="text-sm text-gray-500">Até:</span>
           <DatePicker 
             date={dataFimFilter} 
-            setDate={setDataFimFilter}
-            placeholder="Data final"
+            onSelect={setDataFimFilter}
+            placeholder="Selecione"
           />
         </div>
       </div>
