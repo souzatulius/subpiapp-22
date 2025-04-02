@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
@@ -65,7 +64,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     isLoading: isLoadingInternal
   } = useDefaultDashboardState(department);
 
-  // Use either external cards (from parent) or internal cards
   const cards = externalCards || internalCards;
   const isLoading = isLoadingInternal && !externalCards;
 
@@ -84,7 +82,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     dashboardType === 'dashboard' ? 'inicial' : 'comunicacao'
   );
   
-  // Effect to sync the page type with dashboardType
   useEffect(() => {
     if (dashboardType === 'dashboard' && selectedPageType !== 'inicial') {
       setSelectedPageType('inicial');
@@ -93,7 +90,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     }
   }, [dashboardType]);
   
-  // Mock data for dynamic cards in preview
   const [mockData, setMockData] = useState({
     kpis: {
       pressRequests: {
@@ -137,7 +133,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     ]
   });
 
-  // Handle drag over event
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     if (!isDraggingOver) {
@@ -145,13 +140,11 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     }
   };
 
-  // Handle drag leave event
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDraggingOver(false);
   };
 
-  // Handle drop event
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDraggingOver(false);
@@ -161,21 +154,17 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       const cardType = e.dataTransfer.getData('card/type');
       
       if (cardData && cardData.id) {
-        // Check if we already have this card (by title)
         const existingCard = cards.find(c => c.title === cardData.title);
         if (existingCard) {
-          // Silently skip adding duplicate cards
           return;
         }
         
-        // Create a new card with a unique ID based on the dropped card
         const newCard: ActionCardItem = {
           ...cardData,
-          id: `card-${uuidv4()}`, // Generate a new unique ID
-          isCustom: false // Mark as not custom to prevent deletion
+          id: `card-${uuidv4()}`,
+          isCustom: false
         };
         
-        // Preserve the dynamic card type from the dragged item
         if (cardType === 'dynamic' && cardData.type) {
           newCard.type = cardData.type;
         }
@@ -183,7 +172,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         const updatedCards = [...cards, newCard];
         handleCardsChange(updatedCards);
         
-        // Notify parent component if callback exists
         if (onAddCard) {
           onAddCard(newCard);
         }
@@ -220,17 +208,16 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     }
   };
 
-  // Handle manual save to make sure data is persisted
   const handleManualSave = async () => {
     if (onSave) {
       return onSave();
     }
     
-    // Fallback save implementation if no onSave provided
     try {
-      const viewTypeToSave = dashboardType;
+      const viewTypeToSave = selectedPageType === 'inicial' ? 'dashboard' : 'communication';
       
-      // Check if there's an existing config
+      console.log(`Saving dashboard config for department: ${department}, view type: ${viewTypeToSave}`);
+      
       const { data: existingConfig, error: checkError } = await supabase
         .from('department_dashboards')
         .select('id')
@@ -251,7 +238,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       const cardsJson = JSON.stringify(cards);
 
       if (existingConfig) {
-        // Update existing config
         const { error: updateError } = await supabase
           .from('department_dashboards')
           .update({ cards_config: cardsJson })
@@ -267,7 +253,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           return false;
         }
       } else {
-        // Insert new config
         const { error: insertError } = await supabase
           .from('department_dashboards')
           .insert({
@@ -307,9 +292,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Controls bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg border">
-        {/* Department selection */}
         <div className="flex items-center gap-2 flex-grow">
           <Select value={department} onValueChange={handleDepartmentSelect}>
             <SelectTrigger className="w-[200px] h-9 text-sm">
@@ -348,7 +331,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           </Button>
         </div>
         
-        {/* Save/Reset buttons */}
         <div className="flex items-center gap-2">
           {onReset && (
             <Button
@@ -377,7 +359,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         </div>
       </div>
       
-      {/* Dashboard preview area */}
       <div 
         className={`p-4 transition-all duration-300 ${isDraggingOver ? 'bg-blue-50 border-2 border-blue-300 border-dashed' : ''}`}
         onDragOver={handleDragOver}
@@ -406,7 +387,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               onHideCard={handleHideCard}
               isMobileView={isMobilePreview}
               isEditMode={true}
-              // Enable special features
               showSpecialFeatures={true}
               quickDemandTitle={newDemandTitle}
               onQuickDemandTitleChange={setNewDemandTitle}
@@ -414,7 +394,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               onSearchSubmit={handleSearchSubmit}
               specialCardsData={{
                 ...specialCardsData,
-                ...mockData // Add mock data for dynamic card previews
+                ...mockData
               }}
             />
           )}
