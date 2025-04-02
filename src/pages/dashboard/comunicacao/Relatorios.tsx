@@ -1,13 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
-import { PieChart, SlidersHorizontal, Printer, FileDown, Eye, Search, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { PieChart, SlidersHorizontal, Printer, FileDown, Eye, Search } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DndContext } from "@dnd-kit/core";
-import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { RelatoriosKPICards } from '@/components/relatorios/RelatoriosKPICards';
 import { RelatoriosGraphCards } from '@/components/relatorios/RelatoriosGraphCards';
 import RelatoriosFilters from '@/components/relatorios/filters/RelatoriosFilters';
@@ -102,7 +101,7 @@ const RelatoriosPage = () => {
           </div>
 
           <TabsContent value="charts" className="mt-4">
-            <DndContext modifiers={[restrictToWindowEdges]}>
+            <DndContext>
               <div className="space-y-6">
                 <RelatoriosKPICards isEditMode={isEditMode} />
                 <RelatoriosGraphCards isEditMode={isEditMode} />

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SortableGraphCard } from './components/SortableGraphCard';
 import { useReportsData } from './hooks/useReportsData';
 import { useChartComponents } from './hooks/useChartComponents';

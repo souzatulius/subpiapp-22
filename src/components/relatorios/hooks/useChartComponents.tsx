@@ -192,7 +192,7 @@ export const useChartComponents = () => {
       ),
       notasPorTema: (
         <PieChart 
-          data={reportsData?.statusData?.length ? reportsData.statusData : sampleData.temas}
+          data={reportsData?.temas?.length ? reportsData.temas : sampleData.temas}
           colors={['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe']}
         />
       ),
