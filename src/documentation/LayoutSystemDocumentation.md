@@ -10,11 +10,11 @@ This document describes the standard layout structure used throughout the applic
 A reusable layout component for dashboard pages that provides:
 
 1. **Standard Structure**:
-   - Header with navigation controls
+   - Header with navigation controls and centered logo
    - Sidebar navigation (desktop only)
    - Main content area with standardized spacing
    - Mobile bottom navigation (mobile only)
-   - Breadcrumb navigation
+   - Breadcrumb navigation with path filtering
 
 2. **Responsive Design**:
    - Uses `useIsMobile()` hook to adapt layout for different screen sizes
@@ -32,13 +32,13 @@ A reusable layout component for dashboard pages that provides:
 
 ### Header (`src/components/layouts/header/Header.tsx`)
 
-The main header component appears at the top of all authenticated pages.
+The main header component appears at the top of all authenticated pages with a three-column layout:
 
 #### Features:
 
-1. **Sidebar Toggle**: Button to expand/collapse the sidebar
-2. **User Profile**: Access to user settings and logout
-3. **Notifications**: Alert system for application notifications
+1. **Left Column (1/3 width)**: Contains sidebar toggle button
+2. **Center Column (1/3 width)**: Contains centered application logo
+3. **Right Column (1/3 width)**: Contains user profile and notifications
 4. **Responsive Design**: Adapts to different screen sizes
 
 ## Main Content Area Standards
@@ -60,6 +60,21 @@ The main header component appears at the top of all authenticated pages.
 4. **Breadcrumb Placement**:
    - Positioned at the top of the content area before the WelcomeCard
    - Small, gray text to provide context without visual distraction
+   - Configured to hide specific paths like 'dashboard/dashboard', 'dashboard/comunicacao'
+
+## Settings Dashboard Layout
+
+### Settings Component Structure
+
+1. **WelcomeCard**:
+   - Blue gradient background (`bg-gradient-to-r from-blue-800 to-blue-950`)
+   - Title and description without stat cards
+   - Consistent styling with other welcome cards but specialized for settings
+
+2. **Content Organization**:
+   - Organized into logical sections based on functionality
+   - Side navigation for different setting categories
+   - Responsive layout that adapts to screen size
 
 ## Mobile-Specific Considerations
 
@@ -81,7 +96,7 @@ Most pages follow this general structure:
 
 ```tsx
 <div className="min-h-screen flex flex-col bg-gray-50">
-  {/* Header */}
+  {/* Header with centered logo */}
   <Header showControls={true} toggleSidebar={toggleSidebar} />
 
   <div className="flex flex-1 overflow-hidden">
@@ -90,7 +105,7 @@ Most pages follow this general structure:
 
     {/* Main content */}
     <main className="flex-1 overflow-auto">
-      {/* Breadcrumb */}
+      {/* Breadcrumb with filtered paths */}
       <BreadcrumbBar />
       
       {/* Content container */}
@@ -144,3 +159,4 @@ Settings pages follow a slightly different structure:
 1. **Settings Sidebar**: Replaces the standard dashboard sidebar
 2. **SettingsSectionLayout**: Special component for settings section pages
 3. **Mobile Navigation**: Uses a customized version with settings-specific items
+4. **WelcomeCard**: Simplified version without stat cards

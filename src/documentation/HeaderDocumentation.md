@@ -40,28 +40,46 @@ The header includes a toggle button that controls the sidebar visibility:
 
 This is connected to the parent component via the `toggleSidebar` prop.
 
-### 2. User Profile
+### 2. Logo Placement
+
+The logo is centrally positioned in the header with a three-column layout:
+- Left section (1/3): Contains the sidebar toggle button
+- Middle section (1/3): Contains the centered logo
+- Right section (1/3): Contains user controls (notifications, profile)
+
+```tsx
+<div className="flex justify-between items-center px-4 py-2 max-w-screen-2xl mx-auto">
+  <div className="flex items-center w-1/3">
+    {/* Sidebar toggle */}
+  </div>
+  <div className="flex items-center justify-center w-1/3">
+    {/* Centered logo */}
+  </div>
+  <div className="flex items-center justify-end space-x-3 w-1/3">
+    {/* User controls */}
+  </div>
+</div>
+```
+
+### 3. User Profile
 
 The user profile section includes:
-
 - Profile photo display
 - Dropdown menu with user information
 - Quick links to profile settings
 - Logout functionality
 
-### 3. Notifications
+### 4. Notifications
 
 The notifications system includes:
-
 - Notification bell icon with unread count indicator
 - Popup with recent notifications
 - Ability to mark notifications as read
 - Navigation to related content
 
-### 4. Responsive Design
+### 5. Responsive Design
 
 The header adapts to different screen sizes:
-
 - Full controls on desktop
 - Simplified controls on mobile
 - Conditionally shown elements based on screen size
@@ -95,10 +113,13 @@ interface HeaderProps {
    - Bottom border (`border-b border-gray-200`)
    - Shadow for depth (`shadow-sm`)
 
-2. **Height**:
-   - Fixed height of 64px (`h-16`)
+2. **Logo**:
+   - Centered within header
+   - Height of 48px on desktop (h-12)
+   - Height of 40px on mobile (h-10)
 
 3. **Layout**:
+   - Three-column grid with equal width sections
    - Flex container with space-between alignment
    - Padding left/right (`px-4`) to match content area
 
@@ -119,7 +140,7 @@ The header component works in conjunction with:
 
 ```
 +----------------------------------------+
-|  [≡]  Logo              👤 🔔          |
+| [≡]     |      Logo      |   👤 🔔    |
 +----------------------------------------+
 | < Breadcrumb navigation goes here >    |
 +----------------------------------------+

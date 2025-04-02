@@ -15,10 +15,16 @@ The desktop sidebar provides the main navigation for the application on larger s
    - Can be toggled between expanded and collapsed states
    - Expanded state shows icons and text
    - Collapsed state shows only icons
+   - Width changes from 64px (collapsed) to 256px (expanded)
 
 2. **Navigation Configuration**:
    - Navigation items are defined in `src/components/dashboard/sidebar/navigationConfig.tsx`
    - Each item has an ID, icon, label, and path
+   - Current standard sections:
+     - Início (Home)
+     - Comunicação
+     - Relatórios
+     - Ranking da Zeladoria
 
 3. **Visual Design**:
    - Dark blue background (`bg-[#051b2c]`)
@@ -70,19 +76,24 @@ The header provides additional navigation controls and user-specific options.
 
 #### Key Features:
 
-1. **Sidebar Toggle**:
+1. **Three-Column Layout**:
+   - Left column (1/3): Sidebar toggle button
+   - Middle column (1/3): Centered logo
+   - Right column (1/3): User controls (notifications, profile)
+
+2. **Sidebar Toggle**:
    - Button to collapse/expand the sidebar on desktop
    - Menu button on mobile that opens the sidebar as an overlay
 
-2. **User Profile Menu**:
+3. **User Profile Menu**:
    - Access to user-specific settings and logout
    - Profile photo display
 
-3. **Notifications**:
+4. **Notifications**:
    - Notification bell icon
    - Popup with recent notifications
 
-4. **Responsive Design**:
+5. **Responsive Design**:
    - Adjusts controls and layout based on screen size
    - Different spacing and components for mobile vs. desktop
 
@@ -91,6 +102,26 @@ The header provides additional navigation controls and user-specific options.
 ```tsx
 <Header showControls={true} toggleSidebar={toggleSidebar} />
 ```
+
+## Breadcrumb Navigation
+
+### Component: `src/components/layouts/BreadcrumbBar.tsx`
+
+Provides contextual navigation showing the current location in the application hierarchy.
+
+#### Key Features:
+
+1. **Path Filtering**:
+   - Hides specific segments like 'dashboard/dashboard', 'dashboard/comunicacao'
+   - Provides clean, logical navigation paths
+
+2. **User-Friendly Names**:
+   - Maps URL segments to readable display names
+   - Consistent naming conventions
+
+3. **Placement**:
+   - Positioned below header
+   - Above page content
 
 ## Navigation Configuration
 
@@ -109,10 +140,10 @@ Each navigation item includes:
 
 #### Current Main Sections:
 
-1. Dashboard (Home)
-2. Comunicação
-3. Relatórios
-4. Ranking das Subs
+1. Dashboard (Home) - `/dashboard`
+2. Comunicação - `/dashboard/comunicacao/comunicacao`
+3. Relatórios - `/dashboard/comunicacao/relatorios`
+4. Ranking da Zeladoria - `/dashboard/zeladoria/ranking-subs`
 
 This configuration is used by both the desktop sidebar and mobile bottom navigation to maintain consistency.
 

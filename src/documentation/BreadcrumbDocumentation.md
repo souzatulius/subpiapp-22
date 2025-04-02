@@ -1,3 +1,4 @@
+
 # Breadcrumb Implementation Documentation
 
 This document describes the current implementation of breadcrumbs throughout the application to establish a consistent pattern for future development.
@@ -28,16 +29,27 @@ The breadcrumb bar is implemented in `src/components/layouts/BreadcrumbBar.tsx`.
    - Maps URL segments to user-friendly display names
    - Contains a dictionary of standard page names
 
-3. **Navigation**:
+3. **Hidden Segments**:
+   - Certain paths are explicitly hidden from breadcrumb display:
+     - 'zeladoria'
+     - 'dashboard/dashboard'
+     - 'dashboard/comunicacao'
+     - 'comunicacao'
+
+4. **Special Path Handling**:
+   - Handles duplicated segments (e.g., only showing first 'dashboard')
+   - Properly handles nested paths with special rules
+
+5. **Navigation**:
    - Each breadcrumb item is clickable
    - Navigates to the corresponding path when clicked
    - Special handling for settings pages
 
-4. **Home Link**:
+6. **Home Link**:
    - Always includes a home link with a house icon
    - Navigates to the dashboard
 
-5. **Styling**:
+7. **Styling**:
    - Small, light gray text for minimal visual impact
    - Positioned above the main content area
    - Consistent padding (px-6 py-2)
@@ -80,3 +92,15 @@ For sections like Settings that need special navigation handling, use the `onSet
 ```
 
 This allows for custom behavior when specific breadcrumb sections are clicked.
+
+## Segment Filtering Rules
+
+The current implementation filters breadcrumb segments as follows:
+
+1. Removes empty segments
+2. Removes segments explicitly listed in `hiddenSegments`
+3. Special handling for dashboard paths:
+   - Keeps the first 'dashboard' segment when at index 0
+   - Hides 'comunicacao' when preceded by 'dashboard'
+
+This ensures a clean and consistent breadcrumb trail throughout the application.
