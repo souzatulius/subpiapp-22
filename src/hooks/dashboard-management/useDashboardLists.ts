@@ -32,16 +32,16 @@ export const useDashboardLists = () => {
         // Fetch 5 most recent demands that are in progress
         const { data: demands, error: demandsError } = await supabase
           .from('demandas')
-          .select('id, titulo, status, created_at')
+          .select('id, titulo, status, horario_publicacao')
           .in('status', ['em_andamento', 'aguardando_resposta', 'aguardando_aprovacao'])
-          .order('created_at', { ascending: false })
+          .order('horario_publicacao', { ascending: false })
           .limit(5);
 
         // Fetch 5 most recent official notes
         const { data: notes, error: notesError } = await supabase
           .from('notas_oficiais')
-          .select('id, titulo, status, created_at')
-          .order('created_at', { ascending: false })
+          .select('id, titulo, status, criado_em')
+          .order('criado_em', { ascending: false })
           .limit(5);
 
         if (demandsError) {
@@ -68,7 +68,7 @@ export const useDashboardLists = () => {
             id: demand.id,
             title: demand.titulo,
             status: statusMap[demand.status] || 'pending',
-            date: new Date(demand.created_at).toLocaleDateString('pt-BR'),
+            date: new Date(demand.horario_publicacao).toLocaleDateString('pt-BR'),
             path: `/dashboard/comunicacao/responder?demanda_id=${demand.id}`
           };
         });
@@ -86,7 +86,7 @@ export const useDashboardLists = () => {
             id: note.id,
             title: note.titulo,
             status: statusMap[note.status] || 'pending',
-            date: new Date(note.created_at).toLocaleDateString('pt-BR'),
+            date: new Date(note.criado_em).toLocaleDateString('pt-BR'),
             path: `/dashboard/comunicacao/notas?nota_id=${note.id}`
           };
         });

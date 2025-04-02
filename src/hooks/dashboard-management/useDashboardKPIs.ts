@@ -55,46 +55,46 @@ export const useDashboardKPIs = () => {
         const yesterdayStr = yesterday.toISOString().split('T')[0];
 
         // Fetch press requests data
-        const { data: todayRequests, error: todayError } = await supabase
+        const { count: todayCount, error: todayError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
-          .gte('created_at', `${todayStr}T00:00:00`)
-          .lt('created_at', `${todayStr}T23:59:59`);
+          .gte('horario_publicacao', `${todayStr}T00:00:00`)
+          .lt('horario_publicacao', `${todayStr}T23:59:59`);
 
-        const { data: yesterdayRequests, error: yesterdayError } = await supabase
+        const { count: yesterdayCount, error: yesterdayError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
-          .gte('created_at', `${yesterdayStr}T00:00:00`)
-          .lt('created_at', `${yesterdayStr}T23:59:59`);
+          .gte('horario_publicacao', `${yesterdayStr}T00:00:00`)
+          .lt('horario_publicacao', `${yesterdayStr}T23:59:59`);
 
         // Fetch pending approvals
-        const { data: pendingApproval, error: pendingError } = await supabase
+        const { count: pendingCount, error: pendingError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .in('status', ['aguardando_aprovacao', 'aguardando_resposta']);
 
         // Count how many are specifically awaiting response
-        const { data: awaitingResponse, error: awaitingError } = await supabase
+        const { count: awaitingCount, error: awaitingError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'aguardando_resposta');
 
         // Fetch notes data
-        const { data: totalNotes, error: notesError } = await supabase
+        const { count: totalNotesCount, error: notesError } = await supabase
           .from('notas_oficiais')
-          .select('count, status', { count: 'exact' });
+          .select('*', { count: 'exact', head: true });
 
         // Count approved and rejected notes
-        const { data: approvedNotes, error: approvedError } = await supabase
+        const { count: approvedCount, error: approvedError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'aprovada');
 
-        const { data: rejectedNotes, error: rejectedError } = await supabase
+        const { count: rejectedCount, error: rejectedError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'rejeitada');
 
         // If there were any errors, log them but continue
@@ -107,29 +107,29 @@ export const useDashboardKPIs = () => {
         }
 
         // Calculate percentage change
-        const todayCount = todayRequests?.count || 0;
-        const yesterdayCount = yesterdayRequests?.count || 0;
-        const percentageChange = yesterdayCount === 0 
+        const todayValue = todayCount || 0;
+        const yesterdayValue = yesterdayCount || 0;
+        const percentageChange = yesterdayValue === 0 
           ? 0 
-          : ((todayCount - yesterdayCount) / yesterdayCount) * 100;
+          : ((todayValue - yesterdayValue) / yesterdayValue) * 100;
 
         // Update KPIs state
         setKpis({
           pressRequests: {
-            today: todayCount,
-            yesterday: yesterdayCount,
+            today: todayValue,
+            yesterday: yesterdayValue,
             percentageChange,
             loading: false
           },
           pendingApproval: {
-            total: pendingApproval?.count || 0,
-            awaitingResponse: awaitingResponse?.count || 0,
+            total: pendingCount || 0,
+            awaitingResponse: awaitingCount || 0,
             loading: false
           },
           notesProduced: {
-            total: totalNotes?.count || 0,
-            approved: approvedNotes?.count || 0,
-            rejected: rejectedNotes?.count || 0,
+            total: totalNotesCount || 0,
+            approved: approvedCount || 0,
+            rejected: rejectedCount || 0,
             loading: false
           }
         });
