@@ -30,7 +30,6 @@ import ConsultarNotas from './pages/dashboard/comunicacao/ConsultarNotas';
 import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
 import NotasDashboard from './pages/dashboard/comunicacao/Notas';
-import DashboardManagement from './pages/settings/DashboardManagement'; // Nova importação
 
 // Admin Pages
 import UserPermissionsList from './pages/admin/UserPermissionsList';
@@ -64,7 +63,6 @@ function App() {
               {/* Dashboard route */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              <Route path="/settings/dashboard-management" element={<ProtectedRoute><DashboardManagement /></ProtectedRoute>} />
 
               {/* Admin routes */}
               <Route path="/admin/users-permissions" element={<ProtectedRoute><UserPermissionsList /></ProtectedRoute>} />
