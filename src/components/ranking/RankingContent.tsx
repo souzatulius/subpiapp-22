@@ -15,11 +15,13 @@ import { format } from 'date-fns';
 interface RankingContentProps {
   filterDialogOpen: boolean;
   setFilterDialogOpen: (open: boolean) => void;
+  disableCardContainers?: boolean;
 }
 
 const RankingContent: React.FC<RankingContentProps> = ({
   filterDialogOpen,
-  setFilterDialogOpen
+  setFilterDialogOpen,
+  disableCardContainers = false
 }) => {
   const { user } = useAuth();
   const [uploadId, setUploadId] = useState<string | null>(null);
@@ -152,6 +154,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
           painelData={painelData || []}
           onSimulateIdealRanking={handleSimulateIdealRanking}
           isSimulationActive={isSimulationActive}
+          disableCardContainers={disableCardContainers}
         />
       )}
       

@@ -67,7 +67,11 @@ const RankingSubs = () => {
       
       <div className="mt-6">
         <DemoDataProvider>
-          <RankingContent filterDialogOpen={filterDialogOpen} setFilterDialogOpen={setFilterDialogOpen} />
+          <RankingContent 
+            filterDialogOpen={filterDialogOpen} 
+            setFilterDialogOpen={setFilterDialogOpen} 
+            disableCardContainers={true} 
+          />
         </DemoDataProvider>
       </div>
     </motion.div>

@@ -28,6 +28,7 @@ interface ChartsSectionProps {
   painelData: any[] | null;
   onSimulateIdealRanking: () => void;
   isSimulationActive: boolean;
+  disableCardContainers?: boolean;
 }
 
 const ChartsSection: React.FC<ChartsSectionProps> = ({
@@ -37,7 +38,8 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   sgzData,
   painelData,
   onSimulateIdealRanking,
-  isSimulationActive
+  isSimulationActive,
+  disableCardContainers = false
 }) => {
   // Set up DnD sensors
   const sensors = useSensors(
@@ -67,7 +69,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
       const items: ChartItem[] = [
         {
           id: 'evolution-chart',
-          title: 'Evolução % Status (Dia/Semana)',
+          title: 'Serviços em Andamento',
           component: <EvolutionChart data={chartData.evolution || {}} sgzData={sgzData} painelData={painelData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
           isVisible: true,
           analysis: 'Análise da evolução diária e semanal das porcentagens de OS Fechadas, Pendentes e Canceladas.',
@@ -94,7 +96,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         },
         {
           id: 'district-performance-chart',
-          title: 'Performance por Distrito',
+          title: 'Distritos incluídos indevidamente',
           component: <DistrictPerformanceChart data={chartData.districtPerformance || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
           isVisible: true,
           analysis: 'Comparativo de performance entre os distritos, mostrando taxa de resolução e tempo médio.',
@@ -103,7 +105,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         },
         {
           id: 'department-comparison-chart',
-          title: 'Comparação STLP / STM / STPO',
+          title: 'Comparação por Departamento',
           component: <DepartmentComparisonChart data={chartData.departmentComparison || {}} sgzData={sgzData} isLoading={isLoading} isSimulationActive={isSimulationActive} />,
           isVisible: true,
           analysis: 'Comparação entre os departamentos técnicos: STLP, STM e STPO.',
@@ -138,8 +140,9 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     return <NoDataMessage />;
   }
   
-  return (
-    <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
+  // Render content based on disableCardContainers prop
+  const renderContent = () => (
+    <>
       <div className="flex justify-end mb-4">
         <Button 
           onClick={onSimulateIdealRanking}
@@ -177,6 +180,17 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
           </div>
         </SortableContext>
       </DndContext>
+    </>
+  );
+  
+  // Return the content directly or wrapped in a Card based on the prop
+  if (disableCardContainers) {
+    return renderContent();
+  }
+  
+  return (
+    <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
+      {renderContent()}
     </Card>
   );
 };
