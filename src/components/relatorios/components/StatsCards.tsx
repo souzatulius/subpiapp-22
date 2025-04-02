@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, Clock, FileText, MessageSquare, Percent } from "lucide-react";
 import { CardStats } from '../hooks/reports/types';
 
 interface StatsCardsProps {
@@ -17,24 +17,32 @@ const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
       value: cardStats.totalDemandas,
       change: cardStats.demandasVariacao,
       unit: "",
+      icon: <MessageSquare className="h-4 w-4" />,
+      description: "Demandas cadastradas hoje"
     },
     {
       title: "Notas emitidas",
       value: cardStats.totalNotas,
       change: cardStats.notasVariacao,
       unit: "",
+      icon: <FileText className="h-4 w-4" />,
+      description: `${cardStats.notasAguardando || 0} aguardando aprovação`
     },
     {
       title: "Tempo médio de resposta",
       value: cardStats.tempoMedioResposta,
       change: cardStats.tempoRespostaVariacao,
       unit: " dias",
+      icon: <Clock className="h-4 w-4" />,
+      description: "Comparado ao período anterior"
     },
     {
       title: "Taxa de aprovação",
-      value: cardStats.taxaAprovacao,
+      value: `${cardStats.taxaAprovacao}%`,
       change: cardStats.aprovacaoVariacao,
-      unit: "%",
+      unit: "",
+      icon: <Percent className="h-4 w-4" />,
+      description: `${cardStats.notasEditadas || 0}% das notas foram editadas`
     }
   ];
 
@@ -63,8 +71,11 @@ const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
         <Card key={index} className="border border-orange-200 hover:shadow-md transition-all rounded-xl overflow-hidden">
           <CardContent className="p-4">
             <div className="flex flex-col">
-              <div className="text-xs font-medium text-orange-800">
-                {stat.title}
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-orange-800">
+                  {stat.title}
+                </span>
+                <div className="h-5 w-5 text-orange-600">{stat.icon}</div>
               </div>
               {isLoading ? (
                 <div className="mt-2">
@@ -75,6 +86,9 @@ const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
                 <>
                   <div className="text-2xl font-bold text-orange-700">
                     {stat.value}{stat.unit}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {stat.description}
                   </div>
                   {renderChangeIndicator(stat.change, index === 2)}
                 </>

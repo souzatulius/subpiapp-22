@@ -60,6 +60,17 @@ export const useReportsData = (filters: ReportFilters = {}) => {
   useEffect(() => {
     console.log('useReportsData - useEffect disparado para buscar dados');
     fetchData();
+    
+    // Para desenvolvimento, podemos adicionar um refresh automático dos dados a cada 2 minutos
+    const intervalId = setInterval(() => {
+      console.log('Atualizando dados automaticamente...');
+      fetchData();
+    }, 120000); // 2 minutos
+    
+    return () => {
+      clearInterval(intervalId);
+      console.log('useReportsData - limpeza do intervalo de atualização');
+    };
   }, [fetchData]);
 
   return {

@@ -8,6 +8,8 @@ export interface CardStats {
   tempoRespostaVariacao: number;
   taxaAprovacao: number;
   aprovacaoVariacao: number;
+  notasAguardando?: number;
+  notasEditadas?: number;
 }
 
 export interface ChartDataItem {

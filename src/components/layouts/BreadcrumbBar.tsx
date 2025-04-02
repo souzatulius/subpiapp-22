@@ -33,6 +33,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       'consultar-notas': 'Consultar Notas',
       usuarios: 'Usuários',
       relatorios: 'Relatórios',
+      'ranking-subs': 'Ranking da Zeladoria',
       // Adicione outros mapeamentos conforme necessário
     };
     
