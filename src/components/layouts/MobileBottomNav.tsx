@@ -19,7 +19,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   const location = useLocation();
 
   return (
-    <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] border-t border-gray-800 shadow-lg z-50 ${className}`}>
+    <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] shadow-lg z-50 ${className}`}>
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => (
           <NavLink
@@ -38,7 +38,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
             <div className="text-[#f57737]">
               {item.icon}
             </div>
-            <span className="text-xs mt-1">{item.label}</span>
+            <span className="text-xs mt-1 truncate">{item.label}</span>
           </NavLink>
         ))}
       </div>

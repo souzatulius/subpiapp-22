@@ -39,7 +39,7 @@ const MobileSettingsNav = () => {
   };
   
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] border-t border-gray-800 shadow-lg z-50">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] shadow-lg z-50">
       <div className="flex justify-around">
         {navItems.map((item) => (
           <button
@@ -52,7 +52,7 @@ const MobileSettingsNav = () => {
             <div className="text-[#f57737]">
               {item.icon}
             </div>
-            <span className="text-[11px] mt-1 truncate">{item.label}</span>
+            <span className="text-xs mt-1 truncate">{item.label}</span>
           </button>
         ))}
       </div>
