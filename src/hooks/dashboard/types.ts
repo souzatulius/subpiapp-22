@@ -45,6 +45,8 @@ export interface DashboardStateReturn {
     isLoading: boolean;
   };
   userCoordenaticaoId: string | null;
+  isLoadingDashboard: boolean; // Added the missing property
+  viewType?: 'dashboard' | 'communication'; // Add viewType as an optional property
 }
 
 export interface ChartVisibility {

@@ -218,6 +218,7 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
     handleSearchSubmit,
     specialCardsData,
     userCoordenaticaoId,
-    isLoadingDashboard
+    isLoadingDashboard,
+    viewType
   };
 };
