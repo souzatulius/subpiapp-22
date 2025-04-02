@@ -4,15 +4,19 @@ import { Button } from '@/components/ui/button';
 import { ImageIcon, X } from 'lucide-react';
 
 interface PhotoUploadActionsProps {
-  selectedFile: File | null;
-  onFileChange: (file: File | null) => void;
-  disabled: boolean;
+  photoPreview: string | null;
+  handlePhotoChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  uploadError: string | null;
+  isUploading: boolean;
+  handleUpload: (file: File) => Promise<void>;
 }
 
 const PhotoUploadActions: React.FC<PhotoUploadActionsProps> = ({
-  selectedFile,
-  onFileChange,
-  disabled
+  photoPreview,
+  handlePhotoChange,
+  uploadError,
+  isUploading,
+  handleUpload
 }) => {
   // Create a hidden file input element that we can trigger programmatically
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -22,53 +26,67 @@ const PhotoUploadActions: React.FC<PhotoUploadActionsProps> = ({
     fileInputRef.current?.click();
   };
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleFileSelected = () => {
+    const files = fileInputRef.current?.files;
     if (files && files.length > 0) {
-      onFileChange(files[0]);
+      handleUpload(files[0]);
     }
-    // Reset the input value so selecting the same file again will trigger the onChange
-    e.target.value = '';
   };
   
-  const handleRemovePhoto = () => {
-    onFileChange(null);
-  };
-
   return (
-    <div className="flex items-center gap-2">
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        className="hidden"
-        disabled={disabled}
-      />
+    <div className="space-y-4">
+      {photoPreview && (
+        <div className="flex justify-center">
+          <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-gray-200">
+            <img 
+              src={photoPreview} 
+              alt="Profile preview" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      )}
       
-      <Button 
-        type="button" 
-        variant="outline" 
-        onClick={handleUploadClick}
-        disabled={disabled}
-        className="flex items-center"
-      >
-        <ImageIcon className="mr-2 h-4 w-4" />
-        Escolher foto
-      </Button>
+      {uploadError && (
+        <div className="text-sm text-red-500 mb-2">
+          {uploadError}
+        </div>
+      )}
       
-      {selectedFile && (
+      <div className="flex items-center gap-2">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handlePhotoChange}
+          accept="image/*"
+          className="hidden"
+          disabled={isUploading}
+        />
+        
         <Button 
           type="button" 
           variant="outline" 
-          onClick={handleRemovePhoto} 
-          disabled={disabled}
-          className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
+          onClick={handleUploadClick}
+          disabled={isUploading}
+          className="flex items-center"
         >
-          <X className="mr-2 h-4 w-4" />
-          Remover
+          <ImageIcon className="mr-2 h-4 w-4" />
+          {isUploading ? 'Enviando...' : 'Escolher foto'}
         </Button>
-      )}
+        
+        {photoPreview && (
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
+          >
+            <X className="mr-2 h-4 w-4" />
+            Remover
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
