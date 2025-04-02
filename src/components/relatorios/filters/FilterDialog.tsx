@@ -20,7 +20,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   onOpenChange,
   onFiltersChange = () => {}
 }) => {
-  const defaultDateRange = {
+  const defaultDateRange: DateRange = {
     from: new Date(new Date().setMonth(new Date().getMonth() - 3)),
     to: new Date(),
   };
@@ -91,7 +91,10 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
         <div className="grid gap-6 py-4">
           <div className="grid gap-2">
             <Label htmlFor="date-range">Período</Label>
-            <DatePickerWithRange date={date} setDate={setDate} />
+            <DatePickerWithRange 
+              dateRange={date} 
+              onRangeChange={setDate} 
+            />
           </div>
           
           <div className="grid gap-2">

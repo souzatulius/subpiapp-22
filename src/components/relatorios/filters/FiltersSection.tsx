@@ -11,7 +11,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, FilterIcon, XIcon } from 'lucide-react';
-import { DateRange } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
 
 interface FiltersSectionProps {
   dateRange: DateRange;

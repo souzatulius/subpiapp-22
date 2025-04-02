@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CardStats } from './types';
@@ -22,12 +21,11 @@ export const useCardStatsData = () => {
     try {
       // Construir filtros para as consultas
       let dateFilter = {};
-      if (filters.dateRange) {
-        const { from, to } = filters.dateRange;
+      if (filters.dateRange?.from) {
         dateFilter = {
           horario_publicacao: { 
-            gte: from.toISOString(),
-            lte: to.toISOString()
+            gte: filters.dateRange.from.toISOString(),
+            ...(filters.dateRange.to ? { lte: filters.dateRange.to.toISOString() } : {})
           }
         };
       }

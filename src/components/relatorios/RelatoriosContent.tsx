@@ -24,7 +24,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
   setFilterDialogOpen,
   filters = {}
 }) => {
-  const defaultDateRange = {
+  const defaultDateRange: DateRange = {
     from: new Date(new Date().setMonth(new Date().getMonth() - 3)),
     to: new Date(),
   };
@@ -40,7 +40,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
   
   const currentFilters = {
     ...filters,
-    dateRange: dateRange
+    dateRange: filters.dateRange || dateRange
   };
   
   const { reportsData, cardStats, isLoading: dataLoading } = useReportsData(currentFilters);

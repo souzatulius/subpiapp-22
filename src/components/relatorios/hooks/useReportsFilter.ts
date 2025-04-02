@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { DateRange } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
 import { addDays, subDays } from 'date-fns';
 
 interface ReportsFilters {

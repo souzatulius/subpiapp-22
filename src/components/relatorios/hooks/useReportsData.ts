@@ -4,12 +4,10 @@ import { useCardStatsData } from './reports/useCardStatsData';
 import { useChartStatsData } from './reports/useChartStatsData';
 import { CardStats } from './reports/types';
 import { supabase } from '@/integrations/supabase/client';
+import { DateRange } from 'react-day-picker';
 
 export interface ReportFilters {
-  dateRange?: {
-    from: Date;
-    to: Date;
-  };
+  dateRange?: DateRange;
   coordenacao?: string;
   problema?: string;
 }
