@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -24,6 +24,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showValidationAlert, setShowValidationAlert] = useState(false);
   const location = useLocation();
+  const formRef = useRef<HTMLDivElement>(null);
   
   const {
     formData,
@@ -52,6 +53,13 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     filteredServicos,
     handleServiceSearch
   } = useDemandForm(user?.id, onClose);
+
+  // Efeito para rolar para o topo quando mudar de etapa
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [activeStep]);
 
   useEffect(() => {
     // Extract origine_id from URL if present
@@ -120,7 +128,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" ref={formRef}>
       <Card className="border border-gray-200 rounded-lg">
         <div className="p-6">
           <div className="mb-6">

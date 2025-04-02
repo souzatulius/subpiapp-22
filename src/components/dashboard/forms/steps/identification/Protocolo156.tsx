@@ -31,6 +31,24 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
     }
   };
 
+  // Função para lidar com a entrada do número de protocolo, limitando a 10 dígitos numéricos
+  const handleProtocolNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numericValue = value.replace(/\D/g, '').substring(0, 10); // Limita a 10 dígitos numéricos
+    
+    // Cria um novo evento com o valor tratado
+    const newEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: e.target.name,
+        value: numericValue
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleChange(newEvent);
+  };
+
   return (
     <div className="space-y-3">
       <Label
@@ -65,9 +83,11 @@ const Protocolo156: React.FC<Protocolo156Props> = ({
             id="numero_protocolo_156"
             name="numero_protocolo_156"
             value={numeroProtocolo156}
-            onChange={handleChange}
+            onChange={handleProtocolNumberChange}
             placeholder="Digite aqui os 10 dígitos"
+            maxLength={10}
             className={hasFieldError('numero_protocolo_156', errors) ? 'border-orange-500' : ''}
+            inputMode="numeric"
           />
           {hasFieldError('numero_protocolo_156', errors) && (
             <p className="text-orange-500 text-sm mt-1">{getFieldErrorMessage('numero_protocolo_156', errors)}</p>

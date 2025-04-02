@@ -1,106 +1,71 @@
 
 import React from 'react';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { useLocation, Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ChevronRight, Home } from 'lucide-react';
 
-const BreadcrumbBar: React.FC = () => {
+interface BreadcrumbBarProps {
+  onSettingsClick?: () => void;
+}
+
+const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   const location = useLocation();
-  const { user } = useAuth();
+  const navigate = useNavigate();
   
-  // Check if current page is a public page or main dashboard
-  const isPublicPage = ['/login', '/register', '/forgot-password', '/email-verified', '/'].includes(location.pathname) || 
-                      location.pathname.includes('/404');
-  const isMainDashboard = location.pathname === '/dashboard';
+  // Remove leading slash and split path into segments
+  const pathSegments = location.pathname.substring(1).split('/');
   
-  // Don't render breadcrumbs on public pages or main dashboard
-  if (!user || isPublicPage || isMainDashboard) {
-    return null;
-  }
-  
-  // Map of route paths to friendly names
-  const routeNames: Record<string, string> = {
-    'dashboard': 'Dashboard',
-    'comunicacao': 'Comunicação',
-    'notas': 'Notas para Imprensa',
-    'cadastrar': 'Cadastrar Demanda',
-    'responder': 'Responder Demandas',
-    'consultar-demandas': 'Consultar Demandas',
-    'criar-nota': 'Criar Nota',
-    'aprovar-nota': 'Aprovar Nota',
-    'consultar-notas': 'Consultar Notas',
-    'relatorios': 'Relatórios',
-    'zeladoria': 'Zeladoria',
-    'ranking-subs': 'Ranking das Subs',
-    'settings': 'Configurações'
+  const getDisplayName = (segment: string) => {
+    const displayNames: Record<string, string> = {
+      dashboard: 'Dashboard',
+      comunicacao: 'Comunicação',
+      'cadastrar-demanda': 'Cadastrar Demanda',
+      cadastrar: 'Cadastrar',
+      settings: 'Configurações',
+      profile: 'Meu Perfil',
+      'consultar-demandas': 'Consultar Demandas',
+      'consultar-notas': 'Consultar Notas',
+      usuarios: 'Usuários',
+      // Adicione outros mapeamentos conforme necessário
+    };
+    
+    return displayNames[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
   };
   
-  const paths = location.pathname.split('/').filter(path => path);
-  
-  if (paths.length === 0) return null;
-  
-  // Special case for dashboard to avoid duplication
-  if (paths.length === 1 && paths[0] === 'dashboard') {
-    return null; // No breadcrumbs on main dashboard
-  }
+  const handleClick = (index: number) => {
+    if (pathSegments[index] === 'settings' && onSettingsClick) {
+      onSettingsClick();
+      return;
+    }
+    
+    const path = '/' + pathSegments.slice(0, index + 1).join('/');
+    navigate(path);
+  };
   
   return (
-    <div className="max-w-7xl mx-auto px-6 pt-4 pb-1">
-      <Breadcrumb className="w-full">
-        <BreadcrumbList className="text-xs text-gray-500">
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/dashboard">Dashboard</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          
-          {paths.map((path, index) => {
-            // Skip the first path if it's dashboard to avoid duplication
-            if (index === 0 && path === 'dashboard') return null;
-            
-            // Get friendly name from the map or capitalize the first letter
-            const formattedPath = routeNames[path] || (path.charAt(0).toUpperCase() + path.slice(1));
-            
-            // Build the correct URL path
-            // Ensure proper path for comunicacao section
-            let href = `/${paths.slice(0, index + 1).join('/')}`;
-            
-            // Special handling for "comunicacao" to ensure correct link
-            if (path === 'comunicacao' && index > 0 && paths[index-1] === 'dashboard') {
-              href = '/dashboard/comunicacao/comunicacao';
-            }
-            
-            // Make "Configurações" in settings section clickable
-            if (path === 'settings' && paths.length > 1) {
-              return (
-                <React.Fragment key={index}>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link to="/settings">Configurações</Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                </React.Fragment>
-              );
-            }
-            
-            return (
-              <React.Fragment key={index}>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  {index === paths.length - 1 ? (
-                    <span className="text-gray-600 font-medium">{formattedPath}</span>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link to={href}>{formattedPath}</Link>
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-              </React.Fragment>
-            );
-          })}
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="bg-white border-b border-gray-200 px-4 py-2 text-sm flex items-center overflow-x-auto">
+      <button 
+        onClick={() => navigate('/dashboard')} 
+        className="flex items-center text-blue-600 hover:text-blue-800"
+      >
+        <Home className="h-4 w-4 mr-1" />
+        <span>Início</span>
+      </button>
+      
+      {pathSegments.map((segment, index) => {
+        if (!segment) return null;
+        
+        return (
+          <React.Fragment key={index}>
+            <ChevronRight className="h-4 w-4 mx-1 text-gray-500" />
+            <button 
+              onClick={() => handleClick(index)}
+              className="hover:text-blue-600 whitespace-nowrap"
+            >
+              {getDisplayName(segment)}
+            </button>
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 };

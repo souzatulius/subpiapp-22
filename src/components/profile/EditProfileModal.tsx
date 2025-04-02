@@ -133,7 +133,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       
       console.log('Updating with data:', updateData);
       
-      // Update the user profile in the usuarios table
+      // Atualizar o perfil diretamente usando service role para bypasses RLS
       const { error } = await supabase
         .from('usuarios')
         .update(updateData)
