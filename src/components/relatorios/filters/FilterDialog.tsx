@@ -143,7 +143,6 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
                 <div className="space-y-2">
                   <Label htmlFor="date-from">Data Início</Label>
                   <DatePicker
-                    id="date-from"
                     date={dateRange.from}
                     onSelect={handleDateFromChange}
                     placeholder="Selecione"
@@ -152,7 +151,6 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
                 <div className="space-y-2">
                   <Label htmlFor="date-to">Data Fim</Label>
                   <DatePicker
-                    id="date-to"
                     date={dateRange.to}
                     onSelect={handleDateToChange}
                     placeholder="Selecione"

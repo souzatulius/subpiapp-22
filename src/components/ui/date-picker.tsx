@@ -2,7 +2,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
-import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,9 +14,9 @@ import {
 import { Input } from "./input";
 import { Label } from "./label";
 
-interface DatePickerProps {
+export interface DatePickerProps {
   date?: Date;
-  setDate: (date?: Date) => void;
+  onSelect: (date?: Date) => void;
   placeholder?: string;
   className?: string;
   showTimeSelect?: boolean;
@@ -24,7 +24,7 @@ interface DatePickerProps {
 
 export function DatePicker({
   date,
-  setDate,
+  onSelect,
   placeholder = "Selecione uma data",
   className,
   showTimeSelect = false
@@ -59,13 +59,13 @@ export function DatePicker({
         type === 'hours' ? parseInt(value) : parseInt(selectedHours),
         type === 'minutes' ? parseInt(value) : parseInt(selectedMinutes)
       );
-      setDate(newDate);
+      onSelect(newDate);
     }
   };
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (!selectedDate) {
-      setDate(undefined);
+      onSelect(undefined);
       return;
     }
 
@@ -74,7 +74,7 @@ export function DatePicker({
       selectedDate.setHours(parseInt(selectedHours), parseInt(selectedMinutes));
     }
     
-    setDate(selectedDate);
+    onSelect(selectedDate);
   };
 
   return (
