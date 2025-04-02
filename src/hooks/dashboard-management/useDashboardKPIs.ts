@@ -54,10 +54,10 @@ export const useDashboardKPIs = () => {
         const todayStr = today.toISOString().split('T')[0];
         const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-        // Fetch press requests data
+        // Fetch press requests data for today
         const todayResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${todayStr}T00:00:00`)
           .lt('horario_publicacao', `${todayStr}T23:59:59`);
@@ -65,9 +65,10 @@ export const useDashboardKPIs = () => {
         const todayCount = todayResult.count || 0;
         const todayError = todayResult.error;
 
+        // Fetch press requests data for yesterday
         const yesterdayResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${yesterdayStr}T00:00:00`)
           .lt('horario_publicacao', `${yesterdayStr}T23:59:59`);
@@ -78,7 +79,7 @@ export const useDashboardKPIs = () => {
         // Fetch pending approvals
         const pendingResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .in('status', ['aguardando_aprovacao', 'aguardando_resposta']);
           
         const pendingCount = pendingResult.count || 0;
@@ -87,7 +88,7 @@ export const useDashboardKPIs = () => {
         // Count how many are specifically awaiting response
         const awaitingResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'aguardando_resposta');
           
         const awaitingCount = awaitingResult.count || 0;
@@ -96,7 +97,7 @@ export const useDashboardKPIs = () => {
         // Fetch notes data
         const totalNotesResult = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true });
+          .select('count', { count: 'exact', head: true });
           
         const totalNotesCount = totalNotesResult.count || 0;
         const totalNotesError = totalNotesResult.error;
@@ -104,7 +105,7 @@ export const useDashboardKPIs = () => {
         // Count approved and rejected notes
         const approvedResult = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'aprovada');
           
         const approvedCount = approvedResult.count || 0;
@@ -112,7 +113,7 @@ export const useDashboardKPIs = () => {
 
         const rejectedResult = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'rejeitada');
           
         const rejectedCount = rejectedResult.count || 0;

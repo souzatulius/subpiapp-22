@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,7 +16,7 @@
   }
   h1 {
     font-size: 1.875rem; /* 30px */
-    line-height: 1.1; /* Condensado para mobile */
+    line-height: 0.9; /* Espaçamento ainda mais condensado para mobile */
   }
   h2 {
     font-size: 1.5rem; /* 24px */
