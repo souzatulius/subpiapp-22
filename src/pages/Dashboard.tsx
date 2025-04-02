@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -13,6 +12,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { ActionCardItem } from '@/hooks/dashboard/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
+import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 
 const Dashboard = () => {
   // Start with sidebar collapsed
@@ -82,8 +82,9 @@ const Dashboard = () => {
       <div className="flex flex-1 overflow-hidden">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 overflow-auto p-6 pb-20 md:pb-6">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-auto">
+          <BreadcrumbBar />
+          <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
             <WelcomeCard
               title={`Olá, ${firstName}!`}
               description="Organize esta área do seu jeito, movendo ou ocultando os cards."
@@ -133,7 +134,6 @@ const Dashboard = () => {
           </SheetHeader>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Card options */}
             <CardOption 
               title="Demandas Pendentes" 
               description="Visualize suas demandas aguardando resposta"
