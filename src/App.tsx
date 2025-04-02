@@ -70,14 +70,14 @@ function App() {
 
               {/* Dashboard with shared layout */}
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                {/* Comunicação routes */}
-                <Route path="comunicacao/comunicacao" element={<ComunicacaoDashboard />} />
+                {/* Comunicação routes - updated paths */}
+                <Route path="comunicacao" element={<ComunicacaoDashboard />} />
                 <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
                 <Route path="comunicacao/responder" element={<ResponderDemandas />} />
-                <Route path="comunicacao/consultar-demandas" element={<ConsultarDemandas />} />
+                <Route path="comunicacao/demandas" element={<ConsultarDemandas />} />
                 <Route path="comunicacao/criar-nota" element={<CriarNotaOficial />} />
                 <Route path="comunicacao/aprovar-nota" element={<AprovarNotaOficial />} />
-                <Route path="comunicacao/consultar-notas" element={<ConsultarNotas />} />
+                <Route path="comunicacao/notas" element={<ConsultarNotas />} />
                 <Route path="comunicacao/relatorios" element={<RelatoriosPage />} />
                 
                 {/* Zeladoria routes */}

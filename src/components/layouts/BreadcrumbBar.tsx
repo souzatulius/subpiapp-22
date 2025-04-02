@@ -29,8 +29,8 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       cadastrar: 'Cadastrar',
       settings: 'Configurações',
       profile: 'Meu Perfil',
-      'consultar-demandas': 'Consultar Demandas',
-      'consultar-notas': 'Consultar Notas',
+      demandas: 'Consultar Demandas',
+      notas: 'Consultar Notas',
       usuarios: 'Usuários',
       relatorios: 'Relatórios',
       'ranking-subs': 'Ranking da Zeladoria',
@@ -41,7 +41,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   };
 
   // Lista de segmentos que devem ser ocultados no breadcrumb
-  const hiddenSegments = ['zeladoria', 'dashboard/dashboard', 'dashboard/comunicacao'];
+  const hiddenSegments = ['zeladoria', 'dashboard/dashboard'];
   
   const handleClick = (index: number) => {
     const segment = pathSegments[index];
@@ -61,25 +61,14 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     // Remover segmentos vazios
     if (!segment) return false;
     
-    // Special case for comunicacao/comunicacao path
-    const fullPath = pathSegments.slice(0, index + 1).join('/');
-    if (fullPath === 'dashboard/comunicacao/comunicacao') {
+    // Special case for comunicacao path - showing Comunicação
+    if (segment === 'comunicacao' && index === 1) {
       return true;
     }
     
     // Remover segmentos que devem ser ocultados
+    const fullPath = pathSegments.slice(0, index + 1).join('/');
     if (hiddenSegments.includes(segment) || hiddenSegments.includes(fullPath)) {
-      return false;
-    }
-    
-    // Check for specific combinations to hide
-    if (segment === 'dashboard' && index === 0) {
-      // Keep only the first dashboard segment
-      return true;
-    }
-    
-    if (segment === 'comunicacao' && pathSegments[index - 1] === 'dashboard') {
-      // Hide dashboard/comunicacao
       return false;
     }
     

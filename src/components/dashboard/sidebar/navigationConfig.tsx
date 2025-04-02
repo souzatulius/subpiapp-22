@@ -22,7 +22,7 @@ export const getNavigationSections = () => [
     id: 'comunicacao',
     icon: <MessageCircle size={20} />,
     label: 'Comunicação',
-    path: '/dashboard/comunicacao/comunicacao',
+    path: '/dashboard/comunicacao',
     isSection: false
   },
   // Seção 4: Relatórios
