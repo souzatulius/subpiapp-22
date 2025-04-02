@@ -45,7 +45,7 @@ const Relatorios = () => {
                 transition={{ duration: 0.5 }}
               >
                 <WelcomeCard 
-                  title="Relatórios" 
+                  title="Relatórios!" 
                   description="Visualize estatísticas e relatórios de comunicação" 
                   icon={<PieChart className="h-6 w-6 mr-2" />} 
                   color="bg-gradient-to-r from-orange-500 to-orange-700"

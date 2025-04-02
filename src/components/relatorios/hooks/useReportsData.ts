@@ -26,20 +26,28 @@ export const useReportsData = (filters: ReportFilters = {}) => {
     isLoadingCharts
   } = useChartStatsData();
 
+  // Log para debug
+  console.log('useReportsData - filters:', filters);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        console.log('Iniciando carregamento de dados para relatórios...');
+        
         // Primeiro, buscamos os dados dos cards
         await fetchCardStats(filters);
+        console.log('Dados dos cards carregados com sucesso');
         
         // Em seguida, buscamos os dados para os gráficos
         await fetchChartData(filters);
+        console.log('Dados dos gráficos carregados com sucesso');
         
       } catch (error) {
         console.error('Erro ao buscar dados de relatórios:', error);
       } finally {
         setIsLoading(false);
+        console.log('Carregamento de dados concluído');
       }
     };
 

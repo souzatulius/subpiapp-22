@@ -23,7 +23,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   
   const getDisplayName = (segment: string) => {
     const displayNames: Record<string, string> = {
-      dashboard: 'Dashboard',
+      dashboard: 'Início',
       comunicacao: 'Comunicação',
       'cadastrar-demanda': 'Cadastrar Demanda',
       cadastrar: 'Cadastrar',
@@ -32,11 +32,15 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       'consultar-demandas': 'Consultar Demandas',
       'consultar-notas': 'Consultar Notas',
       usuarios: 'Usuários',
+      relatorios: 'Relatórios!',
       // Adicione outros mapeamentos conforme necessário
     };
     
     return displayNames[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
   };
+
+  // Lista de segmentos que devem ser ocultados no breadcrumb
+  const hiddenSegments = ['zeladoria', 'dashboard'];
   
   const handleClick = (index: number) => {
     const segment = pathSegments[index];
@@ -51,6 +55,18 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     navigate(path);
   };
   
+  // Filtrar segmentos duplicados consecutivos
+  const filteredSegments = pathSegments.filter((segment, index) => {
+    // Remover segmentos vazios
+    if (!segment) return false;
+    
+    // Remover segmentos que devem ser ocultados
+    if (hiddenSegments.includes(segment)) return false;
+    
+    // Remover duplicatas consecutivas (como comunicacao/comunicacao)
+    return index === 0 || segment !== pathSegments[index - 1];
+  });
+  
   return (
     <div className="px-6 py-2 text-xs text-gray-500">
       <Breadcrumb>
@@ -64,7 +80,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
             </BreadcrumbLink>
           </BreadcrumbItem>
           
-          {pathSegments.map((segment, index) => {
+          {filteredSegments.map((segment, index) => {
             if (!segment) return null;
             
             return (
@@ -73,7 +89,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
                     <button 
-                      onClick={() => handleClick(index)}
+                      onClick={() => handleClick(pathSegments.indexOf(segment))}
                       className="hover:text-gray-700 whitespace-nowrap"
                     >
                       {getDisplayName(segment)}

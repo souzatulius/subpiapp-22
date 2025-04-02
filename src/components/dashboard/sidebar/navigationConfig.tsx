@@ -29,7 +29,7 @@ export const getNavigationSections = () => [
   {
     id: 'relatorios',
     icon: <BarChart2 size={20} />,
-    label: 'Relatórios',
+    label: 'Relatórios!',
     path: '/dashboard/comunicacao/relatorios',
     isSection: false
   },
