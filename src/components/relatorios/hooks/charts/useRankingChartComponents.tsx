@@ -36,7 +36,7 @@ export const useRankingChartComponents = () => {
         data={servicesByDistrictData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
         ]}
       />
     ),
@@ -45,7 +45,7 @@ export const useRankingChartComponents = () => {
         data={serviceTypesData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[2] }
         ]}
       />
     ),
@@ -54,7 +54,7 @@ export const useRankingChartComponents = () => {
         data={statusDistributionData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
+          { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[3] }
         ]}
       />
     ),
@@ -72,7 +72,7 @@ export const useRankingChartComponents = () => {
         data={topCompaniesData}
         xAxisDataKey="name"
         bars={[
-          { dataKey: 'Concluídas', name: 'Concluídas', color: chartColors[0] }
+          { dataKey: 'Concluídas', name: 'Concluídas', color: chartColors[1] }
         ]}
       />
     ),

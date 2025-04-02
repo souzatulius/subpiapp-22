@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useChartConfigs } from '../hooks/charts/useChartConfigs';
 
 interface BarChartProps {
   data: Array<Record<string, any>>;
@@ -9,7 +10,7 @@ interface BarChartProps {
   bars: Array<{
     dataKey: string;
     name: string;
-    color: string;
+    color?: string;
   }>;
   className?: string;
   insight?: string;
@@ -25,6 +26,9 @@ export const BarChart: React.FC<BarChartProps> = ({
   horizontal = false,
   stacked = false
 }) => {
+  // Get the color configs
+  const { chartColors } = useChartConfigs();
+
   // Validate input data
   const isDataValid = Array.isArray(data) && data.length > 0;
   const areBarsValid = Array.isArray(bars) && bars.length > 0;
@@ -37,9 +41,6 @@ export const BarChart: React.FC<BarChartProps> = ({
       </div>
     );
   }
-  
-  // Default colors if not provided
-  const defaultColors = ['#f97316', '#0ea5e9', '#1e40af', '#71717a', '#27272a'];
   
   return (
     <div className={`h-full w-full ${className}`}>
@@ -76,7 +77,7 @@ export const BarChart: React.FC<BarChartProps> = ({
               key={index} 
               dataKey={bar.dataKey} 
               name={bar.name} 
-              fill={bar.color || defaultColors[index % defaultColors.length]} 
+              fill={bar.color || chartColors[index % chartColors.length]} 
               stackId={stacked ? "stack" : undefined} 
             />
           ))}

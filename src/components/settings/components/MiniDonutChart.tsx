@@ -16,7 +16,7 @@ interface MiniDonutChartProps {
 
 const MiniDonutChart: React.FC<MiniDonutChartProps> = ({ 
   data, 
-  colors = ["#3b82f6", "#93c5fd", "#dbeafe", "#f0f9ff"], 
+  colors = ["#0ea5e9", "#1e40af", "#f97316", "#71717a", "#27272a"], 
   height = 100
 }) => {
   return (
@@ -24,7 +24,7 @@ const MiniDonutChart: React.FC<MiniDonutChartProps> = ({
       <ChartContainer
         config={{
           donut: {
-            color: "#3b82f6",
+            color: "#0ea5e9",
           },
         }}
       >

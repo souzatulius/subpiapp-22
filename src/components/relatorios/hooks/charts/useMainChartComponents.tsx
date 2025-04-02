@@ -1,10 +1,10 @@
-
 import React, { useMemo } from 'react';
 import { BarChart } from '../../charts/BarChart';
 import { LineChart } from '../../charts/LineChart';
 import { PieChart } from '../../charts/PieChart';
 import { AreaChart } from '../../charts/AreaChart';
 import { useReportsData } from '../useReportsData';
+import { useChartConfigs } from './useChartConfigs';
 import { 
   transformDistrictsToPieData,
   transformMediaTypesToBarData, 
@@ -21,6 +21,7 @@ import { ChartComponentsCollection } from './types';
 
 export const useMainChartComponents = () => {
   const { reportsData, isLoading } = useReportsData();
+  const { chartColors, pieChartColors } = useChartConfigs();
 
   // Process and transform real data for charts
   const chartComponents = useMemo<ChartComponentsCollection>(() => {
@@ -32,7 +33,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }
+              { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
             ]}
           />
         ),
@@ -41,7 +42,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             lines={[
-              { dataKey: 'Complexidade', name: 'Complexidade', color: '#f97316' }
+              { dataKey: 'Complexidade', name: 'Complexidade', color: chartColors[0] }
             ]}
           />
         ),
@@ -50,7 +51,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Solicitações', name: 'Solicitações', color: '#f97316' }
+              { dataKey: 'Solicitações', name: 'Solicitações', color: chartColors[0] }
             ]}
           />
         ),
@@ -59,7 +60,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             lines={[
-              { dataKey: 'Demandas', name: 'Dias até resposta', color: '#f97316' }
+              { dataKey: 'Demandas', name: 'Dias até resposta', color: chartColors[0] }
             ]}
           />
         ),
@@ -68,7 +69,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Respostas', name: 'Quantidade', color: '#f97316' }
+              { dataKey: 'Respostas', name: 'Quantidade', color: chartColors[1] }
             ]}
           />
         ),
@@ -77,7 +78,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             areas={[
-              { dataKey: 'Respostas', name: 'Respostas', color: '#f97316' }
+              { dataKey: 'Respostas', name: 'Respostas', color: chartColors[0] }
             ]}
           />
         ),
@@ -86,20 +87,20 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }
+              { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
             ]}
           />
         ),
         'notasPorTema': (
           <PieChart 
             data={[]}
-            colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+            colorSet="blue"
           />
         ),
         'distribuicaoImpacto': (
           <PieChart 
             data={[]}
-            colors={['#f97316', '#fb923c', '#fdba74']}
+            colorSet="orange"
           />
         ),
         'evolucaoMensal': (
@@ -107,8 +108,8 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             lines={[
-              { dataKey: 'Demandas', name: 'Demandas', color: '#f97316' },
-              { dataKey: 'Notas', name: 'Notas', color: '#0ea5e9' }
+              { dataKey: 'Demandas', name: 'Demandas', color: chartColors[0] },
+              { dataKey: 'Notas', name: 'Notas', color: chartColors[1] }
             ]}
           />
         ),
@@ -117,8 +118,8 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Atual', name: 'Atual', color: '#f97316' },
-              { dataKey: 'Anterior', name: 'Anterior', color: '#0ea5e9' }
+              { dataKey: 'Atual', name: 'Atual', color: chartColors[0] },
+              { dataKey: 'Anterior', name: 'Anterior', color: chartColors[1] }
             ]}
           />
         ),
@@ -127,7 +128,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             lines={[
-              { dataKey: 'Satisfação', name: 'Índice', color: '#f97316' }
+              { dataKey: 'Satisfação', name: 'Índice', color: chartColors[0] }
             ]}
           />
         ),
@@ -152,7 +153,7 @@ export const useMainChartComponents = () => {
           data={barProblemasData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }
+            { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
           ]}
         />
       ),
@@ -161,7 +162,7 @@ export const useMainChartComponents = () => {
           data={barNeighborhoodsData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Quantidade', name: 'Quantidade', color: '#0ea5e9' }
+            { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
           ]}
         />
       ),
@@ -170,7 +171,7 @@ export const useMainChartComponents = () => {
           data={barOriginsData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Solicitações', name: 'Quantidade', color: '#f97316' }
+            { dataKey: 'Solicitações', name: 'Quantidade', color: chartColors[0] }
           ]}
         />
       ),
@@ -179,7 +180,7 @@ export const useMainChartComponents = () => {
           data={lineResponseTimesData}
           xAxisDataKey="name"
           lines={[
-            { dataKey: 'Demandas', name: 'Dias até resposta', color: '#f97316' }
+            { dataKey: 'Demandas', name: 'Dias até resposta', color: chartColors[0] }
           ]}
         />
       ),
@@ -188,7 +189,7 @@ export const useMainChartComponents = () => {
           data={barCoordinationsData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Respostas', name: 'Quantidade', color: '#0ea5e9' }
+            { dataKey: 'Respostas', name: 'Quantidade', color: chartColors[1] }
           ]}
         />
       ),
@@ -197,7 +198,7 @@ export const useMainChartComponents = () => {
           data={barResponsiblesData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Quantidade', name: 'Demandas criadas', color: '#f97316' }
+            { dataKey: 'Quantidade', name: 'Demandas criadas', color: chartColors[2] }
           ]}
         />
       ),
@@ -206,20 +207,20 @@ export const useMainChartComponents = () => {
           data={barMediaTypesData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Quantidade', name: 'Quantidade', color: '#0ea5e9' }
+            { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
           ]}
         />
       ),
       'notasPorTema': (
         <PieChart 
           data={pieStatusData}
-          colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+          colorSet="blue"
         />
       ),
       'distribuicaoImpacto': (
         <PieChart 
           data={pieDistrictsData}
-          colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+          colorSet="orange"
         />
       ),
       'evolucaoMensal': (
@@ -227,7 +228,7 @@ export const useMainChartComponents = () => {
           data={lineResponseTimesData}
           xAxisDataKey="name"
           lines={[
-            { dataKey: 'Demandas', name: 'Tempo médio (dias)', color: '#f97316' }
+            { dataKey: 'Demandas', name: 'Tempo médio (dias)', color: chartColors[0] }
           ]}
         />
       ),
@@ -236,18 +237,18 @@ export const useMainChartComponents = () => {
           data={barMediaTypesData.slice(0, 3)}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Quantidade', name: 'Quantidade', color: '#f97316' }
+            { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
           ]}
         />
       ),
       'indiceSatisfacao': (
         <PieChart 
           data={pieApprovalsData}
-          colors={['#22c55e', '#f97316', '#ef4444']}
+          colorSet="status"
         />
       ),
     };
-  }, [reportsData, isLoading]);
+  }, [reportsData, isLoading, chartColors, pieChartColors]);
 
   return { chartComponents };
 };

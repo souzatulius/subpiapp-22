@@ -16,7 +16,7 @@ interface MiniBarChartProps {
 
 const MiniBarChart: React.FC<MiniBarChartProps> = ({ 
   data, 
-  color = "#3b82f6", 
+  color = "#0ea5e9", 
   height = 100 
 }) => {
   return (

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { PieChart as RechartsBarChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useChartConfigs } from '../hooks/charts/useChartConfigs';
 
 interface DataItem {
   name: string;
@@ -12,15 +13,18 @@ interface PieChartProps {
   title?: string;
   insight?: string;
   colors?: string[];
+  colorSet?: 'default' | 'orange' | 'blue' | 'status';
 }
 
 export const PieChart: React.FC<PieChartProps> = ({ 
   data, 
-  colors 
+  colors,
+  colorSet = 'default'
 }) => {
-  // Define a palette with orange, blue, dark blue, gray and dark gray
-  const defaultColors = ['#f97316', '#0ea5e9', '#1e40af', '#71717a', '#27272a'];
-  const chartColors = colors || defaultColors;
+  const { pieChartColors } = useChartConfigs();
+  
+  // Use either provided colors, a predefined color set, or default colors
+  const chartColors = colors || pieChartColors[colorSet] || pieChartColors.default;
 
   // Validate input data
   const isDataValid = Array.isArray(data) && data.length > 0;
