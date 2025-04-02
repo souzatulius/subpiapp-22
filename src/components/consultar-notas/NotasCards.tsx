@@ -13,7 +13,7 @@ interface NotasCardsProps {
   notas: NotaOficial[];
   loading: boolean;
   formatDate: (dateString: string) => string;
-  onDeleteNota: (notaId: string) => Promise<void>;
+  onDeleteNota: (nota: NotaOficial) => void;
   deleteLoading: boolean;
 }
 
@@ -35,15 +35,7 @@ const NotasCards: React.FC<NotasCardsProps> = ({
   };
 
   const handleDeleteClick = (nota: NotaOficial) => {
-    setSelectedNota(nota);
-    setIsDeleteOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (selectedNota) {
-      await onDeleteNota(selectedNota.id);
-      setIsDeleteOpen(false);
-    }
+    onDeleteNota(nota);
   };
 
   const handleExportPDF = (nota: NotaOficial) => {
@@ -172,14 +164,6 @@ const NotasCards: React.FC<NotasCardsProps> = ({
             isOpen={isDetailOpen}
             onClose={() => setIsDetailOpen(false)}
             formatDate={formatDate}
-          />
-          
-          <DeleteNotaDialog 
-            isOpen={isDeleteOpen}
-            onClose={() => setIsDeleteOpen(false)}
-            onConfirm={handleConfirmDelete}
-            notaTitle={selectedNota.titulo}
-            hasDemanda={!!selectedNota.demanda_id}
           />
         </>
       )}
