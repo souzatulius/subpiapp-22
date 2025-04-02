@@ -4,7 +4,6 @@ import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaul
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { Loader2, Smartphone, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -62,6 +61,19 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const { departments } = useDepartments();
+
+  const [selectedPageType, setSelectedPageType] = useState<'inicial' | 'comunicacao'>(
+    dashboardType === 'dashboard' ? 'inicial' : 'comunicacao'
+  );
+  
+  // Effect to sync the page type with dashboardType
+  useEffect(() => {
+    if (dashboardType === 'dashboard' && selectedPageType !== 'inicial') {
+      setSelectedPageType('inicial');
+    } else if (dashboardType === 'communication' && selectedPageType !== 'comunicacao') {
+      setSelectedPageType('comunicacao');
+    }
+  }, [dashboardType]);
   
   // Mock data for dynamic cards in preview
   const [mockData, setMockData] = useState({
@@ -134,11 +146,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         // Check if we already have this card (by title)
         const existingCard = cards.find(c => c.title === cardData.title);
         if (existingCard) {
-          toast({
-            title: "Card já existe",
-            description: `O card "${cardData.title}" já está no dashboard`,
-            variant: "warning"
-          });
+          // Silently skip adding duplicate cards
           return;
         }
         
@@ -156,12 +164,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         
         setCards([...cards, newCard]);
         
-        toast({
-          title: "Card adicionado",
-          description: `O card "${newCard.title}" foi adicionado ao dashboard`,
-          variant: "success"
-        });
-        
         // Notify parent component if callback exists
         if (onAddCard) {
           onAddCard(newCard);
@@ -169,11 +171,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       }
     } catch (error) {
       console.error('Error parsing dropped card data:', error);
-      toast({
-        title: "Erro ao adicionar card",
-        description: "Ocorreu um erro ao adicionar o card ao dashboard",
-        variant: "destructive"
-      });
     }
   };
 
@@ -189,6 +186,21 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     }
   };
 
+  const handlePageTypeSelect = (value: string) => {
+    if (value === 'inicial' || value === 'comunicacao') {
+      setSelectedPageType(value);
+      if (value === 'inicial' && dashboardType !== 'dashboard') {
+        if (onDepartmentChange) {
+          onDepartmentChange('dashboard');
+        }
+      } else if (value === 'comunicacao' && dashboardType !== 'communication') {
+        if (onDepartmentChange) {
+          onDepartmentChange('communication');
+        }
+      }
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Controls bar */}
@@ -200,12 +212,21 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               <SelectValue placeholder="Selecione a coordenação" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="default">Padrão (Todos)</SelectItem>
               {departments.map(dept => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.sigla || dept.descricao}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={selectedPageType} onValueChange={handlePageTypeSelect}>
+            <SelectTrigger className="w-[160px] h-9 text-sm">
+              <SelectValue placeholder="Tipo de Página" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="inicial">Inicial</SelectItem>
+              <SelectItem value="comunicacao">Comunicação</SelectItem>
             </SelectContent>
           </Select>
           

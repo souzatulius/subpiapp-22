@@ -27,17 +27,7 @@ export const useDepartments = () => {
           throw new Error(error.message);
         }
         
-        // Add 'default' as the first option for all departments
-        const departmentsWithDefault = [
-          { 
-            id: 'default', 
-            descricao: 'Padrão (Todos)',
-            sigla: null 
-          },
-          ...(data || [])
-        ];
-        
-        setDepartments(departmentsWithDefault);
+        setDepartments(data || []);
       } catch (err) {
         console.error('Error fetching departments:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch departments');

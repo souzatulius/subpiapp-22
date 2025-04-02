@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import KPICard from './KPICard';
 import DynamicListCard from './DynamicListCard';
@@ -15,7 +16,13 @@ import { Save, RefreshCcw } from 'lucide-react';
 import DraggableCard from './DraggableCard';
 import { ActionCardItem } from '@/types/dashboard';
 import { v4 as uuidv4 } from 'uuid';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@radix-ui/react-select';
+import { 
+  Select, 
+  SelectTrigger, 
+  SelectValue, 
+  SelectContent, 
+  SelectItem 
+} from '@/components/ui/select';
 import { Plus } from 'lucide-react';
 
 const DashboardManagementContent: React.FC = () => {
@@ -241,9 +248,8 @@ const DashboardManagementContent: React.FC = () => {
             <Select
               value={selectedViewType}
               onValueChange={(value) => setSelectedViewType(value as 'dashboard' | 'communication')}
-              className="w-[160px]"
             >
-              <SelectTrigger className="h-9 text-sm">
+              <SelectTrigger className="h-9 text-sm w-[160px]">
                 <SelectValue placeholder="Tipo de dashboard" />
               </SelectTrigger>
               <SelectContent>
