@@ -23,14 +23,6 @@ interface DatePickerWithRangeProps {
   className?: string;
 }
 
-// Format dates as DD MMM/YY
-const formatDateShort = (date: Date): string => {
-  const day = format(date, "d", { locale: pt });
-  const month = format(date, "MMM", { locale: pt });
-  const year = format(date, "yy", { locale: pt });
-  return `${day} ${month}/${year}`;
-};
-
 export function DatePickerWithRange({
   dateRange,
   onRangeChange,
@@ -53,10 +45,11 @@ export function DatePickerWithRange({
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {formatDateShort(dateRange.from)} - {formatDateShort(dateRange.to)}
+                  {format(dateRange.from, "PPP", { locale: pt })} -{" "}
+                  {format(dateRange.to, "PPP", { locale: pt })}
                 </>
               ) : (
-                formatDateShort(dateRange.from)
+                format(dateRange.from, "PPP", { locale: pt })
               )
             ) : (
               <span>Escolha um período</span>
