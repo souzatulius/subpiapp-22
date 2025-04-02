@@ -28,6 +28,7 @@ export const useChartComponents = () => {
             data={[]}
             colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
             showOnlyPercentage={true}
+            showLabels={true}
           />
         ),
         tempoMedioResposta: (
@@ -66,7 +67,7 @@ export const useChartComponents = () => {
     // Sample data for the charts when real data isn't available
     const sampleData = {
       problemas: [
-        { name: 'Manutenção', value: 85 },
+        { name: 'Poda', value: 85 },
         { name: 'Limpeza', value: 65 },
         { name: 'Iluminação', value: 42 },
         { name: 'Segurança', value: 38 },
@@ -74,11 +75,10 @@ export const useChartComponents = () => {
         { name: 'Outros', value: 15 }
       ],
       origens: [
-        { name: 'Portal', value: 120 },
-        { name: 'WhatsApp', value: 80 },
-        { name: 'Aplicativo', value: 60 },
-        { name: 'Telefone', value: 40 },
-        { name: 'Presencial', value: 20 }
+        { name: 'Imprensa', value: 120 },
+        { name: 'SMSUB', value: 80 },
+        { name: 'Internas', value: 60 },
+        { name: 'Outros', value: 40 }
       ],
       tempoResposta: [
         { name: 'Jan', value: 45, aprovacao: 60 },
@@ -115,7 +115,8 @@ export const useChartComponents = () => {
       origemDemandas: (
         <PieChart 
           data={reportsData?.origins?.length ? reportsData.origins : sampleData.origens}
-          colors={['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5']}
+          colorSet="orange"
+          showLabels={true}
           showOnlyPercentage={true}
         />
       ),

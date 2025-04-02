@@ -1,88 +1,82 @@
 
 import React from 'react';
-import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useChartConfigs } from '../hooks/charts/useChartConfigs';
+import { Bar, BarChart as RechartsBarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-interface BarChartProps {
-  data: Array<Record<string, any>>;
-  title?: string;
+export interface BarChartProps {
+  data: any[];
   xAxisDataKey: string;
-  bars: Array<{
+  bars: {
     dataKey: string;
     name: string;
-    color?: string;
-  }>;
-  className?: string;
-  insight?: string;
+    color: string;
+    stackId?: string;
+  }[];
+  yAxisTicks?: number[];
   horizontal?: boolean;
-  stacked?: boolean;
 }
 
 export const BarChart: React.FC<BarChartProps> = ({ 
   data, 
   xAxisDataKey, 
-  bars, 
-  className,
-  horizontal = false,
-  stacked = false
+  bars,
+  yAxisTicks,
+  horizontal = false
 }) => {
-  // Get the color configs
-  const { chartColors } = useChartConfigs();
+  // Format the number with dot as thousand separator and comma for decimal
+  const formatNumber = (value: number) => {
+    if (typeof value !== 'number') return value;
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
 
-  // Validate input data
-  const isDataValid = Array.isArray(data) && data.length > 0;
-  const areBarsValid = Array.isArray(bars) && bars.length > 0;
+  // Ensure default font color for better printing
+  const tickStyle = { fill: '#64748b' };
 
-  // If data or bars are invalid, render placeholder
-  if (!isDataValid || !areBarsValid) {
+  if (!data || data.length === 0) {
     return (
-      <div className={`h-full flex items-center justify-center ${className}`}>
-        <p className="text-orange-200">Dados não disponíveis</p>
+      <div className="flex items-center justify-center h-full w-full">
+        <p className="text-gray-400">Sem dados disponíveis</p>
       </div>
     );
   }
-  
+
   return (
-    <div className={`h-full w-full ${className}`}>
-      <ResponsiveContainer width="100%" height="100%">
-        <RechartsBarChart
-          data={data}
-          layout={horizontal ? 'vertical' : 'horizontal'}
-          margin={{
-            top: 5,
-            right: 10,
-            left: 0,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#71717a" />
-          {horizontal ? (
-            <>
-              <XAxis type="number" stroke="#71717a" />
-              <YAxis dataKey={xAxisDataKey} type="category" stroke="#71717a" />
-            </>
-          ) : (
-            <>
-              <XAxis dataKey={xAxisDataKey} stroke="#71717a" />
-              <YAxis stroke="#71717a" />
-            </>
-          )}
-          <Tooltip 
-            contentStyle={{ backgroundColor: '#1e40af', borderColor: '#0ea5e9', color: '#ffffff' }} 
-            labelStyle={{ color: '#ffffff' }}
+    <ResponsiveContainer width="100%" height="100%">
+      <RechartsBarChart
+        data={data}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        layout={horizontal ? 'vertical' : 'horizontal'}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+        
+        {horizontal ? (
+          <>
+            <XAxis type="number" tickFormatter={formatNumber} style={tickStyle} />
+            <YAxis dataKey={xAxisDataKey} type="category" style={tickStyle} />
+          </>
+        ) : (
+          <>
+            <XAxis dataKey={xAxisDataKey} style={tickStyle} />
+            <YAxis ticks={yAxisTicks} tickFormatter={formatNumber} style={tickStyle} />
+          </>
+        )}
+        
+        <Tooltip 
+          formatter={(value) => [formatNumber(value as number), '']}
+        />
+        
+        <Legend />
+        
+        {bars.map((bar, index) => (
+          <Bar
+            key={index}
+            dataKey={bar.dataKey}
+            name={bar.name}
+            fill={bar.color}
+            stackId={bar.stackId}
+            radius={[4, 4, 0, 0]}
           />
-          <Legend wrapperStyle={{ color: '#71717a' }} />
-          {bars.map((bar, index) => (
-            <Bar 
-              key={index} 
-              dataKey={bar.dataKey} 
-              name={bar.name} 
-              fill={bar.color || chartColors[index % chartColors.length]} 
-              stackId={stacked ? "stack" : undefined} 
-            />
-          ))}
-        </RechartsBarChart>
-      </ResponsiveContainer>
-    </div>
+        ))}
+      </RechartsBarChart>
+    </ResponsiveContainer>
   );
 };

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BarChart3, SlidersHorizontal, Printer, FileText } from 'lucide-react';
 import RankingContent from '@/components/ranking/RankingContent';
 import { motion } from 'framer-motion';
@@ -9,22 +9,22 @@ import { Button } from '@/components/ui/button';
 import '@/components/ranking/charts/ChartRegistration';
 // Import the demo data provider
 import DemoDataProvider from '@/components/ranking/DemoDataProvider';
+import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 
 const RankingSubs = () => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   
   const handlePrint = () => {
-    window.print();
+    printWithStyles();
   };
   
   const handleExportPDF = () => {
-    // Implementation for PDF export would go here
-    console.log('Export PDF');
+    exportToPDF('Ranking das Subprefeituras');
   };
   
   return (
     <motion.div 
-      className="max-w-7xl mx-auto" 
+      className="max-w-7xl mx-auto pdf-content" 
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }} 
       transition={{ duration: 0.5 }}

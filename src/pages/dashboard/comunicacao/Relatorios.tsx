@@ -7,6 +7,8 @@ import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@
 import { RelatoriosKPICards } from '@/components/relatorios/RelatoriosKPICards';
 import { RelatoriosGraphCards } from '@/components/relatorios/RelatoriosGraphCards';
 import FilterDialog from '@/components/relatorios/filters/FilterDialog';
+import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
+
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
 
@@ -21,16 +23,15 @@ const RelatoriosPage = () => {
   );
 
   const handlePrint = () => {
-    window.print();
+    printWithStyles();
   };
 
   const handleExportPDF = () => {
-    // Implementação futura de exportação para PDF
-    alert('Funcionalidade de exportação para PDF em desenvolvimento.');
+    exportToPDF('Relatórios de Comunicação');
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto pdf-content">
       {/* WelcomeCard com largura total */}
       <WelcomeCard
         title="Relatórios"
@@ -79,7 +80,7 @@ const RelatoriosPage = () => {
       </div>
 
       {/* Conteúdo principal com apenas visualização de gráficos */}
-      <div className="mt-6">
+      <div className="mt-6 chart-container">
         <DndContext
           sensors={sensors}
           onDragStart={() => setIsDragging(true)}

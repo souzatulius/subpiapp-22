@@ -54,27 +54,30 @@ export const PieChart: React.FC<PieChartProps> = ({
     return null;
   };
 
+  // Updated custom label to display percentages outside the pie chart
   const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
-    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+    // Calculate the position for the label outside the pie
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius * 1.15;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    // Only show labels for segments with more than 5% of the total
-    if (percent < 0.05) return null;
+    // Only show labels for segments with more than 3% of the total
+    if (percent < 0.03) return null;
+
+    const textAnchor = x > cx ? 'start' : 'end';
 
     return (
       <text 
         x={x} 
         y={y} 
-        fill="#fff" 
-        textAnchor="middle" 
+        fill="#71717a" 
+        textAnchor={textAnchor} 
         dominantBaseline="central"
         fontSize={12}
-        fontWeight="bold"
+        fontWeight="medium"
       >
-        {showOnlyPercentage 
-          ? `${(percent * 100).toFixed(0)}%` 
-          : `${name}: ${(percent * 100).toFixed(0)}%`}
+        {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
@@ -83,7 +86,7 @@ export const PieChart: React.FC<PieChartProps> = ({
     const { payload } = props;
     
     return (
-      <ul className="flex flex-wrap justify-center gap-4 mt-2">
+      <ul className="flex flex-wrap justify-center gap-4 mt-3">
         {payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center">
             <div
@@ -119,6 +122,7 @@ export const PieChart: React.FC<PieChartProps> = ({
           fill="#8884d8"
           paddingAngle={2}
           label={showLabels ? CustomLabel : false}
+          labelLine={showLabels ? true : false}
         >
           {data.map((entry, index) => (
             <Cell 
