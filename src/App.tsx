@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { useState } from "react";
 
 // Pages
 import Index from "./pages/Index";
@@ -34,17 +35,18 @@ import NotasDashboard from './pages/dashboard/comunicacao/Notas';
 // Admin Pages
 import UserPermissionsList from './pages/admin/UserPermissionsList';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000, // 1 minute
-      gcTime: 5 * 60 * 1000, // 5 minutes (renamed from cacheTime)
-      refetchOnWindowFocus: false
-    }
-  }
-});
-
 function App() {
+  // Create a new QueryClient instance within the component
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000, // 1 minute
+        gcTime: 5 * 60 * 1000, // 5 minutes (renamed from cacheTime)
+        refetchOnWindowFocus: false
+      }
+    }
+  }));
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

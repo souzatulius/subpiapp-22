@@ -11,6 +11,8 @@ export interface Notification {
   lida: boolean;
   usuario_id?: string;
   referencia_id?: string;
+  referencia_tipo?: string;
+  metadados?: any;
 }
 
 export const useNotifications = () => {
