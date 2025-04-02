@@ -24,7 +24,13 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showSuffix, setShowSuffix] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Show suffix when user starts typing
+  useEffect(() => {
+    setShowSuffix(value.length > 0);
+  }, [value]);
 
   // Clean the input value to ensure no suffix is included
   useEffect(() => {
@@ -105,9 +111,17 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
           onMouseLeave={() => setIsHovered(false)}
           {...registerField}
         />
-        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400">
-          {suffix}
-        </span>
+        {showSuffix && (
+          <span 
+            className="pointer-events-none absolute top-1/2 transform -translate-y-1/2 text-gray-400"
+            style={{ 
+              left: `${4 + (value.length * 0.6)}em`,
+              transition: 'left 0.1s ease-out'
+            }}
+          >
+            {suffix}
+          </span>
+        )}
       </div>
     </div>
   );
