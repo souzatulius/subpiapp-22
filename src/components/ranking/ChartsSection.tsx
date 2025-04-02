@@ -140,8 +140,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
     return <NoDataMessage />;
   }
   
-  // Render content based on disableCardContainers prop
-  const renderContent = () => (
+  return (
     <>
       <div className="flex justify-end mb-4">
         <Button 
@@ -181,17 +180,6 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
         </SortableContext>
       </DndContext>
     </>
-  );
-  
-  // Return the content directly or wrapped in a Card based on the prop
-  if (disableCardContainers) {
-    return renderContent();
-  }
-  
-  return (
-    <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
-      {renderContent()}
-    </Card>
   );
 };
 

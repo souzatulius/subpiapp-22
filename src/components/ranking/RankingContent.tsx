@@ -144,7 +144,7 @@ const RankingContent: React.FC<RankingContentProps> = ({
         </Card>
       )}
 
-      {/* Charts Section - Use only ONE chart rendering component, not both */}
+      {/* Charts Section - directly rendered without any container when disableCardContainers is true */}
       {hasData && (
         <ChartsSection
           chartData={{}}
