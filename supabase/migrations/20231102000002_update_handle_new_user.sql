@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
  SET search_path TO 'public'
 AS $function$
 BEGIN
-  INSERT INTO public.usuarios (
+  INSERT INTO public.usuarios (  -- Change from users to usuarios
     id, 
     nome_completo, 
     email, 

@@ -56,7 +56,7 @@ export const usePhotoUpload = () => {
       
       // Update user profile with new photo URL
       const { error: updateError } = await supabase
-        .from('usuarios')
+        .from('usuarios')  // Changed from 'users' to 'usuarios'
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       

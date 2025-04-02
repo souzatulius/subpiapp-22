@@ -37,7 +37,7 @@ export const useProfile = () => {
       
       // Update the user's metadata in the usuarios table
       const { error: updateError } = await supabase
-        .from('usuarios')
+        .from('usuarios')  // Changed from 'users' to 'usuarios'
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       

@@ -123,7 +123,7 @@ export const updateProfile = async (data: any, userId: string) => {
     // Update profile information in the usuarios table only
     if (userId) {
       const { error: profileError } = await supabase
-        .from('usuarios')
+        .from('usuarios')  // Changed from 'users' to 'usuarios'
         .update({
           nome_completo: data.nome_completo,
           aniversario: data.aniversario,
