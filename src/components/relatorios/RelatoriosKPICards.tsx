@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { CaretUp, Users, Clock, Star, Flag, BookOpen } from 'lucide-react';
+import { ChevronUp, Users, Clock, Star, Flag, BookOpen } from 'lucide-react';
 import { SortableKPICard } from './components/SortableKPICard';
 import { useReportsData } from './hooks/useReportsData';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
@@ -48,7 +48,7 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ currentT
     crescimento: {
       id: 'crescimento',
       title: 'Taxa de Crescimento',
-      icon: <CaretUp className="h-4 w-4" />,
+      icon: <ChevronUp className="h-4 w-4" />,
       value: '15.3%',
       change: 5.1,
       status: 'positive' as const,
