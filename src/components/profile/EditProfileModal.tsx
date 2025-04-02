@@ -135,9 +135,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       const updateData = {
         nome_completo: data.nome_completo,
         whatsapp: cleanWhatsapp || null,
-        aniversario: aniversarioISO,
-        // NÃO incluir os campos restritos:
-        // cargo_id, coordenacao_id, supervisao_tecnica_id
+        aniversario: aniversarioISO
       };
       
       console.log('Atualizando com os dados:', updateData);
