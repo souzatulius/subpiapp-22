@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Session, User } from '@supabase/supabase-js';
@@ -129,7 +128,7 @@ export const updateProfile = async (data: any, userId: string) => {
           aniversario: data.aniversario,
           whatsapp: data.whatsapp,
           cargo_id: data.cargo_id,
-          area_coordenacao_id: data.area_coordenacao_id,
+          coordenacao_id: data.coordenacao_id,
         })
         .eq('id', userId);
 

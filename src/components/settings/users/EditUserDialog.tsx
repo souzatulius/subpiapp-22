@@ -177,11 +177,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
         }
       }
       
-      const submitData: UserFormData = {
-        ...data
-      };
-      
-      await onSubmit(submitData);
+      await onSubmit(data);
     } catch (error: any) {
       console.error('Error processing form submission:', error);
       setUploadError(error.message || "Ocorreu um erro ao processar o formulário");
