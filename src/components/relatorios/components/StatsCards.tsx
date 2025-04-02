@@ -60,7 +60,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
-        <Card key={index} className="border border-orange-200 hover:shadow-md transition-all">
+        <Card key={index} className="border border-orange-200 hover:shadow-md transition-all rounded-xl overflow-hidden">
           <CardContent className="p-4">
             <div className="flex flex-col">
               <div className="text-xs font-medium text-orange-800">
@@ -68,8 +68,8 @@ const StatsCards: React.FC<StatsCardsProps> = ({ cardStats, isLoading }) => {
               </div>
               {isLoading ? (
                 <div className="mt-2">
-                  <Skeleton className="h-7 w-24 bg-orange-100" />
-                  <Skeleton className="h-4 w-16 mt-1 bg-orange-50" />
+                  <Skeleton className="h-7 w-24 bg-orange-100 rounded-lg" />
+                  <Skeleton className="h-4 w-16 mt-1 bg-orange-50 rounded-lg" />
                 </div>
               ) : (
                 <>
