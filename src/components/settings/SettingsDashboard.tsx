@@ -13,14 +13,9 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({ searchQuery }) =>
   const { stats, loading } = useSettingsStats();
   const { coordenacoes } = useAccessControlData();
   
-  // Agora usamos coordenacoes em vez de totalUsers
-  const totalCoordenacoes = coordenacoes?.length || 0;
-  
   return (
     <div className="space-y-6">
       <WelcomeCard 
-        userCount={totalCoordenacoes}
-        label="coordenações"
         color="bg-gradient-to-r from-blue-800 to-blue-950"
       />
       

@@ -40,17 +40,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               Gerencie todas as configurações do sistema em um só lugar.
             </p>
           </div>
-          <div className="flex space-x-4 w-full md:w-auto">
-            {userCount !== undefined && (
-              <StatCard 
-                title={`${userCount} ${label}`}
-                value={userCount}
-                description="no sistema" 
-                section="settings"
-                highlight={true}
-              />
-            )}
-            {showButton && (
+          {showButton && (
+            <div>
               <StatCard
                 showButton={true}
                 buttonText={buttonText}
@@ -58,8 +49,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
                 buttonVariant={buttonVariant}
                 onButtonClick={onButtonClick}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
