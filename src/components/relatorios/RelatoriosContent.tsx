@@ -43,18 +43,24 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
     dateRange: filters.dateRange || dateRange
   };
   
+  // Acompanhe o carregamento de dados com console logs
+  console.log('RelatoriosContent - currentFilters:', currentFilters);
+  
   const { reportsData, cardStats, isLoading: dataLoading } = useReportsData(currentFilters);
+  
+  console.log('RelatoriosContent - reportsData:', reportsData);
+  console.log('RelatoriosContent - cardStats:', cardStats);
   
   const { chartComponents } = useChartComponents();
 
   const initialItems = React.useMemo(() => createRelatorioItems({
-    chartData: {},
+    chartData: reportsData || {},
     chartComponents,
     isLoading: isLoading || dataLoading,
     hiddenItems: [],
     expandedAnalyses: [],
     analysisOnlyItems: []
-  }), [chartComponents, isLoading, dataLoading]);
+  }), [chartComponents, isLoading, dataLoading, reportsData]);
 
   const {
     items,
@@ -71,7 +77,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
     // Definir um timer para simular carregamento, mas se os dados reais já estiverem prontos, termine mais cedo
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, dataLoading ? 1500 : 500);
+    }, dataLoading ? 800 : 300);  // Reduzindo os tempos para melhorar a percepção de performance
     
     return () => clearTimeout(timer);
   }, [dataLoading]);

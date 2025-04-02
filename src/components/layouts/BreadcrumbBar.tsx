@@ -32,7 +32,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       'consultar-demandas': 'Consultar Demandas',
       'consultar-notas': 'Consultar Notas',
       usuarios: 'Usuários',
-      relatorios: 'Relatórios!',
+      relatorios: 'Relatórios',
       // Adicione outros mapeamentos conforme necessário
     };
     
@@ -55,7 +55,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     navigate(path);
   };
   
-  // Filtrar segmentos duplicados consecutivos
+  // Filtrar segmentos duplicados consecutivos e segmentos que devem ser ocultados
   const filteredSegments = pathSegments.filter((segment, index) => {
     // Remover segmentos vazios
     if (!segment) return false;
