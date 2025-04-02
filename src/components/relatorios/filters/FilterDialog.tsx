@@ -166,14 +166,14 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Coordenação</Label>
                 <Select 
-                  value={filters.coordenacao || ''} 
-                  onValueChange={value => onFiltersChange({ ...filters, coordenacao: value })}
+                  value={filters.coordenacao || 'todos'} 
+                  onValueChange={value => onFiltersChange({ ...filters, coordenacao: value === 'todos' ? undefined : value })}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione a coordenação" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="todos">Todas</SelectItem>
                     <SelectItem value="coord1">CPDU</SelectItem>
                     <SelectItem value="coord2">CPO</SelectItem>
                     <SelectItem value="coord3">Governo Local</SelectItem>
@@ -186,14 +186,14 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Tema / Problema</Label>
                 <Select 
-                  value={filters.problema || ''} 
-                  onValueChange={value => onFiltersChange({ ...filters, problema: value })}
+                  value={filters.problema || 'todos'} 
+                  onValueChange={value => onFiltersChange({ ...filters, problema: value === 'todos' ? undefined : value })}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione o tema" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
                     <SelectItem value="prob1">Bueiros</SelectItem>
                     <SelectItem value="prob2">Poda de Árvores</SelectItem>
                     <SelectItem value="prob3">Remoção de galhos</SelectItem>
