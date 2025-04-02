@@ -5,6 +5,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { ActionCardItem, CardWidth, CardHeight, CardColor, CardType } from '@/types/dashboard';
 import ActionCard from './ActionCard';
 import { PencilLine, Trash2, EyeOff } from 'lucide-react';
+import KPICard from '@/components/settings/dashboard-management/KPICard';
+import DynamicListCard, { ListItem } from '@/components/settings/dashboard-management/DynamicListCard';
+import OriginSelectionCard from '@/components/settings/dashboard-management/OriginSelectionCard';
+import SmartSearchCard from '@/components/settings/dashboard-management/SmartSearchCard';
 
 export interface Controls {
   cardId: string;
@@ -135,7 +139,7 @@ export function UnifiedActionCard({
   isQuickDemand,
   isSearch,
   isMobileView = false,
-  showSpecialFeatures,
+  showSpecialFeatures = true,
   quickDemandTitle,
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
@@ -147,25 +151,135 @@ export function UnifiedActionCard({
   hasSubtitle,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   
+  // Render different card types based on the type prop
+  const renderCardContent = () => {
+    // Handle dynamic KPI cards
+    if (type === 'data_dynamic' && specialCardsData?.kpis) {
+      const kpis = specialCardsData.kpis;
+      
+      // Determine which KPI to show based on the title
+      if (title.includes('Solicitações de imprensa')) {
+        return (
+          <KPICard 
+            title="Solicitações de imprensa"
+            value={kpis.pressRequests.today}
+            previousValue={kpis.pressRequests.yesterday}
+            percentageChange={kpis.pressRequests.percentageChange}
+            loading={kpis.pressRequests.loading}
+            variant={kpis.pressRequests.percentageChange > 0 ? "success" : "default"}
+          />
+        );
+      } else if (title.includes('Demandas em aprovação')) {
+        return (
+          <KPICard 
+            title="Demandas em aprovação"
+            value={kpis.pendingApproval.total}
+            secondaryValue={kpis.pendingApproval.awaitingResponse}
+            secondaryLabel="aguardando resposta"
+            loading={kpis.pendingApproval.loading}
+            variant="warning"
+          />
+        );
+      } else if (title.includes('Notas produzidas')) {
+        return (
+          <KPICard 
+            title="Notas produzidas"
+            value={kpis.notesProduced.total}
+            secondaryValue={kpis.notesProduced.approved}
+            secondaryLabel={`aprovadas | ${kpis.notesProduced.rejected} recusadas`}
+            loading={kpis.notesProduced.loading}
+            variant="success"
+          />
+        );
+      }
+    }
+    
+    // Handle dynamic list cards
+    if (type === 'in_progress_demands' && specialCardsData?.lists) {
+      return (
+        <DynamicListCard 
+          title="Demandas em andamento"
+          items={specialCardsData.lists.recentDemands.items || []}
+          loading={specialCardsData.lists.recentDemands.loading}
+          emptyMessage="Nenhuma demanda em andamento"
+          viewAllPath="/dashboard/comunicacao/demandas"
+          viewAllLabel="Ver todas as demandas"
+        />
+      );
+    }
+    
+    if (type === 'recent_notes' && specialCardsData?.lists) {
+      return (
+        <DynamicListCard 
+          title="Notas de imprensa"
+          items={specialCardsData.lists.recentNotes.items || []}
+          loading={specialCardsData.lists.recentNotes.loading}
+          emptyMessage="Nenhuma nota de imprensa"
+          viewAllPath="/dashboard/comunicacao/notas"
+          viewAllLabel="Ver todas as notas"
+        />
+      );
+    }
+    
+    // Handle origin selection card
+    if (type === 'origin_selection' && specialCardsData?.originOptions) {
+      return (
+        <OriginSelectionCard 
+          title="De onde vem a demanda?"
+          options={specialCardsData.originOptions || []}
+        />
+      );
+    }
+    
+    // Handle search card
+    if (type === 'smart_search') {
+      return (
+        <SmartSearchCard placeholder="O que vamos fazer?" />
+      );
+    }
+    
+    // Default to standard action card
+    return (
+      <div
+        className="h-full"
+        {...(sortableProps ? { ...sortableProps.attributes, ...sortableProps.listeners } : {})}
+      >
+        <ActionCard
+          id={id}
+          title={title}
+          iconId={iconId}
+          path={path}
+          color={color}
+          isDraggable={isEditing}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onHide={onHide}
+          isCustom={isCustom}
+          iconSize={iconSize}
+          isMobileView={isMobileView}
+        />
+      </div>
+    );
+  };
+  
   return (
-    <div
-      className="h-full"
-      {...(sortableProps ? { ...sortableProps.attributes, ...sortableProps.listeners } : {})}
-    >
-      <ActionCard
-        id={id}
-        title={title}
-        iconId={iconId}
-        path={path}
-        color={color}
-        isDraggable={isEditing}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onHide={onHide}
-        isCustom={isCustom}
-        iconSize={iconSize}
-        isMobileView={isMobileView}
-      />
+    <div className="h-full">
+      {renderCardContent()}
+      
+      {/* Overlay controls for editing when in edit mode */}
+      {isEditing && (onEdit || onHide || onDelete) && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <Controls 
+            cardId={id} 
+            onEdit={onEdit || (() => {})}
+            onDelete={onDelete}
+            onHide={onHide}
+            isCustom={isCustom}
+          />
+        </div>
+      )}
     </div>
   );
 }
+
+export default UnifiedActionCard;

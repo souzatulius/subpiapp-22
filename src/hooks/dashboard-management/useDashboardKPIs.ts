@@ -57,14 +57,14 @@ export const useDashboardKPIs = () => {
         // Fetch press requests data - fixing the type issue
         const todayResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${todayStr}T00:00:00`)
           .lt('horario_publicacao', `${todayStr}T23:59:59`);
 
         const yesterdayResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${yesterdayStr}T00:00:00`)
           .lt('horario_publicacao', `${yesterdayStr}T23:59:59`);
@@ -72,29 +72,29 @@ export const useDashboardKPIs = () => {
         // Fetch pending approvals
         const pendingResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .in('status', ['aguardando_aprovacao', 'aguardando_resposta']);
 
         // Count how many are specifically awaiting response
         const awaitingResult = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'aguardando_resposta');
 
         // Fetch notes data
         const totalNotesResult = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true });
+          .select('count', { count: 'exact', head: true });
 
         // Count approved and rejected notes
         const approvedResult = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'aprovada');
 
         const rejectedResult = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'rejeitada');
 
         // Extract counts safely with fallbacks to 0

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import KPICard from './KPICard';
 import DynamicListCard from './DynamicListCard';
@@ -12,10 +11,9 @@ import { useAvailableCards } from '@/hooks/dashboard-management/useAvailableCard
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Save, RefreshCcw, Trash2 } from 'lucide-react';
+import { Save, RefreshCcw } from 'lucide-react';
 import DraggableCard from './DraggableCard';
 import { ActionCardItem } from '@/types/dashboard';
-import { CardTitle, CardContent } from '@/components/ui/card';
 import { v4 as uuidv4 } from 'uuid';
 
 const DashboardManagementContent: React.FC = () => {

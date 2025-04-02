@@ -64,6 +64,8 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     
     try {
       const cardData = JSON.parse(e.dataTransfer.getData('application/json'));
+      const cardType = e.dataTransfer.getData('card/type');
+      
       if (cardData && cardData.id) {
         // Check if we already have this card (by title)
         const existingCard = cards.find(c => c.title === cardData.title);
@@ -82,6 +84,11 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           id: `card-${uuidv4()}`, // Generate a new unique ID
           isCustom: false // Mark as not custom to prevent deletion
         };
+        
+        // Preserve the dynamic card type from the dragged item
+        if (cardType === 'dynamic' && cardData.type) {
+          newCard.type = cardData.type;
+        }
         
         setCards([...cards, newCard]);
         
