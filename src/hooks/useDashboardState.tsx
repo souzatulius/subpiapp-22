@@ -63,10 +63,28 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
   // Then try to load custom dashboard if available
   useEffect(() => {
     const fetchCustomDashboard = async () => {
-      if (!userId) return;
+      if (!userId || !userCoordenaticaoId) return;
       
       try {
-        // First check user's custom dashboard
+        // First check if there's a department dashboard
+        const { data: deptDashboard, error: deptError } = await supabase
+          .from('department_dashboards')
+          .select('cards_config')
+          .eq('department', userCoordenaticaoId)
+          .eq('view_type', 'dashboard')
+          .single();
+        
+        if (!deptError && deptDashboard?.cards_config) {
+          try {
+            const deptCards = JSON.parse(deptDashboard.cards_config);
+            setActionCards(deptCards);
+            return;
+          } catch (e) {
+            console.error('Error parsing department dashboard config:', e);
+          }
+        }
+        
+        // If no department dashboard, try user's custom dashboard
         const { data: userDashboard, error: userError } = await supabase
           .from('user_dashboard')
           .select('cards_config')
@@ -83,27 +101,25 @@ export const useDashboardState = (userId?: string): DashboardStateReturn => {
           }
         }
         
-        // If no user-specific dashboard, check if there's a default for the user's department
-        if (userCoordenaticaoId) {
-          const { data: deptDashboard, error: deptError } = await supabase
-            .from('department_dashboards')
-            .select('cards_config')
-            .eq('department', userCoordenaticaoId)
-            .eq('view_type', 'dashboard')
-            .single();
+        // If no custom dashboards found, check for default dashboard
+        const { data: defaultDept, error: defaultError } = await supabase
+          .from('department_dashboards')
+          .select('cards_config')
+          .eq('department', 'default')
+          .eq('view_type', 'dashboard')
+          .single();
           
-          if (!deptError && deptDashboard?.cards_config) {
-            try {
-              const deptCards = JSON.parse(deptDashboard.cards_config);
-              setActionCards(deptCards);
-              return;
-            } catch (e) {
-              console.error('Error parsing department dashboard config:', e);
-            }
+        if (!defaultError && defaultDept?.cards_config) {
+          try {
+            const defaultCards = JSON.parse(defaultDept.cards_config);
+            setActionCards(defaultCards);
+            return;
+          } catch (e) {
+            console.error('Error parsing default dashboard config:', e);
           }
         }
         
-        // If no custom dashboards found, use the default cards
+        // If all else fails, use the default cards
         setActionCards(defaultCards);
       } catch (err) {
         console.error('Error loading dashboard:', err);
