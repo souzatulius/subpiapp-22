@@ -18,6 +18,7 @@ import ResponsibilityChart from './charts/ResponsibilityChart';
 
 // Import chart registration
 import './charts/ChartRegistration';
+import { Card } from '@/components/ui/card';
 
 interface ChartsSectionProps {
   chartData: any;
@@ -138,8 +139,8 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
   }
   
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
+    <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
+      <div className="flex justify-end mb-4">
         <Button 
           onClick={onSimulateIdealRanking}
           className={`gap-2 ${isSimulationActive 
@@ -176,7 +177,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({
           </div>
         </SortableContext>
       </DndContext>
-    </div>
+    </Card>
   );
 };
 

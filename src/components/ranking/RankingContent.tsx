@@ -5,7 +5,6 @@ import FilterDialog from './filters/FilterDialog';
 import { useFilterManagement } from '@/hooks/ranking/useFilterManagement';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Card } from '@/components/ui/card';
-import RankingCharts from './RankingCharts';
 import DashboardCards from './insights/DashboardCards';
 import ChartsSection from './ChartsSection';
 import { useDemoData } from './DemoDataProvider';
@@ -143,28 +142,17 @@ const RankingContent: React.FC<RankingContentProps> = ({
         </Card>
       )}
 
-      {/* Charts Section */}
+      {/* Charts Section - Use only ONE chart rendering component, not both */}
       {hasData && (
-        <>
-          <RankingCharts 
-            sgzData={sgzData || []}
-            painelData={painelData || []}
-            isLoading={isDemoLoading}
-            chartVisibility={chartVisibility}
-            isSimulationActive={isSimulationActive}
-            onSimulateIdealRanking={handleSimulateIdealRanking}
-          />
-          
-          <ChartsSection
-            chartData={{}}
-            isLoading={isDemoLoading}
-            chartVisibility={chartVisibility}
-            sgzData={sgzData || []}
-            painelData={painelData || []}
-            onSimulateIdealRanking={handleSimulateIdealRanking}
-            isSimulationActive={isSimulationActive}
-          />
-        </>
+        <ChartsSection
+          chartData={{}}
+          isLoading={isDemoLoading}
+          chartVisibility={chartVisibility}
+          sgzData={sgzData || []}
+          painelData={painelData || []}
+          onSimulateIdealRanking={handleSimulateIdealRanking}
+          isSimulationActive={isSimulationActive}
+        />
       )}
       
       <FilterDialog 
