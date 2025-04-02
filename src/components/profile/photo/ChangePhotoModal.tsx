@@ -13,9 +13,12 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { v4 as uuidv4 } from 'uuid';
 import { Loader2, UploadCloud } from 'lucide-react';
 import { useUserProfile } from '@/components/layouts/header/useUserProfile';
+
+// Standardized bucket name and folder structure
+const PROFILE_PHOTOS_BUCKET = 'usuarios';
+const PROFILE_PHOTOS_FOLDER = 'fotos_perfil';
 
 interface ChangePhotoModalProps {
   isOpen: boolean;
@@ -61,30 +64,6 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
     }
   };
 
-  const ensureProfilePhotosBucketExists = async () => {
-    try {
-      // Check if 'profile-photos' bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketExists = buckets?.some(bucket => bucket.name === 'profile-photos');
-      
-      if (!bucketExists) {
-        console.log('Profile photos bucket does not exist. Creating it...');
-        // Create bucket if it doesn't exist
-        await supabase.storage.createBucket('profile-photos', {
-          public: true
-        });
-        
-        // Set bucket RLS policy to allow authenticated reads
-        console.log('Profile photos bucket created successfully');
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Error ensuring profile photos bucket exists:', error);
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -108,20 +87,14 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
     
     setIsSubmitting(true);
     try {
-      // Ensure bucket exists
-      const bucketExists = await ensureProfilePhotosBucketExists();
-      if (!bucketExists) {
-        throw new Error("Não foi possível configurar o armazenamento para fotos");
-      }
-      
-      // Generate unique file name
-      const fileExt = photoFile.name.split('.').pop();
-      const fileName = `${user.id}-${uuidv4()}.${fileExt}`;
+      // Generate standardized filename with extension
+      const fileExt = photoFile.name.split('.').pop() || 'jpg';
+      const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
       // Upload the file
       const { error: uploadError } = await supabase.storage
-        .from('profile-photos')
-        .upload(fileName, photoFile, {
+        .from(PROFILE_PHOTOS_BUCKET)
+        .upload(filePath, photoFile, {
           upsert: true,
           cacheControl: '3600'
         });
@@ -133,8 +106,8 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('profile-photos')
-        .getPublicUrl(fileName);
+        .from(PROFILE_PHOTOS_BUCKET)
+        .getPublicUrl(filePath);
 
       if (urlData?.publicUrl) {
         // Update user profile with new photo URL

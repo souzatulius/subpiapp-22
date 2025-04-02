@@ -3,11 +3,11 @@ import { useState, useRef, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid';
 import { UserProfile } from '@/types/common';
 
-// The bucket name must only contain lowercase letters, numbers, dots, and hyphens
-const PROFILE_PHOTOS_BUCKET = 'profile-photos';
+// Standardized bucket name and folder structure
+const PROFILE_PHOTOS_BUCKET = 'usuarios';
+const PROFILE_PHOTOS_FOLDER = 'fotos_perfil';
 
 export const usePhotoUpload = (
   userProfile: UserProfile | null, 
@@ -85,11 +85,16 @@ export const usePhotoUpload = (
       if (photoRemoved) {
         // If the user has an existing photo, remove it from storage
         if (userProfile?.foto_perfil_url) {
-          const urlParts = userProfile.foto_perfil_url.split('/');
-          const filename = urlParts[urlParts.length - 1];
-          
-          if (filename) {
-            await supabase.storage.from(PROFILE_PHOTOS_BUCKET).remove([filename]);
+          try {
+            const urlPath = new URL(userProfile.foto_perfil_url).pathname;
+            const filePath = urlPath.split('/').slice(2).join('/'); // Remove /storage/v1/object/
+            
+            if (filePath) {
+              await supabase.storage.from(PROFILE_PHOTOS_BUCKET).remove([filePath]);
+            }
+          } catch (err) {
+            console.error('Error parsing or removing old photo:', err);
+            // Continue even if old photo removal fails
           }
         }
         
@@ -114,10 +119,9 @@ export const usePhotoUpload = (
       
       // If there's a new photo to upload
       if (selectedFile) {
-        // Generate unique filename
-        const fileExt = selectedFile.name.split('.').pop();
-        const fileName = `${user.id}-${uuidv4()}.${fileExt}`;
-        const filePath = fileName;
+        // Generate standardized filename with extension
+        const fileExt = selectedFile.name.split('.').pop() || 'jpg';
+        const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
         
         // Upload file
         const { error: uploadError } = await supabase.storage

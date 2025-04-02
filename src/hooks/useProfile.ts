@@ -4,6 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from './useSupabaseAuth';
 
+// Standardized bucket name and folder structure
+const PROFILE_PHOTOS_BUCKET = 'usuarios';
+const PROFILE_PHOTOS_FOLDER = 'fotos_perfil';
+
 export const useProfile = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
@@ -14,13 +18,12 @@ export const useProfile = () => {
     try {
       setLoading(true);
       
-      // Upload the file to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `profile-photos/${fileName}`;
+      // Upload the file to storage with standardized path
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, file);
         
       if (uploadError) {
@@ -29,12 +32,12 @@ export const useProfile = () => {
       
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
+        .from(PROFILE_PHOTOS_BUCKET)
         .getPublicUrl(filePath);
       
-      // Update the user's metadata in the auth.users table using update() instead
+      // Update the user's metadata in the usuarios table
       const { error: updateError } = await supabase
-        .from('usuarios')  // Use 'usuarios' table instead of directly updating auth.users
+        .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       

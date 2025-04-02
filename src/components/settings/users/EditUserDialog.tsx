@@ -31,6 +31,9 @@ interface EditUserDialogProps {
   isSubmitting?: boolean;
 }
 
+const PROFILE_PHOTOS_BUCKET = 'usuarios';
+const PROFILE_PHOTOS_FOLDER = 'fotos_perfil';
+
 const EditUserDialog: React.FC<EditUserDialogProps> = ({
   open,
   onOpenChange,
@@ -75,7 +78,6 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
   useEffect(() => {
     if (user && open) {
-      // Handle aniversario date parsing more carefully
       let parsedAniversario = undefined;
       
       if (user.aniversario) {
@@ -120,43 +122,17 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     }
   }, [user, open, reset]);
 
-  const ensureProfilePhotosBucketExists = async () => {
-    try {
-      // Check if 'profile-photos' bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketExists = buckets?.some(bucket => bucket.name === 'profile-photos');
-      
-      if (!bucketExists) {
-        console.log('Profile photos bucket does not exist. Creating it...');
-        // Create bucket if it doesn't exist
-        await supabase.storage.createBucket('profile-photos', {
-          public: true
-        });
-        
-        // Optionally add RLS policies if needed
-        console.log('Profile photos bucket created successfully');
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Error ensuring profile photos bucket exists:', error);
-      return false;
-    }
-  };
-
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         setUploadError("A imagem não pode exceder 5MB");
         return;
       }
       
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         setUploadError("O arquivo deve ser uma imagem");
         return;
@@ -176,22 +152,13 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     setUploadError(null);
     
     try {
-      // Handle photo upload
-      if (photoFile) {
-        // Ensure bucket exists - should already be created by our SQL migration
-        const bucketExists = await ensureProfilePhotosBucketExists();
-        if (!bucketExists) {
-          throw new Error("Não foi possível configurar o armazenamento para fotos");
-        }
+      if (photoFile && user?.id) {
+        const fileExt = photoFile.name.split('.').pop() || 'jpg';
+        const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
         
-        // Generate unique file name
-        const fileExt = photoFile.name.split('.').pop();
-        const fileName = `${user?.id || 'temp'}-${uuidv4()}.${fileExt}`;
-        
-        // Upload the file
         const { error: uploadError } = await supabase.storage
-          .from('profile-photos')
-          .upload(fileName, photoFile, {
+          .from(PROFILE_PHOTOS_BUCKET)
+          .upload(filePath, photoFile, {
             upsert: true,
             cacheControl: '3600'
           });
@@ -201,22 +168,19 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
           throw new Error("Erro ao fazer upload da foto: " + uploadError.message);
         }
 
-        // Get public URL
         const { data: urlData } = supabase.storage
-          .from('profile-photos')
-          .getPublicUrl(fileName);
+          .from(PROFILE_PHOTOS_BUCKET)
+          .getPublicUrl(filePath);
 
         if (urlData?.publicUrl) {
           data.foto_perfil_url = urlData.publicUrl;
         }
       }
       
-      // Create a copy of the data for submission
       const submitData: UserFormData = {
         ...data
       };
       
-      // Submit the form with the data
       await onSubmit(submitData);
     } catch (error: any) {
       console.error('Error processing form submission:', error);

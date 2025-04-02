@@ -55,7 +55,14 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         .update(cleanData)
         .eq('id', currentUser.id);
       
-      if (error) throw error;
+      if (error) {
+        // Special handling for protected fields
+        if (error.message && error.message.includes('protected fields')) {
+          throw new Error('Alguns campos são protegidos e não podem ser alterados. Apenas administradores podem modificar cargo, coordenação e supervisão técnica.');
+        } else {
+          throw error;
+        }
+      }
       
       toast({
         title: 'Usuário atualizado',
