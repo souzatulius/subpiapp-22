@@ -4,8 +4,7 @@ import {
   Home, 
   MessageCircle, 
   BarChart2, 
-  TrendingUp,
-  Settings
+  TrendingUp
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
@@ -41,13 +40,6 @@ export const getNavigationSections = () => [
     label: 'Ranking da Zeladoria',
     path: '/dashboard/zeladoria/ranking-subs',
     isSection: false
-  },
-  // Seção 6: Gerenciamento de Dashboards
-  {
-    id: 'dashboard-management',
-    icon: <Settings size={20} />,
-    label: 'Gerenciamento de Dashboards',
-    path: '/dashboard/settings/dashboard-management',
-    isSection: false
   }
+  // Dashboard Management section has been removed
 ];

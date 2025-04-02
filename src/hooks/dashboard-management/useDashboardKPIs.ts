@@ -54,71 +54,50 @@ export const useDashboardKPIs = () => {
         const todayStr = today.toISOString().split('T')[0];
         const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-        // Fetch press requests data for today
-        const todayResult = await supabase
+        // Fetch press requests data for today - using a different approach to avoid type issues
+        const { count: todayCount, error: todayError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${todayStr}T00:00:00`)
           .lt('horario_publicacao', `${todayStr}T23:59:59`);
           
-        const todayCount = todayResult.count || 0;
-        const todayError = todayResult.error;
-
         // Fetch press requests data for yesterday
-        const yesterdayResult = await supabase
+        const { count: yesterdayCount, error: yesterdayError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('tipo', 'imprensa')
           .gte('horario_publicacao', `${yesterdayStr}T00:00:00`)
           .lt('horario_publicacao', `${yesterdayStr}T23:59:59`);
           
-        const yesterdayCount = yesterdayResult.count || 0;
-        const yesterdayError = yesterdayResult.error;
-
         // Fetch pending approvals
-        const pendingResult = await supabase
+        const { count: pendingCount, error: pendingError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .in('status', ['aguardando_aprovacao', 'aguardando_resposta']);
           
-        const pendingCount = pendingResult.count || 0;
-        const pendingError = pendingResult.error;
-
         // Count how many are specifically awaiting response
-        const awaitingResult = await supabase
+        const { count: awaitingCount, error: awaitingError } = await supabase
           .from('demandas')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'aguardando_resposta');
           
-        const awaitingCount = awaitingResult.count || 0;
-        const awaitingError = awaitingResult.error;
-
         // Fetch notes data
-        const totalNotesResult = await supabase
+        const { count: totalNotesCount, error: totalNotesError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
           
-        const totalNotesCount = totalNotesResult.count || 0;
-        const totalNotesError = totalNotesResult.error;
-
         // Count approved and rejected notes
-        const approvedResult = await supabase
+        const { count: approvedCount, error: approvedError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'aprovada');
           
-        const approvedCount = approvedResult.count || 0;
-        const approvedError = approvedResult.error;
-
-        const rejectedResult = await supabase
+        const { count: rejectedCount, error: rejectedError } = await supabase
           .from('notas_oficiais')
-          .select('count', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('status', 'rejeitada');
           
-        const rejectedCount = rejectedResult.count || 0;
-        const rejectedError = rejectedResult.error;
-
         // Log any errors
         if (todayError || yesterdayError || pendingError || 
             awaitingError || totalNotesError || approvedError || rejectedError) {
@@ -134,8 +113,8 @@ export const useDashboardKPIs = () => {
         }
 
         // Calculate percentage change
-        const todayValue = todayCount;
-        const yesterdayValue = yesterdayCount;
+        const todayValue = todayCount || 0;
+        const yesterdayValue = yesterdayCount || 0;
         const percentageChange = yesterdayValue === 0 
           ? 0 
           : ((todayValue - yesterdayValue) / yesterdayValue) * 100;
@@ -149,14 +128,14 @@ export const useDashboardKPIs = () => {
             loading: false
           },
           pendingApproval: {
-            total: pendingCount,
-            awaitingResponse: awaitingCount,
+            total: pendingCount || 0,
+            awaitingResponse: awaitingCount || 0,
             loading: false
           },
           notesProduced: {
-            total: totalNotesCount,
-            approved: approvedCount,
-            rejected: rejectedCount,
+            total: totalNotesCount || 0,
+            approved: approvedCount || 0,
+            rejected: rejectedCount || 0,
             loading: false
           }
         });
