@@ -297,7 +297,15 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         return false;
       }
 
-      const cardsJson = JSON.stringify(cards);
+      // Before saving, ensure dynamic cards maintain their type
+      const cardsToSave = cards.map(card => {
+        if (card.dataSourceKey) {
+          return {...card, type: 'data_dynamic'};
+        }
+        return card;
+      });
+      
+      const cardsJson = JSON.stringify(cardsToSave);
 
       if (existingConfig) {
         const { error: updateError } = await supabase
@@ -334,11 +342,14 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         }
       }
       
-      toast({
-        title: "Dashboard salvo",
-        description: "Configuração do dashboard salva com sucesso",
-        variant: "success"
-      });
+      // Only show toast if onSave is not provided (to avoid duplicate toasts)
+      if (!onSave) {
+        toast({
+          title: "Dashboard salvo",
+          description: "Configuração do dashboard salva com sucesso",
+          variant: "success"
+        });
+      }
       
       return true;
     } catch (error) {

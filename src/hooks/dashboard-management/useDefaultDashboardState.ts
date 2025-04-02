@@ -55,8 +55,19 @@ export const useDefaultDashboardState = (departmentId: string = 'default', viewT
         try {
           const parsedCards = JSON.parse(departmentConfig.cards_config);
           console.log(`Loaded ${parsedCards.length} cards from department-specific config`);
-          setCards(parsedCards);
+          
+          // Ensure proper card types are preserved
+          const processedCards = parsedCards.map((card: ActionCardItem) => {
+            // Make sure dynamic cards are properly identified
+            if (card.dataSourceKey) {
+              return {...card, type: 'data_dynamic'};
+            }
+            return card;
+          });
+          
+          setCards(processedCards);
           setConfigSource('custom');
+          setIsLoading(false);
           return;
         } catch (parseError) {
           console.error('Error parsing department dashboard config:', parseError);
@@ -81,7 +92,17 @@ export const useDefaultDashboardState = (departmentId: string = 'default', viewT
         try {
           const parsedCards = JSON.parse(defaultConfig.cards_config);
           console.log(`Loaded ${parsedCards.length} cards from default config`);
-          setCards(parsedCards);
+          
+          // Ensure proper card types are preserved
+          const processedCards = parsedCards.map((card: ActionCardItem) => {
+            // Make sure dynamic cards are properly identified
+            if (card.dataSourceKey) {
+              return {...card, type: 'data_dynamic'};
+            }
+            return card;
+          });
+          
+          setCards(processedCards);
           setConfigSource('default');
         } catch (parseError) {
           console.error('Error parsing default dashboard config:', parseError);
@@ -107,6 +128,7 @@ export const useDefaultDashboardState = (departmentId: string = 'default', viewT
   
   // Handle editing a card
   const handleEditCard = useCallback((card: ActionCardItem) => {
+    console.log("Editing card:", card);
     setEditingCard(card);
     setIsCustomizationModalOpen(true);
   }, []);
@@ -146,11 +168,16 @@ export const useDefaultDashboardState = (departmentId: string = 'default', viewT
   // Handle saving a card
   const handleSaveCard = useCallback((data: any) => {
     if (editingCard) {
-      // Update existing card
+      // Update existing card - preserve card type and data source key
       setCards(prevCards => 
         prevCards.map(card => 
           card.id === editingCard.id 
-            ? { ...card, ...data } 
+            ? { 
+                ...card, 
+                ...data, 
+                type: editingCard.type, // Preserve the original card type
+                dataSourceKey: editingCard.dataSourceKey // Preserve data source key for dynamic cards
+              } 
             : card
         )
       );

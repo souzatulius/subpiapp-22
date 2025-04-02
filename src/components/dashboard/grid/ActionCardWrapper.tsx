@@ -9,6 +9,7 @@ import PendingActionsCardWrapper from './card-types/PendingActionsCardWrapper';
 import SearchCard from './card-types/SearchCard';
 import QuickDemandCardWrapper from './card-types/QuickDemandCardWrapper';
 import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
+import DynamicDataCard from '../DynamicDataCard';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -42,9 +43,53 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   specialCardsData
 }) => {
   const { userDepartment, isComunicacao } = useDepartmentData();
+  const IconComponent = card.iconId ? getIconComponentFromId(card.iconId) : null;
+
+  // Get icon component from ID
+  function getIconComponentFromId(iconId: string) {
+    const IconMap = {
+      'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
+      'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
+      'file-check': () => import('lucide-react').then(mod => mod.FileCheck),
+      'bar-chart-2': () => import('lucide-react').then(mod => mod.BarChart2),
+      'plus-circle': () => import('lucide-react').then(mod => mod.PlusCircle),
+      'search': () => import('lucide-react').then(mod => mod.Search),
+      'clock': () => import('lucide-react').then(mod => mod.Clock),
+      'alert-triangle': () => import('lucide-react').then(mod => mod.AlertTriangle),
+      'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
+      'file-text': () => import('lucide-react').then(mod => mod.FileText),
+      'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
+      // Add more icons as needed
+    };
+    
+    const LoadedIcon = React.lazy(() => 
+      IconMap[iconId]?.() || import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
+    );
+    
+    return (props: any) => (
+      <React.Suspense fallback={<div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full" />}>
+        <LoadedIcon {...props} />
+      </React.Suspense>
+    );
+  }
 
   // Render the appropriate card content based on the card type
   const renderCardContent = () => {
+    // Check if it's a dynamic data card
+    if (card.type === 'data_dynamic' && card.dataSourceKey) {
+      return (
+        <DynamicDataCard 
+          title={card.title}
+          icon={IconComponent && <IconComponent className="h-8 w-8" />}
+          color={card.color}
+          dataSourceKey={card.dataSourceKey}
+          coordenacaoId={userDepartment || 'default'}
+          usuarioId="current"
+          highlight={false}
+        />
+      );
+    }
+    
     if (card.isQuickDemand) {
       return (
         <QuickDemandCardWrapper 
@@ -110,9 +155,9 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard ? {
+      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' ? {
         ...card,
-        path: '' // Remove path to prevent default click behavior
+        path: '' // Remove path to prevent default click behavior for special cards
       } : card} 
       onEdit={onEdit}
       onDelete={onDelete}

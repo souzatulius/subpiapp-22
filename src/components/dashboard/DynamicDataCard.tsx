@@ -51,6 +51,8 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
     }
   };
 
+  console.log(`DynamicDataCard: ${title} - dataSourceKey: ${dataSourceKey}, loading: ${loading}, data:`, data);
+
   return (
     <div 
       className={`w-full h-full rounded-md ${shadowClass} transition-all hover:shadow-lg ${borderClass} flex flex-col`}
@@ -66,7 +68,7 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
           <Skeleton className="h-7 w-24 bg-white/30" />
         ) : (
           <p className="text-2xl font-bold text-white">
-            {valueFormatter(data?.length ?? 0)}
+            {Array.isArray(data) ? valueFormatter(data?.length ?? 0) : valueFormatter(0)}
           </p>
         )}
       </div>
