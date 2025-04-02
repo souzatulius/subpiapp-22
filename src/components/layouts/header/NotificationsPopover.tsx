@@ -158,3 +158,5 @@ export const NotificationsPopover: React.FC = () => {
     </Popover>
   );
 };
+
+export default NotificationsPopover;

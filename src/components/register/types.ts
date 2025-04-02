@@ -20,6 +20,7 @@ export interface FormData {
 export interface SelectOption {
   id: string;
   value: string;
+  sigla?: string;
 }
 
 export interface PasswordRequirement {

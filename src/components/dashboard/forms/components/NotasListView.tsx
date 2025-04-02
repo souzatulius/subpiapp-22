@@ -10,20 +10,24 @@ interface NotasListViewProps {
   isLoading: boolean;
   onSelectNota: (nota: NotaOficial) => void;
   selectedNota: NotaOficial | null;
+  hideHeaderButton?: boolean;
 }
 
 const NotasListView: React.FC<NotasListViewProps> = ({
   notas,
   isLoading,
   onSelectNota,
-  selectedNota
+  selectedNota,
+  hideHeaderButton = false
 }) => {
   return (
     <Card className="p-6">
       <Tabs defaultValue="pendentes">
-        <TabsList className="mb-4">
-          <TabsTrigger value="pendentes">Pendentes de Aprovação</TabsTrigger>
-        </TabsList>
+        {!hideHeaderButton && (
+          <TabsList className="mb-4">
+            <TabsTrigger value="pendentes">Pendentes de Aprovação</TabsTrigger>
+          </TabsList>
+        )}
         <TabsContent value="pendentes">
           <NotasList 
             notas={notas || []}
