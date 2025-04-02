@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowDownIcon, ArrowUpIcon, GripVertical } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, GripVertical, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -96,20 +96,21 @@ export const SortableKPICard = forwardRef<HTMLDivElement, SortableKPICardProps>(
           ) : (
             <>
               <div className="mt-2 flex items-end">
-                <span className="text-[2.25rem] leading-tight font-bold text-subpi-blue">
+                <span className="text-[2.25rem] leading-tight font-bold text-orange-500">
                   {value}
                 </span>
-                {typeof change === 'number' && change !== 0 && (
+                {typeof change === 'number' && (
                   <div 
                     className={cn(
-                      "flex items-center ml-2 mb-1.5",
-                      status === 'positive' ? 'text-green-600' : 'text-red-600'
+                      "flex items-center ml-2 mb-1.5 text-orange-500"
                     )}
                   >
-                    {status === 'positive' ? (
+                    {change > 0 ? (
                       <ArrowUpIcon className="h-3 w-3 mr-0.5" />
-                    ) : (
+                    ) : change < 0 ? (
                       <ArrowDownIcon className="h-3 w-3 mr-0.5" />
+                    ) : (
+                      <Minus className="h-3 w-3 mr-0.5" />
                     )}
                     <span className="text-[0.9rem] font-medium">
                       {Math.abs(change)}%
@@ -119,7 +120,7 @@ export const SortableKPICard = forwardRef<HTMLDivElement, SortableKPICardProps>(
               </div>
               <p className="text-[0.95rem] text-gray-700 mt-1">{description}</p>
               {secondary && (
-                <p className="text-[0.8rem] text-gray-500 mt-0.5">{secondary}</p>
+                <p className="text-[0.8rem] text-orange-500 mt-0.5">{secondary}</p>
               )}
             </>
           )}

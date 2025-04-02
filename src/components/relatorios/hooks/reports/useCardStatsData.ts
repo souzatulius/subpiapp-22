@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CardStats } from './types';
@@ -126,7 +125,7 @@ export const useCardStatsData = () => {
       
       console.log('Notas aguardando aprovação:', notasAguardando);
       
-      // 7. Buscar tempo médio de resposta das demandas
+      // 7. Buscar tempo médio de resposta das demandas - AGORA EM HORAS
       const { data: respostasData, error: respostasError } = await supabase
         .from('demandas')
         .select(`
@@ -141,8 +140,8 @@ export const useCardStatsData = () => {
         throw respostasError;
       }
       
-      // Calcular tempo médio de resposta
-      let tempoTotalDias = 0;
+      // Calcular tempo médio de resposta EM HORAS
+      let tempoTotalHoras = 0;
       let contagemRespostas = 0;
       
       if (respostasData && respostasData.length > 0) {
@@ -150,17 +149,17 @@ export const useCardStatsData = () => {
           if (demanda.respostas && demanda.respostas.length > 0) {
             const dataDemanda = new Date(demanda.horario_publicacao);
             const dataResposta = new Date(demanda.respostas[0].criado_em);
-            const diferencaDias = (dataResposta.getTime() - dataDemanda.getTime()) / (1000 * 3600 * 24);
-            tempoTotalDias += diferencaDias;
+            const diferencaHoras = (dataResposta.getTime() - dataDemanda.getTime()) / (1000 * 3600);
+            tempoTotalHoras += diferencaHoras;
             contagemRespostas++;
           }
         });
       }
       
       const tempoMedioResposta = contagemRespostas > 0 ? 
-        Number((tempoTotalDias / contagemRespostas).toFixed(1)) : 0;
+        Number((tempoTotalHoras / contagemRespostas).toFixed(1)) : 0;
       
-      console.log('Tempo médio de resposta (dias):', tempoMedioResposta);
+      console.log('Tempo médio de resposta (horas):', tempoMedioResposta);
       
       // Buscar tempos de resposta do mês atual para comparação
       const { data: respostasMesAtualData, error: respostasMesAtualError } = await supabase
@@ -179,7 +178,7 @@ export const useCardStatsData = () => {
         throw respostasMesAtualError;
       }
       
-      // Calcular tempo médio do mês atual
+      // Calcular tempo médio do mês atual EM HORAS
       let tempoTotalMesAtual = 0;
       let contagemRespostasMesAtual = 0;
       
@@ -188,8 +187,8 @@ export const useCardStatsData = () => {
           if (demanda.respostas && demanda.respostas.length > 0) {
             const dataDemanda = new Date(demanda.horario_publicacao);
             const dataResposta = new Date(demanda.respostas[0].criado_em);
-            const diferencaDias = (dataResposta.getTime() - dataDemanda.getTime()) / (1000 * 3600 * 24);
-            tempoTotalMesAtual += diferencaDias;
+            const diferencaHoras = (dataResposta.getTime() - dataDemanda.getTime()) / (1000 * 3600);
+            tempoTotalMesAtual += diferencaHoras;
             contagemRespostasMesAtual++;
           }
         });

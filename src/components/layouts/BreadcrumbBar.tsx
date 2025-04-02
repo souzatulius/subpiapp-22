@@ -41,7 +41,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   };
 
   // Lista de segmentos que devem ser ocultados no breadcrumb
-  const hiddenSegments = ['zeladoria', 'dashboard'];
+  const hiddenSegments = ['zeladoria'];
   
   const handleClick = (index: number) => {
     const segment = pathSegments[index];
@@ -49,6 +49,12 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     // Verificar se é a seção de configurações e há um manipulador especial
     if (segment === 'settings' && onSettingsClick) {
       onSettingsClick();
+      return;
+    }
+    
+    // Se for comunicacao, garantir que o caminho tenha comunicacao duplicado
+    if (segment === 'comunicacao' && index === 1) {
+      navigate('/dashboard/comunicacao/comunicacao');
       return;
     }
     
@@ -64,8 +70,12 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     // Remover segmentos que devem ser ocultados
     if (hiddenSegments.includes(segment)) return false;
     
-    // Remover duplicatas consecutivas (como comunicacao/comunicacao)
-    return index === 0 || segment !== pathSegments[index - 1];
+    // Remover duplicatas consecutivas (como comunicacao/comunicacao), exceto para o caso especial
+    if (index > 0 && segment === pathSegments[index - 1] && segment !== 'comunicacao') {
+      return false;
+    }
+    
+    return true;
   });
   
   return (

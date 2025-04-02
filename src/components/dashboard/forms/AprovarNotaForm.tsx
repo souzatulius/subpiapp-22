@@ -115,6 +115,7 @@ const AprovarNotaForm: React.FC<AprovarNotaFormProps> = () => {
       isLoading={isLoading}
       onSelectNota={handleSelectNota}
       selectedNota={selectedNota}
+      hideHeaderButton={true}
     />
   );
 };

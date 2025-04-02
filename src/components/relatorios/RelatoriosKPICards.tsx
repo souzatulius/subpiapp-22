@@ -77,9 +77,9 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
     },
     tempo: {
       id: 'tempo',
-      title: 'Tempo Médio de Resposta',
+      title: 'Tempo de Resposta',
       icon: <Clock className="h-5 w-5" />,
-      value: `${cardStats.tempoMedioResposta} dias`,
+      value: `${cardStats.tempoMedioResposta} horas`,
       change: cardStats.tempoRespostaVariacao,
       status: cardStats.tempoRespostaVariacao <= 0 ? 'positive' : 'negative', // Menor tempo é melhor
       description: 'Comparado ao período anterior',
