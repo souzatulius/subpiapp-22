@@ -6,9 +6,9 @@ import { ActionCardItem, CardWidth, CardHeight, CardColor, CardType } from '@/ty
 import ActionCard from './ActionCard';
 import { PencilLine, Trash2, EyeOff } from 'lucide-react';
 import KPICard from '@/components/settings/dashboard-management/KPICard';
-import DynamicListCard, { ListItem } from '@/components/settings/dashboard-management/DynamicListCard';
-import OriginSelectionCard from '@/components/settings/dashboard-management/OriginSelectionCard';
-import SmartSearchCard from '@/components/settings/dashboard-management/SmartSearchCard';
+import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
+import OriginSelectionCard from './cards/OriginSelectionCard';
+import SmartSearchCard from './SmartSearchCard';
 
 export interface Controls {
   cardId: string;
@@ -157,7 +157,7 @@ export function UnifiedActionCard({
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
-      // Determine which KPI to show based on the title
+      // Determine which KPI to show based on the title or data source
       if (title.includes('Solicitações de imprensa')) {
         return (
           <KPICard 
@@ -234,7 +234,10 @@ export function UnifiedActionCard({
     // Handle search card
     if (type === 'smart_search') {
       return (
-        <SmartSearchCard placeholder="O que vamos fazer?" />
+        <SmartSearchCard 
+          placeholder="O que vamos fazer?" 
+          onSearch={onSearchSubmit}
+        />
       );
     }
     
@@ -263,7 +266,7 @@ export function UnifiedActionCard({
   };
   
   return (
-    <div className="h-full">
+    <div className="h-full relative group">
       {renderCardContent()}
       
       {/* Overlay controls for editing when in edit mode */}

@@ -62,7 +62,7 @@ export const useDashboardKPIs = () => {
           .gte('horario_publicacao', `${todayStr}T00:00:00`)
           .lt('horario_publicacao', `${todayStr}T23:59:59`);
           
-        const todayCount = todayData ? todayData.length : 0;
+        const todayCount = todayData?.length || 0;
           
         // Fetch press requests data for yesterday
         const { data: yesterdayData, error: yesterdayError } = await supabase
@@ -72,7 +72,7 @@ export const useDashboardKPIs = () => {
           .gte('horario_publicacao', `${yesterdayStr}T00:00:00`)
           .lt('horario_publicacao', `${yesterdayStr}T23:59:59`);
           
-        const yesterdayCount = yesterdayData ? yesterdayData.length : 0;
+        const yesterdayCount = yesterdayData?.length || 0;
           
         // Fetch pending approvals
         const { data: pendingData, error: pendingError } = await supabase
@@ -80,7 +80,7 @@ export const useDashboardKPIs = () => {
           .select('id')
           .in('status', ['aguardando_aprovacao', 'aguardando_resposta']);
           
-        const pendingCount = pendingData ? pendingData.length : 0;
+        const pendingCount = pendingData?.length || 0;
           
         // Count how many are specifically awaiting response
         const { data: awaitingData, error: awaitingError } = await supabase
@@ -88,14 +88,14 @@ export const useDashboardKPIs = () => {
           .select('id')
           .eq('status', 'aguardando_resposta');
           
-        const awaitingCount = awaitingData ? awaitingData.length : 0;
+        const awaitingCount = awaitingData?.length || 0;
           
         // Fetch notes data
         const { data: totalNotesData, error: totalNotesError } = await supabase
           .from('notas_oficiais')
           .select('id');
           
-        const totalNotesCount = totalNotesData ? totalNotesData.length : 0;
+        const totalNotesCount = totalNotesData?.length || 0;
           
         // Count approved and rejected notes
         const { data: approvedData, error: approvedError } = await supabase
@@ -103,14 +103,14 @@ export const useDashboardKPIs = () => {
           .select('id')
           .eq('status', 'aprovada');
           
-        const approvedCount = approvedData ? approvedData.length : 0;
+        const approvedCount = approvedData?.length || 0;
           
         const { data: rejectedData, error: rejectedError } = await supabase
           .from('notas_oficiais')
           .select('id')
           .eq('status', 'rejeitada');
           
-        const rejectedCount = rejectedData ? rejectedData.length : 0;
+        const rejectedCount = rejectedData?.length || 0;
           
         // Log any errors
         if (todayError || yesterdayError || pendingError || 
@@ -127,8 +127,8 @@ export const useDashboardKPIs = () => {
         }
 
         // Calculate percentage change
-        const todayValue = todayCount || 0;
-        const yesterdayValue = yesterdayCount || 0;
+        const todayValue = todayCount;
+        const yesterdayValue = yesterdayCount;
         const percentageChange = yesterdayValue === 0 
           ? 0 
           : ((todayValue - yesterdayValue) / yesterdayValue) * 100;

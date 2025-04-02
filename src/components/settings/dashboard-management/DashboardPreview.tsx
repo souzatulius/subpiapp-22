@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
@@ -42,6 +42,50 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   } = useDefaultDashboardState(department);
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  
+  // Mock data for dynamic cards in preview
+  const [mockData, setMockData] = useState({
+    kpis: {
+      pressRequests: {
+        today: 14,
+        yesterday: 12,
+        percentageChange: 16.7,
+        loading: false
+      },
+      pendingApproval: {
+        total: 8,
+        awaitingResponse: 5,
+        loading: false
+      },
+      notesProduced: {
+        total: 42,
+        approved: 38,
+        rejected: 4,
+        loading: false
+      }
+    },
+    lists: {
+      recentDemands: {
+        items: [
+          { id: 'dem-1', title: 'Demanda de exemplo 1', status: 'in-progress' as const, date: '2023-12-01', path: '#' },
+          { id: 'dem-2', title: 'Demanda de exemplo 2', status: 'pending' as const, date: '2023-12-02', path: '#' }
+        ],
+        loading: false
+      },
+      recentNotes: {
+        items: [
+          { id: 'note-1', title: 'Nota de exemplo 1', status: 'approved' as const, date: '2023-12-01', path: '#' },
+          { id: 'note-2', title: 'Nota de exemplo 2', status: 'pending' as const, date: '2023-12-02', path: '#' }
+        ],
+        loading: false
+      }
+    },
+    originOptions: [
+      { id: 'origin-1', title: 'Imprensa', icon: '📰' },
+      { id: 'origin-2', title: 'Ministério', icon: '🏛️' },
+      { id: 'origin-3', title: 'Interno', icon: '🏢' }
+    ]
+  });
 
   // Handle drag over event
   const handleDragOver = (e: React.DragEvent) => {
@@ -148,7 +192,10 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             onQuickDemandTitleChange={setNewDemandTitle}
             onQuickDemandSubmit={handleQuickDemandSubmit}
             onSearchSubmit={handleSearchSubmit}
-            specialCardsData={specialCardsData}
+            specialCardsData={{
+              ...specialCardsData,
+              ...mockData // Add mock data for dynamic card previews
+            }}
           />
         )}
       </div>
