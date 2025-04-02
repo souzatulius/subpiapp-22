@@ -2,10 +2,10 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ArrowDownIcon, ArrowUpIcon, Minus } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowDownIcon, ArrowUpIcon, GripVertical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 
 interface SortableKPICardProps {
   id: string;
@@ -13,7 +13,7 @@ interface SortableKPICardProps {
   icon: React.ReactNode;
   value: string | number;
   change?: number;
-  status?: 'positive' | 'negative' | 'neutral';
+  status: 'positive' | 'negative' | 'neutral';
   description: string;
   secondary?: string;
   isLoading?: boolean;
@@ -26,11 +26,11 @@ export const SortableKPICard: React.FC<SortableKPICardProps> = ({
   icon,
   value,
   change,
-  status = 'neutral',
+  status,
   description,
   secondary,
   isLoading = false,
-  isEditMode = false
+  isEditMode = false,
 }) => {
   const {
     attributes,
@@ -38,75 +38,90 @@ export const SortableKPICard: React.FC<SortableKPICardProps> = ({
     setNodeRef,
     transform,
     transition,
-    isDragging
-  } = useSortable({ id });
-  
+    isDragging,
+  } = useSortable({
+    id,
+    disabled: !isEditMode,
+  });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 50 : 'auto',
-    opacity: isDragging ? 0.8 : 1,
-    cursor: isEditMode ? 'grab' : 'default',
-    animation: isEditMode ? 'wiggle 1s infinite' : 'none'
+    opacity: isDragging ? 0.5 : 1,
   };
 
   const getStatusColor = () => {
     switch (status) {
       case 'positive':
-        return 'text-green-600';
+        return 'text-green-500';
       case 'negative':
-        return 'text-red-600';
+        return 'text-red-500';
       default:
-        return 'text-slate-600';
+        return 'text-gray-500';
     }
   };
 
   const getStatusIcon = () => {
-    switch (status) {
-      case 'positive':
-        return <ArrowUpIcon className="h-4 w-4 mr-1" />;
-      case 'negative':
-        return <ArrowDownIcon className="h-4 w-4 mr-1" />;
-      default:
-        return <Minus className="h-4 w-4 mr-1" />;
-    }
+    if (!change) return null;
+    
+    return status === 'positive' ? (
+      <ArrowUpIcon className="h-4 w-4 text-green-500" />
+    ) : (
+      <ArrowDownIcon className="h-4 w-4 text-red-500" />
+    );
   };
 
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
-      {...(isEditMode ? { ...attributes, ...listeners } : {})}
+      className="relative group"
     >
-      <Card className={cn(
-        "border border-gray-200 hover:shadow-md transition-all duration-300 rounded-xl overflow-hidden",
-        "bg-gradient-to-b from-gray-50 to-white",
-        isDragging && "ring-2 ring-blue-500"
-      )}>
-        <CardHeader className="flex flex-row items-center justify-between pb-2 pt-3 px-4">
-          <h3 className="text-sm font-medium text-slate-800">{title}</h3>
-          <div className="h-5 w-5 text-orange-500">{icon}</div>
-        </CardHeader>
-        <CardContent className="px-4 pb-4 pt-0">
-          {isLoading ? (
-            <>
-              <Skeleton className="h-6 w-24 bg-gray-100 rounded-lg mb-1" />
-              <Skeleton className="h-4 w-32 bg-gray-50 rounded-lg" />
-            </>
-          ) : (
-            <>
-              <div className="text-xl font-bold text-slate-800">{value}</div>
-              <div className="text-xs text-slate-500">{description}</div>
+      <CardContent className="p-6">
+        {isLoading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2 text-slate-600">
+                {icon}
+                <span className="font-medium">{title}</span>
+              </div>
+              
+              {isEditMode && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 absolute top-2 right-2 cursor-grab"
+                  {...attributes}
+                  {...listeners}
+                >
+                  <GripVertical className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            
+            <div className="flex items-end gap-2 mb-1">
+              <div className="text-2xl font-bold">{value}</div>
               {change !== undefined && (
-                <div className={`mt-2 flex items-center gap-1 text-xs ${getStatusColor()}`}>
+                <div className={`flex items-center gap-1 text-sm ${getStatusColor()}`}>
                   {getStatusIcon()}
-                  <span>{secondary}</span>
+                  <span>{Math.abs(change)}%</span>
                 </div>
               )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            </div>
+            
+            <div className="text-xs text-slate-500">
+              <p>{description}</p>
+              {secondary && <p className="mt-1">{secondary}</p>}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };

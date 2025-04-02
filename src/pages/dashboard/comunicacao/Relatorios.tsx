@@ -3,18 +3,25 @@ import React, { useState } from 'react';
 import { PieChart, SlidersHorizontal, Printer, FileDown, Eye, Search } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { DndContext } from "@dnd-kit/core";
 import { RelatoriosKPICards } from '@/components/relatorios/RelatoriosKPICards';
 import { RelatoriosGraphCards } from '@/components/relatorios/RelatoriosGraphCards';
-import RelatoriosFilters from '@/components/relatorios/filters/RelatoriosFilters';
+import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
 
 const RelatoriosPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportPDF = () => {
+    // Implementação futura de exportação para PDF
+    alert('Funcionalidade de exportação para PDF em desenvolvimento.');
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -31,7 +38,7 @@ const RelatoriosPage = () => {
         <Button 
           variant="outline" 
           size="icon"
-          onClick={() => window.print()}
+          onClick={handlePrint}
           className="h-9 w-9"
           title="Imprimir"
         >
@@ -41,38 +48,23 @@ const RelatoriosPage = () => {
         <Button 
           variant="outline"
           size="icon"
+          onClick={handleExportPDF}
           className="h-9 w-9"
           title="Exportar PDF"
         >
           <FileDown className="h-4 w-4" />
         </Button>
         
-        <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-          <SheetTrigger asChild>
-            <Button 
-              variant="default" 
-              size="icon"
-              className="h-9 w-9"
-              title="Filtros"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="w-[300px] sm:w-[450px]" side="right">
-            <SheetHeader>
-              <SheetTitle>Filtros de relatório</SheetTitle>
-              <SheetDescription>
-                Customize a visualização dos dados e relatórios.
-              </SheetDescription>
-            </SheetHeader>
-            <ScrollArea className="h-[calc(100vh-120px)] pr-4">
-              <div className="py-6">
-                <RelatoriosFilters />
-              </div>
-            </ScrollArea>
-          </SheetContent>
-        </Sheet>
-
+        <Button 
+          variant="default" 
+          size="icon"
+          onClick={() => setIsFilterOpen(true)}
+          className="h-9 w-9"
+          title="Filtros"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+        </Button>
+        
         <Button
           variant={isEditMode ? "secondary" : "outline"}
           size="icon"
@@ -82,6 +74,12 @@ const RelatoriosPage = () => {
         >
           {isEditMode ? <Eye className="h-4 w-4" /> : <Search className="h-4 w-4" />}
         </Button>
+
+        {/* Filter dialog */}
+        <FilterDialog 
+          open={isFilterOpen} 
+          onOpenChange={setIsFilterOpen} 
+        />
       </div>
 
       {/* Conteúdo principal com apenas visualização de gráficos */}

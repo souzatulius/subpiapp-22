@@ -1,212 +1,140 @@
 
 import React, { useState, useEffect } from 'react';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { subDays } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { addDays, subDays } from 'date-fns';
-import { ReportFilters } from '../hooks/useReportsData';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { ReportFilters } from '../hooks/useReportsData';
 
 interface RelatoriosFiltersProps {
-  onApplyFilters?: (filters: ReportFilters) => void;
+  filters: ReportFilters;
+  onFiltersChange: (filters: ReportFilters) => void;
+  onResetFilters: () => void;
 }
 
-const RelatoriosFilters: React.FC<RelatoriosFiltersProps> = ({ onApplyFilters }) => {
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: subDays(new Date(), 30),
-    to: new Date(),
-  });
+export const RelatoriosFilters: React.FC<RelatoriosFiltersProps> = ({ 
+  filters, 
+  onFiltersChange, 
+  onResetFilters 
+}) => {
+  const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
+  const [problemas, setProblemas] = useState<{id: string, descricao: string}[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const [coordenacao, setCoordenacao] = useState<string>('');
-  const [problema, setProblema] = useState<string>('');
-  const [showKPIs, setShowKPIs] = useState(true);
-  const [showGraphs, setShowGraphs] = useState(true);
-  
-  const [coordenacoes, setCoordenacoes] = useState<any[]>([]);
-  const [problemas, setProblemas] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Load coordenações e problemas from Supabase
   useEffect(() => {
-    const fetchOptions = async () => {
+    const fetchFilterOptions = async () => {
       setLoading(true);
       try {
-        // Fetch coordenacoes
+        // Fetch coordenações
         const { data: coordData, error: coordError } = await supabase
           .from('coordenacoes')
-          .select('id, descricao');
+          .select('id, descricao')
+          .order('descricao');
         
-        if (!coordError && coordData) {
-          setCoordenacoes(coordData);
-        }
+        if (coordError) throw coordError;
+        setCoordenacoes(coordData || []);
         
         // Fetch problemas
         const { data: probData, error: probError } = await supabase
           .from('problemas')
-          .select('id, descricao');
+          .select('id, descricao')
+          .order('descricao');
         
-        if (!probError && probData) {
-          setProblemas(probData);
-        }
+        if (probError) throw probError;
+        setProblemas(probData || []);
       } catch (error) {
-        console.error('Erro ao carregar opções de filtro:', error);
+        console.error('Erro ao buscar opções de filtro:', error);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchOptions();
+    fetchFilterOptions();
   }, []);
-
-  const handleApply = () => {
-    if (onApplyFilters) {
-      onApplyFilters({
-        dateRange,
-        coordenacao: coordenacao || undefined,
-        problema: problema || undefined
-      });
-    }
-  };
-
-  const handleReset = () => {
-    setDateRange({
-      from: subDays(new Date(), 30),
-      to: new Date(),
+  
+  const handleDateRangeChange = (range: DateRange) => {
+    onFiltersChange({
+      ...filters,
+      dateRange: range
     });
-    setCoordenacao('');
-    setProblema('');
-    setShowKPIs(true);
-    setShowGraphs(true);
-    
-    if (onApplyFilters) {
-      onApplyFilters({});
-    }
   };
-
-  const getPredefinedRanges = () => [
-    {
-      label: 'Últimos 7 dias',
-      onClick: () => setDateRange({
-        from: subDays(new Date(), 7),
-        to: new Date()
-      })
-    },
-    {
-      label: 'Últimos 30 dias',
-      onClick: () => setDateRange({
-        from: subDays(new Date(), 30),
-        to: new Date()
-      })
-    },
-    {
-      label: 'Este mês',
-      onClick: () => {
-        const now = new Date();
-        setDateRange({
-          from: new Date(now.getFullYear(), now.getMonth(), 1),
-          to: new Date()
-        });
-      }
-    }
-  ];
-
+  
+  const handleCoordenacaoChange = (value: string) => {
+    onFiltersChange({
+      ...filters,
+      coordenacao: value === 'todos' ? undefined : value
+    });
+  };
+  
+  const handleProblemaChange = (value: string) => {
+    onFiltersChange({
+      ...filters,
+      problema: value === 'todos' ? undefined : value
+    });
+  };
+  
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-2">Período</h3>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {getPredefinedRanges().map((range) => (
-            <Badge 
-              key={range.label}
-              variant="outline" 
-              className="cursor-pointer hover:bg-slate-100"
-              onClick={range.onClick}
-            >
-              {range.label}
-            </Badge>
-          ))}
-        </div>
+        <Label className="text-sm mb-1 block">Período</Label>
         <DateRangePicker 
-          dateRange={dateRange} 
-          onRangeChange={setDateRange} 
-          className="w-full"
+          dateRange={filters.dateRange || { from: subDays(new Date(), 90), to: new Date() }} 
+          onRangeChange={handleDateRangeChange} 
         />
       </div>
-
-      <div className="grid gap-4">
-        <div>
-          <Label>Coordenação</Label>
-          <Select
-            value={coordenacao}
-            onValueChange={setCoordenacao}
-            disabled={loading}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Todas as coordenações" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todas as coordenações</SelectItem>
-              {coordenacoes.map((coord) => (
-                <SelectItem key={coord.id} value={coord.id}>{coord.descricao}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label>Problema / Tema</Label>
-          <Select
-            value={problema}
-            onValueChange={setProblema}
-            disabled={loading}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Todos os problemas" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todos os problemas</SelectItem>
-              {problemas.map((prob) => (
-                <SelectItem key={prob.id} value={prob.id}>{prob.descricao}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
+      
       <div>
-        <h3 className="text-lg font-medium mb-2">Visualização</h3>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="show-kpis" 
-              checked={showKPIs} 
-              onCheckedChange={(checked) => setShowKPIs(checked === true)}
-            />
-            <Label htmlFor="show-kpis">Mostrar indicadores-chave (KPIs)</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="show-graphs" 
-              checked={showGraphs}
-              onCheckedChange={(checked) => setShowGraphs(checked === true)}
-            />
-            <Label htmlFor="show-graphs">Mostrar gráficos analíticos</Label>
-          </div>
-        </div>
+        <Label className="text-sm mb-1 block">Coordenação</Label>
+        <Select 
+          value={filters.coordenacao || 'todos'} 
+          onValueChange={handleCoordenacaoChange}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione a coordenação" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todas as coordenações</SelectItem>
+            {coordenacoes.map(coord => (
+              <SelectItem key={coord.id} value={coord.id}>
+                {coord.descricao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-
-      <div className="pt-4 flex flex-col space-y-2">
-        <Button onClick={handleApply}>
-          Aplicar filtros
-        </Button>
-        <Button variant="outline" onClick={handleReset}>
-          Redefinir filtros
-        </Button>
+      
+      <div>
+        <Label className="text-sm mb-1 block">Tema / Problema</Label>
+        <Select 
+          value={filters.problema || 'todos'} 
+          onValueChange={handleProblemaChange}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione o tema" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos os temas</SelectItem>
+            {problemas.map(prob => (
+              <SelectItem key={prob.id} value={prob.id}>
+                {prob.descricao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+      
+      <Button 
+        variant="outline" 
+        onClick={onResetFilters} 
+        className="w-full"
+      >
+        Limpar filtros
+      </Button>
     </div>
   );
 };

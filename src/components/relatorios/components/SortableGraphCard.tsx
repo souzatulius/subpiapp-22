@@ -2,38 +2,37 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Eye, EyeOff, Search, Bookmark } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Eye, EyeOff, GripVertical, Search } from 'lucide-react';
 
 interface SortableGraphCardProps {
   id: string;
   title: string;
   description?: string;
-  children: React.ReactNode;
   isVisible: boolean;
-  showAnalysis: boolean;
-  analysis?: string;
   isLoading?: boolean;
   isEditMode?: boolean;
-  onToggleVisibility: () => void;
-  onToggleAnalysis: () => void;
+  showAnalysis?: boolean;
+  analysis?: string;
+  onToggleVisibility?: () => void;
+  onToggleAnalysis?: () => void;
+  children: React.ReactNode;
 }
 
 export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
   id,
   title,
   description,
-  children,
   isVisible,
-  showAnalysis,
-  analysis,
   isLoading = false,
   isEditMode = false,
+  showAnalysis = false,
+  analysis,
   onToggleVisibility,
-  onToggleAnalysis
+  onToggleAnalysis,
+  children,
 }) => {
   const {
     attributes,
@@ -41,108 +40,84 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
     setNodeRef,
     transform,
     transition,
-    isDragging
-  } = useSortable({ id });
-  
+    isDragging,
+  } = useSortable({
+    id,
+    disabled: !isEditMode,
+  });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 50 : 'auto',
-    opacity: isDragging ? 0.8 : 1,
-    cursor: isEditMode ? 'grab' : 'default',
-    animation: isEditMode ? 'wiggle 1s infinite' : 'none'
+    opacity: isDragging ? 0.5 : 1,
+    position: 'relative' as const,
   };
 
-  if (!isVisible && !isEditMode) return null;
-
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
-      {...(isEditMode ? { ...attributes, ...listeners } : {})}
+      className="overflow-hidden group"
     >
-      {showAnalysis ? (
-        <Card className={cn(
-          "border border-orange-200 hover:shadow-md transition-all rounded-xl overflow-hidden h-full",
-          "bg-gradient-to-r from-orange-50 to-orange-100",
-          isDragging && "ring-2 ring-blue-500"
-        )}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 pt-3 px-4 bg-gradient-to-r from-orange-200 to-orange-300">
-            <h3 className="text-base font-medium text-orange-900">{title} - Análise</h3>
-            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleAnalysis();
-                }}
-                className="p-1 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-orange-700 hover:text-orange-900 transition-all"
-                title="Mostrar gráfico"
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+        <div>
+          <CardTitle className="text-lg">{title}</CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
+        </div>
+        {isEditMode ? (
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8" 
+              onClick={onToggleVisibility}
+            >
+              {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 cursor-grab"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            {onToggleAnalysis && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={onToggleAnalysis}
+                title={showAnalysis ? "Ocultar análise" : "Ver análise"}
               >
                 <Search className="h-4 w-4" />
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleVisibility();
-                }}
-                className="p-1 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-orange-700 hover:text-orange-900 transition-all"
-                title="Ocultar card"
-              >
-                <EyeOff className="h-4 w-4" />
-              </button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            <p className="text-orange-800 text-sm">{analysis}</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className={cn(
-          "border border-slate-200 hover:shadow-md transition-all rounded-xl overflow-hidden group",
-          "bg-gradient-to-b from-white to-slate-50",
-          isDragging && "ring-2 ring-blue-500"
-        )}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 pt-3 px-4 bg-gradient-to-r from-blue-700 to-blue-800">
-            <div>
-              <h3 className="text-base font-medium text-white">{title}</h3>
-              {description && <p className="text-xs text-blue-100">{description}</p>}
-            </div>
-            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              {analysis && (
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleAnalysis();
-                  }}
-                  className="p-1 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-blue-700 hover:text-blue-900 transition-all"
-                  title="Mostrar análise"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              )}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleVisibility();
-                }}
-                className="p-1 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 text-blue-700 hover:text-blue-900 transition-all"
-                title="Ocultar card"
-              >
-                <EyeOff className="h-4 w-4" />
-              </button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-2">
-            {isLoading ? (
-              <Skeleton className="h-[250px] w-full bg-slate-100 rounded-lg" />
-            ) : (
-              <div className="h-[250px] overflow-auto">
-                {children}
+              </Button>
+            )}
+          </div>
+        )}
+      </CardHeader>
+      
+      <CardContent className="p-0">
+        {isLoading ? (
+          <div className="p-6 space-y-2">
+            <Skeleton className="h-[200px] w-full" />
+          </div>
+        ) : (
+          <>
+            {children}
+            {showAnalysis && analysis && (
+              <div className="p-4 bg-slate-50 border-t">
+                <h4 className="text-sm font-medium text-slate-700 mb-1">Análise</h4>
+                <p className="text-sm text-slate-600">{analysis}</p>
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };

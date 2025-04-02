@@ -5,6 +5,7 @@ import { useChartStatsData } from './reports/useChartStatsData';
 import { CardStats } from './reports/types';
 import { supabase } from '@/integrations/supabase/client';
 import { DateRange } from 'react-day-picker';
+import { subDays } from 'date-fns';
 
 export interface ReportFilters {
   dateRange?: DateRange;
@@ -12,9 +13,20 @@ export interface ReportFilters {
   problema?: string;
 }
 
-export const useReportsData = (filters: ReportFilters = {}) => {
-  console.log('useReportsData iniciando com filtros:', filters);
+export const useReportsData = (initialFilters: ReportFilters = {}) => {
+  console.log('useReportsData iniciando com filtros:', initialFilters);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Manter estado dos filtros internamente
+  const [filters, setFilters] = useState<ReportFilters>({
+    dateRange: initialFilters.dateRange || { 
+      from: subDays(new Date(), 90),
+      to: new Date()
+    },
+    coordenacao: initialFilters.coordenacao,
+    problema: initialFilters.problema
+  });
+  
   const { 
     cardStats, 
     fetchCardStats,
@@ -32,6 +44,7 @@ export const useReportsData = (filters: ReportFilters = {}) => {
   console.log('useReportsData - reportsData:', reportsData);
   console.log('useReportsData - isLoadingCards:', isLoadingCards);
   console.log('useReportsData - isLoadingCharts:', isLoadingCharts);
+  console.log('useReportsData - filtros atuais:', filters);
 
   // Utilizando useCallback para evitar recriação desnecessária da função
   const fetchData = useCallback(async () => {
@@ -57,6 +70,18 @@ export const useReportsData = (filters: ReportFilters = {}) => {
     }
   }, [filters, fetchCardStats, fetchChartData]);
 
+  // Resetar filtros para o estado inicial
+  const resetFilters = useCallback(() => {
+    const defaultFilters: ReportFilters = {
+      dateRange: { 
+        from: subDays(new Date(), 90),
+        to: new Date() 
+      }
+    };
+    
+    setFilters(defaultFilters);
+  }, []);
+
   useEffect(() => {
     console.log('useReportsData - useEffect disparado para buscar dados');
     fetchData();
@@ -76,6 +101,9 @@ export const useReportsData = (filters: ReportFilters = {}) => {
   return {
     reportsData,
     isLoading: isLoading || isLoadingCards || isLoadingCharts,
-    cardStats
+    cardStats,
+    filters,
+    setFilters,
+    resetFilters
   };
 };

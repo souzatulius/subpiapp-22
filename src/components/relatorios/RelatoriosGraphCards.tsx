@@ -6,6 +6,7 @@ import { useChartComponents } from './hooks/useChartComponents';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { AlertCircle } from 'lucide-react';
 
 interface GraphCardItem {
   id: string;
@@ -136,6 +137,44 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     }
   };
 
+  // Function to check if there's enough data for a specific chart
+  const hasEnoughData = (cardId: string) => {
+    if (!reportsData) return false;
+    
+    switch (cardId) {
+      case 'distribuicaoPorTemas':
+        return reportsData.problemas && reportsData.problemas.length > 1;
+      case 'origemDemandas':
+        return reportsData.origins && reportsData.origins.length > 1;
+      case 'tempoMedioResposta':
+        return reportsData.responseTimes && reportsData.responseTimes.length > 1;
+      case 'performanceArea':
+        return reportsData.coordinations && reportsData.coordinations.length > 1;
+      case 'notasEmitidas':
+        return reportsData.mediaTypes && reportsData.mediaTypes.length > 1;
+      case 'notasPorTema':
+        return reportsData.statuses && reportsData.statuses.length > 1;
+      case 'evolucaoMensal':
+        // This uses evolucao in the sample data, may need adjustment based on actual data structure
+        return true;
+      case 'indiceSatisfacao':
+        return reportsData.approvals && reportsData.approvals.length > 1;
+      default:
+        return false;
+    }
+  };
+
+  // Render a placeholder message when there's not enough data
+  const renderEmptyDataMessage = (cardId: string) => (
+    <div className="h-[250px] flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+      <AlertCircle className="h-10 w-10 mb-3 text-orange-300" />
+      <h4 className="font-medium text-slate-500 mb-1">Dados insuficientes</h4>
+      <p className="text-sm">
+        Não há dados suficientes para gerar este gráfico. Por favor, verifique os filtros aplicados ou tente novamente mais tarde.
+      </p>
+    </div>
+  );
+
   return (
     <DndContext 
       sensors={sensors}
@@ -151,6 +190,8 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
             .filter(cardId => visibleCards.includes(cardId))
             .map((cardId) => {
               const card = cardsData[cardId];
+              const hasData = !isLoading && hasEnoughData(cardId);
+              
               return (
                 <SortableGraphCard
                   key={card.id}
@@ -165,7 +206,15 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                   onToggleVisibility={() => handleToggleVisibility(card.id)}
                   onToggleAnalysis={() => handleToggleAnalysis(card.id)}
                 >
-                  {chartComponents[card.id] || <div className="h-[250px] flex items-center justify-center text-slate-400">Gráfico não disponível</div>}
+                  {isLoading ? (
+                    <div className="h-[250px] flex items-center justify-center">
+                      <div className="h-8 w-8 border-4 border-t-orange-500 border-r-transparent border-b-orange-300 border-l-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : hasData ? (
+                    chartComponents[card.id] || <div className="h-[250px] flex items-center justify-center text-slate-400">Gráfico não disponível</div>
+                  ) : (
+                    renderEmptyDataMessage(card.id)
+                  )}
                 </SortableGraphCard>
               );
             })}
