@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -151,13 +150,10 @@ export function UnifiedActionCard({
   hasSubtitle,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   
-  // Render different card types based on the type prop
   const renderCardContent = () => {
-    // Handle dynamic KPI cards
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
-      // Determine which KPI to show based on the title or data source
       if (title.includes('Solicitações de imprensa')) {
         return (
           <KPICard 
@@ -194,7 +190,6 @@ export function UnifiedActionCard({
       }
     }
     
-    // Handle dynamic list cards
     if (type === 'in_progress_demands' && specialCardsData?.lists) {
       return (
         <DynamicListCard 
@@ -221,7 +216,6 @@ export function UnifiedActionCard({
       );
     }
     
-    // Handle origin selection card
     if (type === 'origin_selection' && specialCardsData?.originOptions) {
       return (
         <OriginSelectionCard 
@@ -231,7 +225,6 @@ export function UnifiedActionCard({
       );
     }
     
-    // Handle search card
     if (type === 'smart_search') {
       return (
         <SmartSearchCard 
@@ -241,7 +234,6 @@ export function UnifiedActionCard({
       );
     }
     
-    // Default to standard action card
     return (
       <div
         className="h-full"
@@ -269,8 +261,7 @@ export function UnifiedActionCard({
     <div className="h-full relative group">
       {renderCardContent()}
       
-      {/* Overlay controls for editing when in edit mode */}
-      {isEditing && (onEdit || onHide || onDelete) && (
+      {(isEditing || onEdit || onHide || onDelete) && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <Controls 
             cardId={id} 

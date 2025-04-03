@@ -19,17 +19,17 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
 
   return (
     <div 
-      className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+      className="w-full h-full flex flex-col items-center justify-center cursor-pointer py-4"
       onClick={handleCardClick}
     >
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center">
         {React.createElement(
           card.iconId ? card.iconId : 'div',
           { 
-            className: isMobileView ? 'h-12 w-12 mb-4 text-white' : 'h-16 w-16 mb-4 text-white' 
+            className: isMobileView ? 'h-8 w-8 mb-2 text-white' : 'h-8 w-8 mb-2 text-white' 
           }
         )}
-        <h3 className="text-lg font-semibold text-white text-center">{card.title}</h3>
+        <h3 className="text-sm font-semibold text-white text-center">{card.title}</h3>
       </div>
     </div>
   );

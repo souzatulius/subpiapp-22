@@ -44,9 +44,9 @@ const getWidthClass = (width?: string): string => {
 
 const getHeightClass = (height?: string): string => {
   switch (height) {
-    case '1': return 'h-40';
-    case '2': return 'h-80';
-    default: return 'h-40';
+    case '1': return 'h-[160px]'; // Ajustado para 160px
+    case '2': return 'h-[320px]';
+    default: return 'h-[160px]';
   }
 };
 
@@ -60,12 +60,12 @@ const CardPreview: React.FC<CardPreviewProps> = ({ title, subtitle, color, iconI
     <div className="mt-4">
       <h3 className="text-sm font-medium mb-2">Pré-visualização</h3>
       <div className={`${widthClass} mx-auto`}>
-        <div className={`rounded-lg p-6 ${colorClasses} flex flex-col items-center justify-center text-center ${heightClass}`}>
+        <div className={`rounded-lg p-4 ${colorClasses} flex flex-col items-center justify-center text-center ${heightClass}`}>
           <div className="mb-2">
-            {IconComponent && <IconComponent className="h-8 w-8" />}
+            {IconComponent && <IconComponent className="h-6 w-6" />}
           </div>
-          <h3 className="text-lg font-semibold">{title || 'Título do Card'}</h3>
-          {subtitle && <p className="text-sm mt-1 opacity-90">{subtitle}</p>}
+          <h3 className="text-sm font-semibold">{title || 'Título do Card'}</h3>
+          {subtitle && <p className="text-xs mt-1 opacity-90">{subtitle}</p>}
         </div>
       </div>
     </div>

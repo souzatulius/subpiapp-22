@@ -59,11 +59,11 @@ const getBackgroundColor = (color: CardColor): string => {
 
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
-    case 'sm': return 'w-6 h-6';
-    case 'md': return 'w-8 h-8';
-    case 'lg': return 'w-12 h-12'; // Mobile size
-    case 'xl': return 'w-16 h-16'; // Desktop size
-    default: return 'w-16 h-16';
+    case 'sm': return 'w-5 h-5';
+    case 'md': return 'w-6 h-6';
+    case 'lg': return 'w-8 h-8'; // Mobile size
+    case 'xl': return 'w-8 h-8'; // Reduced from w-16 h-16
+    default: return 'w-8 h-8';
   }
 };
 
@@ -78,7 +78,7 @@ const ActionCard = ({
   onDelete,
   onHide,
   isCustom = false,
-  iconSize = 'xl',
+  iconSize = 'md',
   isMobileView = false,
   children
 }: ActionCardProps) => {
@@ -93,12 +93,12 @@ const ActionCard = ({
 
   return (
     <div 
-      className={`w-full h-full rounded-xl shadow-md overflow-hidden cursor-pointer 
+      className={`w-full h-[160px] rounded-xl shadow-md overflow-hidden cursor-pointer 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColor}`}
+        active:scale-95 ${bgColor} group`}
       onClick={path ? handleClick : undefined}
     >
-      <div className="relative p-6 h-full flex flex-col items-center justify-center text-center group">
+      <div className="relative h-full flex flex-col items-center justify-center text-center group py-4">
         {isDraggable && (onEdit || onHide) && (
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
             <Controls 
@@ -115,10 +115,10 @@ const ActionCard = ({
           <>{children}</>
         ) : (
           <>
-            <div className="text-white mb-4">
+            <div className="text-white mb-2">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
-            <h3 className="text-lg font-semibold text-white">{title}</h3>
+            <h3 className="text-sm font-semibold text-white">{title}</h3>
           </>
         )}
       </div>
