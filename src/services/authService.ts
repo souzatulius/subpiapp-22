@@ -31,11 +31,17 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
       updatedData.foto_perfil_url = userData.foto_perfil_url;
     }
 
+    console.log('Atualizando perfil do usuário:', userId, 'com dados:', updatedData);
+
     const { error } = await supabase
-      .from('usuarios')
+      .from('usuarios')  // Use a tabela pública 'usuarios', não 'auth.users'
       .update(updatedData)
       .eq('id', userId);
       
+    if (error) {
+      console.error('Erro ao atualizar perfil:', error);
+    }
+    
     return { error };
   } catch (error) {
     console.error('Error updating profile:', error);

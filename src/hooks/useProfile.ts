@@ -29,10 +29,9 @@ export const useProfile = () => {
       const fileExt = file.name.split('.').pop() || 'jpg';
       const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
-      console.log(`Uploading to ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
+      console.log(`Tentando fazer upload para ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
       
-      // Directly attempt upload without checking bucket existence
-      // since we've created it via SQL
+      // Diretamente tenta upload sem verificar a existência do bucket
       const { error: uploadError, data: uploadData } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, file, {
@@ -41,29 +40,29 @@ export const useProfile = () => {
         });
         
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('Erro no upload:', uploadError);
         throw new Error(`Erro no upload: ${uploadError.message}`);
       }
       
-      // Get public URL
+      // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .getPublicUrl(filePath);
       
-      console.log('Generated public URL:', publicUrl);
+      console.log('URL pública gerada:', publicUrl);
       
-      // Update the user's metadata in the usuarios table
+      // Atualizar a tabela 'usuarios' em vez de tentar acessar auth.users diretamente
       const { error: updateError } = await supabase
-        .from('usuarios')
+        .from('usuarios')  // Use a tabela correta
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       
       if (updateError) {
-        console.error('Update error:', updateError);
+        console.error('Erro na atualização:', updateError);
         throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
       }
       
-      // Force refresh to update UI
+      // Forçar atualização para recarregar a UI
       window.dispatchEvent(new Event('storage'));
       
       toast({
@@ -73,7 +72,7 @@ export const useProfile = () => {
       
       return publicUrl;
     } catch (error: any) {
-      console.error('Profile update error:', error);
+      console.error('Erro na atualização do perfil:', error);
       toast({
         title: 'Erro',
         description: error.message || 'Não foi possível atualizar sua foto',

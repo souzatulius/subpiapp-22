@@ -3,13 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const setupProfilePhotosStorage = async () => {
   try {
-    console.log('Checking storage configuration for profile photos...');
+    console.log('Verificando configuração de armazenamento para fotos de perfil...');
     
-    // Check if the bucket exists - we'll assume it exists since we've created it via SQL
-    // but we'll handle potential permission issues gracefully
-    
+    // Testar acesso ao bucket com uma operação mínima
     try {
-      // Test access to the bucket with a minimal operation
+      // Testamos apenas se conseguimos listar arquivos no bucket
       const { data: objects, error } = await supabase.storage
         .from('usuarios')
         .list('fotos_perfil', {
@@ -17,19 +15,18 @@ export const setupProfilePhotosStorage = async () => {
         });
       
       if (error) {
-        console.warn('Could not list bucket objects:', error.message);
-        // Don't throw here, just warn - the bucket might exist but be empty
+        console.warn('Não foi possível listar objetos no bucket:', error.message);
+        // Não lançamos erro aqui, apenas avisamos - o bucket pode existir mas estar vazio
       }
       
-      console.log('Storage access check completed');
+      console.log('Verificação de acesso ao armazenamento concluída');
       return true;
     } catch (error) {
-      console.error('Error checking storage configuration:', error);
-      // We'll continue even if we hit an error here - the upload might still work
-      return true;
+      console.error('Erro ao verificar a configuração de armazenamento:', error);
+      throw new Error('Não foi possivel configurar o armazenamento de fotos. Tente novamente mais tarde.');
     }
   } catch (error) {
-    console.error('Unexpected error in setupProfilePhotosStorage:', error);
-    return false;
+    console.error('Erro inesperado em setupProfilePhotosStorage:', error);
+    throw error;
   }
 };

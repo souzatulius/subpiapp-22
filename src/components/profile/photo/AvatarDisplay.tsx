@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface AvatarDisplayProps {
@@ -15,8 +15,31 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   size = 'md',
   className = ''
 }) => {
+  const [imageKey, setImageKey] = useState<number>(Date.now());
+  
+  // Efeito para recarregar a imagem quando ela for atualizada
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setImageKey(Date.now()); // Força a recarga da imagem
+    };
+    
+    const handlePhotoUpdated = () => {
+      setImageKey(Date.now()); // Força a recarga da imagem
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('profile:photo:updated', handlePhotoUpdated);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('profile:photo:updated', handlePhotoUpdated);
+    };
+  }, []);
+
   // Generate initials from name
   const getInitials = (name: string): string => {
+    if (!name) return '??';
+    
     return name
       .split(' ')
       .map(part => part[0])
@@ -42,11 +65,11 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     
     try {
       const url = new URL(imageSrc);
-      url.searchParams.set('t', Date.now().toString());
+      url.searchParams.set('t', `${imageKey}`);
       return url.toString();
     } catch (e) {
-      // If the URL is invalid, just return the original string
-      return `${imageSrc}?t=${Date.now()}`;
+      // If the URL is invalid, just return the original string with timestamp
+      return `${imageSrc}?t=${imageKey}`;
     }
   };
 
@@ -58,7 +81,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
           alt={nome} 
           className="object-cover"
           onError={(e) => {
-            console.error('Avatar image failed to load');
+            console.error('Avatar image failed to load:', e);
             // The AvatarFallback will be shown automatically
           }}
         />
