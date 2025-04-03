@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { getAvailableCards } from '@/hooks/dashboard/defaultCards';
+import { getDefaultCards } from '@/hooks/dashboard/defaultCards';
 import ActionCard from '@/components/dashboard/ActionCard';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { SearchIcon, ChevronDown, ChevronRight } from 'lucide-react';
@@ -16,7 +16,9 @@ interface DraggableCardLibraryProps {
 const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardToDashboard }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const availableCards = useMemo(() => getAvailableCards(), []);
+  
+  // Use getDefaultCards instead of getAvailableCards
+  const availableCards = useMemo(() => getDefaultCards(), []);
 
   // Group cards by category
   const cardsByCategory = useMemo(() => {
