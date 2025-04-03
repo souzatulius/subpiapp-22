@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import PhotoUploadActions from './PhotoUploadActions';
 import { usePhotoUpload } from './usePhotoUpload';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { useSession } from '@supabase/auth-helpers-react'; // ou seu método de auth
+import { useSession } from '@supabase/auth-helpers-react'; 
 
 interface ChangePhotoModalProps {
   isOpen: boolean;
@@ -60,6 +61,7 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     try {
       const url = await uploadProfilePhoto(userId, selectedFile);
       if (url) {
+        // This event will be caught by AvatarDisplay to refresh the image
         window.dispatchEvent(new Event('profile:photo:updated'));
         onClose();
       }

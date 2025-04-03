@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useEffect, useState } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface AvatarDisplayProps {
   nome: string;
-  imageSrc?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  imageSrc?: string | null; 
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -13,91 +13,61 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   nome, 
   imageSrc, 
   size = 'md',
-  className = ''
+  className = '' 
 }) => {
-  const [imageKey, setImageKey] = useState<number>(Date.now());
-  
-  // Efeito para recarregar a imagem quando ela for atualizada
+  const [src, setSrc] = useState<string | null>(imageSrc || null);
+  const [initials, setInitials] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => {
-    const handleStorageChange = () => {
-      console.log('Storage event detected, refreshing avatar');
-      setImageKey(Date.now()); // Força a recarga da imagem
-    };
-    
-    const handlePhotoUpdated = () => {
-      console.log('Photo updated event detected, refreshing avatar');
-      setImageKey(Date.now()); // Força a recarga da imagem
+    // Generate initials from name
+    if (nome) {
+      const parts = nome.split(' ').filter(Boolean);
+      if (parts.length >= 2) {
+        setInitials(`${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase());
+      } else if (parts.length === 1) {
+        setInitials(parts[0].substring(0, 2).toUpperCase());
+      } else {
+        setInitials('--');
+      }
+    }
+
+    // Update source if imageSrc changes
+    setSrc(imageSrc || null);
+  }, [nome, imageSrc]);
+
+  // Listen for profile photo updates
+  useEffect(() => {
+    const handleProfilePhotoUpdate = () => {
+      // Force a refresh of the avatar by updating the key
+      setRefreshKey(prev => prev + 1);
+      
+      // If we have an image URL, append a cache-busting param
+      if (imageSrc) {
+        const url = new URL(imageSrc);
+        url.searchParams.set('t', Date.now().toString());
+        setSrc(url.toString());
+      }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('profile:photo:updated', handlePhotoUpdated);
+    window.addEventListener('profile:photo:updated', handleProfilePhotoUpdate);
     
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('profile:photo:updated', handlePhotoUpdated);
+      window.removeEventListener('profile:photo:updated', handleProfilePhotoUpdate);
     };
-  }, []);
+  }, [imageSrc]);
 
-  // Generate initials from name
-  const getInitials = (name: string): string => {
-    if (!name) return '??';
-    
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+  // Size classes
+  const sizeClasses = {
+    sm: 'h-8 w-8 text-xs',
+    md: 'h-10 w-10 text-sm',
+    lg: 'h-14 w-14 text-lg'
   };
-
-  // Get avatar size class
-  const getSizeClass = (): string => {
-    switch (size) {
-      case 'sm': return 'h-8 w-8 text-xs';
-      case 'md': return 'h-10 w-10 text-sm';
-      case 'lg': return 'h-14 w-14 text-lg';
-      case 'xl': return 'h-24 w-24 text-2xl';
-      default: return 'h-10 w-10 text-sm';
-    }
-  };
-  
-  // Add a timestamp to the image URL to prevent caching issues
-  const getImageUrl = (): string => {
-    if (!imageSrc) return '';
-    
-    try {
-      const url = new URL(imageSrc);
-      url.searchParams.set('t', `${imageKey}`);
-      return url.toString();
-    } catch (e) {
-      // If the URL is invalid, just return the original string with timestamp
-      return `${imageSrc}?t=${imageKey}`;
-    }
-  };
-
-  // For debugging
-  useEffect(() => {
-    if (imageSrc) {
-      console.log('Avatar image source:', getImageUrl());
-    }
-  }, [imageSrc, imageKey]);
 
   return (
-    <Avatar className={`${getSizeClass()} ${className}`}>
-      {imageSrc && (
-        <AvatarImage 
-          src={getImageUrl()} 
-          alt={nome} 
-          className="object-cover"
-          onError={(e) => {
-            console.error('Avatar image failed to load:', e);
-            // The AvatarFallback will be shown automatically
-          }}
-        />
-      )}
-      <AvatarFallback className="bg-orange-100 text-subpi-blue">
-        {getInitials(nome)}
-      </AvatarFallback>
+    <Avatar className={`${sizeClasses[size]} ${className}`} key={refreshKey}>
+      {src && <AvatarImage src={src} alt={nome || 'Avatar do usuário'} />}
+      <AvatarFallback>{initials}</AvatarFallback>
     </Avatar>
   );
 };

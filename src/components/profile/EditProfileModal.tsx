@@ -6,13 +6,21 @@ import { Pencil } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useSession } from '@supabase/auth-helpers-react';
 import MaskedInput from 'react-text-mask';
+import { toast } from '@/components/ui/use-toast';
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
+  userData?: any;
+  refreshUserData?: () => Promise<void>;
 }
 
-const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) => {
+const EditProfileModal: React.FC<EditProfileModalProps> = ({ 
+  isOpen, 
+  onClose,
+  userData,
+  refreshUserData
+}) => {
   const session = useSession();
   const userId = session?.user?.id;
 
@@ -31,14 +39,24 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
   useEffect(() => {
     const fetchData = async () => {
       if (!userId) return;
+      
+      // If userData prop is provided, use that
+      if (userData) {
+        setNome(userData.nome_completo || '');
+        setWhatsapp(userData.whatsapp || '');
+        setAniversario(userData.aniversario || '');
+        return;
+      }
+
+      // Otherwise fetch from database
       const { data, error } = await supabase
         .from('usuarios')
-        .select('nome, whatsapp, aniversario')
+        .select('nome_completo, whatsapp, aniversario')
         .eq('id', userId)
         .single();
 
       if (data) {
-        setNome(data.nome || '');
+        setNome(data.nome_completo || '');
         setWhatsapp(data.whatsapp || '');
         setAniversario(data.aniversario || '');
       } else {
@@ -47,7 +65,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     };
 
     if (isOpen) fetchData();
-  }, [userId, isOpen]);
+  }, [userId, isOpen, userData]);
 
   const handleSave = async () => {
     if (!userId) return;
@@ -58,16 +76,31 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose }) 
     try {
       const { error } = await supabase
         .from('usuarios')
-        .update({ nome, whatsapp, aniversario })
+        .update({ 
+          nome_completo: nome, 
+          whatsapp, 
+          aniversario 
+        })
         .eq('id', userId);
 
       if (error) {
         setError('Erro ao salvar alterações.');
         console.error(error);
       } else {
+        // Refresh user data if callback is provided
+        if (refreshUserData) {
+          await refreshUserData();
+        }
+        
+        toast({
+          title: "Perfil atualizado",
+          description: "Suas informações foram atualizadas com sucesso.",
+        });
+        
         onClose();
       }
     } catch (err) {
+      console.error('Erro inesperado:', err);
       setError('Erro inesperado.');
     } finally {
       setIsSaving(false);

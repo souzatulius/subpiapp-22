@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileData } from '@/components/profile/types';
+import { toast } from '@/components/ui/use-toast';
 
 /**
  * Update user profile information
@@ -33,7 +34,7 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
 
     console.log('Atualizando perfil do usuário:', userId, 'com dados:', updatedData);
 
-    // CORREÇÃO: Usar corretamente a tabela 'usuarios' e não tentar acessar 'auth.users'
+    // Update the 'usuarios' table
     const { error } = await supabase
       .from('usuarios')
       .update(updatedData)
@@ -41,8 +42,18 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
       
     if (error) {
       console.error('Erro ao atualizar perfil:', error);
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error.message,
+        variant: "destructive"
+      });
       throw error;
     }
+    
+    toast({
+      title: "Perfil atualizado",
+      description: "Suas informações foram atualizadas com sucesso.",
+    });
     
     return { error: null };
   } catch (error) {
