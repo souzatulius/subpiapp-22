@@ -5,7 +5,6 @@ import PhotoUploadActions from './PhotoUploadActions';
 import { usePhotoUpload } from './usePhotoUpload';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { useSession } from '@supabase/auth-helpers-react'; 
 
 interface ChangePhotoModalProps {
   isOpen: boolean;
@@ -13,9 +12,6 @@ interface ChangePhotoModalProps {
 }
 
 const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) => {
-  const session = useSession();
-  const userId = session?.user?.id;
-
   const { uploadProfilePhoto, isUploading } = usePhotoUpload();
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -24,19 +20,20 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const file = event.target.files?.[0];
-
+    
     if (!file) {
       setPhotoPreview(null);
       setSelectedFile(null);
       return;
     }
-
+    
+    // Validação básica do arquivo antes de gerar preview
     if (!file.type.startsWith('image/')) {
       setUploadError('O arquivo deve ser uma imagem');
       return;
     }
-
-    if (file.size > 5 * 1024 * 1024) {
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB
       setUploadError('A imagem não pode exceder 5MB');
       return;
     }
@@ -53,23 +50,25 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
   };
 
   const handleConfirmUpload = async () => {
-    if (!selectedFile || !userId) {
-      setUploadError("Por favor selecione uma foto e esteja logado.");
+    if (!selectedFile) {
+      setUploadError("Por favor selecione uma foto primeiro");
       return;
     }
-
+    
     try {
-      const url = await uploadProfilePhoto(userId, selectedFile);
+      const url = await uploadProfilePhoto(selectedFile);
       if (url) {
-        // This event will be caught by AvatarDisplay to refresh the image
+        // Dispare eventos para atualizar a UI com a nova imagem
         window.dispatchEvent(new Event('profile:photo:updated'));
+        window.dispatchEvent(new Event('storage'));
         onClose();
       }
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : 'Erro ao fazer upload da foto');
     }
   };
-
+  
+  // Reset state quando o modal é fechado
   const handleClose = () => {
     if (!isUploading) {
       setPhotoPreview(null);
@@ -85,7 +84,7 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
         <DialogHeader>
           <DialogTitle>Alterar foto de perfil</DialogTitle>
         </DialogHeader>
-
+        
         <PhotoUploadActions 
           photoPreview={photoPreview}
           handlePhotoChange={handlePhotoChange}
@@ -94,10 +93,17 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
         />
 
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={handleClose} disabled={isUploading}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isUploading}
+          >
             Cancelar
           </Button>
-          <Button onClick={handleConfirmUpload} disabled={!selectedFile || isUploading}>
+          <Button 
+            onClick={handleConfirmUpload} 
+            disabled={!selectedFile || isUploading}
+          >
             {isUploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

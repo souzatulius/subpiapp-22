@@ -1,213 +1,379 @@
-import { useEffect, useState } from 'react';
+
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Pencil } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useSession } from '@supabase/auth-helpers-react';
 import { toast } from '@/components/ui/use-toast';
+import { format, parse } from 'date-fns';
+import { Loader2, Camera } from 'lucide-react';
+import { ProfileData, UserProfile } from './types';
+import { updateProfile } from '@/services/authService';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import AvatarDisplay from './photo/AvatarDisplay';
+import ChangePhotoModal from './photo/ChangePhotoModal';
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userData?: any;
-  refreshUserData?: () => Promise<void>;
+  userData: ProfileData | null;
+  refreshUserData: () => Promise<void>;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ 
   isOpen, 
-  onClose,
-  userData,
-  refreshUserData
+  onClose, 
+  userData, 
+  refreshUserData 
 }) => {
-  const session = useSession();
-  const userId = session?.user?.id;
-
-  const [nome, setNome] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [aniversario, setAniversario] = useState('');
-  const [isEditing, setIsEditing] = useState({
-    nome: false,
-    whatsapp: false,
-    aniversario: false,
+  const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [formData, setFormData] = useState<ProfileData>({
+    nome_completo: userData?.nome_completo || '',
+    whatsapp: userData?.whatsapp || '',
+    aniversario: userData?.aniversario || ''
   });
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Carrega dados atuais do perfil
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) return;
+  
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  
+  // Reset form data when modal is opened with new user data
+  React.useEffect(() => {
+    if (userData) {
+      setFormData({
+        nome_completo: userData.nome_completo || '',
+        whatsapp: userData.whatsapp || '',
+        aniversario: userData.aniversario || ''
+      });
+    }
+  }, [userData, isOpen]);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when field is edited
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+  
+  const formatWhatsapp = (value: string) => {
+    // Remove non-numeric characters
+    let cleaned = value.replace(/\D/g, '');
+    
+    // Format: (XX) XXXXX-XXXX
+    if (cleaned.length > 0) {
+      cleaned = cleaned.substring(0, 11); // Limit to 11 digits
       
-      // If userData prop is provided, use that
-      if (userData) {
-        setNome(userData.nome_completo || '');
-        setWhatsapp(userData.whatsapp || '');
-        setAniversario(userData.aniversario || '');
-        return;
+      if (cleaned.length > 10) {
+        return `(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 7)}-${cleaned.substring(7)}`;
+      } else if (cleaned.length > 6) {
+        return `(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 6)}-${cleaned.substring(6)}`;
+      } else if (cleaned.length > 2) {
+        return `(${cleaned.substring(0, 2)}) ${cleaned.substring(2)}`;
       }
-
-      // Otherwise fetch from database
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('nome_completo, whatsapp, aniversario')
-        .eq('id', userId)
-        .single();
-
-      if (data) {
-        setNome(data.nome_completo || '');
-        setWhatsapp(data.whatsapp || '');
-        setAniversario(data.aniversario || '');
-      } else {
-        console.error(error);
-      }
-    };
-
-    if (isOpen) fetchData();
-  }, [userId, isOpen, userData]);
-
-  const handleSave = async () => {
-    if (!userId) return;
-
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase
-        .from('usuarios')
-        .update({ 
-          nome_completo: nome, 
-          whatsapp: formatPhoneNumber(whatsapp), 
-          aniversario 
-        })
-        .eq('id', userId);
-
-      if (error) {
-        setError('Erro ao salvar alterações.');
-        console.error(error);
-      } else {
-        // Refresh user data if callback is provided
-        if (refreshUserData) {
-          await refreshUserData();
-        }
-        
-        toast({
-          title: "Perfil atualizado",
-          description: "Suas informações foram atualizadas com sucesso.",
-        });
-        
-        onClose();
-      }
-    } catch (err) {
-      console.error('Erro inesperado:', err);
-      setError('Erro inesperado.');
-    } finally {
-      setIsSaving(false);
+      
+      return cleaned;
     }
-  };
-
-  const toggleEdit = (field: keyof typeof isEditing) => {
-    setIsEditing((prev) => ({ ...prev, [field]: !prev[field] }));
-  };
-
-  // Format phone number with mask
-  const formatPhoneNumber = (value: string): string => {
-    // Remove all non-digit characters
-    const digits = value.replace(/\D/g, '');
     
-    // Apply formatting based on the number of digits
-    if (digits.length <= 2) {
-      return digits ? `(${digits}` : '';
-    } else if (digits.length <= 7) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
-    }
+    return '';
   };
-
-  // Manual implementation of masked input for phone number
+  
   const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatPhoneNumber(e.target.value);
-    setWhatsapp(formattedValue);
+    const formatted = formatWhatsapp(e.target.value);
+    setFormData(prev => ({ ...prev, whatsapp: formatted }));
+    
+    // Clear error when field is edited
+    if (formErrors.whatsapp) {
+      setFormErrors(prev => ({ ...prev, whatsapp: '' }));
+    }
   };
-
-  // Manual implementation of masked input for date
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
+  
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
     
-    if (value.length > 8) value = value.slice(0, 8);
-    
-    let formattedValue = '';
-    if (value.length <= 2) {
-      formattedValue = value;
-    } else if (value.length <= 4) {
-      formattedValue = `${value.slice(0, 2)}/${value.slice(2)}`;
-    } else {
-      formattedValue = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+    // Validate nome_completo
+    if (!formData.nome_completo || typeof formData.nome_completo === 'string' && formData.nome_completo.trim().length === 0) {
+      errors.nome_completo = 'O nome completo é obrigatório';
     }
     
-    setAniversario(formattedValue);
+    // Validate aniversario
+    if (formData.aniversario) {
+      // Only validate if a date is provided
+      try {
+        if (typeof formData.aniversario === 'string') {
+          // Try to parse the date to check if it's valid
+          parse(formData.aniversario, 'yyyy-MM-dd', new Date());
+        }
+      } catch (error) {
+        errors.aniversario = 'Data de aniversário inválida';
+      }
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
+  // Helper function to ensure date is in string format
+  const formatDateValue = (date: string | Date | null | undefined): string => {
+    if (!date) return '';
+    
+    if (typeof date === 'string') {
+      // If already a string, check if it's in the right format
+      if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return date;
+      }
+      
+      // Try to parse and format it
+      try {
+        const parsedDate = new Date(date);
+        if (!isNaN(parsedDate.getTime())) {
+          return format(parsedDate, 'yyyy-MM-dd');
+        }
+      } catch (e) {
+        console.error('Error formatting date:', e);
+      }
+      return '';
+    } 
+    
+    // Handle Date object
+    if (date instanceof Date) {
+      return format(date, 'yyyy-MM-dd');
+    }
+    
+    return '';
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    if (!user?.id) {
+      toast({
+        title: 'Erro',
+        description: 'Usuário não identificado. Faça login novamente.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Format aniversario to string format expected by the backend
+      const formattedData = {
+        ...formData,
+        // Ensure aniversario is in the correct string format
+        aniversario: formData.aniversario ? 
+          (typeof formData.aniversario === 'string' ? 
+            formData.aniversario : 
+            format(formData.aniversario as Date, 'yyyy-MM-dd')) 
+          : null
+      };
+      
+      const { error } = await updateProfile(formattedData, user.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Refresh user data to update the UI
+      await refreshUserData();
+      
+      toast({
+        title: 'Perfil atualizado',
+        description: 'Suas informações foram atualizadas com sucesso',
+        variant: 'success'
+      });
+      
+      onClose();
+    } catch (error: any) {
+      console.error('Erro ao atualizar perfil:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível atualizar seu perfil',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const openPhotoModal = () => {
+    setIsPhotoModalOpen(true);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md w-[90%] sm:w-full">
-        <DialogHeader>
-          <DialogTitle>Editar perfil</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4 mt-2">
-          <div className="flex items-center gap-2">
-            <Input
-              disabled={!isEditing.nome}
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Nome completo"
-            />
-            <Button size="icon" variant="ghost" onClick={() => toggleEdit('nome')}>
-              <Pencil size={18} />
-            </Button>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md w-[90%] sm:w-full">
+          <DialogHeader>
+            <DialogTitle>Editar Perfil</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex justify-center my-6">
+            <div className="relative">
+              <AvatarDisplay 
+                nome={userData?.nome_completo || ''}
+                imageSrc={userData?.foto_perfil_url}
+                size="xl"
+              />
+              <Button 
+                size="icon"
+                className="absolute bottom-0 right-0 bg-subpi-blue text-white hover:bg-subpi-blue-dark rounded-full h-8 w-8"
+                onClick={openPhotoModal}
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <Input
-              className="w-full"
-              placeholder="(11) 91234-5678"
-              value={whatsapp}
-              disabled={!isEditing.whatsapp}
-              onChange={handleWhatsappChange}
-            />
-            <Button size="icon" variant="ghost" onClick={() => toggleEdit('whatsapp')}>
-              <Pencil size={18} />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Input
-              className="w-full"
-              placeholder="DD/MM/AAAA"
-              value={aniversario}
-              disabled={!isEditing.aniversario}
-              onChange={handleDateChange}
-            />
-            <Button size="icon" variant="ghost" onClick={() => toggleEdit('aniversario')}>
-              <Pencil size={18} />
-            </Button>
-          </div>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
-        </div>
-
-        <DialogFooter className="mt-6">
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <label htmlFor="nome_completo" className="text-sm font-medium">
+                Nome Completo
+              </label>
+              <Input
+                id="nome_completo"
+                name="nome_completo"
+                value={formData.nome_completo}
+                onChange={handleChange}
+                className={formErrors.nome_completo ? "border-red-500" : ""}
+              />
+              {formErrors.nome_completo && (
+                <p className="text-sm text-red-500 mt-1">{formErrors.nome_completo}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="email" className="text-sm font-medium">Email</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="email"
+                name="email"
+                value={(userData as UserProfile)?.email || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="cargo" className="text-sm font-medium">Cargo</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="cargo"
+                name="cargo"
+                value={(userData as UserProfile)?.cargo || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="coordenacao" className="text-sm font-medium">Coordenação</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="coordenacao"
+                name="coordenacao"
+                value={(userData as UserProfile)?.coordenacao || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="supervisao_tecnica" className="text-sm font-medium">Supervisão Técnica</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="supervisao_tecnica"
+                name="supervisao_tecnica"
+                value={(userData as UserProfile)?.supervisao_tecnica || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="whatsapp" className="text-sm font-medium">
+                WhatsApp
+              </label>
+              <Input
+                id="whatsapp"
+                name="whatsapp"
+                value={formData.whatsapp}
+                onChange={handleWhatsappChange}
+                placeholder="(XX) XXXXX-XXXX"
+                className={formErrors.whatsapp ? "border-red-500" : ""}
+              />
+              {formErrors.whatsapp && (
+                <p className="text-sm text-red-500 mt-1">{formErrors.whatsapp}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="aniversario" className="text-sm font-medium">
+                Data de Aniversário
+              </label>
+              <Input
+                id="aniversario"
+                name="aniversario"
+                type="date"
+                value={formatDateValue(formData.aniversario)}
+                onChange={handleChange}
+                className={formErrors.aniversario ? "border-red-500" : ""}
+              />
+              {formErrors.aniversario && (
+                <p className="text-sm text-red-500 mt-1">{formErrors.aniversario}</p>
+              )}
+            </div>
+            
+            <DialogFooter className="mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  'Salvar'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      <ChangePhotoModal 
+        isOpen={isPhotoModalOpen}
+        onClose={() => {
+          setIsPhotoModalOpen(false);
+          // Refresh user data after changing photo
+          refreshUserData();
+        }}
+      />
+    </>
   );
 };
 

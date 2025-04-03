@@ -6,7 +6,6 @@ import { AuthContext } from '@/contexts/AuthContext';
 import * as authService from '@/services/authService';
 import { isUserApproved, createAdminNotification, updateUserProfile } from '@/lib/authUtils';
 import { supabase } from '@/integrations/supabase/client';
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -160,10 +159,5 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     updateProfile,
   };
 
-  // Wrap with SessionContextProvider from auth-helpers-react
-  return (
-    <SessionContextProvider supabaseClient={supabase} initialSession={session}>
-      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-    </SessionContextProvider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

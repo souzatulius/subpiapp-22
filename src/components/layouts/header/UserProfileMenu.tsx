@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useUserProfile } from './useUserProfile';
@@ -15,26 +15,11 @@ import { LogOut, Settings, User } from 'lucide-react';
 import AvatarDisplay from '@/components/profile/photo/AvatarDisplay';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import { toast } from '@/components/ui/use-toast';
-import { useSession } from '@supabase/auth-helpers-react';
 
 const UserProfileMenu: React.FC = () => {
   const { signOut, user } = useAuth();
-  const session = useSession();
   const { userProfile, isLoading, refreshUserProfile } = useUserProfile();
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
-  
-  // Listen for profile updates
-  useEffect(() => {
-    const handleProfileUpdate = () => {
-      refreshUserProfile();
-    };
-    
-    window.addEventListener('profile:updated', handleProfileUpdate);
-    
-    return () => {
-      window.removeEventListener('profile:updated', handleProfileUpdate);
-    };
-  }, [refreshUserProfile]);
   
   const handleSignOut = async () => {
     try {
@@ -108,7 +93,7 @@ const UserProfileMenu: React.FC = () => {
       <EditProfileModal
         isOpen={isEditProfileModalOpen}
         onClose={() => setIsEditProfileModalOpen(false)}
-        userData={userProfile}
+        userData={userProfile || null}
         refreshUserData={refreshUserProfile}
       />
     </>
