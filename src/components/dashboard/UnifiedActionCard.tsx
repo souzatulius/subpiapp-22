@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -11,6 +12,7 @@ import SmartSearchCard from './cards/SmartSearchCard';
 import CardControls from './card-parts/CardControls';
 import OriginFormCard from './cards/OriginFormCard';
 import DynamicCard from './DynamicCard';
+import DynamicIcon from './DynamicIcon';
 
 export interface Controls {
   cardId: string;
@@ -161,7 +163,7 @@ export function UnifiedActionCard({
         <DynamicCard 
           title={title}
           dataSourceKey={dataSourceKey}
-          iconComponent={iconId ? React.createElement(getIconComponentFromId(iconId), { className: 'h-6 w-6' }) : undefined}
+          iconId={iconId}
         />
       );
     }
@@ -298,32 +300,29 @@ export function UnifiedActionCard({
 }
 
 function getIconComponentFromId(iconId: string) {
-  const IconMap = {
-    'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
-    'plus-circle': () => import('lucide-react').then(mod => mod.PlusCircle),
-    'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
-    'message-circle': () => import('lucide-react').then(mod => mod.MessageCircle),
-    'file-text': () => import('lucide-react').then(mod => mod.FileText),
-    'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
-    'trophy': () => import('lucide-react').then(mod => mod.Trophy),
-    'bar-chart-2': () => import('lucide-react').then(mod => mod.BarChart2),
-    'search': () => import('lucide-react').then(mod => mod.Search),
-    'clipboard-document-check': () => import('lucide-react').then(mod => mod.ClipboardCheck),
-    'list-bullet': () => import('lucide-react').then(mod => mod.List),
-    'inbox-arrow-down': () => import('lucide-react').then(mod => mod.InboxIcon),
-    'document-check': () => import('lucide-react').then(mod => mod.FileCheck),
-    'document-plus': () => import('lucide-react').then(mod => mod.FilePlus),
-    'document-text': () => import('lucide-react').then(mod => mod.FileText),
+  const importFunc = (id: string) => {
+    switch (id) {
+      case 'message-square-reply': return import('lucide-react').then(mod => mod.MessageSquareReply);
+      case 'plus-circle': return import('lucide-react').then(mod => mod.PlusCircle);
+      case 'list-filter': return import('lucide-react').then(mod => mod.ListFilter);
+      case 'message-circle': return import('lucide-react').then(mod => mod.MessageCircle);
+      case 'file-text': return import('lucide-react').then(mod => mod.FileText);
+      case 'check-circle': return import('lucide-react').then(mod => mod.CheckCircle);
+      case 'trophy': return import('lucide-react').then(mod => mod.Trophy);
+      case 'bar-chart-2': return import('lucide-react').then(mod => mod.BarChart2);
+      case 'search': return import('lucide-react').then(mod => mod.Search);
+      case 'clipboard-document-check': return import('lucide-react').then(mod => mod.ClipboardCheck);
+      case 'list-bullet': return import('lucide-react').then(mod => mod.List);
+      case 'inbox-arrow-down': return import('lucide-react').then(mod => mod.InboxIcon);
+      case 'document-check': return import('lucide-react').then(mod => mod.FileCheck);
+      case 'document-plus': return import('lucide-react').then(mod => mod.FilePlus);
+      case 'document-text': return import('lucide-react').then(mod => mod.FileText);
+      default: return import('lucide-react').then(mod => mod.MessageSquare);
+    }
   };
   
-  const LoadedIcon = React.lazy(() => 
-    IconMap[iconId]?.() || import('lucide-react').then(mod => ({ default: mod.MessageSquare }))
-  );
-  
-  return (props: any) => (
-    <React.Suspense fallback={<div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full" />}>
-      <LoadedIcon {...props} />
-    </React.Suspense>
+  return () => (
+    <DynamicIcon iconId={iconId} className="h-6 w-6" />
   );
 }
 
