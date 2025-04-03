@@ -106,6 +106,7 @@ const DashboardManagementContent: React.FC = () => {
         description: "As configurações do dashboard foram salvas com sucesso",
       });
     }
+    return success; // Return the success value to match the expected type
   };
 
   const handleResetDashboard = async () => {
@@ -116,7 +117,7 @@ const DashboardManagementContent: React.FC = () => {
         description: "O dashboard foi resetado para as configurações padrão",
       });
     }
-    return success;
+    return success; // Return the success value to match the expected type
   };
 
   const handleCardDrop = (cardDataJson: string) => {
