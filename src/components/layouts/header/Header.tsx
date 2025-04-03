@@ -9,9 +9,14 @@ import logo from '/public/lovable-uploads/5b8c78fb-e26a-45d0-844e-df1dea58037b.p
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
+  hideUserMenu?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  showControls = false, 
+  toggleSidebar,
+  hideUserMenu = false
+}) => {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between">
@@ -34,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) 
         </div>
         
         <div className="flex items-center space-x-4">
-          {showControls && (
+          {showControls && !hideUserMenu && (
             <UserProfileMenu />
           )}
         </div>
