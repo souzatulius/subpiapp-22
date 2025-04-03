@@ -1,22 +1,33 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
+import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
 import DashboardPreview from './DashboardPreview';
-import DashboardCardLibrary from './DashboardCardLibrary';
 import DraggableCardLibrary from './DraggableCardLibrary';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { ActionCardItem } from '@/types/dashboard';
+import { Button } from '@/components/ui/button';
+import { Library } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 const DashboardManagementContent: React.FC = () => {
-  const [selectedDepartment, setSelectedDepartment] = useState('default');
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [pageType, setPageType] = useState<'dashboard' | 'communication'>('dashboard');
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   
+  const { departments, loading: departmentsLoading } = useDepartments();
   const { config, setConfig, isLoading, isSaving, saveConfig, resetAllDashboards } = 
     useDefaultDashboardConfig(selectedDepartment, pageType);
 
+  // Set initial department when departments are loaded
+  useEffect(() => {
+    if (departments.length > 0 && !selectedDepartment) {
+      setSelectedDepartment(departments[0].id);
+    }
+  }, [departments, selectedDepartment]);
+  
   const handleDepartmentChange = (department: string) => {
     setSelectedDepartment(department);
   };
@@ -27,6 +38,15 @@ const DashboardManagementContent: React.FC = () => {
   };
   
   const handleSave = async () => {
+    if (!selectedDepartment) {
+      toast({
+        title: "Atenção",
+        description: "Selecione uma coordenação antes de salvar",
+        variant: "warning"
+      });
+      return false;
+    }
+
     console.log(`Saving dashboard for department: ${selectedDepartment}, page type: ${pageType}`);
     const saved = await saveConfig(config, selectedDepartment, pageType);
     
@@ -42,22 +62,27 @@ const DashboardManagementContent: React.FC = () => {
   };
   
   const handleReset = async () => {
+    if (!selectedDepartment) {
+      toast({
+        title: "Atenção",
+        description: "Selecione uma coordenação antes de resetar",
+        variant: "warning"
+      });
+      return false;
+    }
+    
     const confirmed = window.confirm(
-      "Tem certeza que deseja resetar todos os dashboards para a configuração padrão? Esta ação não pode ser desfeita."
+      "Tem certeza que deseja resetar o dashboard? Os cards serão removidos e essa ação não pode ser desfeita."
     );
     
     if (confirmed) {
-      const result = await resetAllDashboards();
-      
-      if (result) {
-        toast({
-          title: "Dashboards resetados",
-          description: "Todas as configurações foram resetadas para o padrão",
-          variant: "success"
-        });
-      }
-      
-      return result;
+      setConfig([]);
+      toast({
+        title: "Dashboard resetado",
+        description: "Todos os cards foram removidos",
+        variant: "success"
+      });
+      return true;
     }
     
     return false;
@@ -82,51 +107,52 @@ const DashboardManagementContent: React.FC = () => {
   return (
     <Card>
       <CardContent className="p-6">
-        <Tabs defaultValue="designer">
-          <TabsList className="mb-6">
-            <TabsTrigger value="designer">Designer</TabsTrigger>
-            <TabsTrigger value="library">Biblioteca de Cards</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="designer">
-            <div className="space-y-6">
-              <DashboardPreview
-                dashboardType={pageType}
-                department={selectedDepartment}
-                onDepartmentChange={handleDepartmentChange}
-                onViewTypeChange={setIsMobilePreview}
-                isMobilePreview={isMobilePreview}
-                onReset={handleReset}
-                onSave={handleSave}
-                isSaving={isSaving}
-                onCardsChange={setConfig}
-                cards={config}
-                onPageTypeChange={handlePageTypeChange}
-                onDrop={(cardData) => {
-                  try {
-                    const card = JSON.parse(cardData) as ActionCardItem;
-                    handleAddCardToDashboard(card);
-                    return true;
-                  } catch (err) {
-                    console.error('Failed to parse card data:', err);
-                    return false;
-                  }
-                }}
+        <div className="space-y-6">
+          <DashboardPreview
+            dashboardType={pageType}
+            department={selectedDepartment}
+            onDepartmentChange={handleDepartmentChange}
+            onViewTypeChange={setIsMobilePreview}
+            isMobilePreview={isMobilePreview}
+            onReset={handleReset}
+            onSave={handleSave}
+            isSaving={isSaving}
+            onCardsChange={setConfig}
+            cards={config}
+            onPageTypeChange={handlePageTypeChange}
+            onDrop={(cardData) => {
+              try {
+                const card = JSON.parse(cardData) as ActionCardItem;
+                handleAddCardToDashboard(card);
+                return true;
+              } catch (err) {
+                console.error('Failed to parse card data:', err);
+                return false;
+              }
+            }}
+            departments={departments}
+            isLoadingDepartments={departmentsLoading}
+            showLibraryButton
+            onLibraryClick={() => setIsLibraryOpen(true)}
+          />
+        </div>
+        
+        {/* Biblioteca de Cards como Sheet */}
+        <Sheet open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
+          <SheetContent size="lg" className="w-[90%] sm:w-[540px] md:w-[720px]">
+            <SheetHeader>
+              <SheetTitle className="flex items-center">
+                <Library className="h-5 w-5 mr-2" />
+                Biblioteca de Cards
+              </SheetTitle>
+            </SheetHeader>
+            <div className="mt-6">
+              <DraggableCardLibrary 
+                onAddCardToDashboard={handleAddCardToDashboard}
               />
-              
-              {/* Mostrar biblioteca flutuante sempre */}
-              <div className="mt-4">
-                <DraggableCardLibrary 
-                  onAddCardToDashboard={handleAddCardToDashboard}
-                />
-              </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="library">
-            <DashboardCardLibrary />
-          </TabsContent>
-        </Tabs>
+          </SheetContent>
+        </Sheet>
       </CardContent>
     </Card>
   );

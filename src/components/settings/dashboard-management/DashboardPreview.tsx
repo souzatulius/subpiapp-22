@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
-import { Save, RotateCcw, Smartphone, Monitor } from 'lucide-react';
+import { Save, RotateCcw, Smartphone, Monitor, Library } from 'lucide-react';
+import { Department } from '@/hooks/dashboard-management/useDepartments';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -22,6 +23,10 @@ interface DashboardPreviewProps {
   onSave?: () => Promise<boolean>;
   isSaving?: boolean;
   onDrop?: (cardData: string) => boolean;
+  departments?: Department[];
+  isLoadingDepartments?: boolean;
+  showLibraryButton?: boolean;
+  onLibraryClick?: () => void;
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({
@@ -37,6 +42,10 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   onSave,
   isSaving = false,
   onDrop,
+  departments = [],
+  isLoadingDepartments = false,
+  showLibraryButton = false,
+  onLibraryClick,
 }) => {
   const [isEditMode, setIsEditMode] = useState(true);
 
@@ -89,16 +98,20 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="department-select">Coordenação</Label>
-              <Select value={department} onValueChange={onDepartmentChange}>
+              <Select 
+                value={department} 
+                onValueChange={onDepartmentChange}
+                disabled={isLoadingDepartments}
+              >
                 <SelectTrigger id="department-select" className="w-full">
-                  <SelectValue placeholder="Selecione a coordenação" />
+                  <SelectValue placeholder={isLoadingDepartments ? "Carregando..." : "Selecione a coordenação"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Padrão</SelectItem>
-                  <SelectItem value="comunicacao">Comunicação</SelectItem>
-                  <SelectItem value="orcamento">Orçamento</SelectItem>
-                  <SelectItem value="administrativo">Administrativo</SelectItem>
-                  <SelectItem value="ti">Tecnologia da Informação</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.descricao} {dept.sigla && `(${dept.sigla})`}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -113,22 +126,13 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
                   <SelectValue placeholder="Selecione o tipo de página" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dashboard">Dashboard principal</SelectItem>
-                  <SelectItem value="communication">Página de comunicação</SelectItem>
+                  <SelectItem value="dashboard">Inicial</SelectItem>
+                  <SelectItem value="communication">Comunicação</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="flex items-center space-x-4 mt-6">
-              <div className="flex items-center space-x-2">
-                <Switch 
-                  id="edit-mode" 
-                  checked={isEditMode} 
-                  onCheckedChange={setIsEditMode} 
-                />
-                <Label htmlFor="edit-mode">Modo de edição</Label>
-              </div>
-              
               <div className="flex items-center space-x-2">
                 <Switch 
                   id="mobile-preview" 
@@ -148,6 +152,17 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         </div>
         
         <div className="flex space-x-2">
+          {showLibraryButton && onLibraryClick && (
+            <Button 
+              variant="secondary" 
+              size="sm"
+              onClick={onLibraryClick}
+            >
+              <Library className="h-4 w-4 mr-2" />
+              Biblioteca
+            </Button>
+          )}
+          
           {onReset && (
             <Button 
               variant="outline" 
