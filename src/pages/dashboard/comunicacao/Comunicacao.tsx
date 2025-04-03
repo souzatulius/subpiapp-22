@@ -141,7 +141,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       if (viewType === 'communication' && 
          (eventDepartment === userDepartment || 
           (isPreview && eventDepartment === department))) {
-        console.log('Reloading dashboard config after update');
+        console.log('Reloading communication dashboard config after update');
         loadDashboardConfig();
       }
     };

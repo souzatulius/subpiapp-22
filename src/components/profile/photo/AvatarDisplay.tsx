@@ -53,7 +53,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   // Get avatar size class
   const getSizeClass = (): string => {
     switch (size) {
-      case 'sm': return 'h-8 w-8 text-xs';
+      case 'sm': return 'h-10 w-10 text-xs';
       case 'md': return 'h-10 w-10 text-sm';
       case 'lg': return 'h-14 w-14 text-lg';
       case 'xl': return 'h-24 w-24 text-2xl';
@@ -88,7 +88,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
           }}
         />
       )}
-      <AvatarFallback className="bg-orange-100 text-subpi-blue">
+      <AvatarFallback className="bg-orange-500 text-white">
         {getInitials(nome)}
       </AvatarFallback>
     </Avatar>

@@ -53,8 +53,8 @@ const UserProfileMenu: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 mr-2 md:mr-0 md:h-auto md:w-auto md:px-4 md:py-2">
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex md:flex-col md:items-start">
-              <span className="font-bold text-sm text-blue-800">
+            <div className="hidden md:flex md:flex-col md:items-end">
+              <span className="font-bold text-sm text-subpi-blue-dark">
                 {getShortName(userProfile?.nome_completo || 'Usuário')}
               </span>
               <span className="text-xs text-gray-400">
@@ -65,6 +65,7 @@ const UserProfileMenu: React.FC = () => {
               nome={userProfile?.nome_completo || user.email || ''}
               imageSrc={userProfile?.foto_perfil_url}
               size="sm" 
+              className="bg-orange-500"
             />
           </div>
         </Button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
 import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
@@ -77,7 +76,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     }
   };
 
-  // Enhanced handlers with proper logging and error handling
   const handleDeleteCard = (id: string) => {
     console.log(`Deleting card with ID: ${id}`);
     try {
@@ -85,7 +83,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       console.log(`Cards before deletion: ${cards.length}, after: ${updatedCards.length}`);
       handleCardsChange(updatedCards);
       
-      // Show confirmation toast
       toast({
         title: "Card removido",
         description: "O card foi removido com sucesso do dashboard",
@@ -112,7 +109,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       );
       handleCardsChange(updatedCards);
       
-      // Show confirmation toast
       toast({
         title: "Card ocultado",
         description: "O card foi ocultado do dashboard",
@@ -271,6 +267,12 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   const handleManualSave = async () => {
     if (onSave) {
       const saveResult = await onSave();
+      
+      const updateEvent = new CustomEvent('dashboard:config:updated', {
+        detail: { department, viewType: dashboardType }
+      });
+      window.dispatchEvent(updateEvent);
+      
       return saveResult;
     }
     
@@ -296,7 +298,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         return false;
       }
 
-      // Before saving, ensure dynamic cards maintain their type
       const cardsToSave = cards.map(card => {
         if (card.dataSourceKey) {
           return {...card, type: 'data_dynamic'};
@@ -341,7 +342,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         }
       }
       
-      // Only show toast if onSave is not provided (to avoid duplicate toasts)
       if (!onSave) {
         toast({
           title: "Dashboard salvo",
@@ -350,11 +350,12 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         });
       }
       
-      // Dispatch an event to notify that the dashboard config has been updated
       const updateEvent = new CustomEvent('dashboard:config:updated', {
         detail: { department, viewType: viewTypeToSave }
       });
       window.dispatchEvent(updateEvent);
+      
+      console.log(`Event dispatched for department: ${department}, view type: ${viewTypeToSave}`);
       
       return true;
     } catch (error) {
