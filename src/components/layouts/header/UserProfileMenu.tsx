@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useUserProfile } from './useUserProfile';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Bell } from 'lucide-react';
+import { LogOut, Bell, Settings, User } from 'lucide-react';
 import AvatarDisplay from '@/components/profile/photo/AvatarDisplay';
 import { toast } from '@/components/ui/use-toast';
 import { useNotifications } from './useNotifications';
@@ -19,7 +19,8 @@ import { useNotifications } from './useNotifications';
 const UserProfileMenu: React.FC = () => {
   const { signOut, user } = useAuth();
   const { userProfile, isLoading } = useUserProfile();
-  const { notifications, unreadCount, fetchNotifications } = useNotifications();
+  const { unreadCount, fetchNotifications } = useNotifications();
+  const navigate = useNavigate();
   
   useEffect(() => {
     if (user) {
@@ -52,20 +53,6 @@ const UserProfileMenu: React.FC = () => {
       ? `${names[0]} ${names[1]}` 
       : fullName;
   };
-  
-  // Formata data da notificação
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
-
-  // Get only the latest 3 notifications
-  const recentNotifications = notifications.slice(0, 3);
 
   // Show nothing while loading to avoid flash of content
   if (isLoading || !user) return null;
@@ -109,33 +96,29 @@ const UserProfileMenu: React.FC = () => {
         
         <DropdownMenuSeparator />
         
-        {/* Notificações recentes */}
-        {recentNotifications.length > 0 ? (
-          <div className="max-h-60 overflow-y-auto">
-            <p className="px-3 py-1 text-xs font-semibold text-gray-500">Notificações recentes</p>
-            {recentNotifications.map(notification => (
-              <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3 cursor-default">
-                <p className="text-sm">{notification.mensagem}</p>
-                <p className="text-xs text-gray-500 mt-1">{formatDate(notification.data_envio)}</p>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-          </div>
-        ) : (
-          <DropdownMenuItem disabled className="text-center text-sm text-gray-500">
-            Nenhuma notificação recente
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem asChild>
+          <Link to="/settings?tab=perfil" className="flex items-center">
+            <User className="mr-2 h-4 w-4" />
+            <span>Editar perfil</span>
+          </Link>
+        </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
-          <Link to="/notificacoes" className="flex items-center">
+          <Link to="/settings?tab=notificacoes" className="flex items-center">
             <Bell className="mr-2 h-4 w-4" />
-            <span>Ver todas notificações</span>
+            <span>Gerenciar Notificações</span>
             {unreadCount > 0 && (
               <span className="ml-auto bg-orange-500 text-white text-xs rounded-full px-2 py-0.5">
                 {unreadCount}
               </span>
             )}
+          </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="flex items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Configurações</span>
           </Link>
         </DropdownMenuItem>
         

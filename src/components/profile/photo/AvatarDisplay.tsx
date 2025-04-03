@@ -1,101 +1,61 @@
 
-import React, { useState, useEffect } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 interface AvatarDisplayProps {
   nome: string;
-  imageSrc?: string;
+  imageSrc?: string | null;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   showNotificationCount?: boolean;
   notificationCount?: number;
 }
 
-const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ 
-  nome, 
-  imageSrc, 
+const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
+  nome,
+  imageSrc,
   size = 'md',
-  className = '',
+  className,
   showNotificationCount = false,
   notificationCount = 0
 }) => {
-  const [imageKey, setImageKey] = useState<number>(Date.now());
-  
-  // Efeito para recarregar a imagem quando ela for atualizada
-  useEffect(() => {
-    const handleStorageChange = () => {
-      console.log('Storage event detected, refreshing avatar');
-      setImageKey(Date.now()); // Força a recarga da imagem
-    };
-    
-    const handlePhotoUpdated = () => {
-      console.log('Photo updated event detected, refreshing avatar');
-      setImageKey(Date.now()); // Força a recarga da imagem
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('profile:photo:updated', handlePhotoUpdated);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('profile:photo:updated', handlePhotoUpdated);
-    };
-  }, []);
-
-  // Generate initials from name
-  const getInitials = (name: string): string => {
-    if (!name) return '??';
-    
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+  // Obter as iniciais do nome
+  const getInitials = (name: string) => {
+    const parts = name.split(' ').filter(part => part.length > 0);
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
   };
 
-  // Get avatar size class
-  const getSizeClass = (): string => {
-    switch (size) {
-      case 'sm': return 'h-10 w-10 text-xs';
-      case 'md': return 'h-10 w-10 text-sm';
-      case 'lg': return 'h-14 w-14 text-lg';
-      case 'xl': return 'h-24 w-24 text-2xl';
-      default: return 'h-10 w-10 text-sm';
-    }
+  const sizeClasses = {
+    sm: 'h-8 w-8 text-xs',
+    md: 'h-10 w-10 text-sm',
+    lg: 'h-14 w-14 text-lg',
+    xl: 'h-20 w-20 text-xl',
   };
-  
-  // Add a timestamp to the image URL to prevent caching issues
-  const getImageUrl = (): string => {
-    if (!imageSrc) return '';
-    
-    try {
-      const url = new URL(imageSrc);
-      url.searchParams.set('t', `${imageKey}`);
-      return url.toString();
-    } catch (e) {
-      // If the URL is invalid, just return the original string with timestamp
-      return `${imageSrc}?t=${imageKey}`;
-    }
-  };
+
+  const avatarSize = sizeClasses[size];
+  const initials = getInitials(nome);
 
   return (
-    <Avatar className={`${getSizeClass()} ${className}`}>
-      {imageSrc && (
-        <AvatarImage 
-          src={getImageUrl()} 
-          alt={nome} 
-          className="object-cover"
-          onError={(e) => {
-            console.error('Avatar image failed to load:', e);
-            // The AvatarFallback will be shown automatically
-          }}
-        />
+    <div className="relative">
+      <Avatar className={cn(avatarSize, className)}>
+        {imageSrc ? (
+          <AvatarImage src={imageSrc} alt={nome || 'Usuário'} />
+        ) : (
+          <AvatarFallback className="bg-[#003570] hover:bg-orange-500 transition-colors font-semibold text-white">
+            <span className="text-lg">{initials}</span>
+          </AvatarFallback>
+        )}
+      </Avatar>
+      
+      {showNotificationCount && notificationCount > 0 && (
+        <span className="absolute -top-1 -right-1 h-4 w-4 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">
+          {notificationCount > 9 ? '9+' : notificationCount}
+        </span>
       )}
-      <AvatarFallback className={className || 'bg-blue-700 text-white'}>
-        {showNotificationCount ? notificationCount : getInitials(nome)}
-      </AvatarFallback>
-    </Avatar>
+    </div>
   );
 };
 

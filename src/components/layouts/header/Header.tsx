@@ -1,22 +1,21 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu as MenuIcon, Bell } from 'lucide-react';
+import { Menu as MenuIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import UserProfileMenu from './UserProfileMenu';
-import { NotificationsPopover } from './NotificationsPopover';
 
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
-  hideUserMenu?: boolean; // Add this new prop
+  hideUserMenu?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
   showControls = true,
   toggleSidebar,
-  hideUserMenu = false, // Set a default value
+  hideUserMenu = false,
 }) => {
   const { user } = useAuth();
   const location = useLocation();
@@ -47,13 +46,10 @@ const Header: React.FC<HeaderProps> = ({
           </Link>
         </div>
 
-        {/* Right section - User profile and notifications */}
+        {/* Right section - User profile only (removed notifications) */}
         <div className="flex items-center justify-end space-x-3 w-1/3">
           {user && !hideUserMenu && (
-            <>
-              <NotificationsPopover />
-              <UserProfileMenu />
-            </>
+            <UserProfileMenu />
           )}
         </div>
       </div>
