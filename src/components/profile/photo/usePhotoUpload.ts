@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { setupProfilePhotosStorage } from './setupProfilePhotosStorage';
 
 // Bucket name e estrutura de pastas padronizada
 const PROFILE_PHOTOS_BUCKET = 'usuarios';
@@ -32,6 +33,12 @@ export const usePhotoUpload = () => {
       
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
         throw new Error('A imagem não pode exceder 5MB');
+      }
+      
+      // Garantindo que o bucket existe
+      const setupResult = await setupProfilePhotosStorage();
+      if (!setupResult) {
+        throw new Error('Não foi possível configurar o armazenamento de fotos');
       }
       
       // Upload da foto
@@ -75,6 +82,9 @@ export const usePhotoUpload = () => {
         description: "Sua foto de perfil foi atualizada com sucesso!",
         variant: "success"
       });
+      
+      // Dispare um evento para atualizar a UI
+      window.dispatchEvent(new Event('storage'));
       
       return publicUrl;
     } catch (error: any) {

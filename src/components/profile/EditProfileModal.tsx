@@ -1,285 +1,251 @@
 
-import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from '@/components/ui/dialog';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { ProfileData } from './types';
-import { formatDateInput, formatPhoneNumber, formatDateToString, parseFormattedDate } from '@/lib/inputFormatting';
+import { format, parse } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userData?: ProfileData | null;
-  refreshUserData?: () => Promise<void>;
+  userData: ProfileData | null;
+  refreshUserData: () => Promise<void>;
 }
 
-const EditProfileModal: React.FC<EditProfileModalProps> = ({
-  isOpen,
+const EditProfileModal: React.FC<EditProfileModalProps> = ({ 
+  isOpen, 
   onClose,
   userData,
-  refreshUserData = () => Promise.resolve()
+  refreshUserData 
 }) => {
-  const { user } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [dateInputValue, setDateInputValue] = useState('');
-  const [whatsappValue, setWhatsappValue] = useState('');
+  const { updateProfile, user, loading } = useAuth();
   
-  const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<ProfileData>({
-    defaultValues: {
-      nome_completo: '',
-      whatsapp: '',
-      aniversario: undefined
-    }
+  const [formData, setFormData] = useState<ProfileData>({
+    nome_completo: userData?.nome_completo || '',
+    whatsapp: userData?.whatsapp || '',
+    aniversario: userData?.aniversario || null
   });
 
-  // Carrega os dados do usuário quando o diálogo abre
-  useEffect(() => {
-    if (userData && isOpen) {
-      setValue('nome_completo', userData.nome_completo || '');
-      
-      // Formata o whatsapp com máscara
-      const formattedWhatsapp = userData.whatsapp ? formatPhoneNumber(userData.whatsapp) : '';
-      setWhatsappValue(formattedWhatsapp);
-      
-      // Processa a data de aniversário se existir
-      if (userData.aniversario) {
-        try {
-          let formattedDate = '';
-          if (typeof userData.aniversario === 'string') {
-            // Formata string de data para DD/MM/YYYY
-            const dateObj = new Date(userData.aniversario);
-            if (!isNaN(dateObj.getTime())) {
-              formattedDate = formatDateToString(dateObj);
-            }
-          } else if (userData.aniversario instanceof Date) {
-            // Já é um objeto Date
-            formattedDate = formatDateToString(userData.aniversario);
-          }
-          
-          setDateInputValue(formattedDate);
-        } catch (error) {
-          console.error('Erro ao processar data:', error);
-          setDateInputValue('');
-        }
-      } else {
-        setDateInputValue('');
-      }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
 
-      // Campos que o usuário não pode editar
-      setValue('cargo_id', userData.cargo_id);
-      setValue('coordenacao_id', userData.coordenacao_id);
-      setValue('supervisao_tecnica_id', userData.supervisao_tecnica_id);
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!formData.nome_completo?.trim()) {
+      newErrors.nome_completo = 'O nome é obrigatório';
     }
-  }, [userData, setValue, isOpen]);
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const formattedValue = formatDateInput(value);
-    setDateInputValue(formattedValue);
-  };
-  
-  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const formattedValue = formatPhoneNumber(value);
-    setWhatsappValue(formattedValue);
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const onSubmit = async (data: ProfileData) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    // Formato especial para o campo de telefone
+    if (name === 'whatsapp') {
+      // Remove todos os caracteres não numéricos
+      const numbersOnly = value.replace(/\D/g, '');
+      
+      // Formatar número de telefone
+      let formattedValue = numbersOnly;
+      if (numbersOnly.length <= 11) {
+        if (numbersOnly.length > 2) {
+          formattedValue = `(${numbersOnly.substring(0, 2)}) ${numbersOnly.substring(2)}`;
+        }
+        if (numbersOnly.length > 7) {
+          formattedValue = `(${numbersOnly.substring(0, 2)}) ${numbersOnly.substring(2, 7)}-${numbersOnly.substring(7)}`;
+        }
+      }
+      
+      setFormData(prev => ({ ...prev, [name]: formattedValue }));
+    } 
+    // Formato especial para o campo de data de aniversário
+    else if (name === 'aniversario') {
+      // Remove todos os caracteres não numéricos
+      const numbersOnly = value.replace(/\D/g, '');
+      
+      // Formatar data
+      let formattedDate = numbersOnly;
+      if (numbersOnly.length > 2) {
+        formattedDate = `${numbersOnly.substring(0, 2)}/${numbersOnly.substring(2)}`;
+      }
+      if (numbersOnly.length > 4) {
+        formattedDate = `${numbersOnly.substring(0, 2)}/${numbersOnly.substring(2, 4)}/${numbersOnly.substring(4, 8)}`;
+      }
+      
+      // Limitar ao tamanho máximo da data (10 caracteres: DD/MM/AAAA)
+      if (formattedDate.length <= 10) {
+        setFormData(prev => ({ 
+          ...prev, 
+          aniversario: formattedDate.length === 10 ? formattedDate : formattedDate || null
+        }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
+    // Limpar o erro do campo que está sendo editado
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     if (!user?.id) {
-      toast({
-        title: "Erro",
-        description: "Usuário não identificado. Por favor, faça login novamente.",
-        variant: "destructive"
-      });
+      setErrors({ form: 'Usuário não autenticado' });
       return;
     }
     
     setIsSubmitting(true);
+    
     try {
-      // Processa a data formatada para objeto Date
-      let parsedDate = null;
-      let aniversarioISO = null;
+      // Preparar dados para envio, transformando data para formato ISO
+      let formattedData = { ...formData };
       
-      if (dateInputValue) {
-        parsedDate = parseFormattedDate(dateInputValue);
-        if (!parsedDate) {
-          toast({
-            title: "Erro",
-            description: "Formato de data inválido. Use DD/MM/AAAA.",
-            variant: "destructive"
-          });
+      // Converter data do formato DD/MM/YYYY para ISO se existir
+      if (formData.aniversario && formData.aniversario.length === 10) {
+        try {
+          // Parse the date from "DD/MM/YYYY" format
+          const parsedDate = parse(formData.aniversario, 'dd/MM/yyyy', new Date(), { locale: ptBR });
+          
+          // Format it as ISO date (YYYY-MM-DD)
+          formattedData.aniversario = format(parsedDate, 'yyyy-MM-dd');
+          
+          console.log(`Converted date from ${formData.aniversario} to ${formattedData.aniversario}`);
+        } catch (error) {
+          console.error('Erro ao converter data:', error);
+          setErrors({ aniversario: 'Formato de data inválido' });
           setIsSubmitting(false);
           return;
         }
-        aniversarioISO = parsedDate.toISOString();
       }
       
-      // Limpa a entrada de whatsapp (remove máscara)
-      const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
+      // Log the data being submitted
+      console.log('Submitting update with data:', formattedData);
       
-      // Dados para atualização com tipos corretos
-      const updateData = {
-        nome_completo: data.nome_completo,
-        whatsapp: cleanWhatsapp || null,
-        aniversario: aniversarioISO
-      };
-      
-      console.log('Atualizando com dados:', updateData);
-      
-      // Atualiza o perfil - Certifique-se de usar a tabela 'usuarios', NÃO 'users'
-      const { error } = await supabase
-        .from('usuarios')
-        .update(updateData)
-        .eq('id', user.id);
+      const { error } = await updateProfile(formattedData);
       
       if (error) {
         console.error('Erro ao atualizar perfil:', error);
-        throw error;
+        setErrors({ form: error.message || 'Erro ao atualizar perfil' });
+      } else {
+        // Atualizar dados no componente pai
+        await refreshUserData();
+        onClose();
       }
-      
-      toast({
-        title: "Perfil atualizado",
-        description: "Suas informações foram atualizadas com sucesso."
-      });
-      
-      // Força atualização da UI
-      window.dispatchEvent(new Event('storage'));
-      
-      if (refreshUserData) await refreshUserData();
-      onClose();
-      
     } catch (error: any) {
-      console.error('Erro ao atualizar perfil:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar as informações: " + (error.message || "Erro desconhecido"),
-        variant: "destructive"
-      });
+      console.error('Exceção ao atualizar perfil:', error);
+      setErrors({ form: error.message || 'Erro desconhecido ao atualizar perfil' });
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const handleClose = () => {
-    reset();
-    setDateInputValue('');
-    setWhatsappValue('');
-    onClose();
+  
+  // Formatar a data antes de exibir, se necessário
+  const formatDisplayDate = (dateString: string | null): string => {
+    if (!dateString) return '';
+    
+    // Verificar se a data já está no formato DD/MM/YYYY
+    if (dateString.includes('/')) {
+      return dateString;
+    }
+    
+    try {
+      // Se a data estiver em formato ISO (YYYY-MM-DD), converter para DD/MM/YYYY
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
+    } catch (e) {
+      console.error('Erro ao formatar data para exibição:', e);
+      return dateString;
+    }
   };
 
+  // Quando o modal abre, atualizar o state com os dados mais recentes
+  React.useEffect(() => {
+    if (userData) {
+      setFormData({
+        nome_completo: userData.nome_completo || '',
+        whatsapp: userData.whatsapp || '',
+        aniversario: userData.aniversario ? formatDisplayDate(userData.aniversario) : null
+      });
+    }
+  }, [userData, isOpen]);
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] w-[80%] sm:w-full">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Editar Perfil</DialogTitle>
-          <DialogDescription>
-            Atualize suas informações pessoais.
-          </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="nome_completo">Nome completo</Label>
-            <Input
-              id="nome_completo"
-              {...register('nome_completo', { required: 'Nome é obrigatório' })}
+            <Input 
+              id="nome_completo" 
+              name="nome_completo" 
+              value={formData.nome_completo} 
+              onChange={handleChange}
+              placeholder="Seu nome completo"
+              className={errors.nome_completo ? 'border-red-500' : ''}
             />
-            {errors.nome_completo && (
-              <p className="text-sm text-red-500">{errors.nome_completo.message}</p>
-            )}
+            {errors.nome_completo && <p className="text-sm text-red-500">{errors.nome_completo}</p>}
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="whatsapp">WhatsApp</Label>
-            <Input
-              id="whatsapp"
-              placeholder="(11) 98765-4321"
-              value={whatsappValue}
-              onChange={handleWhatsappChange}
-              maxLength={15}
+            <Input 
+              id="whatsapp" 
+              name="whatsapp" 
+              value={formData.whatsapp || ''} 
+              onChange={handleChange}
+              placeholder="(11) 99999-9999"
+              className={errors.whatsapp ? 'border-red-500' : ''}
             />
+            {errors.whatsapp && <p className="text-sm text-red-500">{errors.whatsapp}</p>}
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="aniversario">Data de aniversário</Label>
-            <Input
-              id="aniversario"
+            <Input 
+              id="aniversario" 
+              name="aniversario" 
+              value={formData.aniversario || ''} 
+              onChange={handleChange}
               placeholder="DD/MM/AAAA"
-              value={dateInputValue}
-              onChange={handleDateChange}
-              maxLength={10}
+              className={errors.aniversario ? 'border-red-500' : ''}
             />
+            {errors.aniversario && <p className="text-sm text-red-500">{errors.aniversario}</p>}
           </div>
-
-          {/* Campos somente leitura para coordenação, supervisão e cargo */}
-          {userData?.coordenacao && (
-            <div className="space-y-2">
-              <Label htmlFor="coordenacao">Coordenação</Label>
-              <Input
-                id="coordenacao"
-                value={userData.coordenacao}
-                disabled
-                readOnly
-                className="bg-gray-100"
-              />
-              <p className="text-xs text-muted-foreground">Este campo só pode ser alterado pelo administrador.</p>
-            </div>
-          )}
-
-          {userData?.supervisao_tecnica && (
-            <div className="space-y-2">
-              <Label htmlFor="supervisao_tecnica">Supervisão Técnica</Label>
-              <Input
-                id="supervisao_tecnica"
-                value={userData.supervisao_tecnica}
-                disabled
-                readOnly
-                className="bg-gray-100"
-              />
-              <p className="text-xs text-muted-foreground">Este campo só pode ser alterado pelo administrador.</p>
-            </div>
-          )}
-
-          {userData?.cargo && (
-            <div className="space-y-2">
-              <Label htmlFor="cargo">Cargo</Label>
-              <Input
-                id="cargo"
-                value={userData.cargo}
-                disabled
-                readOnly
-                className="bg-gray-100"
-              />
-              <p className="text-xs text-muted-foreground">Este campo só pode ser alterado pelo administrador.</p>
-            </div>
-          )}
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+          {errors.form && <p className="text-sm text-red-500 mt-4">{errors.form}</p>}
+
+          <DialogFooter className="mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                'Salvar'
-              )}
+            <Button 
+              type="submit"
+              disabled={isSubmitting || loading}
+            >
+              {isSubmitting ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
         </form>

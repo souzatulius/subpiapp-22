@@ -13,7 +13,14 @@ export const useProfile = () => {
   const { user } = useAuth();
 
   const updateProfilePhoto = async (file: File) => {
-    if (!user) return null;
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive"
+      });
+      return null;
+    }
     
     try {
       setLoading(true);
@@ -24,9 +31,21 @@ export const useProfile = () => {
       
       console.log(`Uploading to ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
       
-      const { error: uploadError } = await supabase.storage
+      // Check if bucket exists and create it if not
+      const { data: buckets } = await supabase.storage.listBuckets();
+      if (!buckets?.some(b => b.name === PROFILE_PHOTOS_BUCKET)) {
+        console.log(`Bucket ${PROFILE_PHOTOS_BUCKET} does not exist, creating it...`);
+        await supabase.storage.createBucket(PROFILE_PHOTOS_BUCKET, {
+          public: true
+        });
+      }
+      
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
         
       if (uploadError) {
         console.error('Upload error:', uploadError);

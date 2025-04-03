@@ -101,51 +101,53 @@ export const signOut = async () => {
   }
 };
 
-// Update profile - Corrigido para usar a tabela 'usuarios'
+// Update profile - Corrigido para usar apenas a tabela 'usuarios'
 export const updateProfile = async (data: any, userId: string) => {
+  if (!userId) {
+    console.error('updateProfile: userId not provided');
+    return { error: new Error('ID de usuário não fornecido') };
+  }
+  
   try {
-    // Atualizar metadados do usuário em auth
-    const { error: authError } = await supabase.auth.updateUser({
-      data: {
-        name: data.nome_completo,
-        birthday: data.aniversario,
+    console.log('Atualizando dados do perfil para userId:', userId, 'com dados:', data);
+    
+    // Atualizar informações do perfil na tabela usuarios
+    const { error: profileError } = await supabase
+      .from('usuarios')
+      .update({
+        nome_completo: data.nome_completo,
+        aniversario: data.aniversario,
         whatsapp: data.whatsapp,
-        role: data.cargo,
-        area: data.area,
-      }
-    });
+      })
+      .eq('id', userId);
 
-    if (authError) {
-      console.error('Erro ao atualizar metadados:', authError);
-      // Não interromper a execução se esta parte falhar
-      // Muitos usuários estão tendo problemas aqui, mas podemos atualizar só o perfil
-      console.log('Continuando com atualização da tabela usuarios mesmo com erro em auth.updateUser');
+    if (profileError) {
+      console.error('Erro ao atualizar perfil em usuarios:', profileError);
+      return { error: profileError };
     }
-
-    // Atualizar informações do perfil somente na tabela usuarios
-    if (userId) {
-      console.log('Atualizando dados na tabela usuarios para userId:', userId, 'com dados:', data);
+    
+    // Atualizar também metadata do usuário na auth
+    try {
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          name: data.nome_completo,
+          birthday: data.aniversario,
+          whatsapp: data.whatsapp
+        }
+      });
       
-      const { error: profileError } = await supabase
-        .from('usuarios')
-        .update({
-          nome_completo: data.nome_completo,
-          aniversario: data.aniversario,
-          whatsapp: data.whatsapp,
-          cargo_id: data.cargo_id,
-          coordenacao_id: data.coordenacao_id,
-        })
-        .eq('id', userId);
-
-      if (profileError) {
-        console.error('Erro ao atualizar perfil:', profileError);
-        return { error: profileError };
+      if (authError) {
+        console.warn('Erro ao atualizar metadados de auth:', authError);
+        // Não interrompemos o fluxo por causa deste erro
       }
-      
-      // Força uma atualização da UI
-      window.dispatchEvent(new Event('storage'));
+    } catch (authUpdateError) {
+      console.warn('Exceção ao atualizar auth metadata:', authUpdateError);
+      // Não interrompemos o fluxo por causa deste erro
     }
-
+      
+    // Força uma atualização da UI
+    window.dispatchEvent(new Event('storage'));
+    
     toast({
       title: "Perfil atualizado",
       description: "Suas informações foram atualizadas com sucesso.",

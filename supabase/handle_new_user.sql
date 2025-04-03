@@ -22,7 +22,7 @@ BEGIN
     NULLIF(new.raw_user_meta_data->>'birthday', '')::date,
     NULLIF(new.raw_user_meta_data->>'whatsapp', ''),
     NULLIF(new.raw_user_meta_data->>'role_id', ''),
-    NULLIF(new.raw_user_meta_data->>'area_id', '')
+    NULLIF(new.raw_user_meta_data->>'coordenacao_id', '')
   );
   RETURN new;
 END;

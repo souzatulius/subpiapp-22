@@ -42,12 +42,11 @@ export const showAuthError = (error: any) => {
 // Check if a user is approved to access the system
 export const isUserApproved = async (userId: string): Promise<boolean> => {
   try {
-    // Check if the user has admin permissions, which indicates approval
+    // Check if the user has permissions, which indicates approval
     const { data: permissionsData, error: permissionsError } = await supabase
       .from('usuario_permissoes')
       .select('permissao_id')
-      .eq('usuario_id', userId)
-      .single();
+      .eq('usuario_id', userId);
     
     if (permissionsError) {
       console.error('Erro ao verificar permissões do usuário:', permissionsError);
@@ -55,7 +54,7 @@ export const isUserApproved = async (userId: string): Promise<boolean> => {
     }
     
     // If the user has any permissions assigned, consider them approved
-    return permissionsData !== null;
+    return permissionsData !== null && permissionsData.length > 0;
   } catch (error) {
     console.error('Erro ao verificar aprovação do usuário:', error);
     return false;
@@ -84,7 +83,14 @@ export const createAdminNotification = async (
 
 // Update user profile data
 export const updateUserProfile = async (userId: string, userData: any): Promise<{ error: any | null }> => {
+  if (!userId) {
+    console.error('updateUserProfile: userId not provided');
+    return { error: new Error('ID de usuário não fornecido') };
+  }
+  
   try {
+    console.log('Atualizando dados do perfil com:', userData);
+    
     // Update user profile in the usuarios table
     const { error } = await supabase
       .from('usuarios')
