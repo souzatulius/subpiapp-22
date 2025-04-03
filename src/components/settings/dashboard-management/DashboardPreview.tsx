@@ -272,6 +272,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         detail: { department, viewType: dashboardType }
       });
       window.dispatchEvent(updateEvent);
+      console.log(`Event dispatched in handleManualSave for department: ${department}, view type: ${dashboardType}`);
       
       return saveResult;
     }

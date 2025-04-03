@@ -9,6 +9,7 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import { supabase } from '@/integrations/supabase/client';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
+import { useUserData } from '@/hooks/dashboard/useUserData';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -20,6 +21,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   department = 'comunicacao' 
 }) => {
   const { user } = useAuth();
+  const { firstName } = useUserData(user?.id);
   const isMobile = useIsMobile();
   
   const [dashboardCards, setDashboardCards] = useState<ActionCardItem[]>([]);
@@ -85,18 +87,20 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           console.log('Loaded department-specific communication dashboard cards:', config.length);
           setDashboardCards(config);
           setConfigSource('custom');
+          setIsLoading(false);
+          return;
         } catch (e) {
           console.error('Error parsing communication dashboard config:', e);
           fetchDefaultConfig();
         }
       } else {
         // If no department-specific config or error, fall back to default
+        console.log('No department-specific config or error occurred, falling back to default');
         fetchDefaultConfig();
       }
     } catch (e) {
       console.error('Error in loadDashboardConfig:', e);
       setDashboardCards([]);
-    } finally {
       setIsLoading(false);
     }
   }, [isPreview, department, userDepartment]);
@@ -129,6 +133,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     } catch (e) {
       console.error('Error in fetchDefaultConfig:', e);
       setDashboardCards([]);
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -166,10 +172,10 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   
   // Load dashboard config when user department changes
   useEffect(() => {
-    if (user || isPreview) {
+    if (userDepartment || isPreview) {
       loadDashboardConfig();
     }
-  }, [user, isPreview, loadDashboardConfig, userDepartment]);
+  }, [userDepartment, isPreview, loadDashboardConfig]);
 
   // Show loading state if user data is needed but not available
   if (!isPreview && !user) {
