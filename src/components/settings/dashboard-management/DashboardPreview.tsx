@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/use-toast';
 interface Department {
   id: string;
   nome: string;
+  sigla?: string;
 }
 
 interface DashboardPreviewProps {
@@ -56,6 +57,11 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 }) => {
   const { toast } = useToast();
   const [isSaved, setIsSaved] = useState(false);
+
+  // Get department display name (show sigla if available, otherwise full name)
+  const getDepartmentDisplayName = (dept: Department) => {
+    return dept.sigla && dept.sigla.trim() !== '' ? dept.sigla : dept.nome;
+  };
 
   const handleSave = async () => {
     try {
@@ -147,7 +153,9 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             </SelectTrigger>
             <SelectContent>
               {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.id}>{dept.nome}</SelectItem>
+                <SelectItem key={dept.id} value={dept.id}>
+                  {getDepartmentDisplayName(dept)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

@@ -32,6 +32,13 @@ const DashboardManagementContent: React.FC = () => {
     resetAllDashboards,
   } = useDefaultDashboardConfig();
 
+  // Ensure a department is selected if one is available
+  useEffect(() => {
+    if (departments.length > 0 && !selectedDepartment) {
+      setSelectedDepartment(departments[0].id);
+    }
+  }, [departments, selectedDepartment, setSelectedDepartment]);
+
   const handleAddCardToDashboard = (card: ActionCardItem) => {
     // Create a new card with unique ID
     const newCard = {
@@ -134,48 +141,34 @@ const DashboardManagementContent: React.FC = () => {
   return (
     <Card>
       <CardContent className="p-6">
-        <Tabs defaultValue="editor" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="editor">Editor de Dashboard</TabsTrigger>
-            <TabsTrigger value="settings">Configurações</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="editor" className="space-y-4">
-            <div className="flex flex-col lg:flex-row gap-6">
-              {/* Left side - Card Library */}
-              <div className="w-full lg:w-1/3">
-                <DraggableCardLibrary onAddCardToDashboard={handleAddCardToDashboard} />
-              </div>
-              
-              {/* Right side - Dashboard Preview */}
-              <div className="w-full lg:w-2/3">
-                <DashboardPreview 
-                  dashboardType={selectedViewType}
-                  department={selectedDepartment}
-                  onDepartmentChange={setSelectedDepartment}
-                  onViewTypeChange={setIsMobilePreview}
-                  isMobilePreview={isMobilePreview}
-                  onReset={handleResetDashboard}
-                  onSave={handleSaveDashboard}
-                  isSaving={isSaving}
-                  onCardsChange={setDashboardCards}
-                  cards={dashboardCards}
-                  onPageTypeChange={setSelectedViewType}
-                  onDrop={handleCardDrop}
-                  departments={departments}
-                  isLoadingDepartments={isLoadingDepartments}
-                />
-              </div>
+        <div className="space-y-4">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Left side - Card Library */}
+            <div className="w-full lg:w-1/3">
+              <DraggableCardLibrary onAddCardToDashboard={handleAddCardToDashboard} />
             </div>
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <div className="space-y-4">
-              <h2 className="text-lg font-medium">Configurações do Dashboard</h2>
-              {/* Configuração adicional aqui */}
+            
+            {/* Right side - Dashboard Preview */}
+            <div className="w-full lg:w-2/3">
+              <DashboardPreview 
+                dashboardType={selectedViewType}
+                department={selectedDepartment}
+                onDepartmentChange={setSelectedDepartment}
+                onViewTypeChange={setIsMobilePreview}
+                isMobilePreview={isMobilePreview}
+                onReset={handleResetDashboard}
+                onSave={handleSaveDashboard}
+                isSaving={isSaving}
+                onCardsChange={setDashboardCards}
+                cards={dashboardCards}
+                onPageTypeChange={setSelectedViewType}
+                onDrop={handleCardDrop}
+                departments={departments}
+                isLoadingDepartments={isLoadingDepartments}
+              />
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </CardContent>
       
       <CardCustomizationModal
