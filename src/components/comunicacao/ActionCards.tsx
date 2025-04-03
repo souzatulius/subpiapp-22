@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { UnifiedActionCard } from '@/components/dashboard/UnifiedActionCard';
 import { ActionCardItem } from '@/types/dashboard';
-import { useDefaultDashboardConfig } from '@/hooks/dashboard-management/useDefaultDashboardConfig';
+import { useDefaultDashboardConfig } from '@/hooks/dashboard/useDefaultDashboardConfig';
 
 interface ActionCardsProps {
   coordenacaoId: string;

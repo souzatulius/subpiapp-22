@@ -20,36 +20,39 @@ export const useBadgeValues = (departmentId: string) => {
       
       try {
         // Fetch pending demands count for "Responder Demandas" badge
-        const { error: pendingError, count: pendingCount } = await supabase
+        const { data: pendingData, error: pendingError } = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('status', 'pendente')
           .eq('coordenacao_id', departmentId);
           
-        if (!pendingError && pendingCount !== null) {
+        if (!pendingError) {
+          const pendingCount = pendingData?.length || 0;
           setBadgeValues(prev => ({ ...prev, 'responder-demandas': pendingCount.toString() }));
         }
         
         // Fetch demands awaiting note for "Criar Nota" badge
-        const { error: awaitingNoteError, count: awaitingNoteCount } = await supabase
+        const { data: awaitingNoteData, error: awaitingNoteError } = await supabase
           .from('demandas')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('status', 'respondida')
           .eq('nota_criada', false)
           .eq('coordenacao_id', departmentId);
           
-        if (!awaitingNoteError && awaitingNoteCount !== null) {
+        if (!awaitingNoteError) {
+          const awaitingNoteCount = awaitingNoteData?.length || 0;
           setBadgeValues(prev => ({ ...prev, 'criar-nota': awaitingNoteCount.toString() }));
         }
         
         // Fetch notes awaiting approval for "Aprovar Notas" badge
-        const { error: awaitingApprovalError, count: awaitingApprovalCount } = await supabase
+        const { data: approvalData, error: awaitingApprovalError } = await supabase
           .from('notas_oficiais')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('status', 'aguardando_aprovacao')
           .eq('coordenacao_id', departmentId);
           
-        if (!awaitingApprovalError && awaitingApprovalCount !== null) {
+        if (!awaitingApprovalError) {
+          const awaitingApprovalCount = approvalData?.length || 0;
           setBadgeValues(prev => ({ ...prev, 'aprovar-notas': awaitingApprovalCount.toString() }));
         }
       } catch (error) {
