@@ -76,30 +76,30 @@ export const useDynamicCardsData = (department: string = 'comunicacao'): Dynamic
     const fetchKPIData = async () => {
       try {
         // Fetch press request stats
-        const { data: pressRequests, error: pressError } = await supabase
+        const pressResponse = await supabase
           .from('demandas')
-          .select('count(*)', { count: 'exact' })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'pendente')
           .eq('origem_id', (await supabase.from('origens_demandas').select('id').eq('descricao', 'Imprensa').single()).data?.id)
           .gte('criado_em', new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
 
-        const { data: yesterdayRequests } = await supabase
+        const yesterdayResponse = await supabase
           .from('demandas')
-          .select('count(*)', { count: 'exact' })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'pendente')
           .eq('origem_id', (await supabase.from('origens_demandas').select('id').eq('descricao', 'Imprensa').single()).data?.id)
           .gte('criado_em', new Date(new Date().setDate(new Date().getDate() - 1)).toISOString())
           .lt('criado_em', new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
           
         // Fetch approval stats
-        const { data: approvalStats, error: approvalError } = await supabase
+        const approvalResponse = await supabase
           .from('demandas')
-          .select('count(*)', { count: 'exact' })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'em-andamento');
         
-        const { data: awaitingResponse } = await supabase
+        const awaitingResponse = await supabase
           .from('demandas')
-          .select('count(*)', { count: 'exact' })
+          .select('count', { count: 'exact', head: true })
           .eq('status', 'em-andamento')
           .is('respostas_demandas.id', null)
           .not('prazo_resposta', 'is', null);
@@ -114,8 +114,8 @@ export const useDynamicCardsData = (department: string = 'comunicacao'): Dynamic
         const rejected = notesStats?.filter(note => note.status === 'rejeitada').length || 0;
 
         // Calculate percentage change
-        const todayCount = pressRequests?.count || 0;
-        const yesterdayCount = yesterdayRequests?.count || 0;
+        const todayCount = pressResponse.count || 0;
+        const yesterdayCount = yesterdayResponse.count || 0;
         let percentageChange = 0;
         
         if (yesterdayCount > 0) {
@@ -132,8 +132,8 @@ export const useDynamicCardsData = (department: string = 'comunicacao'): Dynamic
               loading: false 
             },
             pendingApproval: { 
-              total: approvalStats?.count || 0, 
-              awaitingResponse: awaitingResponse?.count || 0,
+              total: approvalResponse.count || 0, 
+              awaitingResponse: awaitingResponse.count || 0,
               loading: false 
             },
             notesProduced: { 

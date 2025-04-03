@@ -73,3 +73,73 @@ export const getDynamicCardDefaults = (userDepartment: string | null): ActionCar
     return true;
   });
 };
+
+// Add the missing export function getCommunicationActionCards
+export const getCommunicationActionCards = (): ActionCardItem[] => {
+  const getCardColor = (color: string): CardColor => {
+    return color as CardColor;
+  };
+
+  return [
+    {
+      id: 'comunicacao',
+      title: "Comunicação",
+      path: "/dashboard/comunicacao",
+      iconId: "message-square-reply",
+      color: getCardColor('blue-700'),
+      width: "50",
+      height: "2",
+      type: "standard",
+      displayMobile: true,
+      mobileOrder: 1
+    },
+    {
+      id: 'nova-solicitacao',
+      title: "Nova Solicitação",
+      path: "/dashboard/comunicacao/cadastrar",
+      iconId: "plus-circle",
+      color: getCardColor('orange-400'),
+      width: "25",
+      height: "2",
+      type: "standard",
+      displayMobile: true,
+      mobileOrder: 2
+    },
+    {
+      id: 'consultar-demandas',
+      title: "Consultar Demandas",
+      path: "/dashboard/comunicacao/demandas",
+      iconId: "list-filter",
+      color: getCardColor('gray-800'),
+      width: "25",
+      height: "2",
+      type: "standard",
+      displayMobile: true,
+      mobileOrder: 3
+    },
+    {
+      id: 'criar-nota',
+      title: "Criar Nota",
+      path: "/dashboard/comunicacao/criar-nota",
+      iconId: "file-text",
+      color: getCardColor('blue-900'),
+      width: "25",
+      height: "2",
+      type: "standard",
+      displayMobile: true,
+      mobileOrder: 5
+    },
+    {
+      id: 'consultar-notas',
+      title: "Consultar Notas",
+      path: "/dashboard/comunicacao/notas",
+      iconId: "file-text",
+      color: getCardColor('gray-200'),
+      width: "25",
+      height: "2",
+      type: "standard",
+      displayMobile: true,
+      mobileOrder: 6
+    }
+  ];
+};
