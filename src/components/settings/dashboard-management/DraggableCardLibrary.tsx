@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Grip, Maximize2, Minimize2 } from 'lucide-react';
 import { useAvailableCards } from '@/hooks/dashboard-management/useAvailableCards';
@@ -80,18 +79,21 @@ const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardTo
     e.dataTransfer.setData('application/json', JSON.stringify(card));
     e.dataTransfer.effectAllowed = 'copy';
     
-    // Create a drag image that mimics the card's appearance
-    if (e.target instanceof HTMLElement) {
+    // Fix: Type check before accessing classList
+    const target = e.target;
+    if (target instanceof HTMLElement) {
       // This helps maintain the visual during drag
       setTimeout(() => {
-        e.target.classList.add('opacity-50');
+        target.classList.add('opacity-50');
       }, 0);
     }
   };
   
   const handleCardDragEnd = (e: React.DragEvent) => {
-    if (e.target instanceof HTMLElement) {
-      e.target.classList.remove('opacity-50');
+    // Fix: Type check before accessing classList
+    const target = e.target;
+    if (target instanceof HTMLElement) {
+      target.classList.remove('opacity-50');
     }
   };
 
