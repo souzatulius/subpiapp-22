@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Plus } from 'lucide-react';
 import { useUserData } from '@/hooks/useUserData';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const DashboardManagementContent: React.FC = () => {
   const { kpis } = useDashboardKPIs();
@@ -32,10 +34,37 @@ const DashboardManagementContent: React.FC = () => {
   const { originOptions } = useOriginOptions();
   const { availableCards, dynamicCards, standardCards } = useAvailableCards();
   const [isMobilePreview, setIsMobilePreview] = useState(false);
-  const { user, userData } = useUserData();
+  const { user } = useUserData();
+  const { user: authUser } = useAuth();
+  const [userDepartment, setUserDepartment] = useState<string>('comunicacao');
   
-  // Get user department and use it as initial department
-  const userDepartment = userData?.coordenacao_id || 'comunicacao';
+  // Fetch user's department from the database
+  useEffect(() => {
+    const fetchUserDepartment = async () => {
+      if (!authUser) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('coordenacao_id')
+          .eq('id', authUser.id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching user department:', error);
+          return;
+        }
+        
+        if (data?.coordenacao_id) {
+          setUserDepartment(data.coordenacao_id);
+        }
+      } catch (err) {
+        console.error('Error in fetchUserDepartment:', err);
+      }
+    };
+    
+    fetchUserDepartment();
+  }, [authUser]);
   
   const {
     config,

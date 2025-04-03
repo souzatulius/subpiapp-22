@@ -130,7 +130,7 @@ const Dashboard = () => {
   
   // Listen for dashboard config updates from DashboardManagementContent
   useEffect(() => {
-    const handleDashboardConfigUpdate = (event: CustomEvent) => {
+    const handleDashboardConfigUpdate = (event: CustomEvent<{department: string, viewType: string}>) => {
       const { department: eventDepartment, viewType } = event.detail;
       console.log('Dashboard config updated event received:', eventDepartment, viewType);
       
