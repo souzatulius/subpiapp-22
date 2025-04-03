@@ -75,13 +75,6 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     }
   };
 
-  // For debugging
-  useEffect(() => {
-    if (imageSrc) {
-      console.log('Avatar image source:', getImageUrl());
-    }
-  }, [imageSrc, imageKey]);
-
   return (
     <Avatar className={`${getSizeClass()} ${className}`}>
       {imageSrc && (
