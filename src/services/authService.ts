@@ -42,3 +42,85 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
     return { error };
   }
 };
+
+/**
+ * Set up authentication listener
+ */
+export const setupAuthListener = async (callback: (session: any) => void) => {
+  const { data: { subscription } } = await supabase.auth.onAuthStateChange(
+    (_, session) => {
+      callback(session);
+    }
+  );
+  
+  return subscription;
+};
+
+/**
+ * Sign up a new user
+ */
+export const signUp = async (email: string, password: string, userData: any) => {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: userData
+      }
+    });
+    
+    return { data, error };
+  } catch (error) {
+    console.error('Error during signup:', error);
+    return { error };
+  }
+};
+
+/**
+ * Sign in an existing user
+ */
+export const signIn = async (email: string, password: string) => {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    return { data, error };
+  } catch (error) {
+    console.error('Error during signin:', error);
+    return { error };
+  }
+};
+
+/**
+ * Sign in with Google OAuth
+ */
+export const signInWithGoogle = async () => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+    
+    return { data, error };
+  } catch (error) {
+    console.error('Error during Google signin:', error);
+    return { error };
+  }
+};
+
+/**
+ * Sign out the current user
+ */
+export const signOut = async () => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    return { error };
+  } catch (error) {
+    console.error('Error during signout:', error);
+    return { error };
+  }
+};
