@@ -29,6 +29,7 @@ interface DashboardPreviewProps {
   isSaving?: boolean;
   onCardsChange?: (cards: ActionCardItem[]) => void;
   cards?: ActionCardItem[];
+  onPageTypeChange?: (pageType: 'dashboard' | 'communication') => void;
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
@@ -42,7 +43,8 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   onSave,
   isSaving = false,
   onCardsChange,
-  cards: externalCards
+  cards: externalCards,
+  onPageTypeChange
 }) => {
   const {
     cards: internalCards,
@@ -252,14 +254,11 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       
       console.log(`Changing page type to ${value}, viewType: ${newViewType}`);
       
-      if (value === 'inicial' && dashboardType !== 'dashboard') {
-        if (onDepartmentChange) {
-          onDepartmentChange('dashboard');
-        }
-      } else if (value === 'comunicacao' && dashboardType !== 'communication') {
-        if (onDepartmentChange) {
-          onDepartmentChange('communication');
-        }
+      if (onPageTypeChange) {
+        onPageTypeChange(newViewType);
+      } 
+      else if (onDepartmentChange) {
+        onDepartmentChange(newViewType);
       }
     }
   };
@@ -388,7 +387,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           </Select>
           
           <Select value={selectedPageType} onValueChange={handlePageTypeSelect}>
-            <SelectTrigger className="w-[160px] h-9 text-sm">
+            <SelectTrigger className="w-[160px] h-9 text-sm bg-white">
               <SelectValue placeholder="Tipo de Página" />
             </SelectTrigger>
             <SelectContent>

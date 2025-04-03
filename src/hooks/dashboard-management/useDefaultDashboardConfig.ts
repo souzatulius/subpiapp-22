@@ -1,12 +1,11 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 
-export const useDefaultDashboardConfig = (initialDepartment: string = 'default') => {
+export const useDefaultDashboardConfig = (initialDepartment: string = 'default', initialViewType: 'dashboard' | 'communication' = 'dashboard') => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>(initialDepartment);
-  const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>('dashboard');
+  const [selectedViewType, setSelectedViewType] = useState<'dashboard' | 'communication'>(initialViewType);
   const [config, setConfig] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -18,10 +17,18 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
   // Update selectedDepartment when initialDepartment changes
   useEffect(() => {
-    if (initialDepartment && initialDepartment !== 'default') {
+    if (initialDepartment && initialDepartment !== selectedDepartment) {
       setSelectedDepartment(initialDepartment);
     }
-  }, [initialDepartment]);
+  }, [initialDepartment, selectedDepartment]);
+
+  // Update selectedViewType when initialViewType changes
+  useEffect(() => {
+    if (initialViewType !== selectedViewType) {
+      console.log(`View type changed from ${selectedViewType} to ${initialViewType}`);
+      setSelectedViewType(initialViewType);
+    }
+  }, [initialViewType, selectedViewType]);
 
   const fetchDashboardConfig = useCallback(async () => {
     setIsLoading(true);
@@ -78,7 +85,6 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
     }
   }, [selectedDepartment, selectedViewType]);
 
-  // Separate function to fetch default config when department-specific is not found
   const fetchDefaultConfig = async () => {
     try {
       console.log(`Fetching default config for view type: ${selectedViewType}`);
@@ -114,13 +120,14 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
     }
   };
 
+  // Re-fetch config when selectedDepartment or selectedViewType changes
   useEffect(() => {
     fetchDashboardConfig();
-  }, [fetchDashboardConfig]);
+  }, [fetchDashboardConfig, selectedDepartment, selectedViewType]);
 
-  const saveConfig = async (cards: ActionCardItem[], departmentId: string = selectedDepartment) => {
+  const saveConfig = async (cards: ActionCardItem[], departmentId: string = selectedDepartment, viewType: 'dashboard' | 'communication' = selectedViewType) => {
     setIsSaving(true);
-    console.log(`Saving config for department: ${departmentId}, view type: ${selectedViewType}`, cards.length, 'cards');
+    console.log(`Saving config for department: ${departmentId}, view type: ${viewType}`, cards.length, 'cards');
     
     try {
       // First, check if there's an existing config
@@ -128,7 +135,7 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
         .from('department_dashboards')
         .select('id')
         .eq('department', departmentId)
-        .eq('view_type', selectedViewType)
+        .eq('view_type', viewType)
         .maybeSingle();
 
       if (checkError && checkError.code !== 'PGRST116') {
@@ -140,7 +147,7 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
       if (existingConfig) {
         // Update existing config
-        console.log(`Updating existing config: ${departmentId}/${selectedViewType}`);
+        console.log(`Updating existing config: ${departmentId}/${viewType}`);
         const { error: updateError } = await supabase
           .from('department_dashboards')
           .update({ cards_config: cardsJson })
@@ -157,12 +164,12 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
         }
       } else {
         // Insert new config
-        console.log(`Creating new config: ${departmentId}/${selectedViewType}`);
+        console.log(`Creating new config: ${departmentId}/${viewType}`);
         const { error: insertError } = await supabase
           .from('department_dashboards')
           .insert({
             department: departmentId,
-            view_type: selectedViewType,
+            view_type: viewType,
             cards_config: cardsJson
           });
 
@@ -179,7 +186,7 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
 
       setDebugInfo(prev => ({
         ...prev,
-        lastSaved: `${departmentId}/${selectedViewType}`
+        lastSaved: `${departmentId}/${viewType}`
       }));
 
       toast({
