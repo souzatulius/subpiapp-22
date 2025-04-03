@@ -92,7 +92,7 @@ export const usePhotoUpload = () => {
       
       console.log('URL pública obtida:', urlData.publicUrl);
       
-      // CORREÇÃO: Atualiza a tabela usuarios com a nova URL
+      // CORREÇÃO: Atualiza a tabela usuarios com a nova URL - NÃO auth.users
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: urlData.publicUrl })

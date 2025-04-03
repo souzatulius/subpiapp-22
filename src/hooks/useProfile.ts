@@ -51,7 +51,7 @@ export const useProfile = () => {
       
       console.log('URL pública gerada:', publicUrl);
       
-      // CORREÇÃO: Atualizar a tabela 'usuarios' corretamente
+      // CORREÇÃO: Atualizar a tabela 'usuarios' corretamente - não auth.users
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
