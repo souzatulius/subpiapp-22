@@ -35,17 +35,29 @@ export const usePhotoUpload = () => {
         throw new Error('A imagem não pode exceder 5MB');
       }
       
+      // Exibindo os detalhes do arquivo para debug
+      console.log('Detalhes do arquivo:', {
+        nome: file.name,
+        tipo: file.type,
+        tamanho: `${(file.size / 1024).toFixed(2)}KB`
+      });
+      
       // Garantindo que o bucket existe
+      console.log('Configurando armazenamento...');
       const setupResult = await setupProfilePhotosStorage();
+      
       if (!setupResult) {
-        throw new Error('Não foi possível configurar o armazenamento de fotos');
+        console.error('Falha na configuração do armazenamento');
+        throw new Error('Não foi possível configurar o armazenamento de fotos. Tente novamente mais tarde.');
       }
+      
+      console.log('Armazenamento configurado com sucesso');
       
       // Upload da foto
       const fileExt = file.name.split('.').pop() || 'jpg';
       const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
-      console.log(`Uploading to ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
+      console.log(`Iniciando upload para ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
       
       const { error: uploadError, data: uploadData } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
@@ -59,6 +71,8 @@ export const usePhotoUpload = () => {
         throw new Error(`Erro no upload: ${uploadError.message}`);
       }
       
+      console.log('Upload concluído com sucesso. Gerando URL pública...');
+      
       // Obtenção da URL pública
       const { data: { publicUrl } } = supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
@@ -67,6 +81,7 @@ export const usePhotoUpload = () => {
       console.log('URL pública gerada:', publicUrl);
       
       // Atualização do perfil com a nova URL da foto na tabela 'usuarios'
+      console.log('Atualizando perfil do usuário com a nova URL...');
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
@@ -76,6 +91,8 @@ export const usePhotoUpload = () => {
         console.error('Erro ao atualizar perfil com URL da foto:', updateError);
         throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
       }
+      
+      console.log('Perfil atualizado com sucesso');
       
       toast({
         title: "Foto atualizada",
