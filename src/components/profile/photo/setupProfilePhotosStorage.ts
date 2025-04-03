@@ -10,6 +10,13 @@ export const setupProfilePhotosStorage = async () => {
     
     if (listError) {
       console.error('Erro ao listar buckets:', listError);
+      
+      // Se o erro for de permissão, vamos tentar prosseguir assumindo que o bucket possa existir
+      if (listError.message.includes('permission denied')) {
+        console.log('Permissão negada ao listar buckets, tentando prosseguir mesmo assim...');
+        return true; // Retornamos true para tentar o upload mesmo sem conseguir verificar o bucket
+      }
+      
       return false;
     }
     
@@ -26,11 +33,20 @@ export const setupProfilePhotosStorage = async () => {
         
         if (createError) {
           console.error('Erro ao criar bucket "usuarios":', createError);
+          
+          // Se o erro for de chave duplicada, significa que o bucket já existe
           if (createError.message.includes('duplicate key value violates unique constraint')) {
             console.log('O bucket já existe (erro de chave duplicada), continuando...');
-          } else {
-            return false;
+            return true;
           }
+          
+          // Se o erro for de permissão, vamos tentar prosseguir mesmo assim
+          if (createError.message.includes('permission denied')) {
+            console.log('Permissão negada ao criar bucket, tentando prosseguir mesmo assim...');
+            return true; // Retornamos true para tentar o upload mesmo sem conseguir criar o bucket
+          }
+          
+          return false;
         } else {
           console.log('Bucket "usuarios" criado com sucesso');
         }
@@ -38,55 +54,31 @@ export const setupProfilePhotosStorage = async () => {
         console.error('Exceção ao criar bucket:', bucketError);
         return false;
       }
-      
-      // Tenta atualizar as políticas do bucket recém-criado para torná-lo público
-      try {
-        const { error: updateError } = await supabase.storage.updateBucket('usuarios', {
-          public: true,
-          fileSizeLimit: 5242880 // 5MB
-        });
-        
-        if (updateError) {
-          console.error('Erro ao atualizar políticas do bucket:', updateError);
-          // Não retornamos false aqui, pois o bucket já foi criado
-        } else {
-          console.log('Políticas do bucket atualizadas com sucesso');
-        }
-      } catch (policyError) {
-        console.error('Exceção ao atualizar políticas:', policyError);
-        // Não retornamos false aqui, pois o bucket já foi criado
-      }
     } else {
       console.log('Bucket "usuarios" já existe, verificando políticas...');
-      
-      // Tenta atualizar o bucket existente para garantir que seja público
-      try {
-        const { error: updateError } = await supabase.storage.updateBucket('usuarios', {
-          public: true,
-          fileSizeLimit: 5242880 // 5MB
-        });
-        
-        if (updateError) {
-          console.error('Erro ao atualizar políticas do bucket existente:', updateError);
-          
-          // Se o erro for de permissão, não é crítico para o fluxo principal
-          if (updateError.message.includes('permission denied')) {
-            console.log('Aviso: Sem permissão para atualizar o bucket, mas continuando com o upload...');
-          }
-        } else {
-          console.log('Políticas do bucket atualizadas com sucesso');
-        }
-      } catch (policyError) {
-        console.error('Exceção ao atualizar políticas do bucket existente:', policyError);
-        // Não retornamos false aqui, permissão para upload pode ainda funcionar
-      }
     }
     
-    // Verificando permissões de RLS para o bucket usuarios
-    console.log('Verificando se o usuário tem permissão para upload...');
-    
-    // Como não podemos verificar políticas diretamente, vamos tentar um teste
-    // de upload dummy para confirmar acesso (opcional, pode remover esta parte)
+    // Tenta atualizar o bucket para garantir que seja público, mas não falha se não tiver permissão
+    try {
+      const { error: updateError } = await supabase.storage.updateBucket('usuarios', {
+        public: true,
+        fileSizeLimit: 5242880 // 5MB
+      });
+      
+      if (updateError) {
+        console.error('Erro ao atualizar políticas do bucket:', updateError);
+        
+        // Se o erro for de permissão, não é crítico para o fluxo principal
+        if (updateError.message.includes('permission denied')) {
+          console.log('Aviso: Sem permissão para atualizar o bucket, mas continuando com o upload...');
+        }
+      } else {
+        console.log('Políticas do bucket atualizadas com sucesso');
+      }
+    } catch (policyError) {
+      console.error('Exceção ao atualizar políticas:', policyError);
+      // Não retornamos false aqui, permissão para upload pode ainda funcionar
+    }
     
     console.log('Configuração do armazenamento concluída com sucesso');
     return true;

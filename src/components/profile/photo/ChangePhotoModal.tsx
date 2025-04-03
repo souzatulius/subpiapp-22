@@ -18,10 +18,23 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
     const file = event.target.files?.[0];
+    
     if (!file) {
       setPhotoPreview(null);
       setSelectedFile(null);
+      return;
+    }
+    
+    // Validação básica do arquivo antes de gerar preview
+    if (!file.type.startsWith('image/')) {
+      setUploadError('O arquivo deve ser uma imagem');
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      setUploadError('A imagem não pode exceder 5MB');
       return;
     }
 
@@ -29,9 +42,11 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     reader.onloadend = () => {
       setPhotoPreview(reader.result as string);
     };
+    reader.onerror = () => {
+      setUploadError('Erro ao ler o arquivo. Tente outro formato de imagem.');
+    };
     reader.readAsDataURL(file);
     setSelectedFile(file);
-    setUploadError(null);
   };
 
   const handleConfirmUpload = async () => {
@@ -43,7 +58,8 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     try {
       const url = await uploadProfilePhoto(selectedFile);
       if (url) {
-        // Dispare um evento para atualizar a UI com a nova imagem
+        // Dispare eventos para atualizar a UI com a nova imagem
+        window.dispatchEvent(new Event('profile:photo:updated'));
         window.dispatchEvent(new Event('storage'));
         onClose();
       }
@@ -51,9 +67,19 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
       setUploadError(error instanceof Error ? error.message : 'Erro ao fazer upload da foto');
     }
   };
+  
+  // Reset state quando o modal é fechado
+  const handleClose = () => {
+    if (!isUploading) {
+      setPhotoPreview(null);
+      setSelectedFile(null);
+      setUploadError(null);
+      onClose();
+    }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md w-[80%] sm:w-full">
         <DialogHeader>
           <DialogTitle>Alterar foto de perfil</DialogTitle>
@@ -69,7 +95,7 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
         <DialogFooter className="mt-4">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isUploading}
           >
             Cancelar

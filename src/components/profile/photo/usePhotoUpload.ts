@@ -53,12 +53,14 @@ export const usePhotoUpload = () => {
       
       console.log('Armazenamento configurado com sucesso');
       
-      // Upload da foto
-      const fileExt = file.name.split('.').pop() || 'jpg';
-      const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
+      // Preparação do caminho do arquivo para upload
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${fileName}.${fileExt}`;
       
       console.log(`Iniciando upload para ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
       
+      // Tentativa de upload
       const { error: uploadError, data: uploadData } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, file, {
@@ -68,6 +70,12 @@ export const usePhotoUpload = () => {
       
       if (uploadError) {
         console.error('Erro no upload da foto:', uploadError);
+        
+        // Se for erro de permissão, fornecemos uma mensagem mais clara
+        if (uploadError.message.includes('permission denied')) {
+          throw new Error('Você não tem permissão para fazer upload de arquivos. Verifique suas permissões.');
+        }
+        
         throw new Error(`Erro no upload: ${uploadError.message}`);
       }
       
@@ -77,6 +85,10 @@ export const usePhotoUpload = () => {
       const { data: { publicUrl } } = supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .getPublicUrl(filePath);
+      
+      if (!publicUrl) {
+        throw new Error('Não foi possível gerar uma URL pública para a imagem');
+      }
       
       console.log('URL pública gerada:', publicUrl);
       
@@ -101,6 +113,7 @@ export const usePhotoUpload = () => {
       });
       
       // Dispare um evento para atualizar a UI
+      window.dispatchEvent(new Event('profile:photo:updated'));
       window.dispatchEvent(new Event('storage'));
       
       return publicUrl;
