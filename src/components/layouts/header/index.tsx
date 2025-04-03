@@ -1,6 +1,4 @@
 
-import Header from './Header';
-import UserProfileMenu from './UserProfileMenu';
-
-export { Header, UserProfileMenu };
-export default Header;
+// Export Header and UserProfileMenu components
+export { default as UserProfileMenu } from './UserProfileMenu';
+export { default } from './Header';
