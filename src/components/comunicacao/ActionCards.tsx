@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,13 +12,15 @@ interface ActionCardsProps {
   isComunicacao: boolean;
   baseUrl?: string;
   isEditMode?: boolean;
+  onEdit?: (card: ActionCardItem) => void;
 }
 
 const ActionCards: React.FC<ActionCardsProps> = ({ 
   coordenacaoId, 
   isComunicacao,
   baseUrl = '',
-  isEditMode = false
+  isEditMode = false,
+  onEdit
 }) => {
   const { config: dashboardCards, isLoading } = useDefaultDashboardConfig('comunicacao');
   
@@ -95,21 +98,44 @@ const ActionCards: React.FC<ActionCardsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card, index) => (
-        <Link key={card.id || index} to={card.path} className="block h-full">
-          <UnifiedActionCard
-            id={card.id}
-            title={card.title}
-            subtitle={card.subtitle}
-            iconId={card.iconId}
-            path={card.path}
-            color={card.color}
-            width={card.width || '25'}
-            height={'1'}
-            type={card.type || 'standard'} 
-            hasSubtitle={!!card.subtitle}
-            iconSize="md"
-          />
-        </Link>
+        <div key={card.id || index} className="h-[160px]">
+          {isEditMode ? (
+            <UnifiedActionCard
+              id={card.id}
+              title={card.title}
+              subtitle={card.subtitle}
+              iconId={card.iconId}
+              path={card.path}
+              color={card.color}
+              width={card.width || '25'}
+              height={'1'}
+              type={card.type || 'standard'} 
+              onEdit={onEdit ? (id) => {
+                const cardToEdit = cards.find(c => c.id === id);
+                if (cardToEdit && onEdit) onEdit(cardToEdit);
+              } : undefined}
+              isEditing={isEditMode}
+              hasSubtitle={!!card.subtitle}
+              iconSize="md"
+            />
+          ) : (
+            <Link to={card.path} className="block h-full">
+              <UnifiedActionCard
+                id={card.id}
+                title={card.title}
+                subtitle={card.subtitle}
+                iconId={card.iconId}
+                path={card.path}
+                color={card.color}
+                width={card.width || '25'}
+                height={'1'}
+                type={card.type || 'standard'} 
+                hasSubtitle={!!card.subtitle}
+                iconSize="md"
+              />
+            </Link>
+          )}
+        </div>
       ))}
     </div>
   );

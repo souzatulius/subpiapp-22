@@ -8,6 +8,7 @@ import KPICard from '@/components/settings/dashboard-management/KPICard';
 import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
+import CardControls from './card-parts/CardControls';
 
 export interface Controls {
   cardId: string;
@@ -261,16 +262,17 @@ export function UnifiedActionCard({
     <div className="h-full relative group">
       {renderCardContent()}
       
-      {(isEditing || onEdit || onHide || onDelete) && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-          <Controls 
-            cardId={id} 
-            onEdit={onEdit || (() => {})}
-            onDelete={onDelete}
-            onHide={onHide}
-            isCustom={isCustom}
-          />
-        </div>
+      {(isEditing || onEdit) && (
+        <CardControls 
+          onEdit={onEdit ? (e) => { 
+            e.stopPropagation();
+            onEdit(id); 
+          } : undefined}
+          onDelete={onDelete ? (e) => { 
+            e.stopPropagation();
+            onDelete(id); 
+          } : undefined}
+        />
       )}
     </div>
   );

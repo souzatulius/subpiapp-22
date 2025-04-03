@@ -1,8 +1,7 @@
-
 import { useNavigate } from 'react-router-dom';
-import { Controls } from './UnifiedActionCard';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import CardControls from './card-parts/CardControls';
 
 export interface ActionCardProps {
   id: string;
@@ -61,9 +60,9 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm': return 'w-5 h-5';
     case 'md': return 'w-6 h-6';
-    case 'lg': return 'w-8 h-8'; // Mobile size
-    case 'xl': return 'w-8 h-8'; // Reduced from w-16 h-16
-    default: return 'w-8 h-8';
+    case 'lg': return 'w-8 h-8';
+    case 'xl': return 'w-8 h-8';
+    default: return 'w-6 h-6';  // Adjusted default size to be more compact
   }
 };
 
@@ -98,17 +97,18 @@ const ActionCard = ({
         active:scale-95 ${bgColor} group`}
       onClick={path ? handleClick : undefined}
     >
-      <div className="relative h-full flex flex-col items-center justify-center text-center group py-4">
-        {isDraggable && (onEdit || onHide) && (
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <Controls 
-              cardId={id} 
-              onEdit={() => onEdit ? onEdit(id) : undefined} 
-              onDelete={onDelete}
-              onHide={onHide}
-              isCustom={isCustom}
-            />
-          </div>
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-4">
+        {isDraggable && (
+          <CardControls 
+            onEdit={onEdit ? (e) => { 
+              e.stopPropagation();
+              if (onEdit) onEdit(id); 
+            } : undefined} 
+            onDelete={onDelete ? (e) => { 
+              e.stopPropagation();
+              if (onDelete) onDelete(id); 
+            } : undefined}
+          />
         )}
         
         {children ? (

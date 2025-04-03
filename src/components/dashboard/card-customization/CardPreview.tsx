@@ -44,7 +44,7 @@ const getWidthClass = (width?: string): string => {
 
 const getHeightClass = (height?: string): string => {
   switch (height) {
-    case '1': return 'h-[160px]'; // Ajustado para 160px
+    case '1': return 'h-[160px]';
     case '2': return 'h-[320px]';
     default: return 'h-[160px]';
   }

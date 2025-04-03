@@ -26,10 +26,13 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
         {React.createElement(
           card.iconId ? card.iconId : 'div',
           { 
-            className: isMobileView ? 'h-8 w-8 mb-2 text-white' : 'h-8 w-8 mb-2 text-white' 
+            className: 'h-6 w-6 mb-2 text-white' 
           }
         )}
         <h3 className="text-sm font-semibold text-white text-center">{card.title}</h3>
+        {card.subtitle && (
+          <p className="text-xs text-white/80 mt-1">{card.subtitle}</p>
+        )}
       </div>
     </div>
   );
