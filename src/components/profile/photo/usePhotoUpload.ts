@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
-// Standardized bucket name and folder structure
+// Bucket name e estrutura de pastas padronizada
 const PROFILE_PHOTOS_BUCKET = 'usuarios';
 const PROFILE_PHOTOS_FOLDER = 'fotos_perfil';
 
@@ -25,7 +25,7 @@ export const usePhotoUpload = () => {
     try {
       setIsUploading(true);
       
-      // Validate file type and size
+      // Validação do arquivo
       if (!file.type.startsWith('image/')) {
         throw new Error('O arquivo deve ser uma imagem');
       }
@@ -34,13 +34,13 @@ export const usePhotoUpload = () => {
         throw new Error('A imagem não pode exceder 5MB');
       }
       
-      // Upload the photo
+      // Upload da foto
       const fileExt = file.name.split('.').pop() || 'jpg';
       const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
       console.log(`Uploading to ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
       
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -48,25 +48,25 @@ export const usePhotoUpload = () => {
         });
       
       if (uploadError) {
-        console.error('Error uploading photo:', uploadError);
+        console.error('Erro no upload da foto:', uploadError);
         throw new Error(`Erro no upload: ${uploadError.message}`);
       }
       
-      // Get the public URL
+      // Obtenção da URL pública
       const { data: { publicUrl } } = supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .getPublicUrl(filePath);
       
-      console.log('Generated public URL:', publicUrl);
+      console.log('URL pública gerada:', publicUrl);
       
-      // Update user profile with new photo URL - use 'usuarios' table
+      // Atualização do perfil com a nova URL da foto na tabela 'usuarios'
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       
       if (updateError) {
-        console.error('Error updating profile with photo URL:', updateError);
+        console.error('Erro ao atualizar perfil com URL da foto:', updateError);
         throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
       }
       
@@ -76,14 +76,9 @@ export const usePhotoUpload = () => {
         variant: "success"
       });
       
-      // Force refresh to update UI with new image
-      setTimeout(() => {
-        window.dispatchEvent(new Event('storage')); // Trigger storage event to refresh user profile data
-      }, 500);
-      
       return publicUrl;
     } catch (error: any) {
-      console.error('Error updating profile photo:', error);
+      console.error('Erro ao atualizar foto de perfil:', error);
       toast({
         title: "Erro",
         description: error.message || "Falha ao atualizar a foto de perfil",

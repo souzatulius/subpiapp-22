@@ -45,40 +45,40 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }
   });
 
-  // Load user data when dialog opens
+  // Carrega os dados do usuário quando o diálogo abre
   useEffect(() => {
     if (userData && isOpen) {
       setValue('nome_completo', userData.nome_completo || '');
       
-      // Format whatsapp with mask
+      // Formata o whatsapp com máscara
       const formattedWhatsapp = userData.whatsapp ? formatPhoneNumber(userData.whatsapp) : '';
       setWhatsappValue(formattedWhatsapp);
       
-      // Process birthday date if it exists
+      // Processa a data de aniversário se existir
       if (userData.aniversario) {
         try {
           let formattedDate = '';
           if (typeof userData.aniversario === 'string') {
-            // Format date string to DD/MM/YYYY
+            // Formata string de data para DD/MM/YYYY
             const dateObj = new Date(userData.aniversario);
             if (!isNaN(dateObj.getTime())) {
               formattedDate = formatDateToString(dateObj);
             }
           } else if (userData.aniversario instanceof Date) {
-            // Already a Date object
+            // Já é um objeto Date
             formattedDate = formatDateToString(userData.aniversario);
           }
           
           setDateInputValue(formattedDate);
         } catch (error) {
-          console.error('Error processing date:', error);
+          console.error('Erro ao processar data:', error);
           setDateInputValue('');
         }
       } else {
         setDateInputValue('');
       }
 
-      // Fields that user cannot edit
+      // Campos que o usuário não pode editar
       setValue('cargo_id', userData.cargo_id);
       setValue('coordenacao_id', userData.coordenacao_id);
       setValue('supervisao_tecnica_id', userData.supervisao_tecnica_id);
@@ -109,7 +109,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     
     setIsSubmitting(true);
     try {
-      // Process formatted date to a Date object
+      // Processa a data formatada para objeto Date
       let parsedDate = null;
       let aniversarioISO = null;
       
@@ -127,26 +127,26 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         aniversarioISO = parsedDate.toISOString();
       }
       
-      // Clean whatsapp input (remove mask)
+      // Limpa a entrada de whatsapp (remove máscara)
       const cleanWhatsapp = whatsappValue.replace(/\D/g, '');
       
-      // Data for update with correct types
+      // Dados para atualização com tipos corretos
       const updateData = {
         nome_completo: data.nome_completo,
         whatsapp: cleanWhatsapp || null,
         aniversario: aniversarioISO
       };
       
-      console.log('Updating with data:', updateData);
+      console.log('Atualizando com dados:', updateData);
       
-      // Update profile - Make sure to use the 'usuarios' table, NOT 'users'
+      // Atualiza o perfil - Certifique-se de usar a tabela 'usuarios', NÃO 'users'
       const { error } = await supabase
         .from('usuarios')
         .update(updateData)
         .eq('id', user.id);
       
       if (error) {
-        console.error('Error updating profile:', error);
+        console.error('Erro ao atualizar perfil:', error);
         throw error;
       }
       
@@ -155,14 +155,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         description: "Suas informações foram atualizadas com sucesso."
       });
       
+      // Força atualização da UI
+      window.dispatchEvent(new Event('storage'));
+      
       if (refreshUserData) await refreshUserData();
       onClose();
       
     } catch (error: any) {
-      console.error('Error updating profile:', error);
+      console.error('Erro ao atualizar perfil:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar as informações. Por favor, tente novamente.",
+        description: "Não foi possível atualizar as informações: " + (error.message || "Erro desconhecido"),
         variant: "destructive"
       });
     } finally {
@@ -221,7 +224,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             />
           </div>
 
-          {/* Read-only fields for coordination, supervision and role */}
+          {/* Campos somente leitura para coordenação, supervisão e cargo */}
           {userData?.coordenacao && (
             <div className="space-y-2">
               <Label htmlFor="coordenacao">Coordenação</Label>

@@ -29,6 +29,7 @@ export const useProfile = () => {
         .upload(filePath, file);
         
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw new Error(`Erro no upload: ${uploadError.message}`);
       }
       
@@ -39,15 +40,19 @@ export const useProfile = () => {
       
       console.log('Generated public URL:', publicUrl);
       
-      // Update the user's metadata in the usuarios table
+      // Update the user's metadata in the usuarios table - NOT auth.users
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       
       if (updateError) {
+        console.error('Update error:', updateError);
         throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
       }
+      
+      // Force refresh to update UI
+      window.dispatchEvent(new Event('storage'));
       
       toast({
         title: 'Sucesso!',
@@ -57,9 +62,10 @@ export const useProfile = () => {
       
       return publicUrl;
     } catch (error: any) {
+      console.error('Profile update error:', error);
       toast({
         title: 'Erro',
-        description: error.message,
+        description: error.message || 'Não foi possível atualizar sua foto',
         variant: 'destructive'
       });
       return null;

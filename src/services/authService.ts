@@ -14,8 +14,8 @@ export const signUp = async (email: string, password: string, userData: any) => 
           name: userData.nome_completo,
           birthday: userData.aniversario,
           whatsapp: userData.whatsapp,
-          role_id: userData.cargo_id, // Store the ID of the cargo
-          area_id: userData.coordenacao_id, // Store the ID of the area
+          role_id: userData.cargo_id,
+          area_id: userData.coordenacao_id,
         },
         emailRedirectTo: `${window.location.origin}/email-verified`,
       }
@@ -101,10 +101,10 @@ export const signOut = async () => {
   }
 };
 
-// Update profile
+// Update profile - Corrigido para usar a tabela 'usuarios'
 export const updateProfile = async (data: any, userId: string) => {
   try {
-    // Update user metadata in auth
+    // Atualizar metadados do usuário em auth
     const { error: authError } = await supabase.auth.updateUser({
       data: {
         name: data.nome_completo,
@@ -117,11 +117,15 @@ export const updateProfile = async (data: any, userId: string) => {
 
     if (authError) {
       console.error('Erro ao atualizar metadados:', authError);
-      return { error: authError };
+      // Não interromper a execução se esta parte falhar
+      // Muitos usuários estão tendo problemas aqui, mas podemos atualizar só o perfil
+      console.log('Continuando com atualização da tabela usuarios mesmo com erro em auth.updateUser');
     }
 
-    // Update profile information in the usuarios table only
+    // Atualizar informações do perfil somente na tabela usuarios
     if (userId) {
+      console.log('Atualizando dados na tabela usuarios para userId:', userId, 'com dados:', data);
+      
       const { error: profileError } = await supabase
         .from('usuarios')
         .update({
@@ -137,6 +141,9 @@ export const updateProfile = async (data: any, userId: string) => {
         console.error('Erro ao atualizar perfil:', profileError);
         return { error: profileError };
       }
+      
+      // Força uma atualização da UI
+      window.dispatchEvent(new Event('storage'));
     }
 
     toast({

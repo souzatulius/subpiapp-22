@@ -43,6 +43,8 @@ const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({ isOpen, onClose }) 
     try {
       const url = await uploadProfilePhoto(selectedFile);
       if (url) {
+        // Dispare um evento para atualizar a UI com a nova imagem
+        window.dispatchEvent(new Event('storage'));
         onClose();
       }
     } catch (error) {
