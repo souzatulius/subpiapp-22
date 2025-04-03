@@ -2,8 +2,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
-import ProfileMenu from './ProfileMenu';
-import NotificationsPopover from './NotificationsPopover';
 
 interface HeaderProps {
   showControls?: boolean;
@@ -48,14 +46,9 @@ const Header: React.FC<HeaderProps> = ({
           </Link>
         </div>
         
-        {/* Right section - User controls */}
-        <div className="flex items-center justify-end space-x-3 w-1/3">
-          {!hideUserMenu && !isAuthPage && (
-            <>
-              <NotificationsPopover />
-              <ProfileMenu />
-            </>
-          )}
+        {/* Right section - Empty now that user controls are removed */}
+        <div className="flex items-center justify-end w-1/3">
+          {/* User controls removed */}
         </div>
       </div>
     </header>
