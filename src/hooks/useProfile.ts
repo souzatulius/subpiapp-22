@@ -51,9 +51,9 @@ export const useProfile = () => {
       
       console.log('URL pública gerada:', publicUrl);
       
-      // Atualizar a tabela 'usuarios' em vez de tentar acessar auth.users diretamente
+      // CORREÇÃO: Atualizar a tabela 'usuarios' corretamente
       const { error: updateError } = await supabase
-        .from('usuarios')  // Use a tabela correta
+        .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
         .eq('id', user.id);
       
@@ -64,6 +64,7 @@ export const useProfile = () => {
       
       // Forçar atualização para recarregar a UI
       window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('profile:photo:updated'));
       
       toast({
         title: 'Sucesso!',

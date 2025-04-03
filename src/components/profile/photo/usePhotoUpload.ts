@@ -92,9 +92,9 @@ export const usePhotoUpload = () => {
       
       console.log('URL pública obtida:', urlData.publicUrl);
       
-      // Atualiza a tabela usuarios com a nova URL
+      // CORREÇÃO: Atualiza a tabela usuarios com a nova URL
       const { error: updateError } = await supabase
-        .from('usuarios')  // Use a tabela correta
+        .from('usuarios')
         .update({ foto_perfil_url: urlData.publicUrl })
         .eq('id', user.id);
       
@@ -102,16 +102,16 @@ export const usePhotoUpload = () => {
         console.error('Erro ao atualizar perfil:', updateError);
         toast({
           title: "Erro",
-          description: "A foto foi carregada mas não foi possível atualizá-la no seu perfil. Detalhes: " + updateError.message,
+          description: "Erro ao atualizar foto no perfil: " + updateError.message,
           variant: "destructive"
         });
-        // Não lançamos erro aqui para que a URL seja retornada mesmo com falha ao atualizar o perfil
-      } else {
-        toast({
-          title: "Sucesso",
-          description: "Foto de perfil atualizada com sucesso",
-        });
+        throw new Error(updateError.message);
       }
+      
+      toast({
+        title: "Sucesso",
+        description: "Foto de perfil atualizada com sucesso",
+      });
       
       // Dispare eventos para atualizar a UI
       window.dispatchEvent(new Event('storage'));

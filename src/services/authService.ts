@@ -33,16 +33,18 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
 
     console.log('Atualizando perfil do usuário:', userId, 'com dados:', updatedData);
 
+    // CORREÇÃO: Usar corretamente a tabela 'usuarios' e não tentar acessar 'auth.users'
     const { error } = await supabase
-      .from('usuarios')  // Use a tabela pública 'usuarios', não 'auth.users'
+      .from('usuarios')
       .update(updatedData)
       .eq('id', userId);
       
     if (error) {
       console.error('Erro ao atualizar perfil:', error);
+      throw error;
     }
     
-    return { error };
+    return { error: null };
   } catch (error) {
     console.error('Error updating profile:', error);
     return { error };

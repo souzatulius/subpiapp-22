@@ -20,10 +20,12 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   // Efeito para recarregar a imagem quando ela for atualizada
   useEffect(() => {
     const handleStorageChange = () => {
+      console.log('Storage event detected, refreshing avatar');
       setImageKey(Date.now()); // Força a recarga da imagem
     };
     
     const handlePhotoUpdated = () => {
+      console.log('Photo updated event detected, refreshing avatar');
       setImageKey(Date.now()); // Força a recarga da imagem
     };
 
@@ -72,6 +74,13 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
       return `${imageSrc}?t=${imageKey}`;
     }
   };
+
+  // For debugging
+  useEffect(() => {
+    if (imageSrc) {
+      console.log('Avatar image source:', getImageUrl());
+    }
+  }, [imageSrc, imageKey]);
 
   return (
     <Avatar className={`${getSizeClass()} ${className}`}>
