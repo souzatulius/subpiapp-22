@@ -111,6 +111,36 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     return Object.keys(errors).length === 0;
   };
   
+  // Helper function to ensure date is in string format
+  const formatDateValue = (date: string | Date | undefined): string => {
+    if (!date) return '';
+    
+    if (typeof date === 'string') {
+      // If already a string, check if it's in the right format
+      if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return date;
+      }
+      
+      // Try to parse and format it
+      try {
+        const parsedDate = new Date(date);
+        if (!isNaN(parsedDate.getTime())) {
+          return format(parsedDate, 'yyyy-MM-dd');
+        }
+      } catch (e) {
+        console.error('Error formatting date:', e);
+      }
+      return '';
+    } 
+    
+    // Handle Date object
+    if (date instanceof Date) {
+      return format(date, 'yyyy-MM-dd');
+    }
+    
+    return '';
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -130,7 +160,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Convert aniversario to string format expected by the backend
+      // Format aniversario to string format expected by the backend
       const formattedData = {
         ...formData,
         // Ensure aniversario is in the correct string format
@@ -218,7 +248,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               id="aniversario"
               name="aniversario"
               type="date"
-              value={formData.aniversario}
+              value={formatDateValue(formData.aniversario)}
               onChange={handleChange}
               className={formErrors.aniversario ? "border-red-500" : ""}
             />
