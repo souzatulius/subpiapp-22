@@ -17,7 +17,7 @@ export const useUserData = (userId?: string) => {
       try {
         const { data, error } = await supabase
           .from('usuarios')
-          .select('nome')
+          .select('nome_completo')
           .eq('id', userId)
           .single();
 
@@ -30,7 +30,7 @@ export const useUserData = (userId?: string) => {
         if (data) {
           setUser(data);
           // Extract first name from full name
-          const fullName = data.nome || '';
+          const fullName = data.nome_completo || '';
           const firstName = fullName.split(' ')[0] || 'Usuário';
           setFirstName(firstName);
         }
