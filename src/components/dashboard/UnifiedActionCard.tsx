@@ -7,8 +7,10 @@ import { PencilLine, Trash2, EyeOff } from 'lucide-react';
 import KPICard from '@/components/settings/dashboard-management/KPICard';
 import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
 import OriginSelectionCard from './cards/OriginSelectionCard';
-import SmartSearchCard from './SmartSearchCard';
+import SmartSearchCard from './cards/SmartSearchCard';
 import CardControls from './card-parts/CardControls';
+import OriginFormCard from './cards/OriginFormCard';
+import DynamicCard from './DynamicCard';
 
 export interface Controls {
   cardId: string;
@@ -77,6 +79,7 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   specialCardsData?: any;
   hasSubtitle?: boolean;
   isMobileView?: boolean;
+  dataSourceKey?: string;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -149,9 +152,20 @@ export function UnifiedActionCard({
   hasBadge,
   badgeValue,
   hasSubtitle,
+  dataSourceKey,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   
   const renderCardContent = () => {
+    if (type === 'dynamic' && dataSourceKey) {
+      return (
+        <DynamicCard 
+          title={title}
+          dataSourceKey={dataSourceKey}
+          iconComponent={iconId ? React.createElement(getIconComponentFromId(iconId), { className: 'h-6 w-6' }) : undefined}
+        />
+      );
+    }
+    
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
@@ -226,11 +240,16 @@ export function UnifiedActionCard({
       );
     }
     
-    if (type === 'smart_search') {
+    if (dataSourceKey === 'form_origem') {
+      return <OriginFormCard />;
+    }
+    
+    if (dataSourceKey === 'smartSearch' || type === 'smart_search') {
       return (
         <SmartSearchCard 
           placeholder="O que vamos fazer?" 
           onSearch={onSearchSubmit}
+          isEditMode={isEditing}
         />
       );
     }
@@ -275,6 +294,36 @@ export function UnifiedActionCard({
         />
       )}
     </div>
+  );
+}
+
+function getIconComponentFromId(iconId: string) {
+  const IconMap = {
+    'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
+    'plus-circle': () => import('lucide-react').then(mod => mod.PlusCircle),
+    'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
+    'message-circle': () => import('lucide-react').then(mod => mod.MessageCircle),
+    'file-text': () => import('lucide-react').then(mod => mod.FileText),
+    'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
+    'trophy': () => import('lucide-react').then(mod => mod.Trophy),
+    'bar-chart-2': () => import('lucide-react').then(mod => mod.BarChart2),
+    'search': () => import('lucide-react').then(mod => mod.Search),
+    'clipboard-document-check': () => import('lucide-react').then(mod => mod.ClipboardCheck),
+    'list-bullet': () => import('lucide-react').then(mod => mod.List),
+    'inbox-arrow-down': () => import('lucide-react').then(mod => mod.InboxIcon),
+    'document-check': () => import('lucide-react').then(mod => mod.FileCheck),
+    'document-plus': () => import('lucide-react').then(mod => mod.FilePlus),
+    'document-text': () => import('lucide-react').then(mod => mod.FileText),
+  };
+  
+  const LoadedIcon = React.lazy(() => 
+    IconMap[iconId]?.() || import('lucide-react').then(mod => ({ default: mod.MessageSquare }))
+  );
+  
+  return (props: any) => (
+    <React.Suspense fallback={<div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full" />}>
+      <LoadedIcon {...props} />
+    </React.Suspense>
   );
 }
 

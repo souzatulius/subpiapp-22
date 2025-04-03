@@ -1,15 +1,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2 } from 'lucide-react';
+import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2, Search } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import { ActionCardItem, CardColor } from '@/types/dashboard';
+import { ActionCardItem, CardColor, DynamicCardItem } from '@/types/dashboard';
 import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 import { supabase } from '@/integrations/supabase/client';
+import { useDynamicCardsData } from '@/hooks/dashboard/useDynamicCardsData';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -25,8 +26,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const isMobile = useIsMobile();
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [cards, setCards] = useState<ActionCardItem[]>([]);
+  const [dynamicCards, setDynamicCards] = useState<DynamicCardItem[]>([]);
   const { getBadgeValue } = useBadgeValues();
+  const dynamicData = useDynamicCardsData(department);
 
+  // Function to convert color string to CardColor enum
   const getBgColor = (color: string): CardColor => {
     switch (color) {
       case 'grey-400': return 'gray-400' as CardColor;
@@ -63,6 +67,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     getUserDepartment();
   }, [user, isPreview]);
 
+  // Setup initial action cards
   useEffect(() => {
     const initialCards: ActionCardItem[] = [
       {
@@ -184,6 +189,164 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       }
     ];
 
+    // Setup initial dynamic cards based on requirements
+    const initialDynamicCards: DynamicCardItem[] = [
+      {
+        id: 'smart-search',
+        title: "O que vamos fazer?",
+        type: "dynamic",
+        iconId: "search",
+        path: "",
+        color: getBgColor('blue-light'),
+        width: "100", // will occupy full width
+        height: "1",
+        dataSourceKey: "smartSearch",
+        displayMobile: true,
+        mobileOrder: 0,
+        allowedDepartments: [],
+        canEdit: false,
+        widthDesktop: 4,
+        widthMobile: 2
+      },
+      {
+        id: 'kpi-solicitacoes',
+        title: "Solicitações de Imprensa",
+        type: "dynamic",
+        iconId: "message-square-reply",
+        path: "",
+        color: getBgColor('blue'),
+        width: "25",
+        height: "1",
+        dataSourceKey: "kpi_solicitacoes",
+        displayMobile: true,
+        mobileOrder: 10,
+        allowedDepartments: ['comunicacao', 'gabinete'],
+        canEdit: false,
+        widthDesktop: 1,
+        widthMobile: 1
+      },
+      {
+        id: 'kpi-demandas-aprovacao',
+        title: "Demandas em Aprovação",
+        type: "dynamic",
+        iconId: "clipboard-document-check",
+        path: "",
+        color: getBgColor('orange'),
+        width: "25",
+        height: "1",
+        dataSourceKey: "kpi_demandas_aprovacao",
+        displayMobile: true,
+        mobileOrder: 11,
+        allowedDepartments: ['comunicacao', 'gabinete'],
+        canEdit: false,
+        widthDesktop: 1,
+        widthMobile: 1
+      },
+      {
+        id: 'kpi-notas-produzidas',
+        title: "Notas Produzidas",
+        type: "dynamic",
+        iconId: "file-text",
+        path: "",
+        color: getBgColor('green'),
+        width: "25",
+        height: "1",
+        dataSourceKey: "kpi_notas_produzidas",
+        displayMobile: true,
+        mobileOrder: 12,
+        allowedDepartments: ['comunicacao', 'gabinete'],
+        canEdit: false,
+        widthDesktop: 1,
+        widthMobile: 1
+      },
+      {
+        id: 'demandas-andamento',
+        title: "Demandas em Andamento",
+        type: "dynamic",
+        iconId: "list-bullet",
+        path: "",
+        color: getBgColor('blue-dark'),
+        width: "50",
+        height: "2",
+        dataSourceKey: "demandas_andamento",
+        displayMobile: true,
+        mobileOrder: 13,
+        allowedDepartments: ['comunicacao'],
+        canEdit: false,
+        widthDesktop: 2,
+        widthMobile: 2
+      },
+      {
+        id: 'demandas-aguardando-resposta',
+        title: "Aguardando Resposta",
+        type: "dynamic",
+        iconId: "inbox-arrow-down",
+        path: "",
+        color: getBgColor('orange-light'),
+        width: "50",
+        height: "2",
+        dataSourceKey: "demandas_aguardando_resposta",
+        displayMobile: true,
+        mobileOrder: 14,
+        allowedDepartments: [],
+        canEdit: false,
+        widthDesktop: 2,
+        widthMobile: 1
+      },
+      {
+        id: 'notas-aprovacao',
+        title: "Notas para Aprovação",
+        type: "dynamic",
+        iconId: "check-circle",
+        path: "",
+        color: getBgColor('green-light'),
+        width: "50",
+        height: "2",
+        dataSourceKey: "notas_aprovacao",
+        displayMobile: true,
+        mobileOrder: 15,
+        allowedDepartments: [],
+        canEdit: false,
+        widthDesktop: 2,
+        widthMobile: 1
+      },
+      {
+        id: 'demandas-aguardando-nota',
+        title: "Demandas Aguardando Nota",
+        type: "dynamic",
+        iconId: "file-text",
+        path: "",
+        color: getBgColor('blue-light'),
+        width: "50",
+        height: "2",
+        dataSourceKey: "demandas_aguardando_nota",
+        displayMobile: true,
+        mobileOrder: 16,
+        allowedDepartments: ['comunicacao'],
+        canEdit: false,
+        widthDesktop: 2,
+        widthMobile: 1
+      },
+      {
+        id: 'form-origem',
+        title: "Nova Solicitação",
+        type: "dynamic",
+        iconId: "plus-circle",
+        path: "",
+        color: getBgColor('orange-light'),
+        width: "50",
+        height: "2",
+        dataSourceKey: "form_origem",
+        displayMobile: true,
+        mobileOrder: 17,
+        allowedDepartments: ['comunicacao'],
+        canEdit: false,
+        widthDesktop: 2,
+        widthMobile: 1
+      }
+    ];
+
+    // Filter cards based on user department
     const filteredCards = initialCards.filter(card => {
       if (card.allowedDepartments && card.allowedDepartments.length > 0) {
         return !userDepartment || card.allowedDepartments.includes(userDepartment);
@@ -191,8 +354,19 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       return true;
     });
 
+    const filteredDynamicCards = initialDynamicCards.filter(card => {
+      if (card.allowedDepartments && card.allowedDepartments.length > 0) {
+        return !userDepartment || card.allowedDepartments.includes(userDepartment);
+      }
+      return true;
+    });
+
     setCards(filteredCards);
+    setDynamicCards(filteredDynamicCards);
   }, [userDepartment, getBadgeValue]);
+
+  // Combine standard and dynamic cards
+  const allCards = [...cards, ...dynamicCards];
 
   if (!isPreview && !user) {
     return (
@@ -216,10 +390,17 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       
       <div className="mt-4">
         <UnifiedCardGrid
-          cards={cards}
-          onCardsChange={(updatedCards) => setCards(updatedCards)}
+          cards={allCards}
+          onCardsChange={(updatedCards) => {
+            // Split updated cards back into standard and dynamic cards
+            const standardCards = updatedCards.filter(card => card.type !== 'dynamic');
+            const dynamicCards = updatedCards.filter(card => card.type === 'dynamic');
+            
+            setCards(standardCards);
+            setDynamicCards(dynamicCards as DynamicCardItem[]);
+          }}
           isMobileView={isMobile}
-          specialCardsData={{}}
+          specialCardsData={dynamicData}
         />
       </div>
       

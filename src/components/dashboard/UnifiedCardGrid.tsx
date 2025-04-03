@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -14,8 +13,8 @@ import { SortableUnifiedActionCard, UnifiedActionCardProps } from './UnifiedActi
 import { getWidthClass, getHeightClass } from './CardGrid';
 import { ActionCardItem, CardType, CardColor, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+import DynamicCard from './DynamicCard';
 
-// Make sure UnifiedCardItem includes all required properties from ActionCardItem
 export interface UnifiedCardItem extends ActionCardItem {
   // Any additional props specific to UnifiedCardItem can go here
 }
@@ -29,7 +28,6 @@ interface UnifiedCardGridProps {
   isMobileView?: boolean;
   isEditMode?: boolean;
   disableWiggleEffect?: boolean;
-  // Add properties to support special cards
   showSpecialFeatures?: boolean;
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
@@ -67,27 +65,21 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       const newIndex = cards.findIndex((item) => item.id === over.id);
       
       if (oldIndex !== -1 && newIndex !== -1) {
-        // Use type assertion to ensure the array is recognized as the right type
         const newCards = arrayMove([...cards], oldIndex, newIndex);
         onCardsChange(newCards);
       }
     }
   };
 
-  // Filter cards to show only visible ones (not hidden)
   const visibleCards = cards.filter(card => !card.isHidden);
 
-  // Filter cards for mobile view from visible cards
   const displayedCards = isMobileView
     ? visibleCards.filter((card) => card.displayMobile !== false)
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
-  // Calculate total columns based on mobile view
   const totalColumns = isMobileView ? 2 : 4;
   
-  // Always call useGridOccupancy with displayedCards, even if empty
-  // We moved this outside the conditional render to avoid the hooks error
   const { occupiedSlots } = useGridOccupancy(
     displayedCards.map(card => ({ 
       id: card.id,
@@ -114,48 +106,71 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     >
       <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={displayedCards.map(card => card.id)}>
-          {displayedCards.map(card => (
-            <div 
-              key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
-            >
-              <SortableUnifiedActionCard
-                id={card.id}
-                title={card.title}
-                subtitle={card.subtitle}
-                iconId={card.iconId}
-                path={card.path}
-                color={card.color}
-                width={card.width}
-                height={card.height}
-                isDraggable={isEditMode}
-                isEditing={isEditMode}
-                onEdit={onEditCard ? (id) => {
-                  const cardToEdit = cards.find(c => c.id === id);
-                  if (cardToEdit && onEditCard) onEditCard(cardToEdit);
-                } : undefined}
-                onDelete={onDeleteCard}
-                onHide={onHideCard}
-                iconSize={isMobileView ? 'lg' : 'xl'}
-                disableWiggleEffect={disableWiggleEffect}
-                // Pass through properties for special cards
-                type={card.type}
-                isQuickDemand={card.isQuickDemand}
-                isSearch={card.isSearch}
-                showSpecialFeatures={showSpecialFeatures}
-                quickDemandTitle={quickDemandTitle}
-                onQuickDemandTitleChange={onQuickDemandTitleChange}
-                onQuickDemandSubmit={onQuickDemandSubmit}
-                onSearchSubmit={onSearchSubmit}
-                specialCardsData={specialCardsData}
-                isCustom={card.isCustom}
-                hasBadge={card.hasBadge}
-                badgeValue={card.badgeValue}
-                hasSubtitle={!!card.subtitle}
-                isMobileView={isMobileView}
-              />
-            </div>
-          ))}
+          {displayedCards.map(card => {
+            let cardWidthClass = getWidthClass(card.width, isMobileView);
+            
+            if (card.type === 'dynamic' && 'widthDesktop' in card) {
+              const dynamicCard = card as any;
+              const widthValue = isMobileView 
+                ? dynamicCard.widthMobile 
+                : dynamicCard.widthDesktop;
+              
+              if (widthValue) {
+                const widthMapping = {
+                  1: '25',
+                  2: '50',
+                  3: '75',
+                  4: '100'
+                };
+                cardWidthClass = getWidthClass(widthMapping[widthValue] as CardWidth, isMobileView);
+              }
+            }
+
+            return (
+              <div 
+                key={card.id}
+                className={`${cardWidthClass} ${getHeightClass(card.height)}`}
+              >
+                <SortableUnifiedActionCard
+                  id={card.id}
+                  title={card.title}
+                  subtitle={card.subtitle}
+                  iconId={card.iconId}
+                  path={card.path}
+                  color={card.color}
+                  width={card.width}
+                  height={card.height}
+                  isDraggable={isEditMode}
+                  isEditing={isEditMode}
+                  onEdit={onEditCard ? (id) => {
+                    const cardToEdit = cards.find(c => c.id === id);
+                    if (cardToEdit && onEditCard && (cardToEdit.type !== 'dynamic' || !('canEdit' in cardToEdit) || cardToEdit.canEdit !== false)) {
+                      onEditCard(cardToEdit);
+                    }
+                  } : undefined}
+                  onDelete={onDeleteCard}
+                  onHide={onHideCard}
+                  iconSize={isMobileView ? 'lg' : 'xl'}
+                  disableWiggleEffect={disableWiggleEffect}
+                  type={card.type}
+                  dataSourceKey={card.dataSourceKey}
+                  isQuickDemand={card.isQuickDemand}
+                  isSearch={card.isSearch}
+                  showSpecialFeatures={showSpecialFeatures}
+                  quickDemandTitle={quickDemandTitle}
+                  onQuickDemandTitleChange={onQuickDemandTitleChange}
+                  onQuickDemandSubmit={onQuickDemandSubmit}
+                  onSearchSubmit={onSearchSubmit}
+                  specialCardsData={specialCardsData}
+                  isCustom={card.isCustom}
+                  hasBadge={card.hasBadge}
+                  badgeValue={card.badgeValue}
+                  hasSubtitle={!!card.subtitle}
+                  isMobileView={isMobileView}
+                />
+              </div>
+            );
+          })}
         </SortableContext>
       </div>
     </DndContext>
