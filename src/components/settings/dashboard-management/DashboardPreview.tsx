@@ -1,499 +1,206 @@
-import React, { useState, useEffect } from 'react';
-import { useDefaultDashboardState } from '@/hooks/dashboard-management/useDefaultDashboardState';
-import CardCustomizationModal from '@/components/dashboard/card-customization/CardCustomizationModal';
+
+import React, { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
-import { v4 as uuidv4 } from 'uuid';
-import { Loader2, Smartphone, Monitor } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { Save, RotateCcw, Smartphone, Monitor } from 'lucide-react';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
   department: string;
-  isMobilePreview?: boolean;
-  onAddCard?: (card: ActionCardItem) => void;
-  onDepartmentChange?: (department: string) => void;
+  cards: ActionCardItem[];
+  onCardsChange: (cards: ActionCardItem[]) => void;
+  onDepartmentChange: (department: string) => void;
+  onPageTypeChange: (pageType: 'dashboard' | 'communication') => void;
   onViewTypeChange?: (isMobile: boolean) => void;
+  isMobilePreview?: boolean;
   onReset?: () => Promise<boolean>;
   onSave?: () => Promise<boolean>;
   isSaving?: boolean;
-  onCardsChange?: (cards: ActionCardItem[]) => void;
-  cards?: ActionCardItem[];
-  onPageTypeChange?: (pageType: 'dashboard' | 'communication') => void;
+  onDrop?: (cardData: string) => boolean;
 }
 
-const DashboardPreview: React.FC<DashboardPreviewProps> = ({ 
-  dashboardType, 
+const DashboardPreview: React.FC<DashboardPreviewProps> = ({
+  dashboardType,
   department,
-  isMobilePreview = false,
-  onAddCard,
+  cards,
+  onCardsChange,
   onDepartmentChange,
+  onPageTypeChange,
   onViewTypeChange,
+  isMobilePreview = false,
   onReset,
   onSave,
   isSaving = false,
-  onCardsChange,
-  cards: externalCards,
-  onPageTypeChange
+  onDrop,
 }) => {
-  const {
-    cards: internalCards,
-    setCards,
-    isCustomizationModalOpen,
-    setIsCustomizationModalOpen,
-    editingCard,
-    handleDeleteCard: internalDeleteCard,
-    handleHideCard: internalHideCard,
-    handleEditCard,
-    handleSaveCard,
-    specialCardsData,
-    newDemandTitle,
-    setNewDemandTitle,
-    handleQuickDemandSubmit,
-    searchQuery,
-    setSearchQuery,
-    handleSearchSubmit,
-    isLoading: isLoadingInternal,
-    configSource
-  } = useDefaultDashboardState(department, dashboardType === 'dashboard' ? 'dashboard' : 'communication');
+  const [isEditMode, setIsEditMode] = useState(true);
 
-  const cards = externalCards || internalCards;
-  const isLoading = isLoadingInternal && !externalCards;
-
-  const handleCardsChange = (updatedCards: ActionCardItem[]) => {
-    if (onCardsChange) {
-      onCardsChange(updatedCards);
-    } else {
-      setCards(updatedCards);
-    }
+  const handleEditCardClick = (card: ActionCardItem) => {
+    console.log('Edit card:', card);
+    // Here you would open a modal or drawer to edit the card
   };
 
-  const handleDeleteCard = (id: string) => {
-    console.log(`Deleting card with ID: ${id}`);
-    try {
-      const updatedCards = cards.filter(card => card.id !== id);
-      console.log(`Cards before deletion: ${cards.length}, after: ${updatedCards.length}`);
-      handleCardsChange(updatedCards);
-      
-      toast({
-        title: "Card removido",
-        description: "O card foi removido com sucesso do dashboard",
-        variant: "default"
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error deleting card:', error);
-      toast({
-        title: "Erro ao remover card",
-        description: "Não foi possível remover o card. Tente novamente.",
-        variant: "destructive"
-      });
-      return false;
-    }
+  const handleDeleteCardClick = (cardId: string) => {
+    console.log('Delete card:', cardId);
+    const newCards = cards.filter(card => card.id !== cardId);
+    onCardsChange(newCards);
   };
 
-  const handleHideCard = (id: string) => {
-    console.log(`Hiding card with ID: ${id}`);
-    try {
-      const updatedCards = cards.map(card => 
-        card.id === id ? { ...card, isHidden: true } : card
-      );
-      handleCardsChange(updatedCards);
-      
-      toast({
-        title: "Card ocultado",
-        description: "O card foi ocultado do dashboard",
-        variant: "default"
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error hiding card:', error);
-      toast({
-        title: "Erro ao ocultar card",
-        description: "Não foi possível ocultar o card. Tente novamente.",
-        variant: "destructive"
-      });
-      return false;
-    }
+  const handleHideCardClick = (cardId: string) => {
+    console.log('Hide card:', cardId);
+    const newCards = cards.map(card => 
+      card.id === cardId 
+        ? { ...card, isHidden: true } 
+        : card
+    );
+    onCardsChange(newCards);
   };
-
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const { departments } = useDepartments();
-
-  const [selectedPageType, setSelectedPageType] = useState<'inicial' | 'comunicacao'>(
-    dashboardType === 'dashboard' ? 'inicial' : 'comunicacao'
-  );
   
-  useEffect(() => {
-    if (dashboardType === 'dashboard' && selectedPageType !== 'inicial') {
-      setSelectedPageType('inicial');
-    } else if (dashboardType === 'communication' && selectedPageType !== 'comunicacao') {
-      setSelectedPageType('comunicacao');
-    }
-  }, [dashboardType]);
-  
-  const [mockData, setMockData] = useState({
-    kpis: {
-      pressRequests: {
-        today: 14,
-        yesterday: 12,
-        percentageChange: 16.7,
-        loading: false
-      },
-      pendingApproval: {
-        total: 8,
-        awaitingResponse: 5,
-        loading: false
-      },
-      notesProduced: {
-        total: 42,
-        approved: 38,
-        rejected: 4,
-        loading: false
-      }
-    },
-    lists: {
-      recentDemands: {
-        items: [
-          { id: 'dem-1', title: 'Demanda de exemplo 1', status: 'in-progress' as const, date: '2023-12-01', path: '#' },
-          { id: 'dem-2', title: 'Demanda de exemplo 2', status: 'pending' as const, date: '2023-12-02', path: '#' }
-        ],
-        loading: false
-      },
-      recentNotes: {
-        items: [
-          { id: 'note-1', title: 'Nota de exemplo 1', status: 'approved' as const, date: '2023-12-01', path: '#' },
-          { id: 'note-2', title: 'Nota de exemplo 2', status: 'pending' as const, date: '2023-12-02', path: '#' }
-        ],
-        loading: false
-      }
-    },
-    originOptions: [
-      { id: 'origin-1', title: 'Imprensa', icon: '📰' },
-      { id: 'origin-2', title: 'Ministério', icon: '🏛️' },
-      { id: 'origin-3', title: 'Interno', icon: '🏢' }
-    ]
-  });
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    if (!isDraggingOver) {
-      setIsDraggingOver(true);
-    }
+    e.stopPropagation();
   };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-  };
-
+  
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDraggingOver(false);
+    e.stopPropagation();
     
     try {
-      const cardData = JSON.parse(e.dataTransfer.getData('application/json'));
-      const cardType = e.dataTransfer.getData('card/type');
+      const cardData = e.dataTransfer.getData('application/json');
+      if (!cardData) return;
       
-      if (cardData && cardData.id) {
-        const existingCard = cards.find(c => c.title === cardData.title);
-        if (existingCard) {
-          return;
-        }
-        
-        const newCard: ActionCardItem = {
-          ...cardData,
-          id: `card-${uuidv4()}`,
-          isCustom: false
-        };
-        
-        if (cardType === 'dynamic' && cardData.type) {
-          newCard.type = cardData.type;
-        }
-        
-        const updatedCards = [...cards, newCard];
-        handleCardsChange(updatedCards);
-        
-        if (onAddCard) {
-          onAddCard(newCard);
-        }
+      if (onDrop && onDrop(cardData)) {
+        console.log('Card dropped and added to dashboard');
       }
-    } catch (error) {
-      console.error('Error parsing dropped card data:', error);
-    }
-  };
-
-  const handleViewChange = (isMobile: boolean) => {
-    if (onViewTypeChange) {
-      onViewTypeChange(isMobile);
-    }
-  };
-
-  const handleDepartmentSelect = (value: string) => {
-    if (onDepartmentChange) {
-      onDepartmentChange(value);
-    }
-  };
-
-  const handlePageTypeSelect = (value: string) => {
-    if (value === 'inicial' || value === 'comunicacao') {
-      setSelectedPageType(value);
-      const newViewType = value === 'inicial' ? 'dashboard' : 'communication';
-      
-      console.log(`Changing page type to ${value}, viewType: ${newViewType}`);
-      
-      if (onPageTypeChange) {
-        onPageTypeChange(newViewType);
-      } 
-      else if (onDepartmentChange) {
-        onDepartmentChange(newViewType);
-      }
-    }
-  };
-
-  const handleManualSave = async () => {
-    if (onSave) {
-      const saveResult = await onSave();
-      
-      const updateEvent = new CustomEvent('dashboard:config:updated', {
-        detail: { department, viewType: dashboardType }
-      });
-      window.dispatchEvent(updateEvent);
-      console.log(`Event dispatched in handleManualSave for department: ${department}, view type: ${dashboardType}`);
-      
-      return saveResult;
-    }
-    
-    try {
-      const viewTypeToSave = selectedPageType === 'inicial' ? 'dashboard' : 'communication';
-      
-      console.log(`Saving dashboard config for department: ${department}, view type: ${viewTypeToSave}`);
-      
-      const { data: existingConfig, error: checkError } = await supabase
-        .from('department_dashboards')
-        .select('id')
-        .eq('department', department)
-        .eq('view_type', viewTypeToSave)
-        .maybeSingle();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking existing dashboard config:', checkError);
-        toast({
-          title: "Erro ao verificar dashboard",
-          description: "Não foi possível verificar a configuração existente",
-          variant: "destructive"
-        });
-        return false;
-      }
-
-      const cardsToSave = cards.map(card => {
-        if (card.dataSourceKey) {
-          return {...card, type: 'data_dynamic'};
-        }
-        return card;
-      });
-      
-      const cardsJson = JSON.stringify(cardsToSave);
-
-      if (existingConfig) {
-        const { error: updateError } = await supabase
-          .from('department_dashboards')
-          .update({ cards_config: cardsJson })
-          .eq('id', existingConfig.id);
-
-        if (updateError) {
-          console.error('Error updating dashboard config:', updateError);
-          toast({
-            title: "Erro ao salvar dashboard",
-            description: "Não foi possível salvar a configuração do dashboard",
-            variant: "destructive"
-          });
-          return false;
-        }
-      } else {
-        const { error: insertError } = await supabase
-          .from('department_dashboards')
-          .insert({
-            department: department,
-            view_type: viewTypeToSave,
-            cards_config: cardsJson
-          });
-
-        if (insertError) {
-          console.error('Error inserting dashboard config:', insertError);
-          toast({
-            title: "Erro ao criar dashboard",
-            description: "Não foi possível criar a configuração do dashboard",
-            variant: "destructive"
-          });
-          return false;
-        }
-      }
-      
-      if (!onSave) {
-        toast({
-          title: "Dashboard salvo",
-          description: "Configuração do dashboard salva com sucesso",
-          variant: "success"
-        });
-      }
-      
-      const updateEvent = new CustomEvent('dashboard:config:updated', {
-        detail: { department, viewType: viewTypeToSave }
-      });
-      window.dispatchEvent(updateEvent);
-      
-      console.log(`Event dispatched for department: ${department}, view type: ${viewTypeToSave}`);
-      
-      return true;
-    } catch (error) {
-      console.error('Error saving dashboard:', error);
-      toast({
-        title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar a configuração",
-        variant: "destructive"
-      });
-      return false;
+    } catch (err) {
+      console.error('Error handling drop:', err);
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg border">
-        <div className="flex items-center gap-2 flex-grow">
-          <Select value={department} onValueChange={handleDepartmentSelect}>
-            <SelectTrigger className="w-[200px] h-9 text-sm">
-              <SelectValue placeholder="Selecione a coordenação" />
-            </SelectTrigger>
-            <SelectContent>
-              {departments.map(dept => (
-                <SelectItem key={dept.id} value={dept.id}>
-                  {dept.sigla || dept.descricao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Select value={selectedPageType} onValueChange={handlePageTypeSelect}>
-            <SelectTrigger className="w-[160px] h-9 text-sm bg-white">
-              <SelectValue placeholder="Tipo de Página" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="inicial">Inicial</SelectItem>
-              <SelectItem value="comunicacao">Comunicação</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => handleViewChange(!isMobilePreview)}
-            className="h-9"
-          >
-            {isMobilePreview ? (
-              <><Smartphone className="h-4 w-4 mr-1" /> Mobile</>
-            ) : (
-              <><Monitor className="h-4 w-4 mr-1" /> Desktop</>
-            )}
-          </Button>
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="department-select">Coordenação</Label>
+              <Select value={department} onValueChange={onDepartmentChange}>
+                <SelectTrigger id="department-select" className="w-full">
+                  <SelectValue placeholder="Selecione a coordenação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Padrão</SelectItem>
+                  <SelectItem value="comunicacao">Comunicação</SelectItem>
+                  <SelectItem value="orcamento">Orçamento</SelectItem>
+                  <SelectItem value="administrativo">Administrativo</SelectItem>
+                  <SelectItem value="ti">Tecnologia da Informação</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="page-type-select">Tipo de página</Label>
+              <Select 
+                value={dashboardType} 
+                onValueChange={(value) => onPageTypeChange(value as 'dashboard' | 'communication')}
+              >
+                <SelectTrigger id="page-type-select" className="w-full">
+                  <SelectValue placeholder="Selecione o tipo de página" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dashboard">Dashboard principal</SelectItem>
+                  <SelectItem value="communication">Página de comunicação</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center space-x-4 mt-6">
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="edit-mode" 
+                  checked={isEditMode} 
+                  onCheckedChange={setIsEditMode} 
+                />
+                <Label htmlFor="edit-mode">Modo de edição</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="mobile-preview" 
+                  checked={isMobilePreview} 
+                  onCheckedChange={(checked) => onViewTypeChange && onViewTypeChange(checked)} 
+                />
+                <Label htmlFor="mobile-preview" className="flex items-center">
+                  {isMobilePreview ? (
+                    <><Smartphone className="h-4 w-4 mr-1" /> Mobile</>
+                  ) : (
+                    <><Monitor className="h-4 w-4 mr-1" /> Desktop</>
+                  )}
+                </Label>
+              </div>
+            </div>
+          </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex space-x-2">
           {onReset && (
-            <Button
-              variant="outline"
+            <Button 
+              variant="outline" 
               size="sm"
               onClick={onReset}
-              className="h-9"
+              disabled={isSaving}
             >
+              <RotateCcw className="h-4 w-4 mr-2" />
               Resetar
             </Button>
           )}
           
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleManualSave}
-            disabled={isSaving}
-            className="h-9"
-          >
-            {isSaving ? (
-              <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Salvando...</>
-            ) : (
-              <>Salvar</>
-            )}
-          </Button>
-        </div>
-      </div>
-      
-      <div 
-        className={`p-4 transition-all duration-300 ${isDraggingOver ? 'bg-blue-50 border-2 border-blue-300 border-dashed' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div className={`p-4 bg-gray-100 rounded-lg min-h-[400px] ${isDraggingOver ? 'opacity-70' : ''}`}>
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
-              <p className="text-gray-600">Carregando configuração do dashboard...</p>
-            </div>
-          ) : cards.length === 0 ? (
-            <div className="text-center p-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-              {isDraggingOver ? 
-                "Solte aqui para adicionar o card ao dashboard" : 
-                "Nenhum card configurado. Arraste cards para este espaço para começar a personalizar o dashboard."
-              }
-            </div>
-          ) : (
-            <UnifiedCardGrid 
-              cards={cards}
-              onCardsChange={handleCardsChange}
-              onEditCard={handleEditCard}
-              onDeleteCard={handleDeleteCard}
-              onHideCard={handleHideCard}
-              isMobileView={isMobilePreview}
-              isEditMode={true}
-              showSpecialFeatures={true}
-              quickDemandTitle={newDemandTitle}
-              onQuickDemandTitleChange={setNewDemandTitle}
-              onQuickDemandSubmit={handleQuickDemandSubmit}
-              onSearchSubmit={handleSearchSubmit}
-              specialCardsData={{
-                ...specialCardsData,
-                ...mockData
-              }}
-            />
+          {onSave && (
+            <Button 
+              size="sm"
+              onClick={onSave}
+              disabled={isSaving}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Salvar
+            </Button>
           )}
         </div>
       </div>
       
-      {isDraggingOver && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="bg-blue-500 bg-opacity-20 text-blue-800 font-semibold p-4 rounded-lg shadow-lg">
-            Solte para adicionar ao dashboard
+      <Card 
+        className="shadow-md bg-gray-50"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        <CardContent className="p-4">
+          <div className={`relative ${isMobilePreview ? 'max-w-sm mx-auto' : 'w-full'} min-h-[40vh] border border-dashed border-gray-300 rounded-lg p-4 bg-white`}>
+            {cards.length === 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-center p-4">
+                <div>
+                  <p className="font-medium">Sem cards no dashboard</p>
+                  <p className="text-sm mt-1">Arraste cards da biblioteca para adicionar</p>
+                </div>
+              </div>
+            ) : (
+              <UnifiedCardGrid
+                cards={cards}
+                onCardsChange={onCardsChange}
+                onEditCard={handleEditCardClick}
+                onDeleteCard={handleDeleteCardClick}
+                onHideCard={handleHideCardClick}
+                isMobileView={isMobilePreview}
+                isEditMode={isEditMode}
+              />
+            )}
           </div>
-        </div>
-      )}
-      
-      <CardCustomizationModal
-        isOpen={isCustomizationModalOpen}
-        onClose={() => setIsCustomizationModalOpen(false)}
-        onSave={handleSaveCard}
-        initialData={editingCard || undefined}
-      />
+        </CardContent>
+      </Card>
     </div>
   );
 };
