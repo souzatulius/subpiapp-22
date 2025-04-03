@@ -11,21 +11,9 @@ export const useAvailableCards = () => {
     const fetchAvailableCards = async () => {
       setIsLoading(true);
       try {
-        // Try to get cards from a library table if it exists
-        const { data, error } = await supabase
-          .from('card_library')
-          .select('*');
-
-        if (error) {
-          console.error('Error fetching card library:', error);
-          // Fallback to sample cards if table doesn't exist
-          setAvailableCards(getSampleCards());
-        } else if (data && data.length > 0) {
-          setAvailableCards(data as ActionCardItem[]);
-        } else {
-          // No cards found, use sample cards
-          setAvailableCards(getSampleCards());
-        }
+        // Since there's no card_library table in the database,
+        // we'll just use the sample cards directly
+        setAvailableCards(getSampleCards());
       } catch (err) {
         console.error('Failed to fetch available cards:', err);
         setAvailableCards(getSampleCards());
