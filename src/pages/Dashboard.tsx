@@ -10,7 +10,7 @@ import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import { Loader2 } from 'lucide-react';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import { ActionCardItem } from '@/types/dashboard';
+import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 
@@ -25,7 +25,7 @@ const Dashboard = () => {
   const { badgeValues, isLoading: isBadgeLoading } = useBadgeValues(userDepartment || '');
 
   // Map background color to Tailwind classes
-  const getBgColor = (color: string) => {
+  const getBgColor = (color: string): CardColor => {
     switch (color) {
       case 'grey-400': return 'gray-400';
       case 'grey-800': return 'gray-800';
@@ -63,7 +63,6 @@ const Dashboard = () => {
     }
   }, [user]);
   
-  // Create and filter cards based on user department
   useEffect(() => {
     if (!user) {
       setIsLoading(false);
@@ -194,13 +193,10 @@ const Dashboard = () => {
       }
     ];
 
-    // Filter cards based on department permissions
     const filteredCards = initialCards.filter(card => {
-      // If card has allowedDepartments and it's not empty, check if user's department is in the list
       if (card.allowedDepartments && card.allowedDepartments.length > 0) {
         return !userDepartment || card.allowedDepartments.includes(userDepartment);
       }
-      // Otherwise, show the card to everyone
       return true;
     });
 

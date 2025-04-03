@@ -38,6 +38,21 @@ const getBackgroundColor = (color: CardColor): string => {
     case 'gray-ultra-light': return 'bg-gray-100';
     case 'lime': return 'bg-lime-500';
     case 'orange-600': return 'bg-orange-600';
+    case 'blue-light': return 'bg-blue-300';
+    case 'green-light': return 'bg-green-300';
+    case 'purple-light': return 'bg-purple-300';
+    // New color mappings
+    case 'gray-400': return 'bg-gray-400';
+    case 'gray-800': return 'bg-gray-800';
+    case 'gray-950': return 'bg-gray-950';
+    case 'blue-700': return 'bg-blue-700';
+    case 'blue-900': return 'bg-blue-900';
+    case 'blue-960': return 'bg-blue-900';
+    case 'orange-400': return 'bg-orange-400';
+    case 'orange-500': return 'bg-orange-500';
+    case 'gray-200': return 'bg-gray-200';
+    case 'lime-500': return 'bg-lime-500';
+    case 'neutral-200': return 'bg-gray-200';
     default: return 'bg-blue-500';
   }
 };

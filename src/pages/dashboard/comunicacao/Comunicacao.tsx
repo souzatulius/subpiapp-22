@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2 } from 'lucide-react';
@@ -6,7 +7,7 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import { ActionCardItem } from '@/types/dashboard';
+import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -26,7 +27,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const { badgeValues, isLoading: isBadgeLoading } = useBadgeValues(userDepartment || 'comunicacao');
 
-  const getBgColor = (color: string) => {
+  const getBgColor = (color: string): CardColor => {
     switch (color) {
       case 'grey-400': return 'gray-400';
       case 'grey-800': return 'gray-800';
