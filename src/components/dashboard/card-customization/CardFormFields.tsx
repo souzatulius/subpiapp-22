@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   FormField,
@@ -218,8 +217,8 @@ const CardFormFields: React.FC<Props> = ({
             <FormLabel>Cor</FormLabel>
             <FormControl>
               <ColorOptions
-                selectedColor={field.value as CardColor}
-                onSelectColor={(color: CardColor) => form.setValue('color', color)}
+                selectedColor={field.value}
+                onSelectColor={(color) => form.setValue('color', color as CardColor)}
               />
             </FormControl>
             <FormMessage />

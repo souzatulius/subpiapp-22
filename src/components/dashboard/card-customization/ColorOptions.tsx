@@ -11,7 +11,7 @@ interface ColorOptionsProps {
 
 const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColor }) => {
   // Updated color options with all available colors including the newly added ones
-  const colorOptions: Array<{value: CardColor; display: string; className: string}> = [
+  const colorOptions: Array<{value: string; display: string; className: string}> = [
     // Original colors
     { value: 'blue', display: 'blue-500', className: 'bg-blue-500 border-blue-600 text-white' },
     { value: 'green', display: 'green-500', className: 'bg-green-500 border-green-600 text-white' },
