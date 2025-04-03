@@ -1,12 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-export interface Department {
-  id: string;
-  descricao: string;
-  sigla?: string;
-}
+import { Department } from '@/types/dashboard';
 
 export const useDepartments = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -27,7 +22,15 @@ export const useDepartments = () => {
           throw new Error(error.message);
         }
         
-        setDepartments(data || []);
+        // Map the response data to match the Department interface
+        const mappedDepartments: Department[] = (data || []).map(item => ({
+          id: item.id,
+          nome: item.descricao, // Map descricao to nome
+          sigla: item.sigla,
+          descricao: item.descricao
+        }));
+        
+        setDepartments(mappedDepartments);
       } catch (err) {
         console.error('Error fetching departments:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch departments');
