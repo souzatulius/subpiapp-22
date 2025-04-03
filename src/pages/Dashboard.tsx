@@ -128,6 +128,24 @@ const Dashboard = () => {
     }
   };
   
+  // Listen for dashboard config updates from DashboardManagementContent
+  useEffect(() => {
+    const handleDashboardConfigUpdate = (event: CustomEvent) => {
+      const { department: eventDepartment, viewType } = event.detail;
+      console.log('Dashboard config updated event received:', eventDepartment, viewType);
+      
+      if (viewType === 'dashboard' && eventDepartment === userDepartment) {
+        console.log('Reloading dashboard config after update');
+        loadDashboardConfig();
+      }
+    };
+    
+    window.addEventListener('dashboard:config:updated', handleDashboardConfigUpdate as EventListener);
+    return () => {
+      window.removeEventListener('dashboard:config:updated', handleDashboardConfigUpdate as EventListener);
+    };
+  }, [loadDashboardConfig, userDepartment]);
+  
   // Load user department when user is available
   useEffect(() => {
     const loadUserDepartment = async () => {

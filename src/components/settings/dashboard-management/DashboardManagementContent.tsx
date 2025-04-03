@@ -24,6 +24,7 @@ import {
   SelectItem 
 } from "@/components/ui/select";
 import { Plus } from 'lucide-react';
+import { useUserData } from '@/hooks/useUserData';
 
 const DashboardManagementContent: React.FC = () => {
   const { kpis } = useDashboardKPIs();
@@ -31,6 +32,10 @@ const DashboardManagementContent: React.FC = () => {
   const { originOptions } = useOriginOptions();
   const { availableCards, dynamicCards, standardCards } = useAvailableCards();
   const [isMobilePreview, setIsMobilePreview] = useState(false);
+  const { user, userData } = useUserData();
+  
+  // Get user department and use it as initial department
+  const userDepartment = userData?.coordenacao_id || 'comunicacao';
   
   const {
     config,
@@ -44,7 +49,14 @@ const DashboardManagementContent: React.FC = () => {
     saveConfig,
     resetAllDashboards,
     fetchDashboardConfig
-  } = useDefaultDashboardConfig();
+  } = useDefaultDashboardConfig(userDepartment);
+
+  // Ensure we're using user's department when component first loads
+  useEffect(() => {
+    if (userDepartment) {
+      setSelectedDepartment(userDepartment);
+    }
+  }, [userDepartment, setSelectedDepartment]);
 
   // Refresh the dashboard config when component mounts and when dependencies change
   useEffect(() => {
@@ -52,12 +64,22 @@ const DashboardManagementContent: React.FC = () => {
   }, [selectedDepartment, selectedViewType, fetchDashboardConfig]);
 
   const handleSaveConfig = async () => {
-    console.log('Saving dashboard config:', config);
+    console.log(`Saving dashboard config for ${selectedDepartment}:`, config);
     const success = await saveConfig(config);
+    
     if (success) {
+      // Dispatch a custom event to notify other components that dashboard config has changed
+      const event = new CustomEvent('dashboard:config:updated', {
+        detail: {
+          department: selectedDepartment,
+          viewType: selectedViewType
+        }
+      });
+      window.dispatchEvent(event);
+      
       toast({
         title: "Configuração salva",
-        description: "A configuração do dashboard foi salva com sucesso.",
+        description: `A configuração do dashboard para ${selectedDepartment} foi salva com sucesso.`,
         variant: "success"
       });
     } else {

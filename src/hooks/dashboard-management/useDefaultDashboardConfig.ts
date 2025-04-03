@@ -16,6 +16,13 @@ export const useDefaultDashboardConfig = (initialDepartment: string = 'default')
     lastSaved: ''
   });
 
+  // Update selectedDepartment when initialDepartment changes
+  useEffect(() => {
+    if (initialDepartment && initialDepartment !== 'default') {
+      setSelectedDepartment(initialDepartment);
+    }
+  }, [initialDepartment]);
+
   const fetchDashboardConfig = useCallback(async () => {
     setIsLoading(true);
     try {

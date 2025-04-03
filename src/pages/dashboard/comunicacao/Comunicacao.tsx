@@ -132,6 +132,26 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     }
   };
   
+  // Listen for dashboard config updates from DashboardManagementContent
+  useEffect(() => {
+    const handleDashboardConfigUpdate = (event: CustomEvent) => {
+      const { department: eventDepartment, viewType } = event.detail;
+      console.log('Dashboard config updated event received:', eventDepartment, viewType);
+      
+      if (viewType === 'communication' && 
+         (eventDepartment === userDepartment || 
+          (isPreview && eventDepartment === department))) {
+        console.log('Reloading dashboard config after update');
+        loadDashboardConfig();
+      }
+    };
+    
+    window.addEventListener('dashboard:config:updated', handleDashboardConfigUpdate as EventListener);
+    return () => {
+      window.removeEventListener('dashboard:config:updated', handleDashboardConfigUpdate as EventListener);
+    };
+  }, [loadDashboardConfig, userDepartment, department, isPreview]);
+  
   // Load user department when user is available
   useEffect(() => {
     const loadUserDepartment = async () => {
