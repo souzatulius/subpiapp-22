@@ -153,6 +153,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
     
     try {
       if (photoFile && user?.id) {
+        console.log("Uploading photo to Supabase storage...");
         const fileExt = photoFile.name.split('.').pop() || 'jpg';
         const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
         
@@ -174,6 +175,7 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({
 
         if (urlData?.publicUrl) {
           data.foto_perfil_url = urlData.publicUrl;
+          console.log("Photo uploaded successfully, URL:", urlData.publicUrl);
         }
       }
       

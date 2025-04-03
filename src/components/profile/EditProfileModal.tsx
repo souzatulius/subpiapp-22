@@ -47,7 +47,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   // Load user data when dialog opens
   useEffect(() => {
-    if (userData) {
+    if (userData && isOpen) {
       setValue('nome_completo', userData.nome_completo || '');
       
       // Format whatsapp with mask
@@ -139,7 +139,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       
       console.log('Updating with data:', updateData);
       
-      // Update profile - IMPORTANT: Use the 'usuarios' table instead of 'users'
+      // Update profile - Make sure to use the 'usuarios' table, NOT 'users'
       const { error } = await supabase
         .from('usuarios')
         .update(updateData)

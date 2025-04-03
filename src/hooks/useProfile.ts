@@ -22,6 +22,8 @@ export const useProfile = () => {
       const fileExt = file.name.split('.').pop() || 'jpg';
       const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
+      console.log(`Uploading to ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
+      
       const { error: uploadError } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, file);
@@ -34,6 +36,8 @@ export const useProfile = () => {
       const { data: { publicUrl } } = supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .getPublicUrl(filePath);
+      
+      console.log('Generated public URL:', publicUrl);
       
       // Update the user's metadata in the usuarios table
       const { error: updateError } = await supabase

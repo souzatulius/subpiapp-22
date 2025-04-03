@@ -38,15 +38,7 @@ export const usePhotoUpload = () => {
       const fileExt = file.name.split('.').pop() || 'jpg';
       const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${Date.now()}.${fileExt}`;
       
-      // Check if storage bucket exists, create if not
-      const { data: buckets } = await supabase.storage.listBuckets();
-      if (!buckets?.find(bucket => bucket.name === PROFILE_PHOTOS_BUCKET)) {
-        console.log('Creating storage bucket for user photos...');
-        await supabase.storage.createBucket(PROFILE_PHOTOS_BUCKET, {
-          public: true,
-          fileSizeLimit: 5242880 // 5MB
-        });
-      }
+      console.log(`Uploading to ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
       
       const { error: uploadError } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
@@ -64,6 +56,8 @@ export const usePhotoUpload = () => {
       const { data: { publicUrl } } = supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .getPublicUrl(filePath);
+      
+      console.log('Generated public URL:', publicUrl);
       
       // Update user profile with new photo URL - use 'usuarios' table
       const { error: updateError } = await supabase

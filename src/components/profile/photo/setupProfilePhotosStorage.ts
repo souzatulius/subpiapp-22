@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const setupProfilePhotosStorage = async () => {
   try {
-    // Check if 'profile-photos' bucket exists
+    // Check if 'usuarios' bucket exists
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
     if (listError) {
@@ -11,11 +11,11 @@ export const setupProfilePhotosStorage = async () => {
       return false;
     }
     
-    const bucketExists = buckets?.some(bucket => bucket.name === 'profile-photos');
+    const bucketExists = buckets?.some(bucket => bucket.name === 'usuarios');
     
     if (!bucketExists) {
-      console.log('Creating profile-photos bucket...');
-      const { error: createError } = await supabase.storage.createBucket('profile-photos', {
+      console.log('Creating usuarios bucket...');
+      const { error: createError } = await supabase.storage.createBucket('usuarios', {
         public: true
       });
       
@@ -27,7 +27,7 @@ export const setupProfilePhotosStorage = async () => {
       console.log('Bucket created successfully');
 
       // Update bucket policies to make it public
-      const { error: updateError } = await supabase.storage.updateBucket('profile-photos', {
+      const { error: updateError } = await supabase.storage.updateBucket('usuarios', {
         public: true
       });
       
