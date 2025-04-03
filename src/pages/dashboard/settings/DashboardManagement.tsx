@@ -23,7 +23,6 @@ const DashboardManagement: React.FC = () => {
           description="Configure e personalize os dashboards para cada coordenação"
           icon={<Layout className="h-6 w-6 mr-2 text-white" />}
           color="bg-gradient-to-r from-blue-600 to-blue-800"
-          userName={firstName}
         />
         
         <div className="mt-6">

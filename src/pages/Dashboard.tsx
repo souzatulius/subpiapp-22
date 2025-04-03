@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -16,7 +15,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
-  // Start with sidebar collapsed
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   const isMobile = useIsMobile();
@@ -27,7 +25,6 @@ const Dashboard = () => {
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [configSource, setConfigSource] = useState<'default' | 'custom'>('default');
   
-  // Get user department from user profile
   const getUserDepartment = useCallback(async () => {
     if (!user) return null;
     
@@ -50,17 +47,14 @@ const Dashboard = () => {
     }
   }, [user]);
   
-  // Load dashboard configuration based on user's department
   const loadDashboardConfig = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Determine the user's department ID, fall back to default if not available
       const departmentId = userDepartment || 'default';
       const viewType = 'dashboard';
       
       console.log('Loading dashboard config for department:', departmentId, 'viewType:', viewType);
       
-      // First try to get department-specific config
       const { data, error } = await supabase
         .from('department_dashboards')
         .select('cards_config')
@@ -70,7 +64,6 @@ const Dashboard = () => {
         
       if (!error && data && data.cards_config) {
         try {
-          // Parse the configuration and set cards
           const config = JSON.parse(data.cards_config);
           console.log('Loaded department-specific dashboard cards:', config.length);
           setDashboardCards(config);
@@ -80,7 +73,6 @@ const Dashboard = () => {
           fetchDefaultConfig();
         }
       } else {
-        // If no department-specific config or error, fall back to default
         fetchDefaultConfig();
       }
     } catch (e) {
@@ -91,7 +83,6 @@ const Dashboard = () => {
     }
   }, [userDepartment]);
   
-  // Get default dashboard config as fallback
   const fetchDefaultConfig = async () => {
     try {
       console.log('Fetching default dashboard config');
@@ -122,7 +113,6 @@ const Dashboard = () => {
     }
   };
   
-  // Listen for dashboard config updates from DashboardManagementContent
   useEffect(() => {
     const handleDashboardConfigUpdate = (event: CustomEvent<{department: string, viewType: string}>) => {
       const { department: eventDepartment, viewType } = event.detail;
@@ -140,7 +130,6 @@ const Dashboard = () => {
     };
   }, [loadDashboardConfig, userDepartment]);
   
-  // Load user department when user is available
   useEffect(() => {
     const loadUserDepartment = async () => {
       if (user) {
@@ -152,7 +141,6 @@ const Dashboard = () => {
     loadUserDepartment();
   }, [user, getUserDepartment]);
   
-  // Load dashboard config when user department changes
   useEffect(() => {
     if (user) {
       loadDashboardConfig();
@@ -165,7 +153,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header - explicitly pass showControls={true} */}
       <Header showControls={true} toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
@@ -175,13 +162,13 @@ const Dashboard = () => {
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
             <WelcomeCard
-              title={`Olá, ${firstName || 'Usuário'}!`}
+              title="Dashboard"
               description="Bem-vindo ao seu dashboard personalizado."
               icon={<Home className="h-6 w-6 mr-2" />}
               color="bg-gradient-to-r from-blue-800 to-blue-950"
+              userName={firstName || 'Usuário'}
             />
             
-            {/* Display dashboard cards */}
             <div className="mt-6">
               {isLoading ? (
                 <div className="flex justify-center items-center p-8">
@@ -211,7 +198,6 @@ const Dashboard = () => {
         </main>
       </div>
       
-      {/* Mobile Bottom Navigation - only visible on mobile */}
       {isMobile && <MobileBottomNav />}
     </div>
   );
