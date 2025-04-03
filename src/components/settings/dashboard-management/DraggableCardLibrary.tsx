@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Grip, Maximize2, Minimize2 } from 'lucide-react';
 import { useAvailableCards } from '@/hooks/dashboard-management/useAvailableCards';
@@ -5,6 +6,7 @@ import { ActionCardItem } from '@/types/dashboard';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 
 interface DraggableCardLibraryProps {
   onAddCardToDashboard: (card: ActionCardItem) => void;
@@ -97,6 +99,72 @@ const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardTo
     }
   };
 
+  // Renderizar cards da biblioteca de forma independente sem usar UnifiedCardGrid
+  const renderLibraryCards = () => {
+    return (
+      <div className={`grid ${expanded ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
+        {filteredCards.map(card => (
+          <div 
+            key={card.id} 
+            draggable 
+            onDragStart={handleCardDragStart(card)}
+            onDragEnd={handleCardDragEnd}
+            className="cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
+          >
+            <div className="card-preview relative aspect-[3/2] bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+              <div className="absolute inset-0 p-3 flex flex-col" style={{transform: 'scale(0.9)'}}>
+                <div className={`w-full h-full rounded-md flex items-center p-3 ${getCardColorClass(card.color)}`}>
+                  <div className="flex items-center">
+                    {renderCardIcon(card)}
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-white truncate">{card.title}</h3>
+                      {card.subtitle && (
+                        <p className="text-xs text-white/80 truncate">{card.subtitle}</p>
+                      )}
+                    </div>
+                  </div>
+                  {card.hasBadge && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {card.badgeValue || '!'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Função auxiliar para renderizar o ícone do card
+  const renderCardIcon = (card: ActionCardItem) => {
+    const IconComponent = getIconComponentFromId(card.iconId);
+    if (!IconComponent) return null;
+    
+    return <IconComponent className="h-5 w-5 text-white" />;
+  };
+
+  // Função auxiliar para obter a classe de cor do card
+  const getCardColorClass = (color: string): string => {
+    switch (color) {
+      case 'blue': return 'bg-blue-500';
+      case 'green': return 'bg-green-500';
+      case 'orange': return 'bg-orange-500';
+      case 'gray-light': return 'bg-gray-200 text-gray-800';
+      case 'gray-dark': return 'bg-gray-700';
+      case 'blue-dark': return 'bg-blue-700';
+      case 'orange-light': return 'bg-orange-300';
+      case 'gray-ultra-light': return 'bg-gray-100';
+      case 'lime': return 'bg-lime-500';
+      case 'orange-600': return 'bg-orange-600';
+      case 'blue-light': return 'bg-blue-400';
+      case 'green-light': return 'bg-green-400';
+      case 'purple-light': return 'bg-purple-400';
+      default: return 'bg-blue-500';
+    }
+  };
+
   const renderCardLibraryContent = () => (
     <div className="space-y-4">
       <div className="relative w-full">
@@ -117,29 +185,7 @@ const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardTo
             Nenhum card encontrado com o termo "{searchTerm}"
           </div>
         ) : (
-          <div className={`grid ${expanded ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-            {filteredCards.map(card => (
-              <div 
-                key={card.id} 
-                draggable 
-                onDragStart={handleCardDragStart(card)}
-                onDragEnd={handleCardDragEnd}
-                className="cursor-grab active:cursor-grabbing transition-transform transform-gpu hover:scale-105"
-                style={{ touchAction: 'none' }} // Helps with mobile drag
-              >
-                {/* Using a scale transform to maintain proportions while fitting in the library */}
-                <div className="transform scale-90 origin-top-left">
-                  <UnifiedCardGrid
-                    cards={[card]}
-                    onCardsChange={() => {}}
-                    disableWiggleEffect={true}
-                    showSpecialFeatures={false}
-                    isEditMode={false}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          renderLibraryCards()
         )}
       </div>
       

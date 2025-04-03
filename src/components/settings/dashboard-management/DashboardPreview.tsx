@@ -27,6 +27,7 @@ interface DashboardPreviewProps {
   isLoadingDepartments?: boolean;
   showLibraryButton?: boolean;
   onLibraryClick?: () => void;
+  isDragOver?: boolean; // Novo prop para indicar quando um card está sendo arrastado sobre o preview
 }
 
 const DashboardPreview: React.FC<DashboardPreviewProps> = ({
@@ -46,9 +47,9 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   isLoadingDepartments = false,
   showLibraryButton = false,
   onLibraryClick,
+  isDragOver = false,
 }) => {
   const [isEditMode, setIsEditMode] = useState(true);
-  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleEditCardClick = (card: ActionCardItem) => {
     console.log('Edit card:', card);
@@ -71,26 +72,18 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     onCardsChange(newCards);
   };
   
+  // Gerenciar eventos de drag para feedback visual
   const handleDragOver = (e: React.DragEvent) => {
-    // This is required to allow dropping
     e.preventDefault();
     e.stopPropagation();
-    
-    // Add visual cues for drop target
-    setIsDragOver(true);
     
     // Set dropEffect to copy to indicate we're copying the card
     e.dataTransfer.dropEffect = 'copy';
   };
   
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-  
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragOver(false);
     
     try {
       const cardData = e.dataTransfer.getData('application/json');
@@ -205,9 +198,8 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       </div>
       
       <Card 
-        className={`shadow-md bg-gray-50 ${isDragOver ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
+        className={`shadow-md bg-gray-50 ${isDragOver ? 'ring-2 ring-blue-500 ring-offset-2 transition-all' : ''}`}
         onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <CardContent className="p-4">

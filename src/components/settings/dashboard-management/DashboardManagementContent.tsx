@@ -16,6 +16,7 @@ const DashboardManagementContent: React.FC = () => {
   const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [pageType, setPageType] = useState<'dashboard' | 'communication'>('dashboard');
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [isDraggingOverPreview, setIsDraggingOverPreview] = useState(false);
   
   const { departments, loading: departmentsLoading } = useDepartments();
   const { config, setConfig, isLoading, isSaving, saveConfig, resetAllDashboards } = 
@@ -102,51 +103,93 @@ const DashboardManagementContent: React.FC = () => {
       description: `O card "${card.title}" foi adicionado ao dashboard`,
       variant: "success"
     });
+
+    // Fechar a biblioteca após adicionar o card, se estiver aberta
+    if (isLibraryOpen) {
+      setIsLibraryOpen(false);
+    }
+  };
+
+  // Gerenciar evento de drop diretamente no container
+  const handleDrop = (cardData: string): boolean => {
+    try {
+      const card = JSON.parse(cardData) as ActionCardItem;
+      handleAddCardToDashboard(card);
+      setIsDraggingOverPreview(false);
+      return true;
+    } catch (err) {
+      console.error('Failed to parse card data:', err);
+      setIsDraggingOverPreview(false);
+      return false;
+    }
+  };
+
+  // Manipular eventos de drag para feedback visual
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOverPreview(true);
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDragLeave = () => {
+    setIsDraggingOverPreview(false);
   };
 
   return (
     <Card>
       <CardContent className="p-6">
         <div className="space-y-6">
-          <DashboardPreview
-            dashboardType={pageType}
-            department={selectedDepartment}
-            onDepartmentChange={handleDepartmentChange}
-            onViewTypeChange={setIsMobilePreview}
-            isMobilePreview={isMobilePreview}
-            onReset={handleReset}
-            onSave={handleSave}
-            isSaving={isSaving}
-            onCardsChange={setConfig}
-            cards={config}
-            onPageTypeChange={handlePageTypeChange}
-            onDrop={(cardData) => {
-              try {
-                const card = JSON.parse(cardData) as ActionCardItem;
-                handleAddCardToDashboard(card);
-                return true;
-              } catch (err) {
-                console.error('Failed to parse card data:', err);
-                return false;
+          <div 
+            className={`dashboard-preview-container ${isDraggingOverPreview ? 'ring-2 ring-blue-500' : ''}`} 
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const cardData = e.dataTransfer.getData('application/json');
+              if (cardData) {
+                handleDrop(cardData);
               }
             }}
-            departments={departments}
-            isLoadingDepartments={departmentsLoading}
-            showLibraryButton
-            onLibraryClick={() => setIsLibraryOpen(true)}
-          />
+          >
+            <DashboardPreview
+              dashboardType={pageType}
+              department={selectedDepartment}
+              onDepartmentChange={handleDepartmentChange}
+              onViewTypeChange={setIsMobilePreview}
+              isMobilePreview={isMobilePreview}
+              onReset={handleReset}
+              onSave={handleSave}
+              isSaving={isSaving}
+              onCardsChange={setConfig}
+              cards={config}
+              onPageTypeChange={handlePageTypeChange}
+              onDrop={handleDrop}
+              departments={departments}
+              isLoadingDepartments={departmentsLoading}
+              showLibraryButton
+              onLibraryClick={() => setIsLibraryOpen(true)}
+              isDragOver={isDraggingOverPreview}
+            />
+          </div>
         </div>
         
         {/* Biblioteca de Cards como Sheet */}
         <Sheet open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
-          <SheetContent className="w-[90%] sm:w-[540px] md:w-[720px]">
+          <SheetContent className="w-[90%] sm:w-[540px] md:w-[720px] overflow-y-auto" onInteractOutside={(e) => {
+            // Prevent closing when dragging cards out
+            if (e.target instanceof HTMLElement && e.target.closest('[draggable="true"]')) {
+              e.preventDefault();
+            }
+          }}>
             <SheetHeader>
               <SheetTitle className="flex items-center">
                 <Library className="h-5 w-5 mr-2" />
                 Biblioteca de Cards
               </SheetTitle>
             </SheetHeader>
-            <div className="mt-6">
+            <div className="mt-6 pb-20">
               <DraggableCardLibrary 
                 onAddCardToDashboard={handleAddCardToDashboard}
               />
