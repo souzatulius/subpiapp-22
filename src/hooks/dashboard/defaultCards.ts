@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 
 // Function to get icon component from ID
@@ -25,15 +24,8 @@ export function getIconComponentFromId(iconId: string) {
     'default': () => import('lucide-react').then(mod => mod.MessageSquare),
   };
   
-  const LoadedIcon = React.lazy(() => 
-    IconMap[iconId] ? IconMap[iconId]() : IconMap['default']()
-  );
-  
-  return (props: any) => (
-    <React.Suspense fallback={<div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full" />}>
-      <LoadedIcon {...props} />
-    </React.Suspense>
-  );
+  // Return the appropriate import function
+  return IconMap[iconId] || IconMap['default'];
 }
 
 export const getDynamicCardDefaults = (userDepartment: string | null): ActionCardItem[] => {
