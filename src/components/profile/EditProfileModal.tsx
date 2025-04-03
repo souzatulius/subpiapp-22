@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { format, parse } from 'date-fns';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Camera } from 'lucide-react';
 import { ProfileData } from './types';
 import { updateProfile } from '@/services/authService';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import AvatarDisplay from './photo/AvatarDisplay';
+import ChangePhotoModal from './photo/ChangePhotoModal';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({
     nome_completo: userData?.nome_completo || '',
     whatsapp: userData?.whatsapp || '',
@@ -112,7 +115,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
   
   // Helper function to ensure date is in string format
-  const formatDateValue = (date: string | Date | undefined): string => {
+  const formatDateValue = (date: string | Date | null | undefined): string => {
     if (!date) return '';
     
     if (typeof date === 'string') {
@@ -198,91 +201,179 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       setIsSubmitting(false);
     }
   };
+  
+  const openPhotoModal = () => {
+    setIsPhotoModalOpen(true);
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md w-[90%] sm:w-full">
-        <DialogHeader>
-          <DialogTitle>Editar Perfil</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <label htmlFor="nome_completo" className="text-sm font-medium">
-              Nome Completo
-            </label>
-            <Input
-              id="nome_completo"
-              name="nome_completo"
-              value={formData.nome_completo}
-              onChange={handleChange}
-              className={formErrors.nome_completo ? "border-red-500" : ""}
-            />
-            {formErrors.nome_completo && (
-              <p className="text-sm text-red-500 mt-1">{formErrors.nome_completo}</p>
-            )}
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md w-[90%] sm:w-full">
+          <DialogHeader>
+            <DialogTitle>Editar Perfil</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex justify-center my-6">
+            <div className="relative">
+              <AvatarDisplay 
+                nome={userData?.nome_completo || ''}
+                imageSrc={userData?.foto_perfil_url}
+                size="xl"
+              />
+              <Button 
+                size="icon"
+                className="absolute bottom-0 right-0 bg-subpi-blue text-white hover:bg-subpi-blue-dark rounded-full h-8 w-8"
+                onClick={openPhotoModal}
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
-          <div className="space-y-2">
-            <label htmlFor="whatsapp" className="text-sm font-medium">
-              WhatsApp
-            </label>
-            <Input
-              id="whatsapp"
-              name="whatsapp"
-              value={formData.whatsapp}
-              onChange={handleWhatsappChange}
-              placeholder="(XX) XXXXX-XXXX"
-              className={formErrors.whatsapp ? "border-red-500" : ""}
-            />
-            {formErrors.whatsapp && (
-              <p className="text-sm text-red-500 mt-1">{formErrors.whatsapp}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="aniversario" className="text-sm font-medium">
-              Data de Aniversário
-            </label>
-            <Input
-              id="aniversario"
-              name="aniversario"
-              type="date"
-              value={formatDateValue(formData.aniversario)}
-              onChange={handleChange}
-              className={formErrors.aniversario ? "border-red-500" : ""}
-            />
-            {formErrors.aniversario && (
-              <p className="text-sm text-red-500 mt-1">{formErrors.aniversario}</p>
-            )}
-          </div>
-          
-          <DialogFooter className="mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                'Salvar'
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <label htmlFor="nome_completo" className="text-sm font-medium">
+                Nome Completo
+              </label>
+              <Input
+                id="nome_completo"
+                name="nome_completo"
+                value={formData.nome_completo}
+                onChange={handleChange}
+                className={formErrors.nome_completo ? "border-red-500" : ""}
+              />
+              {formErrors.nome_completo && (
+                <p className="text-sm text-red-500 mt-1">{formErrors.nome_completo}</p>
               )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="email" className="text-sm font-medium">Email</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="email"
+                name="email"
+                value={userData?.email || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="cargo" className="text-sm font-medium">Cargo</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="cargo"
+                name="cargo"
+                value={userData?.cargo || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="coordenacao" className="text-sm font-medium">Coordenação</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="coordenacao"
+                name="coordenacao"
+                value={userData?.coordenacao || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="supervisao_tecnica" className="text-sm font-medium">Supervisão Técnica</label>
+                <span className="text-xs text-gray-500">Não editável</span>
+              </div>
+              <Input
+                id="supervisao_tecnica"
+                name="supervisao_tecnica"
+                value={userData?.supervisao_tecnica || ''}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="whatsapp" className="text-sm font-medium">
+                WhatsApp
+              </label>
+              <Input
+                id="whatsapp"
+                name="whatsapp"
+                value={formData.whatsapp}
+                onChange={handleWhatsappChange}
+                placeholder="(XX) XXXXX-XXXX"
+                className={formErrors.whatsapp ? "border-red-500" : ""}
+              />
+              {formErrors.whatsapp && (
+                <p className="text-sm text-red-500 mt-1">{formErrors.whatsapp}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="aniversario" className="text-sm font-medium">
+                Data de Aniversário
+              </label>
+              <Input
+                id="aniversario"
+                name="aniversario"
+                type="date"
+                value={formatDateValue(formData.aniversario)}
+                onChange={handleChange}
+                className={formErrors.aniversario ? "border-red-500" : ""}
+              />
+              {formErrors.aniversario && (
+                <p className="text-sm text-red-500 mt-1">{formErrors.aniversario}</p>
+              )}
+            </div>
+            
+            <DialogFooter className="mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  'Salvar'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      <ChangePhotoModal 
+        isOpen={isPhotoModalOpen}
+        onClose={() => {
+          setIsPhotoModalOpen(false);
+          // Refresh user data after changing photo
+          refreshUserData();
+        }}
+      />
+    </>
   );
 };
 

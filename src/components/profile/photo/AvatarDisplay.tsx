@@ -58,7 +58,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
           }}
         />
       )}
-      <AvatarFallback className="bg-primary/10 text-primary">
+      <AvatarFallback className="bg-orange-100 text-subpi-blue">
         {getInitials(nome)}
       </AvatarFallback>
     </Avatar>

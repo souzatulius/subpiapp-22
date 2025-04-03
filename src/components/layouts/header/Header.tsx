@@ -2,6 +2,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
+import UserProfileMenu from './UserProfileMenu';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface HeaderProps {
   showControls?: boolean;
@@ -15,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({
   hideUserMenu = false
 }) => {
   const location = useLocation();
+  const { user } = useAuth();
   
   // Check if current page is an auth page where we should hide user controls
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
@@ -46,9 +49,11 @@ const Header: React.FC<HeaderProps> = ({
           </Link>
         </div>
         
-        {/* Right section - Empty now that user controls are removed */}
+        {/* Right section - User controls */}
         <div className="flex items-center justify-end w-1/3">
-          {/* User controls removed */}
+          {!hideUserMenu && !isAuthPage && user && (
+            <UserProfileMenu />
+          )}
         </div>
       </div>
     </header>

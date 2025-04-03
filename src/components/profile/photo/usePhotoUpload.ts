@@ -1,135 +1,89 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { setupProfilePhotosStorage } from './setupProfilePhotosStorage';
 
-// Bucket name e estrutura de pastas padronizada
-const PROFILE_PHOTOS_BUCKET = 'usuarios';
-const PROFILE_PHOTOS_FOLDER = 'fotos_perfil';
+const STORAGE_BUCKET = 'usuarios';
+const STORAGE_PATH = 'fotos_perfil';
 
 export const usePhotoUpload = () => {
-  const [isUploading, setIsUploading] = useState(false);
   const { user } = useAuth();
-
+  const [isUploading, setIsUploading] = useState(false);
+  
   const uploadProfilePhoto = async (file: File): Promise<string | null> => {
     if (!user?.id) {
-      toast({
-        title: "Erro",
-        description: "Usuário não autenticado. Faça login novamente.",
-        variant: "destructive"
-      });
-      return null;
+      throw new Error('Usuário não autenticado');
     }
     
+    if (!file) {
+      throw new Error('Nenhum arquivo selecionado');
+    }
+    
+    // Validação básica do arquivo
+    if (!file.type.startsWith('image/')) {
+      throw new Error('O arquivo deve ser uma imagem');
+    }
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB 
+      throw new Error('A imagem não pode exceder 5MB');
+    }
+    
+    setIsUploading(true);
+    
     try {
-      setIsUploading(true);
-      
-      // Validação do arquivo
-      if (!file.type.startsWith('image/')) {
-        throw new Error('O arquivo deve ser uma imagem');
+      // Verifica se o bucket existe e está configurado corretamente
+      const storageSetup = await setupProfilePhotosStorage();
+      if (!storageSetup) {
+        throw new Error('Não foi possivel configurar o armazenamento de fotos. Tente novamente mais tarde.');
       }
       
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        throw new Error('A imagem não pode exceder 5MB');
-      }
+      // Cria uma pasta para o usuário e usa timestamp para evitar colisões de nomes
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${STORAGE_PATH}/${user.id}/${Date.now()}.${fileExt}`;
       
-      // Exibindo os detalhes do arquivo para debug
-      console.log('Detalhes do arquivo:', {
-        nome: file.name,
-        tipo: file.type,
-        tamanho: `${(file.size / 1024).toFixed(2)}KB`
-      });
-      
-      // Garantindo que o bucket existe
-      console.log('Configurando armazenamento...');
-      const setupResult = await setupProfilePhotosStorage();
-      
-      if (!setupResult) {
-        console.error('Falha na configuração do armazenamento');
-        throw new Error('Não foi possível configurar o armazenamento de fotos. Tente novamente mais tarde.');
-      }
-      
-      console.log('Armazenamento configurado com sucesso');
-      
-      // Preparação do caminho do arquivo para upload
-      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-      const filePath = `${PROFILE_PHOTOS_FOLDER}/${user.id}/${fileName}.${fileExt}`;
-      
-      console.log(`Iniciando upload para ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
-      
-      // Tentativa de upload
-      const { error: uploadError, data: uploadData } = await supabase.storage
-        .from(PROFILE_PHOTOS_BUCKET)
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
+          contentType: file.type
         });
       
       if (uploadError) {
-        console.error('Erro no upload da foto:', uploadError);
-        
-        // Se for erro de permissão, fornecemos uma mensagem mais clara
-        if (uploadError.message.includes('permission denied')) {
-          throw new Error('Você não tem permissão para fazer upload de arquivos. Verifique suas permissões.');
-        }
-        
-        throw new Error(`Erro no upload: ${uploadError.message}`);
+        console.error('Erro no upload:', uploadError);
+        throw new Error(uploadError.message);
       }
       
-      console.log('Upload concluído com sucesso. Gerando URL pública...');
-      
-      // Obtenção da URL pública
-      const { data: { publicUrl } } = supabase.storage
-        .from(PROFILE_PHOTOS_BUCKET)
+      // Obter a URL pública do arquivo
+      const { data: urlData } = supabase.storage
+        .from(STORAGE_BUCKET)
         .getPublicUrl(filePath);
       
-      if (!publicUrl) {
-        throw new Error('Não foi possível gerar uma URL pública para a imagem');
+      if (!urlData || !urlData.publicUrl) {
+        throw new Error('Não foi possível obter a URL do arquivo');
       }
       
-      console.log('URL pública gerada:', publicUrl);
-      
-      // Atualização do perfil com a nova URL da foto na tabela 'usuarios'
-      console.log('Atualizando perfil do usuário com a nova URL...');
+      // Atualiza o perfil do usuário com a nova URL
       const { error: updateError } = await supabase
         .from('usuarios')
-        .update({ foto_perfil_url: publicUrl })
+        .update({ foto_perfil_url: urlData.publicUrl })
         .eq('id', user.id);
       
       if (updateError) {
-        console.error('Erro ao atualizar perfil com URL da foto:', updateError);
-        throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
+        console.error('Erro ao atualizar perfil:', updateError);
+        throw new Error('Erro ao atualizar foto de perfil no banco de dados');
       }
       
-      console.log('Perfil atualizado com sucesso');
-      
-      toast({
-        title: "Foto atualizada",
-        description: "Sua foto de perfil foi atualizada com sucesso!",
-        variant: "success"
-      });
-      
-      // Dispare um evento para atualizar a UI
-      window.dispatchEvent(new Event('profile:photo:updated'));
-      window.dispatchEvent(new Event('storage'));
-      
-      return publicUrl;
-    } catch (error: any) {
-      console.error('Erro ao atualizar foto de perfil:', error);
-      toast({
-        title: "Erro",
-        description: error.message || "Falha ao atualizar a foto de perfil",
-        variant: "destructive"
-      });
-      return null;
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Erro no processo de upload:', error);
+      throw error;
     } finally {
       setIsUploading(false);
     }
   };
-
+  
   return {
     uploadProfilePhoto,
     isUploading
