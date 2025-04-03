@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { format, parse } from 'date-fns';
 import { Loader2, Camera } from 'lucide-react';
-import { ProfileData } from './types';
+import { ProfileData, UserProfile } from './types';
 import { updateProfile } from '@/services/authService';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import AvatarDisplay from './photo/AvatarDisplay';
@@ -256,7 +256,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="email"
                 name="email"
-                value={userData?.email || ''}
+                value={(userData as UserProfile)?.email || ''}
                 disabled
                 className="bg-gray-100"
               />
@@ -270,7 +270,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="cargo"
                 name="cargo"
-                value={userData?.cargo || ''}
+                value={(userData as UserProfile)?.cargo || ''}
                 disabled
                 className="bg-gray-100"
               />
@@ -284,7 +284,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="coordenacao"
                 name="coordenacao"
-                value={userData?.coordenacao || ''}
+                value={(userData as UserProfile)?.coordenacao || ''}
                 disabled
                 className="bg-gray-100"
               />
@@ -298,7 +298,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="supervisao_tecnica"
                 name="supervisao_tecnica"
-                value={userData?.supervisao_tecnica || ''}
+                value={(userData as UserProfile)?.supervisao_tecnica || ''}
                 disabled
                 className="bg-gray-100"
               />
