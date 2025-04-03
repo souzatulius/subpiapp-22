@@ -25,7 +25,12 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
       };
       
       // Process whatsapp
-      cleanData.whatsapp = data.whatsapp || null;
+      if (data.whatsapp) {
+        // Ensure WhatsApp is stored in clean format (numbers only)
+        cleanData.whatsapp = data.whatsapp.replace(/\D/g, '');
+      } else {
+        cleanData.whatsapp = null;
+      }
       
       // Process birthday - ensure it's in ISO format for database storage
       if (data.aniversario) {

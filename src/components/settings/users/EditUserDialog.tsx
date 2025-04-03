@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import {
   Dialog,
@@ -16,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import { ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
 import { formatDateToString, parseFormattedDate } from '@/lib/inputFormatting';
 
