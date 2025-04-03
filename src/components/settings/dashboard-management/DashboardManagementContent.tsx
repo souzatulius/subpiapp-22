@@ -124,35 +124,11 @@ const DashboardManagementContent: React.FC = () => {
     }
   };
 
-  // Manipular eventos de drag para feedback visual
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOverPreview(true);
-    e.dataTransfer.dropEffect = 'copy';
-  };
-
-  const handleDragLeave = () => {
-    setIsDraggingOverPreview(false);
-  };
-
   return (
     <Card>
       <CardContent className="p-6">
         <div className="space-y-6">
-          <div 
-            className={`dashboard-preview-container ${isDraggingOverPreview ? 'ring-2 ring-blue-500' : ''}`} 
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const cardData = e.dataTransfer.getData('application/json');
-              if (cardData) {
-                handleDrop(cardData);
-              }
-            }}
-          >
+          <div className="dashboard-preview-container">
             <DashboardPreview
               dashboardType={pageType}
               department={selectedDepartment}
@@ -176,13 +152,17 @@ const DashboardManagementContent: React.FC = () => {
         </div>
         
         {/* Biblioteca de Cards como Sheet */}
-        <Sheet open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
-          <SheetContent className="w-[90%] sm:w-[540px] md:w-[720px] overflow-y-auto" onInteractOutside={(e) => {
-            // Prevent closing when dragging cards out
-            if (e.target instanceof HTMLElement && e.target.closest('[draggable="true"]')) {
+        <Sheet 
+          open={isLibraryOpen} 
+          onOpenChange={setIsLibraryOpen}
+        >
+          <SheetContent 
+            className="w-[90%] sm:w-[540px] md:w-[720px] overflow-y-auto"
+            onDragOver={(e) => {
               e.preventDefault();
-            }
-          }}>
+              e.stopPropagation();
+            }}
+          >
             <SheetHeader>
               <SheetTitle className="flex items-center">
                 <Library className="h-5 w-5 mr-2" />

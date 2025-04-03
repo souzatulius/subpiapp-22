@@ -1,258 +1,173 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Grip, Maximize2, Minimize2 } from 'lucide-react';
-import { useAvailableCards } from '@/hooks/dashboard-management/useAvailableCards';
-import { ActionCardItem } from '@/types/dashboard';
-import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { getAvailableCards } from '@/hooks/dashboard/defaultCards';
+import ActionCard from '@/components/dashboard/ActionCard';
+import { ActionCardItem, CardColor } from '@/types/dashboard';
+import { SearchIcon, ChevronDown, ChevronRight } from 'lucide-react';
+import DraggableCard from './DraggableCard';
 
 interface DraggableCardLibraryProps {
   onAddCardToDashboard: (card: ActionCardItem) => void;
 }
 
 const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardToDashboard }) => {
-  const { availableCards, isLoading } = useAvailableCards();
   const [searchTerm, setSearchTerm] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: 80 });
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [expanded, setExpanded] = useState(false);
-  const [isFloating, setIsFloating] = useState(false);
-  const libraryRef = useRef<HTMLDivElement>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const availableCards = useMemo(() => getAvailableCards(), []);
 
-  const filteredCards = availableCards.filter(card => 
-    card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (card.subtitle && card.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Group cards by category
+  const cardsByCategory = useMemo(() => {
+    return availableCards.reduce((acc: Record<string, ActionCardItem[]>, card) => {
+      const category = card.type || 'standard';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(card);
+      return acc;
+    }, {});
+  }, [availableCards]);
 
-  // Handle drag start
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.drag-handle')) {
-      setIsDragging(true);
-      setStartPos({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y
-      });
-    }
+  // Expand all categories by default
+  useEffect(() => {
+    const allCategories = Object.keys(cardsByCategory);
+    const initialExpandedState = allCategories.reduce((acc: Record<string, boolean>, category) => {
+      acc[category] = true; // All expanded initially
+      return acc;
+    }, {});
+    setExpandedCategories(initialExpandedState);
+  }, [cardsByCategory]);
+
+  // Filter cards based on search term
+  const filteredCategories = useMemo(() => {
+    if (!searchTerm) return cardsByCategory;
+    
+    const filtered: Record<string, ActionCardItem[]> = {};
+    
+    Object.entries(cardsByCategory).forEach(([category, cards]) => {
+      const matchingCards = cards.filter(card => 
+        card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (card.subtitle && card.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      
+      if (matchingCards.length > 0) {
+        filtered[category] = matchingCards;
+      }
+    });
+    
+    return filtered;
+  }, [cardsByCategory, searchTerm]);
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
-  // Handle drag motion
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - startPos.x,
-        y: e.clientY - startPos.y
-      });
+  // Handle drag start on a card
+  const handleCardDragStart = (event: React.DragEvent, card: ActionCardItem) => {
+    if (event.target instanceof HTMLElement) {
+      event.target.classList.add('opacity-50');
     }
+    
+    // Set drag data
+    event.dataTransfer.setData('application/json', JSON.stringify(card));
+    event.dataTransfer.effectAllowed = 'copy';
   };
 
   // Handle drag end
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Set up event listeners for dragging
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    } else {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging]);
-
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
-
-  const toggleFloating = () => {
-    setIsFloating(!isFloating);
-  };
-
-  const handleCardDragStart = (card: ActionCardItem) => (e: React.DragEvent) => {
-    e.dataTransfer.setData('application/json', JSON.stringify(card));
-    e.dataTransfer.effectAllowed = 'copy';
-    
-    // Fix: Type check before accessing classList
-    const target = e.target;
-    if (target instanceof HTMLElement) {
-      // This helps maintain the visual during drag
-      setTimeout(() => {
-        target.classList.add('opacity-50');
-      }, 0);
-    }
-  };
-  
-  const handleCardDragEnd = (e: React.DragEvent) => {
-    // Fix: Type check before accessing classList
-    const target = e.target;
-    if (target instanceof HTMLElement) {
-      target.classList.remove('opacity-50');
+  const handleCardDragEnd = (event: React.DragEvent) => {
+    if (event.target instanceof HTMLElement) {
+      event.target.classList.remove('opacity-50');
     }
   };
 
-  // Renderizar cards da biblioteca de forma independente sem usar UnifiedCardGrid
-  const renderLibraryCards = () => {
-    return (
-      <div className={`grid ${expanded ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-        {filteredCards.map(card => (
-          <div 
-            key={card.id} 
-            draggable 
-            onDragStart={handleCardDragStart(card)}
-            onDragEnd={handleCardDragEnd}
-            className="cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
-          >
-            <div className="card-preview relative aspect-[3/2] bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-              <div className="absolute inset-0 p-3 flex flex-col" style={{transform: 'scale(0.9)'}}>
-                <div className={`w-full h-full rounded-md flex items-center p-3 ${getCardColorClass(card.color)}`}>
-                  <div className="flex items-center">
-                    {renderCardIcon(card)}
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-white truncate">{card.title}</h3>
-                      {card.subtitle && (
-                        <p className="text-xs text-white/80 truncate">{card.subtitle}</p>
-                      )}
-                    </div>
-                  </div>
-                  {card.hasBadge && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {card.badgeValue || '!'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  // Função auxiliar para renderizar o ícone do card
-  const renderCardIcon = (card: ActionCardItem) => {
-    const IconComponent = getIconComponentFromId(card.iconId);
-    if (!IconComponent) return null;
-    
-    return <IconComponent className="h-5 w-5 text-white" />;
-  };
-
-  // Função auxiliar para obter a classe de cor do card
-  const getCardColorClass = (color: string): string => {
-    switch (color) {
-      case 'blue': return 'bg-blue-500';
-      case 'green': return 'bg-green-500';
-      case 'orange': return 'bg-orange-500';
-      case 'gray-light': return 'bg-gray-200 text-gray-800';
-      case 'gray-dark': return 'bg-gray-700';
-      case 'blue-dark': return 'bg-blue-700';
-      case 'orange-light': return 'bg-orange-300';
-      case 'gray-ultra-light': return 'bg-gray-100';
-      case 'lime': return 'bg-lime-500';
-      case 'orange-600': return 'bg-orange-600';
-      case 'blue-light': return 'bg-blue-400';
-      case 'green-light': return 'bg-green-400';
-      case 'purple-light': return 'bg-purple-400';
-      default: return 'bg-blue-500';
+  // Get category display name
+  const getCategoryDisplayName = (category: string): string => {
+    switch (category) {
+      case 'standard': return 'Cards Padrão';
+      case 'data_dynamic': return 'Cards Dinâmicos';
+      case 'special': return 'Cards Especiais';
+      case 'smart_search': return 'Busca Inteligente';
+      default: return category.charAt(0).toUpperCase() + category.slice(1);
     }
   };
 
-  const renderCardLibraryContent = () => (
+  return (
     <div className="space-y-4">
-      <div className="relative w-full">
-        <input
-          type="text"
-          placeholder="Buscar cards..."
-          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <div className="relative">
+        <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+        <Input
+          className="pl-8"
+          placeholder="Pesquisar cards..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      
-      <div className={`rounded-md border border-gray-200 bg-gray-50 p-4 ${expanded ? 'h-[600px]' : 'h-[400px]'} overflow-y-auto`}>
-        {isLoading ? (
-          <div className="p-4 text-center">Carregando biblioteca de cards...</div>
-        ) : filteredCards.length === 0 ? (
-          <div className="p-4 text-center text-gray-500">
-            Nenhum card encontrado com o termo "{searchTerm}"
+
+      <div className="space-y-4">
+        {Object.keys(filteredCategories).length === 0 ? (
+          <div className="text-center py-4 text-gray-500">
+            Nenhum card encontrado para "{searchTerm}"
           </div>
         ) : (
-          renderLibraryCards()
+          Object.entries(filteredCategories).map(([category, cards]) => (
+            <Card key={category} className="overflow-hidden">
+              <div 
+                className="bg-gray-50 p-2 border-b cursor-pointer flex justify-between items-center"
+                onClick={() => toggleCategory(category)}
+              >
+                <h3 className="font-medium text-sm flex items-center">
+                  {expandedCategories[category] ? (
+                    <ChevronDown className="h-4 w-4 mr-1" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 mr-1" />
+                  )}
+                  {getCategoryDisplayName(category)}
+                </h3>
+                <Badge variant="outline" className="text-xs">
+                  {cards.length}
+                </Badge>
+              </div>
+              
+              {expandedCategories[category] && (
+                <CardContent className="p-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    {cards.map((card) => (
+                      <div 
+                        key={card.id} 
+                        className="transform scale-50 origin-top-left h-32" // Use scale transform for visual sizing
+                        draggable
+                        onDragStart={(e) => handleCardDragStart(e, card)}
+                        onDragEnd={handleCardDragEnd}
+                        onDoubleClick={() => onAddCardToDashboard(card)}
+                      >
+                        <div className="w-[200%] h-[200%]"> {/* Double size container to counteract the 50% scale */}
+                          <ActionCard
+                            id={card.id}
+                            title={card.title}
+                            iconId={card.iconId}
+                            path={card.path}
+                            color={card.color as CardColor}
+                            width={card.width}
+                            height={card.height}
+                            type={card.type}
+                            dataSourceKey={card.dataSourceKey}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          ))
         )}
       </div>
-      
-      <div className="text-xs text-gray-500 text-center">
-        Arraste os cards para o dashboard para adicioná-los
-      </div>
     </div>
-  );
-  
-  if (isFloating) {
-    return (
-      <>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="fixed bottom-4 right-4 z-50 shadow-lg"
-          onClick={toggleFloating}
-        >
-          Mostrar Biblioteca
-        </Button>
-        
-        <div
-          ref={libraryRef}
-          className={`fixed shadow-xl rounded-lg z-40 bg-white border border-gray-200 ${expanded ? 'w-[800px]' : 'w-[500px]'} overflow-hidden`}
-          style={{ 
-            left: `${position.x}px`, 
-            top: `${position.y}px`,
-            transform: 'translate3d(0,0,0)', // Force GPU acceleration
-          }}
-        >
-          <div 
-            className="bg-blue-600 text-white p-2 flex items-center justify-between cursor-move drag-handle"
-            onMouseDown={handleMouseDown}
-          >
-            <div className="flex items-center">
-              <Grip className="h-4 w-4 mr-2" />
-              <h3 className="font-medium text-sm">Biblioteca de Cards</h3>
-            </div>
-            <div className="flex items-center space-x-1">
-              {expanded ? (
-                <Minimize2 className="h-4 w-4 cursor-pointer" onClick={toggleExpand} />
-              ) : (
-                <Maximize2 className="h-4 w-4 cursor-pointer" onClick={toggleExpand} />
-              )}
-              <X className="h-4 w-4 cursor-pointer" onClick={toggleFloating} />
-            </div>
-          </div>
-          <div className="p-4">
-            {renderCardLibraryContent()}
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader className="pb-3 flex flex-row justify-between items-center">
-        <CardTitle className="text-lg font-medium">Biblioteca de Cards</CardTitle>
-        <Button variant="outline" size="sm" onClick={toggleFloating}>
-          Desacoplar
-        </Button>
-      </CardHeader>
-      <CardContent>
-        {renderCardLibraryContent()}
-      </CardContent>
-    </Card>
   );
 };
 
