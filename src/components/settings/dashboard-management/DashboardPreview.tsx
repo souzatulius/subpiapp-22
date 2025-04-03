@@ -5,7 +5,7 @@ import CardCustomizationModal from '@/components/dashboard/card-customization/Ca
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
 import { v4 as uuidv4 } from 'uuid';
-import { Loader2, Smartphone, Monitor, Info, Trash2 } from 'lucide-react';
+import { Loader2, Smartphone, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Select,
@@ -17,8 +17,6 @@ import {
 import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
 
 interface DashboardPreviewProps {
   dashboardType: 'dashboard' | 'communication';
@@ -351,6 +349,12 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         });
       }
       
+      // Dispatch an event to notify that the dashboard config has been updated
+      const updateEvent = new CustomEvent('dashboard:config:updated', {
+        detail: { department, viewType: viewTypeToSave }
+      });
+      window.dispatchEvent(updateEvent);
+      
       return true;
     } catch (error) {
       console.error('Error saving dashboard:', error);
@@ -402,26 +406,6 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               <><Monitor className="h-4 w-4 mr-1" /> Desktop</>
             )}
           </Button>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant={configSource === 'default' ? 'secondary' : 'success'} className="cursor-help">
-                  <Info className="h-3 w-3 mr-1" /> {configSource === 'custom' ? 'Personalizado' : 'Padrão'}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-md bg-black/90 text-white p-3">
-                <div className="space-y-2 text-xs">
-                  <p><strong>Tipo de Página:</strong> {selectedPageType}</p>
-                  <p><strong>Tipo de Dashboard:</strong> {dashboardType}</p>
-                  <p><strong>ID Departamento:</strong> {department}</p>
-                  <p><strong>Salvando em:</strong> tabela department_dashboards</p>
-                  <p><strong>Tipo de Visualização:</strong> {selectedPageType === 'inicial' ? 'dashboard' : 'communication'}</p>
-                  <p className="text-yellow-300 font-medium">Certifique-se de que o tipo de página corresponde ao dashboard que deseja personalizar!</p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
         
         <div className="flex items-center gap-2">

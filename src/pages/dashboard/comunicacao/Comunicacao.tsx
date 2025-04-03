@@ -9,8 +9,6 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import { supabase } from '@/integrations/supabase/client';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -28,7 +26,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [configSource, setConfigSource] = useState<'default' | 'custom'>('default');
-  const [debugInfo, setDebugInfo] = useState({ viewType: 'communication', departmentId: '', isDefault: true });
   
   // Get user department from user profile
   const getUserDepartment = useCallback(async () => {
@@ -66,7 +63,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       const viewType = 'communication';
         
       console.log('Loading communication dashboard config for department:', departmentId, 'viewType:', viewType);
-      setDebugInfo({ viewType, departmentId, isDefault: departmentId === 'default' });
       
       // First try to get department-specific config
       const { data, error } = await supabase
@@ -83,7 +79,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           console.log('Loaded department-specific communication dashboard cards:', config.length);
           setDashboardCards(config);
           setConfigSource('custom');
-          setDebugInfo(prev => ({ ...prev, isDefault: false }));
         } catch (e) {
           console.error('Error parsing communication dashboard config:', e);
           fetchDefaultConfig();
@@ -117,7 +112,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           console.log('Loaded default communication dashboard cards:', config.length);
           setDashboardCards(config);
           setConfigSource('default');
-          setDebugInfo(prev => ({ ...prev, isDefault: true }));
         } catch (e) {
           console.error('Error parsing default communication dashboard config:', e);
           setDashboardCards([]);
@@ -181,29 +175,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     );
   }
 
-  const DebugBadge = () => (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-white/50 hover:bg-white/80 cursor-help">
-            {configSource === 'custom' ? 'Custom' : 'Default'}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent side="left" className="max-w-sm bg-black/90 text-white p-3">
-          <div className="space-y-1 text-xs">
-            <p><strong>ViewType:</strong> {debugInfo.viewType}</p>
-            <p><strong>Department:</strong> {debugInfo.departmentId}</p>
-            <p><strong>Config:</strong> {debugInfo.isDefault ? 'Default' : 'Custom'}</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-
   return (
     <div className="space-y-6">
-      <div className="relative">
-        <DebugBadge />
+      <div>
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
