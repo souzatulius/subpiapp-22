@@ -110,8 +110,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
               width={card.width || '25'}
               height={'1'}
               type={card.type || 'standard'} 
-              onEdit={onEdit ? () => {
-                const cardToEdit = cards.find(c => c.id === card.id);
+              onEdit={onEdit ? (id) => {
+                const cardToEdit = cards.find(c => c.id === id);
                 if (cardToEdit && onEdit) onEdit(cardToEdit);
               } : undefined}
               isEditing={isEditMode}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -8,11 +7,8 @@ import { PencilLine, Trash2, EyeOff } from 'lucide-react';
 import KPICard from '@/components/settings/dashboard-management/KPICard';
 import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
 import OriginSelectionCard from './cards/OriginSelectionCard';
-import SmartSearchCard from './cards/SmartSearchCard';
+import SmartSearchCard from './SmartSearchCard';
 import CardControls from './card-parts/CardControls';
-import OriginFormCard from './cards/OriginFormCard';
-import DynamicCard from './DynamicCard';
-import DynamicIcon from './DynamicIcon';
 
 export interface Controls {
   cardId: string;
@@ -81,7 +77,6 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   specialCardsData?: any;
   hasSubtitle?: boolean;
   isMobileView?: boolean;
-  dataSourceKey?: string;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -154,20 +149,9 @@ export function UnifiedActionCard({
   hasBadge,
   badgeValue,
   hasSubtitle,
-  dataSourceKey,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   
   const renderCardContent = () => {
-    if (type === 'dynamic' && dataSourceKey) {
-      return (
-        <DynamicCard 
-          title={title}
-          dataSourceKey={dataSourceKey}
-          iconId={iconId}
-        />
-      );
-    }
-    
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
@@ -242,16 +226,11 @@ export function UnifiedActionCard({
       );
     }
     
-    if (dataSourceKey === 'form_origem') {
-      return <OriginFormCard />;
-    }
-    
-    if (dataSourceKey === 'smartSearch' || type === 'smart_search') {
+    if (type === 'smart_search') {
       return (
         <SmartSearchCard 
           placeholder="O que vamos fazer?" 
           onSearch={onSearchSubmit}
-          isEditMode={isEditing}
         />
       );
     }
@@ -296,33 +275,6 @@ export function UnifiedActionCard({
         />
       )}
     </div>
-  );
-}
-
-function getIconComponentFromId(iconId: string) {
-  const importFunc = (id: string) => {
-    switch (id) {
-      case 'message-square-reply': return import('lucide-react').then(mod => mod.MessageSquareReply);
-      case 'plus-circle': return import('lucide-react').then(mod => mod.PlusCircle);
-      case 'list-filter': return import('lucide-react').then(mod => mod.ListFilter);
-      case 'message-circle': return import('lucide-react').then(mod => mod.MessageCircle);
-      case 'file-text': return import('lucide-react').then(mod => mod.FileText);
-      case 'check-circle': return import('lucide-react').then(mod => mod.CheckCircle);
-      case 'trophy': return import('lucide-react').then(mod => mod.Trophy);
-      case 'bar-chart-2': return import('lucide-react').then(mod => mod.BarChart2);
-      case 'search': return import('lucide-react').then(mod => mod.Search);
-      case 'clipboard-document-check': return import('lucide-react').then(mod => mod.ClipboardCheck);
-      case 'list-bullet': return import('lucide-react').then(mod => mod.List);
-      case 'inbox-arrow-down': return import('lucide-react').then(mod => mod.InboxIcon);
-      case 'document-check': return import('lucide-react').then(mod => mod.FileCheck);
-      case 'document-plus': return import('lucide-react').then(mod => mod.FilePlus);
-      case 'document-text': return import('lucide-react').then(mod => mod.FileText);
-      default: return import('lucide-react').then(mod => mod.MessageSquare);
-    }
-  };
-  
-  return () => (
-    <DynamicIcon iconId={iconId} className="h-6 w-6" />
   );
 }
 
