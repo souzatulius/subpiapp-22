@@ -9,7 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import { ActionCardItem } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
 import { Library } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const DashboardManagementContent: React.FC = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
@@ -19,7 +19,7 @@ const DashboardManagementContent: React.FC = () => {
   const [isDraggingOverPreview, setIsDraggingOverPreview] = useState(false);
   
   const { departments, loading: departmentsLoading } = useDepartments();
-  const { config, setConfig, isLoading, isSaving, saveConfig, resetAllDashboards } = 
+  const { config, setConfig, isLoading, isSaving, saveConfig } = 
     useDefaultDashboardConfig(selectedDepartment, pageType);
 
   // Set initial department when departments are loaded
@@ -57,6 +57,12 @@ const DashboardManagementContent: React.FC = () => {
         description: `Configuração do ${pageType === 'dashboard' ? 'dashboard' : 'página de comunicação'} salva com sucesso`,
         variant: "success"
       });
+      
+      // Dispatch a custom event to notify about the update
+      const event = new CustomEvent('dashboard:config:updated', {
+        detail: { department: selectedDepartment, viewType: pageType }
+      });
+      window.dispatchEvent(event);
     }
     
     return saved;
@@ -104,13 +110,13 @@ const DashboardManagementContent: React.FC = () => {
       variant: "success"
     });
 
-    // Fechar a biblioteca após adicionar o card, se estiver aberta
+    // Close the library after adding a card
     if (isLibraryOpen) {
       setIsLibraryOpen(false);
     }
   };
 
-  // Gerenciar evento de drop diretamente no container
+  // Handle drop event directly in the container
   const handleDrop = (cardData: string): boolean => {
     try {
       const card = JSON.parse(cardData) as ActionCardItem;
@@ -147,21 +153,18 @@ const DashboardManagementContent: React.FC = () => {
               showLibraryButton
               onLibraryClick={() => setIsLibraryOpen(true)}
               isDragOver={isDraggingOverPreview}
+              setIsDragOver={setIsDraggingOverPreview}
             />
           </div>
         </div>
         
-        {/* Biblioteca de Cards como Sheet */}
+        {/* Card Library as Sheet */}
         <Sheet 
           open={isLibraryOpen} 
           onOpenChange={setIsLibraryOpen}
         >
           <SheetContent 
             className="w-[90%] sm:w-[540px] md:w-[720px] overflow-y-auto"
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
           >
             <SheetHeader>
               <SheetTitle className="flex items-center">

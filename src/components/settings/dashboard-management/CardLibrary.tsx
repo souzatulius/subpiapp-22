@@ -47,6 +47,12 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
     return darkColors.includes(color) ? 'text-white' : 'text-gray-800';
   };
 
+  const handleDragStart = (e: React.DragEvent, card: ActionCardItem) => {
+    // Use the dataTransfer API to set the drag data
+    e.dataTransfer.setData('application/json', JSON.stringify(card));
+    e.dataTransfer.effectAllowed = 'copy';
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium flex items-center">
@@ -65,9 +71,7 @@ const CardLibrary: React.FC<CardLibraryProps> = ({
                 key={card.id + "-library"} 
                 className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-md group cursor-move"
                 draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.setData('application/json', JSON.stringify(card));
-                }}
+                onDragStart={(e) => handleDragStart(e, card)}
                 onClick={() => onAddCardToDashboard(card)}
               >
                 <div className={`w-10 h-10 rounded-md flex items-center justify-center ${bgColorClass}`}>
