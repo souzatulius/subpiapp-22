@@ -9,11 +9,15 @@ import { toast } from '@/components/ui/use-toast';
 import DraggableCardLibrary from './DraggableCardLibrary';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import CardCustomizationModal from '@/components/dashboard/CardCustomizationModal';
+import DashboardPreview from './DashboardPreview';
+import { useDepartments } from '@/hooks/dashboard-management/useDepartments';
 
 const DashboardManagementContent: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
+  const [isMobilePreview, setIsMobilePreview] = useState(false);
   const { availableCards } = useAvailableCards();
+  const { departments, loading: isLoadingDepartments } = useDepartments();
   
   const {
     config: dashboardCards,
@@ -23,7 +27,9 @@ const DashboardManagementContent: React.FC = () => {
     selectedViewType,
     setSelectedViewType,
     isLoading,
+    isSaving,
     saveConfig,
+    resetAllDashboards,
   } = useDefaultDashboardConfig();
 
   const handleAddCardToDashboard = (card: ActionCardItem) => {
@@ -102,6 +108,28 @@ const DashboardManagementContent: React.FC = () => {
     }
   };
 
+  const handleResetDashboard = async () => {
+    const success = await resetAllDashboards();
+    if (success) {
+      toast({
+        title: "Dashboard resetado",
+        description: "O dashboard foi resetado para as configurações padrão",
+      });
+    }
+    return success;
+  };
+
+  const handleCardDrop = (cardDataJson: string) => {
+    try {
+      const cardData = JSON.parse(cardDataJson);
+      handleAddCardToDashboard(cardData);
+      return true;
+    } catch (error) {
+      console.error("Error parsing dropped card data:", error);
+      return false;
+    }
+  };
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -120,38 +148,22 @@ const DashboardManagementContent: React.FC = () => {
               
               {/* Right side - Dashboard Preview */}
               <div className="w-full lg:w-2/3">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-medium">Preview do Dashboard</h2>
-                    <button 
-                      onClick={handleSaveDashboard}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    >
-                      Salvar Dashboard
-                    </button>
-                  </div>
-                  
-                  <Card>
-                    <CardContent className="p-4">
-                      {isLoading ? (
-                        <div className="h-[400px] flex items-center justify-center">
-                          <p>Carregando dashboard...</p>
-                        </div>
-                      ) : (
-                        <div className="min-h-[400px]">
-                          <UnifiedCardGrid 
-                            cards={dashboardCards}
-                            onCardsChange={setDashboardCards}
-                            onEditCard={handleEditCard}
-                            onDeleteCard={handleDeleteCard}
-                            onHideCard={handleHideCard}
-                            isEditMode={true}
-                          />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
+                <DashboardPreview 
+                  dashboardType={selectedViewType}
+                  department={selectedDepartment}
+                  onDepartmentChange={setSelectedDepartment}
+                  onViewTypeChange={setIsMobilePreview}
+                  isMobilePreview={isMobilePreview}
+                  onReset={handleResetDashboard}
+                  onSave={handleSaveDashboard}
+                  isSaving={isSaving}
+                  onCardsChange={setDashboardCards}
+                  cards={dashboardCards}
+                  onPageTypeChange={setSelectedViewType}
+                  onDrop={handleCardDrop}
+                  departments={departments}
+                  isLoadingDepartments={isLoadingDepartments}
+                />
               </div>
             </div>
           </TabsContent>
