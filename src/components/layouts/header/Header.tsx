@@ -1,54 +1,40 @@
 
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu as MenuIcon } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import UserProfileMenu from './UserProfileMenu';
+import { UserProfileMenu } from './index';
+import { Menu } from 'lucide-react';
+import logo from '/public/lovable-uploads/5b8c78fb-e26a-45d0-844e-df1dea58037b.png';
 
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
-  hideUserMenu?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  showControls = true,
-  toggleSidebar,
-  hideUserMenu = false,
-}) => {
-  const { user } = useAuth();
-  const location = useLocation();
-
+const Header: React.FC<HeaderProps> = ({ showControls = false, toggleSidebar }) => {
   return (
-    <header className="sticky top-0 z-10 w-full bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex justify-between items-center px-4 py-2 max-w-screen-2xl mx-auto">
-        {/* Left section */}
-        <div className="flex items-center w-1/3">
+    <header className="sticky top-0 z-50 bg-white shadow-sm">
+      <div className="container mx-auto flex h-16 items-center justify-between">
+        <div className="flex items-center space-x-4">
           {showControls && toggleSidebar && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleSidebar}
-              className="p-2 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+              className="lg:hidden"
+              aria-label="Menu"
             >
-              <MenuIcon className="h-6 w-6" />
-            </button>
+              <Menu className="h-5 w-5" />
+            </Button>
           )}
-        </div>
-
-        {/* Center section - Logo */}
-        <div className="flex items-center justify-center w-1/3">
-          <Link to="/" className="flex items-center">
-            <img
-              src="/lovable-uploads/a94cbbfc-b0c9-4e5c-86e2-9f9db452dca3.png"
-              alt="SUBPI Logo"
-              className="h-12 md:h-12"
-            />
+          <Link to="/" className="flex items-center space-x-2">
+            <img src={logo} alt="Logo" className="h-8" />
+            <span className="font-medium hidden sm:inline-block">Sistema de Gestão</span>
           </Link>
         </div>
-
-        {/* Right section - User profile only (removed notifications) */}
-        <div className="flex items-center justify-end space-x-3 w-1/3">
-          {user && !hideUserMenu && (
+        
+        <div className="flex items-center space-x-4">
+          {showControls && (
             <UserProfileMenu />
           )}
         </div>

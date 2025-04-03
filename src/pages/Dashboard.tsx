@@ -13,12 +13,13 @@ import { ActionCardItem } from '@/types/dashboard';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useUserData } from '@/hooks/dashboard/useUserData';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const { firstName } = useDashboardState();
+  const { firstName } = useUserData(user?.id);
   
   const [dashboardCards, setDashboardCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -166,7 +167,7 @@ const Dashboard = () => {
               description="Bem-vindo ao seu dashboard personalizado."
               icon={<Home className="h-6 w-6 mr-2" />}
               color="bg-gradient-to-r from-blue-800 to-blue-950"
-              userName={firstName || 'Usuário'}
+              userName={firstName}
             />
             
             <div className="mt-6">
