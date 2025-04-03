@@ -10,11 +10,13 @@ import { NotificationsPopover } from './NotificationsPopover';
 interface HeaderProps {
   showControls?: boolean;
   toggleSidebar?: () => void;
+  hideUserMenu?: boolean; // Add this new prop
 }
 
 const Header: React.FC<HeaderProps> = ({
   showControls = true,
   toggleSidebar,
+  hideUserMenu = false, // Set a default value
 }) => {
   const { user } = useAuth();
   const location = useLocation();
@@ -47,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Right section - User profile and notifications */}
         <div className="flex items-center justify-end space-x-3 w-1/3">
-          {user && (
+          {user && !hideUserMenu && (
             <>
               <NotificationsPopover />
               <UserProfileMenu />
