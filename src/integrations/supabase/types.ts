@@ -2018,7 +2018,6 @@ export type Database = {
           foto_perfil_url: string | null
           id: string
           nome_completo: string
-          problema_id: string | null
           status: string | null
           status_conta: string | null
           supervisao_tecnica_id: string | null
@@ -2034,7 +2033,6 @@ export type Database = {
           foto_perfil_url?: string | null
           id: string
           nome_completo: string
-          problema_id?: string | null
           status?: string | null
           status_conta?: string | null
           supervisao_tecnica_id?: string | null
@@ -2050,20 +2048,12 @@ export type Database = {
           foto_perfil_url?: string | null
           id?: string
           nome_completo?: string
-          problema_id?: string | null
           status?: string | null
           status_conta?: string | null
           supervisao_tecnica_id?: string | null
           whatsapp?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "usuarios_area_coordenacao_id_fkey"
-            columns: ["problema_id"]
-            isOneToOne: false
-            referencedRelation: "problemas"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "usuarios_cargo_id_fkey"
             columns: ["cargo_id"]
