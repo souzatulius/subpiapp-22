@@ -1,11 +1,11 @@
+
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pencil } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@supabase/auth-helpers-react';
-import MaskedInput from 'react-text-mask';
 import { toast } from '@/components/ui/use-toast';
 
 interface EditProfileModalProps {
@@ -78,7 +78,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         .from('usuarios')
         .update({ 
           nome_completo: nome, 
-          whatsapp, 
+          whatsapp: formatPhoneNumber(whatsapp), 
           aniversario 
         })
         .eq('id', userId);
@@ -111,6 +111,45 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setIsEditing((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
+  // Format phone number with mask
+  const formatPhoneNumber = (value: string): string => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Apply formatting based on the number of digits
+    if (digits.length <= 2) {
+      return digits ? `(${digits}` : '';
+    } else if (digits.length <= 7) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
+  };
+
+  // Manual implementation of masked input for phone number
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatPhoneNumber(e.target.value);
+    setWhatsapp(formattedValue);
+  };
+
+  // Manual implementation of masked input for date
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    
+    if (value.length > 8) value = value.slice(0, 8);
+    
+    let formattedValue = '';
+    if (value.length <= 2) {
+      formattedValue = value;
+    } else if (value.length <= 4) {
+      formattedValue = `${value.slice(0, 2)}/${value.slice(2)}`;
+    } else {
+      formattedValue = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+    }
+    
+    setAniversario(formattedValue);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md w-[90%] sm:w-full">
@@ -132,13 +171,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <MaskedInput
-              mask={['(', /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}
-              className="w-full border rounded px-3 py-2 text-sm"
+            <Input
+              className="w-full"
               placeholder="(11) 91234-5678"
               value={whatsapp}
               disabled={!isEditing.whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
+              onChange={handleWhatsappChange}
             />
             <Button size="icon" variant="ghost" onClick={() => toggleEdit('whatsapp')}>
               <Pencil size={18} />
@@ -146,13 +184,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <MaskedInput
-              mask={[/\d/, /\d/, '/', /\d/, /\d/, '/', /\d/, /\d/, /\d/, /\d/]}
-              className="w-full border rounded px-3 py-2 text-sm"
+            <Input
+              className="w-full"
               placeholder="DD/MM/AAAA"
               value={aniversario}
               disabled={!isEditing.aniversario}
-              onChange={(e) => setAniversario(e.target.value)}
+              onChange={handleDateChange}
             />
             <Button size="icon" variant="ghost" onClick={() => toggleEdit('aniversario')}>
               <Pencil size={18} />
