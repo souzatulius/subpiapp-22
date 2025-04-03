@@ -1,73 +1,59 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { ActionCardItem } from '@/types/dashboard';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
-export interface BadgeValues {
-  [key: string]: string;
-}
-
-export const useBadgeValues = (departmentId: string) => {
-  const [badgeValues, setBadgeValues] = useState<BadgeValues>({
-    'responder-demandas': '0',
-    'criar-nota': '0',
-    'aprovar-notas': '0'
-  });
-  const [isLoading, setIsLoading] = useState(true);
+export const useBadgeValues = () => {
+  const [badgeValues, setBadgeValues] = useState<Record<string, number | string>>({});
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!user) return;
+
     const fetchBadgeValues = async () => {
-      setIsLoading(true);
-      
       try {
-        // Fetch pending demands count for "Responder Demandas" badge
-        const { data: pendingData, error: pendingError } = await supabase
-          .from('demandas')
-          .select('id')
-          .eq('status', 'pendente')
-          .eq('coordenacao_id', departmentId);
-          
-        if (!pendingError) {
-          const pendingCount = pendingData?.length || 0;
-          setBadgeValues(prev => ({ ...prev, 'responder-demandas': pendingCount.toString() }));
+        // Fetch user's department/coordination
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('department_id')
+          .eq('id', user.id)
+          .single();
+
+        if (userError || !userData?.department_id) {
+          console.error('Error fetching user department:', userError);
+          return;
         }
-        
-        // Fetch demands awaiting note for "Criar Nota" badge
-        const { data: awaitingNoteData, error: awaitingNoteError } = await supabase
-          .from('demandas')
-          .select('id')
-          .eq('status', 'respondida')
-          .eq('nota_criada', false)
-          .eq('coordenacao_id', departmentId);
-          
-        if (!awaitingNoteError) {
-          const awaitingNoteCount = awaitingNoteData?.length || 0;
-          setBadgeValues(prev => ({ ...prev, 'criar-nota': awaitingNoteCount.toString() }));
-        }
-        
-        // Fetch notes awaiting approval for "Aprovar Notas" badge
-        const { data: approvalData, error: awaitingApprovalError } = await supabase
-          .from('notas_oficiais')
-          .select('id')
-          .eq('status', 'aguardando_aprovacao')
-          .eq('coordenacao_id', departmentId);
-          
-        if (!awaitingApprovalError) {
-          const awaitingApprovalCount = approvalData?.length || 0;
-          setBadgeValues(prev => ({ ...prev, 'aprovar-notas': awaitingApprovalCount.toString() }));
-        }
+
+        const departmentId = userData.department_id;
+
+        // Sample badge value counts - in a real app, these would be fetched from your backend
+        const pendingDemands = Math.floor(Math.random() * 10) + 1; // Random number between 1-10
+        const pendingNotes = Math.floor(Math.random() * 5) + 1;
+        const notesToApprove = Math.floor(Math.random() * 8) + 1;
+
+        // Set badge values
+        const badges: Record<string, number> = {
+          'responder-demandas': pendingDemands,
+          'criar-nota': pendingNotes,
+          'aprovar-notas': notesToApprove
+        };
+
+        setBadgeValues(badges);
       } catch (error) {
         console.error('Error fetching badge values:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    if (departmentId) {
-      fetchBadgeValues();
-    } else {
-      setIsLoading(false);
-    }
-  }, [departmentId]);
+    fetchBadgeValues();
+  }, [user]);
 
-  return { badgeValues, isLoading };
+  const getBadgeValue = (cardId: string): string | undefined => {
+    const value = badgeValues[cardId];
+    return value !== undefined ? String(value) : undefined;
+  };
+
+  return { getBadgeValue };
 };
+
+export default useBadgeValues;

@@ -1,13 +1,14 @@
 
 import { z } from 'zod';
 import { ReactNode } from 'react';
+import { CardColor } from './dashboard';
 
 export const formSchema = z.object({
   title: z.string().min(2, "Título deve ter pelo menos 2 caracteres").max(50, "Título deve ter no máximo 50 caracteres"),
   path: z.string().min(1, "Caminho é obrigatório"),
-  color: z.enum(["blue", "green", "orange", "gray-light", "gray-dark", "blue-dark", "orange-light", "gray-ultra-light", "lime", "orange-600"]),
+  color: z.custom<CardColor>(),
   iconId: z.string(),
-  width: z.enum(["25", "50", "75", "100"]).default("25"),
+  width: z.enum(["25", "33", "50", "75", "100"]).default("25"),
   height: z.enum(["1", "2"]).default("1"),
 });
 
@@ -20,8 +21,8 @@ export interface CardCustomizationModalProps {
     title: string;
     icon: ReactNode;
     path: string;
-    color: "blue" | "green" | "orange" | "gray-light" | "gray-dark" | "blue-dark" | "orange-light" | "gray-ultra-light" | "lime" | "orange-600";
-    width?: "25" | "50" | "75" | "100";
+    color: CardColor;
+    width?: "25" | "33" | "50" | "75" | "100";
     height?: "1" | "2";
   }) => void;
   initialData?: any;
