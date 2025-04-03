@@ -40,9 +40,14 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   const getImageUrl = (): string => {
     if (!imageSrc) return '';
     
-    const url = new URL(imageSrc);
-    url.searchParams.set('t', Date.now().toString());
-    return url.toString();
+    try {
+      const url = new URL(imageSrc);
+      url.searchParams.set('t', Date.now().toString());
+      return url.toString();
+    } catch (e) {
+      // If the URL is invalid, just return the original string
+      return `${imageSrc}?t=${Date.now()}`;
+    }
   };
 
   return (
@@ -53,7 +58,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
           alt={nome} 
           className="object-cover"
           onError={(e) => {
-            console.error('Avatar image failed to load:', e);
+            console.error('Avatar image failed to load');
             // The AvatarFallback will be shown automatically
           }}
         />

@@ -31,15 +31,8 @@ export const useProfile = () => {
       
       console.log(`Uploading to ${PROFILE_PHOTOS_BUCKET}/${filePath}`);
       
-      // Check if bucket exists and create it if not
-      const { data: buckets } = await supabase.storage.listBuckets();
-      if (!buckets?.some(b => b.name === PROFILE_PHOTOS_BUCKET)) {
-        console.log(`Bucket ${PROFILE_PHOTOS_BUCKET} does not exist, creating it...`);
-        await supabase.storage.createBucket(PROFILE_PHOTOS_BUCKET, {
-          public: true
-        });
-      }
-      
+      // Directly attempt upload without checking bucket existence
+      // since we've created it via SQL
       const { error: uploadError, data: uploadData } = await supabase.storage
         .from(PROFILE_PHOTOS_BUCKET)
         .upload(filePath, file, {
@@ -59,7 +52,7 @@ export const useProfile = () => {
       
       console.log('Generated public URL:', publicUrl);
       
-      // Update the user's metadata in the usuarios table - NOT auth.users
+      // Update the user's metadata in the usuarios table
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ foto_perfil_url: publicUrl })
@@ -76,7 +69,6 @@ export const useProfile = () => {
       toast({
         title: 'Sucesso!',
         description: 'Foto de perfil atualizada com sucesso',
-        variant: 'success'
       });
       
       return publicUrl;
