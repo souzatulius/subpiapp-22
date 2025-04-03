@@ -22,7 +22,7 @@ export const useBadgeValues = (departmentId: string) => {
         // Fetch pending demands count for "Responder Demandas" badge
         const { data: pendingData, error: pendingError } = await supabase
           .from('demandas')
-          .select('id', { count: 'exact' })
+          .select('id')
           .eq('status', 'pendente')
           .eq('coordenacao_id', departmentId);
           
@@ -34,7 +34,7 @@ export const useBadgeValues = (departmentId: string) => {
         // Fetch demands awaiting note for "Criar Nota" badge
         const { data: awaitingNoteData, error: awaitingNoteError } = await supabase
           .from('demandas')
-          .select('id', { count: 'exact' })
+          .select('id')
           .eq('status', 'respondida')
           .eq('nota_criada', false)
           .eq('coordenacao_id', departmentId);
@@ -47,7 +47,7 @@ export const useBadgeValues = (departmentId: string) => {
         // Fetch notes awaiting approval for "Aprovar Notas" badge
         const { data: approvalData, error: awaitingApprovalError } = await supabase
           .from('notas_oficiais')
-          .select('id', { count: 'exact' })
+          .select('id')
           .eq('status', 'aguardando_aprovacao')
           .eq('coordenacao_id', departmentId);
           
