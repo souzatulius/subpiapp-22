@@ -4,7 +4,7 @@ import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { UnifiedActionCard } from '@/components/dashboard/UnifiedActionCard';
-import { ActionCardItem } from '@/types/dashboard';
+import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard/useDefaultDashboardConfig';
 
 interface ActionCardsProps {
@@ -24,14 +24,14 @@ const ActionCards: React.FC<ActionCardsProps> = ({
 }) => {
   const { config: dashboardCards, isLoading } = useDefaultDashboardConfig('comunicacao');
   
-  const defaultCards = [
+  const defaultCards: ActionCardItem[] = [
     {
       id: 'cadastrar-demanda',
       title: 'Cadastrar Demanda',
       subtitle: 'Registre novas solicitações da imprensa',
       iconId: 'PlusCircle',
       path: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar`,
-      color: 'blue',
+      color: 'blue' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
@@ -44,7 +44,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Responda às demandas pendentes',
       iconId: 'MessageSquare',
       path: `${baseUrl ? `/${baseUrl}` : ''}/responder`,
-      color: 'green',
+      color: 'green' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
@@ -57,7 +57,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Elabore notas oficiais',
       iconId: 'FileText',
       path: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota`,
-      color: 'orange',
+      color: 'orange' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
@@ -70,7 +70,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Revise e aprove notas oficiais',
       iconId: 'CheckCircle',
       path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`,
-      color: 'purple-light',
+      color: 'purple-light' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
