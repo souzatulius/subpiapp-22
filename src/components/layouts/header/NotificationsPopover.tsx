@@ -1,18 +1,20 @@
 
-import React, { useState, useEffect } from 'react';
-import { Bell, Check, Trash } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Bell } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/badge';
 import { useNotifications } from './useNotifications';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Separator } from '@/components/ui/separator';
 
-export const NotificationsPopover: React.FC = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+const NotificationsPopover: React.FC = () => {
   const {
     notifications,
     unreadCount,
@@ -23,137 +25,95 @@ export const NotificationsPopover: React.FC = () => {
   } = useNotifications();
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications();
-    }
-  }, [user, fetchNotifications]);
-
-  // Set up real-time subscription for new notifications
-  useEffect(() => {
-    if (!user) return;
-
-    // Subscribe to changes in the notifications table for this user
-    const channel = supabase
-      .channel('notifications-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT', // Only listen for new notifications
-          schema: 'public',
-          table: 'notificacoes',
-          filter: `usuario_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('New notification received:', payload);
-          // Only refresh notifications when new ones are inserted
-          fetchNotifications();
-        }
-      )
-      .subscribe();
-
-    // Cleanup subscription on unmount
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, fetchNotifications]);
-
-  const getNotificationIcon = (tipo: string) => {
-    switch (tipo) {
-      case 'demanda':
-        return <div className="w-2 h-2 rounded-full bg-green-500"></div>;
-      case 'comunicado':
-        return <div className="w-2 h-2 rounded-full bg-blue-500"></div>;
-      case 'nota':
-        return <div className="w-2 h-2 rounded-full bg-orange-500"></div>;
-      default:
-        return <div className="w-2 h-2 rounded-full bg-gray-500"></div>;
-    }
-  };
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+    try {
+      const date = new Date(dateString);
+      return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
+    } catch (e) {
+      return "Data inválida";
+    }
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-[#003570]" />
+          <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 h-4 w-4 bg-[#f57c35] rounded-full flex items-center justify-center text-white text-[10px]">
+            <span className="absolute -top-1 -right-1 h-4 w-4 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 max-h-[60vh] overflow-hidden flex flex-col">
-        <div className="p-3 border-b flex justify-between items-center bg-zinc-200">
+      <PopoverContent align="end" className="w-80 p-0">
+        <div className="p-4 bg-gray-50 flex items-center justify-between">
           <h3 className="font-medium">Notificações</h3>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-8">
-              <Check className="h-3 w-3 mr-1" />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={markAllAsRead}
+              className="text-xs h-8"
+            >
               Marcar todas como lidas
             </Button>
           )}
         </div>
-        <div className="overflow-y-auto flex-grow">
+        <ScrollArea className="h-[300px]">
           {notifications.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 bg-zinc-100">
+            <div className="p-4 text-center text-gray-500">
               Nenhuma notificação
             </div>
           ) : (
-            <div>
-              {notifications.map(notification => (
+            <div className="py-2">
+              {notifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className={`p-3 border-b flex hover:bg-gray-50 transition-colors ${!notification.lida ? 'bg-blue-50' : ''}`}
+                  className={`px-4 py-3 hover:bg-gray-50 ${!notification.lida ? 'bg-blue-50' : ''}`}
                 >
-                  <div className="mr-3 mt-1">{getNotificationIcon(notification.tipo || 'comunicado')}</div>
-                  <div className="flex-grow">
-                    <p className="text-sm">{notification.mensagem}</p>
-                    <p className="text-xs text-gray-500">{formatDate(notification.data_envio)}</p>
-                  </div>
-                  <div className="flex flex-col space-y-1">
-                    {!notification.lida && (
-                      <button 
-                        onClick={() => markAsRead(notification.id)} 
-                        className="text-blue-500 hover:text-blue-700 p-1" 
-                        title="Marcar como lida"
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="flex items-center">
+                      <Badge variant={!notification.lida ? "warning" : "secondary"} className="mr-2">
+                        {notification.tipo || 'Info'}
+                      </Badge>
+                      <span className="text-xs text-gray-500">
+                        {formatDate(notification.data_envio)}
+                      </span>
+                    </div>
+                    <div className="flex space-x-1">
+                      {!notification.lida && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => markAsRead(notification.id)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <span className="sr-only">Marcar como lida</span>
+                          <span className="text-xs">✓</span>
+                        </Button>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => deleteNotification(notification.id)}
+                        className="h-6 w-6 p-0 text-red-500"
                       >
-                        <Check className="h-4 w-4" />
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => deleteNotification(notification.id)} 
-                      className="text-red-500 hover:text-red-700 p-1" 
-                      title="Excluir notificação"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </button>
+                        <span className="sr-only">Deletar</span>
+                        <span className="text-xs">×</span>
+                      </Button>
+                    </div>
                   </div>
+                  <p className="text-sm">{notification.mensagem}</p>
+                  <Separator className="mt-2" />
                 </div>
               ))}
             </div>
           )}
-        </div>
-        <div className="p-3 border-t text-center bg-gray-100">
-          <Button 
-            variant="link" 
-            className="text-sm h-auto p-0" 
-            onClick={() => {
-              setIsOpen(false);
-              navigate('/settings?tab=notificacoes');
-            }}
-          >
-            Ver todas as notificações
-          </Button>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
