@@ -22,7 +22,7 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
       className="w-full h-full flex flex-col items-center justify-center cursor-pointer py-4"
       onClick={handleCardClick}
     >
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center text-center">
         {React.createElement(
           card.iconId ? card.iconId : 'div',
           { 
@@ -31,7 +31,7 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
         )}
         <h3 className="text-sm font-semibold text-white text-center">{card.title}</h3>
         {card.subtitle && (
-          <p className="text-xs text-white/80 mt-1">{card.subtitle}</p>
+          <p className="text-xs text-white/80 mt-1 text-center">{card.subtitle}</p>
         )}
       </div>
     </div>

@@ -204,18 +204,17 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-blue-500 to-blue-700"
-          userName={firstName}
         />
       </div>
       
-      <div className="mt-6">
+      <div className="mt-4">
         <UnifiedCardGrid
           cards={cards}
           onCardsChange={(updatedCards) => setCards(updatedCards)}
