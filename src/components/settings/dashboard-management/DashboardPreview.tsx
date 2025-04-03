@@ -270,7 +270,8 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
   const handleManualSave = async () => {
     if (onSave) {
-      return onSave();
+      const saveResult = await onSave();
+      return saveResult;
     }
     
     try {

@@ -14,8 +14,6 @@ import { ActionCardItem } from '@/types/dashboard';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
 
 const Dashboard = () => {
   // Start with sidebar collapsed
@@ -28,7 +26,6 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [configSource, setConfigSource] = useState<'default' | 'custom'>('default');
-  const [debugInfo, setDebugInfo] = useState({ viewType: 'dashboard', departmentId: '', isDefault: true });
   
   // Get user department from user profile
   const getUserDepartment = useCallback(async () => {
@@ -62,7 +59,6 @@ const Dashboard = () => {
       const viewType = 'dashboard';
       
       console.log('Loading dashboard config for department:', departmentId, 'viewType:', viewType);
-      setDebugInfo({ viewType, departmentId, isDefault: departmentId === 'default' });
       
       // First try to get department-specific config
       const { data, error } = await supabase
@@ -79,7 +75,6 @@ const Dashboard = () => {
           console.log('Loaded department-specific dashboard cards:', config.length);
           setDashboardCards(config);
           setConfigSource('custom');
-          setDebugInfo(prev => ({ ...prev, isDefault: false }));
         } catch (e) {
           console.error('Error parsing dashboard config:', e);
           fetchDefaultConfig();
@@ -113,7 +108,6 @@ const Dashboard = () => {
           console.log('Loaded default dashboard cards:', config.length);
           setDashboardCards(config);
           setConfigSource('default');
-          setDebugInfo(prev => ({ ...prev, isDefault: true }));
         } catch (e) {
           console.error('Error parsing default dashboard config:', e);
           setDashboardCards([]);
@@ -169,25 +163,6 @@ const Dashboard = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const DebugBadge = () => (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-white/50 hover:bg-white/80 cursor-help">
-            {configSource === 'custom' ? 'Custom' : 'Default'}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent side="left" className="max-w-sm bg-black/90 text-white p-3">
-          <div className="space-y-1 text-xs">
-            <p><strong>ViewType:</strong> {debugInfo.viewType}</p>
-            <p><strong>Department:</strong> {debugInfo.departmentId}</p>
-            <p><strong>Config:</strong> {debugInfo.isDefault ? 'Default' : 'Custom'}</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header - explicitly pass showControls={true} */}
@@ -199,15 +174,12 @@ const Dashboard = () => {
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
-            <div className="relative">
-              <DebugBadge />
-              <WelcomeCard
-                title={`Olá, ${firstName}!`}
-                description="Bem-vindo ao seu dashboard personalizado."
-                icon={<Home className="h-6 w-6 mr-2" />}
-                color="bg-gradient-to-r from-blue-800 to-blue-950"
-              />
-            </div>
+            <WelcomeCard
+              title={`Olá, ${firstName || 'Usuário'}!`}
+              description="Bem-vindo ao seu dashboard personalizado."
+              icon={<Home className="h-6 w-6 mr-2" />}
+              color="bg-gradient-to-r from-blue-800 to-blue-950"
+            />
             
             {/* Display dashboard cards */}
             <div className="mt-6">

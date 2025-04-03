@@ -45,7 +45,13 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         return 'comunicacao'; // Default for communication dashboard
       }
       
-      return data?.coordenacao_id || 'comunicacao';
+      // If the user doesn't have a department, assign them to 'comunicacao'
+      if (!data?.coordenacao_id || data.coordenacao_id === 'default') {
+        console.log('User has no department or has default department, using comunicacao');
+        return 'comunicacao';
+      }
+      
+      return data.coordenacao_id;
     } catch (e) {
       console.error('Error in getUserDepartment:', e);
       return 'comunicacao';
