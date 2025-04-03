@@ -22,6 +22,7 @@ interface WelcomeCardProps {
   buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "action";
   onButtonClick?: () => void;
   color?: string;
+  userName?: string;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -36,12 +37,13 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   statHighlight = true,
   statUnreadCount = 0,
   statOnClick,
-  color = "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800", // Updated gradient
+  color = "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800",
   showButton = false,
   buttonText = "Filtros e Configurações",
   buttonIcon,
   buttonVariant = "outline",
-  onButtonClick
+  onButtonClick,
+  userName
 }) => {
   return (
     <Card className={`${color} text-white shadow-lg overflow-hidden`}>
@@ -50,7 +52,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
           <div>
             <h2 className="text-2xl font-bold mb-2 flex items-center">
               {icon}
-              {title}
+              {userName ? `Olá, ${userName}!` : title}
             </h2>
             <p className="text-blue-100">
               {description}

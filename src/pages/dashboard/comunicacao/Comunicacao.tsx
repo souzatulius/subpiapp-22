@@ -85,7 +85,16 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           // Parse the configuration and set cards
           const config = JSON.parse(data.cards_config);
           console.log('Loaded department-specific communication dashboard cards:', config.length);
-          setDashboardCards(config);
+          
+          // Ensure proper type for dynamic cards
+          const processedCards = config.map((card: ActionCardItem) => {
+            if (card.dataSourceKey) {
+              return {...card, type: 'data_dynamic'};
+            }
+            return card;
+          });
+          
+          setDashboardCards(processedCards);
           setConfigSource('custom');
           setIsLoading(false);
           return;
@@ -120,7 +129,16 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         try {
           const config = JSON.parse(data.cards_config);
           console.log('Loaded default communication dashboard cards:', config.length);
-          setDashboardCards(config);
+          
+          // Ensure proper type for dynamic cards
+          const processedCards = config.map((card: ActionCardItem) => {
+            if (card.dataSourceKey) {
+              return {...card, type: 'data_dynamic'};
+            }
+            return card;
+          });
+          
+          setDashboardCards(processedCards);
           setConfigSource('default');
         } catch (e) {
           console.error('Error parsing default communication dashboard config:', e);
@@ -215,7 +233,47 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               overdueItems: [],
               notesToApprove: 0,
               responsesToDo: 0,
-              isLoading: false
+              isLoading: false,
+              kpis: {
+                pressRequests: {
+                  today: 14,
+                  yesterday: 12,
+                  percentageChange: 16.7,
+                  loading: false
+                },
+                pendingApproval: {
+                  total: 8,
+                  awaitingResponse: 5,
+                  loading: false
+                },
+                notesProduced: {
+                  total: 42,
+                  approved: 38,
+                  rejected: 4,
+                  loading: false
+                }
+              },
+              lists: {
+                recentDemands: {
+                  items: [
+                    { id: 'dem-1', title: 'Demanda de exemplo 1', status: 'in-progress' as const, date: '2023-12-01', path: '#' },
+                    { id: 'dem-2', title: 'Demanda de exemplo 2', status: 'pending' as const, date: '2023-12-02', path: '#' }
+                  ],
+                  loading: false
+                },
+                recentNotes: {
+                  items: [
+                    { id: 'note-1', title: 'Nota de exemplo 1', status: 'approved' as const, date: '2023-12-01', path: '#' },
+                    { id: 'note-2', title: 'Nota de exemplo 2', status: 'pending' as const, date: '2023-12-02', path: '#' }
+                  ],
+                  loading: false
+                }
+              },
+              originOptions: [
+                { id: 'origin-1', title: 'Imprensa', icon: '📰' },
+                { id: 'origin-2', title: 'Ministério', icon: '🏛️' },
+                { id: 'origin-3', title: 'Interno', icon: '🏢' }
+              ]
             }}
           />
         ) : (

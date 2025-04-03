@@ -4,8 +4,13 @@ import { Layout } from 'lucide-react';
 import { motion } from 'framer-motion';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import DashboardManagementContent from '@/components/settings/dashboard-management/DashboardManagementContent';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useUserData } from '@/hooks/useUserData';
 
 const DashboardManagement: React.FC = () => {
+  const { user } = useAuth();
+  const { firstName } = useUserData(user?.id);
+
   return (
     <div className="max-w-7xl mx-auto">
       <motion.div 
@@ -18,6 +23,7 @@ const DashboardManagement: React.FC = () => {
           description="Configure e personalize os dashboards para cada coordenação"
           icon={<Layout className="h-6 w-6 mr-2 text-white" />}
           color="bg-gradient-to-r from-blue-600 to-blue-800"
+          userName={firstName}
         />
         
         <div className="mt-6">
