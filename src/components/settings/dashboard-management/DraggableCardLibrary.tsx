@@ -5,7 +5,6 @@ import { useAvailableCards } from '@/hooks/dashboard-management/useAvailableCard
 import { ActionCardItem } from '@/types/dashboard';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
 interface DraggableCardLibraryProps {
@@ -79,6 +78,21 @@ const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardTo
 
   const handleCardDragStart = (card: ActionCardItem) => (e: React.DragEvent) => {
     e.dataTransfer.setData('application/json', JSON.stringify(card));
+    e.dataTransfer.effectAllowed = 'copy';
+    
+    // Create a drag image that mimics the card's appearance
+    if (e.target instanceof HTMLElement) {
+      // This helps maintain the visual during drag
+      setTimeout(() => {
+        e.target.classList.add('opacity-50');
+      }, 0);
+    }
+  };
+  
+  const handleCardDragEnd = (e: React.DragEvent) => {
+    if (e.target instanceof HTMLElement) {
+      e.target.classList.remove('opacity-50');
+    }
   };
 
   const renderCardLibraryContent = () => (
@@ -107,15 +121,20 @@ const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardTo
                 key={card.id} 
                 draggable 
                 onDragStart={handleCardDragStart(card)}
-                className="cursor-grab active:cursor-grabbing h-[120px]"
+                onDragEnd={handleCardDragEnd}
+                className="cursor-grab active:cursor-grabbing transition-transform transform-gpu hover:scale-105"
+                style={{ touchAction: 'none' }} // Helps with mobile drag
               >
-                <UnifiedCardGrid
-                  cards={[card]}
-                  onCardsChange={() => {}}
-                  disableWiggleEffect={true}
-                  showSpecialFeatures={false}
-                  isEditMode={false}
-                />
+                {/* Using a scale transform to maintain proportions while fitting in the library */}
+                <div className="transform scale-90 origin-top-left">
+                  <UnifiedCardGrid
+                    cards={[card]}
+                    onCardsChange={() => {}}
+                    disableWiggleEffect={true}
+                    showSpecialFeatures={false}
+                    isEditMode={false}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -143,7 +162,11 @@ const DraggableCardLibrary: React.FC<DraggableCardLibraryProps> = ({ onAddCardTo
         <div
           ref={libraryRef}
           className={`fixed shadow-xl rounded-lg z-40 bg-white border border-gray-200 ${expanded ? 'w-[800px]' : 'w-[500px]'} overflow-hidden`}
-          style={{ left: `${position.x}px`, top: `${position.y}px` }}
+          style={{ 
+            left: `${position.x}px`, 
+            top: `${position.y}px`,
+            transform: 'translate3d(0,0,0)', // Force GPU acceleration
+          }}
         >
           <div 
             className="bg-blue-600 text-white p-2 flex items-center justify-between cursor-move drag-handle"

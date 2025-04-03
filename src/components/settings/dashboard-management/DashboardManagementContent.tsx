@@ -139,7 +139,7 @@ const DashboardManagementContent: React.FC = () => {
         
         {/* Biblioteca de Cards como Sheet */}
         <Sheet open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
-          <SheetContent size="lg" className="w-[90%] sm:w-[540px] md:w-[720px]">
+          <SheetContent className="w-[90%] sm:w-[540px] md:w-[720px]">
             <SheetHeader>
               <SheetTitle className="flex items-center">
                 <Library className="h-5 w-5 mr-2" />

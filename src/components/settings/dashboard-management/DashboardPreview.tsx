@@ -48,6 +48,7 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   onLibraryClick,
 }) => {
   const [isEditMode, setIsEditMode] = useState(true);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleEditCardClick = (card: ActionCardItem) => {
     console.log('Edit card:', card);
@@ -71,17 +72,32 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   };
   
   const handleDragOver = (e: React.DragEvent) => {
+    // This is required to allow dropping
     e.preventDefault();
     e.stopPropagation();
+    
+    // Add visual cues for drop target
+    setIsDragOver(true);
+    
+    // Set dropEffect to copy to indicate we're copying the card
+    e.dataTransfer.dropEffect = 'copy';
+  };
+  
+  const handleDragLeave = () => {
+    setIsDragOver(false);
   };
   
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsDragOver(false);
     
     try {
       const cardData = e.dataTransfer.getData('application/json');
-      if (!cardData) return;
+      if (!cardData) {
+        console.error("No card data found in the drop event");
+        return;
+      }
       
       if (onDrop && onDrop(cardData)) {
         console.log('Card dropped and added to dashboard');
@@ -189,12 +205,17 @@ const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       </div>
       
       <Card 
-        className="shadow-md bg-gray-50"
+        className={`shadow-md bg-gray-50 ${isDragOver ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <CardContent className="p-4">
-          <div className={`relative ${isMobilePreview ? 'max-w-sm mx-auto' : 'w-full'} min-h-[40vh] border border-dashed border-gray-300 rounded-lg p-4 bg-white`}>
+          <div 
+            className={`relative ${isMobilePreview ? 'max-w-sm mx-auto' : 'w-full'} min-h-[40vh] border 
+              ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'} 
+              border-dashed rounded-lg p-4 transition-colors duration-200`}
+          >
             {cards.length === 0 ? (
               <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-center p-4">
                 <div>
