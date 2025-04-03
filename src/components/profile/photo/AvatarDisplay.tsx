@@ -7,13 +7,17 @@ interface AvatarDisplayProps {
   imageSrc?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+  showNotificationCount?: boolean;
+  notificationCount?: number;
 }
 
 const AvatarDisplay: React.FC<AvatarDisplayProps> = ({ 
   nome, 
   imageSrc, 
   size = 'md',
-  className = ''
+  className = '',
+  showNotificationCount = false,
+  notificationCount = 0
 }) => {
   const [imageKey, setImageKey] = useState<number>(Date.now());
   
@@ -88,8 +92,8 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
           }}
         />
       )}
-      <AvatarFallback className="bg-orange-500 text-white">
-        {getInitials(nome)}
+      <AvatarFallback className={className || 'bg-blue-700 text-white'}>
+        {showNotificationCount ? notificationCount : getInitials(nome)}
       </AvatarFallback>
     </Avatar>
   );
