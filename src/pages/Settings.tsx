@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -88,7 +89,6 @@ const getSectionTitle = (section: string) => {
     case 'distritos_bairros': return 'Distritos e Bairros';
     case 'notificacoes': return 'Notificações';
     case 'comunicados': return 'Avisos e Comunicados';
-    case 'dashboard_management': return 'Gerenciamento de Dashboards';
     default: return '';
   }
 };

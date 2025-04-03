@@ -30,7 +30,6 @@ import ConsultarDemandas from './pages/dashboard/comunicacao/ConsultarDemandas';
 import ConsultarNotas from './pages/dashboard/comunicacao/ConsultarNotas';
 import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
-import DashboardManagement from './pages/dashboard/settings/DashboardManagement';
 
 // Admin Pages
 import UserPermissionsList from './pages/admin/UserPermissionsList';
@@ -83,9 +82,6 @@ function App() {
                 
                 {/* Zeladoria routes */}
                 <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
-                
-                {/* Settings routes */}
-                <Route path="settings/dashboard-management" element={<DashboardManagement />} />
               </Route>
 
               {/* 404 route */}
