@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 
 export type CardColor =
@@ -39,4 +38,11 @@ export interface ActionCardItem {
   hasBadge?: boolean;
   badgeValue?: string;
   isHidden?: boolean;
+}
+
+export interface Department {
+  id: string;
+  nome: string;
+  sigla?: string;
+  descricao?: string;
 }

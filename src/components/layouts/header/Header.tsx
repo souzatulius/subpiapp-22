@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserProfileMenu } from './index';
 import { Menu } from 'lucide-react';
-import logo from '/public/lovable-uploads/5b8c78fb-e26a-45d0-844e-df1dea58037b.png';
+import { useUserProfile } from './useUserProfile';
 
 interface HeaderProps {
   showControls?: boolean;
@@ -17,10 +17,23 @@ const Header: React.FC<HeaderProps> = ({
   toggleSidebar,
   hideUserMenu = false
 }) => {
+  const { userProfile } = useUserProfile();
+  
+  // Get first and second name if available
+  const getDisplayName = () => {
+    if (!userProfile?.nome_completo) return '';
+    const nameParts = userProfile.nome_completo.split(' ');
+    if (nameParts.length >= 2) {
+      return `${nameParts[0]} ${nameParts[1]}`;
+    }
+    return nameParts[0];
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between">
-        <div className="flex items-center space-x-4">
+        {/* Left side with menu toggle */}
+        <div className="w-1/4 flex items-center">
           {showControls && toggleSidebar && (
             <Button
               variant="ghost"
@@ -32,15 +45,31 @@ const Header: React.FC<HeaderProps> = ({
               <Menu className="h-5 w-5" />
             </Button>
           )}
-          <Link to="/" className="flex items-center space-x-2">
-            <img src={logo} alt="Logo" className="h-8" />
-            <span className="font-medium hidden sm:inline-block">Sistema de Gestão</span>
+        </div>
+        
+        {/* Center - Logo */}
+        <div className="w-2/4 flex justify-center">
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/003ae508-4951-4978-a94b-35490e166867.png" 
+              alt="SUB-PI Logo" 
+              className="h-12"
+            />
           </Link>
         </div>
         
-        <div className="flex items-center space-x-4">
+        {/* Right side - User profile */}
+        <div className="w-1/4 flex items-center justify-end">
           {showControls && !hideUserMenu && (
-            <UserProfileMenu />
+            <div className="flex items-center">
+              {userProfile && (
+                <div className="text-right mr-3 hidden sm:block">
+                  <p className="font-bold text-[#003570]">{getDisplayName()}</p>
+                  <p className="text-xs text-gray-500">{userProfile.email}</p>
+                </div>
+              )}
+              <UserProfileMenu />
+            </div>
           )}
         </div>
       </div>

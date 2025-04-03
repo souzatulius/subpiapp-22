@@ -14,7 +14,6 @@ import { LogOut, User, Settings, Bell } from 'lucide-react';
 import { useUserProfile } from './useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { transformName } from '@/utils/stringUtils';
 
 const UserProfileMenu: React.FC = () => {
   const { userProfile, isLoading } = useUserProfile();
