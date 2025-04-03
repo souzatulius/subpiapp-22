@@ -8,12 +8,12 @@ import { Home } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
+import { Loader2 } from 'lucide-react';
+import { useUserData } from '@/hooks/dashboard/useUserData';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
-import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { useUserData } from '@/hooks/dashboard/useUserData';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -170,31 +170,7 @@ const Dashboard = () => {
               userName={firstName}
             />
             
-            <div className="mt-6">
-              {isLoading ? (
-                <div className="flex justify-center items-center p-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-500 mr-2" />
-                  <span className="text-blue-800">Carregando seu dashboard...</span>
-                </div>
-              ) : dashboardCards.length > 0 ? (
-                <UnifiedCardGrid 
-                  cards={dashboardCards.filter(card => !card.isHidden)} 
-                  onCardsChange={() => {}}
-                  isMobileView={isMobile}
-                  specialCardsData={{
-                    overdueCount: 0,
-                    overdueItems: [],
-                    notesToApprove: 0,
-                    responsesToDo: 0,
-                    isLoading: false
-                  }}
-                />
-              ) : (
-                <div className="text-center p-8 bg-white rounded-lg border border-gray-200">
-                  <p className="text-gray-500">Nenhum card configurado para exibição.</p>
-                </div>
-              )}
-            </div>
+            
           </div>
         </main>
       </div>
