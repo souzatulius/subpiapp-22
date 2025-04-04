@@ -12,6 +12,7 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
+import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
@@ -20,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   
@@ -30,6 +32,10 @@ const DashboardPage: React.FC = () => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
   };
   
   const handleCardEdit = (card: ActionCardItem) => {
@@ -62,7 +68,7 @@ const DashboardPage: React.FC = () => {
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
             {/* WelcomeCard takes full width */}
-            <div className="w-full mb-6">
+            <div className="w-full mb-4">
               <WelcomeCard
                 title="Dashboard"
                 description="Bem-vindo ao seu dashboard personalizado."
@@ -71,6 +77,13 @@ const DashboardPage: React.FC = () => {
                 userName={firstName}
               />
             </div>
+            
+            {/* Edit mode toggle */}
+            {!isLoading && (
+              <div className="flex justify-end mb-6">
+                <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
+              </div>
+            )}
             
             {/* Content container with better height calculation and scrolling behavior */}
             <div className="relative" style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}>
@@ -90,8 +103,7 @@ const DashboardPage: React.FC = () => {
                         onEditCard={handleCardEdit}
                         onHideCard={handleCardHide}
                         isMobileView={isMobile}
-                        isEditMode={false}
-                        verticalSpacing="y-3"
+                        isEditMode={isEditMode}
                       />
                     </div>
                   </ScrollArea>

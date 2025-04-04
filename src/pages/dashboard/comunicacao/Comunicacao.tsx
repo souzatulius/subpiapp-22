@@ -7,6 +7,7 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import EditCardModal from '@/components/dashboard/EditCardModal';
+import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
@@ -27,11 +28,13 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   
   const {
     cards,
+    isEditMode,
     isEditModalOpen,
     selectedCard,
     isLoading,
     handleCardEdit,
     handleCardHide,
+    toggleEditMode,
     handleSaveCardEdit,
     setIsEditModalOpen
   } = useComunicacaoDashboard(user, isPreview, department);
@@ -41,8 +44,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="w-full mb-6">
+    <div className="space-y-4">
+      <div className="w-full">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
@@ -50,6 +53,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           color="bg-gradient-to-r from-blue-500 to-blue-700"
         />
       </div>
+      
+      {!isLoading && <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />}
       
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -65,8 +70,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
             onEditCard={handleCardEdit}
             onHideCard={handleCardHide}
             isMobileView={isMobile}
-            isEditMode={false}
-            verticalSpacing="y-3"
+            isEditMode={isEditMode}
           />
         ) : (
           <div className="p-6 text-center text-gray-500">
