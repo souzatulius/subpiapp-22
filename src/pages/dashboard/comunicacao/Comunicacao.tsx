@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2 } from 'lucide-react';
+import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
@@ -280,27 +280,34 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      {/* Full width WelcomeCard */}
+      <div className="w-full">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-blue-500 to-blue-700"
         />
-        
+      </div>
+      
+      {/* Edit mode toggle button as an icon only */}
+      <div className="flex justify-end">
         <Button 
           onClick={toggleEditMode}
-          className={`hidden md:flex ${
+          variant="ghost"
+          size="icon"
+          className={`${
             isEditMode 
-              ? 'bg-blue-600 text-white hover:bg-blue-700' 
+              ? 'bg-blue-100 text-blue-700' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
+          title={isEditMode ? 'Concluir edição' : 'Personalizar dashboard'}
         >
-          {isEditMode ? 'Concluir edição' : 'Personalizar dashboard'}
+          <Settings className="h-5 w-5" />
         </Button>
       </div>
       
-      <div className="mt-4">
+      <div className="mt-2">
         <UnifiedCardGrid
           cards={cards}
           onCardsChange={(updatedCards) => setCards(updatedCards)}
