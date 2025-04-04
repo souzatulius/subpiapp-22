@@ -12,6 +12,7 @@ import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useDashboardInicial } from '@/hooks/dashboard/useDashboardInicial';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Home } from 'lucide-react';
+import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 
 interface DashboardPageProps {
   isPreview?: boolean;
@@ -51,8 +52,11 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           description="Acompanhe seus principais indicadores"
           icon={<Home className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-blue-500 to-blue-700"
+          userName={firstName}
         />
       </div>
+      
+      <WelcomeMessage />
       
       {!isLoading && <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />}
       

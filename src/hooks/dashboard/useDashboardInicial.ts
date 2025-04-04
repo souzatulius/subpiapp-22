@@ -25,9 +25,9 @@ export const useDashboardInicial = (
 
   useEffect(() => {
     const fetchCards = async () => {
+      // In preview mode, use default cards immediately
       if (isPreview) {
-        // In preview mode, use default cards immediately
-        setCards(getInitialDashboardCards(activeDepartment));
+        setCards(getInitialDashboardCards(activeDepartment || undefined));
         setIsLoading(false);
         return;
       }
@@ -39,7 +39,7 @@ export const useDashboardInicial = (
 
       try {
         // First get default cards based on department
-        const defaultCards = getInitialDashboardCards(activeDepartment);
+        const defaultCards = getInitialDashboardCards(activeDepartment || undefined);
         
         // Then try to fetch user customizations for the home dashboard
         const { data, error } = await supabase
@@ -73,7 +73,7 @@ export const useDashboardInicial = (
       } catch (error) {
         console.error('Error fetching dashboard cards', error);
         // Fallback to default cards on error
-        setCards(getInitialDashboardCards(activeDepartment));
+        setCards(getInitialDashboardCards(activeDepartment || undefined));
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +86,7 @@ export const useDashboardInicial = (
     const timeoutId = setTimeout(() => {
       if (isLoading) {
         console.log('Loading timeout reached, using default cards');
-        setCards(getInitialDashboardCards(activeDepartment));
+        setCards(getInitialDashboardCards(activeDepartment || undefined));
         setIsLoading(false);
       }
     }, 2000);
@@ -94,7 +94,7 @@ export const useDashboardInicial = (
     fetchCards();
     
     return () => clearTimeout(timeoutId);
-  }, [user, isPreview, activeDepartment]);
+  }, [user, isPreview, activeDepartment, isDepartmentLoading]); // Added isDepartmentLoading to dependencies
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
