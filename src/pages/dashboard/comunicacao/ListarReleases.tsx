@@ -70,7 +70,7 @@ const ListarReleases = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('card');
   const [searchReleases, setSearchReleases] = useState('');
   const [searchNoticias, setSearchNoticias] = useState('');
   const [filteredReleases, setFilteredReleases] = useState<Release[]>([]);
