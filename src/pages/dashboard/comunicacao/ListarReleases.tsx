@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -46,7 +45,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { debounce } from '@/lib/utils';
 
-// Define Release interface
+// Define Release interface with proper typing
 interface Release {
   id: string;
   tipo: 'release' | 'noticia';
@@ -56,6 +55,7 @@ interface Release {
   criado_em: string;
   autor_id: string;
   publicada?: boolean;
+  atualizado_em?: string;
 }
 
 const ListarReleases = () => {
@@ -214,10 +214,14 @@ const ListarReleases = () => {
 
   const markAsPublished = async (noticia: Release) => {
     try {
+      // Fix the update object to ensure it matches the database schema
       const { error } = await supabase
         .from('releases')
-        .update({ publicada: !noticia.publicada })
-        .eq('id', noticia.id) as any;
+        .update({ 
+          publicada: !noticia.publicada,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('id', noticia.id);
       
       if (error) throw error;
       
