@@ -13,6 +13,7 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditModeToggle from '@/components/dashboard/EditModeToggle';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -60,15 +61,17 @@ const DashboardPage: React.FC = () => {
               <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
             </div>
             
-            {/* Card Grid */}
-            <CardGridContainer 
-              cards={cards.filter(card => !card.isHidden)}
-              onCardsChange={setCards => {}}
-              onEditCard={handleCardEdit}
-              onHideCard={handleCardHide}
-              isMobileView={isMobile}
-              isEditMode={isEditMode}
-            />
+            {/* Card Grid with ScrollArea */}
+            <ScrollArea className="h-[calc(100vh-260px)] pr-4">
+              <CardGridContainer 
+                cards={cards.filter(card => !card.isHidden)}
+                onCardsChange={setCards => {}}
+                onEditCard={handleCardEdit}
+                onHideCard={handleCardHide}
+                isMobileView={isMobile}
+                isEditMode={isEditMode}
+              />
+            </ScrollArea>
           </div>
         </main>
       </div>
