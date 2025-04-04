@@ -40,10 +40,10 @@ export const getWidthClass = (width?: string, isMobileView: boolean = false): st
 export const getHeightClass = (height?: string): string => {
   switch (height) {
     case '1':
-      return 'h-28'; // Reduced from h-32 to h-28 (7rem instead of 8rem)
+      return 'h-24'; // Reduced from h-28
     case '2':
-      return 'h-60'; // Reduced from h-64 to h-60 (15rem instead of 16rem)
+      return 'h-48'; // Reduced from h-60
     default:
-      return 'h-28'; // Default height also reduced
+      return 'h-24'; // Default height also reduced
   }
 };

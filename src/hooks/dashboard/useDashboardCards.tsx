@@ -6,6 +6,20 @@ import { useDepartment } from './useDepartment';
 import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 
+// This function processes cards data to prevent deep type issues
+const processCardsData = (data: any): ActionCardItem[] => {
+  if (!data) return [];
+  
+  // Handle string JSON
+  const rawCards = typeof data === 'string' ? JSON.parse(data) : data;
+  
+  // Validate it's an array
+  if (!Array.isArray(rawCards)) return [];
+  
+  // Return the cards
+  return rawCards;
+};
+
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,11 +59,9 @@ export const useDashboardCards = () => {
           return;
         }
 
-        const customCards = typeof data.cards_config === 'string'
-          ? JSON.parse(data.cards_config)
-          : data.cards_config;
-
-        if (Array.isArray(customCards) && customCards.length > 0) {
+        const customCards = processCardsData(data.cards_config);
+        
+        if (customCards.length > 0) {
           setCards(customCards);
         } else {
           setCards(defaultCards);

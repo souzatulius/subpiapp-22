@@ -1,26 +1,30 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './components/AuthCallback';
-import { AuthLayout } from './components/AuthLayout';
+import AuthLayout from './components/AuthLayout';
 import DashboardPage from './pages/DashboardPage';
 import ReleasesAndNews from './pages/dashboard/comunicacao/ReleasesAndNews';
 import CadastrarRelease from './pages/dashboard/comunicacao/CadastrarRelease';
 import ListarReleases from './pages/dashboard/comunicacao/ListarReleases';
-import SettingsPage from './pages/SettingsPage';
-import ProfilePage from './pages/ProfilePage';
-import DemandasPage from './pages/DemandasPage';
-import ConsultarNotas from './pages/ConsultarNotas';
-import UsuariosPage from './pages/UsuariosPage';
-import RelatoriosPage from './pages/RelatoriosPage';
-import RankingSubsPage from './pages/RankingSubsPage';
-import AprovarNota from './pages/dashboard/comunicacao/AprovarNota';
-import CriarNota from './pages/dashboard/comunicacao/CriarNota';
-import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
-import ConsultarDemandas from './pages/dashboard/comunicacao/ConsultarDemandas';
-import ConsultarNotasPage from './pages/dashboard/comunicacao/ConsultarNotasPage';
+
+// Placeholder components for routes that aren't implemented yet
+const PlaceholderPage = () => <div className="p-8">Esta página está em desenvolvimento</div>;
+const SettingsPage = () => <PlaceholderPage />;
+const ProfilePage = () => <PlaceholderPage />;
+const DemandasPage = () => <PlaceholderPage />;
+const ConsultarNotas = () => <PlaceholderPage />;
+const UsuariosPage = () => <PlaceholderPage />;
+const RelatoriosPage = () => <PlaceholderPage />;
+const RankingSubsPage = () => <PlaceholderPage />;
+const AprovarNota = () => <PlaceholderPage />;
+const CriarNota = () => <PlaceholderPage />;
+const CadastrarDemanda = () => <PlaceholderPage />;
+const ConsultarDemandas = () => <PlaceholderPage />;
+const ConsultarNotasPage = () => <PlaceholderPage />;
 
 function App() {
   return (
