@@ -11,13 +11,25 @@ const processCardsData = (data: any): ActionCardItem[] => {
   if (!data) return [];
   
   // Handle string JSON
-  const rawCards = typeof data === 'string' ? JSON.parse(data) : data;
-  
-  // Validate it's an array
-  if (!Array.isArray(rawCards)) return [];
-  
-  // Return the cards
-  return rawCards;
+  let rawCards: any[] = [];
+  try {
+    if (typeof data === 'string') {
+      rawCards = JSON.parse(data);
+    } else if (Array.isArray(data)) {
+      rawCards = data;
+    } else {
+      return [];
+    }
+    
+    // Validate it's an array
+    if (!Array.isArray(rawCards)) return [];
+    
+    // Return the cards
+    return rawCards as ActionCardItem[];
+  } catch (error) {
+    console.error('Error processing cards data:', error);
+    return [];
+  }
 };
 
 export const useDashboardCards = () => {
@@ -36,7 +48,7 @@ export const useDashboardCards = () => {
         return;
       }
 
-      // Normaliza o valor da coordenação para facilitar comparação
+      // Normalize the department value for easier comparison
       const normalizedDepartment = userDepartment
         ? userDepartment
             .toLowerCase()
@@ -67,6 +79,7 @@ export const useDashboardCards = () => {
           setCards(defaultCards);
         }
       } catch (error) {
+        console.error('Error fetching dashboard cards:', error);
         setCards(defaultCards);
       } finally {
         setIsLoading(false);

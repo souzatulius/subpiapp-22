@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import ReleasesAndNews from './pages/dashboard/comunicacao/ReleasesAndNews';
 import CadastrarRelease from './pages/dashboard/comunicacao/CadastrarRelease';
 import ListarReleases from './pages/dashboard/comunicacao/ListarReleases';
+import Comunicacao from './pages/dashboard/comunicacao/Comunicacao';
 
 // Placeholder components for routes that aren't implemented yet
 const PlaceholderPage = () => <div className="p-8">Esta página está em desenvolvimento</div>;
@@ -39,8 +40,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/*" element={<DashboardPage />}>
           {/* Dashboard Routes */}
-          <Route path="comunicacao" element={<Navigate to="/dashboard/comunicacao/comunicacao" replace />} />
-          <Route path="comunicacao/comunicacao" element={<Navigate to="/dashboard/comunicacao/releases" replace />} />
+          <Route path="comunicacao" element={<Comunicacao />} />
+          <Route path="comunicacao/comunicacao" element={<Navigate to="/dashboard/comunicacao" replace />} />
           <Route path="comunicacao/releases" element={<ReleasesAndNews />} />
           <Route path="comunicacao/cadastrar-release" element={<CadastrarRelease />} />
           <Route path="comunicacao/listar-releases" element={<ListarReleases />} />
