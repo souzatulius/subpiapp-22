@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { LayoutDashboard, Loader2, Settings } from 'lucide-react';
@@ -6,7 +7,7 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
-import { ActionCardItem, UnifiedCardItem } from '@/types/dashboard';
+import { ActionCardItem } from '@/types/dashboard';
 import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -55,7 +56,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPreview = false }) => {
     fetchUserDashboardConfig();
   }, [user, setActionCards]);
 
-  const handleCardEdit = (card: ActionCardItem | UnifiedCardItem) => {
+  const handleCardEdit = (card: ActionCardItem) => {
     toast({
       title: "Edição de Card",
       description: "Função de edição será implementada em breve.",
@@ -63,12 +64,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isPreview = false }) => {
     });
   };
 
-  const handleCardHide = async (card: ActionCardItem | UnifiedCardItem) => {
+  const handleCardHide = async (card: ActionCardItem) => {
     if (!card.id) return;
     
-    const cardId = card.id;
     const updatedCards = actionCards.map(c => 
-      c.id === cardId ? { ...c, isHidden: true } : c
+      c.id === card.id ? { ...c, isHidden: true } : c
     );
     
     setActionCards(updatedCards);
