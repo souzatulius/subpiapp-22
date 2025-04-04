@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -10,12 +11,13 @@ export const useUserData = (userId?: string) => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userId) {
-        console.warn('useUserData: userId ausente, abortando busca');
         setIsLoadingUser(false);
         return;
       }
 
       try {
+        console.log(`Fetching user data for ID: ${userId}`);
+        
         const { data, error } = await supabase
           .from('usuarios')
           .select(`
@@ -28,21 +30,27 @@ export const useUserData = (userId?: string) => {
           .single();
 
         if (error) {
-          console.error('Erro ao buscar dados do usuário:', error.message);
+          console.error('Error fetching user data:', error.message);
           setIsLoadingUser(false);
           return;
         }
 
         if (data) {
           setUser(data);
-          setUserCoordenaticaoId(data.coordenacao_id?.descricao || null);
+          
+          // Convert coordenacao_id.descricao to a normalized department ID
+          const departmentDesc = data.coordenacao_id?.descricao || '';
+          const normalizedDept = getDepartmentId(departmentDesc);
+          setUserCoordenaticaoId(normalizedDept);
+          
+          console.log(`User department set to: ${normalizedDept} (from: ${departmentDesc})`);
 
           const fullName = data.nome_completo || '';
           const first = fullName.split(' ')[0] || 'Usuário';
           setFirstName(first);
         }
       } catch (error: any) {
-        console.error('Erro inesperado em useUserData:', error.message || error);
+        console.error('Unexpected error in useUserData:', error.message || error);
       } finally {
         setIsLoadingUser(false);
       }
@@ -50,6 +58,17 @@ export const useUserData = (userId?: string) => {
 
     fetchUserData();
   }, [userId]);
+  
+  // Helper function to normalize department names
+  const getDepartmentId = (description: string): string => {
+    const desc = description.toLowerCase();
+    
+    if (desc.includes('comunicação')) return 'comunicacao';
+    if (desc.includes('gabinete')) return 'gabinete';
+    
+    // Return the original description as fallback
+    return desc;
+  };
 
   return {
     user,

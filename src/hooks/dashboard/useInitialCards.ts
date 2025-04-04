@@ -10,6 +10,7 @@ export const useInitialCards = (userDepartment: string | null) => {
 
   useEffect(() => {
     setIsLoading(true);
+    console.log("Initializing cards for department:", userDepartment);
 
     const initialCards: ActionCardItem[] = [
       {
@@ -159,12 +160,16 @@ export const useInitialCards = (userDepartment: string | null) => {
 
     const filteredCards = initialCards.filter(card => {
       if (card.allowedDepartments && card.allowedDepartments.length > 0) {
-        return !userDepartment || card.allowedDepartments.includes(userDepartment);
+        if (!userDepartment) return true;
+        return card.allowedDepartments.includes(userDepartment);
       }
       return true;
     });
 
-    setCards(filteredCards.sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999)));
+    console.log(`Filtered ${initialCards.length} cards to ${filteredCards.length} based on department:`, userDepartment);
+    
+    const sortedCards = filteredCards.sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999));
+    setCards(sortedCards);
     setIsLoading(false);
   }, [userDepartment, getBadgeValue]);
 
