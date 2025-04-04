@@ -1,7 +1,6 @@
-
+// src/pages/DashboardPage.tsx
 import React, { useState } from 'react';
 import { Home } from 'lucide-react';
-import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -13,35 +12,40 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import useUserDashboardCards from '@/hooks/dashboard/useUserDashboardCards';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
-  
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  
-  // Using the dashboard-specific useUserData hook
-  const { firstName, isLoadingUser } = useUserData(user?.id);
-  const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
+  const { firstName } = useUserData(user?.id);
+
+  // Utiliza o hook unificado para o dashboard padrão (departamento "default")
+  const {
+    cards,
+    isLoading,
+    isEditMode,
+    toggleEditMode,
+    handleCardEdit,
+    handleCardHide,
+    updateCardsOrder,
+    isEditModalOpen,
+    selectedCard,
+    handleSaveCardEdit,
+    setIsEditModalOpen
+  } = useUserDashboardCards(user, 'default');
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  
-  const handleCardEdit = (card: ActionCardItem) => {
-    setSelectedCard(card);
-    setIsEditCardModalOpen(true);
-  };
-  
+
   const handleSaveCard = (updatedCard: Partial<ActionCardItem>) => {
-    saveCardEdit(updatedCard as ActionCardItem);
-    setIsEditCardModalOpen(false);
+    handleSaveCardEdit(updatedCard as ActionCardItem);
+    setIsEditModalOpen(false);
     toast({
       title: "Card atualizado",
       description: "As alterações foram salvas com sucesso.",
@@ -56,14 +60,11 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header showControls={true} toggleSidebar={toggleSidebar} />
-      
       <div className="flex flex-1 overflow-hidden">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
-        
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-4 md:p-6 pb-16 md:pb-6">
-            {/* WelcomeCard takes full width */}
             <div className="w-full mb-4">
               <WelcomeCard
                 title="Dashboard"
@@ -73,8 +74,6 @@ const DashboardPage: React.FC = () => {
                 userName={firstName}
               />
             </div>
-            
-            {/* Content container with better height calculation and scrolling behavior */}
             <div className="relative" style={{ minHeight: "500px" }}>
               {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -88,11 +87,11 @@ const DashboardPage: React.FC = () => {
                     <div className="pb-4">
                       <CardGridContainer 
                         cards={cards.filter(card => !card.isHidden)}
-                        onCardsChange={() => {}}
+                        onCardsChange={updateCardsOrder}
                         onEditCard={handleCardEdit}
                         onHideCard={handleCardHide}
                         isMobileView={isMobile}
-                        isEditMode={false}
+                        isEditMode={isEditMode}
                       />
                     </div>
                   </ScrollArea>
@@ -106,17 +105,14 @@ const DashboardPage: React.FC = () => {
           </div>
         </main>
       </div>
-      
-      {/* Edit Card Modal */}
       {selectedCard && (
         <EditCardModal 
-          isOpen={isEditCardModalOpen}
-          onClose={() => setIsEditCardModalOpen(false)}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
           onSave={handleSaveCard}
           card={selectedCard}
         />
       )}
-      
       {isMobile && <MobileBottomNav />}
     </div>
   );
