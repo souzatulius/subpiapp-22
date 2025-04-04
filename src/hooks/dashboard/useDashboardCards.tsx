@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -23,9 +24,11 @@ export const useDashboardCards = () => {
 
       // Normaliza o valor da coordenação para facilitar comparação
       const normalizedDepartment = userDepartment
-        ?.toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') || undefined;
+        ? userDepartment
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+        : undefined;
 
       const defaultCards = getInitialDashboardCards(normalizedDepartment);
 

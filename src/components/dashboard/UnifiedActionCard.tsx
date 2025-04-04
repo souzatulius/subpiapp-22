@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -85,7 +84,7 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     id,
     isDraggable = false,
     isEditing = false,
-    disableWiggleEffect = false,
+    disableWiggleEffect = true,
     ...rest
   } = props;
 
@@ -102,7 +101,6 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     transform: CSS.Transform.toString(transform),
     transition,
     animation: disableWiggleEffect ? 'none' : undefined,
-    // Add a slight drop shadow and z-index when dragging
     zIndex: isDragging ? 10 : 'auto',
     boxShadow: isDragging ? '0 5px 15px rgba(0,0,0,0.2)' : 'none',
   };
@@ -119,6 +117,7 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
         id={id} 
         sortableProps={isDraggable ? { attributes, listeners } : undefined} 
         isEditing={isEditing}
+        disableWiggleEffect={disableWiggleEffect}
         {...rest} 
       />
     </div>
