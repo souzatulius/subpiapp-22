@@ -24,25 +24,25 @@ export const useDashboardInicial = (
   const activeDepartment = departmentOverride || userDepartment;
 
   useEffect(() => {
+    // If we're still loading department data and not in preview mode, don't fetch cards yet
     if (isDepartmentLoading && !isPreview) {
-      // Still loading department data, don't fetch cards yet
       return;
     }
 
     const fetchCards = async () => {
-      // In preview mode, use default cards immediately
-      if (isPreview) {
-        setCards(getInitialDashboardCards(activeDepartment || undefined));
-        setIsLoading(false);
-        return;
-      }
-
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
       try {
+        // In preview mode, use default cards immediately
+        if (isPreview) {
+          setCards(getInitialDashboardCards(activeDepartment || undefined));
+          setIsLoading(false);
+          return;
+        }
+
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+
         // First get default cards based on department
         const defaultCards = getInitialDashboardCards(activeDepartment || undefined);
         
