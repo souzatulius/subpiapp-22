@@ -1,33 +1,46 @@
 
-// Fix for error TS2589: Type instantiation is excessively deep and possibly infinite
-// This is typically caused by circular type references or excessive type complexity
-
-// Import only what's needed to reduce type complexity
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
+import { useInitialCards } from './useInitialCards';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useUserData } from './useUserData';
 
-// Simplified version of the hook to fix the build error
+// Enhanced version of the hook to provide actual card data
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { userCoordenaticaoId } = useUserData(user?.id);
+  
+  // Use the initialCards hook to get the default cards based on user department
+  const { cards: initialCards, isLoading: isLoadingInitial } = useInitialCards(userCoordenaticaoId);
   
   useEffect(() => {
-    // Load cards logic would go here
-    setIsLoading(false);
-  }, []);
+    if (!isLoadingInitial) {
+      setCards(initialCards);
+      setIsLoading(false);
+    }
+  }, [initialCards, isLoadingInitial]);
   
-  // Add the missing functions from the error
-  const handleCardEdit = () => {
-    // Implementation would go here
+  const handleCardEdit = (updatedCard: ActionCardItem) => {
+    setCards(currentCards => 
+      currentCards.map(card => 
+        card.id === updatedCard.id ? { ...card, ...updatedCard } : card
+      )
+    );
   };
   
-  const handleCardHide = () => {
-    // Implementation would go here
+  const handleCardHide = (cardId: string) => {
+    setCards(currentCards => 
+      currentCards.map(card => 
+        card.id === cardId ? { ...card, isHidden: true } : card
+      )
+    );
   };
   
   return {
     cards,
-    isLoading,
+    isLoading: isLoading || isLoadingInitial,
     setCards,
     handleCardEdit,
     handleCardHide

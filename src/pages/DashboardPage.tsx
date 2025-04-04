@@ -26,7 +26,7 @@ const DashboardPage: React.FC = () => {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
-  // Fix: Use the dashboard-specific useUserData hook with the user.id parameter
+  // Using the dashboard-specific useUserData hook
   const { firstName, isLoadingUser } = useUserData(user?.id);
   const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
 
