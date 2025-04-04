@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import { useUserData } from '@/hooks/dashboard/useUserData';
+import { useUserData } from '@/hooks/useUserData';
 import EditCardModal from '@/components/dashboard/EditCardModal';
 import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';

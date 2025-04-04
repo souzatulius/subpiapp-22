@@ -94,7 +94,7 @@ export const useDashboardInicial = (
     fetchCards();
     
     return () => clearTimeout(timeoutId);
-  }, [user, isPreview, activeDepartment, isDepartmentLoading]); // Added isDepartmentLoading to dependencies
+  }, [user, isPreview, activeDepartment, isDepartmentLoading]);
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
