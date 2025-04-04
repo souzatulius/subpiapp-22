@@ -88,7 +88,7 @@ const DashboardPage: React.FC = () => {
             {/* Content container with better height calculation and scrolling behavior */}
             <div className="relative" style={{ height: "calc(100vh - 300px)", minHeight: "500px" }}>
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {Array.from({ length: 8 }).map((_, index) => (
                     <Skeleton key={index} className="h-32 w-full rounded-lg" />
                   ))}
