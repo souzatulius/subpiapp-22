@@ -235,7 +235,7 @@ const CardFormFields: React.FC<Props> = ({
             <FormControl>
               <IconSelector
                 selectedIconId={selectedIconId}
-                onSelectIcon={id => {
+                onIconSelect={id => {
                   setSelectedIconId(id);
                   form.setValue('iconId', id);
                 }}
