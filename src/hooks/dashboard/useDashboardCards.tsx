@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -11,12 +10,9 @@ export const useDashboardCards = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { userDepartment, isLoading: isDepartmentLoading } = useDepartment(user);
-  
+
   useEffect(() => {
-    // Only start fetching if department loading is complete
-    if (isDepartmentLoading) {
-      return; // Exit early if department is still loading
-    }
+    if (isDepartmentLoading) return;
 
     const fetchCards = async () => {
       if (!user) {
@@ -25,42 +21,38 @@ export const useDashboardCards = () => {
         return;
       }
 
+      // Normaliza o valor da coordenação para facilitar comparação
+      const normalizedDepartment = userDepartment
+        ?.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') || undefined;
+
+      const defaultCards = getInitialDashboardCards(normalizedDepartment);
+
       try {
-        // Start with default cards based on department
-        const defaultCards = getInitialDashboardCards(userDepartment || undefined);
-        
-        // Try to fetch user customizations
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
+          .eq('page', 'inicial')
           .single();
-        
-        if (error) {
-          console.log('No custom dashboard found, using defaults');
+
+        if (error || !data?.cards_config) {
           setCards(defaultCards);
-        } else if (data && data.cards_config) {
-          try {
-            const customCards = typeof data.cards_config === 'string' 
-              ? JSON.parse(data.cards_config) 
-              : data.cards_config;
-            
-            if (Array.isArray(customCards) && customCards.length > 0) {
-              setCards(customCards);
-            } else {
-              setCards(defaultCards);
-            }
-          } catch (e) {
-            console.error('Error parsing cards config', e);
-            setCards(defaultCards);
-          }
+          return;
+        }
+
+        const customCards = typeof data.cards_config === 'string'
+          ? JSON.parse(data.cards_config)
+          : data.cards_config;
+
+        if (Array.isArray(customCards) && customCards.length > 0) {
+          setCards(customCards);
         } else {
           setCards(defaultCards);
         }
       } catch (error) {
-        console.error('Error fetching dashboard cards', error);
-        // Fallback to default cards on error
-        setCards(getInitialDashboardCards(userDepartment || undefined));
+        setCards(defaultCards);
       } finally {
         setIsLoading(false);
       }
@@ -69,46 +61,36 @@ export const useDashboardCards = () => {
     fetchCards();
   }, [user, userDepartment, isDepartmentLoading]);
 
-  const handleCardEdit = (cardToUpdate: ActionCardItem) => {
+  const persistCards = (updatedCards: ActionCardItem[]) => {
     if (!user) return;
-    
-    const updatedCards = cards.map(card => 
-      card.id === cardToUpdate.id ? cardToUpdate : card
-    );
-    
+
     setCards(updatedCards);
-    
+
     supabase
       .from('user_dashboard')
       .upsert({
         user_id: user.id,
+        page: 'inicial',
         cards_config: JSON.stringify(updatedCards),
         department_id: userDepartment || 'default'
       })
       .then(({ error }) => {
-        if (error) console.error('Error saving card edit', error);
+        if (error) console.error('Erro ao salvar configuração de cards:', error);
       });
   };
 
+  const handleCardEdit = (cardToUpdate: ActionCardItem) => {
+    const updatedCards = cards.map(card =>
+      card.id === cardToUpdate.id ? cardToUpdate : card
+    );
+    persistCards(updatedCards);
+  };
+
   const handleCardHide = (id: string) => {
-    if (!user) return;
-    
-    const updatedCards = cards.map(card => 
+    const updatedCards = cards.map(card =>
       card.id === id ? { ...card, isHidden: true } : card
     );
-    
-    setCards(updatedCards);
-    
-    supabase
-      .from('user_dashboard')
-      .upsert({
-        user_id: user.id,
-        cards_config: JSON.stringify(updatedCards),
-        department_id: userDepartment || 'default'
-      })
-      .then(({ error }) => {
-        if (error) console.error('Error saving card hide preference', error);
-      });
+    persistCards(updatedCards);
   };
 
   return {
