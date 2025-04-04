@@ -25,7 +25,7 @@ const WelcomeMessage: React.FC = () => {
   }
 
   return (
-    <div className="col-span-4 mb-4">
+    <div className="col-span-4 mb-8">
       <Card className="bg-blue-50 text-blue-800 border border-blue-200 rounded-xl shadow-md overflow-hidden">
         <CardContent className="p-4 flex items-start space-x-3">
           <div className="flex-shrink-0 mt-1">
