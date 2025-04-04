@@ -26,7 +26,10 @@ export const useUserDashboardCards = (
   useEffect(() => {
     const fetchCards = async () => {
       if (isPreview) {
-        setCards(getDefaultCards(department));
+        // Se estiver em preview, utiliza os cards padrão
+        const defaultCards = getDefaultCards(department);
+        console.log("Default cards (preview):", defaultCards);
+        setCards(defaultCards);
         setIsLoading(false);
         return;
       }
@@ -37,8 +40,9 @@ export const useUserDashboardCards = (
       try {
         // Define os cards padrão para feedback imediato
         const defaultCards = getDefaultCards(department);
+        console.log("Default cards:", defaultCards);
         setCards(defaultCards);
-        // Busca customizações do usuário
+        // Busca customizações do usuário no Supabase
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
@@ -50,6 +54,7 @@ export const useUserDashboardCards = (
             ? JSON.parse(data.cards_config) 
             : data.cards_config;
           if (Array.isArray(customCards) && customCards.length > 0) {
+            console.log("Custom cards encontrados:", customCards);
             setCards(customCards);
           }
         }
