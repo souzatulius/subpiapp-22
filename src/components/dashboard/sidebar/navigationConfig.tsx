@@ -5,8 +5,7 @@ import {
   MessageCircle, 
   BarChart2, 
   TrendingUp,
-  FileText,
-  Sparkles
+  FileText
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
@@ -27,7 +26,15 @@ export const getNavigationSections = () => [
     path: '/dashboard/comunicacao',
     isSection: false
   },
-  // Seção 4: Relatórios
+  // Seção 4: Releases e Notícias
+  {
+    id: 'releases',
+    icon: <FileText size={20} />,
+    label: 'Releases e Notícias',
+    path: '/dashboard/comunicacao/releases',
+    isSection: false
+  },
+  // Seção 5: Relatórios
   {
     id: 'relatorios',
     icon: <BarChart2 size={20} />,
@@ -35,7 +42,7 @@ export const getNavigationSections = () => [
     path: '/dashboard/comunicacao/relatorios',
     isSection: false
   },
-  // Seção 5: Ranking das Subs
+  // Seção 6: Ranking das Subs
   {
     id: 'ranking',
     icon: <TrendingUp size={20} />,

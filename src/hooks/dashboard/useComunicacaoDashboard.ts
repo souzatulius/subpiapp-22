@@ -40,17 +40,29 @@ export const useComunicacaoDashboard = (
       try {
         // First get default cards based on department
         const defaultCards = getCommunicationActionCards();
+        setCards(defaultCards); // Set default cards immediately for faster UI loading
+        
+        // Use a timeout to ensure we don't wait too long
+        const timeoutId = setTimeout(() => {
+          if (isLoading) {
+            console.log('Loading timeout reached, using default cards for comunicacao');
+            setIsLoading(false);
+          }
+        }, 2000);
         
         // Then try to fetch user customizations
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
+          .eq('department_id', activeDepartment)
           .single();
         
+        // Clear the timeout as we received a response
+        clearTimeout(timeoutId);
+        
         if (error) {
-          console.log('No custom dashboard found, using defaults');
-          setCards(defaultCards);
+          console.log('No custom dashboard found for comunicacao, using defaults');
         } else if (data && data.cards_config) {
           try {
             const customCards = typeof data.cards_config === 'string' 
@@ -59,20 +71,13 @@ export const useComunicacaoDashboard = (
             
             if (Array.isArray(customCards) && customCards.length > 0) {
               setCards(customCards);
-            } else {
-              setCards(defaultCards);
             }
           } catch (e) {
             console.error('Error parsing cards config', e);
-            setCards(defaultCards);
           }
-        } else {
-          setCards(defaultCards);
         }
       } catch (error) {
         console.error('Error fetching dashboard cards', error);
-        // Fallback to default cards on error
-        setCards(getCommunicationActionCards());
       } finally {
         setIsLoading(false);
       }
@@ -80,19 +85,7 @@ export const useComunicacaoDashboard = (
 
     // Start loading
     setIsLoading(true);
-    
-    // Short timeout to ensure default cards are set even if fetch fails
-    const timeoutId = setTimeout(() => {
-      if (isLoading) {
-        console.log('Loading timeout reached, using default cards');
-        setCards(getCommunicationActionCards());
-        setIsLoading(false);
-      }
-    }, 2000);
-    
     fetchCards();
-    
-    return () => clearTimeout(timeoutId);
   }, [user, isPreview, activeDepartment]);
 
   const toggleEditMode = () => {

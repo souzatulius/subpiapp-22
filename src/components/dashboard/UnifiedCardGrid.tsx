@@ -40,7 +40,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onHideCard,
   isMobileView = false,
   isEditMode = false,
-  disableWiggleEffect = true, // Changed default to true to disable wiggle effect
+  disableWiggleEffect = false,
   showSpecialFeatures = true,
   quickDemandTitle,
   onQuickDemandTitleChange,

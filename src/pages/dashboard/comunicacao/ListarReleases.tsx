@@ -389,22 +389,28 @@ const ListarReleases = () => {
               </div>
               
               {isNoticia && (
-                <div className="absolute bottom-4 right-4">
-                  <Badge 
-                    variant={item.publicada ? "success" : "warning"} 
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                <div className="absolute bottom-4 right-4 flex items-center gap-1">
+                  {item.publicada && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      <Check className="h-3 w-3 mr-1" /> Publicada
+                    </Badge>
+                  )}
+                  <Button 
+                    variant={item.publicada ? "outline" : "secondary"} 
+                    size="sm" 
                     onClick={() => markAsPublished(item)}
+                    className={item.publicada ? "border-green-500 text-green-600" : ""}
                   >
                     {item.publicada ? (
                       <>
-                        <Check className="h-3 w-3 mr-1" /> Publicada
+                        <X className="h-4 w-4 mr-1" /> Despublicar
                       </>
                     ) : (
                       <>
-                        Não publicada
+                        <Check className="h-4 w-4 mr-1" /> Publicar
                       </>
                     )}
-                  </Badge>
+                  </Button>
                 </div>
               )}
             </CardContent>
@@ -476,21 +482,20 @@ const ListarReleases = () => {
                 </TableCell>
                 {isNoticia && (
                   <TableCell>
-                    <Badge 
-                      variant={item.publicada ? "success" : "warning"} 
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
                       onClick={() => markAsPublished(item)}
+                      className={item.publicada ? "text-green-600" : "text-gray-500"}
                     >
                       {item.publicada ? (
                         <>
-                          <Check className="h-3 w-3 mr-1" /> Publicada
+                          <Check className="h-4 w-4 mr-1" /> Publicada
                         </>
                       ) : (
-                        <>
-                          Não publicada
-                        </>
+                        "Publicar"
                       )}
-                    </Badge>
+                    </Button>
                   </TableCell>
                 )}
                 <TableCell className="text-right">
@@ -671,22 +676,8 @@ const ListarReleases = () => {
                 {selectedRelease?.tipo === 'release' ? 'Release' : 'Notícia'}: {selectedRelease?.tipo === 'noticia' ? (selectedRelease?.titulo || 'Sem título') : ''}
               </div>
               {selectedRelease?.tipo === 'noticia' && (
-                <Badge 
-                  variant={selectedRelease?.publicada ? "success" : "warning"} 
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => {
-                    if (selectedRelease) markAsPublished(selectedRelease);
-                  }}
-                >
-                  {selectedRelease?.publicada ? (
-                    <>
-                      <Check className="h-3 w-3 mr-1" /> Publicada
-                    </>
-                  ) : (
-                    <>
-                      Não publicada
-                    </>
-                  )}
+                <Badge variant={selectedRelease?.publicada ? "default" : "outline"} className={selectedRelease?.publicada ? "bg-green-100 text-green-800" : ""}>
+                  {selectedRelease?.publicada ? "Publicada" : "Não publicada"}
                 </Badge>
               )}
             </AlertDialogTitle>
@@ -722,6 +713,27 @@ const ListarReleases = () => {
                 }}>
                   <Sparkles className="h-4 w-4 mr-2" />
                   Criar Notícia
+                </Button>
+              )}
+              {selectedRelease?.tipo === 'noticia' && (
+                <Button 
+                  variant={selectedRelease.publicada ? "outline" : "default"}
+                  onClick={() => {
+                    markAsPublished(selectedRelease);
+                    setIsViewModalOpen(false);
+                  }}
+                >
+                  {selectedRelease.publicada ? (
+                    <>
+                      <X className="h-4 w-4 mr-2" />
+                      Despublicar
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Publicar
+                    </>
+                  )}
                 </Button>
               )}
             </div>

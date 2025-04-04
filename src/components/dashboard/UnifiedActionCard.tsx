@@ -9,7 +9,6 @@ import DynamicListCard from '@/components/settings/dashboard-management/DynamicL
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
 import CardControls from './card-parts/CardControls';
-import { useNavigate } from 'react-router-dom';
 
 export interface Controls {
   cardId: string;
@@ -85,7 +84,7 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     id,
     isDraggable = false,
     isEditing = false,
-    disableWiggleEffect = true,
+    disableWiggleEffect = false,
     ...rest
   } = props;
 
@@ -111,14 +110,13 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
       ref={setNodeRef} 
       style={style} 
       className={`h-full ${isDragging ? 'opacity-80' : ''}`}
-      {...attributes}
-      {...listeners}
+      {...(isDraggable ? attributes : {})}
+      {...(isDraggable ? listeners : {})}
     >
       <UnifiedActionCard 
         id={id} 
         sortableProps={isDraggable ? { attributes, listeners } : undefined} 
         isEditing={isEditing}
-        disableWiggleEffect={disableWiggleEffect}
         {...rest} 
       />
     </div>
@@ -161,13 +159,6 @@ export function UnifiedActionCard({
   badgeValue,
   hasSubtitle,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
-  const navigate = useNavigate();
-  
-  const handleCardClick = () => {
-    if (path && !isEditing) {
-      navigate(path);
-    }
-  };
   
   const renderCardContent = () => {
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
@@ -254,32 +245,31 @@ export function UnifiedActionCard({
     }
     
     return (
-      <div className="h-full" onClick={handleCardClick}>
+      <div className="h-full">
         <ActionCard
           id={id}
           title={title}
           iconId={iconId}
           path={path}
           color={color}
-          isDraggable={isEditing}
-          onEdit={undefined}
-          onDelete={undefined}
-          onHide={undefined}
+          isDraggable={true}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onHide={onHide}
           isCustom={isCustom}
           iconSize={iconSize}
           isMobileView={isMobileView}
-          showControls={false}
         />
       </div>
     );
   };
   
   return (
-    <div className="h-full relative group" onClick={isEditing ? undefined : handleCardClick}>
+    <div className="h-full relative group">
       {renderCardContent()}
       
       {(isEditing || onEdit) && (
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
           <CardControls 
             onEdit={onEdit ? () => onEdit(id) : undefined}
             onDelete={onDelete ? () => onDelete(id) : undefined}

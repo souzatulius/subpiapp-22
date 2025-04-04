@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { getBgColor } from './useCardColors';
@@ -11,7 +10,8 @@ export const useInitialCards = (userDepartment: string | null) => {
 
   useEffect(() => {
     setIsLoading(true);
-    
+    console.log("Initializing cards for department:", userDepartment);
+
     const initialCards: ActionCardItem[] = [
       {
         id: 'comunicacao',
@@ -19,8 +19,8 @@ export const useInitialCards = (userDepartment: string | null) => {
         path: "/dashboard/comunicacao",
         iconId: "message-square-reply",
         color: getBgColor('blue-700'),
-        width: "25", // 1 coluna
-        height: "1",
+        width: "25",
+        height: "2",
         type: "standard",
         displayMobile: true,
         mobileOrder: 1
@@ -32,7 +32,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "plus-circle",
         color: getBgColor('orange-400'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         displayMobile: true,
         mobileOrder: 2,
@@ -45,7 +45,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "list-filter",
         color: getBgColor('grey-800'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         displayMobile: true,
         mobileOrder: 3
@@ -57,7 +57,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "message-circle",
         color: getBgColor('orange-500'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('responder-demandas'),
@@ -71,7 +71,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "file-text",
         color: getBgColor('blue-960'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('criar-nota'),
@@ -86,7 +86,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "file-text",
         color: getBgColor('neutral-200'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         displayMobile: true,
         mobileOrder: 6
@@ -98,7 +98,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "check-circle",
         color: getBgColor('grey-950'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('aprovar-notas'),
@@ -112,7 +112,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "trophy",
         color: getBgColor('lime-500'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         displayMobile: true,
         mobileOrder: 8
@@ -124,22 +124,52 @@ export const useInitialCards = (userDepartment: string | null) => {
         iconId: "bar-chart-2",
         color: getBgColor('grey-400'),
         width: "25",
-        height: "1",
+        height: "2",
         type: "standard",
         displayMobile: true,
         mobileOrder: 9,
+        allowedDepartments: ['comunicacao', 'gabinete']
+      },
+      {
+        id: 'gerar-noticia',
+        title: "Gerar Notícia",
+        path: "/dashboard/comunicacao/cadastrar-release",
+        iconId: "document-plus",
+        color: getBgColor('lime-400'),
+        width: "25",
+        height: "2",
+        type: "standard",
+        displayMobile: true,
+        mobileOrder: 10,
+        allowedDepartments: ['comunicacao']
+      },
+      {
+        id: 'ver-releases',
+        title: "Ver Releases e Notícias",
+        path: "/dashboard/comunicacao/releases",
+        iconId: "file-text",
+        color: getBgColor('blue-900'),
+        width: "25",
+        height: "2",
+        type: "standard",
+        displayMobile: true,
+        mobileOrder: 11,
         allowedDepartments: ['comunicacao', 'gabinete']
       }
     ];
 
     const filteredCards = initialCards.filter(card => {
       if (card.allowedDepartments && card.allowedDepartments.length > 0) {
-        return !userDepartment || card.allowedDepartments.includes(userDepartment);
+        if (!userDepartment) return true;
+        return card.allowedDepartments.includes(userDepartment);
       }
       return true;
     });
 
-    setCards(filteredCards);
+    console.log(`Filtered ${initialCards.length} cards to ${filteredCards.length} based on department:`, userDepartment);
+    
+    const sortedCards = filteredCards.sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999));
+    setCards(sortedCards);
     setIsLoading(false);
   }, [userDepartment, getBadgeValue]);
 

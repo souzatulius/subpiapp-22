@@ -8,7 +8,11 @@ export type CardColor =
   | 'blue-light' | 'green-light' | 'purple-light'
   | 'gray-400' | 'gray-800' | 'gray-950' | 'blue-700'
   | 'blue-900' | 'blue-960' | 'orange-400' | 'orange-500'
-  | 'gray-200' | 'lime-500' | 'neutral-200';
+  | 'gray-200' | 'lime-500' | 'neutral-200'
+  // British spelling variants
+  | 'grey-400' | 'grey-800' | 'grey-950' | 'grey-light'
+  | 'grey-dark' | 'grey-ultra-light'
+  | 'lime-400'; // Additional lime variant
 
 export type CardWidth = '25' | '33' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
