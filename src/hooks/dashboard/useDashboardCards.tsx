@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDepartment } from './useDepartment';
-import { getDefaultCards } from './defaultCards';
+import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useDashboardCards = () => {
@@ -27,7 +27,7 @@ export const useDashboardCards = () => {
 
       try {
         // Start with default cards based on department
-        const defaultCards = getDefaultCards(userDepartment || undefined);
+        const defaultCards = getInitialDashboardCards(userDepartment || undefined);
         
         // Try to fetch user customizations
         const { data, error } = await supabase
@@ -60,7 +60,7 @@ export const useDashboardCards = () => {
       } catch (error) {
         console.error('Error fetching dashboard cards', error);
         // Fallback to default cards on error
-        setCards(getDefaultCards(userDepartment || undefined));
+        setCards(getInitialDashboardCards(userDepartment || undefined));
       } finally {
         setIsLoading(false);
       }
