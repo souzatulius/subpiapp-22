@@ -10,7 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatDateTime(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return format(date, 'dd/MM/yyyy HH:mm');
+    return format(date, 'dd/MM/yy HH:mm');
   } catch (error) {
     return '-';
   }
