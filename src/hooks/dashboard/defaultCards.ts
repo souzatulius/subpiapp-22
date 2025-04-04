@@ -122,19 +122,8 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       badgeValue: "0",
       displayMobile: true,
       mobileOrder: 7
-    },
-    {
-      id: 'ranking-zeladoria',
-      title: "Ranking da Zeladoria",
-      path: "/dashboard/zeladoria/ranking-subs",
-      iconId: "trophy",
-      color: 'orange-600' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 8
     }
+    // Removed the "Ranking da Zeladoria" card from here
   ];
 };
 
@@ -154,6 +143,18 @@ export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
       type: 'standard' as CardType,
       displayMobile: true,
       mobileOrder: 1
+    },
+    {
+      id: 'comunicacao',
+      title: 'Comunicação',
+      iconId: 'message-circle',
+      path: '/dashboard/comunicacao',
+      color: 'blue' as CardColor,
+      width: '25' as CardWidth,
+      height: '1' as CardHeight,
+      type: 'standard' as CardType,
+      displayMobile: true,
+      mobileOrder: 2
     },
     {
       id: 'overdue-demands',

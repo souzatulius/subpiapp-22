@@ -93,6 +93,24 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
     return <IconComponent className="h-6 w-6" />;
   };
 
+  // Get all available icons
+  const getAllIcons = () => {
+    // Start with suggested icons
+    const allIcons = [...SUGGESTED_ICONS];
+    
+    // Add other icons from Lucide
+    Object.keys(LucideIcons)
+      .filter(key => 
+        typeof (LucideIcons as any)[key] === 'function' && 
+        !['createLucideIcon', 'default'].includes(key) &&
+        !allIcons.includes(key)
+      )
+      .slice(0, 60 - SUGGESTED_ICONS.length)
+      .forEach(key => allIcons.push(key));
+    
+    return allIcons;
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
@@ -114,7 +132,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
           <div className="grid gap-2">
             <Label>Ícone</Label>
             <div className="grid grid-cols-6 gap-2 h-40 overflow-y-auto p-2 border rounded-md">
-              {SUGGESTED_ICONS.map((key) => (
+              {getAllIcons().map((key) => (
                 <div
                   key={key}
                   className={`flex items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 ${
@@ -125,24 +143,6 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                   {renderIconComponent(key)}
                 </div>
               ))}
-              {Object.keys(LucideIcons)
-                .filter(key => 
-                  typeof (LucideIcons as any)[key] === 'function' && 
-                  !['createLucideIcon', 'default'].includes(key) &&
-                  !SUGGESTED_ICONS.includes(key)
-                )
-                .slice(0, 60 - SUGGESTED_ICONS.length)
-                .map((key) => (
-                  <div
-                    key={key}
-                    className={`flex items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 ${
-                      iconId === key ? 'bg-blue-100 border-blue-500' : ''
-                    }`}
-                    onClick={() => setIconId(key)}
-                  >
-                    {renderIconComponent(key)}
-                  </div>
-                ))}
             </div>
           </div>
           
