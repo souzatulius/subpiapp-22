@@ -7,7 +7,6 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import EditCardModal from '@/components/dashboard/EditCardModal';
-import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
@@ -55,7 +54,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
       
-      {!isLoading && <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />}
+      {/* Removed the EditModeToggle component here */}
       
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
