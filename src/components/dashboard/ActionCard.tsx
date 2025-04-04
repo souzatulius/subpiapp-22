@@ -25,6 +25,7 @@ export interface ActionCardProps {
   children?: React.ReactNode;
   iconSize?: 'sm' | 'md' | 'lg' | 'xl';
   isMobileView?: boolean;
+  showControls?: boolean;
 }
 
 const getBackgroundColor = (color: CardColor): string => {
@@ -110,24 +111,23 @@ const ActionCard = ({
   isCustom = false,
   iconSize = 'md',
   isMobileView = false,
-  children
+  children,
+  showControls = true
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
   
-  const handleClick = () => {
-    if (path) navigate(path);
-  };
-
+  // We'll remove this handler since it's now managed by the parent component
+  // This prevents conflicts with the drag and drop functionality
+  
   return (
     <div 
       className={`w-full h-full rounded-xl shadow-md overflow-hidden 
-        ${!isDraggable && path ? 'cursor-pointer' : 'cursor-grab'} 
+        ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColor} group relative`} 
-      onClick={!isDraggable && path ? handleClick : undefined}
+        active:scale-95 ${bgColor} group relative`}
     >
       {isDraggable && (
         <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
@@ -137,7 +137,8 @@ const ActionCard = ({
         </div>
       )}
 
-      {(onEdit || onDelete || onHide) && (
+      {/* Only render controls if showControls is true */}
+      {showControls && (onEdit || onDelete || onHide) && (
         <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <CardControls 
             onEdit={onEdit ? () => onEdit(id) : undefined} 

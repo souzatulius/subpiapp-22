@@ -12,7 +12,6 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
-import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
@@ -67,7 +66,7 @@ const DashboardPage: React.FC = () => {
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
-            {/* WelcomeCard takes full width */}
+            {/* WelcomeCard takes full width - removed showButton prop */}
             <div className="w-full mb-3">
               <WelcomeCard
                 title="Dashboard"
@@ -78,12 +77,7 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
-            {/* Edit mode toggle */}
-            {!isLoading && (
-              <div className="flex justify-end mb-4">
-                <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
-              </div>
-            )}
+            {/* Removed the EditModeToggle section here */}
             
             {/* Content container with better height calculation and scrolling behavior */}
             <div className="relative" style={{ height: "calc(100vh - 300px)", minHeight: "500px" }}>
