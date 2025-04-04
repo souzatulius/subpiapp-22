@@ -54,8 +54,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onSearchSubmit,
   specialCardsData
 }) => {
+  // Configure sensors for improved drag-and-drop experience
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    // Lower the activation constraint distance to make it easier to start dragging
+    useSensor(PointerSensor, { 
+      activationConstraint: { distance: 5 } // Reduce activation distance for easier dragging
+    }),
     useSensor(KeyboardSensor)
   );
 
@@ -128,7 +132,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 color={card.color}
                 width={card.width}
                 height={card.height}
-                isDraggable={isEditMode}
+                isDraggable={true} // Always enable dragging
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {
                   const cardToEdit = cards.find(c => c.id === id);

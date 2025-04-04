@@ -1,8 +1,8 @@
-
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
+import { MoveIcon } from 'lucide-react';
 
 export interface ActionCardProps {
   id: string;
@@ -122,11 +122,20 @@ const ActionCard = ({
 
   return (
     <div 
-      className={`w-full h-40 rounded-xl shadow-md overflow-hidden cursor-pointer 
+      className={`w-full h-40 rounded-xl shadow-md overflow-hidden 
+        ${!isDraggable && path ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
         active:scale-95 ${bgColor} group relative`} 
-      onClick={path ? handleClick : undefined}
+      onClick={!isDraggable && path ? handleClick : undefined}
     >
+      {isDraggable && (
+        <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
+          <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
+            <MoveIcon className="h-3.5 w-3.5" />
+          </div>
+        </div>
+      )}
+
       {(onEdit || onDelete || onHide) && (
         <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <CardControls 

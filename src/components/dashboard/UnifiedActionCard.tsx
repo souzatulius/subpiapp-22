@@ -95,16 +95,26 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     animation: disableWiggleEffect ? 'none' : undefined,
+    // Add a slight drop shadow and z-index when dragging
+    zIndex: isDragging ? 10 : 'auto',
+    boxShadow: isDragging ? '0 5px 15px rgba(0,0,0,0.2)' : 'none',
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="h-full">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={`h-full ${isDragging ? 'opacity-80' : ''}`}
+      {...attributes}
+      {...listeners}
+    >
       <UnifiedActionCard 
         id={id} 
         sortableProps={isDraggable ? { attributes, listeners } : undefined} 
@@ -237,17 +247,14 @@ export function UnifiedActionCard({
     }
     
     return (
-      <div
-        className="h-full"
-        {...(sortableProps ? { ...sortableProps.attributes, ...sortableProps.listeners } : {})}
-      >
+      <div className="h-full">
         <ActionCard
           id={id}
           title={title}
           iconId={iconId}
           path={path}
           color={color}
-          isDraggable={isEditing}
+          isDraggable={true}
           onEdit={onEdit}
           onDelete={onDelete}
           onHide={onHide}

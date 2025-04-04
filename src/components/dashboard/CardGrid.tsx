@@ -48,7 +48,8 @@ const CardGrid: React.FC<CardGridProps> = ({
   onSearchSubmit = () => {}
 }) => {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    // Make dragging easier by reducing the activation distance
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor)
   );
 
