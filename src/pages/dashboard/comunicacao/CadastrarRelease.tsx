@@ -1,595 +1,274 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Loader2, Save, Sparkles } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import { FileText, Loader2, Trash, SparklesIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
-import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 
-interface GeneratedContent {
-  titulo: string;
+// Define a type for releases since it might not be in the Supabase types yet
+interface Release {
+  id: string;
+  tipo: 'release' | 'noticia';
+  titulo?: string;
   conteudo: string;
+  release_origem_id?: string | null;
+  criado_em: string;
+  autor_id: string;
 }
 
 const CadastrarRelease = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const releaseId = searchParams.get('releaseId');
-  const noticiaId = searchParams.get('noticiaId');
+  const [releaseContent, setReleaseContent] = useState('');
+  const [isGeneratingNews, setIsGeneratingNews] = useState(false);
+  const [isSavingRelease, setIsSavingRelease] = useState(false);
+  const [generatedNews, setGeneratedNews] = useState<{ titulo: string; conteudo: string } | null>(null);
+  const [isEditingNews, setIsEditingNews] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [generatingNews, setGeneratingNews] = useState(false);
-  const [savingNews, setSavingNews] = useState(false);
-  const [content, setContent] = useState('');
-  const [originalReleaseId, setOriginalReleaseId] = useState<string | null>(null);
-  const [originReleaseContent, setOriginReleaseContent] = useState('');
-  const [noticiaContent, setNoticiaContent] = useState<GeneratedContent>({
-    titulo: '',
-    conteudo: ''
-  });
-  const [isGeneratedNewsModalOpen, setIsGeneratedNewsModalOpen] = useState(false);
-  const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false);
-  const [isEditingNoticia, setIsEditingNoticia] = useState(false);
-  const [isAskToGenerateOpen, setIsAskToGenerateOpen] = useState(false);
+  const handleSaveRelease = async () => {
+    if (!releaseContent.trim()) {
+      toast({
+        title: "Conteúdo vazio",
+        description: "Por favor, cole o conteúdo do release antes de salvar.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  useEffect(() => {
-    const initialize = async () => {
-      if (releaseId) {
-        await fetchRelease(releaseId);
-      } else if (noticiaId) {
-        await fetchNoticia(noticiaId);
-      }
-    };
-
-    initialize();
-  }, [releaseId, noticiaId]);
-
-  const fetchRelease = async (id: string) => {
     try {
-      setLoading(true);
+      setIsSavingRelease(true);
       
+      // Using the custom client approach to avoid TypeScript errors
       const { data, error } = await supabase
         .from('releases')
-        .select('*')
-        .eq('id', id)
-        .single();
+        .insert({
+          conteudo: releaseContent,
+          tipo: 'release',
+          autor_id: user?.id
+        } as any)
+        .select() as any;
       
       if (error) throw error;
       
-      if (data) {
-        setContent(data.conteudo);
-        setOriginalReleaseId(data.id);
-        setOriginReleaseContent(data.conteudo);
-      }
+      toast({
+        title: "Release salvo com sucesso!",
+        description: "O release foi salvo no banco de dados.",
+      });
+      
+      // Clear the form after successful save
+      setReleaseContent('');
       
     } catch (error: any) {
-      console.error('Error fetching release:', error);
+      console.error('Erro ao salvar release:', error);
       toast({
-        title: "Erro ao carregar release",
-        description: error.message,
+        title: "Erro ao salvar release",
+        description: error.message || "Ocorreu um erro ao salvar o release. Tente novamente.",
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setIsSavingRelease(false);
     }
   };
 
-  const fetchNoticia = async (id: string) => {
+  const handleGenerateNews = async () => {
+    if (!releaseContent.trim()) {
+      toast({
+        title: "Conteúdo vazio",
+        description: "Por favor, cole o conteúdo do release antes de gerar notícia.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      setLoading(true);
+      setIsGeneratingNews(true);
       
-      const { data, error } = await supabase
-        .from('releases')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data) {
-        setIsEditingNoticia(true);
-        setNoticiaContent({
-          titulo: data.titulo || '',
-          conteudo: data.conteudo
+      // Call the Edge Function to generate news
+      const { data: generatedData, error: functionError } = await supabase.functions
+        .invoke('generate-news', {
+          body: { releaseContent }
         });
-        setOriginalReleaseId(data.release_origem_id);
-        
-        if (data.release_origem_id) {
-          // Fetch the origin release content
-          const { data: originData, error: originError } = await supabase
-            .from('releases')
-            .select('conteudo')
-            .eq('id', data.release_origem_id)
-            .single();
-            
-          if (!originError && originData) {
-            setOriginReleaseContent(originData.conteudo);
-          }
-        }
+
+      if (functionError) throw functionError;
+      
+      if (!generatedData.success || !generatedData.data) {
+        throw new Error(generatedData.error || "Falha na geração da notícia");
       }
       
-    } catch (error: any) {
-      console.error('Error fetching noticia:', error);
-      toast({
-        title: "Erro ao carregar notícia",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveRelease = async () => {
-    if (!user) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar autenticado para salvar um release.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!content.trim()) {
-      toast({
-        title: "Erro",
-        description: "O conteúdo do release não pode estar vazio.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      const releaseData = {
-        conteudo: content,
-        autor_id: user.id,
-        tipo: 'release',
-      };
-      
-      const { data, error } = await supabase
-        .from('releases')
-        .insert([releaseData])
-        .select()
-        .single();
-      
-      if (error) throw error;
+      // Set the generated news and show the editing mode
+      setGeneratedNews(generatedData.data);
+      setIsEditingNews(true);
       
       toast({
-        title: "Sucesso",
-        description: "Release salvo com sucesso!",
+        title: "Notícia gerada com sucesso!",
+        description: "Revise e edite a notícia gerada antes de salvar.",
       });
-
-      setOriginalReleaseId(data.id);
-      setOriginReleaseContent(data.conteudo);
-      
-      // Open dialog asking if user wants to generate a news article
-      setIsAskToGenerateOpen(true);
       
     } catch (error: any) {
-      console.error('Error saving release:', error);
-      toast({
-        title: "Erro ao salvar",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateNews = async () => {
-    if (!originalReleaseId) {
-      toast({
-        title: "Erro",
-        description: "Nenhum release original encontrado para gerar notícia.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      setGeneratingNews(true);
-      
-      // Call the edge function to generate news
-      const { data: funcData, error: funcError } = await supabase.functions.invoke('generate-news', {
-        body: { releaseContent: originReleaseContent }
-      });
-      
-      if (funcError) throw funcError;
-      
-      if (!funcData.success) {
-        throw new Error(funcData.error || "Erro ao gerar notícia");
-      }
-      
-      setNoticiaContent(funcData.data);
-      setIsGeneratedNewsModalOpen(true);
-      
-    } catch (error: any) {
-      console.error('Error generating news:', error);
+      console.error('Erro ao gerar notícia:', error);
       toast({
         title: "Erro ao gerar notícia",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao gerar a notícia. Tente novamente.",
         variant: "destructive"
       });
     } finally {
-      setGeneratingNews(false);
-      setIsAskToGenerateOpen(false);
+      setIsGeneratingNews(false);
     }
   };
 
-  const saveNoticia = async () => {
-    if (!user) {
+  const handleSaveNews = async () => {
+    if (!generatedNews || !releaseContent.trim()) {
       toast({
-        title: "Erro",
-        description: "Você precisa estar autenticado para salvar uma notícia.",
+        title: "Dados incompletos",
+        description: "Não foi possível salvar a notícia. Dados incompletos.",
         variant: "destructive"
       });
       return;
     }
-    
-    if (!noticiaContent.titulo.trim() || !noticiaContent.conteudo.trim()) {
-      toast({
-        title: "Erro",
-        description: "Título e conteúdo da notícia são obrigatórios.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
+
     try {
-      setSavingNews(true);
+      setIsSavingRelease(true);
       
-      const noticiaData = {
-        titulo: noticiaContent.titulo,
-        conteudo: noticiaContent.conteudo,
-        autor_id: user.id,
-        tipo: 'noticia',
-        release_origem_id: originalReleaseId,
-        publicada: false
-      };
+      // First save the release
+      const { data: releaseData, error: releaseError } = await supabase
+        .from('releases')
+        .insert({
+          conteudo: releaseContent,
+          tipo: 'release',
+          autor_id: user?.id
+        } as any)
+        .select() as any;
       
-      // If editing, update the existing notícia
-      if (isEditingNoticia && noticiaId) {
-        const { error } = await supabase
-          .from('releases')
-          .update(noticiaData)
-          .eq('id', noticiaId);
-          
-        if (error) throw error;
-        
-        toast({
-          title: "Sucesso",
-          description: "Notícia atualizada com sucesso!",
-        });
-      } else {
-        // Otherwise insert a new notícia
-        const { error } = await supabase
-          .from('releases')
-          .insert([noticiaData]);
-          
-        if (error) throw error;
-        
-        toast({
-          title: "Sucesso",
-          description: "Notícia salva com sucesso!",
-        });
-      }
+      if (releaseError) throw releaseError;
       
-      // Close the modals
-      setIsGeneratedNewsModalOpen(false);
-      setIsConfirmSaveModalOpen(false);
+      // Then save the generated news with a reference to the release
+      const { data: newsData, error: newsError } = await supabase
+        .from('releases')
+        .insert({
+          titulo: generatedNews.titulo,
+          conteudo: generatedNews.conteudo,
+          tipo: 'noticia',
+          autor_id: user?.id,
+          release_origem_id: releaseData[0].id
+        } as any)
+        .select() as any;
       
-      // Navigate to news tab on the main releases page
-      navigate('/dashboard/comunicacao/releases?tab=news');
+      if (newsError) throw newsError;
+      
+      toast({
+        title: "Notícia salva com sucesso!",
+        description: "A notícia e o release original foram salvos no banco de dados.",
+      });
+      
+      // Reset the form after successful save
+      setReleaseContent('');
+      setGeneratedNews(null);
+      setIsEditingNews(false);
       
     } catch (error: any) {
-      console.error('Error saving news:', error);
+      console.error('Erro ao salvar notícia:', error);
       toast({
         title: "Erro ao salvar notícia",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao salvar a notícia. Tente novamente.",
         variant: "destructive"
       });
     } finally {
-      setSavingNews(false);
+      setIsSavingRelease(false);
     }
   };
 
   return (
     <motion.div 
-      className="max-w-4xl mx-auto"
+      className="max-w-6xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <BreadcrumbBar />
-      
       <WelcomeCard
-        title={isEditingNoticia ? "Editar Notícia" : releaseId ? "Gerar Notícia a partir de Release" : "Cadastrar Novo Release"}
-        description={isEditingNoticia 
-          ? "Edite o conteúdo da notícia para publicação." 
-          : releaseId 
-            ? "Gere uma notícia institucional a partir do release recebido." 
-            : "Registre o conteúdo de um release recebido por e-mail."}
-        icon={<FileText className="h-6 w-6 text-white" />}
-        color="bg-gradient-to-r from-blue-500 to-blue-600"
+        title="Cadastrar Release"
+        description="Transforme releases recebidos por e-mail em notícias editáveis"
+        icon={<Sparkles className="h-6 w-6 text-white" />}
+        color="bg-gradient-to-r from-indigo-500 to-indigo-600"
       />
 
-      <div className="mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>{isEditingNoticia ? "Notícia" : "Release"}</CardTitle>
-            <CardDescription>
-              {isEditingNoticia 
-                ? "Edite o conteúdo da notícia a ser publicada." 
-                : releaseId 
-                  ? "Release recebido para geração de notícia." 
-                  : "Cole o conteúdo do release recebido por e-mail."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-              </div>
-            ) : isEditingNoticia ? (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="titulo">Título da Notícia</Label>
-                  <Input
-                    id="titulo"
-                    value={noticiaContent.titulo}
-                    onChange={(e) => setNoticiaContent(prev => ({ ...prev, titulo: e.target.value }))}
-                    placeholder="Insira o título da notícia"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="conteudo">Conteúdo da Notícia</Label>
-                  <Textarea
-                    id="conteudo"
-                    value={noticiaContent.conteudo}
-                    onChange={(e) => setNoticiaContent(prev => ({ ...prev, conteudo: e.target.value }))}
-                    placeholder="Insira o conteúdo da notícia"
-                    className="mt-1 min-h-[300px]"
-                  />
-                </div>
-                
-                {originalReleaseId && originReleaseContent && (
-                  <div className="mt-6 border-t pt-4">
-                    <h3 className="text-sm font-medium mb-2">Release Original:</h3>
-                    <div className="text-sm text-gray-700 bg-gray-50 p-4 rounded-md max-h-[200px] overflow-y-auto">
-                      {originReleaseContent}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex justify-end mt-6 space-x-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/dashboard/comunicacao/releases?tab=news')}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button 
-                    onClick={() => setIsConfirmSaveModalOpen(true)}
-                    disabled={!noticiaContent.titulo.trim() || !noticiaContent.conteudo.trim()}
-                  >
-                    Salvar Notícia
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="conteudo">Conteúdo do Release</Label>
-                  <Textarea
-                    id="conteudo"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Cole aqui o conteúdo do release recebido por e-mail"
-                    className="mt-1 min-h-[400px]"
-                    disabled={!!releaseId}
-                  />
-                </div>
-                
-                <div className="flex justify-end mt-6 space-x-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/dashboard/comunicacao/releases')}
-                  >
-                    Cancelar
-                  </Button>
-                  
-                  {releaseId ? (
-                    <Button 
-                      onClick={generateNews}
-                      disabled={generatingNews}
-                    >
-                      {generatingNews ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Gerando...
-                        </>
-                      ) : (
-                        <>
-                          <SparklesIcon className="h-4 w-4 mr-2" />
-                          Gerar Notícia
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={saveRelease}
-                      disabled={loading || !content.trim()}
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        "Salvar Release"
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Dialog for asking if user wants to generate news */}
-      <Dialog open={isAskToGenerateOpen} onOpenChange={setIsAskToGenerateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Gerar Notícia?</DialogTitle>
-          </DialogHeader>
-          <p className="py-4">
-            O release foi salvo com sucesso. Deseja gerar uma notícia a partir deste release?
-          </p>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsAskToGenerateOpen(false);
-                navigate('/dashboard/comunicacao/releases');
-              }}
-            >
-              Não, ir para listagem
-            </Button>
-            <Button 
-              onClick={generateNews}
-              disabled={generatingNews}
-            >
-              {generatingNews ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Gerando...
-                </>
-              ) : (
-                <>
-                  <SparklesIcon className="h-4 w-4 mr-2" />
-                  Sim, gerar notícia
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog for generated news content */}
-      <Dialog open={isGeneratedNewsModalOpen} onOpenChange={setIsGeneratedNewsModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Notícia Gerada</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 my-4">
-            <div>
-              <Label htmlFor="news-title">Título</Label>
-              <Input
+      <div className="mt-6 bg-white p-6 rounded-xl shadow-sm">
+        {!isEditingNews ? (
+          <>
+            <h2 className="text-xl font-semibold mb-4">Novo Release</h2>
+            <Textarea
+              className="min-h-[300px] mb-4"
+              placeholder="Cole aqui o release recebido por e-mail"
+              value={releaseContent}
+              onChange={(e) => setReleaseContent(e.target.value)}
+            />
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                onClick={handleSaveRelease}
+                disabled={isSavingRelease || isGeneratingNews}
+              >
+                {isSavingRelease ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                Salvar Release
+              </Button>
+              <Button 
+                onClick={handleGenerateNews}
+                disabled={isGeneratingNews || isSavingRelease}
+              >
+                {isGeneratingNews ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                Gerar Notícia
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 className="text-xl font-semibold mb-4">Editar Notícia Gerada</h2>
+            
+            <div className="mb-4">
+              <label htmlFor="news-title" className="block text-sm font-medium text-gray-700 mb-1">
+                Título da Notícia
+              </label>
+              <input
                 id="news-title"
-                value={noticiaContent.titulo}
-                onChange={(e) => setNoticiaContent(prev => ({ ...prev, titulo: e.target.value }))}
-                className="mt-1"
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                value={generatedNews?.titulo || ''}
+                onChange={(e) => setGeneratedNews(prev => prev ? {...prev, titulo: e.target.value} : null)}
               />
             </div>
-            <div>
-              <Label htmlFor="news-content">Conteúdo</Label>
+            
+            <div className="mb-4">
+              <label htmlFor="news-content" className="block text-sm font-medium text-gray-700 mb-1">
+                Conteúdo da Notícia
+              </label>
               <Textarea
                 id="news-content"
-                value={noticiaContent.conteudo}
-                onChange={(e) => setNoticiaContent(prev => ({ ...prev, conteudo: e.target.value }))}
-                className="mt-1 min-h-[300px]"
+                className="min-h-[300px]"
+                value={generatedNews?.conteudo || ''}
+                onChange={(e) => setGeneratedNews(prev => prev ? {...prev, conteudo: e.target.value} : null)}
               />
             </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsGeneratedNewsModalOpen(false);
-                navigate('/dashboard/comunicacao/releases');
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={() => setIsConfirmSaveModalOpen(true)}
-              disabled={savingNews}
-            >
-              {savingNews ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                "Salvar Notícia"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog for confirmation of saving news */}
-      <Dialog open={isConfirmSaveModalOpen} onOpenChange={setIsConfirmSaveModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar Salvamento</DialogTitle>
-          </DialogHeader>
-          <p className="py-4">
-            {isEditingNoticia 
-              ? "Tem certeza que deseja salvar as alterações desta notícia?"
-              : "Tem certeza que deseja salvar esta notícia gerada?"}
-          </p>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsConfirmSaveModalOpen(false)}
-              disabled={savingNews}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={saveNoticia}
-              disabled={savingNews}
-            >
-              {savingNews ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                "Confirmar"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditingNews(false)}
+              >
+                Voltar
+              </Button>
+              <Button 
+                onClick={handleSaveNews}
+                disabled={isSavingRelease}
+              >
+                {isSavingRelease ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                Salvar Notícia
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
     </motion.div>
   );
 };

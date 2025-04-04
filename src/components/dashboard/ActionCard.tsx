@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -85,15 +84,15 @@ const getBackgroundColor = (color: CardColor): string => {
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm':
-      return 'w-4 h-4';
+      return 'w-5 h-5';
     case 'md':
-      return 'w-5 h-5';
-    case 'lg':
       return 'w-6 h-6';
+    case 'lg':
+      return 'w-8 h-8';
     case 'xl':
-      return 'w-7 h-7';
+      return 'w-8 h-8';
     default:
-      return 'w-5 h-5';
+      return 'w-6 h-6';
   }
 };
 
@@ -115,17 +114,15 @@ const ActionCard = ({
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
-  const iconSizeClass = getIconSize(isMobileView ? 'md' : iconSize);
+  const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
   
   const handleClick = () => {
-    if (path && window.location.pathname !== path) {
-      navigate(path);
-    }
+    if (path) navigate(path);
   };
 
   return (
     <div 
-      className={`w-full h-24 rounded-xl shadow-md overflow-hidden 
+      className={`w-full h-40 rounded-xl shadow-md overflow-hidden 
         ${!isDraggable && path ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
         active:scale-95 ${bgColor} group relative`} 
@@ -133,8 +130,8 @@ const ActionCard = ({
     >
       {isDraggable && (
         <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
-          <div className="p-1 rounded-full bg-white bg-opacity-60 text-gray-600">
-            <MoveIcon className="h-3 w-3" />
+          <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
+            <MoveIcon className="h-3.5 w-3.5" />
           </div>
         </div>
       )}
@@ -149,15 +146,15 @@ const ActionCard = ({
         </div>
       )}
       
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-2">
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-4">
         {children ? (
           <>{children}</>
         ) : (
           <>
-            <div className="text-white mb-1">
+            <div className="text-white mb-2">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
-            <h3 className="font-semibold text-white text-sm">{title}</h3>
+            <h3 className="font-semibold text-white text-xl">{title}</h3>
           </>
         )}
       </div>

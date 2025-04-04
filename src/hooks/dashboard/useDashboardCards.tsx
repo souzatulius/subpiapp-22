@@ -6,32 +6,6 @@ import { useDepartment } from './useDepartment';
 import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 
-// This function processes cards data to prevent deep type issues
-const processCardsData = (data: any): ActionCardItem[] => {
-  if (!data) return [];
-  
-  // Handle string JSON
-  let rawCards: any[] = [];
-  try {
-    if (typeof data === 'string') {
-      rawCards = JSON.parse(data);
-    } else if (Array.isArray(data)) {
-      rawCards = data;
-    } else {
-      return [];
-    }
-    
-    // Validate it's an array
-    if (!Array.isArray(rawCards)) return [];
-    
-    // Return the cards
-    return rawCards as ActionCardItem[];
-  } catch (error) {
-    console.error('Error processing cards data:', error);
-    return [];
-  }
-};
-
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +22,7 @@ export const useDashboardCards = () => {
         return;
       }
 
-      // Normalize the department value for easier comparison
+      // Normaliza o valor da coordenação para facilitar comparação
       const normalizedDepartment = userDepartment
         ? userDepartment
             .toLowerCase()
@@ -71,15 +45,16 @@ export const useDashboardCards = () => {
           return;
         }
 
-        const customCards = processCardsData(data.cards_config);
-        
-        if (customCards.length > 0) {
+        const customCards = typeof data.cards_config === 'string'
+          ? JSON.parse(data.cards_config)
+          : data.cards_config;
+
+        if (Array.isArray(customCards) && customCards.length > 0) {
           setCards(customCards);
         } else {
           setCards(defaultCards);
         }
       } catch (error) {
-        console.error('Error fetching dashboard cards:', error);
         setCards(defaultCards);
       } finally {
         setIsLoading(false);

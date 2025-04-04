@@ -4,10 +4,9 @@ import PWAButton from './PWAButton';
 import Header from '@/components/layouts/Header';
 import LeftContentSection from './shared/LeftContentSection';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Outlet } from 'react-router-dom';
 
-export interface AuthLayoutProps {
-  children?: React.ReactNode;
+interface AuthLayoutProps {
+  children: React.ReactNode;
 }
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({
@@ -40,7 +39,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           } : undefined}
         >
           <div className="w-full max-w-md animate-fade-right">
-            {children || <Outlet />}
+            {children}
           </div>
         </div>
       </div>

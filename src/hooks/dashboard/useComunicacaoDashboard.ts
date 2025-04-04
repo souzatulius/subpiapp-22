@@ -45,11 +45,11 @@ export const useComunicacaoDashboard = (
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
-          .eq('page', 'comunicacao')  // This is important - it must be different from 'inicial'
+          .eq('page', 'comunicacao')
           .single();
         
         if (error) {
-          console.log('No custom communications dashboard found, using defaults');
+          console.log('No custom dashboard found, using defaults');
           setCards(defaultCards);
         } else if (data && data.cards_config) {
           try {
@@ -112,7 +112,7 @@ export const useComunicacaoDashboard = (
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          page: 'comunicacao',  // Make sure to use the correct page identifier
+          page: 'comunicacao',
           cards_config: JSON.stringify(updatedCards),
           department_id: activeDepartment
         })
@@ -135,7 +135,7 @@ export const useComunicacaoDashboard = (
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          page: 'comunicacao',  // Make sure to use the correct page identifier
+          page: 'comunicacao',
           cards_config: JSON.stringify(updatedCards),
           department_id: activeDepartment
         })

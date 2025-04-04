@@ -89,7 +89,6 @@ const CardGrid: React.FC<CardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : cards;
 
-  // Separate different types of cards
   const searchCards = displayedCards.filter(card => card.isSearch);
   const dynamicDataCards = displayedCards.filter(
     card => card.type === 'data_dynamic' && card.dataSourceKey
@@ -104,7 +103,7 @@ const CardGrid: React.FC<CardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className={`w-full grid gap-1 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+      <div className={`w-full grid gap-y-1 gap-x-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={displayedCards.map(card => card.id)}>
           {[...searchCards, ...dynamicDataCards, ...regularCards].map(card => (
             <CardGroup
