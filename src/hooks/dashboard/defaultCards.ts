@@ -253,7 +253,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     path: '/dashboard/zeladoria/ranking-subs',
     color: 'orange',
     width: '25',
-    height: '2',
+    height: '1',
     type: 'standard',
     displayMobile: true,
     mobileOrder: 7

@@ -47,10 +47,10 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
 }) => {
   return (
     <Card className={`${color} text-white shadow-lg overflow-hidden`}>
-      <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+      <CardContent className="p-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold mb-1 flex items-center">
+            <h2 className="text-2xl font-bold mb-2 flex items-center">
               {icon}
               {userName ? `Olá, ${userName}!` : title}
             </h2>

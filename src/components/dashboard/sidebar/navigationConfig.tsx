@@ -5,7 +5,8 @@ import {
   MessageCircle, 
   BarChart2, 
   TrendingUp,
-  FileText
+  FileText,
+  Sparkles
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
@@ -24,6 +25,14 @@ export const getNavigationSections = () => [
     icon: <MessageCircle size={20} />,
     label: 'Comunicação',
     path: '/dashboard/comunicacao',
+    isSection: false
+  },
+  // Seção 3: Cadastrar Release
+  {
+    id: 'cadastrar-release',
+    icon: <Sparkles size={20} />,
+    label: 'Cadastrar Release',
+    path: '/dashboard/comunicacao/cadastrar-release',
     isSection: false
   },
   // Seção 4: Releases e Notícias
