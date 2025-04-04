@@ -9,14 +9,19 @@ interface BackButtonProps {
   className?: string;
   title?: string;
   onClick?: () => void;
+  hidden?: boolean;
 }
 
 const BackButton: React.FC<BackButtonProps> = ({ 
   destination, 
   className,
   title = "Voltar",
-  onClick
+  onClick,
+  hidden = false
 }) => {
+  // If the button is hidden, don't render it at all
+  if (hidden) return null;
+  
   const navigate = useNavigate();
   
   const handleClick = () => {

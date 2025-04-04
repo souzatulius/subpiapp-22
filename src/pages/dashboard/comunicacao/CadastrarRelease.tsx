@@ -46,17 +46,14 @@ const CadastrarRelease = () => {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [savedReleaseId, setSavedReleaseId] = useState<string | null>(null);
 
-  // Parse query parameters to check if we're editing a release or noticia
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const releaseId = params.get('releaseId');
     const noticiaId = params.get('noticiaId');
     
     if (releaseId) {
-      // Fetch the release content to generate news
       fetchReleaseContent(releaseId);
     } else if (noticiaId) {
-      // Load the noticia for editing
       fetchNoticiaContent(noticiaId);
     }
   }, [location.search]);
@@ -74,7 +71,6 @@ const CadastrarRelease = () => {
       
       if (data) {
         setReleaseContent(data.conteudo);
-        // Automatically trigger news generation
         handleGenerateNews(data.conteudo);
       }
     } catch (error: any) {
@@ -101,7 +97,6 @@ const CadastrarRelease = () => {
       if (error) throw error;
       
       if (data) {
-        // If we're editing a noticia, set it up in the editing form
         setGeneratedNews({
           titulo: data.titulo || '',
           conteudo: data.conteudo
@@ -133,7 +128,6 @@ const CadastrarRelease = () => {
     try {
       setIsSavingRelease(true);
       
-      // Using the custom client approach to avoid TypeScript errors
       const { data, error } = await supabase
         .from('releases')
         .insert({
@@ -150,10 +144,8 @@ const CadastrarRelease = () => {
         description: "O release foi salvo no banco de dados.",
       });
       
-      // Store the saved release ID for potential news generation
       setSavedReleaseId(data[0].id);
       
-      // Show dialog asking if user wants to generate news
       setShowGenerateDialog(true);
       
     } catch (error: any) {
@@ -181,7 +173,6 @@ const CadastrarRelease = () => {
     try {
       setIsGeneratingNews(true);
       
-      // Call the Edge Function to generate news
       const { data: generatedData, error: functionError } = await supabase.functions
         .invoke('generate-news', {
           body: { releaseContent: content }
@@ -193,7 +184,6 @@ const CadastrarRelease = () => {
         throw new Error(generatedData.error || "Falha na geração da notícia");
       }
       
-      // Set the generated news and show the editing mode
       setGeneratedNews(generatedData.data);
       setIsEditingNews(true);
       
@@ -227,11 +217,9 @@ const CadastrarRelease = () => {
     try {
       setIsSavingRelease(true);
       
-      // Check if we need to save the release first
       let releaseId = savedReleaseId;
       
       if (!releaseId) {
-        // First save the release
         const { data: releaseData, error: releaseError } = await supabase
           .from('releases')
           .insert({
@@ -245,7 +233,6 @@ const CadastrarRelease = () => {
         releaseId = releaseData[0].id;
       }
       
-      // Then save the generated news with a reference to the release
       const { data: newsData, error: newsError } = await supabase
         .from('releases')
         .insert({
@@ -265,7 +252,6 @@ const CadastrarRelease = () => {
         description: "A notícia e o release original foram salvos no banco de dados.",
       });
       
-      // Redirect to the news tab of ListarReleases
       navigate('/dashboard/comunicacao/releases?tab=noticias');
       
     } catch (error: any) {
@@ -293,7 +279,10 @@ const CadastrarRelease = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <BackButton destination="/dashboard/comunicacao/releases" />
+      <BackButton 
+        destination="/dashboard/comunicacao/releases" 
+        hidden={isEditingNews} 
+      />
       
       <WelcomeCard
         title="Cadastrar Release"
@@ -379,7 +368,6 @@ const CadastrarRelease = () => {
         )}
       </div>
 
-      {/* Dialog to ask if user wants to generate news after saving release */}
       <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -391,7 +379,6 @@ const CadastrarRelease = () => {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => {
               setShowGenerateDialog(false);
-              // Redirect to releases tab
               navigate('/dashboard/comunicacao/releases?tab=releases');
             }}>
               Não
