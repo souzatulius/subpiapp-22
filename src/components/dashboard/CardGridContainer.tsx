@@ -35,6 +35,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
       isEditMode={isEditMode}
       disableWiggleEffect={true} // Explicitly set to true to disable wiggle effect
       specialCardsData={specialCardsData}
+      showSpecialFeatures={true}
     />
   );
 };

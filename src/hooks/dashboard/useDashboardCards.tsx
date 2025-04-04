@@ -50,13 +50,13 @@ export const useDashboardCards = () => {
         
         if (typeof data.cards_config === 'string') {
           try {
-            customCards = JSON.parse(data.cards_config);
+            customCards = JSON.parse(data.cards_config) as ActionCardItem[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
             customCards = [];
           }
         } else if (Array.isArray(data.cards_config)) {
-          customCards = data.cards_config;
+          customCards = data.cards_config as ActionCardItem[];
         }
 
         if (Array.isArray(customCards) && customCards.length > 0) {

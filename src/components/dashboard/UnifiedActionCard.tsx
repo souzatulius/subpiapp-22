@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -9,6 +10,7 @@ import DynamicListCard from '@/components/settings/dashboard-management/DynamicL
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
 import CardControls from './card-parts/CardControls';
+import { useNavigate } from 'react-router-dom';
 
 export interface Controls {
   cardId: string;
@@ -160,6 +162,13 @@ export function UnifiedActionCard({
   badgeValue,
   hasSubtitle,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    if (path && !isEditing) {
+      navigate(path);
+    }
+  };
   
   const renderCardContent = () => {
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
@@ -246,14 +255,14 @@ export function UnifiedActionCard({
     }
     
     return (
-      <div className="h-full">
+      <div className="h-full" onClick={handleCardClick}>
         <ActionCard
           id={id}
           title={title}
           iconId={iconId}
           path={path}
           color={color}
-          isDraggable={true}
+          isDraggable={isEditing}
           onEdit={onEdit}
           onDelete={onDelete}
           onHide={onHide}
@@ -266,7 +275,7 @@ export function UnifiedActionCard({
   };
   
   return (
-    <div className="h-full relative group">
+    <div className="h-full relative group" onClick={isEditing ? undefined : handleCardClick}>
       {renderCardContent()}
       
       {(isEditing || onEdit) && (
