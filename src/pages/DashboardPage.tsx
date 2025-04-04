@@ -1,130 +1,94 @@
 
-import React, { useState } from 'react';
-import { Home } from 'lucide-react';
-import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useUserData } from '@/hooks/useUserData';
+import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import Header from '@/components/layouts/Header';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
+import { useUserData } from '@/hooks/dashboard/useUserData';
+import EditCardModal from '@/components/dashboard/EditCardModal';
+import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
-import EditModeToggle from '@/components/dashboard/EditModeToggle';
-import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/hooks/use-toast';
+import { useDashboardInicial } from '@/hooks/dashboard/useDashboardInicial';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Home } from 'lucide-react';
 
-const DashboardPage: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
-  
-  const isMobile = useIsMobile();
+interface DashboardPageProps {
+  isPreview?: boolean;
+  department?: string;
+}
+
+const DashboardPage: React.FC<DashboardPageProps> = ({ 
+  isPreview = false, 
+  department 
+}) => {
   const { user } = useAuth();
   const { firstName } = useUserData(user?.id);
-  const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
-  };
+  const isMobile = useIsMobile();
   
-  const handleCardEdit = (card: ActionCardItem) => {
-    setSelectedCard(card);
-    setIsEditCardModalOpen(true);
-  };
-  
-  const handleSaveCard = (updatedCard: Partial<ActionCardItem>) => {
-    saveCardEdit(updatedCard as ActionCardItem);
-    setIsEditCardModalOpen(false);
-    toast({
-      title: "Card atualizado",
-      description: "As alterações foram salvas com sucesso.",
-      variant: "default",
-    });
-  };
+  const {
+    cards,
+    isEditMode,
+    isEditModalOpen,
+    selectedCard,
+    isLoading,
+    handleCardEdit,
+    handleCardHide,
+    toggleEditMode,
+    handleSaveCardEdit,
+    setIsEditModalOpen
+  } = useDashboardInicial(user, isPreview, department);
 
-  if (!user) {
-    return <LoadingIndicator message="Carregando..." />;
+  if (!isPreview && !user) {
+    return <LoadingIndicator />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header showControls={true} toggleSidebar={toggleSidebar} />
-      
-      <div className="flex flex-1 overflow-hidden">
-        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
-        
-        <main className="flex-1 overflow-auto">
-          <BreadcrumbBar />
-          <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
-            {/* WelcomeCard takes full width */}
-            <div className="w-full mb-4">
-              <WelcomeCard
-                title="Dashboard"
-                description="Bem-vindo ao seu dashboard personalizado."
-                icon={<Home className="h-6 w-6 mr-2" />}
-                color="bg-gradient-to-r from-blue-800 to-blue-950"
-                userName={firstName}
-              />
-            </div>
-            
-            {/* Edit mode toggle */}
-            {!isLoading && (
-              <div className="flex justify-end mb-6">
-                <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
-              </div>
-            )}
-            
-            {/* Card Grid with ScrollArea */}
-            <ScrollArea className="h-[calc(100vh-260px)] pr-4">
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <Skeleton key={index} className="h-32 w-full rounded-lg" />
-                  ))}
-                </div>
-              ) : (
-                cards && cards.length > 0 ? (
-                  <CardGridContainer 
-                    cards={cards.filter(card => !card.isHidden)}
-                    onCardsChange={() => {}}
-                    onEditCard={handleCardEdit}
-                    onHideCard={handleCardHide}
-                    isMobileView={isMobile}
-                    isEditMode={isEditMode}
-                  />
-                ) : (
-                  <div className="p-6 text-center text-gray-500">
-                    Nenhum card disponível.
-                  </div>
-                )
-              )}
-            </ScrollArea>
-          </div>
-        </main>
+    <div className="space-y-4">
+      <div className="w-full">
+        <WelcomeCard
+          title="Dashboard Inicial"
+          description="Acompanhe seus principais indicadores"
+          icon={<Home className="h-6 w-6 mr-2" />}
+          color="bg-gradient-to-r from-blue-500 to-blue-700"
+        />
       </div>
       
-      {/* Edit Card Modal */}
+      {!isLoading && <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />}
+      
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Skeleton key={index} className="h-32 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : (
+        cards.length > 0 ? (
+          <CardGridContainer
+            cards={cards}
+            onCardsChange={cards => cards}
+            onEditCard={handleCardEdit}
+            onHideCard={handleCardHide}
+            isMobileView={isMobile}
+            isEditMode={isEditMode}
+          />
+        ) : (
+          <div className="p-6 text-center text-gray-500">
+            Nenhum card disponível.
+          </div>
+        )
+      )}
+      
       {selectedCard && (
         <EditCardModal 
-          isOpen={isEditCardModalOpen}
-          onClose={() => setIsEditCardModalOpen(false)}
-          onSave={handleSaveCard}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveCardEdit}
           card={selectedCard}
         />
       )}
       
-      {isMobile && <MobileBottomNav />}
+      {!isPreview && isMobile && <MobileBottomNav />}
     </div>
   );
 };

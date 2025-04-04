@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDepartment } from './useDepartment';
-import { getDefaultCards } from './defaultCards';
+import { getInitialDashboardCards, getCommunicationActionCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useDashboardCards = () => {
+export const useDashboardCards = (page: string = 'inicial') => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
@@ -20,18 +20,21 @@ export const useDashboardCards = () => {
       }
 
       try {
-        // Start with default cards based on department
-        const defaultCards = getDefaultCards(userDepartment || undefined);
+        // Start with default cards based on page and department
+        const defaultCards = page === 'comunicacao' 
+          ? getCommunicationActionCards() 
+          : getInitialDashboardCards(userDepartment || undefined);
         
         // Try to fetch user customizations
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
+          .eq('page', page)
           .single();
         
         if (error) {
-          console.log('No custom dashboard found, using defaults');
+          console.log(`No custom dashboard found for ${page}, using defaults`);
           setCards(defaultCards);
         } else if (data && data.cards_config) {
           try {
@@ -54,7 +57,10 @@ export const useDashboardCards = () => {
       } catch (error) {
         console.error('Error fetching dashboard cards', error);
         // Fallback to default cards on error
-        setCards(getDefaultCards(userDepartment || undefined));
+        const defaultCards = page === 'comunicacao' 
+          ? getCommunicationActionCards() 
+          : getInitialDashboardCards(userDepartment || undefined);
+        setCards(defaultCards);
       } finally {
         setIsLoading(false);
       }
@@ -64,7 +70,7 @@ export const useDashboardCards = () => {
     if (!isDepartmentLoading) {
       fetchCards();
     }
-  }, [user, userDepartment, isDepartmentLoading]);
+  }, [user, userDepartment, isDepartmentLoading, page]);
 
   const handleCardEdit = (cardToUpdate: ActionCardItem) => {
     if (!user) return;
@@ -80,7 +86,8 @@ export const useDashboardCards = () => {
       .upsert({
         user_id: user.id,
         cards_config: JSON.stringify(updatedCards),
-        department_id: userDepartment || 'default'
+        department_id: userDepartment || 'default',
+        page: page
       })
       .then(({ error }) => {
         if (error) console.error('Error saving card edit', error);
@@ -101,7 +108,8 @@ export const useDashboardCards = () => {
       .upsert({
         user_id: user.id,
         cards_config: JSON.stringify(updatedCards),
-        department_id: userDepartment || 'default'
+        department_id: userDepartment || 'default',
+        page: page
       })
       .then(({ error }) => {
         if (error) console.error('Error saving card hide preference', error);
