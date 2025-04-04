@@ -1,3 +1,6 @@
+import React, { useState, useCallback, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
 export const useDepartment = (user: any | null) => {
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +40,7 @@ export const useDepartment = (user: any | null) => {
       } else if (descricao.includes('gabinete')) {
         setUserDepartment('gabinete');
       } else {
-        setUserDepartment(descricao); // ou 'default'
+        setUserDepartment(descricao); // fallback
       }
     } catch (e) {
       console.error('Erro geral em getUserDepartment:', e);
