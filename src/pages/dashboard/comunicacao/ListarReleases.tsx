@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -21,6 +22,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,14 +45,14 @@ import {
   List, 
   Check, 
   Search, 
-  X
+  X,
+  Link
 } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { debounce } from '@/lib/utils';
 
 // Define Release interface with proper typing
 interface Release {
@@ -76,10 +85,27 @@ const ListarReleases = () => {
   const [filteredReleases, setFilteredReleases] = useState<Release[]>([]);
   const [filteredNoticias, setFilteredNoticias] = useState<Release[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [relatedRelease, setRelatedRelease] = useState<Release | null>(null);
+  const [isRelatedReleaseModalOpen, setIsRelatedReleaseModalOpen] = useState(false);
 
   useEffect(() => {
     fetchReleases();
+    
+    // Get tab from URL query params
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'releases' || tab === 'noticias') {
+      setActiveTab(tab);
+    }
   }, []);
+
+  useEffect(() => {
+    // Update URL when tab changes
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('tab', activeTab);
+    const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
+    history.pushState(null, '', newRelativePathQuery);
+  }, [activeTab]);
 
   useEffect(() => {
     // Filtra os items por tipo
@@ -214,7 +240,7 @@ const ListarReleases = () => {
 
   const markAsPublished = async (noticia: Release) => {
     try {
-      // Fix the update object to ensure it matches the database schema
+      // Update using the new publicada field
       const { error } = await supabase
         .from('releases')
         .update({ 
@@ -242,6 +268,59 @@ const ListarReleases = () => {
         description: error.message || "Ocorreu um erro ao atualizar o status da notícia.",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleViewRelatedRelease = async (noticiaId: string) => {
+    try {
+      setIsLoading(true);
+      
+      // First get the noticia to find its release_origem_id
+      const { data: noticia, error: noticiaError } = await supabase
+        .from('releases')
+        .select('release_origem_id')
+        .eq('id', noticiaId)
+        .single() as any;
+      
+      if (noticiaError) throw noticiaError;
+      
+      if (noticia?.release_origem_id) {
+        // Then fetch the related release
+        const { data: release, error: releaseError } = await supabase
+          .from('releases')
+          .select('*')
+          .eq('id', noticia.release_origem_id)
+          .single() as any;
+        
+        if (releaseError) throw releaseError;
+        
+        if (release) {
+          setRelatedRelease(release);
+          setIsRelatedReleaseModalOpen(true);
+        } else {
+          toast({
+            title: "Release não encontrado",
+            description: "O release original associado a esta notícia não foi encontrado.",
+            variant: "destructive"
+          });
+        }
+      } else {
+        toast({
+          title: "Sem release associado",
+          description: "Esta notícia não tem um release associado.",
+          variant: "destructive"
+        });
+      }
+      
+    } catch (error: any) {
+      console.error('Erro ao buscar release relacionado:', error);
+      toast({
+        title: "Erro ao buscar release",
+        description: error.message || "Ocorreu um erro ao buscar o release associado.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -497,7 +576,7 @@ const ListarReleases = () => {
       />
 
       <div className="mt-5">
-        <Tabs defaultValue="noticias" onValueChange={setActiveTab} className="w-full">
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between mb-4">
             <TabsList>
               <TabsTrigger value="noticias">Notícias</TabsTrigger>
@@ -622,22 +701,16 @@ const ListarReleases = () => {
           </ScrollArea>
           <AlertDialogFooter className="flex justify-between sm:justify-between">
             <div>
-              {/* Mostrar botão "Ver Notícia Criada" se for um release com notícia vinculada */}
-              {selectedRelease?.tipo === 'release' && selectedRelease.release_origem_id && (
-                <Button variant="secondary" onClick={() => {
-                  setIsViewModalOpen(false);
-                  // Encontre a notícia vinculada
-                  const noticiaVinculada = noticias.find(n => n.release_origem_id === selectedRelease.id);
-                  if (noticiaVinculada) {
-                    setActiveTab("noticias");
-                    setTimeout(() => {
-                      setSelectedRelease(noticiaVinculada);
-                      setIsViewModalOpen(true);
-                    }, 100);
-                  }
-                }}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Ver Notícia Criada
+              {/* Adicionado botão para ver release associado à notícia */}
+              {selectedRelease?.tipo === 'noticia' && selectedRelease.release_origem_id && (
+                <Button 
+                  variant="secondary" 
+                  onClick={() => {
+                    handleViewRelatedRelease(selectedRelease.id);
+                  }}
+                >
+                  <Link className="h-4 w-4 mr-2" />
+                  Ver Release Original
                 </Button>
               )}
             </div>
@@ -677,6 +750,33 @@ const ListarReleases = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal para visualizar release associado à notícia */}
+      <Dialog open={isRelatedReleaseModalOpen} onOpenChange={setIsRelatedReleaseModalOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Release Original</DialogTitle>
+            <DialogDescription>
+              Conteúdo do release que originou a notícia.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[60vh]">
+            <div className="p-4 whitespace-pre-wrap border rounded-md bg-gray-50">
+              {relatedRelease?.conteudo}
+            </div>
+          </ScrollArea>
+          
+          <DialogFooter>
+            <div className="text-sm text-gray-500 mr-auto">
+              Criado em: {relatedRelease?.criado_em ? formatDate(relatedRelease.criado_em) : '-'}
+            </div>
+            <Button onClick={() => setIsRelatedReleaseModalOpen(false)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

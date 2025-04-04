@@ -1441,6 +1441,7 @@ export type Database = {
           conteudo: string
           criado_em: string
           id: string
+          publicada: boolean | null
           release_origem_id: string | null
           tipo: string
           titulo: string | null
@@ -1451,6 +1452,7 @@ export type Database = {
           conteudo: string
           criado_em?: string
           id?: string
+          publicada?: boolean | null
           release_origem_id?: string | null
           tipo: string
           titulo?: string | null
@@ -1461,6 +1463,7 @@ export type Database = {
           conteudo?: string
           criado_em?: string
           id?: string
+          publicada?: boolean | null
           release_origem_id?: string | null
           tipo?: string
           titulo?: string | null

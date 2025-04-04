@@ -253,7 +253,8 @@ const CadastrarRelease = () => {
           conteudo: generatedNews.conteudo,
           tipo: 'noticia',
           autor_id: user?.id,
-          release_origem_id: releaseId
+          release_origem_id: releaseId,
+          publicada: false
         } as any)
         .select() as any;
       
