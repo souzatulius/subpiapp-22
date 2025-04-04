@@ -10,6 +10,8 @@ import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -26,6 +28,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const { getBadgeValue } = useBadgeValues();
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const getBgColor = (color: string): CardColor => {
     switch (color) {
@@ -194,6 +197,78 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     setCards(filteredCards);
   }, [userDepartment, getBadgeValue]);
 
+  const handleCardEdit = (card: ActionCardItem) => {
+    toast({
+      title: "Edição de Card",
+      description: "Função de edição será implementada em breve.",
+      variant: "default",
+    });
+  };
+
+  const handleCardHide = async (cardId: string) => {
+    const updatedCards = cards.map(card => 
+      card.id === cardId ? { ...card, isHidden: true } : card
+    );
+    
+    setCards(updatedCards);
+    
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from('user_dashboard')
+          .select('cards_config')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        
+        if (data) {
+          await supabase
+            .from('user_dashboard')
+            .update({ 
+              cards_config: JSON.stringify(updatedCards),
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', user.id);
+        } else {
+          await supabase
+            .from('user_dashboard')
+            .insert({ 
+              user_id: user.id,
+              cards_config: JSON.stringify(updatedCards),
+              department_id: userDepartment || null
+            });
+        }
+        
+        toast({
+          title: "Card ocultado",
+          description: "O card foi ocultado do painel. Você pode restaurá-lo nas configurações.",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error('Erro ao ocultar card:', error);
+        
+        setCards(cards);
+        
+        toast({
+          title: "Erro",
+          description: "Não foi possível ocultar o card. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Card ocultado",
+        description: "O card foi ocultado temporariamente. Faça login para salvar suas configurações.",
+        variant: "default",
+      });
+    }
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+
   if (!isPreview && !user) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh]">
@@ -205,20 +280,34 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="flex justify-between items-center">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-blue-500 to-blue-700"
         />
+        
+        <Button 
+          onClick={toggleEditMode}
+          className={`hidden md:flex ${
+            isEditMode 
+              ? 'bg-blue-600 text-white hover:bg-blue-700' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          {isEditMode ? 'Concluir edição' : 'Personalizar dashboard'}
+        </Button>
       </div>
       
       <div className="mt-4">
         <UnifiedCardGrid
           cards={cards}
           onCardsChange={(updatedCards) => setCards(updatedCards)}
+          onEditCard={handleCardEdit}
+          onHideCard={handleCardHide}
           isMobileView={isMobile}
+          isEditMode={isEditMode}
           specialCardsData={{}}
         />
       </div>
