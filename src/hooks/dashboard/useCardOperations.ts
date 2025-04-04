@@ -34,23 +34,34 @@ export const useCardOperations = (cards: ActionCardItem[], setCards: React.Dispa
     
     if (user) {
       try {
-        const success = saveCardConfig(updatedCards);
-        
-        if (success !== false) {
-          toast({
-            title: "Card ocultado",
-            description: "O card foi ocultado do painel. Você pode restaurá-lo nas configurações.",
-            variant: "default",
+        saveCardConfig(updatedCards)
+          .then(success => {
+            if (success) {
+              toast({
+                title: "Card ocultado",
+                description: "O card foi ocultado do painel. Você pode restaurá-lo nas configurações.",
+                variant: "default",
+              });
+            } else {
+              setCards(cards);
+              
+              toast({
+                title: "Erro",
+                description: "Não foi possível ocultar o card. Tente novamente.",
+                variant: "destructive",
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Erro ao ocultar card:', error);
+            setCards(cards);
+            
+            toast({
+              title: "Erro",
+              description: "Não foi possível ocultar o card. Tente novamente.",
+              variant: "destructive",
+            });
           });
-        } else {
-          setCards(cards);
-          
-          toast({
-            title: "Erro",
-            description: "Não foi possível ocultar o card. Tente novamente.",
-            variant: "destructive",
-          });
-        }
       } catch (error) {
         console.error('Erro ao ocultar card:', error);
         

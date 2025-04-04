@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   DndContext,
   closestCenter,
@@ -9,13 +9,12 @@ import {
   useSensors,
   DragEndEvent
 } from '@dnd-kit/core';
-import CardsContainer from './grid/CardsContainer';
+import { SortableContext } from '@dnd-kit/sortable';
 import { ActionCardItem } from '@/types/dashboard';
-import DynamicDataCard from './DynamicDataCard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
-import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import CardGroup from './grid/CardGroup';
 
-interface CardGridProps {
+export interface CardGridProps {
   cards: ActionCardItem[];
   onCardsChange: (cards: ActionCardItem[]) => void;
   onEditCard: (card: ActionCardItem) => void;
@@ -23,9 +22,6 @@ interface CardGridProps {
   onAddNewCard?: () => void;
   isMobileView?: boolean;
   specialCardsData?: any;
-  usuarioId?: string;
-  coordenacaoId?: string;
-  modoAdmin?: boolean;
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
@@ -46,9 +42,6 @@ const CardGrid: React.FC<CardGridProps> = ({
     responsesToDo: 0,
     isLoading: false
   },
-  usuarioId = '',
-  coordenacaoId = '',
-  modoAdmin = true,
   quickDemandTitle = '',
   onQuickDemandTitleChange = () => {},
   onQuickDemandSubmit = () => {},
@@ -97,126 +90,75 @@ const CardGrid: React.FC<CardGridProps> = ({
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : cards;
 
+  const searchCards = displayedCards.filter(card => card.isSearch);
   const dynamicDataCards = displayedCards.filter(
-    (card) => card.type === 'data_dynamic' && card.dataSourceKey
+    card => card.type === 'data_dynamic' && card.dataSourceKey
   );
-  
   const regularCards = displayedCards.filter(
-    (card) => card.type !== 'data_dynamic' || !card.dataSourceKey
+    card => !card.isSearch && (card.type !== 'data_dynamic' || !card.dataSourceKey)
   );
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragEnd={modoAdmin ? handleDragEnd : undefined}
+      onDragEnd={handleDragEnd}
     >
       <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
-        {regularCards
-          .filter(card => card.isSearch)
-          .map(card => (
-            <div 
+        <SortableContext items={displayedCards.map(card => card.id)}>
+          {/* Search Cards */}
+          {searchCards.map(card => (
+            <CardGroup
               key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
-            >
-              <CardsContainer
-                cards={[card]}
-                onEditCard={onEditCard}
-                onDeleteCard={onDeleteCard}
-                onAddNewCard={onAddNewCard}
-                specialCardsData={specialCardsData}
-                quickDemandTitle={quickDemandTitle}
-                onQuickDemandTitleChange={onQuickDemandTitleChange}
-                onQuickDemandSubmit={onQuickDemandSubmit}
-                onSearchSubmit={onSearchSubmit}
-                isMobileView={isMobileView}
-              />
-            </div>
+              card={card}
+              onEditCard={onEditCard}
+              onDeleteCard={onDeleteCard}
+              onAddNewCard={onAddNewCard}
+              specialCardsData={specialCardsData}
+              quickDemandTitle={quickDemandTitle}
+              onQuickDemandTitleChange={onQuickDemandTitleChange}
+              onQuickDemandSubmit={onQuickDemandSubmit}
+              onSearchSubmit={onSearchSubmit}
+              isMobileView={isMobileView}
+            />
           ))}
           
-        {dynamicDataCards.map(card => {
-          const IconComponent = getIconComponentFromId(card.iconId);
-          return (
-            <div 
+          {/* Dynamic Data Cards */}
+          {dynamicDataCards.map(card => (
+            <CardGroup
               key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
-            >
-              <DynamicDataCard
-                key={card.id}
-                title={card.title}
-                icon={IconComponent ? <IconComponent className={isMobileView ? "w-12 h-12" : "w-16 h-16"} /> : null}
-                color={card.color}
-                dataSourceKey={card.dataSourceKey as any}
-                coordenacaoId={coordenacaoId}
-                usuarioId={usuarioId}
-              />
-            </div>
-          );
-        })}
-        
-        {regularCards
-          .filter(card => !card.isSearch)
-          .map(card => (
-            <div 
-              key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
-            >
-              <CardsContainer
-                cards={[card]}
-                onEditCard={onEditCard}
-                onDeleteCard={onDeleteCard}
-                onAddNewCard={onAddNewCard}
-                specialCardsData={specialCardsData}
-                quickDemandTitle={quickDemandTitle}
-                onQuickDemandTitleChange={onQuickDemandTitleChange}
-                onQuickDemandSubmit={onQuickDemandSubmit}
-                onSearchSubmit={onSearchSubmit}
-                isMobileView={isMobileView}
-              />
-            </div>
+              card={card}
+              onEditCard={onEditCard}
+              onDeleteCard={onDeleteCard}
+              onAddNewCard={onAddNewCard}
+              specialCardsData={specialCardsData}
+              isMobileView={isMobileView}
+            />
           ))}
+          
+          {/* Regular Cards */}
+          {regularCards.map(card => (
+            <CardGroup
+              key={card.id}
+              card={card}
+              onEditCard={onEditCard}
+              onDeleteCard={onDeleteCard}
+              onAddNewCard={onAddNewCard}
+              specialCardsData={specialCardsData}
+              quickDemandTitle={quickDemandTitle}
+              onQuickDemandTitleChange={onQuickDemandTitleChange}
+              onQuickDemandSubmit={onQuickDemandSubmit}
+              onSearchSubmit={onSearchSubmit}
+              isMobileView={isMobileView}
+            />
+          ))}
+        </SortableContext>
       </div>
     </DndContext>
   );
 };
 
-export const getWidthClass = (width?: string, isMobileView: boolean = false): string => {
-  if (isMobileView) {
-    switch (width) {
-      case '25':
-        return 'col-span-1';
-      case '50':
-      case '75':
-      case '100':
-        return 'col-span-2';
-      default:
-        return 'col-span-1';
-    }
-  } else {
-    switch (width) {
-      case '25':
-        return 'col-span-1';
-      case '50':
-        return 'col-span-2';
-      case '75':
-        return 'col-span-3';
-      case '100':
-        return 'col-span-4';
-      default:
-        return 'col-span-1';
-    }
-  }
-};
-
-export const getHeightClass = (height?: string): string => {
-  switch (height) {
-    case '1':
-      return 'h-40'; // Keep height consistent at 40 (10rem)
-    case '2':
-      return 'h-40'; // Changed from h-80 to h-40 to be consistent with height "1"
-    default:
-      return 'h-40';
-  }
-};
+// Re-export the width and height classes for use in other components
+export { getWidthClass, getHeightClass } from './grid/GridUtilities';
 
 export default CardGrid;
