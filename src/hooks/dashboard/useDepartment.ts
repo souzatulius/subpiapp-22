@@ -9,21 +9,37 @@ export const useDepartment = (user: any | null) => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // 1. Busca o ID da coordenação do usuário
+      const { data: usuarioData, error: userError } = await supabase
         .from('usuarios')
-        .select('coordenacoes(descricao)')
+        .select('coordenacao_id')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error('Erro ao buscar descrição da coordenação:', error);
+      if (userError || !usuarioData?.coordenacao_id) {
+        console.error('Erro ao buscar coordenacao_id do usuário:', userError);
+        setIsLoading(false);
         return;
       }
 
-      setUserDepartment(data?.coordenacoes?.descricao || null);
-      setIsLoading(false);
+      // 2. Busca a descrição da coordenação com base no ID
+      const { data: coordData, error: coordError } = await supabase
+        .from('coordenacoes')
+        .select('descricao')
+        .eq('id', usuarioData.coordenacao_id)
+        .single();
+
+      if (coordError || !coordData?.descricao) {
+        console.error('Erro ao buscar descrição da coordenação:', coordError);
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. Define o nome da coordenação como valor final
+      setUserDepartment(coordData.descricao);
     } catch (e) {
-      console.error('Erro em getUserDepartment:', e);
+      console.error('Erro geral em getUserDepartment:', e);
+    } finally {
       setIsLoading(false);
     }
   }, [user]);
