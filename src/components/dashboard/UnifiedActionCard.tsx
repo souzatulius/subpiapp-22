@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -263,16 +264,13 @@ export function UnifiedActionCard({
       {renderCardContent()}
       
       {(isEditing || onEdit) && (
-        <CardControls 
-          onEdit={onEdit ? (e) => { 
-            e.stopPropagation();
-            onEdit(id); 
-          } : undefined}
-          onDelete={onDelete ? (e) => { 
-            e.stopPropagation();
-            onDelete(id); 
-          } : undefined}
-        />
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <CardControls 
+            onEdit={onEdit ? () => onEdit(id) : undefined}
+            onDelete={onDelete ? () => onDelete(id) : undefined}
+            onHide={onHide ? () => onHide(id) : undefined}
+          />
+        </div>
       )}
     </div>
   );

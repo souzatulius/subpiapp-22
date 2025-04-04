@@ -204,7 +204,7 @@ const Dashboard = () => {
     setCards(filteredCards);
   }, [userDepartment, getBadgeValue]);
 
-  const handleCardEdit = async (cardId: string) => {
+  const handleCardEdit = (card: ActionCardItem) => {
     toast({
       title: "Edição de Card",
       description: "Função de edição será implementada em breve.",

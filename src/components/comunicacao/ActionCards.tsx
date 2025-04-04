@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
@@ -86,7 +87,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
     (dashboardCards && dashboardCards.length > 0) ? dashboardCards : defaultCards
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (dashboardCards && dashboardCards.length > 0) {
       setCards(dashboardCards);
     } else {

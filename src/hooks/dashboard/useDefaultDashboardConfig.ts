@@ -6,6 +6,7 @@ import { getCommunicationActionCards } from './defaultCards';
 export interface UseDefaultDashboardConfigResult {
   config: ActionCardItem[];
   isLoading: boolean;
+  setConfig: (cards: ActionCardItem[]) => void;
 }
 
 export const useDefaultDashboardConfig = (
@@ -31,6 +32,7 @@ export const useDefaultDashboardConfig = (
 
   return {
     config,
-    isLoading
+    isLoading,
+    setConfig
   };
 };
