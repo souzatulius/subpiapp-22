@@ -1,4 +1,4 @@
-
+// src/pages/dashboard/comunicacao/Comunicacao.tsx
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply } from 'lucide-react';
@@ -9,8 +9,8 @@ import { useUserData } from '@/hooks/dashboard/useUserData';
 import EditCardModal from '@/components/dashboard/EditCardModal';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
-import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
+import useUserDashboardCards from '@/hooks/dashboard/useUserDashboardCards';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -24,17 +24,21 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const { user } = useAuth();
   const { firstName } = useUserData(user?.id);
   const isMobile = useIsMobile();
-  
+
+  // Usa o hook unificado passando o departamento "comunicacao"
   const {
     cards,
-    isEditModalOpen,
-    selectedCard,
     isLoading,
+    isEditMode,
+    toggleEditMode,
     handleCardEdit,
     handleCardHide,
+    updateCardsOrder,
+    isEditModalOpen,
+    selectedCard,
     handleSaveCardEdit,
     setIsEditModalOpen
-  } = useComunicacaoDashboard(user, isPreview, department);
+  } = useUserDashboardCards(user, department, isPreview);
 
   if (!isPreview && !user) {
     return <LoadingIndicator />;
@@ -48,9 +52,9 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-blue-500 to-blue-700"
+          userName={firstName}
         />
       </div>
-      
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -61,11 +65,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         cards.length > 0 ? (
           <CardGridContainer
             cards={cards.filter(card => !card.isHidden)}
-            onCardsChange={cards => cards}
+            onCardsChange={updateCardsOrder}
             onEditCard={handleCardEdit}
             onHideCard={handleCardHide}
             isMobileView={isMobile}
-            isEditMode={false}
+            isEditMode={isEditMode}
           />
         ) : (
           <div className="p-6 text-center text-gray-500">
@@ -73,7 +77,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           </div>
         )
       )}
-      
       {selectedCard && (
         <EditCardModal 
           isOpen={isEditModalOpen}
@@ -82,7 +85,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           card={selectedCard}
         />
       )}
-      
       {!isPreview && isMobile && <MobileBottomNav />}
     </div>
   );
