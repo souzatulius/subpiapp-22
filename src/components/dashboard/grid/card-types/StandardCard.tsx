@@ -19,7 +19,7 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
 
   return (
     <div 
-      className="w-full h-full flex flex-col items-center justify-center cursor-pointer py-4"
+      className="w-full h-full flex flex-col items-center justify-center cursor-pointer py-4 transition-all duration-200 hover:brightness-110 hover:scale-105"
       onClick={handleCardClick}
     >
       <div className="flex flex-col items-center justify-center text-center">

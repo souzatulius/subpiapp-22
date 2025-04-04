@@ -42,7 +42,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="w-full">
+      <div className="w-full mb-8">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
