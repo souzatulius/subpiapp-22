@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -53,8 +52,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatDateTime } from '@/lib/utils';
 
-// Define Release interface with proper typing
 interface Release {
   id: string;
   tipo: 'release' | 'noticia';
@@ -91,7 +90,6 @@ const ListarReleases = () => {
   useEffect(() => {
     fetchReleases();
     
-    // Get tab from URL query params
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
     if (tab === 'releases' || tab === 'noticias') {
@@ -100,7 +98,6 @@ const ListarReleases = () => {
   }, []);
 
   useEffect(() => {
-    // Update URL when tab changes
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set('tab', activeTab);
     const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
@@ -108,7 +105,6 @@ const ListarReleases = () => {
   }, [activeTab]);
 
   useEffect(() => {
-    // Filtra os items por tipo
     if (allItems.length > 0) {
       const releasesItems = allItems.filter(item => item.tipo === 'release');
       const noticiasItems = allItems.filter(item => item.tipo === 'noticia');
@@ -120,7 +116,6 @@ const ListarReleases = () => {
     }
   }, [allItems]);
 
-  // Efeito para filtrar releases com debounce
   useEffect(() => {
     const handler = setTimeout(() => {
       const searchTerm = searchReleases.toLowerCase().trim();
@@ -140,7 +135,6 @@ const ListarReleases = () => {
     return () => clearTimeout(handler);
   }, [searchReleases, releases]);
 
-  // Efeito para filtrar notícias com debounce
   useEffect(() => {
     const handler = setTimeout(() => {
       const searchTerm = searchNoticias.toLowerCase().trim();
@@ -221,7 +215,6 @@ const ListarReleases = () => {
         description: `O ${selectedRelease.tipo === 'release' ? 'release' : 'notícia'} foi excluído(a) com sucesso.`,
       });
       
-      // Refresh the list
       fetchReleases();
       
     } catch (error: any) {
@@ -240,7 +233,6 @@ const ListarReleases = () => {
 
   const markAsPublished = async (noticia: Release) => {
     try {
-      // Update using the new publicada field
       const { error } = await supabase
         .from('releases')
         .update({ 
@@ -258,7 +250,6 @@ const ListarReleases = () => {
           : "A notícia foi marcada como publicada com sucesso.",
       });
       
-      // Refresh the list
       fetchReleases();
       
     } catch (error: any) {
@@ -275,7 +266,6 @@ const ListarReleases = () => {
     try {
       setIsLoading(true);
       
-      // First get the noticia to find its release_origem_id
       const { data: noticia, error: noticiaError } = await supabase
         .from('releases')
         .select('release_origem_id')
@@ -285,7 +275,6 @@ const ListarReleases = () => {
       if (noticiaError) throw noticiaError;
       
       if (noticia?.release_origem_id) {
-        // Then fetch the related release
         const { data: release, error: releaseError } = await supabase
           .from('releases')
           .select('*')
@@ -325,12 +314,11 @@ const ListarReleases = () => {
   };
 
   const renderPreview = (content: string): string => {
-    // Limit to around 100 characters for preview
     return content.length > 100 ? content.substring(0, 100) + '...' : content;
   };
-  
+
   const formatDate = (dateString: string): string => {
-    return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR });
+    return formatDateTime(dateString);
   };
 
   const renderCardView = (items: Release[], isNoticia: boolean = false) => {
@@ -358,20 +346,17 @@ const ListarReleases = () => {
         {items.map((item) => (
           <Card key={item.id} className="overflow-hidden group relative">
             <CardContent className="p-4">
-              <div className="mb-2 flex justify-between items-start">
+              <div className="mb-2">
                 <Badge variant={item.tipo === 'release' ? 'outline' : 'default'} className="mb-2">
                   {item.tipo === 'release' ? 'Release' : 'Notícia'}
                 </Badge>
-                {isNoticia && item.publicada && (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    <Check className="h-3 w-3 mr-1" /> Publicada
-                  </Badge>
-                )}
               </div>
               
-              <h3 className="font-semibold text-lg mb-1 line-clamp-1">
-                {item.titulo || <span className="italic text-gray-500">Sem título</span>}
-              </h3>
+              {item.tipo === 'noticia' && (
+                <h3 className="font-semibold text-lg mb-1 line-clamp-1">
+                  {item.titulo || <span className="italic text-gray-500">Sem título</span>}
+                </h3>
+              )}
               
               <p className="text-sm text-gray-500 mb-3 line-clamp-3">
                 {renderPreview(item.conteudo)}
@@ -381,7 +366,6 @@ const ListarReleases = () => {
                 {formatDate(item.criado_em)}
               </div>
               
-              {/* Botões flutuantes */}
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                 <Button variant="ghost" size="sm" className="bg-white/90 hover:bg-white shadow-sm" onClick={() => handleViewItem(item)}>
                   <Eye className="h-4 w-4" />
@@ -404,9 +388,13 @@ const ListarReleases = () => {
                 </Button>
               </div>
               
-              {/* Botão de publicação manual para notícias */}
               {isNoticia && (
-                <div className="absolute bottom-4 right-4">
+                <div className="absolute bottom-4 right-4 flex items-center gap-1">
+                  {item.publicada && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      <Check className="h-3 w-3 mr-1" /> Publicada
+                    </Badge>
+                  )}
                   <Button 
                     variant={item.publicada ? "outline" : "secondary"} 
                     size="sm" 
@@ -415,10 +403,12 @@ const ListarReleases = () => {
                   >
                     {item.publicada ? (
                       <>
-                        <Check className="h-4 w-4 mr-1" /> Publicada
+                        <X className="h-4 w-4 mr-1" /> Despublicar
                       </>
                     ) : (
-                      "Marcar como publicada"
+                      <>
+                        <Check className="h-4 w-4 mr-1" /> Publicar
+                      </>
                     )}
                   </Button>
                 </div>
@@ -456,8 +446,9 @@ const ListarReleases = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Tipo</TableHead>
-              <TableHead>Título / Conteúdo</TableHead>
-              <TableHead className="w-[180px]">Data de Criação</TableHead>
+              {isNoticia && <TableHead>Título</TableHead>}
+              <TableHead>Conteúdo</TableHead>
+              <TableHead className="w-[120px]">Data</TableHead>
               {isNoticia && <TableHead className="w-[120px]">Status</TableHead>}
               <TableHead className="text-right w-[150px]">Ações</TableHead>
             </TableRow>
@@ -470,17 +461,19 @@ const ListarReleases = () => {
                     {item.tipo === 'release' ? 'Release' : 'Notícia'}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  <div>
+                {isNoticia && (
+                  <TableCell>
                     {item.titulo ? (
                       <span className="font-medium">{item.titulo}</span>
                     ) : (
                       <span className="italic text-gray-500">Sem título</span>
                     )}
-                    <p className="text-sm text-gray-500 mt-1">
-                      {renderPreview(item.conteudo)}
-                    </p>
-                  </div>
+                  </TableCell>
+                )}
+                <TableCell>
+                  <p className="text-sm text-gray-500">
+                    {renderPreview(item.conteudo)}
+                  </p>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm text-gray-500">
@@ -654,7 +647,6 @@ const ListarReleases = () => {
         </Tabs>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -676,13 +668,12 @@ const ListarReleases = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* View Item Modal */}
       <AlertDialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
         <AlertDialogContent className="max-w-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex justify-between items-start">
               <div>
-                {selectedRelease?.tipo === 'release' ? 'Release' : 'Notícia'}: {selectedRelease?.titulo || 'Sem título'}
+                {selectedRelease?.tipo === 'release' ? 'Release' : 'Notícia'}: {selectedRelease?.tipo === 'noticia' ? (selectedRelease?.titulo || 'Sem título') : ''}
               </div>
               {selectedRelease?.tipo === 'noticia' && (
                 <Badge variant={selectedRelease?.publicada ? "default" : "outline"} className={selectedRelease?.publicada ? "bg-green-100 text-green-800" : ""}>
@@ -701,7 +692,6 @@ const ListarReleases = () => {
           </ScrollArea>
           <AlertDialogFooter className="flex justify-between sm:justify-between">
             <div>
-              {/* Adicionado botão para ver release associado à notícia */}
               {selectedRelease?.tipo === 'noticia' && selectedRelease.release_origem_id && (
                 <Button 
                   variant="secondary" 
@@ -736,12 +726,12 @@ const ListarReleases = () => {
                   {selectedRelease.publicada ? (
                     <>
                       <X className="h-4 w-4 mr-2" />
-                      Desmarcar publicação
+                      Despublicar
                     </>
                   ) : (
                     <>
                       <Check className="h-4 w-4 mr-2" />
-                      Marcar como publicada
+                      Publicar
                     </>
                   )}
                 </Button>
@@ -751,7 +741,6 @@ const ListarReleases = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modal para visualizar release associado à notícia */}
       <Dialog open={isRelatedReleaseModalOpen} onOpenChange={setIsRelatedReleaseModalOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>

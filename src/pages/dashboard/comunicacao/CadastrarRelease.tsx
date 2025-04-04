@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import BackButton from '@/components/layouts/BackButton';
+import { formatDateTime } from '@/lib/utils';
 
 // Define a type for releases since it might not be in the Supabase types yet
 interface Release {
@@ -282,6 +282,10 @@ const CadastrarRelease = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const formatDate = (dateString: string): string => {
+    return formatDateTime(dateString);
+  };
+
   return (
     <motion.div 
       className="max-w-6xl mx-auto"
@@ -346,7 +350,7 @@ const CadastrarRelease = () => {
             
             <div className="mb-4">
               <label htmlFor="news-content" className="block text-sm font-medium text-gray-700 mb-1">
-                Conteúdo da Notícia
+                Conte��do da Notícia
               </label>
               <Textarea
                 id="news-content"
