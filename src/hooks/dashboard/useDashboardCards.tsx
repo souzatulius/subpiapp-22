@@ -66,15 +66,17 @@ export const useDashboardCards = () => {
 
   const persistCards = (updatedCards: ActionCardItem[]) => {
     if (!user) return;
-
-    setCards(updatedCards);
+    
+    // Create a shallow copy of the array to avoid mutation issues
+    const cardsCopy = [...updatedCards];
+    setCards(cardsCopy);
 
     supabase
       .from('user_dashboard')
       .upsert({
         user_id: user.id,
         page: 'inicial',
-        cards_config: JSON.stringify(updatedCards),
+        cards_config: JSON.stringify(cardsCopy),
         department_id: userDepartment || 'default'
       })
       .then(({ error }) => {
