@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useDepartment = (user: any | null) => {
@@ -9,6 +9,7 @@ export const useDepartment = (user: any | null) => {
     if (!user) return;
 
     try {
+      // 1. Busca o ID da coordenação do usuário
       const { data: usuarioData, error: userError } = await supabase
         .from('usuarios')
         .select('coordenacao_id')
@@ -21,6 +22,7 @@ export const useDepartment = (user: any | null) => {
         return;
       }
 
+      // 2. Busca a descrição da coordenação com base no ID
       const { data: coordData, error: coordError } = await supabase
         .from('coordenacoes')
         .select('descricao')
@@ -33,15 +35,8 @@ export const useDepartment = (user: any | null) => {
         return;
       }
 
-      const descricao = coordData.descricao.toLowerCase();
-
-      if (descricao.includes('comunicação')) {
-        setUserDepartment('comunicacao');
-      } else if (descricao.includes('gabinete')) {
-        setUserDepartment('gabinete');
-      } else {
-        setUserDepartment(descricao); // fallback
-      }
+      // 3. Define o nome da coordenação como valor final
+      setUserDepartment(coordData.descricao);
     } catch (e) {
       console.error('Erro geral em getUserDepartment:', e);
     } finally {

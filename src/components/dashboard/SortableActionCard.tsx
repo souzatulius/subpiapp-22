@@ -30,7 +30,7 @@ export const Controls = ({
   isCustom?: boolean;
 }) => {
   return (
-    <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
+    <div className="flex space-x-1">
       <button 
         className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-blue-500 transition-colors"
         onClick={(e) => {
@@ -99,11 +99,8 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
       className="w-full h-full"
     >
       {children ? (
-        <div className="w-full h-full relative group cursor-pointer">
-          <div 
-            className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="w-full h-full relative group">
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
             <Controls 
               cardId={card.id} 
               onEdit={handleEdit} 
@@ -118,7 +115,6 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
         <ActionCard
           id={card.id}
           title={card.title}
-          subtitle={card.subtitle}
           iconId={card.iconId}
           path={card.path}
           color={card.color}
@@ -131,8 +127,6 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
           isCustom={card.isCustom}
           type={card.type}
           iconSize={isMobileView ? 'lg' : 'xl'}
-          hasBadge={card.hasBadge}
-          badgeValue={card.badgeValue}
           isMobileView={isMobileView}
         />
       )}

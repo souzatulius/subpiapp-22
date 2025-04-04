@@ -40,10 +40,10 @@ export const getWidthClass = (width?: string, isMobileView: boolean = false): st
 export const getHeightClass = (height?: string): string => {
   switch (height) {
     case '1':
-      return 'h-32'; // 8rem height for small cards
+      return 'h-20'; // Reduced from h-24 to h-20 (5rem instead of 6rem)
     case '2':
-      return 'h-40'; // 10rem height for standard cards
+      return 'h-40'; // Reduced from h-52 to h-40 (10rem instead of 13rem)
     default:
-      return 'h-40'; // Default height set to match the '2' value
+      return 'h-20'; // Default height also reduced
   }
 };

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Home } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useUserData } from '@/hooks/dashboard/useUserData';
+import { useUserData } from '@/hooks/useUserData';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -12,6 +12,7 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
+import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
@@ -20,18 +21,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  
-  // Using the dashboard-specific useUserData hook
-  const { firstName, isLoadingUser } = useUserData(user?.id);
+  const { firstName } = useUserData(user?.id);
   const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
   };
   
   const handleCardEdit = (card: ActionCardItem) => {
@@ -62,9 +66,9 @@ const DashboardPage: React.FC = () => {
         
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
-          <div className="max-w-7xl mx-auto p-4 md:p-6 pb-16 md:pb-6">
+          <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
             {/* WelcomeCard takes full width */}
-            <div className="w-full mb-4">
+            <div className="w-full mb-3">
               <WelcomeCard
                 title="Dashboard"
                 description="Bem-vindo ao seu dashboard personalizado."
@@ -74,10 +78,17 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
+            {/* Edit mode toggle */}
+            {!isLoading && (
+              <div className="flex justify-end mb-4">
+                <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
+              </div>
+            )}
+            
             {/* Content container with better height calculation and scrolling behavior */}
-            <div className="relative" style={{ minHeight: "500px" }}>
+            <div className="relative" style={{ height: "calc(100vh - 300px)", minHeight: "500px" }}>
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {Array.from({ length: 8 }).map((_, index) => (
                     <Skeleton key={index} className="h-32 w-full rounded-lg" />
                   ))}
@@ -92,7 +103,7 @@ const DashboardPage: React.FC = () => {
                         onEditCard={handleCardEdit}
                         onHideCard={handleCardHide}
                         isMobileView={isMobile}
-                        isEditMode={false}
+                        isEditMode={isEditMode}
                       />
                     </div>
                   </ScrollArea>
