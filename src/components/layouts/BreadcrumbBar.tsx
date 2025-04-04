@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
@@ -21,59 +20,132 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   // Remove leading slash and split path into segments
   const pathSegments = location.pathname.substring(1).split('/');
   
-  const getDisplayName = (segment: string) => {
-    const displayNames: Record<string, string> = {
-      dashboard: 'Início',
-      comunicacao: 'Comunicação',
-      'cadastrar-demanda': 'Cadastrar Demanda',
-      cadastrar: 'Cadastrar',
-      settings: 'Configurações',
-      profile: 'Meu Perfil',
-      demandas: 'Consultar Demandas',
-      notas: 'Consultar Notas',
-      usuarios: 'Usuários',
-      relatorios: 'Relatórios',
+  const getDisplayName = (segment: string, fullPath: string) => {
+    // Custom display names for specific paths
+    const customRoutes: Record<string, string> = {
+      'cadastrar-release': 'Novo Release',
+      'releases': 'Releases e Notícias',
+      'cadastrar-demanda': 'Nova Solicitação',
+      'cadastrar': 'Nova Solicitação',
+      'demandas': 'Demandas',
+      'consultar-demandas': 'Demandas',
+      'criar-nota': 'Gerar Nota',
+      'aprovar-nota': 'Aprovar Notas',
+      'notas': 'Notas de Imprensa',
+      'consultar-notas': 'Notas de Imprensa',
+      'relatorios': 'Relatórios',
       'ranking-subs': 'Ranking da Zeladoria',
-      // Adicione outros mapeamentos conforme necessário
+      'dashboard': 'Início',
+      'comunicacao': 'Comunicação',
+      'settings': 'Configurações',
+      'profile': 'Meu Perfil',
+      'usuarios': 'Usuários',
     };
     
-    return displayNames[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+    // Check if we have a custom name for the full path
+    if (customRoutes[fullPath]) {
+      return customRoutes[fullPath];
+    }
+    
+    // Otherwise use the custom name for the segment or capitalize it
+    return customRoutes[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
   };
 
-  // Lista de segmentos que devem ser ocultados no breadcrumb
-  const hiddenSegments = ['zeladoria', 'dashboard/dashboard'];
-  
-  const handleClick = (index: number) => {
-    const segment = pathSegments[index];
+  // Generate custom breadcrumbs based on the current path
+  const generateCustomBreadcrumbs = () => {
+    const path = location.pathname;
     
-    // Verificar se é a seção de configurações e há um manipulador especial
-    if (segment === 'settings' && onSettingsClick) {
+    // Custom breadcrumb paths
+    if (path.includes('/dashboard/comunicacao/cadastrar-release')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/comunicacao', label: 'Comunicação' },
+        { path: '/dashboard/comunicacao/releases', label: 'Releases e Notícias' },
+        { path: '/dashboard/comunicacao/cadastrar-release', label: 'Novo Release' }
+      ];
+    }
+    
+    if (path.includes('/dashboard/comunicacao/releases')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/comunicacao', label: 'Comunicação' },
+        { path: '/dashboard/comunicacao/releases', label: 'Releases e Notícias' }
+      ];
+    }
+    
+    if (path.includes('/dashboard/comunicacao/aprovar-nota')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/comunicacao', label: 'Comunicação' },
+        { path: '/dashboard/comunicacao/notas', label: 'Notas de Imprensa' },
+        { path: '/dashboard/comunicacao/aprovar-nota', label: 'Aprovar Notas' }
+      ];
+    }
+    
+    if (path.includes('/dashboard/comunicacao/consultar-demandas') || 
+        path.includes('/dashboard/comunicacao/demandas')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/comunicacao', label: 'Comunicação' },
+        { path: '/dashboard/comunicacao/demandas', label: 'Demandas' }
+      ];
+    }
+    
+    if (path.includes('/dashboard/comunicacao/criar-nota')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/comunicacao', label: 'Comunicação' },
+        { path: '/dashboard/comunicacao/notas', label: 'Notas de Imprensa' },
+        { path: '/dashboard/comunicacao/criar-nota', label: 'Gerar Nota' }
+      ];
+    }
+    
+    if (path.includes('/dashboard/comunicacao/cadastrar') || 
+        path.includes('/dashboard/comunicacao/cadastrar-demanda')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/comunicacao', label: 'Comunicação' },
+        { path: '/dashboard/comunicacao/demandas', label: 'Demandas' },
+        { path: path, label: 'Nova Solicitação' }
+      ];
+    }
+    
+    if (path.includes('/dashboard/comunicacao/consultar-notas') || 
+        path.includes('/dashboard/comunicacao/notas')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/comunicacao', label: 'Comunicação' },
+        { path: '/dashboard/comunicacao/notas', label: 'Notas de Imprensa' }
+      ];
+    }
+    
+    // Default case: use the path segments
+    return null;
+  };
+  
+  // Get custom breadcrumbs if defined for this route
+  const customBreadcrumbs = generateCustomBreadcrumbs();
+  
+  // Use the custom breadcrumbs if available, otherwise process the path segments
+  const breadcrumbItems = customBreadcrumbs || pathSegments
+    .filter(segment => segment !== '')
+    .map((segment, index) => {
+      const fullPath = pathSegments.slice(0, index + 1).join('/');
+      return {
+        path: '/' + fullPath,
+        label: getDisplayName(segment, fullPath)
+      };
+    });
+  
+  const handleNavigate = (path: string) => {
+    // If this is a settings path and we have a special handler, use it
+    if (path.includes('/settings') && onSettingsClick) {
       onSettingsClick();
       return;
     }
     
-    const path = '/' + pathSegments.slice(0, index + 1).join('/');
     navigate(path);
   };
-  
-  // Filtrar segmentos duplicados consecutivos e segmentos que devem ser ocultados
-  const filteredSegments = pathSegments.filter((segment, index) => {
-    // Remover segmentos vazios
-    if (!segment) return false;
-    
-    // Special case for comunicacao path - showing Comunicação
-    if (segment === 'comunicacao' && index === 1) {
-      return true;
-    }
-    
-    // Remover segmentos que devem ser ocultados
-    const fullPath = pathSegments.slice(0, index + 1).join('/');
-    if (hiddenSegments.includes(segment) || hiddenSegments.includes(fullPath)) {
-      return false;
-    }
-    
-    return true;
-  });
   
   return (
     <div className="px-6 py-2 text-xs text-gray-500">
@@ -88,8 +160,9 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
             </BreadcrumbLink>
           </BreadcrumbItem>
           
-          {filteredSegments.map((segment, index) => {
-            if (!segment || segment === 'dashboard') return null;
+          {breadcrumbItems && breadcrumbItems.length > 0 && breadcrumbItems.map((item, index) => {
+            // Skip the first item (dashboard/início) since we already have the home icon
+            if (item.path === '/dashboard') return null;
             
             return (
               <React.Fragment key={index}>
@@ -97,10 +170,10 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
                     <button 
-                      onClick={() => handleClick(pathSegments.indexOf(segment))}
+                      onClick={() => handleNavigate(item.path)}
                       className="hover:text-gray-700 whitespace-nowrap"
                     >
-                      {getDisplayName(segment)}
+                      {item.label}
                     </button>
                   </BreadcrumbLink>
                 </BreadcrumbItem>

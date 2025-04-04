@@ -45,9 +45,19 @@ export const useDashboardCards = () => {
           return;
         }
 
-        const customCards = typeof data.cards_config === 'string'
-          ? JSON.parse(data.cards_config)
-          : data.cards_config;
+        // Fixed type instantiation issue - parse data safely
+        let customCards: ActionCardItem[] = [];
+        
+        if (typeof data.cards_config === 'string') {
+          try {
+            customCards = JSON.parse(data.cards_config);
+          } catch (e) {
+            console.error('Error parsing cards_config:', e);
+            customCards = [];
+          }
+        } else if (Array.isArray(data.cards_config)) {
+          customCards = data.cards_config;
+        }
 
         if (Array.isArray(customCards) && customCards.length > 0) {
           setCards(customCards);
@@ -55,6 +65,7 @@ export const useDashboardCards = () => {
           setCards(defaultCards);
         }
       } catch (error) {
+        console.error('Error fetching dashboard cards:', error);
         setCards(defaultCards);
       } finally {
         setIsLoading(false);
