@@ -117,8 +117,12 @@ const ActionCard = ({
   const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
   
-  const handleClick = () => {
-    if (path) navigate(path);
+  const handleClick = (e: React.MouseEvent) => {
+    // Only navigate if we have a path and it wasn't a click on a control
+    if (path && e.target === e.currentTarget) {
+      e.stopPropagation();
+      navigate(path);
+    }
   };
 
   return (

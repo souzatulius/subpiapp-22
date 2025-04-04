@@ -11,8 +11,11 @@ interface StandardCardProps {
 const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
   const navigate = useNavigate();
 
-  const handleCardClick = () => {
-    if (card.path) {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only navigate if we have a path and the click was directly on this component
+    // not on a child control element
+    if (card.path && e.target === e.currentTarget) {
+      e.stopPropagation();
       navigate(card.path);
     }
   };
