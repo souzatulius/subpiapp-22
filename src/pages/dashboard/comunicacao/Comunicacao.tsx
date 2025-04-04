@@ -41,7 +41,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mx-auto max-w-7xl p-4 md:p-6">
       <div className="w-full">
         <WelcomeCard
           title="Comunicação"
@@ -52,7 +52,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       </div>
       
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
             <Skeleton key={index} className="h-32 w-full rounded-lg" />
           ))}
@@ -60,7 +60,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       ) : (
         cards.length > 0 ? (
           <CardGridContainer
-            cards={cards}
+            cards={cards.filter(card => !card.isHidden)}
             onCardsChange={cards => cards}
             onEditCard={handleCardEdit}
             onHideCard={handleCardHide}

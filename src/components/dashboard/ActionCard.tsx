@@ -42,6 +42,9 @@ const ActionCard: React.FC<ActionCardProps> = ({
   hasBadge = false,
   badgeValue = '0',
   isMobileView = false,
+  width,
+  height,
+  type,
 }) => {
   const navigate = useNavigate();
   const IconComponent = getIconComponentFromId(iconId);
@@ -115,7 +118,6 @@ const ActionCard: React.FC<ActionCardProps> = ({
     // Only navigate if it's not being dragged and we have a path
     if (!isDraggable && path) {
       e.stopPropagation();
-      console.log(`Navigating to ${path}`);
       navigate(path);
     }
   };
@@ -140,7 +142,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
 
   return (
     <div 
-      className={getCardClass()} 
+      className={`${getCardClass()} cursor-pointer`} 
       onClick={handleCardClick}
       data-card-id={id}
     >

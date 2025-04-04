@@ -59,10 +59,9 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
     setActiveId(null);
   };
 
-  // Handler for card clicks
+  // Handler for card clicks that navigates to the card's path
   const handleCardClick = (card: ActionCardItem) => {
     if (!isEditMode && card.path) {
-      console.log("Navigating to:", card.path);
       navigate(card.path);
     }
   };
@@ -75,13 +74,11 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {cards.map((card) => (
-          <div key={card.id} onClick={(e) => {
-            // Only navigate if not in edit mode
-            if (!isEditMode) {
-              e.stopPropagation();
-              handleCardClick(card);
-            }
-          }}>
+          <div 
+            key={card.id} 
+            className="h-full"
+            onClick={() => !isEditMode && handleCardClick(card)}
+          >
             <SortableUnifiedActionCard
               {...card}
               isDraggable={isEditMode}

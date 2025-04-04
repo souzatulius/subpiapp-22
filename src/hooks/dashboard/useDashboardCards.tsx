@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { useInitialCards } from './useInitialCards';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -18,17 +18,36 @@ export const useDashboardCards = () => {
 
   useEffect(() => {
     const loadCards = async () => {
-      if (!user || isLoadingInitial) return;
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (isLoadingInitial) {
+        return; // Wait for initial cards to load first
+      }
 
       try {
         setIsLoading(true);
         console.log("Loading cards for user:", user.id, "department:", userCoordenaticaoId);
+        
+        // Use a timeout to prevent excessive loading time
+        const timeoutId = setTimeout(() => {
+          if (isLoading) {
+            console.log("Loading timeout reached, using initial cards");
+            setCards(initialCards);
+            setIsLoading(false);
+          }
+        }, 3000);
         
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
           .maybeSingle();
+
+        // Clear the timeout since we got a response
+        clearTimeout(timeoutId);
 
         if (error && error.code !== 'PGRST116') {
           console.error('[DashboardCards] Error fetching user cards:', error);
@@ -128,6 +147,11 @@ export const useDashboardCards = () => {
           
         if (error) throw error;
       }
+      
+      toast({
+        title: "Configuração salva",
+        description: "Suas preferências foram salvas com sucesso"
+      });
       
     } catch (error) {
       console.error('Error saving card configuration:', error);
