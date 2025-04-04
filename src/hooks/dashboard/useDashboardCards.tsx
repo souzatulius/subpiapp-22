@@ -118,3 +118,6 @@ export const useDashboardCards = () => {
     handleCardHide
   };
 };
+
+// Add default export to support both import styles
+export default useDashboardCards;
