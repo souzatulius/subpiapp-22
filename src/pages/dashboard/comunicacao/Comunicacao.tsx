@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2 } from 'lucide-react';
+import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
@@ -205,46 +205,50 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     });
   };
 
-  const handleCardHide = async (cardId: string) => {
+  const handleCardHide = (id: string) => {
     const updatedCards = cards.map(card => 
-      card.id === cardId ? { ...card, isHidden: true } : card
+      card.id === id ? { ...card, isHidden: true } : card
     );
     
     setCards(updatedCards);
     
     if (user) {
       try {
-        const { data, error } = await supabase
-          .from('user_dashboard')
-          .select('cards_config')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (error && error.code !== 'PGRST116') throw error;
-        
-        if (data) {
-          await supabase
+        const saveCardConfig = async () => {
+          const { data, error } = await supabase
             .from('user_dashboard')
-            .update({ 
-              cards_config: JSON.stringify(updatedCards),
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', user.id);
-        } else {
-          await supabase
-            .from('user_dashboard')
-            .insert({ 
-              user_id: user.id,
-              cards_config: JSON.stringify(updatedCards),
-              department_id: userDepartment || null
-            });
-        }
+            .select('cards_config')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (error && error.code !== 'PGRST116') throw error;
+          
+          if (data) {
+            await supabase
+              .from('user_dashboard')
+              .update({ 
+                cards_config: JSON.stringify(updatedCards),
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id);
+          } else {
+            await supabase
+              .from('user_dashboard')
+              .insert({ 
+                user_id: user.id,
+                cards_config: JSON.stringify(updatedCards),
+                department_id: userDepartment || null
+              });
+          }
+          
+          toast({
+            title: "Card ocultado",
+            description: "O card foi ocultado do painel. Você pode restaurá-lo nas configurações.",
+            variant: "default",
+          });
+        };
         
-        toast({
-          title: "Card ocultado",
-          description: "O card foi ocultado do painel. Você pode restaurá-lo nas configurações.",
-          variant: "default",
-        });
+        saveCardConfig();
       } catch (error) {
         console.error('Erro ao ocultar card:', error);
         
@@ -280,27 +284,34 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      {/* WelcomeCard takes full width */}
+      <div className="w-full">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-blue-500 to-blue-700"
         />
-        
+      </div>
+      
+      {/* Personalize button now appears below the WelcomeCard as an icon only */}
+      <div className="flex justify-end">
         <Button 
           onClick={toggleEditMode}
-          className={`hidden md:flex ${
+          variant={isEditMode ? "default" : "ghost"}
+          size="icon"
+          className={`${
             isEditMode 
               ? 'bg-blue-600 text-white hover:bg-blue-700' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
+          title={isEditMode ? 'Concluir edição' : 'Personalizar dashboard'}
         >
-          {isEditMode ? 'Concluir edição' : 'Personalizar dashboard'}
+          <Settings className="h-5 w-5" />
         </Button>
       </div>
       
-      <div className="mt-4">
+      <div>
         <UnifiedCardGrid
           cards={cards}
           onCardsChange={(updatedCards) => setCards(updatedCards)}
