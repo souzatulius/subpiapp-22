@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useUserData } from '@/hooks/useUserData';
@@ -193,11 +192,49 @@ export const useDashboardCards = () => {
   }, [userDepartment, getBadgeValue]);
 
   const handleCardEdit = (card: ActionCardItem) => {
-    toast({
-      title: "Edição de Card",
-      description: "Função de edição será implementada em breve.",
-      variant: "default",
-    });
+    const updatedCards = cards.map(c => 
+      c.id === card.id ? { ...c, ...card } : c
+    );
+    
+    setCards(updatedCards);
+    
+    if (user) {
+      try {
+        const saveCardConfig = async () => {
+          const { data, error } = await supabase
+            .from('user_dashboard')
+            .select('cards_config')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (error && error.code !== 'PGRST116') throw error;
+          
+          if (data) {
+            await supabase
+              .from('user_dashboard')
+              .update({ 
+                cards_config: JSON.stringify(updatedCards),
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id);
+          } else {
+            await supabase
+              .from('user_dashboard')
+              .insert({ 
+                user_id: user.id,
+                cards_config: JSON.stringify(updatedCards),
+                department_id: userDepartment || null
+              });
+          }
+        };
+        
+        saveCardConfig();
+      } catch (error) {
+        console.error('Erro ao atualizar card:', error);
+      }
+    }
+    
+    return card;
   };
 
   const handleCardHide = (id: string) => {
@@ -209,7 +246,6 @@ export const useDashboardCards = () => {
     
     if (user) {
       try {
-        // Save to database
         const saveCardConfig = async () => {
           const { data, error } = await supabase
             .from('user_dashboard')

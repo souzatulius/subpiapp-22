@@ -13,15 +13,21 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditModeToggle from '@/components/dashboard/EditModeToggle';
+import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ActionCardItem } from '@/types/dashboard';
+import { toast } from '@/hooks/use-toast';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
+  
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const { firstName } = useUserData(user?.id);
-  const { cards, isLoading, handleCardEdit, handleCardHide } = useDashboardCards();
+  const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -29,6 +35,21 @@ const DashboardPage: React.FC = () => {
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
+  };
+  
+  const handleCardEdit = (card: ActionCardItem) => {
+    setSelectedCard(card);
+    setIsEditCardModalOpen(true);
+  };
+  
+  const handleSaveCard = (updatedCard: Partial<ActionCardItem>) => {
+    saveCardEdit(updatedCard as ActionCardItem);
+    setIsEditCardModalOpen(false);
+    toast({
+      title: "Card atualizado",
+      description: "As alterações foram salvas com sucesso.",
+      variant: "default",
+    });
   };
 
   if (isLoading) {
@@ -75,6 +96,14 @@ const DashboardPage: React.FC = () => {
           </div>
         </main>
       </div>
+      
+      {/* Edit Card Modal */}
+      <EditCardModal 
+        isOpen={isEditCardModalOpen}
+        onClose={() => setIsEditCardModalOpen(false)}
+        onSave={handleSaveCard}
+        card={selectedCard}
+      />
       
       {isMobile && <MobileBottomNav />}
     </div>
