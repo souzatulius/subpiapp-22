@@ -26,13 +26,23 @@ serve(async (req) => {
       throw new Error('No release content provided');
     }
 
-    // Create a prompt for OpenAI
+    // Create a prompt for OpenAI with the new instructions
     const prompt = `
-      Você é assessor de imprensa da Subprefeitura de Pinheiros. Com base no release recebido por e-mail abaixo, gere um título e o corpo da notícia para publicação no site da Subprefeitura.
-      
-      A notícia deve seguir o padrão editorial de jornais online: objetiva, clara, com linguagem jornalística.
-      
-      Evite reproduzir a voz institucional de quem enviou o release. Por exemplo, se o release veio da Secretaria do Meio Ambiente, a notícia deve ser redigida pela Subprefeitura como fonte, não como a secretaria.
+      Com base no conteúdo do release, escreva uma notícia institucional clara, direta e adequada para publicação no site da Subprefeitura de Pinheiros.
+
+      Gere apenas título e texto.
+
+      No texto, tente gerar ao menos 3 parágrafos. Contribua com sugestões que não alterem a mensagem principal.
+
+      Não inclua subtítulo, legenda de imagem ou emojis.
+
+      Estruture o texto com um parágrafo de abertura objetivo (lead) seguido por informações complementares organizadas em ordem de importância.
+
+      Use linguagem acessível e tom institucional.
+
+      Quando aplicável, inclua um parágrafo de serviço com data, local, horário, link para mais informações e, se houver, valor do ingresso ou instruções de participação.
+
+      Se o evento não for diretamente relacionado a Pinheiros, mantenha o foco na contribuição para a cidade ou a importância para os moradores da região.
       
       Formate a resposta no seguinte formato JSON com duas chaves: 'titulo' e 'conteudo'.
       
@@ -41,7 +51,7 @@ serve(async (req) => {
     `;
 
     // Call OpenAI API
-    console.log("Calling OpenAI API for news generation");
+    console.log("Calling OpenAI API for news generation with updated prompt");
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {

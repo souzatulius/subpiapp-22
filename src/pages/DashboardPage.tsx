@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Home } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useUserData } from '@/hooks/useUserData';
+import { useUserData } from '@/hooks/dashboard/useUserData';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -25,7 +25,9 @@ const DashboardPage: React.FC = () => {
   
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  const { firstName } = useUserData(user?.id);
+  
+  // Fix: Use the dashboard-specific useUserData hook with the user.id parameter
+  const { firstName, isLoadingUser } = useUserData(user?.id);
   const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
 
   const toggleSidebar = () => {
@@ -60,9 +62,9 @@ const DashboardPage: React.FC = () => {
         
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
-          <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
+          <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
             {/* WelcomeCard takes full width */}
-            <div className="w-full mb-8">
+            <div className="w-full mb-3">
               <WelcomeCard
                 title="Dashboard"
                 description="Bem-vindo ao seu dashboard personalizado."
@@ -73,7 +75,7 @@ const DashboardPage: React.FC = () => {
             </div>
             
             {/* Content container with better height calculation and scrolling behavior */}
-            <div className="relative" style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}>
+            <div className="relative" style={{ height: "calc(100vh - 300px)", minHeight: "500px" }}>
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {Array.from({ length: 8 }).map((_, index) => (
@@ -83,13 +85,14 @@ const DashboardPage: React.FC = () => {
               ) : (
                 cards && cards.length > 0 ? (
                   <ScrollArea className="h-full w-full pr-4">
-                    <div className="pb-8">
+                    <div className="pb-4">
                       <CardGridContainer 
                         cards={cards.filter(card => !card.isHidden)}
                         onCardsChange={() => {}}
                         onEditCard={handleCardEdit}
                         onHideCard={handleCardHide}
                         isMobileView={isMobile}
+                        isEditMode={false}
                       />
                     </div>
                   </ScrollArea>

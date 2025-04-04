@@ -13,6 +13,7 @@ export const useComunicacaoDashboard = (
 ) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   
@@ -45,7 +46,6 @@ export const useComunicacaoDashboard = (
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
-          .eq('page', 'comunicacao')
           .single();
         
         if (error) {
@@ -95,6 +95,10 @@ export const useComunicacaoDashboard = (
     return () => clearTimeout(timeoutId);
   }, [user, isPreview, activeDepartment]);
 
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
     setIsEditModalOpen(true);
@@ -112,7 +116,6 @@ export const useComunicacaoDashboard = (
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          page: 'comunicacao',
           cards_config: JSON.stringify(updatedCards),
           department_id: activeDepartment
         })
@@ -135,7 +138,6 @@ export const useComunicacaoDashboard = (
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          page: 'comunicacao',
           cards_config: JSON.stringify(updatedCards),
           department_id: activeDepartment
         })
@@ -147,11 +149,13 @@ export const useComunicacaoDashboard = (
 
   return {
     cards,
+    isEditMode,
     isEditModalOpen,
     selectedCard,
     isLoading,
     handleCardEdit,
     handleCardHide,
+    toggleEditMode,
     handleSaveCardEdit,
     setIsEditModalOpen
   };
