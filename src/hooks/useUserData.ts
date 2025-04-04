@@ -10,6 +10,7 @@ export const useUserData = (userId?: string) => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userId) {
+        console.warn('useUserData: userId ausente, abortando busca');
         setIsLoadingUser(false);
         return;
       }
@@ -27,7 +28,7 @@ export const useUserData = (userId?: string) => {
           .single();
 
         if (error) {
-          console.error('Erro ao buscar dados do usuário:', error);
+          console.error('Erro ao buscar dados do usuário:', error.message);
           setIsLoadingUser(false);
           return;
         }
@@ -36,13 +37,12 @@ export const useUserData = (userId?: string) => {
           setUser(data);
           setUserCoordenaticaoId(data.coordenacao_id?.descricao || null);
 
-          // Primeiro nome
           const fullName = data.nome_completo || '';
           const first = fullName.split(' ')[0] || 'Usuário';
           setFirstName(first);
         }
-      } catch (error) {
-        console.error('Erro em useUserData:', error);
+      } catch (error: any) {
+        console.error('Erro inesperado em useUserData:', error.message || error);
       } finally {
         setIsLoadingUser(false);
       }
@@ -56,6 +56,6 @@ export const useUserData = (userId?: string) => {
     isLoadingUser,
     setUser,
     firstName,
-    userCoordenaticaoId, // <- agora esse valor está correto
+    userCoordenaticaoId,
   };
 };
