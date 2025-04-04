@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Home } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useUserData } from '@/hooks/useUserData';
+import { useUserData } from '@/hooks/dashboard/useUserData';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -27,8 +27,9 @@ const DashboardPage: React.FC = () => {
   
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  // Fix: Remove the parameter from useUserData call as it's not expecting any arguments
-  const { firstName } = useUserData();
+  
+  // Fix: Use the dashboard-specific useUserData hook with the user.id parameter
+  const { firstName, isLoadingUser } = useUserData(user?.id);
   const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
 
   const toggleSidebar = () => {
