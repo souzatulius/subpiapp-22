@@ -29,6 +29,14 @@ export const canAccessProtectedRoute = (route: string, isAdmin: boolean): boolea
     '/settings/dashboard-management'
   ];
 
+  // Rotas restritas a comunicação e gabinete
+  const comunicacaoRoutes = [
+    '/dashboard/comunicacao/cadastrar-release',
+    '/dashboard/comunicacao/releases',
+    '/cadastrar-release',
+    '/releases'
+  ];
+
   // Permitir rotas públicas
   if (publicRoutes.includes(route)) {
     console.log(`Rota pública: ${route}, acesso liberado`);
@@ -43,6 +51,19 @@ export const canAccessProtectedRoute = (route: string, isAdmin: boolean): boolea
   if (isAdminOnly) {
     console.log(`Rota ${route} é restrita para admins. Acesso negado.`);
     return false;
+  }
+
+  // Verificar se é uma rota restrita a comunicação/gabinete
+  const isComunicacaoRoute = comunicacaoRoutes.some(comRoute =>
+    route === comRoute || route.startsWith(`${comRoute}/`)
+  );
+
+  if (isComunicacaoRoute) {
+    // Aqui precisaríamos verificar se o usuário é da coordenação de comunicação ou gabinete
+    // Como não temos acesso direto a essa informação aqui, vamos usar a permissão de admin como proxy
+    // Em uma implementação real, isso seria verificado através de roles ou permissões específicas
+    console.log(`Rota ${route} é restrita para comunicação/gabinete. Verificando permissões.`);
+    return isAdmin; // temporário, deveria verificar a coordenação do usuário
   }
 
   // Por padrão, liberar outras rotas

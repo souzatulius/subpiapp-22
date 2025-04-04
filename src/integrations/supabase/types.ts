@@ -1434,6 +1434,47 @@ export type Database = {
         }
         Relationships: []
       }
+      releases: {
+        Row: {
+          atualizado_em: string
+          autor_id: string
+          conteudo: string
+          criado_em: string
+          id: string
+          release_origem_id: string | null
+          tipo: string
+          titulo: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          autor_id: string
+          conteudo: string
+          criado_em?: string
+          id?: string
+          release_origem_id?: string | null
+          tipo: string
+          titulo?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          autor_id?: string
+          conteudo?: string
+          criado_em?: string
+          id?: string
+          release_origem_id?: string | null
+          tipo?: string
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "releases_release_origem_id_fkey"
+            columns: ["release_origem_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       respostas_demandas: {
         Row: {
           arquivo_url: string | null
