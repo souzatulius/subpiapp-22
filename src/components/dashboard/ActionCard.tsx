@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
+
 export interface ActionCardProps {
   id: string;
   title: string;
@@ -23,6 +24,7 @@ export interface ActionCardProps {
   iconSize?: 'sm' | 'md' | 'lg' | 'xl';
   isMobileView?: boolean;
 }
+
 const getBackgroundColor = (color: CardColor): string => {
   switch (color) {
     case 'blue':
@@ -51,7 +53,6 @@ const getBackgroundColor = (color: CardColor): string => {
       return 'bg-green-300';
     case 'purple-light':
       return 'bg-purple-300';
-    // New color mappings
     case 'gray-400':
       return 'bg-gray-400';
     case 'gray-800':
@@ -78,6 +79,7 @@ const getBackgroundColor = (color: CardColor): string => {
       return 'bg-blue-500';
   }
 };
+
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm':
@@ -90,9 +92,9 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
       return 'w-8 h-8';
     default:
       return 'w-6 h-6';
-    // Adjusted default size to be more compact
   }
 };
+
 const ActionCard = ({
   id,
   title,
@@ -112,28 +114,42 @@ const ActionCard = ({
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
+  
   const handleClick = () => {
     if (path) navigate(path);
   };
-  return <div className={`w-full h-[160px] rounded-xl shadow-md overflow-hidden cursor-pointer 
+
+  return (
+    <div 
+      className={`w-full h-[160px] rounded-xl shadow-md overflow-hidden cursor-pointer 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColor} group`} onClick={path ? handleClick : undefined}>
+        active:scale-95 ${bgColor} group relative`} 
+      onClick={path ? handleClick : undefined}
+    >
+      {(onEdit || onDelete || onHide) && (
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <CardControls 
+            onEdit={onEdit ? () => onEdit(id) : undefined} 
+            onDelete={onDelete ? () => onDelete(id) : undefined}
+            onHide={onHide ? () => onHide(id) : undefined}
+          />
+        </div>
+      )}
+      
       <div className="relative h-full flex flex-col items-center justify-center text-center py-4">
-        {isDraggable && <CardControls onEdit={onEdit ? e => {
-        e.stopPropagation();
-        if (onEdit) onEdit(id);
-      } : undefined} onDelete={onDelete ? e => {
-        e.stopPropagation();
-        if (onDelete) onDelete(id);
-      } : undefined} />}
-        
-        {children ? <>{children}</> : <>
+        {children ? (
+          <>{children}</>
+        ) : (
+          <>
             <div className="text-white mb-2">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <h3 className="font-semibold text-white text-xl">{title}</h3>
-          </>}
+          </>
+        )}
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ActionCard;

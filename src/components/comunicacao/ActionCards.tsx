@@ -1,11 +1,13 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { UnifiedActionCard } from '@/components/dashboard/UnifiedActionCard';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { useDefaultDashboardConfig } from '@/hooks/dashboard/useDefaultDashboardConfig';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface ActionCardsProps {
   coordenacaoId: string;
@@ -22,7 +24,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
   isEditMode = false,
   onEdit
 }) => {
-  const { config: dashboardCards, isLoading } = useDefaultDashboardConfig('comunicacao');
+  const { config: dashboardCards, isLoading, setConfig } = useDefaultDashboardConfig('comunicacao');
+  const { user } = useAuth();
   
   const defaultCards: ActionCardItem[] = [
     {
@@ -79,7 +82,84 @@ const ActionCards: React.FC<ActionCardsProps> = ({
     }
   ];
 
-  const cards = (dashboardCards && dashboardCards.length > 0) ? dashboardCards : defaultCards;
+  const [cards, setCards] = useState<ActionCardItem[]>(
+    (dashboardCards && dashboardCards.length > 0) ? dashboardCards : defaultCards
+  );
+
+  React.useEffect(() => {
+    if (dashboardCards && dashboardCards.length > 0) {
+      setCards(dashboardCards);
+    } else {
+      setCards(defaultCards);
+    }
+  }, [dashboardCards]);
+
+  const handleCardEdit = (cardId: string) => {
+    const cardToEdit = cards.find(c => c.id === cardId);
+    if (cardToEdit && onEdit) onEdit(cardToEdit);
+  };
+
+  const handleCardHide = async (cardId: string) => {
+    const updatedCards = cards.map(card => 
+      card.id === cardId ? { ...card, isHidden: true } : card
+    );
+    
+    setCards(updatedCards);
+    
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from('user_dashboard')
+          .select('cards_config')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data) {
+          await supabase
+            .from('user_dashboard')
+            .update({ 
+              cards_config: JSON.stringify(updatedCards),
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', user.id);
+        } else {
+          await supabase
+            .from('user_dashboard')
+            .insert({ 
+              user_id: user.id,
+              cards_config: JSON.stringify(updatedCards),
+              department_id: coordenacaoId
+            });
+        }
+        
+        setConfig(updatedCards);
+        
+        toast({
+          title: "Card ocultado",
+          description: "O card foi ocultado do painel. Você pode restaurá-lo nas configurações.",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error('Erro ao ocultar card:', error);
+        
+        setCards(cards);
+        
+        toast({
+          title: "Erro",
+          description: "Não foi possível ocultar o card. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Card ocultado",
+        description: "O card foi ocultado temporariamente. Faça login para salvar suas configurações.",
+        variant: "default",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -97,7 +177,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card, index) => (
+      {cards.filter(card => !card.isHidden).map((card, index) => (
         <div key={card.id || index} className="h-[160px]">
           {isEditMode ? (
             <UnifiedActionCard
@@ -110,10 +190,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
               width={card.width || '25'}
               height={'1'}
               type={card.type || 'standard'} 
-              onEdit={onEdit ? (id) => {
-                const cardToEdit = cards.find(c => c.id === id);
-                if (cardToEdit && onEdit) onEdit(cardToEdit);
-              } : undefined}
+              onEdit={handleCardEdit}
+              onHide={handleCardHide}
               isEditing={isEditMode}
               hasSubtitle={!!card.subtitle}
               iconSize="md"
@@ -130,6 +208,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
                 width={card.width || '25'}
                 height={'1'}
                 type={card.type || 'standard'} 
+                onEdit={handleCardEdit}
+                onHide={handleCardHide}
                 hasSubtitle={!!card.subtitle}
                 iconSize="md"
               />

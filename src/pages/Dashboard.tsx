@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/layouts/Header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -14,6 +13,7 @@ import UnifiedCardGrid from '@/components/dashboard/UnifiedCardGrid';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
+import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -24,8 +24,8 @@ const Dashboard = () => {
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const { getBadgeValue } = useBadgeValues();
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // Map background color to Tailwind classes
   const getBgColor = (color: string): CardColor => {
     switch (color) {
       case 'grey-400': return 'gray-400' as CardColor;
@@ -204,8 +204,80 @@ const Dashboard = () => {
     setCards(filteredCards);
   }, [userDepartment, getBadgeValue]);
 
+  const handleCardEdit = async (cardId: string) => {
+    toast({
+      title: "Edição de Card",
+      description: "Função de edição será implementada em breve.",
+      variant: "default",
+    });
+  };
+
+  const handleCardHide = async (cardId: string) => {
+    const updatedCards = cards.map(card => 
+      card.id === cardId ? { ...card, isHidden: true } : card
+    );
+    
+    setCards(updatedCards);
+    
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from('user_dashboard')
+          .select('cards_config')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        
+        if (data) {
+          await supabase
+            .from('user_dashboard')
+            .update({ 
+              cards_config: JSON.stringify(updatedCards),
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', user.id);
+        } else {
+          await supabase
+            .from('user_dashboard')
+            .insert({ 
+              user_id: user.id,
+              cards_config: JSON.stringify(updatedCards),
+              department_id: userDepartment || null
+            });
+        }
+        
+        toast({
+          title: "Card ocultado",
+          description: "O card foi ocultado do painel. Você pode restaurá-lo nas configurações.",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error('Erro ao ocultar card:', error);
+        
+        setCards(cards);
+        
+        toast({
+          title: "Erro",
+          description: "Não foi possível ocultar o card. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Card ocultado",
+        description: "O card foi ocultado temporariamente. Faça login para salvar suas configurações.",
+        variant: "default",
+      });
+    }
+  };
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
   };
 
   if (isLoading) {
@@ -229,19 +301,35 @@ const Dashboard = () => {
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
-            <WelcomeCard
-              title="Dashboard"
-              description="Bem-vindo ao seu dashboard personalizado."
-              icon={<Home className="h-6 w-6 mr-2" />}
-              color="bg-gradient-to-r from-blue-800 to-blue-950"
-              userName={firstName}
-            />
+            <div className="flex justify-between items-center mb-4">
+              <WelcomeCard
+                title="Dashboard"
+                description="Bem-vindo ao seu dashboard personalizado."
+                icon={<Home className="h-6 w-6 mr-2" />}
+                color="bg-gradient-to-r from-blue-800 to-blue-950"
+                userName={firstName}
+              />
+              
+              <button 
+                onClick={toggleEditMode}
+                className={`hidden md:flex items-center gap-2 py-2 px-4 rounded-lg transition-colors ${
+                  isEditMode 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {isEditMode ? 'Concluir edição' : 'Personalizar dashboard'}
+              </button>
+            </div>
             
             <div className="mt-6">
               <UnifiedCardGrid
-                cards={cards}
+                cards={cards.filter(card => !card.isHidden)}
                 onCardsChange={(updatedCards) => setCards(updatedCards)}
+                onEditCard={handleCardEdit}
+                onHideCard={handleCardHide}
                 isMobileView={isMobile}
+                isEditMode={isEditMode}
                 specialCardsData={{}}
               />
             </div>
