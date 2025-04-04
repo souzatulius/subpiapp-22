@@ -24,14 +24,29 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Pencil, Sparkles, Trash2, FileText, Eye } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { 
+  Loader2, 
+  Pencil, 
+  Sparkles, 
+  Trash2, 
+  FileText, 
+  Eye, 
+  Layout, 
+  List, 
+  Check, 
+  Search, 
+  X
+} from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { debounce } from '@/lib/utils';
 
-// Define Release interface since it's not in Supabase types yet
+// Define Release interface
 interface Release {
   id: string;
   tipo: 'release' | 'noticia';
@@ -40,21 +55,84 @@ interface Release {
   release_origem_id?: string | null;
   criado_em: string;
   autor_id: string;
+  publicada?: boolean;
 }
 
 const ListarReleases = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [allItems, setAllItems] = useState<Release[]>([]);
   const [releases, setReleases] = useState<Release[]>([]);
+  const [noticias, setNoticias] = useState<Release[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("noticias");
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  const [searchReleases, setSearchReleases] = useState('');
+  const [searchNoticias, setSearchNoticias] = useState('');
+  const [filteredReleases, setFilteredReleases] = useState<Release[]>([]);
+  const [filteredNoticias, setFilteredNoticias] = useState<Release[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     fetchReleases();
   }, []);
+
+  useEffect(() => {
+    // Filtra os items por tipo
+    if (allItems.length > 0) {
+      const releasesItems = allItems.filter(item => item.tipo === 'release');
+      const noticiasItems = allItems.filter(item => item.tipo === 'noticia');
+      
+      setReleases(releasesItems);
+      setNoticias(noticiasItems);
+      setFilteredReleases(releasesItems);
+      setFilteredNoticias(noticiasItems);
+    }
+  }, [allItems]);
+
+  // Efeito para filtrar releases com debounce
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const searchTerm = searchReleases.toLowerCase().trim();
+      if (searchTerm) {
+        setIsSearching(true);
+        const filtered = releases.filter(item => 
+          (item.titulo?.toLowerCase().includes(searchTerm) || 
+          item.conteudo.toLowerCase().includes(searchTerm))
+        );
+        setFilteredReleases(filtered);
+      } else {
+        setFilteredReleases(releases);
+      }
+      setIsSearching(false);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchReleases, releases]);
+
+  // Efeito para filtrar notícias com debounce
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const searchTerm = searchNoticias.toLowerCase().trim();
+      if (searchTerm) {
+        setIsSearching(true);
+        const filtered = noticias.filter(item => 
+          (item.titulo?.toLowerCase().includes(searchTerm) || 
+          item.conteudo.toLowerCase().includes(searchTerm))
+        );
+        setFilteredNoticias(filtered);
+      } else {
+        setFilteredNoticias(noticias);
+      }
+      setIsSearching(false);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchNoticias, noticias]);
 
   const fetchReleases = async () => {
     try {
@@ -67,7 +145,7 @@ const ListarReleases = () => {
       
       if (error) throw error;
       
-      setReleases(data || []);
+      setAllItems(data || []);
       
     } catch (error: any) {
       console.error('Erro ao carregar releases:', error);
@@ -134,6 +212,35 @@ const ListarReleases = () => {
     }
   };
 
+  const markAsPublished = async (noticia: Release) => {
+    try {
+      const { error } = await supabase
+        .from('releases')
+        .update({ publicada: !noticia.publicada })
+        .eq('id', noticia.id) as any;
+      
+      if (error) throw error;
+      
+      toast({
+        title: noticia.publicada ? "Notícia desmarcada" : "Notícia marcada como publicada",
+        description: noticia.publicada 
+          ? "A notícia foi desmarcada como publicada." 
+          : "A notícia foi marcada como publicada com sucesso.",
+      });
+      
+      // Refresh the list
+      fetchReleases();
+      
+    } catch (error: any) {
+      console.error('Erro ao atualizar status da notícia:', error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: error.message || "Ocorreu um erro ao atualizar o status da notícia.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const renderPreview = (content: string): string => {
     // Limit to around 100 characters for preview
     return content.length > 100 ? content.substring(0, 100) + '...' : content;
@@ -141,6 +248,234 @@ const ListarReleases = () => {
   
   const formatDate = (dateString: string): string => {
     return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR });
+  };
+
+  const renderCardView = (items: Release[], isNoticia: boolean = false) => {
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-600">
+            {isSearching 
+              ? "Buscando..." 
+              : (searchNoticias || searchReleases) 
+                ? "Nenhum item encontrado com esse termo." 
+                : `Nenhum ${isNoticia ? 'notícia' : 'release'} encontrado`
+            }
+          </h3>
+          <p className="text-gray-500 mt-2">
+            {!isSearching && !searchNoticias && !searchReleases && "Cadastre um novo item para começar."}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((item) => (
+          <Card key={item.id} className="overflow-hidden group relative">
+            <CardContent className="p-4">
+              <div className="mb-2 flex justify-between items-start">
+                <Badge variant={item.tipo === 'release' ? 'outline' : 'default'} className="mb-2">
+                  {item.tipo === 'release' ? 'Release' : 'Notícia'}
+                </Badge>
+                {isNoticia && item.publicada && (
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <Check className="h-3 w-3 mr-1" /> Publicada
+                  </Badge>
+                )}
+              </div>
+              
+              <h3 className="font-semibold text-lg mb-1 line-clamp-1">
+                {item.titulo || <span className="italic text-gray-500">Sem título</span>}
+              </h3>
+              
+              <p className="text-sm text-gray-500 mb-3 line-clamp-3">
+                {renderPreview(item.conteudo)}
+              </p>
+              
+              <div className="text-xs text-gray-400 mt-2">
+                {formatDate(item.criado_em)}
+              </div>
+              
+              {/* Botões flutuantes */}
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <Button variant="ghost" size="sm" className="bg-white/90 hover:bg-white shadow-sm" onClick={() => handleViewItem(item)}>
+                  <Eye className="h-4 w-4" />
+                </Button>
+                
+                {isNoticia ? (
+                  <Button variant="ghost" size="sm" className="bg-white/90 hover:bg-white shadow-sm" onClick={() => handleEditNews(item)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  !item.release_origem_id && (
+                    <Button variant="ghost" size="sm" className="bg-white/90 hover:bg-white shadow-sm" onClick={() => handleGenerateNews(item)}>
+                      <Sparkles className="h-4 w-4" />
+                    </Button>
+                  )
+                )}
+                
+                <Button variant="ghost" size="sm" className="bg-white/90 hover:bg-white shadow-sm text-red-500 hover:text-red-600" onClick={() => handleDeleteItem(item)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {/* Botão de publicação manual para notícias */}
+              {isNoticia && (
+                <div className="absolute bottom-4 right-4">
+                  <Button 
+                    variant={item.publicada ? "outline" : "secondary"} 
+                    size="sm" 
+                    onClick={() => markAsPublished(item)}
+                    className={item.publicada ? "border-green-500 text-green-600" : ""}
+                  >
+                    {item.publicada ? (
+                      <>
+                        <Check className="h-4 w-4 mr-1" /> Publicada
+                      </>
+                    ) : (
+                      "Marcar como publicada"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const renderListView = (items: Release[], isNoticia: boolean = false) => {
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-600">
+            {isSearching 
+              ? "Buscando..." 
+              : (searchNoticias || searchReleases) 
+                ? "Nenhum item encontrado com esse termo." 
+                : `Nenhum ${isNoticia ? 'notícia' : 'release'} encontrado`
+            }
+          </h3>
+          <p className="text-gray-500 mt-2">
+            {!isSearching && !searchNoticias && !searchReleases && "Cadastre um novo item para começar."}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Tipo</TableHead>
+              <TableHead>Título / Conteúdo</TableHead>
+              <TableHead className="w-[180px]">Data de Criação</TableHead>
+              {isNoticia && <TableHead className="w-[120px]">Status</TableHead>}
+              <TableHead className="text-right w-[150px]">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <Badge variant={item.tipo === 'release' ? 'outline' : 'default'}>
+                    {item.tipo === 'release' ? 'Release' : 'Notícia'}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div>
+                    {item.titulo ? (
+                      <span className="font-medium">{item.titulo}</span>
+                    ) : (
+                      <span className="italic text-gray-500">Sem título</span>
+                    )}
+                    <p className="text-sm text-gray-500 mt-1">
+                      {renderPreview(item.conteudo)}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-gray-500">
+                    {formatDate(item.criado_em)}
+                  </span>
+                </TableCell>
+                {isNoticia && (
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => markAsPublished(item)}
+                      className={item.publicada ? "text-green-600" : "text-gray-500"}
+                    >
+                      {item.publicada ? (
+                        <>
+                          <Check className="h-4 w-4 mr-1" /> Publicada
+                        </>
+                      ) : (
+                        "Publicar"
+                      )}
+                    </Button>
+                  </TableCell>
+                )}
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleViewItem(item)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    
+                    {item.tipo === 'release' && !item.release_origem_id && (
+                      <Button variant="ghost" size="sm" onClick={() => handleGenerateNews(item)}>
+                        <Sparkles className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    {item.tipo === 'noticia' && (
+                      <Button variant="ghost" size="sm" onClick={() => handleEditNews(item)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteItem(item)}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  };
+
+  const renderSearchInput = (placeholder: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onClear: () => void) => {
+    return (
+      <div className="relative mb-4">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <Search className="h-4 w-4 text-gray-400" />
+        </div>
+        <input
+          type="text"
+          className="pl-10 pr-10 py-2 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+        />
+        {value && (
+          <button 
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+            onClick={onClear}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -157,89 +492,83 @@ const ListarReleases = () => {
         color="bg-gradient-to-r from-blue-500 to-blue-600"
       />
 
-      <div className="mt-6 bg-white p-6 rounded-xl shadow-sm">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Lista de Releases e Notícias</h2>
-          <Button onClick={() => navigate('/dashboard/comunicacao/cadastrar-release')}>
-            Novo Release
-          </Button>
-        </div>
+      <div className="mt-5">
+        <Tabs defaultValue="noticias" onValueChange={setActiveTab} className="w-full">
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="noticias">Notícias</TabsTrigger>
+              <TabsTrigger value="releases">Releases</TabsTrigger>
+            </TabsList>
+            
+            <div className="flex items-center gap-2">
+              <div className="flex bg-muted rounded-md p-1">
+                <Button 
+                  variant={viewMode === 'card' ? 'default' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setViewMode('card')}
+                  className="px-3"
+                >
+                  <Layout className="h-4 w-4 mr-1" />
+                  Cards
+                </Button>
+                <Button 
+                  variant={viewMode === 'list' ? 'default' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="px-3"
+                >
+                  <List className="h-4 w-4 mr-1" />
+                  Lista
+                </Button>
+              </div>
+              <Button onClick={() => navigate('/dashboard/comunicacao/cadastrar-release')}>
+                {activeTab === 'noticias' ? "Nova Notícia" : "Novo Release"}
+              </Button>
+            </div>
+          </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          </div>
-        ) : releases.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-600">Nenhum release ou notícia encontrado</h3>
-            <p className="text-gray-500 mt-2">Cadastre um novo release para começar.</p>
-          </div>
-        ) : (
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Tipo</TableHead>
-                  <TableHead>Título / Conteúdo</TableHead>
-                  <TableHead className="w-[180px]">Data de Criação</TableHead>
-                  <TableHead className="text-right w-[150px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {releases.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <Badge variant={item.tipo === 'release' ? 'outline' : 'default'}>
-                        {item.tipo === 'release' ? 'Release' : 'Notícia'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        {item.titulo ? (
-                          <span className="font-medium">{item.titulo}</span>
-                        ) : (
-                          <span className="italic text-gray-500">Sem título</span>
-                        )}
-                        <p className="text-sm text-gray-500 mt-1">
-                          {renderPreview(item.conteudo)}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-500">
-                        {formatDate(item.criado_em)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleViewItem(item)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        
-                        {item.tipo === 'release' && !item.release_origem_id && (
-                          <Button variant="ghost" size="sm" onClick={() => handleGenerateNews(item)}>
-                            <Sparkles className="h-4 w-4" />
-                          </Button>
-                        )}
-                        
-                        {item.tipo === 'noticia' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleEditNews(item)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        )}
-                        
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteItem(item)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+          <TabsContent value="noticias" className="mt-4">
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              {renderSearchInput(
+                "Buscar notícias...", 
+                searchNoticias, 
+                (e) => setSearchNoticias(e.target.value),
+                () => setSearchNoticias('')
+              )}
+              
+              {isLoading ? (
+                <div className="flex justify-center items-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                </div>
+              ) : (
+                viewMode === 'card' 
+                  ? renderCardView(filteredNoticias, true) 
+                  : renderListView(filteredNoticias, true)
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="releases" className="mt-4">
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              {renderSearchInput(
+                "Buscar releases...", 
+                searchReleases, 
+                (e) => setSearchReleases(e.target.value),
+                () => setSearchReleases('')
+              )}
+              
+              {isLoading ? (
+                <div className="flex justify-center items-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                </div>
+              ) : (
+                viewMode === 'card' 
+                  ? renderCardView(filteredReleases) 
+                  : renderListView(filteredReleases)
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -268,8 +597,15 @@ const ListarReleases = () => {
       <AlertDialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
         <AlertDialogContent className="max-w-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {selectedRelease?.tipo === 'release' ? 'Release' : 'Notícia'}: {selectedRelease?.titulo || 'Sem título'}
+            <AlertDialogTitle className="flex justify-between items-start">
+              <div>
+                {selectedRelease?.tipo === 'release' ? 'Release' : 'Notícia'}: {selectedRelease?.titulo || 'Sem título'}
+              </div>
+              {selectedRelease?.tipo === 'noticia' && (
+                <Badge variant={selectedRelease?.publicada ? "default" : "outline"} className={selectedRelease?.publicada ? "bg-green-100 text-green-800" : ""}>
+                  {selectedRelease?.publicada ? "Publicada" : "Não publicada"}
+                </Badge>
+              )}
             </AlertDialogTitle>
             <div className="text-sm text-gray-500 mb-2">
               Criado em: {selectedRelease?.criado_em ? formatDate(selectedRelease.criado_em) : '-'}
@@ -280,17 +616,60 @@ const ListarReleases = () => {
               {selectedRelease?.conteudo}
             </div>
           </ScrollArea>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Fechar</AlertDialogCancel>
-            {selectedRelease?.tipo === 'release' && !selectedRelease.release_origem_id && (
-              <Button onClick={() => {
-                setIsViewModalOpen(false);
-                handleGenerateNews(selectedRelease);
-              }}>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Gerar Notícia
-              </Button>
-            )}
+          <AlertDialogFooter className="flex justify-between sm:justify-between">
+            <div>
+              {/* Mostrar botão "Ver Notícia Criada" se for um release com notícia vinculada */}
+              {selectedRelease?.tipo === 'release' && selectedRelease.release_origem_id && (
+                <Button variant="secondary" onClick={() => {
+                  setIsViewModalOpen(false);
+                  // Encontre a notícia vinculada
+                  const noticiaVinculada = noticias.find(n => n.release_origem_id === selectedRelease.id);
+                  if (noticiaVinculada) {
+                    setActiveTab("noticias");
+                    setTimeout(() => {
+                      setSelectedRelease(noticiaVinculada);
+                      setIsViewModalOpen(true);
+                    }, 100);
+                  }
+                }}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Ver Notícia Criada
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <AlertDialogCancel>Fechar</AlertDialogCancel>
+              {selectedRelease?.tipo === 'release' && !selectedRelease.release_origem_id && (
+                <Button onClick={() => {
+                  setIsViewModalOpen(false);
+                  handleGenerateNews(selectedRelease);
+                }}>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Criar Notícia
+                </Button>
+              )}
+              {selectedRelease?.tipo === 'noticia' && (
+                <Button 
+                  variant={selectedRelease.publicada ? "outline" : "default"}
+                  onClick={() => {
+                    markAsPublished(selectedRelease);
+                    setIsViewModalOpen(false);
+                  }}
+                >
+                  {selectedRelease.publicada ? (
+                    <>
+                      <X className="h-4 w-4 mr-2" />
+                      Desmarcar publicação
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Marcar como publicada
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
