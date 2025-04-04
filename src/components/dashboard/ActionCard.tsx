@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -121,7 +122,7 @@ const ActionCard = ({
 
   return (
     <div 
-      className={`w-full h-[160px] rounded-xl shadow-md overflow-hidden cursor-pointer 
+      className={`w-full h-40 rounded-xl shadow-md overflow-hidden cursor-pointer 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
         active:scale-95 ${bgColor} group relative`} 
       onClick={path ? handleClick : undefined}

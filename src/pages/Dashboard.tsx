@@ -84,7 +84,7 @@ const Dashboard = () => {
         iconId: "message-square-reply",
         color: getBgColor('blue-700'),
         width: "50",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         displayMobile: true,
         mobileOrder: 1
@@ -96,7 +96,7 @@ const Dashboard = () => {
         iconId: "plus-circle",
         color: getBgColor('orange-400'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         displayMobile: true,
         mobileOrder: 2,
@@ -109,7 +109,7 @@ const Dashboard = () => {
         iconId: "list-filter",
         color: getBgColor('grey-800'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         displayMobile: true,
         mobileOrder: 3
@@ -121,7 +121,7 @@ const Dashboard = () => {
         iconId: "message-circle",
         color: getBgColor('orange-500'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('responder-demandas'),
@@ -135,7 +135,7 @@ const Dashboard = () => {
         iconId: "file-text",
         color: getBgColor('blue-960'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('criar-nota'),
@@ -150,7 +150,7 @@ const Dashboard = () => {
         iconId: "file-text",
         color: getBgColor('neutral-200'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         displayMobile: true,
         mobileOrder: 6
@@ -162,7 +162,7 @@ const Dashboard = () => {
         iconId: "check-circle",
         color: getBgColor('grey-950'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('aprovar-notas'),
@@ -176,7 +176,7 @@ const Dashboard = () => {
         iconId: "trophy",
         color: getBgColor('lime-500'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         displayMobile: true,
         mobileOrder: 8
@@ -188,7 +188,7 @@ const Dashboard = () => {
         iconId: "bar-chart-2",
         color: getBgColor('grey-400'),
         width: "25",
-        height: "2",
+        height: "1", // Changed from "2" to "1"
         type: "standard",
         displayMobile: true,
         mobileOrder: 9,
