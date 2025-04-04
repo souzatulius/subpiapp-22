@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +14,7 @@ export const useComunicacaoDashboard = (
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { getBadgeValue } = useBadgeValues();
 
   const getBgColor = (color: string): CardColor => {
@@ -34,7 +34,14 @@ export const useComunicacaoDashboard = (
 
   // Fetch user department
   useEffect(() => {
-    if (!user || isPreview) return;
+    setIsLoading(true);
+    if (!user || isPreview) {
+      if (isPreview) {
+        setUserDepartment(defaultDepartment);
+      }
+      setIsLoading(false);
+      return;
+    }
 
     const getUserDepartment = async () => {
       const { data, error } = await supabase
@@ -45,17 +52,23 @@ export const useComunicacaoDashboard = (
         
       if (error) {
         console.error('Error fetching user department:', error);
+        setIsLoading(false);
         return;
       }
       
       setUserDepartment(data?.coordenacao_id || null);
+      setIsLoading(false);
     };
 
     getUserDepartment();
-  }, [user, isPreview]);
+  }, [user, isPreview, defaultDepartment]);
 
   // Initialize cards
   useEffect(() => {
+    if (isLoading) return; // Não carregue cards se ainda estiver carregando o departamento
+    
+    setIsLoading(true);
+    
     const initialCards: ActionCardItem[] = [
       {
         id: 'comunicacao',
@@ -63,7 +76,7 @@ export const useComunicacaoDashboard = (
         path: "/dashboard/comunicacao",
         iconId: "message-square-reply",
         color: getBgColor('blue-700'),
-        width: "50",
+        width: "25",
         height: "1",
         type: "standard",
         displayMobile: true,
@@ -184,7 +197,8 @@ export const useComunicacaoDashboard = (
     });
 
     setCards(filteredCards);
-  }, [userDepartment, getBadgeValue]);
+    setIsLoading(false);
+  }, [userDepartment, getBadgeValue, isLoading]);
 
   const handleCardEdit = (card: ActionCardItem) => {
     setSelectedCard(card);
@@ -318,6 +332,7 @@ export const useComunicacaoDashboard = (
     isEditModalOpen,
     selectedCard,
     userDepartment,
+    isLoading,
     handleCardEdit,
     handleCardHide,
     toggleEditMode,

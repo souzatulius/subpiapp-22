@@ -17,6 +17,7 @@ import EditCardModal from '@/components/dashboard/card-customization/EditCardMod
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,7 +53,7 @@ const DashboardPage: React.FC = () => {
     });
   };
 
-  if (isLoading) {
+  if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
 
@@ -84,14 +85,22 @@ const DashboardPage: React.FC = () => {
             
             {/* Card Grid with ScrollArea */}
             <ScrollArea className="h-[calc(100vh-260px)] pr-4">
-              <CardGridContainer 
-                cards={cards.filter(card => !card.isHidden)}
-                onCardsChange={setCards => {}}
-                onEditCard={handleCardEdit}
-                onHideCard={handleCardHide}
-                isMobileView={isMobile}
-                isEditMode={isEditMode}
-              />
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <Skeleton key={index} className="h-32 w-full rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <CardGridContainer 
+                  cards={cards.filter(card => !card.isHidden)}
+                  onCardsChange={setCards => {}}
+                  onEditCard={handleCardEdit}
+                  onHideCard={handleCardHide}
+                  isMobileView={isMobile}
+                  isEditMode={isEditMode}
+                />
+              )}
             </ScrollArea>
           </div>
         </main>

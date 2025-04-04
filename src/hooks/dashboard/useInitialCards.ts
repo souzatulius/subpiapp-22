@@ -6,9 +6,12 @@ import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 
 export const useInitialCards = (userDepartment: string | null) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { getBadgeValue } = useBadgeValues();
 
   useEffect(() => {
+    setIsLoading(true);
+    
     const initialCards: ActionCardItem[] = [
       {
         id: 'comunicacao',
@@ -16,7 +19,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         path: "/dashboard/comunicacao",
         iconId: "message-square-reply",
         color: getBgColor('blue-700'),
-        width: "25", // Alterado de "50" para "25"
+        width: "25", // 1 coluna
         height: "1",
         type: "standard",
         displayMobile: true,
@@ -137,7 +140,8 @@ export const useInitialCards = (userDepartment: string | null) => {
     });
 
     setCards(filteredCards);
+    setIsLoading(false);
   }, [userDepartment, getBadgeValue]);
 
-  return { cards, setCards };
+  return { cards, setCards, isLoading };
 };

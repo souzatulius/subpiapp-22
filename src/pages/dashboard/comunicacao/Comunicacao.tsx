@@ -11,6 +11,7 @@ import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -30,6 +31,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     isEditMode,
     isEditModalOpen,
     selectedCard,
+    isLoading,
     handleCardEdit,
     handleCardHide,
     toggleEditMode,
@@ -54,14 +56,22 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       
       <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
       
-      <CardGridContainer
-        cards={cards}
-        onCardsChange={cards => cards}
-        onEditCard={handleCardEdit}
-        onHideCard={handleCardHide}
-        isMobileView={isMobile}
-        isEditMode={isEditMode}
-      />
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Skeleton key={index} className="h-32 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : (
+        <CardGridContainer
+          cards={cards}
+          onCardsChange={cards => cards}
+          onEditCard={handleCardEdit}
+          onHideCard={handleCardHide}
+          isMobileView={isMobile}
+          isEditMode={isEditMode}
+        />
+      )}
       
       <EditCardModal 
         isOpen={isEditModalOpen}
