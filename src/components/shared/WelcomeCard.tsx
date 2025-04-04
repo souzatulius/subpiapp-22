@@ -11,7 +11,14 @@ interface WelcomeCardProps {
   userName?: string;
   showButton?: boolean;
   buttonText?: string;
+  buttonIcon?: React.ReactNode;
+  buttonVariant?: string;
   onButtonClick?: () => void;
+  statTitle?: string;
+  statIcon?: React.ReactNode;
+  statValue?: number;
+  statDescription?: string;
+  statSection?: string;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -23,7 +30,14 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   userName,
   showButton = false,
   buttonText = 'Começar',
-  onButtonClick
+  buttonIcon,
+  buttonVariant,
+  onButtonClick,
+  statTitle,
+  statIcon,
+  statValue,
+  statDescription,
+  statSection
 }) => {
   return (
     <Card className={`border-none overflow-hidden shadow-md ${color} text-white`}>
@@ -48,8 +62,9 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
           {showButton && (
             <button
               onClick={onButtonClick}
-              className="bg-white text-blue-700 px-4 py-2 rounded-md shadow-sm hover:shadow-md transition-all hover:bg-gray-100 text-sm font-medium"
+              className="bg-white text-blue-700 px-4 py-2 rounded-md shadow-sm hover:shadow-md transition-all hover:bg-gray-100 text-sm font-medium flex items-center gap-2"
             >
+              {buttonIcon}
               {buttonText}
             </button>
           )}

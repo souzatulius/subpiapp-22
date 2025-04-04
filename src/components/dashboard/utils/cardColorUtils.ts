@@ -1,4 +1,3 @@
-
 import { CardColor } from '@/types/dashboard';
 
 // This function checks if a card background color is considered "light"
@@ -32,7 +31,6 @@ export const getColorClasses = (color: CardColor): string => {
     case 'blue-light': return 'bg-blue-300 text-gray-500';
     case 'green-light': return 'bg-green-300 text-gray-500';
     case 'purple-light': return 'bg-purple-300 text-gray-500';
-    // Additional color mappings
     case 'gray-400': return 'bg-gray-400 text-white';
     case 'gray-800': return 'bg-gray-800 text-white';
     case 'gray-950': return 'bg-gray-950 text-white';
@@ -63,7 +61,6 @@ export const getHoverColorClasses = (color: CardColor): string => {
     case 'blue-light': return 'hover:bg-blue-400';
     case 'green-light': return 'hover:bg-green-400';
     case 'purple-light': return 'hover:bg-purple-400';
-    // Additional hover color mappings
     case 'gray-400': return 'hover:bg-gray-500';
     case 'gray-800': return 'hover:bg-gray-900';
     case 'gray-950': return 'hover:bg-black';

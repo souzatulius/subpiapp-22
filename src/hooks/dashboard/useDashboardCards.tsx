@@ -46,18 +46,20 @@ export const useDashboardCards = () => {
           return;
         }
 
-        // Safe parsing of card config data
+        // Simplify the parsing logic to avoid deep type instantiation
         let parsedCards: ActionCardItem[] = [];
         
         if (typeof data.cards_config === 'string') {
           try {
-            // Use type assertion without trying to deeply instantiate the type
             parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
+            parsedCards = defaultCards;
           }
         } else if (Array.isArray(data.cards_config)) {
-          parsedCards = data.cards_config as ActionCardItem[];
+          parsedCards = data.cards_config;
+        } else {
+          parsedCards = defaultCards;
         }
 
         // Only use the parsed cards if they form a valid array
