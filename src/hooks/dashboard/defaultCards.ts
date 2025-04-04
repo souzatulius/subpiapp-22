@@ -1,4 +1,3 @@
-// hooks/dashboard/defaultCards.tsx
 import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
@@ -29,30 +28,31 @@ export const getIconComponentFromId = (iconId: string): React.ElementType => {
   return LucideIcons[componentName] as React.ElementType || LucideIcons.ClipboardList;
 };
 
-// Action cards para a biblioteca
+// Action cards para a página de comunicação
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
-    {
-      id: 'comunicacao',
-      title: "Comunicação",
-      path: "/dashboard/comunicacao",
-      iconId: "communication",
-      color: 'blue' as CardColor,
-      width: '25' as CardWidth, // Alterado de '50' para '25' (1 coluna)
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 1
-    },
     {
       id: 'nova-solicitacao',
       title: "Nova Solicitação",
       path: "/dashboard/comunicacao/cadastrar",
       iconId: "plus-circle",
-      color: 'blue-light' as CardColor,
-      width: '25' as CardWidth, // 1 coluna (widthDesktop: 1)
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
+      color: 'blue-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 1
+    },
+    {
+      id: 'responder-demandas',
+      title: "Responder Demandas",
+      path: "/dashboard/comunicacao/responder",
+      iconId: "chat-bubble-left-right",
+      color: 'orange',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      hasBadge: false, // não exibir badge na página de comunicação
       displayMobile: true,
       mobileOrder: 2
     },
@@ -61,38 +61,37 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: "Consultar Demandas",
       path: "/dashboard/comunicacao/demandas",
       iconId: "list-bullet",
-      color: 'green' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
+      color: 'green',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 3
-    },
-    {
-      id: 'responder-demandas',
-      title: "Responder Demandas",
-      path: "/dashboard/comunicacao/responder",
-      iconId: "chat-bubble-left-right",
-      color: 'orange' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
-      hasBadge: true,
-      badgeValue: "0",
-      displayMobile: true,
-      mobileOrder: 4
     },
     {
       id: 'criar-nota',
       title: "Criar Nota",
       path: "/dashboard/comunicacao/criar-nota",
       iconId: "document-plus",
-      color: 'lime' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
+      color: 'lime',
+      width: '25',
+      height: '2',
+      type: 'standard',
       hasBadge: true,
       badgeValue: "0",
+      displayMobile: true,
+      mobileOrder: 4
+    },
+    {
+      id: 'aprovar-notas',
+      title: "Aprovar Notas",
+      path: "/dashboard/comunicacao/aprovar-nota",
+      iconId: "check-circle",
+      color: 'purple-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      hasBadge: false,
       displayMobile: true,
       mobileOrder: 5
     },
@@ -101,170 +100,212 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: "Consultar Notas",
       path: "/dashboard/comunicacao/notas",
       iconId: "document-text",
-      color: 'blue-dark' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 6
     },
     {
-      id: 'aprovar-notas',
-      title: "Aprovar Notas",
-      path: "/dashboard/comunicacao/aprovar-nota",
-      iconId: "check-circle",
-      color: 'purple-light' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      type: 'standard' as CardType,
-      hasBadge: true,
-      badgeValue: "0",
-      displayMobile: true,
-      mobileOrder: 7
-    }
-    // Removed the "Ranking da Zeladoria" card from here
-  ];
-};
-
-// Cards padrão sem JSX nos dados
-export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
-  const baseCards: ActionCardItem[] = [
-    {
-      id: 'smart-search',
-      title: 'O que você deseja fazer?',
-      iconId: 'search',
-      path: '',
-      color: 'gray-light' as CardColor,
-      width: '100' as CardWidth,
-      height: '1' as CardHeight,
-      isCustom: false,
-      isSearch: true,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 1
-    },
-    {
-      id: 'comunicacao',
-      title: 'Comunicação',
-      iconId: 'message-circle',
-      path: '/dashboard/comunicacao',
-      color: 'blue' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 2
-    },
-    {
-      id: 'overdue-demands',
-      title: 'Demandas em Andamento',
-      iconId: 'clock',
-      path: '/dashboard/comunicacao/consultar-demandas',
-      color: 'orange' as CardColor,
-      width: '25' as CardWidth,
-      height: '2' as CardHeight,
-      isCustom: false,
-      isOverdueDemands: true,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 5
-    },
-    {
-      id: 'pending-actions',
-      title: 'Você precisa agir',
-      iconId: 'alert-triangle',
-      path: '',
-      color: 'orange-light' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      isCustom: false,
-      isPendingActions: true,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 6
-    },
-    {
-      id: '3',
-      title: 'Consultar Demandas',
-      iconId: 'list-filter',
-      path: '/dashboard/comunicacao/consultar-demandas',
-      color: 'green' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 3
-    },
-    {
-      id: '4',
-      title: 'Consultar Notas',
-      iconId: 'file-text',
-      path: '/dashboard/comunicacao/consultar-notas',
-      color: 'blue-dark' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      type: 'standard' as CardType,
-      displayMobile: true,
-      mobileOrder: 4
-    },
-    {
-      id: '5',
-      title: 'Ranking de Zeladoria',
+      id: 'relatorios-comunicacao',
+      title: 'Relatórios da Comunicação',
+      path: '/dashboard/comunicacao/relatorios',
       iconId: 'bar-chart-2',
-      path: '/dashboard/zeladoria/ranking-subs',
-      color: 'orange' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      type: 'standard' as CardType,
+      color: 'blue',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 7
     },
     {
-      id: 'new-card',
-      title: 'Novo Card',
-      iconId: 'plus-circle',
-      path: '',
-      color: 'orange-light' as CardColor,
-      width: '25' as CardWidth,
-      height: '1' as CardHeight,
-      isCustom: false,
-      isNewCardButton: true,
-      type: 'standard' as CardType,
+      id: 'gerar-noticia',
+      title: 'Gerar Notícia',
+      path: '/dashboard/comunicacao/cadastrar-release',
+      iconId: 'document-plus',
+      color: 'lime',
+      width: '25',
+      height: '2',
+      type: 'standard',
       displayMobile: true,
       mobileOrder: 8
+    },
+    {
+      id: 'ver-releases',
+      title: 'Ver Releases e Notícias',
+      path: '/dashboard/comunicacao/releases',
+      iconId: 'file-text',
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 9
     }
   ];
-
-  // Add communication team specific cards
-  if (coordenacaoId === 'comunicacao') {
-    return [
-      ...baseCards,
-      {
-        id: '1',
-        title: 'Nova Demanda',
-        iconId: 'clipboard-list',
-        path: '/dashboard/comunicacao/cadastrar',
-        color: 'blue' as CardColor,
-        width: '25' as CardWidth,
-        height: '1' as CardHeight,
-        type: 'standard' as CardType,
-        displayMobile: true,
-        mobileOrder: 2
-      },
-      {
-        id: '2',
-        title: 'Criar Nota Oficial',
-        iconId: 'file-text',
-        path: '/dashboard/comunicacao/criar-nota',
-        color: 'lime' as CardColor,
-        width: '25' as CardWidth,
-        height: '1' as CardHeight,
-        type: 'standard' as CardType,
-        displayMobile: true,
-        mobileOrder: 3
-      }
-    ];
-  }
-  
-  return baseCards;
 };
+
+// Cards padrão para o dashboard inicial
+export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem[] => {
+  const isComunicacao = coordenacaoId === 'comunicacao';
+  const isGabinete = coordenacaoId === 'gabinete';
+  const allowBadge = !isComunicacao && !isGabinete;
+
+  const cards: ActionCardItem[] = [];
+
+  if (isComunicacao) {
+    cards.push({
+      id: 'nova-solicitacao',
+      title: 'Nova Solicitação',
+      iconId: 'plus-circle',
+      path: '/dashboard/comunicacao/cadastrar',
+      color: 'blue-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 1
+    });
+  }
+
+  cards.push({
+    id: 'responder-demandas',
+    title: 'Responder Demandas',
+    iconId: 'chat-bubble-left-right',
+    path: '/dashboard/comunicacao/responder',
+    color: 'orange',
+    width: '25',
+    height: '2',
+    type: 'standard',
+    hasBadge: allowBadge,
+    badgeValue: "0",
+    displayMobile: true,
+    mobileOrder: 2
+  });
+
+  if (isComunicacao) {
+    cards.push({
+      id: 'consultar-demandas',
+      title: 'Consultar Demandas',
+      iconId: 'list-bullet',
+      path: '/dashboard/comunicacao/demandas',
+      color: 'green',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 3
+    });
+  }
+
+  if (isComunicacao) {
+    cards.push({
+      id: 'criar-nota',
+      title: 'Criar Nota Oficial',
+      iconId: 'document-plus',
+      path: '/dashboard/comunicacao/criar-nota',
+      color: 'lime',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      hasBadge: true,
+      badgeValue: '0',
+      displayMobile: true,
+      mobileOrder: 4
+    });
+  }
+
+  cards.push({
+    id: 'aprovar-notas',
+    title: 'Aprovar Notas',
+    iconId: 'check-circle',
+    path: '/dashboard/comunicacao/aprovar-nota',
+    color: 'purple-light',
+    width: '25',
+    height: '2',
+    type: 'standard',
+    hasBadge: allowBadge,
+    badgeValue: '0',
+    displayMobile: true,
+    mobileOrder: 5
+  });
+
+  if (isComunicacao) {
+    cards.push({
+      id: 'consultar-notas',
+      title: 'Consultar Notas',
+      iconId: 'document-text',
+      path: '/dashboard/comunicacao/notas',
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 6
+    });
+  }
+
+  cards.push({
+    id: 'ranking-zeladoria',
+    title: 'Ranking de Zeladoria',
+    iconId: 'bar-chart-2',
+    path: '/dashboard/zeladoria/ranking-subs',
+    color: 'orange',
+    width: '25',
+    height: '1',
+    type: 'standard',
+    displayMobile: true,
+    mobileOrder: 7
+  });
+
+  if (isComunicacao || isGabinete) {
+    cards.push({
+      id: 'relatorios-comunicacao',
+      title: 'Relatórios da Comunicação',
+      path: '/dashboard/comunicacao/relatorios',
+      iconId: 'bar-chart-2',
+      color: 'blue',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 8
+    });
+  }
+
+  if (isComunicacao) {
+    cards.push({
+      id: 'gerar-noticia',
+      title: 'Gerar Notícia',
+      path: '/dashboard/comunicacao/cadastrar-release',
+      iconId: 'document-plus',
+      color: 'lime',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 9
+    });
+  }
+
+  if (isComunicacao || isGabinete) {
+    cards.push({
+      id: 'ver-releases',
+      title: 'Ver Releases e Notícias',
+      path: '/dashboard/comunicacao/releases',
+      iconId: 'file-text',
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10
+    });
+  }
+
+  return cards;
+};
+
+// Compatibilidade com código existente
+export const getDefaultCards = getInitialDashboardCards;
