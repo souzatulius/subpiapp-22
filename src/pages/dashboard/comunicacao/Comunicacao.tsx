@@ -54,7 +54,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
       
-      <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
+      {!isLoading && <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />}
       
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -63,22 +63,30 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           ))}
         </div>
       ) : (
-        <CardGridContainer
-          cards={cards}
-          onCardsChange={cards => cards}
-          onEditCard={handleCardEdit}
-          onHideCard={handleCardHide}
-          isMobileView={isMobile}
-          isEditMode={isEditMode}
-        />
+        cards.length > 0 ? (
+          <CardGridContainer
+            cards={cards}
+            onCardsChange={cards => cards}
+            onEditCard={handleCardEdit}
+            onHideCard={handleCardHide}
+            isMobileView={isMobile}
+            isEditMode={isEditMode}
+          />
+        ) : (
+          <div className="p-6 text-center text-gray-500">
+            Nenhum card disponível.
+          </div>
+        )
       )}
       
-      <EditCardModal 
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSave={handleSaveCardEdit}
-        card={selectedCard}
-      />
+      {selectedCard && (
+        <EditCardModal 
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveCardEdit}
+          card={selectedCard}
+        />
+      )}
       
       {!isPreview && isMobile && <MobileBottomNav />}
     </div>

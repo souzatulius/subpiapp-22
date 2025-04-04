@@ -79,9 +79,11 @@ const DashboardPage: React.FC = () => {
             </div>
             
             {/* Edit mode toggle */}
-            <div className="flex justify-end mb-6">
-              <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
-            </div>
+            {!isLoading && (
+              <div className="flex justify-end mb-6">
+                <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
+              </div>
+            )}
             
             {/* Card Grid with ScrollArea */}
             <ScrollArea className="h-[calc(100vh-260px)] pr-4">
@@ -92,14 +94,20 @@ const DashboardPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <CardGridContainer 
-                  cards={cards.filter(card => !card.isHidden)}
-                  onCardsChange={setCards => {}}
-                  onEditCard={handleCardEdit}
-                  onHideCard={handleCardHide}
-                  isMobileView={isMobile}
-                  isEditMode={isEditMode}
-                />
+                cards && cards.length > 0 ? (
+                  <CardGridContainer 
+                    cards={cards.filter(card => !card.isHidden)}
+                    onCardsChange={() => {}}
+                    onEditCard={handleCardEdit}
+                    onHideCard={handleCardHide}
+                    isMobileView={isMobile}
+                    isEditMode={isEditMode}
+                  />
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    Nenhum card disponível.
+                  </div>
+                )
               )}
             </ScrollArea>
           </div>
@@ -107,12 +115,14 @@ const DashboardPage: React.FC = () => {
       </div>
       
       {/* Edit Card Modal */}
-      <EditCardModal 
-        isOpen={isEditCardModalOpen}
-        onClose={() => setIsEditCardModalOpen(false)}
-        onSave={handleSaveCard}
-        card={selectedCard}
-      />
+      {selectedCard && (
+        <EditCardModal 
+          isOpen={isEditCardModalOpen}
+          onClose={() => setIsEditCardModalOpen(false)}
+          onSave={handleSaveCard}
+          card={selectedCard}
+        />
+      )}
       
       {isMobile && <MobileBottomNav />}
     </div>
