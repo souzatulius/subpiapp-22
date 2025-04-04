@@ -121,7 +121,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           {displayedCards.map(card => (
             <div 
               key={card.id}
-              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
+              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)} mb-4`}
             >
               <SortableUnifiedActionCard
                 id={card.id}

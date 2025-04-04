@@ -85,8 +85,8 @@ const DashboardPage: React.FC = () => {
               </div>
             )}
             
-            {/* Content with fixed height and proper scrolling */}
-            <div className="relative" style={{ height: "calc(100vh - 280px)", minHeight: "400px" }}>
+            {/* Content container with better height calculation and scrolling behavior */}
+            <div className="relative" style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}>
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {Array.from({ length: 8 }).map((_, index) => (
@@ -95,15 +95,17 @@ const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 cards && cards.length > 0 ? (
-                  <ScrollArea className="h-full pr-4">
-                    <CardGridContainer 
-                      cards={cards.filter(card => !card.isHidden)}
-                      onCardsChange={() => {}}
-                      onEditCard={handleCardEdit}
-                      onHideCard={handleCardHide}
-                      isMobileView={isMobile}
-                      isEditMode={isEditMode}
-                    />
+                  <ScrollArea className="h-full w-full pr-4">
+                    <div className="pb-8">
+                      <CardGridContainer 
+                        cards={cards.filter(card => !card.isHidden)}
+                        onCardsChange={() => {}}
+                        onEditCard={handleCardEdit}
+                        onHideCard={handleCardHide}
+                        isMobileView={isMobile}
+                        isEditMode={isEditMode}
+                      />
+                    </div>
                   </ScrollArea>
                 ) : (
                   <div className="p-6 text-center text-gray-500">
