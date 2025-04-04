@@ -52,7 +52,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
           <div>
             <h2 className="text-2xl font-bold mb-1 flex items-center">
               {icon}
-              {userName ? `Olá, ${userName}!` : title}
+              {/* Always show the title, and only append the user greeting if userName is provided */}
+              {title}{userName ? `, ${userName}!` : ''}
             </h2>
             <p className="text-blue-100">
               {description}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply } from 'lucide-react';
@@ -50,7 +49,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-blue-500 to-blue-700"
-          userName={firstName}
         />
       </div>
       
