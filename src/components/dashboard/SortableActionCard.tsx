@@ -5,7 +5,6 @@ import { CSS } from '@dnd-kit/utilities';
 import ActionCard from '@/components/dashboard/ActionCard';
 import { ActionCardItem } from '@/types/dashboard';
 import { X, Pencil, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface SortableActionCardProps {
   card: ActionCardItem;
@@ -31,7 +30,7 @@ export const Controls = ({
   isCustom?: boolean;
 }) => {
   return (
-    <div className="flex space-x-1">
+    <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
       <button 
         className="p-1 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-blue-500 transition-colors"
         onClick={(e) => {
@@ -79,7 +78,6 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
   children
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: card.id });
-  const navigate = useNavigate();
   
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -91,13 +89,6 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
   const handleEdit = () => {
     onEdit(card);
   };
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Only navigate if the click wasn't on a control button
-    if (card.path && e.target === e.currentTarget) {
-      navigate(card.path);
-    }
-  };
   
   return (
     <div 
@@ -108,11 +99,11 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
       className="w-full h-full"
     >
       {children ? (
-        <div 
-          className="w-full h-full relative group cursor-pointer"
-          onClick={handleCardClick}
-        >
-          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="w-full h-full relative group cursor-pointer">
+          <div 
+            className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Controls 
               cardId={card.id} 
               onEdit={handleEdit} 
