@@ -18,95 +18,193 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Remove leading slash and split path into segments
-  const pathSegments = location.pathname.substring(1).split('/');
+  // Custom breadcrumb paths based on route
+  const getBreadcrumbItems = () => {
+    const currentPath = location.pathname;
+    
+    // Define custom breadcrumb configurations
+    const customBreadcrumbs = [
+      // Releases & Notícias
+      {
+        path: '/dashboard/comunicacao/releases',
+        items: [
+          { label: 'Início', path: '/dashboard' },
+          { label: 'Comunicação', path: '/dashboard/comunicacao' },
+          { label: 'Releases e Notícias', path: '/dashboard/comunicacao/releases' }
+        ]
+      },
+      // Novo Release
+      {
+        path: '/dashboard/comunicacao/cadastrar-release',
+        items: [
+          { label: 'Início', path: '/dashboard' },
+          { label: 'Comunicação', path: '/dashboard/comunicacao' },
+          { label: 'Releases e Notícias', path: '/dashboard/comunicacao/releases' },
+          { label: 'Novo Release', path: '/dashboard/comunicacao/cadastrar-release' }
+        ]
+      },
+      // Aprovar Notas
+      {
+        path: '/dashboard/comunicacao/aprovar-nota',
+        items: [
+          { label: 'Início', path: '/dashboard' },
+          { label: 'Comunicação', path: '/dashboard/comunicacao' },
+          { label: 'Notas de Imprensa', path: '/dashboard/comunicacao/notas' },
+          { label: 'Aprovar Notas', path: '/dashboard/comunicacao/aprovar-nota' }
+        ]
+      },
+      // Consultar Demandas
+      {
+        path: '/dashboard/comunicacao/demandas',
+        items: [
+          { label: 'Início', path: '/dashboard' },
+          { label: 'Comunicação', path: '/dashboard/comunicacao' },
+          { label: 'Demandas', path: '/dashboard/comunicacao/demandas' }
+        ]
+      },
+      // Gerar Nota
+      {
+        path: '/dashboard/comunicacao/criar-nota',
+        items: [
+          { label: 'Início', path: '/dashboard' },
+          { label: 'Comunicação', path: '/dashboard/comunicacao' },
+          { label: 'Notas de Imprensa', path: '/dashboard/comunicacao/notas' },
+          { label: 'Gerar Nota', path: '/dashboard/comunicacao/criar-nota' }
+        ]
+      },
+      // Nova Solicitação
+      {
+        path: '/dashboard/comunicacao/cadastrar',
+        items: [
+          { label: 'Início', path: '/dashboard' },
+          { label: 'Comunicação', path: '/dashboard/comunicacao' },
+          { label: 'Demandas', path: '/dashboard/comunicacao/demandas' },
+          { label: 'Nova Solicitação', path: '/dashboard/comunicacao/cadastrar' }
+        ]
+      },
+      // Consultar Notas
+      {
+        path: '/dashboard/comunicacao/notas',
+        items: [
+          { label: 'Início', path: '/dashboard' },
+          { label: 'Comunicação', path: '/dashboard/comunicacao' },
+          { label: 'Notas de Imprensa', path: '/dashboard/comunicacao/notas' }
+        ]
+      }
+    ];
+    
+    // Find matching path configuration
+    const matchedConfig = customBreadcrumbs.find(config => 
+      currentPath === config.path || 
+      // Special handling for paths with query parameters
+      (currentPath.includes('?') && currentPath.split('?')[0] === config.path)
+    );
+    
+    if (matchedConfig) {
+      return matchedConfig.items;
+    }
+    
+    // Default fallback to the old behavior for paths not explicitly defined
+    return generateDefaultBreadcrumbs();
+  };
+  
+  const generateDefaultBreadcrumbs = () => {
+    // Remove leading slash and split path into segments
+    const pathSegments = location.pathname.substring(1).split('/');
+    
+    // List of segments that should be ocultados no breadcrumb
+    const hiddenSegments = ['zeladoria', 'dashboard/dashboard'];
+    
+    // Filter segments that should be shown
+    const filteredSegments = pathSegments.filter((segment, index) => {
+      // Remove empty segments
+      if (!segment) return false;
+      
+      // Special case for comunicacao path
+      if (segment === 'comunicacao' && index === 1) {
+        return true;
+      }
+      
+      // Remove segments that should be hidden
+      const fullPath = pathSegments.slice(0, index + 1).join('/');
+      if (hiddenSegments.includes(segment) || hiddenSegments.includes(fullPath)) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    // Map segments to breadcrumb items
+    return filteredSegments.map((segment, index) => {
+      if (!segment || segment === 'dashboard') {
+        return { 
+          label: 'Início', 
+          path: '/dashboard' 
+        };
+      }
+      
+      const path = '/' + pathSegments.slice(0, pathSegments.indexOf(segment) + 1).join('/');
+      return {
+        label: getDisplayName(segment),
+        path: path
+      };
+    });
+  };
   
   const getDisplayName = (segment: string) => {
     const displayNames: Record<string, string> = {
       dashboard: 'Início',
       comunicacao: 'Comunicação',
       'cadastrar-demanda': 'Cadastrar Demanda',
-      cadastrar: 'Cadastrar',
+      cadastrar: 'Nova Solicitação',
       settings: 'Configurações',
       profile: 'Meu Perfil',
-      demandas: 'Consultar Demandas',
-      notas: 'Consultar Notas',
+      demandas: 'Demandas',
+      notas: 'Notas de Imprensa',
       usuarios: 'Usuários',
       relatorios: 'Relatórios',
       'ranking-subs': 'Ranking da Zeladoria',
-      // Adicione outros mapeamentos conforme necessário
+      releases: 'Releases e Notícias',
+      'cadastrar-release': 'Novo Release',
+      'criar-nota': 'Gerar Nota',
+      'aprovar-nota': 'Aprovar Notas',
+      // Additional mappings as needed
     };
     
     return displayNames[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
   };
-
-  // Lista de segmentos que devem ser ocultados no breadcrumb
-  const hiddenSegments = ['zeladoria', 'dashboard/dashboard'];
   
-  const handleClick = (index: number) => {
-    const segment = pathSegments[index];
-    
-    // Verificar se é a seção de configurações e há um manipulador especial
-    if (segment === 'settings' && onSettingsClick) {
+  const handleClick = (path: string) => {
+    if (path.includes('settings') && onSettingsClick) {
       onSettingsClick();
       return;
     }
     
-    const path = '/' + pathSegments.slice(0, index + 1).join('/');
     navigate(path);
   };
   
-  // Filtrar segmentos duplicados consecutivos e segmentos que devem ser ocultados
-  const filteredSegments = pathSegments.filter((segment, index) => {
-    // Remover segmentos vazios
-    if (!segment) return false;
-    
-    // Special case for comunicacao path - showing Comunicação
-    if (segment === 'comunicacao' && index === 1) {
-      return true;
-    }
-    
-    // Remover segmentos que devem ser ocultados
-    const fullPath = pathSegments.slice(0, index + 1).join('/');
-    if (hiddenSegments.includes(segment) || hiddenSegments.includes(fullPath)) {
-      return false;
-    }
-    
-    return true;
-  });
+  const breadcrumbItems = getBreadcrumbItems();
   
   return (
     <div className="px-6 py-2 text-xs text-gray-500">
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <button onClick={() => navigate('/dashboard')} className="flex items-center hover:text-gray-700">
-                <Home className="h-3 w-3 mr-1" />
-                <span>Início</span>
-              </button>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          
-          {filteredSegments.map((segment, index) => {
-            if (!segment || segment === 'dashboard') return null;
-            
-            return (
-              <React.Fragment key={index}>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <button 
-                      onClick={() => handleClick(pathSegments.indexOf(segment))}
-                      className="hover:text-gray-700 whitespace-nowrap"
-                    >
-                      {getDisplayName(segment)}
-                    </button>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-              </React.Fragment>
-            );
-          })}
+          {breadcrumbItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <BreadcrumbSeparator />}
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <button 
+                    onClick={() => handleClick(item.path)}
+                    className="hover:text-gray-700 whitespace-nowrap flex items-center"
+                  >
+                    {index === 0 && <Home className="h-3 w-3 mr-1" />}
+                    <span>{item.label}</span>
+                  </button>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </React.Fragment>
+          ))}
         </BreadcrumbList>
       </Breadcrumb>
     </div>
