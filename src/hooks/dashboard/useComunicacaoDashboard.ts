@@ -20,36 +20,34 @@ export const useComunicacaoDashboard = (
   const { userDepartment, isLoading: isDepartmentLoading } = useDepartment(user);
   
   // Use the department override if specified
-  const activeDepartment = departmentOverride || userDepartment;
+  const activeDepartment = departmentOverride || userDepartment || 'comunicacao';
 
   useEffect(() => {
     const fetchCards = async () => {
-      if (isPreview) {
-        // In preview mode, use default cards immediately
-        setCards(getCommunicationActionCards());
-        setIsLoading(false);
-        return;
-      }
-
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
+      setIsLoading(true);
+      
       try {
         // First get default cards based on department
         const defaultCards = getCommunicationActionCards();
         
+        // In preview mode, use default cards immediately
+        if (isPreview || !user) {
+          console.log('Loading default communication cards (preview or no user)');
+          setCards(defaultCards);
+          setIsLoading(false);
+          return;
+        }
+
         // Then try to fetch user customizations
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
           .eq('page', 'comunicacao')
-          .single();
+          .maybeSingle();
         
         if (error) {
-          console.log('No custom dashboard found, using defaults');
+          console.log('Error fetching user dashboard:', error);
           setCards(defaultCards);
         } else if (data && data.cards_config) {
           try {
@@ -58,8 +56,10 @@ export const useComunicacaoDashboard = (
               : data.cards_config;
             
             if (Array.isArray(customCards) && customCards.length > 0) {
+              console.log('Using custom communication cards');
               setCards(customCards);
             } else {
+              console.log('Custom cards invalid, using defaults');
               setCards(defaultCards);
             }
           } catch (e) {
@@ -67,40 +67,28 @@ export const useComunicacaoDashboard = (
             setCards(defaultCards);
           }
         } else {
+          console.log('No custom dashboard found, using defaults');
           setCards(defaultCards);
         }
       } catch (error) {
         console.error('Error fetching dashboard cards', error);
-        // Fallback to default cards on error
         setCards(getCommunicationActionCards());
       } finally {
         setIsLoading(false);
       }
     };
-
-    // Start loading
-    setIsLoading(true);
-    
-    // Short timeout to ensure default cards are set even if fetch fails
-    const timeoutId = setTimeout(() => {
-      if (isLoading) {
-        console.log('Loading timeout reached, using default cards');
-        setCards(getCommunicationActionCards());
-        setIsLoading(false);
-      }
-    }, 2000);
     
     fetchCards();
-    
-    return () => clearTimeout(timeoutId);
   }, [user, isPreview, activeDepartment]);
 
   const handleCardEdit = (card: ActionCardItem) => {
+    console.log('Editing card:', card);
     setSelectedCard(card);
     setIsEditModalOpen(true);
   };
 
   const handleCardHide = (id: string) => {
+    console.log('Hiding card:', id);
     const updatedCards = cards.map(card => 
       card.id === id ? { ...card, isHidden: true } : card
     );
@@ -123,6 +111,7 @@ export const useComunicacaoDashboard = (
   };
 
   const handleSaveCardEdit = (updatedCard: ActionCardItem) => {
+    console.log('Saving edited card:', updatedCard);
     const updatedCards = cards.map(card => 
       card.id === updatedCard.id ? updatedCard : card
     );
@@ -149,7 +138,7 @@ export const useComunicacaoDashboard = (
     cards,
     isEditModalOpen,
     selectedCard,
-    isLoading,
+    isLoading: isLoading || isDepartmentLoading,
     handleCardEdit,
     handleCardHide,
     handleSaveCardEdit,

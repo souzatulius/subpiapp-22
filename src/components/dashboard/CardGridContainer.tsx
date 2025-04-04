@@ -2,6 +2,7 @@
 import React from 'react';
 import CardGrid from './CardGrid';
 import { ActionCardItem } from '@/types/dashboard';
+import UnifiedCardGrid from './UnifiedCardGrid';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
@@ -20,16 +21,20 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   onHideCard,
   isMobileView = false,
   isEditMode = false,
-  verticalSpacing = "y-4"
+  verticalSpacing = "y-3" // Ajustado para y-3 conforme solicitado
 }) => {
+  // Filtra apenas cards não ocultos
+  const visibleCards = cards.filter(card => !card.isHidden);
+
   return (
     <div className={`grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-${verticalSpacing}`}>
-      <CardGrid
-        cards={cards}
+      <UnifiedCardGrid
+        cards={visibleCards}
         onCardsChange={onCardsChange}
         onEditCard={onEditCard}
-        onDeleteCard={onHideCard}
+        onHideCard={onHideCard}
         isMobileView={isMobileView}
+        isEditMode={isEditMode}
         specialCardsData={{
           overdueCount: 0,
           overdueItems: [],
