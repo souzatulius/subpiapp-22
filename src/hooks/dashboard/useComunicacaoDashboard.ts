@@ -41,16 +41,15 @@ export const useComunicacaoDashboard = (
         // First get default cards based on department
         const defaultCards = getCommunicationActionCards();
         
-        // Then try to fetch user customizations for the communication dashboard
+        // Then try to fetch user customizations
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
-          .eq('page', 'comunicacao')
           .single();
         
         if (error) {
-          console.log('No custom dashboard found for communication page, using defaults');
+          console.log('No custom dashboard found, using defaults');
           setCards(defaultCards);
         } else if (data && data.cards_config) {
           try {
@@ -118,8 +117,7 @@ export const useComunicacaoDashboard = (
         .upsert({
           user_id: user.id,
           cards_config: JSON.stringify(updatedCards),
-          department_id: activeDepartment,
-          page: 'comunicacao'
+          department_id: activeDepartment
         })
         .then(({ error }) => {
           if (error) console.error('Error saving card hide preference', error);
@@ -141,8 +139,7 @@ export const useComunicacaoDashboard = (
         .upsert({
           user_id: user.id,
           cards_config: JSON.stringify(updatedCards),
-          department_id: activeDepartment,
-          page: 'comunicacao'
+          department_id: activeDepartment
         })
         .then(({ error }) => {
           if (error) console.error('Error saving card edit', error);

@@ -1,5 +1,4 @@
-
-// hooks/dashboard/defaultCards.ts
+// hooks/dashboard/defaultCards.tsx
 import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
@@ -30,7 +29,7 @@ export const getIconComponentFromId = (iconId: string): React.ElementType => {
   return LucideIcons[componentName] as React.ElementType || LucideIcons.ClipboardList;
 };
 
-// Action cards para a página de comunicação
+// Action cards para a biblioteca
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
     {
@@ -123,12 +122,12 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       displayMobile: true,
       mobileOrder: 7
     }
-    // "Ranking da Zeladoria" card removido daqui
+    // Removed the "Ranking da Zeladoria" card from here
   ];
 };
 
-// Cards padrão para o dashboard inicial
-export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem[] => {
+// Cards padrão sem JSX nos dados
+export const getDefaultCards = (coordenacaoId?: string): ActionCardItem[] => {
   const baseCards: ActionCardItem[] = [
     {
       id: 'smart-search',
@@ -269,6 +268,3 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
   
   return baseCards;
 };
-
-// Manter para compatibilidade com código existente, redireciona para o dashboard inicial
-export const getDefaultCards = getInitialDashboardCards;
