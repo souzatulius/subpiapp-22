@@ -1,86 +1,42 @@
 
 import React from 'react';
 import CardGrid from './CardGrid';
-import UnifiedCardGrid from './UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
   onCardsChange: (cards: ActionCardItem[]) => void;
-  onEditCard?: (card: ActionCardItem) => void;
-  onDeleteCard?: (id: string) => void;
-  onHideCard?: (id: string) => void;
+  onEditCard: (card: ActionCardItem) => void;
+  onHideCard: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
-  disableWiggleEffect?: boolean;
-  showSpecialFeatures?: boolean;
-  quickDemandTitle?: string;
-  onQuickDemandTitleChange?: (value: string) => void;
-  onQuickDemandSubmit?: () => void;
-  onSearchSubmit?: (query: string) => void;
-  specialCardsData?: any;
-  className?: string;
+  verticalSpacing?: string;
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
   cards,
   onCardsChange,
   onEditCard,
-  onDeleteCard,
   onHideCard,
   isMobileView = false,
   isEditMode = false,
-  disableWiggleEffect = false,
-  showSpecialFeatures = true,
-  quickDemandTitle,
-  onQuickDemandTitleChange,
-  onQuickDemandSubmit,
-  onSearchSubmit,
-  specialCardsData,
-  className = ''
+  verticalSpacing = "y-4"
 }) => {
-  const hasDynamicCards = cards.some(card => card.type === 'data_dynamic');
-  
-  // Use CardGrid for complex cards with dynamic data
-  if (hasDynamicCards) {
-    return (
-      <div className={`w-full ${className}`}>
-        <CardGrid
-          cards={cards}
-          onCardsChange={onCardsChange}
-          onEditCard={onEditCard}
-          onDeleteCard={onDeleteCard || (() => {})}
-          // We're not passing onHideCard directly to CardGrid since it doesn't accept this prop
-          isMobileView={isMobileView}
-          specialCardsData={specialCardsData}
-          quickDemandTitle={quickDemandTitle}
-          onQuickDemandTitleChange={onQuickDemandTitleChange}
-          onQuickDemandSubmit={onQuickDemandSubmit}
-          onSearchSubmit={onSearchSubmit}
-          // Add a callback to handle card hide functionality within CardGrid's onDeleteCard
-          onAddNewCard={undefined}
-        />
-      </div>
-    );
-  }
-  
-  // Use UnifiedCardGrid for standard cards
   return (
-    <div className={`w-full ${className}`}>
-      <UnifiedCardGrid
+    <div className={`grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-${verticalSpacing}`}>
+      <CardGrid
         cards={cards}
         onCardsChange={onCardsChange}
         onEditCard={onEditCard}
-        onHideCard={onHideCard}
+        onDeleteCard={onHideCard}
         isMobileView={isMobileView}
-        isEditMode={isEditMode}
-        disableWiggleEffect={disableWiggleEffect}
-        showSpecialFeatures={showSpecialFeatures}
-        quickDemandTitle={quickDemandTitle}
-        onQuickDemandTitleChange={onQuickDemandTitleChange}
-        onQuickDemandSubmit={onQuickDemandSubmit}
-        onSearchSubmit={onSearchSubmit}
-        specialCardsData={specialCardsData}
+        specialCardsData={{
+          overdueCount: 0,
+          overdueItems: [],
+          notesToApprove: 0,
+          responsesToDo: 0,
+          isLoading: false
+        }}
       />
     </div>
   );
