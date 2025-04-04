@@ -2,8 +2,6 @@
 import React from 'react';
 import { DndContext, closestCenter, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { ActionCardItem } from '@/types/dashboard';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { SortableUnifiedActionCard } from './UnifiedActionCard';
 import { useNavigate } from 'react-router-dom';
 
@@ -85,22 +83,11 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
             }
           }}>
             <SortableUnifiedActionCard
-              id={card.id}
-              title={card.title}
-              subtitle={card.subtitle}
-              iconId={card.iconId}
-              path={card.path}
-              color={card.color}
-              width={card.width || '25'}
-              height={card.height || '2'}
-              type={card.type || 'standard'}
+              {...card}
               isDraggable={isEditMode}
               isEditing={isEditMode}
               onEdit={onEditCard ? () => onEditCard(card) : undefined}
               onHide={onHideCard ? () => onHideCard(card.id) : undefined}
-              isCustom={card.isCustom}
-              hasBadge={card.hasBadge}
-              badgeValue={card.badgeValue}
               isMobileView={isMobileView}
               disableWiggleEffect={!isEditMode}
             />

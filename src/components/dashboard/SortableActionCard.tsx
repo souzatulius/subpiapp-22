@@ -118,6 +118,7 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
         <ActionCard
           id={card.id}
           title={card.title}
+          subtitle={card.subtitle}
           iconId={card.iconId}
           path={card.path}
           color={card.color}
@@ -130,6 +131,8 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
           isCustom={card.isCustom}
           type={card.type}
           iconSize={isMobileView ? 'lg' : 'xl'}
+          hasBadge={card.hasBadge}
+          badgeValue={card.badgeValue}
           isMobileView={isMobileView}
         />
       )}

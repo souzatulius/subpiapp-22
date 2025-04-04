@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
-import { CardColor } from '@/types/dashboard';
+import { CardColor, CardWidth, CardHeight } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
 
 interface ActionCardProps {
@@ -21,6 +21,9 @@ interface ActionCardProps {
   hasBadge?: boolean;
   badgeValue?: string;
   isMobileView?: boolean;
+  width?: CardWidth;
+  height?: CardHeight;
+  type?: string;
 }
 
 const ActionCard: React.FC<ActionCardProps> = ({
@@ -43,12 +46,32 @@ const ActionCard: React.FC<ActionCardProps> = ({
   const navigate = useNavigate();
   const IconComponent = getIconComponentFromId(iconId);
 
+  // Helper function to check if a color is dark
+  const isDarkColor = (colorValue: CardColor): boolean => {
+    // Normalize by converting british spelling to american
+    const normalizedColor = colorValue
+      .replace('grey-', 'gray-')
+      .replace('grey', 'gray') as CardColor;
+    
+    const darkColors = [
+      'blue-dark', 'blue-700', 'blue-900', 'blue-960',
+      'gray-dark', 'gray-800', 'gray-950',
+      'orange-400', 'orange-500', 'orange-600',
+      'gray-400', 'lime-500'
+    ];
+    
+    return darkColors.includes(normalizedColor);
+  };
+
   // Generate class based on color
   const getCardClass = () => {
     const baseClasses = "relative h-full rounded-xl shadow transition-all duration-300 p-6 flex flex-col justify-between group";
     
+    // Normalize color (convert British to American spelling)
+    const normalizedColor = color.replace('grey-', 'gray-') as CardColor;
+    
     // Color-specific classes
-    switch (color) {
+    switch (normalizedColor) {
       case 'blue': return `${baseClasses} bg-blue-50 border border-blue-100 hover:shadow-md hover:border-blue-300`;
       case 'blue-light': return `${baseClasses} bg-blue-50 border border-blue-100 hover:shadow-md hover:border-blue-300`;
       case 'blue-dark': return `${baseClasses} bg-blue-700 border border-blue-800 text-white hover:shadow-md hover:border-blue-600`;
@@ -67,8 +90,8 @@ const ActionCard: React.FC<ActionCardProps> = ({
       case 'gray-ultra-light': return `${baseClasses} bg-gray-50 border border-gray-100 hover:shadow-md hover:border-gray-300`;
       case 'gray-200': return `${baseClasses} bg-gray-200 border border-gray-300 hover:shadow-md hover:border-gray-400`;
       case 'gray-400': return `${baseClasses} bg-gray-400 border border-gray-500 text-white hover:shadow-md hover:border-gray-300`;
-      case 'gray-800': case 'grey-800': return `${baseClasses} bg-gray-800 border border-gray-900 text-white hover:shadow-md hover:border-gray-700`;
-      case 'gray-950': case 'grey-950': return `${baseClasses} bg-gray-900 border border-gray-950 text-white hover:shadow-md hover:border-gray-800`;
+      case 'gray-800': return `${baseClasses} bg-gray-800 border border-gray-900 text-white hover:shadow-md hover:border-gray-700`;
+      case 'gray-950': return `${baseClasses} bg-gray-900 border border-gray-950 text-white hover:shadow-md hover:border-gray-800`;
       case 'lime': return `${baseClasses} bg-lime-100 border border-lime-200 hover:shadow-md hover:border-lime-300`;
       case 'lime-400': return `${baseClasses} bg-lime-400 border border-lime-500 hover:shadow-md hover:border-lime-300`;
       case 'lime-500': return `${baseClasses} bg-lime-500 border border-lime-600 text-white hover:shadow-md hover:border-lime-400`;
@@ -99,22 +122,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
 
   const getIconColor = () => {
     // For dark backgrounds use white icons
-    if (
-      color === 'blue-dark' || 
-      color === 'blue-700' || 
-      color === 'blue-900' || 
-      color === 'blue-960' || 
-      color === 'gray-dark' || 
-      color === 'gray-800' || 
-      color === 'grey-800' || 
-      color === 'gray-950' || 
-      color === 'grey-950' || 
-      color === 'orange-400' || 
-      color === 'orange-500' || 
-      color === 'orange-600' ||
-      color === 'gray-400' ||
-      color === 'lime-500'
-    ) {
+    if (isDarkColor(color)) {
       return 'text-white/80 group-hover:text-white';
     }
     
@@ -149,12 +157,12 @@ const ActionCard: React.FC<ActionCardProps> = ({
       </div>
       
       <div className="mt-3">
-        <h3 className={`font-semibold text-md ${color.includes('dark') || color === 'blue-700' || color === 'blue-900' || color === 'blue-960' || color === 'gray-800' || color === 'grey-800' || color === 'gray-950' || color === 'grey-950' || color === 'orange-400' || color === 'orange-500' || color === 'orange-600' || color === 'gray-400' || color === 'lime-500' ? 'text-white' : ''}`}>
+        <h3 className={`font-semibold text-md ${isDarkColor(color) ? 'text-white' : ''}`}>
           {title}
         </h3>
         
         {subtitle && (
-          <p className={`text-sm mt-1 ${color.includes('dark') || color === 'blue-700' || color === 'blue-900' || color === 'blue-960' || color === 'gray-800' || color === 'grey-800' || color === 'gray-950' || color === 'grey-950' || color === 'orange-400' || color === 'orange-500' || color === 'orange-600' || color === 'gray-400' || color === 'lime-500' ? 'text-white/80' : 'text-gray-600'}`}>
+          <p className={`text-sm mt-1 ${isDarkColor(color) ? 'text-white/80' : 'text-gray-600'}`}>
             {subtitle}
           </p>
         )}
