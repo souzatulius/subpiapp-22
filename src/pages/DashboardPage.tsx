@@ -27,7 +27,13 @@ const DashboardPage: React.FC = () => {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const { firstName } = useUserData(user?.id);
-  const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide, handleCardsReorder } = useDashboardCards();
+  const { 
+    cards, 
+    isLoading, 
+    handleCardEdit: saveCardEdit, 
+    handleCardHide,
+    handleCardsReorder
+  } = useDashboardCards();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -66,14 +72,15 @@ const DashboardPage: React.FC = () => {
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
-            {/* WelcomeCard takes full width */}
+            {/* WelcomeCard with greeting parameter */}
             <div className="w-full mb-3">
               <WelcomeCard
                 title="Dashboard"
                 description="Bem-vindo ao seu dashboard personalizado."
-                greeting={`Olá, ${firstName}!`}
                 icon={<Home className="h-6 w-6 mr-2" />}
                 color="bg-gradient-to-r from-blue-800 to-blue-950"
+                userName={firstName}
+                greeting={true}
               />
             </div>
             

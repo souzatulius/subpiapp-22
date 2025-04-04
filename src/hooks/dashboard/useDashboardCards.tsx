@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDepartment } from './useDepartment';
 import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
@@ -23,7 +22,7 @@ export const useDashboardCards = () => {
         return;
       }
 
-      // Normaliza o valor da coordenação para facilitar comparação
+      // Normalize department value for comparison
       const normalizedDepartment = userDepartment
         ? userDepartment
             .toLowerCase()
@@ -46,20 +45,19 @@ export const useDashboardCards = () => {
           return;
         }
 
-        // Simplify the parsing logic to avoid deep type instantiation
+        // Safe parsing of card config data
         let parsedCards: ActionCardItem[] = [];
         
         if (typeof data.cards_config === 'string') {
           try {
-            parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
+            // Using a simpler type assertion to avoid deep type checking
+            parsedCards = JSON.parse(data.cards_config) as any[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
-            parsedCards = defaultCards;
           }
         } else if (Array.isArray(data.cards_config)) {
-          parsedCards = data.cards_config;
-        } else {
-          parsedCards = defaultCards;
+          // Direct assignment with simple type casting
+          parsedCards = data.cards_config as any[];
         }
 
         // Only use the parsed cards if they form a valid array
@@ -95,19 +93,7 @@ export const useDashboardCards = () => {
         department_id: userDepartment || 'default'
       })
       .then(({ error }) => {
-        if (error) {
-          console.error('Erro ao salvar configuração de cards:', error);
-          toast({
-            title: 'Erro ao salvar dashboard',
-            description: 'Não foi possível salvar a configuração.',
-            variant: 'destructive'
-          });
-        } else {
-          toast({
-            title: 'Dashboard atualizado',
-            description: 'Posições dos cards foram salvas com sucesso.'
-          });
-        }
+        if (error) console.error('Erro ao salvar configuração de cards:', error);
       });
   };
 
@@ -124,9 +110,9 @@ export const useDashboardCards = () => {
     );
     persistCards(updatedCards);
   };
-  
-  const handleCardsReorder = (reorderedCards: ActionCardItem[]) => {
-    persistCards(reorderedCards);
+
+  const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
+    persistCards(updatedCards);
   };
 
   return {
