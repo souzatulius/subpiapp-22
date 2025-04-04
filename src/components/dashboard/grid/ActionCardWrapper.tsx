@@ -155,10 +155,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' ? {
-        ...card,
-        path: '' // Remove path to prevent default click behavior for special cards
-      } : card} 
+      card={card} 
       onEdit={onEdit}
       onDelete={onDelete}
       isMobileView={isMobileView}
