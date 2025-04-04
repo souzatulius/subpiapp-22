@@ -85,8 +85,8 @@ const DashboardPage: React.FC = () => {
               </div>
             )}
             
-            {/* Card Grid with ScrollArea */}
-            <ScrollArea className="h-[calc(100vh-260px)] pr-4">
+            {/* Content with fixed height and proper scrolling */}
+            <div className="relative" style={{ height: "calc(100vh - 280px)", minHeight: "400px" }}>
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {Array.from({ length: 8 }).map((_, index) => (
@@ -95,21 +95,23 @@ const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 cards && cards.length > 0 ? (
-                  <CardGridContainer 
-                    cards={cards.filter(card => !card.isHidden)}
-                    onCardsChange={() => {}}
-                    onEditCard={handleCardEdit}
-                    onHideCard={handleCardHide}
-                    isMobileView={isMobile}
-                    isEditMode={isEditMode}
-                  />
+                  <ScrollArea className="h-full pr-4">
+                    <CardGridContainer 
+                      cards={cards.filter(card => !card.isHidden)}
+                      onCardsChange={() => {}}
+                      onEditCard={handleCardEdit}
+                      onHideCard={handleCardHide}
+                      isMobileView={isMobile}
+                      isEditMode={isEditMode}
+                    />
+                  </ScrollArea>
                 ) : (
                   <div className="p-6 text-center text-gray-500">
                     Nenhum card disponível.
                   </div>
                 )
               )}
-            </ScrollArea>
+            </div>
           </div>
         </main>
       </div>

@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 
 export const useCardStorage = (user: any | null, userDepartment: string | null) => {
   const saveCardConfig = async (updatedCards: ActionCardItem[]) => {
-    if (!user) return;
+    if (!user) return false;
     
     try {
       const { data, error } = await supabase

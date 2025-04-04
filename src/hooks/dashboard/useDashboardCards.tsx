@@ -13,8 +13,14 @@ export const useDashboardCards = () => {
   const { userDepartment, isLoading: isDepartmentLoading } = useDepartment(user);
   
   useEffect(() => {
+    // Only start fetching if department loading is complete
+    if (isDepartmentLoading) {
+      return; // Exit early if department is still loading
+    }
+
     const fetchCards = async () => {
       if (!user) {
+        setCards([]);
         setIsLoading(false);
         return;
       }
@@ -60,10 +66,7 @@ export const useDashboardCards = () => {
       }
     };
 
-    // Only start fetching if department loading is complete
-    if (!isDepartmentLoading) {
-      fetchCards();
-    }
+    fetchCards();
   }, [user, userDepartment, isDepartmentLoading]);
 
   const handleCardEdit = (cardToUpdate: ActionCardItem) => {
