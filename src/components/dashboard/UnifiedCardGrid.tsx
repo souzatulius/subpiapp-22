@@ -15,15 +15,15 @@ import { getWidthClass, getHeightClass } from './CardGrid';
 import { ActionCardItem, CardType, CardColor, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
-// Define UnifiedCardItem locally - this extends ActionCardItem with any additional properties
+// Make sure UnifiedCardItem includes all required properties from ActionCardItem
 export interface UnifiedCardItem extends ActionCardItem {
   // Any additional props specific to UnifiedCardItem can go here
 }
 
 interface UnifiedCardGridProps {
-  cards: ActionCardItem[];
-  onCardsChange: (cards: ActionCardItem[]) => void;
-  onEditCard?: (card: ActionCardItem) => void;
+  cards: ActionCardItem[] | UnifiedCardItem[];
+  onCardsChange: (cards: ActionCardItem[] | UnifiedCardItem[]) => void;
+  onEditCard?: (card: ActionCardItem | UnifiedCardItem) => void;
   onDeleteCard?: (id: string) => void;
   onHideCard?: (id: string) => void;
   isMobileView?: boolean;
