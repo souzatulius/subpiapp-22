@@ -16,7 +16,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         path: "/dashboard/comunicacao",
         iconId: "message-square-reply",
         color: getBgColor('blue-700'),
-        width: "50",
+        width: "25", // Alterado de "50" para "25"
         height: "1",
         type: "standard",
         displayMobile: true,

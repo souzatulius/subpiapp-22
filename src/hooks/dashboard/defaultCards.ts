@@ -39,7 +39,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       path: "/dashboard/comunicacao",
       iconId: "communication",
       color: 'blue' as CardColor,
-      width: '50' as CardWidth, // 2 colunas (widthDesktop: 2)
+      width: '25' as CardWidth, // Alterado de '50' para '25' (1 coluna)
       height: '2' as CardHeight,
       type: 'standard' as CardType,
       displayMobile: true,

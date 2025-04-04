@@ -12,9 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ActionCardItem, CardColor } from '@/types/dashboard';
 import { Loader2 } from 'lucide-react';
-import CardPreview from "./CardPreview";
-import IconSelector from "./IconSelector";
 import * as LucideIcons from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ColorOption {
   value: CardColor;
@@ -28,6 +27,16 @@ interface CardCustomizationModalProps {
   onSave: (card: Partial<ActionCardItem>) => void;
   card: ActionCardItem | null;
 }
+
+// Ícones sugeridos para usar nos cards - separados por categorias
+const SUGGESTED_ICONS = {
+  comunicacao: ['MessageSquare', 'MessageCircle', 'MessageSquareText', 'Mail', 'Share2', 'Phone'],
+  demandas: ['ClipboardList', 'ListTodo', 'CheckSquare', 'FileCheck', 'FilePlus2'],
+  documentos: ['FileText', 'File', 'Files', 'Folder', 'FolderOpen'],
+  estatisticas: ['BarChart2', 'PieChart', 'LineChart', 'TrendingUp', 'Activity'],
+  acoes: ['Plus', 'PlusCircle', 'Edit', 'Pencil', 'Save', 'Check'],
+  navegacao: ['Search', 'Home', 'ArrowLeft', 'ArrowRight', 'Settings'],
+};
 
 const COLOR_OPTIONS: ColorOption[] = [
   { value: "gray-400", label: "Gray 400", class: "bg-gray-400" },
@@ -53,6 +62,8 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
   const [color, setColor] = useState<CardColor>("blue-700");
   const [iconId, setIconId] = useState("layout-dashboard");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("sugeridos");
   
   // Reset the form when the modal opens or the card changes
   useEffect(() => {
@@ -60,6 +71,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
       setTitle(card.title);
       setColor(card.color);
       setIconId(card.iconId);
+      setSearchTerm("");
     }
   }, [card, isOpen]);
   
@@ -84,6 +96,19 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     if (!IconComponent) return null;
     return <IconComponent className="h-6 w-6" />;
   };
+
+  // Filtra os ícones com base na pesquisa
+  const getFilteredIcons = () => {
+    if (!searchTerm) return [];
+    
+    return Object.keys(LucideIcons)
+      .filter(key => 
+        typeof (LucideIcons as any)[key] === 'function' && 
+        !['createLucideIcon', 'default'].includes(key) &&
+        key.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .slice(0, 25);
+  };
   
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -105,25 +130,93 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
           
           <div className="grid gap-2">
             <Label>Ícone</Label>
-            <div className="grid grid-cols-5 gap-2 h-40 overflow-y-auto p-2 border rounded-md">
-              {Object.keys(LucideIcons)
-                .filter(key => 
-                  typeof (LucideIcons as any)[key] === 'function' && 
-                  !['createLucideIcon', 'default'].includes(key)
-                )
-                .slice(0, 25) // Limiting to first 25 icons for simplicity
-                .map((key) => (
-                  <div
-                    key={key}
-                    className={`flex items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 ${
-                      iconId === key ? 'bg-blue-100 border-blue-500' : ''
-                    }`}
-                    onClick={() => setIconId(key)}
-                  >
-                    {renderIconComponent(key)}
+            
+            <Tabs defaultValue="sugeridos" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="sugeridos">Sugeridos</TabsTrigger>
+                <TabsTrigger value="todos">Todos</TabsTrigger>
+                <TabsTrigger value="pesquisar">Pesquisar</TabsTrigger>
+              </TabsList>
+              
+              {/* Tab de ícones sugeridos */}
+              <TabsContent value="sugeridos" className="space-y-4">
+                <div className="grid grid-cols-6 gap-2 h-40 overflow-y-auto p-2 border rounded-md">
+                  {Object.entries(SUGGESTED_ICONS).map(([category, icons]) => (
+                    <React.Fragment key={category}>
+                      {icons.map((key) => (
+                        <div
+                          key={key}
+                          className={`flex flex-col items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 ${
+                            iconId === key ? 'bg-blue-100 border-blue-500' : ''
+                          }`}
+                          onClick={() => setIconId(key)}
+                          title={key}
+                        >
+                          {renderIconComponent(key)}
+                          <span className="text-xs mt-1 truncate w-full text-center">{key.substring(0, 6)}</span>
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </TabsContent>
+              
+              {/* Tab de todos os ícones */}
+              <TabsContent value="todos">
+                <div className="grid grid-cols-6 gap-2 h-40 overflow-y-auto p-2 border rounded-md">
+                  {Object.keys(LucideIcons)
+                    .filter(key => 
+                      typeof (LucideIcons as any)[key] === 'function' && 
+                      !['createLucideIcon', 'default'].includes(key)
+                    )
+                    .slice(0, 60)
+                    .map((key) => (
+                      <div
+                        key={key}
+                        className={`flex flex-col items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 ${
+                          iconId === key ? 'bg-blue-100 border-blue-500' : ''
+                        }`}
+                        onClick={() => setIconId(key)}
+                        title={key}
+                      >
+                        {renderIconComponent(key)}
+                        <span className="text-xs mt-1 truncate w-full text-center">{key.substring(0, 6)}</span>
+                      </div>
+                    ))}
+                </div>
+              </TabsContent>
+              
+              {/* Tab de pesquisa de ícones */}
+              <TabsContent value="pesquisar">
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Pesquisar ícones..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <div className="grid grid-cols-6 gap-2 h-36 overflow-y-auto p-2 border rounded-md">
+                    {getFilteredIcons().map((key) => (
+                      <div
+                        key={key}
+                        className={`flex flex-col items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 ${
+                          iconId === key ? 'bg-blue-100 border-blue-500' : ''
+                        }`}
+                        onClick={() => setIconId(key)}
+                        title={key}
+                      >
+                        {renderIconComponent(key)}
+                        <span className="text-xs mt-1 truncate w-full text-center">{key.substring(0, 6)}</span>
+                      </div>
+                    ))}
+                    {getFilteredIcons().length === 0 && searchTerm && (
+                      <div className="col-span-6 text-center py-4 text-gray-500">
+                        Nenhum ícone encontrado
+                      </div>
+                    )}
                   </div>
-                ))}
-            </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
           
           <div className="grid gap-2">
