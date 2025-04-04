@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -122,7 +123,7 @@ const ActionCard = ({
 
   return (
     <div 
-      className={`w-full h-40 rounded-xl shadow-md overflow-hidden 
+      className={`w-full h-32 rounded-xl shadow-md overflow-hidden 
         ${!isDraggable && path ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
         active:scale-95 ${bgColor} group relative`} 
@@ -146,15 +147,15 @@ const ActionCard = ({
         </div>
       )}
       
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-4">
+      <div className="relative h-full flex flex-col items-center justify-center text-center p-2">
         {children ? (
           <>{children}</>
         ) : (
           <>
-            <div className="text-white mb-2">
+            <div className="text-white mb-1">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
-            <h3 className="font-semibold text-white text-xl">{title}</h3>
+            <h3 className="font-semibold text-white text-lg">{title}</h3>
           </>
         )}
       </div>
