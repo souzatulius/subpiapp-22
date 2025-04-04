@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Settings } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import StatCard from '@/components/settings/components/StatCard';
-
 interface WelcomeCardProps {
   title: string;
   description: string;
@@ -25,7 +23,6 @@ interface WelcomeCardProps {
   userName?: string;
   greeting?: boolean;
 }
-
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
@@ -47,9 +44,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   userName,
   greeting = false
 }) => {
-  return (
-    <Card className={`${color} text-white shadow-lg overflow-hidden`}>
-      <CardContent className="p-4">
+  return <Card className={`${color} text-white shadow-lg overflow-hidden`}>
+      <CardContent className="p-4 py-[17px] my-[24px]">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             <h2 className="text-2xl font-bold mb-1 flex items-center">
@@ -61,32 +57,11 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
             </p>
           </div>
           <div className="flex space-x-4 w-full md:w-auto">
-            {statTitle && !showButton && (
-              <StatCard 
-                title={statTitle} 
-                value={statValue || 0} 
-                icon={statIcon}
-                description={statDescription || ""} 
-                section={statSection || ""}
-                highlight={statHighlight}
-                unreadCount={statUnreadCount}
-                onClick={statOnClick}
-              />
-            )}
-            {showButton && (
-              <StatCard 
-                showButton={true}
-                buttonText={buttonText}
-                buttonIcon={buttonIcon}
-                buttonVariant={buttonVariant}
-                onButtonClick={onButtonClick}
-              />
-            )}
+            {statTitle && !showButton && <StatCard title={statTitle} value={statValue || 0} icon={statIcon} description={statDescription || ""} section={statSection || ""} highlight={statHighlight} unreadCount={statUnreadCount} onClick={statOnClick} />}
+            {showButton && <StatCard showButton={true} buttonText={buttonText} buttonIcon={buttonIcon} buttonVariant={buttonVariant} onButtonClick={onButtonClick} />}
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default WelcomeCard;
