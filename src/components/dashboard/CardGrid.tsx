@@ -1,4 +1,4 @@
-
+// src/components/dashboard/CardGrid.tsx
 import React from 'react';
 import {
   DndContext,
@@ -48,12 +48,10 @@ const CardGrid: React.FC<CardGridProps> = ({
   onSearchSubmit = () => {}
 }) => {
   const sensors = useSensors(
-    // Make dragging easier by reducing the activation distance
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor)
   );
 
-  // Always initialize this state regardless of card presence
   const { totalColumns } = useGridOccupancy(
     cards.map(card => ({ 
       id: card.id,
@@ -84,7 +82,6 @@ const CardGrid: React.FC<CardGridProps> = ({
     );
   }
 
-  // Filter cards based on mobile view
   const displayedCards = isMobileView
     ? cards
         .filter((card) => card.displayMobile !== false)
@@ -105,40 +102,9 @@ const CardGrid: React.FC<CardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className={`w-full grid gap-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+      <div className={`w-full grid gap-y-2 gap-x-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={displayedCards.map(card => card.id)}>
-          {/* Search Cards */}
-          {searchCards.map(card => (
-            <CardGroup
-              key={card.id}
-              card={card}
-              onEditCard={onEditCard}
-              onDeleteCard={onDeleteCard}
-              onAddNewCard={onAddNewCard}
-              specialCardsData={specialCardsData}
-              quickDemandTitle={quickDemandTitle}
-              onQuickDemandTitleChange={onQuickDemandTitleChange}
-              onQuickDemandSubmit={onQuickDemandSubmit}
-              onSearchSubmit={onSearchSubmit}
-              isMobileView={isMobileView}
-            />
-          ))}
-          
-          {/* Dynamic Data Cards */}
-          {dynamicDataCards.map(card => (
-            <CardGroup
-              key={card.id}
-              card={card}
-              onEditCard={onEditCard}
-              onDeleteCard={onDeleteCard}
-              onAddNewCard={onAddNewCard}
-              specialCardsData={specialCardsData}
-              isMobileView={isMobileView}
-            />
-          ))}
-          
-          {/* Regular Cards */}
-          {regularCards.map(card => (
+          {[...searchCards, ...dynamicDataCards, ...regularCards].map(card => (
             <CardGroup
               key={card.id}
               card={card}
@@ -159,7 +125,5 @@ const CardGrid: React.FC<CardGridProps> = ({
   );
 };
 
-// Re-export the width and height classes for use in other components
 export { getWidthClass, getHeightClass } from './grid/GridUtilities';
-
 export default CardGrid;
