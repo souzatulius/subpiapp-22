@@ -20,6 +20,24 @@ const NewsEditForm: React.FC<NewsEditFormProps> = ({
   handleSaveNews,
   isSavingRelease
 }) => {
+  const updateNewsTitle = (title: string) => {
+    if (generatedNews) {
+      setGeneratedNews({
+        ...generatedNews,
+        titulo: title
+      });
+    }
+  };
+
+  const updateNewsContent = (content: string) => {
+    if (generatedNews) {
+      setGeneratedNews({
+        ...generatedNews,
+        conteudo: content
+      });
+    }
+  };
+
   return (
     <>
       <h2 className="text-xl font-semibold mb-4">Editar Notícia Gerada</h2>
@@ -33,7 +51,7 @@ const NewsEditForm: React.FC<NewsEditFormProps> = ({
           type="text"
           className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           value={generatedNews?.titulo || ''}
-          onChange={(e) => setGeneratedNews(prev => prev ? {...prev, titulo: e.target.value} : null)}
+          onChange={(e) => updateNewsTitle(e.target.value)}
         />
       </div>
       
@@ -45,7 +63,7 @@ const NewsEditForm: React.FC<NewsEditFormProps> = ({
           id="news-content"
           className="min-h-[300px]"
           value={generatedNews?.conteudo || ''}
-          onChange={(e) => setGeneratedNews(prev => prev ? {...prev, conteudo: e.target.value} : null)}
+          onChange={(e) => updateNewsContent(e.target.value)}
         />
       </div>
       

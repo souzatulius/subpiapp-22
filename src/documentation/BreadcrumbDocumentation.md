@@ -16,12 +16,17 @@ The breadcrumb implementation uses the `@/components/ui/breadcrumb.tsx` componen
 
 ## Current Implementation
 
-The breadcrumb bar is implemented in `src/components/layouts/BreadcrumbBar.tsx`.
+The breadcrumb bar is implemented in the following files:
+
+- `src/components/layouts/BreadcrumbBar.tsx` - Main component
+- `src/components/layouts/breadcrumb/breadcrumbConfig.ts` - Configuration for predefined paths
+- `src/components/layouts/breadcrumb/breadcrumbUtils.ts` - Utility functions for generating breadcrumbs
+- `src/components/layouts/breadcrumb/BreadcrumbItem.tsx` - Individual breadcrumb item component
 
 ### Key Features
 
 1. **Custom Path Configuration**:
-   - Predefined breadcrumb paths for specific routes
+   - Predefined breadcrumb paths for specific routes are defined in `breadcrumbConfig.ts`
    - Each route has a customized breadcrumb trail
    - Fallback to dynamic generation for unconfigured routes
 
@@ -36,10 +41,10 @@ The breadcrumb bar is implemented in `src/components/layouts/BreadcrumbBar.tsx`.
 
 3. **Display Name Mapping**:
    - Maps URL segments to user-friendly display names
-   - Contains a dictionary of standard page names
+   - Contains a dictionary of standard page names in `breadcrumbConfig.ts`
 
 4. **Hidden Segments**:
-   - Certain paths are explicitly hidden from breadcrumb display:
+   - Certain paths are explicitly hidden from breadcrumb display and defined in `breadcrumbConfig.ts`:
      - 'zeladoria'
      - 'dashboard/dashboard'
 
@@ -67,25 +72,24 @@ The breadcrumb text is small enough (text-xs) to fit well on mobile screens. The
 
 ## Usage Pattern
 
-To add breadcrumbs to a new page:
+To add breadcrumbs to a new page, update the custom breadcrumb configuration in `breadcrumbConfig.ts`:
 
-1. Update the custom breadcrumb configuration in `getBreadcrumbItems()` in `BreadcrumbBar.tsx`:
-   ```tsx
-   const customBreadcrumbs = [
-     // Your new path configuration
-     {
-       path: '/your/new/path',
-       items: [
-         { label: 'Início', path: '/dashboard' },
-         { label: 'Some Section', path: '/dashboard/some-section' },
-         { label: 'Your Page', path: '/your/new/path' }
-       ]
-     },
-     // ...existing configurations
-   ];
-   ```
+```tsx
+export const customBreadcrumbs: BreadcrumbConfig[] = [
+  // Your new path configuration
+  {
+    path: '/your/new/path',
+    items: [
+      { label: 'Início', path: '/dashboard' },
+      { label: 'Some Section', path: '/dashboard/some-section' },
+      { label: 'Your Page', path: '/your/new/path' }
+    ]
+  },
+  // ...existing configurations
+];
+```
 
-2. Add any new display names to the `displayNames` dictionary in the `getDisplayName()` function.
+Add any new display names to the `displayNames` dictionary in the same file.
 
 ## Special Handlers
 
