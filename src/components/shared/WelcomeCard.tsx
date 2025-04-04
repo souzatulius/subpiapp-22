@@ -23,6 +23,7 @@ interface WelcomeCardProps {
   onButtonClick?: () => void;
   color?: string;
   userName?: string;
+  greeting?: boolean;
 }
 
 const WelcomeCard: React.FC<WelcomeCardProps> = ({
@@ -43,7 +44,8 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   buttonIcon,
   buttonVariant = "outline",
   onButtonClick,
-  userName
+  userName,
+  greeting = false
 }) => {
   return (
     <Card className={`${color} text-white shadow-lg overflow-hidden`}>
@@ -52,8 +54,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
           <div>
             <h2 className="text-2xl font-bold mb-1 flex items-center">
               {icon}
-              {/* Always show the title, and only append the user greeting if userName is provided */}
-              {title}{userName ? `, ${userName}!` : ''}
+              {greeting && userName ? `Olá, ${userName}!` : title}
             </h2>
             <p className="text-blue-100">
               {description}

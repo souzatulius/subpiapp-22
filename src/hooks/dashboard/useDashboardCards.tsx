@@ -22,7 +22,7 @@ export const useDashboardCards = () => {
         return;
       }
 
-      // Normaliza o valor da coordenação para facilitar comparação
+      // Normalize department value for comparison
       const normalizedDepartment = userDepartment
         ? userDepartment
             .toLowerCase()
@@ -50,14 +50,14 @@ export const useDashboardCards = () => {
         
         if (typeof data.cards_config === 'string') {
           try {
-            // Using type assertion without recursive checking to prevent deep instantiation
-            parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
+            // Using a simpler type assertion to avoid deep type checking
+            parsedCards = JSON.parse(data.cards_config) as any[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
           }
         } else if (Array.isArray(data.cards_config)) {
-          // Direct assignment without complex type checking
-          parsedCards = data.cards_config as ActionCardItem[];
+          // Direct assignment with simple type casting
+          parsedCards = data.cards_config as any[];
         }
 
         // Only use the parsed cards if they form a valid array
@@ -111,11 +111,16 @@ export const useDashboardCards = () => {
     persistCards(updatedCards);
   };
 
+  const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
+    persistCards(updatedCards);
+  };
+
   return {
     cards,
     isLoading: isLoading || isDepartmentLoading,
     handleCardEdit,
-    handleCardHide
+    handleCardHide,
+    handleCardsReorder
   };
 };
 

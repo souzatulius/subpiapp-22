@@ -24,16 +24,21 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   isEditMode = false,
   specialCardsData = {}
 }) => {
+  const handleCardsChange = (updatedCards: ActionCardItem[]) => {
+    // Now we properly call the onCardsChange prop to persist the reordering
+    onCardsChange(updatedCards);
+  };
+
   return (
     <UnifiedCardGrid
       cards={cards}
-      onCardsChange={onCardsChange}
+      onCardsChange={handleCardsChange}
       onEditCard={onEditCard}
       onHideCard={onHideCard}
       onDeleteCard={onDeleteCard}
       isMobileView={isMobileView}
       isEditMode={isEditMode}
-      disableWiggleEffect={true} // Explicitly set to true to disable wiggle effect
+      disableWiggleEffect={true} // Keep this set to true to disable wiggle effect
       specialCardsData={specialCardsData}
       showSpecialFeatures={true}
     />
