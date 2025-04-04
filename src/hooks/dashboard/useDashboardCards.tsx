@@ -50,13 +50,13 @@ export const useDashboardCards = () => {
         
         if (typeof data.cards_config === 'string') {
           try {
-            // Explicitly cast the parsed JSON to ActionCardItem[] without recursive type checking
+            // Using type assertion without recursive checking to prevent deep instantiation
             parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
           }
         } else if (Array.isArray(data.cards_config)) {
-          // Directly cast to ActionCardItem[] without recursive type checking
+          // Direct assignment without complex type checking
           parsedCards = data.cards_config as ActionCardItem[];
         }
 
