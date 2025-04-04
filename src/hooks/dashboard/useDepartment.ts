@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -8,23 +7,23 @@ export const useDepartment = (user: any | null) => {
 
   const getUserDepartment = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('usuarios')
-        .select('coordenacao_id')
+        .select('coordenacoes(descricao)')
         .eq('id', user.id)
         .single();
-        
+
       if (error) {
-        console.error('Error fetching user department:', error);
+        console.error('Erro ao buscar descrição da coordenação:', error);
         return;
       }
-      
-      setUserDepartment(data?.coordenacao_id || null);
+
+      setUserDepartment(data?.coordenacoes?.descricao || null);
       setIsLoading(false);
     } catch (e) {
-      console.error('Error in getUserDepartment:', e);
+      console.error('Erro em getUserDepartment:', e);
       setIsLoading(false);
     }
   }, [user]);
