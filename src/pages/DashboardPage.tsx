@@ -27,7 +27,8 @@ const DashboardPage: React.FC = () => {
   
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  const { firstName } = useUserData(user?.id);
+  // Fix: Remove the parameter from useUserData call as it's not expecting any arguments
+  const { firstName } = useUserData();
   const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
 
   const toggleSidebar = () => {
