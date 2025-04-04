@@ -116,7 +116,7 @@ export const useComunicacaoDashboard = (
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          cards_config: updatedCards,
+          cards_config: JSON.stringify(updatedCards),
           department_id: activeDepartment
         })
         .then(({ error }) => {
@@ -138,7 +138,7 @@ export const useComunicacaoDashboard = (
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          cards_config: updatedCards,
+          cards_config: JSON.stringify(updatedCards),
           department_id: activeDepartment
         })
         .then(({ error }) => {

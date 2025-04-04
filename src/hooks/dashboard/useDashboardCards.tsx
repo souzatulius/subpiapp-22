@@ -79,7 +79,7 @@ export const useDashboardCards = () => {
       .from('user_dashboard')
       .upsert({
         user_id: user.id,
-        cards_config: updatedCards,
+        cards_config: JSON.stringify(updatedCards),
         department_id: userDepartment || 'default'
       })
       .then(({ error }) => {
@@ -100,7 +100,7 @@ export const useDashboardCards = () => {
       .from('user_dashboard')
       .upsert({
         user_id: user.id,
-        cards_config: updatedCards,
+        cards_config: JSON.stringify(updatedCards),
         department_id: userDepartment || 'default'
       })
       .then(({ error }) => {
