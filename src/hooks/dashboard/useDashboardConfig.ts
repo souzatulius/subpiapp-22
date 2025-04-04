@@ -35,7 +35,7 @@ export const useDashboardConfig = (
         setConfig([]);
       } else if (data && data.cards_config) {
         try {
-          const parsedCards = JSON.parse(data.cards_config);
+          const parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
           console.log('Loaded config:', parsedCards);
           setConfig(parsedCards);
         } catch (parseError) {

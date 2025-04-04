@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply } from 'lucide-react';
@@ -27,11 +26,13 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   
   const {
     cards,
+    isEditMode,
     isEditModalOpen,
     selectedCard,
     isLoading,
     handleCardEdit,
     handleCardHide,
+    toggleEditMode,
     handleSaveCardEdit,
     setIsEditModalOpen
   } = useComunicacaoDashboard(user, isPreview, department);
@@ -42,7 +43,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="w-full mb-8">
+      <div className="w-full">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
@@ -60,11 +61,12 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       ) : (
         cards.length > 0 ? (
           <CardGridContainer
-            cards={cards.filter(card => !card.isHidden)}
+            cards={cards}
             onCardsChange={cards => cards}
             onEditCard={handleCardEdit}
             onHideCard={handleCardHide}
             isMobileView={isMobile}
+            isEditMode={isEditMode}
           />
         ) : (
           <div className="p-6 text-center text-gray-500">
