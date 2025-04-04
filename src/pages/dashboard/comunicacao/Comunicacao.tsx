@@ -12,6 +12,7 @@ import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -29,6 +30,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const { getBadgeValue } = useBadgeValues();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
 
   const getBgColor = (color: string): CardColor => {
     switch (color) {
@@ -198,11 +201,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   }, [userDepartment, getBadgeValue]);
 
   const handleCardEdit = (card: ActionCardItem) => {
-    toast({
-      title: "Edição de Card",
-      description: "Função de edição será implementada em breve.",
-      variant: "default",
-    });
+    setSelectedCard(card);
+    setIsEditModalOpen(true);
   };
 
   const handleCardHide = (id: string) => {
@@ -273,6 +273,64 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     setIsEditMode(!isEditMode);
   };
 
+  const handleSaveCardEdit = async (updatedCard: Partial<ActionCardItem>) => {
+    if (!updatedCard.id) return;
+    
+    // Update card in local state
+    const updatedCards = cards.map(card => 
+      card.id === updatedCard.id ? { ...card, ...updatedCard } : card
+    );
+    
+    setCards(updatedCards);
+    setIsEditModalOpen(false);
+    setSelectedCard(null);
+    
+    // Save to database if user is logged in
+    if (user) {
+      try {
+        // Get current cards config
+        const { data } = await supabase
+          .from('user_dashboard')
+          .select('cards_config')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (data) {
+          // Update existing config
+          await supabase
+            .from('user_dashboard')
+            .update({ 
+              cards_config: JSON.stringify(updatedCards),
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', user.id);
+        } else {
+          // Create new config
+          await supabase
+            .from('user_dashboard')
+            .insert({ 
+              user_id: user.id,
+              cards_config: JSON.stringify(updatedCards),
+              department_id: userDepartment || null
+            });
+        }
+        
+        toast({
+          title: "Card atualizado",
+          description: "As alterações foram salvas com sucesso.",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error('Erro ao salvar alterações do card:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível salvar as alterações. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   if (!isPreview && !user) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh]">
@@ -322,6 +380,14 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           specialCardsData={{}}
         />
       </div>
+      
+      {/* Card Edit Modal */}
+      <EditCardModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleSaveCardEdit}
+        card={selectedCard}
+      />
       
       {!isPreview && isMobile && <MobileBottomNav />}
     </div>
