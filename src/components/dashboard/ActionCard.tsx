@@ -25,6 +25,7 @@ export interface ActionCardProps {
   children?: React.ReactNode;
   iconSize?: 'sm' | 'md' | 'lg' | 'xl';
   isMobileView?: boolean;
+  showControls?: boolean;
 }
 
 const getBackgroundColor = (color: CardColor): string => {
@@ -110,7 +111,8 @@ const ActionCard = ({
   isCustom = false,
   iconSize = 'md',
   isMobileView = false,
-  children
+  children,
+  showControls = true
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
@@ -135,7 +137,8 @@ const ActionCard = ({
         </div>
       )}
 
-      {(onEdit || onDelete || onHide) && (
+      {/* Only render controls if showControls is true */}
+      {showControls && (onEdit || onDelete || onHide) && (
         <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <CardControls 
             onEdit={onEdit ? () => onEdit(id) : undefined} 

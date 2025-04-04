@@ -45,22 +45,24 @@ export const useDashboardCards = () => {
           return;
         }
 
-        // Fixed type instantiation issue - parse data safely
-        let customCards: ActionCardItem[] = [];
+        // Safe parsing of card config data
+        let parsedCards: ActionCardItem[] = [];
         
         if (typeof data.cards_config === 'string') {
           try {
-            customCards = JSON.parse(data.cards_config) as ActionCardItem[];
+            // Explicitly cast the parsed JSON to the correct type
+            parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
-            customCards = [];
           }
         } else if (Array.isArray(data.cards_config)) {
-          customCards = data.cards_config as ActionCardItem[];
+          // Explicitly cast the array to the correct type
+          parsedCards = data.cards_config as ActionCardItem[];
         }
 
-        if (Array.isArray(customCards) && customCards.length > 0) {
-          setCards(customCards);
+        // Only use the parsed cards if they form a valid array
+        if (Array.isArray(parsedCards) && parsedCards.length > 0) {
+          setCards(parsedCards);
         } else {
           setCards(defaultCards);
         }

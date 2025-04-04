@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -263,12 +262,13 @@ export function UnifiedActionCard({
           path={path}
           color={color}
           isDraggable={isEditing}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onHide={onHide}
+          onEdit={undefined}
+          onDelete={undefined}
+          onHide={undefined}
           isCustom={isCustom}
           iconSize={iconSize}
           isMobileView={isMobileView}
+          showControls={false}
         />
       </div>
     );
