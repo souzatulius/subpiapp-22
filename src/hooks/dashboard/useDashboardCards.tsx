@@ -45,29 +45,16 @@ export const useDashboardCards = () => {
           return;
         }
 
-        // Safe parsing of card config data
-        let parsedCards: ActionCardItem[] = [];
-        
-        if (typeof data.cards_config === 'string') {
-          try {
-            // Using type assertion without recursive checking to prevent deep instantiation
-            parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
-          } catch (e) {
-            console.error('Error parsing cards_config:', e);
-          }
-        } else if (Array.isArray(data.cards_config)) {
-          // Direct assignment without complex type checking
-          parsedCards = data.cards_config as ActionCardItem[];
-        }
+        const customCards = typeof data.cards_config === 'string'
+          ? JSON.parse(data.cards_config)
+          : data.cards_config;
 
-        // Only use the parsed cards if they form a valid array
-        if (Array.isArray(parsedCards) && parsedCards.length > 0) {
-          setCards(parsedCards);
+        if (Array.isArray(customCards) && customCards.length > 0) {
+          setCards(customCards);
         } else {
           setCards(defaultCards);
         }
       } catch (error) {
-        console.error('Error fetching dashboard cards:', error);
         setCards(defaultCards);
       } finally {
         setIsLoading(false);
@@ -79,17 +66,15 @@ export const useDashboardCards = () => {
 
   const persistCards = (updatedCards: ActionCardItem[]) => {
     if (!user) return;
-    
-    // Create a shallow copy of the array to avoid mutation issues
-    const cardsCopy = [...updatedCards];
-    setCards(cardsCopy);
+
+    setCards(updatedCards);
 
     supabase
       .from('user_dashboard')
       .upsert({
         user_id: user.id,
         page: 'inicial',
-        cards_config: JSON.stringify(cardsCopy),
+        cards_config: JSON.stringify(updatedCards),
         department_id: userDepartment || 'default'
       })
       .then(({ error }) => {
@@ -118,6 +103,3 @@ export const useDashboardCards = () => {
     handleCardHide
   };
 };
-
-// Add default export to support both import styles
-export default useDashboardCards;

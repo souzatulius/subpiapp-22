@@ -20,7 +20,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   
@@ -31,10 +30,6 @@ const DashboardPage: React.FC = () => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
   };
   
   const handleCardEdit = (card: ActionCardItem) => {
@@ -65,9 +60,9 @@ const DashboardPage: React.FC = () => {
         
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
-          <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
-            {/* WelcomeCard takes full width - removed showButton prop */}
-            <div className="w-full mb-3">
+          <div className="max-w-7xl mx-auto p-6 pb-20 md:pb-6">
+            {/* WelcomeCard takes full width */}
+            <div className="w-full mb-8">
               <WelcomeCard
                 title="Dashboard"
                 description="Bem-vindo ao seu dashboard personalizado."
@@ -77,10 +72,8 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
-            {/* Removed the EditModeToggle section here */}
-            
             {/* Content container with better height calculation and scrolling behavior */}
-            <div className="relative" style={{ height: "calc(100vh - 300px)", minHeight: "500px" }}>
+            <div className="relative" style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}>
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {Array.from({ length: 8 }).map((_, index) => (
@@ -90,14 +83,13 @@ const DashboardPage: React.FC = () => {
               ) : (
                 cards && cards.length > 0 ? (
                   <ScrollArea className="h-full w-full pr-4">
-                    <div className="pb-4">
+                    <div className="pb-8">
                       <CardGridContainer 
                         cards={cards.filter(card => !card.isHidden)}
                         onCardsChange={() => {}}
                         onEditCard={handleCardEdit}
                         onHideCard={handleCardHide}
                         isMobileView={isMobile}
-                        isEditMode={isEditMode}
                       />
                     </div>
                   </ScrollArea>

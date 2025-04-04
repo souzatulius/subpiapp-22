@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -7,19 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Save, Sparkles } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { motion } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import BackButton from '@/components/layouts/BackButton';
-import { formatDateTime } from '@/lib/utils';
 
 // Define a type for releases since it might not be in the Supabase types yet
 interface Release {
@@ -30,95 +18,15 @@ interface Release {
   release_origem_id?: string | null;
   criado_em: string;
   autor_id: string;
-  publicada?: boolean;
-  atualizado_em?: string;
 }
 
 const CadastrarRelease = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [releaseContent, setReleaseContent] = useState('');
   const [isGeneratingNews, setIsGeneratingNews] = useState(false);
   const [isSavingRelease, setIsSavingRelease] = useState(false);
   const [generatedNews, setGeneratedNews] = useState<{ titulo: string; conteudo: string } | null>(null);
   const [isEditingNews, setIsEditingNews] = useState(false);
-  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
-  const [savedReleaseId, setSavedReleaseId] = useState<string | null>(null);
-
-  // Parse query parameters to check if we're editing a release or noticia
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const releaseId = params.get('releaseId');
-    const noticiaId = params.get('noticiaId');
-    
-    if (releaseId) {
-      // Fetch the release content to generate news
-      fetchReleaseContent(releaseId);
-    } else if (noticiaId) {
-      // Load the noticia for editing
-      fetchNoticiaContent(noticiaId);
-    }
-  }, [location.search]);
-
-  const fetchReleaseContent = async (releaseId: string) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('releases')
-        .select('*')
-        .eq('id', releaseId)
-        .single() as any;
-      
-      if (error) throw error;
-      
-      if (data) {
-        setReleaseContent(data.conteudo);
-        // Automatically trigger news generation
-        handleGenerateNews(data.conteudo);
-      }
-    } catch (error: any) {
-      console.error('Erro ao carregar release:', error);
-      toast({
-        title: "Erro ao carregar release",
-        description: error.message || "Não foi possível carregar o conteúdo do release.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchNoticiaContent = async (noticiaId: string) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('releases')
-        .select('*')
-        .eq('id', noticiaId)
-        .single() as any;
-      
-      if (error) throw error;
-      
-      if (data) {
-        // If we're editing a noticia, set it up in the editing form
-        setGeneratedNews({
-          titulo: data.titulo || '',
-          conteudo: data.conteudo
-        });
-        setIsEditingNews(true);
-      }
-    } catch (error: any) {
-      console.error('Erro ao carregar notícia:', error);
-      toast({
-        title: "Erro ao carregar notícia",
-        description: error.message || "Não foi possível carregar o conteúdo da notícia.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSaveRelease = async () => {
     if (!releaseContent.trim()) {
@@ -150,11 +58,8 @@ const CadastrarRelease = () => {
         description: "O release foi salvo no banco de dados.",
       });
       
-      // Store the saved release ID for potential news generation
-      setSavedReleaseId(data[0].id);
-      
-      // Show dialog asking if user wants to generate news
-      setShowGenerateDialog(true);
+      // Clear the form after successful save
+      setReleaseContent('');
       
     } catch (error: any) {
       console.error('Erro ao salvar release:', error);
@@ -168,8 +73,8 @@ const CadastrarRelease = () => {
     }
   };
 
-  const handleGenerateNews = async (content = releaseContent) => {
-    if (!content.trim()) {
+  const handleGenerateNews = async () => {
+    if (!releaseContent.trim()) {
       toast({
         title: "Conteúdo vazio",
         description: "Por favor, cole o conteúdo do release antes de gerar notícia.",
@@ -184,7 +89,7 @@ const CadastrarRelease = () => {
       // Call the Edge Function to generate news
       const { data: generatedData, error: functionError } = await supabase.functions
         .invoke('generate-news', {
-          body: { releaseContent: content }
+          body: { releaseContent }
         });
 
       if (functionError) throw functionError;
@@ -227,23 +132,17 @@ const CadastrarRelease = () => {
     try {
       setIsSavingRelease(true);
       
-      // Check if we need to save the release first
-      let releaseId = savedReleaseId;
+      // First save the release
+      const { data: releaseData, error: releaseError } = await supabase
+        .from('releases')
+        .insert({
+          conteudo: releaseContent,
+          tipo: 'release',
+          autor_id: user?.id
+        } as any)
+        .select() as any;
       
-      if (!releaseId) {
-        // First save the release
-        const { data: releaseData, error: releaseError } = await supabase
-          .from('releases')
-          .insert({
-            conteudo: releaseContent,
-            tipo: 'release',
-            autor_id: user?.id
-          } as any)
-          .select() as any;
-        
-        if (releaseError) throw releaseError;
-        releaseId = releaseData[0].id;
-      }
+      if (releaseError) throw releaseError;
       
       // Then save the generated news with a reference to the release
       const { data: newsData, error: newsError } = await supabase
@@ -253,8 +152,7 @@ const CadastrarRelease = () => {
           conteudo: generatedNews.conteudo,
           tipo: 'noticia',
           autor_id: user?.id,
-          release_origem_id: releaseId,
-          publicada: false
+          release_origem_id: releaseData[0].id
         } as any)
         .select() as any;
       
@@ -265,8 +163,10 @@ const CadastrarRelease = () => {
         description: "A notícia e o release original foram salvos no banco de dados.",
       });
       
-      // Redirect to the news tab of ListarReleases
-      navigate('/dashboard/comunicacao/releases?tab=noticias');
+      // Reset the form after successful save
+      setReleaseContent('');
+      setGeneratedNews(null);
+      setIsEditingNews(false);
       
     } catch (error: any) {
       console.error('Erro ao salvar notícia:', error);
@@ -280,12 +180,6 @@ const CadastrarRelease = () => {
     }
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const formatDate = (dateString: string): string => {
-    return formatDateTime(dateString);
-  };
-
   return (
     <motion.div 
       className="max-w-6xl mx-auto"
@@ -293,8 +187,6 @@ const CadastrarRelease = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <BackButton destination="/dashboard/comunicacao/releases" />
-      
       <WelcomeCard
         title="Cadastrar Release"
         description="Transforme releases recebidos por e-mail em notícias editáveis"
@@ -311,20 +203,19 @@ const CadastrarRelease = () => {
               placeholder="Cole aqui o release recebido por e-mail"
               value={releaseContent}
               onChange={(e) => setReleaseContent(e.target.value)}
-              disabled={isLoading}
             />
             <div className="flex gap-4">
               <Button 
                 variant="outline" 
                 onClick={handleSaveRelease}
-                disabled={isSavingRelease || isGeneratingNews || isLoading}
+                disabled={isSavingRelease || isGeneratingNews}
               >
                 {isSavingRelease ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                 Salvar Release
               </Button>
               <Button 
-                onClick={() => handleGenerateNews()}
-                disabled={isGeneratingNews || isSavingRelease || isLoading}
+                onClick={handleGenerateNews}
+                disabled={isGeneratingNews || isSavingRelease}
               >
                 {isGeneratingNews ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
                 Gerar Notícia
@@ -350,7 +241,7 @@ const CadastrarRelease = () => {
             
             <div className="mb-4">
               <label htmlFor="news-content" className="block text-sm font-medium text-gray-700 mb-1">
-                Conte��do da Notícia
+                Conteúdo da Notícia
               </label>
               <Textarea
                 id="news-content"
@@ -378,36 +269,6 @@ const CadastrarRelease = () => {
           </>
         )}
       </div>
-
-      {/* Dialog to ask if user wants to generate news after saving release */}
-      <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Gerar notícia?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Release salvo com sucesso! Deseja gerar uma notícia a partir deste release agora?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setShowGenerateDialog(false);
-              // Redirect to releases tab
-              navigate('/dashboard/comunicacao/releases?tab=releases');
-            }}>
-              Não
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => {
-                setShowGenerateDialog(false);
-                handleGenerateNews();
-              }}
-              className="bg-indigo-500 hover:bg-indigo-600"
-            >
-              Sim, gerar notícia
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </motion.div>
   );
 };
