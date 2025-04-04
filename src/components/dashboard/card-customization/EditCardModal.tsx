@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -86,11 +86,11 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Editar Card</DialogTitle>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Editar Card</SheetTitle>
+        </SheetHeader>
         
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -159,7 +159,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
           </div>
         </div>
         
-        <DialogFooter>
+        <SheetFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
@@ -173,9 +173,9 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
               "Salvar"
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
 

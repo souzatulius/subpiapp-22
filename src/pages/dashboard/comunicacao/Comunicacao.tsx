@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, Loader2, PlusCircle, List, MessageCircle, FileText, CheckCircle, Trophy, BarChart2, Settings } from 'lucide-react';
@@ -12,7 +11,7 @@ import { useBadgeValues } from '@/hooks/dashboard/useBadgeValues';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
+import EditCardModal from '@/components/dashboard/EditCardModal';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -78,7 +77,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "message-square-reply",
         color: getBgColor('blue-700'),
         width: "50",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         displayMobile: true,
         mobileOrder: 1
@@ -90,7 +89,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "plus-circle",
         color: getBgColor('orange-400'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         displayMobile: true,
         mobileOrder: 2,
@@ -103,7 +102,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "list-filter",
         color: getBgColor('grey-800'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         displayMobile: true,
         mobileOrder: 3
@@ -115,7 +114,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "message-circle",
         color: getBgColor('orange-500'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('responder-demandas'),
@@ -129,7 +128,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "file-text",
         color: getBgColor('blue-960'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('criar-nota'),
@@ -144,7 +143,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "file-text",
         color: getBgColor('neutral-200'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         displayMobile: true,
         mobileOrder: 6
@@ -156,7 +155,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "check-circle",
         color: getBgColor('grey-950'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         hasBadge: true,
         badgeValue: getBadgeValue('aprovar-notas'),
@@ -170,7 +169,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "trophy",
         color: getBgColor('lime-500'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         displayMobile: true,
         mobileOrder: 8
@@ -182,7 +181,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         iconId: "bar-chart-2",
         color: getBgColor('grey-400'),
         width: "25",
-        height: "1", // Changed from "2" to "1"
+        height: "1",
         type: "standard",
         displayMobile: true,
         mobileOrder: 9,
@@ -276,7 +275,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   const handleSaveCardEdit = async (updatedCard: Partial<ActionCardItem>) => {
     if (!updatedCard.id) return;
     
-    // Update card in local state
     const updatedCards = cards.map(card => 
       card.id === updatedCard.id ? { ...card, ...updatedCard } : card
     );
@@ -285,10 +283,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     setIsEditModalOpen(false);
     setSelectedCard(null);
     
-    // Save to database if user is logged in
     if (user) {
       try {
-        // Get current cards config
         const { data } = await supabase
           .from('user_dashboard')
           .select('cards_config')
@@ -296,7 +292,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           .single();
           
         if (data) {
-          // Update existing config
           await supabase
             .from('user_dashboard')
             .update({ 
@@ -305,7 +300,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
             })
             .eq('user_id', user.id);
         } else {
-          // Create new config
           await supabase
             .from('user_dashboard')
             .insert({ 
@@ -342,7 +336,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* WelcomeCard takes full width */}
       <div className="w-full">
         <WelcomeCard
           title="Comunicação"
@@ -352,7 +345,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
       
-      {/* Personalize button now appears below the WelcomeCard as an icon only */}
       <div className="flex justify-end">
         <Button 
           onClick={toggleEditMode}
@@ -381,7 +373,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
       
-      {/* Card Edit Modal */}
       <EditCardModal 
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
