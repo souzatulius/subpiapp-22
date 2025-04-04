@@ -9,6 +9,17 @@ import { Loader2, Save, Sparkles } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { motion } from 'framer-motion';
 
+// Define a type for releases since it might not be in the Supabase types yet
+interface Release {
+  id: string;
+  tipo: 'release' | 'noticia';
+  titulo?: string;
+  conteudo: string;
+  release_origem_id?: string | null;
+  criado_em: string;
+  autor_id: string;
+}
+
 const CadastrarRelease = () => {
   const { user } = useAuth();
   const [releaseContent, setReleaseContent] = useState('');
@@ -30,15 +41,15 @@ const CadastrarRelease = () => {
     try {
       setIsSavingRelease(true);
       
+      // Using the custom client approach to avoid TypeScript errors
       const { data, error } = await supabase
         .from('releases')
         .insert({
           conteudo: releaseContent,
           tipo: 'release',
           autor_id: user?.id
-        })
-        .select()
-        .single();
+        } as any)
+        .select() as any;
       
       if (error) throw error;
       
@@ -128,9 +139,8 @@ const CadastrarRelease = () => {
           conteudo: releaseContent,
           tipo: 'release',
           autor_id: user?.id
-        })
-        .select()
-        .single();
+        } as any)
+        .select() as any;
       
       if (releaseError) throw releaseError;
       
@@ -142,10 +152,9 @@ const CadastrarRelease = () => {
           conteudo: generatedNews.conteudo,
           tipo: 'noticia',
           autor_id: user?.id,
-          release_origem_id: releaseData.id
-        })
-        .select()
-        .single();
+          release_origem_id: releaseData[0].id
+        } as any)
+        .select() as any;
       
       if (newsError) throw newsError;
       

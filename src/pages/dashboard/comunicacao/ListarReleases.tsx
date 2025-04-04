@@ -31,6 +31,7 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+// Define Release interface since it's not in Supabase types yet
 interface Release {
   id: string;
   tipo: 'release' | 'noticia';
@@ -62,7 +63,7 @@ const ListarReleases = () => {
       const { data, error } = await supabase
         .from('releases')
         .select('*')
-        .order('criado_em', { ascending: false });
+        .order('criado_em', { ascending: false }) as any;
       
       if (error) throw error;
       
@@ -107,7 +108,7 @@ const ListarReleases = () => {
       const { error } = await supabase
         .from('releases')
         .delete()
-        .eq('id', selectedRelease.id);
+        .eq('id', selectedRelease.id) as any;
       
       if (error) throw error;
       
