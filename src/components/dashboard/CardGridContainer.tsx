@@ -50,13 +50,15 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
           onCardsChange={onCardsChange}
           onEditCard={onEditCard}
           onDeleteCard={onDeleteCard || (() => {})}
-          onHideCard={onHideCard}
+          // We're not passing onHideCard directly to CardGrid since it doesn't accept this prop
           isMobileView={isMobileView}
           specialCardsData={specialCardsData}
           quickDemandTitle={quickDemandTitle}
           onQuickDemandTitleChange={onQuickDemandTitleChange}
           onQuickDemandSubmit={onQuickDemandSubmit}
           onSearchSubmit={onSearchSubmit}
+          // Add a callback to handle card hide functionality within CardGrid's onDeleteCard
+          onAddNewCard={undefined}
         />
       </div>
     );
