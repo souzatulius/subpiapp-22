@@ -12,7 +12,6 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
-import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
@@ -21,7 +20,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   
@@ -32,10 +30,6 @@ const DashboardPage: React.FC = () => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
   };
   
   const handleCardEdit = (card: ActionCardItem) => {
@@ -78,13 +72,6 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
-            {/* Edit mode toggle */}
-            {!isLoading && (
-              <div className="flex justify-end mb-6">
-                <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />
-              </div>
-            )}
-            
             {/* Content container with better height calculation and scrolling behavior */}
             <div className="relative" style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}>
               {isLoading ? (
@@ -103,7 +90,6 @@ const DashboardPage: React.FC = () => {
                         onEditCard={handleCardEdit}
                         onHideCard={handleCardHide}
                         isMobileView={isMobile}
-                        isEditMode={isEditMode}
                       />
                     </div>
                   </ScrollArea>

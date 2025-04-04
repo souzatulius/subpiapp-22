@@ -7,7 +7,6 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { useUserData } from '@/hooks/dashboard/useUserData';
 import EditCardModal from '@/components/dashboard/EditCardModal';
-import EditModeToggle from '@/components/dashboard/EditModeToggle';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
@@ -28,13 +27,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   
   const {
     cards,
-    isEditMode,
     isEditModalOpen,
     selectedCard,
     isLoading,
     handleCardEdit,
     handleCardHide,
-    toggleEditMode,
     handleSaveCardEdit,
     setIsEditModalOpen
   } = useComunicacaoDashboard(user, isPreview, department);
@@ -54,8 +51,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
       
-      {!isLoading && <EditModeToggle isEditMode={isEditMode} onToggle={toggleEditMode} />}
-      
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -65,12 +60,11 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       ) : (
         cards.length > 0 ? (
           <CardGridContainer
-            cards={cards}
+            cards={cards.filter(card => !card.isHidden)}
             onCardsChange={cards => cards}
             onEditCard={handleCardEdit}
             onHideCard={handleCardHide}
             isMobileView={isMobile}
-            isEditMode={isEditMode}
           />
         ) : (
           <div className="p-6 text-center text-gray-500">
