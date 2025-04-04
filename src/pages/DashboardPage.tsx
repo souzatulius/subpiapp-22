@@ -27,7 +27,7 @@ const DashboardPage: React.FC = () => {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const { firstName } = useUserData(user?.id);
-  const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide } = useDashboardCards();
+  const { cards, isLoading, handleCardEdit: saveCardEdit, handleCardHide, handleCardsReorder } = useDashboardCards();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -66,18 +66,16 @@ const DashboardPage: React.FC = () => {
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
-            {/* WelcomeCard takes full width - removed showButton prop */}
+            {/* WelcomeCard takes full width */}
             <div className="w-full mb-3">
               <WelcomeCard
                 title="Dashboard"
                 description="Bem-vindo ao seu dashboard personalizado."
+                greeting={`Olá, ${firstName}!`}
                 icon={<Home className="h-6 w-6 mr-2" />}
                 color="bg-gradient-to-r from-blue-800 to-blue-950"
-                userName={firstName}
               />
             </div>
-            
-            {/* Removed the EditModeToggle section here */}
             
             {/* Content container with better height calculation and scrolling behavior */}
             <div className="relative" style={{ height: "calc(100vh - 300px)", minHeight: "500px" }}>
@@ -93,7 +91,7 @@ const DashboardPage: React.FC = () => {
                     <div className="pb-4">
                       <CardGridContainer 
                         cards={cards.filter(card => !card.isHidden)}
-                        onCardsChange={() => {}}
+                        onCardsChange={handleCardsReorder}
                         onEditCard={handleCardEdit}
                         onHideCard={handleCardHide}
                         isMobileView={isMobile}

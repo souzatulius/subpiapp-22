@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDepartment } from './useDepartment';
 import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
@@ -50,13 +51,12 @@ export const useDashboardCards = () => {
         
         if (typeof data.cards_config === 'string') {
           try {
-            // Using type assertion without recursive checking to prevent deep instantiation
+            // Use type assertion without trying to deeply instantiate the type
             parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
           }
         } else if (Array.isArray(data.cards_config)) {
-          // Direct assignment without complex type checking
           parsedCards = data.cards_config as ActionCardItem[];
         }
 
@@ -93,7 +93,19 @@ export const useDashboardCards = () => {
         department_id: userDepartment || 'default'
       })
       .then(({ error }) => {
-        if (error) console.error('Erro ao salvar configuração de cards:', error);
+        if (error) {
+          console.error('Erro ao salvar configuração de cards:', error);
+          toast({
+            title: 'Erro ao salvar dashboard',
+            description: 'Não foi possível salvar a configuração.',
+            variant: 'destructive'
+          });
+        } else {
+          toast({
+            title: 'Dashboard atualizado',
+            description: 'Posições dos cards foram salvas com sucesso.'
+          });
+        }
       });
   };
 
@@ -110,12 +122,17 @@ export const useDashboardCards = () => {
     );
     persistCards(updatedCards);
   };
+  
+  const handleCardsReorder = (reorderedCards: ActionCardItem[]) => {
+    persistCards(reorderedCards);
+  };
 
   return {
     cards,
     isLoading: isLoading || isDepartmentLoading,
     handleCardEdit,
-    handleCardHide
+    handleCardHide,
+    handleCardsReorder
   };
 };
 

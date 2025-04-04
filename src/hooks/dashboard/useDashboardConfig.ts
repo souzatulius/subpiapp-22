@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
@@ -119,4 +120,17 @@ export const useDashboardConfig = (
       console.error('Erro ao salvar config:', err);
       toast({
         title: 'Erro inesperado',
-        description: 'Não foi possível
+        description: 'Não foi possível salvar a configuração'
+      });
+      setIsSaving(false);
+      return false;
+    }
+  };
+
+  return {
+    config,
+    isLoading,
+    isSaving,
+    saveConfig
+  };
+};

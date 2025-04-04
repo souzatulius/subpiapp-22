@@ -83,18 +83,31 @@ const getBackgroundColor = (color: CardColor): string => {
   }
 };
 
+const isLightBackground = (color: CardColor): boolean => {
+  return [
+    'gray-light', 
+    'gray-ultra-light', 
+    'blue-light', 
+    'green-light', 
+    'orange-light', 
+    'purple-light',
+    'gray-200',
+    'neutral-200'
+  ].includes(color);
+};
+
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   switch (size) {
     case 'sm':
-      return 'w-5 h-5';
+      return 'w-6 h-6';
     case 'md':
-      return 'w-6 h-6';
+      return 'w-8 h-8';
     case 'lg':
-      return 'w-8 h-8';
+      return 'w-10 h-10';
     case 'xl':
-      return 'w-8 h-8';
+      return 'w-12 h-12';
     default:
-      return 'w-6 h-6';
+      return 'w-10 h-10';
   }
 };
 
@@ -109,7 +122,7 @@ const ActionCard = ({
   onDelete,
   onHide,
   isCustom = false,
-  iconSize = 'md',
+  iconSize = 'lg',
   isMobileView = false,
   children,
   showControls = true
@@ -117,10 +130,8 @@ const ActionCard = ({
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
-  const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
-  
-  // We'll remove this handler since it's now managed by the parent component
-  // This prevents conflicts with the drag and drop functionality
+  const iconSizeClass = getIconSize(isMobileView ? 'xl' : iconSize);
+  const textColorClass = isLightBackground(color) ? 'text-gray-500' : 'text-white';
   
   return (
     <div 
@@ -148,15 +159,15 @@ const ActionCard = ({
         </div>
       )}
       
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-3">
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-6">
         {children ? (
           <>{children}</>
         ) : (
           <>
-            <div className="text-white mb-1">
+            <div className={`${textColorClass} mb-4`}>
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
-            <h3 className="font-semibold text-white text-lg">{title}</h3>
+            <h3 className={`font-semibold ${textColorClass} text-lg px-2`}>{title}</h3>
           </>
         )}
       </div>

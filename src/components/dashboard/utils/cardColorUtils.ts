@@ -1,33 +1,49 @@
 
 import { CardColor } from '@/types/dashboard';
 
+// This function checks if a card background color is considered "light"
+export const isLightBackground = (color: CardColor): boolean => {
+  return [
+    'gray-light', 
+    'gray-ultra-light', 
+    'blue-light', 
+    'green-light', 
+    'orange-light', 
+    'purple-light',
+    'gray-200',
+    'neutral-200',
+    'blue-960',
+    'gray-200'
+  ].includes(color);
+};
+
 export const getColorClasses = (color: CardColor): string => {
   switch (color) {
     case 'blue': return 'bg-blue-500 text-white';
     case 'green': return 'bg-green-500 text-white';
     case 'orange': return 'bg-orange-500 text-white';
-    case 'gray-light': return 'bg-gray-200 text-gray-800';
+    case 'gray-light': return 'bg-gray-200 text-gray-500';
     case 'gray-dark': return 'bg-gray-700 text-white';
     case 'blue-dark': return 'bg-blue-700 text-white';
-    case 'orange-light': return 'bg-orange-300 text-gray-800';
-    case 'gray-ultra-light': return 'bg-gray-100 text-gray-800';
+    case 'orange-light': return 'bg-orange-300 text-gray-500';
+    case 'gray-ultra-light': return 'bg-gray-100 text-gray-500';
     case 'lime': return 'bg-lime-500 text-white';
     case 'orange-600': return 'bg-orange-600 text-white';
-    case 'blue-light': return 'bg-blue-300 text-gray-800';
-    case 'green-light': return 'bg-green-300 text-gray-800';
-    case 'purple-light': return 'bg-purple-300 text-gray-800';
+    case 'blue-light': return 'bg-blue-300 text-gray-500';
+    case 'green-light': return 'bg-green-300 text-gray-500';
+    case 'purple-light': return 'bg-purple-300 text-gray-500';
     // Additional color mappings
     case 'gray-400': return 'bg-gray-400 text-white';
     case 'gray-800': return 'bg-gray-800 text-white';
     case 'gray-950': return 'bg-gray-950 text-white';
     case 'blue-700': return 'bg-blue-700 text-white';
     case 'blue-900': return 'bg-blue-900 text-white';
-    case 'blue-960': return 'bg-blue-900 text-white';
+    case 'blue-960': return 'bg-blue-900 text-gray-500';
     case 'orange-400': return 'bg-orange-400 text-white';
     case 'orange-500': return 'bg-orange-500 text-white';
-    case 'gray-200': return 'bg-gray-200 text-gray-800';
+    case 'gray-200': return 'bg-gray-200 text-gray-500';
     case 'lime-500': return 'bg-lime-500 text-white';
-    case 'neutral-200': return 'bg-gray-200 text-gray-800';
+    case 'neutral-200': return 'bg-gray-200 text-gray-500';
     default: return 'bg-blue-500 text-white';
   }
 };
@@ -64,17 +80,5 @@ export const getHoverColorClasses = (color: CardColor): string => {
 };
 
 export const getTextColorClass = (color: CardColor): string => {
-  switch (color) {
-    case 'gray-light':
-    case 'gray-ultra-light':
-    case 'blue-light':
-    case 'green-light':
-    case 'orange-light':
-    case 'purple-light':
-    case 'gray-200':
-    case 'neutral-200':
-      return 'text-gray-800';
-    default:
-      return 'text-white';
-  }
+  return isLightBackground(color) ? 'text-gray-500' : 'text-white';
 };
