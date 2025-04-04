@@ -16,37 +16,28 @@ The breadcrumb implementation uses the `@/components/ui/breadcrumb.tsx` componen
 
 ## Current Implementation
 
-The breadcrumb bar is implemented in the following files:
-
-- `src/components/layouts/BreadcrumbBar.tsx` - Main component
-- `src/components/layouts/breadcrumb/breadcrumbConfig.ts` - Configuration for predefined paths
-- `src/components/layouts/breadcrumb/breadcrumbUtils.ts` - Utility functions for generating breadcrumbs
-- `src/components/layouts/breadcrumb/BreadcrumbItem.tsx` - Individual breadcrumb item component
+The breadcrumb bar is implemented in `src/components/layouts/BreadcrumbBar.tsx`.
 
 ### Key Features
 
-1. **Custom Path Configuration**:
-   - Predefined breadcrumb paths for specific routes are defined in `breadcrumbConfig.ts`
-   - Each route has a customized breadcrumb trail
-   - Fallback to dynamic generation for unconfigured routes
+1. **Dynamic Path Parsing**:
+   - Automatically parses the current location path
+   - Splits into segments for hierarchical representation
 
-2. **Standard Breadcrumb Paths**:
-   - Releases: Início / Comunicação / Releases e Notícias
-   - Novo Release: Início / Comunicação / Releases e Notícias / Novo Release
-   - Aprovar Notas: Início / Comunicação / Notas de Imprensa / Aprovar Notas
-   - Demandas: Início / Comunicação / Demandas
-   - Gerar Nota: Início / Comunicação / Notas de Imprensa / Gerar Nota
-   - Nova Solicitação: Início / Comunicação / Demandas / Nova Solicitação
-   - Notas de Imprensa: Início / Comunicação / Notas de Imprensa
-
-3. **Display Name Mapping**:
+2. **Display Name Mapping**:
    - Maps URL segments to user-friendly display names
-   - Contains a dictionary of standard page names in `breadcrumbConfig.ts`
+   - Contains a dictionary of standard page names
 
-4. **Hidden Segments**:
-   - Certain paths are explicitly hidden from breadcrumb display and defined in `breadcrumbConfig.ts`:
+3. **Hidden Segments**:
+   - Certain paths are explicitly hidden from breadcrumb display:
      - 'zeladoria'
      - 'dashboard/dashboard'
+     - 'dashboard/comunicacao'
+   - Special handling for 'dashboard/comunicacao/comunicacao' which is displayed
+
+4. **Special Path Handling**:
+   - Handles duplicated segments (e.g., only showing first 'dashboard')
+   - Properly handles nested paths with special rules
 
 5. **Navigation**:
    - Each breadcrumb item is clickable
@@ -72,24 +63,24 @@ The breadcrumb text is small enough (text-xs) to fit well on mobile screens. The
 
 ## Usage Pattern
 
-To add breadcrumbs to a new page, update the custom breadcrumb configuration in `breadcrumbConfig.ts`:
+To add breadcrumbs to a new page:
 
-```tsx
-export const customBreadcrumbs: BreadcrumbConfig[] = [
-  // Your new path configuration
-  {
-    path: '/your/new/path',
-    items: [
-      { label: 'Início', path: '/dashboard' },
-      { label: 'Some Section', path: '/dashboard/some-section' },
-      { label: 'Your Page', path: '/your/new/path' }
-    ]
-  },
-  // ...existing configurations
-];
-```
+1. Import the BreadcrumbBar component:
+   ```tsx
+   import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
+   ```
 
-Add any new display names to the `displayNames` dictionary in the same file.
+2. Place it at the top of the main content area:
+   ```tsx
+   <main className="flex-1 overflow-auto">
+     <BreadcrumbBar />
+     <div className="max-w-7xl mx-auto">
+       {/* Rest of the page content */}
+     </div>
+   </main>
+   ```
+
+3. Update the display names mapping in `BreadcrumbBar.tsx` if adding new sections.
 
 ## Special Handlers
 
@@ -101,6 +92,14 @@ For sections like Settings that need special navigation handling, use the `onSet
 
 This allows for custom behavior when specific breadcrumb sections are clicked.
 
-## Default Fallback Behavior
+## Segment Filtering Rules
 
-For routes that don't have an explicit custom configuration, the component falls back to dynamically generating breadcrumbs based on the URL path, similar to the previous implementation. This ensures that all pages have appropriate breadcrumb navigation.
+The current implementation filters breadcrumb segments as follows:
+
+1. Removes empty segments
+2. Removes segments explicitly listed in `hiddenSegments`
+3. Special handling for dashboard paths:
+   - Keeps the first 'dashboard' segment when at index 0
+   - Hides 'dashboard/comunicacao' but shows 'dashboard/comunicacao/comunicacao'
+
+This ensures a clean and consistent breadcrumb trail throughout the application.
