@@ -1,175 +1,139 @@
-
-import { useState, useEffect, useCallback } from 'react';
+// src/hooks/dashboard/useUserDashboardCards.tsx
+import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import { useInitialCards } from './useInitialCards';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useUserData } from '@/hooks/useUserData';
+import { getCommunicationActionCards, getDefaultDashboardCards } from '@/hooks/dashboard/defaultCards';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
-export const useDashboardCards = () => {
+// Função que retorna os cards padrão conforme o departamento
+const getDefaultCards = (department: string) => {
+  if (department === 'comunicacao') {
+    return getCommunicationActionCards();
+  }
+  return getDefaultDashboardCards();
+};
+
+export const useUserDashboardCards = (
+  user: any, 
+  department: string = 'default', 
+  isPreview: boolean = false
+) => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
-  const { userCoordenaticaoId } = useUserData(user?.id);
-
-  // Pass the user's department to useInitialCards
-  const { cards: initialCards, isLoading: isLoadingInitial } = useInitialCards(userCoordenaticaoId);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
 
   useEffect(() => {
-    const loadCards = async () => {
+    const fetchCards = async () => {
+      if (isPreview) {
+        setCards(getDefaultCards(department));
+        setIsLoading(false);
+        return;
+      }
       if (!user) {
         setIsLoading(false);
         return;
       }
-
-      if (isLoadingInitial) {
-        return; // Wait for initial cards to load first
-      }
-
       try {
-        setIsLoading(true);
-        console.log("Loading cards for user:", user.id, "department:", userCoordenaticaoId);
-        
-        // Use a timeout to prevent excessive loading time
-        const timeoutId = setTimeout(() => {
-          if (isLoading) {
-            console.log("Loading timeout reached, using initial cards");
-            setCards(initialCards);
-            setIsLoading(false);
-          }
-        }, 3000);
-        
+        // Define os cards padrão para feedback imediato
+        const defaultCards = getDefaultCards(department);
+        setCards(defaultCards);
+        // Busca customizações do usuário
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
-          .maybeSingle();
-
-        // Clear the timeout since we got a response
-        clearTimeout(timeoutId);
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('[DashboardCards] Error fetching user cards:', error);
-          // Fallback to initial cards if there's an unexpected error
-          setCards(initialCards);
-        } else if (data?.cards_config) {
-          try {
-            const customCards = typeof data.cards_config === 'string'
-              ? JSON.parse(data.cards_config)
-              : data.cards_config;
-
-            const isValid = Array.isArray(customCards) &&
-              customCards.length > 0 &&
-              customCards.every(card => card.id && card.path);
-
-            if (isValid) {
-              setCards(customCards);
-              console.log("Loaded custom cards configuration:", customCards.length, "cards");
-            } else {
-              console.warn('[DashboardCards] Invalid cards configuration, using default cards');
-              setCards(initialCards);
-            }
-          } catch (e) {
-            console.error('[DashboardCards] Error parsing cards config:', e);
-            setCards(initialCards);
+          .eq('department_id', department)
+          .single();
+        if (!error && data && data.cards_config) {
+          const customCards = typeof data.cards_config === 'string' 
+            ? JSON.parse(data.cards_config) 
+            : data.cards_config;
+          if (Array.isArray(customCards) && customCards.length > 0) {
+            setCards(customCards);
           }
-        } else {
-          // No user-specific cards found, use the initial cards
-          console.log("No custom cards found, using initial cards filtered by department:", userCoordenaticaoId);
-          setCards(initialCards);
         }
-      } catch (e) {
-        console.error('[DashboardCards] General error loading cards:', e);
-        setCards(initialCards);
+      } catch (err) {
+        console.error("Erro ao buscar os cards do dashboard:", err);
       } finally {
         setIsLoading(false);
       }
     };
+    setIsLoading(true);
+    fetchCards();
+  }, [user, department, isPreview]);
 
-    loadCards();
-  }, [user, userCoordenaticaoId, initialCards, isLoadingInitial]);
-
-  const handleCardEdit = (updatedCard: ActionCardItem) => {
-    setCards(currentCards =>
-      currentCards.map(card =>
-        card.id === updatedCard.id ? { ...card, ...updatedCard } : card
-      )
-    );
+  const toggleEditMode = () => {
+    setIsEditMode(prev => !prev);
   };
 
-  const handleCardHide = (cardId: string) => {
-    setCards(currentCards =>
-      currentCards.map(card =>
-        card.id === cardId ? { ...card, isHidden: true } : card
-      )
-    );
-    
-    // Save the updated cards configuration to the database
-    if (user) {
-      const updatedCards = cards.map(card => 
-        card.id === cardId ? { ...card, isHidden: true } : card
-      );
-      
-      saveUserCards(user.id, updatedCards);
+  const handleCardEdit = (card: ActionCardItem) => {
+    setSelectedCard(card);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCardHide = (id: string) => {
+    const updatedCards = cards.map(card => card.id === id ? { ...card, isHidden: true } : card);
+    setCards(updatedCards);
+    if (!isPreview && user) {
+      supabase.from('user_dashboard')
+        .upsert({
+          user_id: user.id,
+          cards_config: JSON.stringify(updatedCards),
+          department_id: department
+        })
+        .then(({ error }) => {
+          if (error) console.error("Erro ao salvar preferência de ocultar card", error);
+        });
     }
   };
-  
-  const saveUserCards = async (userId: string, cardConfig: ActionCardItem[]) => {
-    try {
-      const { data, error: checkError } = await supabase
-        .from('user_dashboard')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle();
-      
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-      
-      const cardsJson = JSON.stringify(cardConfig);
-      
-      if (data) {
-        const { error } = await supabase
-          .from('user_dashboard')
-          .update({ cards_config: cardsJson })
-          .eq('id', data.id);
-          
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('user_dashboard')
-          .insert({ 
-            user_id: userId, 
-            cards_config: cardsJson,
-            department_id: userCoordenaticaoId || 'default'
-          });
-          
-        if (error) throw error;
-      }
-      
-      toast({
-        title: "Configuração salva",
-        description: "Suas preferências foram salvas com sucesso"
-      });
-      
-    } catch (error) {
-      console.error('Error saving card configuration:', error);
-      toast({
-        title: "Erro ao salvar configuração",
-        description: "Não foi possível salvar a configuração dos cards",
-        variant: "destructive"
-      });
+
+  const handleSaveCardEdit = (updatedCard: ActionCardItem) => {
+    const updatedCards = cards.map(card => card.id === updatedCard.id ? updatedCard : card);
+    setCards(updatedCards);
+    setIsEditModalOpen(false);
+    if (!isPreview && user) {
+      supabase.from('user_dashboard')
+        .upsert({
+          user_id: user.id,
+          cards_config: JSON.stringify(updatedCards),
+          department_id: department
+        })
+        .then(({ error }) => {
+          if (error) console.error("Erro ao salvar edição do card", error);
+        });
+    }
+  };
+
+  const updateCardsOrder = (newCardsOrder: ActionCardItem[]) => {
+    setCards(newCardsOrder);
+    if (!isPreview && user) {
+      supabase.from('user_dashboard')
+        .upsert({
+          user_id: user.id,
+          cards_config: JSON.stringify(newCardsOrder),
+          department_id: department
+        })
+        .then(({ error }) => {
+          if (error) console.error("Erro ao salvar nova ordem dos cards", error);
+        });
     }
   };
 
   return {
     cards,
-    isLoading: isLoading || isLoadingInitial,
-    setCards,
+    isLoading,
+    isEditMode,
+    toggleEditMode,
+    isEditModalOpen,
+    selectedCard,
     handleCardEdit,
-    handleCardHide
+    handleCardHide,
+    handleSaveCardEdit,
+    updateCardsOrder,
+    setIsEditModalOpen,
+    setCards
   };
 };
 
-export default useDashboardCards;
+export default useUserDashboardCards;
