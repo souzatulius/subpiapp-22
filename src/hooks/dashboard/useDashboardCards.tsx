@@ -1,31 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useDepartment } from './useDepartment';
+import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
-
-// Initial default cards function - simplified to avoid deep type instantiation
-const getDefaultCards = (department?: string): ActionCardItem[] => {
-  return [
-    {
-      id: 'default-1',
-      title: 'Dashboard',
-      iconId: 'layout-dashboard',
-      path: '/dashboard',
-      color: 'blue-700',
-      type: 'standard'
-    },
-    {
-      id: 'default-2',
-      title: 'Comunicação',
-      iconId: 'message-square',
-      path: '/dashboard/comunicacao',
-      color: 'orange-500',
-      type: 'standard'
-    }
-  ];
-};
 
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
@@ -49,7 +27,7 @@ export const useDashboardCards = () => {
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '') || undefined;
 
-      const defaultCards = getDefaultCards(normalizedDepartment);
+      const defaultCards = getInitialDashboardCards(normalizedDepartment);
 
       try {
         const { data, error } = await supabase
