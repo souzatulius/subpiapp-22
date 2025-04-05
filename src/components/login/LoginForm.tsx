@@ -58,10 +58,11 @@ const LoginForm = () => {
             onPasswordChange={handlePasswordChange}
           />
 
+          {/* Botão principal de login */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#003570] text-white py-3 px-6 text-base font-semibold flex items-center justify-center rounded-xl hover:bg-[#002c6d] transition-all duration-200"
+            className="w-full bg-[#003570] text-white py-3 px-6 text-base font-semibold flex items-center justify-center rounded-xl hover:bg-[#002c6d] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LogIn className="mr-2 h-5 w-5" />
             Entrar
@@ -72,16 +73,28 @@ const LoginForm = () => {
             <span className="text-xs uppercase text-[#6B7280] bg-white px-4 absolute">OU</span>
           </div>
 
+          {/* Login com Google */}
           <GoogleLoginButton onGoogleLogin={handleGoogleLogin} />
         </div>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#6B7280]">
-        Não tem uma conta?{' '}
-        <Link to="/register" className="text-[#f57c35] font-semibold hover:underline">
-          Registre-se
+      <div className="mt-6 text-center space-y-2">
+        {/* Botão menor: Acessar ou Solicitar Acesso */}
+        <Link
+          to="/register"
+          className="inline-flex items-center justify-center rounded-xl border-2 border-[#f57c35] bg-transparent text-[#f57c35] py-2.5 px-5 text-sm font-medium transition-all duration-300 hover:bg-[#f57c35] hover:text-white hover:shadow-lg"
+        >
+          Solicitar Acesso
         </Link>
-      </p>
+
+        {/* Link abaixo, opcional */}
+        <p className="text-sm text-[#6B7280]">
+          Esqueceu a senha?{' '}
+          <Link to="/forgot-password" className="text-[#003570] font-semibold hover:underline">
+            Recuperar
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
