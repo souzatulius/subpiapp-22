@@ -1,185 +1,104 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useTableExists } from './useTableExists';
+import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
-interface NotaGerada {
+export interface ReleaseFormValues {
   titulo: string;
   conteudo: string;
+  problema_id: string;
+  tema_id?: string;
+  status?: string;
 }
 
 export const useReleaseForm = () => {
-  const navigate = useNavigate();
-  const [releaseContent, setReleaseContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showGeneratedContent, setShowGeneratedContent] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState<NotaGerada | null>(null);
-  const [editedTitle, setEditedTitle] = useState('');
-  const [editedContent, setEditedContent] = useState('');
+  const { user } = useAuth();
   
-  // Check if nota_anexos table exists
-  const { exists: anexosTableExists } = useTableExists('nota_anexos');
-  
-  const handleSaveRelease = async () => {
-    if (!releaseContent.trim()) {
+  const submitRelease = async (data: ReleaseFormValues, file: File | null) => {
+    if (!user) {
       toast({
-        title: "Campo obrigatório",
-        description: "Insira o conteúdo do release para continuar",
+        title: "Erro de autenticação",
+        description: "Você precisa estar autenticado para criar uma nota oficial.",
         variant: "destructive"
       });
-      return;
+      return false;
     }
-
-    setIsSubmitting(true);
     
     try {
-      // Get the current authenticated user ID
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData?.user?.id || 'sistema';
+      setIsSubmitting(true);
       
-      // Save release to database
-      const { error } = await supabase
-        .from('releases')
-        .insert({ 
-          conteudo: releaseContent,
-          tipo: 'imprensa', // Adding required fields
-          autor_id: userId // Using the actual user id or fallback
-        });
+      // Create the nota in notas_oficiais table
+      const { data: notaData, error: notaError } = await supabase
+        .from('notas_oficiais')
+        .insert({
+          titulo: data.titulo,
+          texto: data.conteudo, // Using texto field instead of conteudo
+          problema_id: data.problema_id,
+          autor_id: user.id,
+          status: data.status || 'pendente'
+        })
+        .select()
+        .single();
       
-      if (error) throw error;
+      if (notaError) throw notaError;
+      
+      // Upload attachment if file is provided
+      if (file && notaData) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `nota-${notaData.id}-${Date.now()}.${fileExt}`;
+        
+        // Check if storage bucket exists before trying to upload
+        try {
+          const { data: fileData, error: fileError } = await supabase.storage
+            .from('nota_attachments')
+            .upload(fileName, file);
+          
+          if (fileError) {
+            console.error('Error uploading file:', fileError);
+          } else if (fileData) {
+            // If we successfully uploaded the file, now try to add reference in the database
+            try {
+              // Try to use an existing anexos table if it exists
+              const { error: anexoError } = await supabase.rpc('add_nota_attachment', {
+                nota_id: notaData.id,
+                file_path: fileData.path
+              });
+              
+              if (anexoError) {
+                console.warn('Could not use RPC add_nota_attachment, attachment not linked to nota');
+              }
+            } catch (e) {
+              console.warn('Error linking attachment to nota:', e);
+            }
+          }
+        } catch (e) {
+          console.warn('Storage bucket nota_attachments may not exist:', e);
+        }
+      }
       
       toast({
-        title: "Release salvo",
-        description: "O conteúdo do release foi salvo com sucesso!"
+        title: "Nota criada com sucesso",
+        description: "A nota oficial foi enviada para revisão e aprovação.",
       });
       
-      // Show confirmation dialog to create news
-      setShowConfirmDialog(true);
-      
-    } catch (error) {
-      console.error('Erro ao salvar release:', error);
+      return true;
+    } catch (error: any) {
+      console.error('Error creating nota oficial:', error);
       toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar o release. Tente novamente.",
+        title: "Erro ao criar nota",
+        description: error.message || "Ocorreu um erro ao criar a nota oficial.",
         variant: "destructive"
       });
+      return false;
     } finally {
       setIsSubmitting(false);
     }
   };
   
-  const handleGenerateNews = async () => {
-    if (!releaseContent.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Insira o conteúdo do release para gerar a notícia",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsGenerating(true);
-    
-    try {
-      // Call OpenAI through Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('generate-news', {
-        body: { releaseContent }
-      });
-      
-      if (error) throw error;
-      
-      if (data?.data) {
-        setGeneratedContent(data.data);
-        setEditedTitle(data.data.titulo || '');
-        setEditedContent(data.data.conteudo || '');
-        setShowGeneratedContent(true);
-      } else {
-        throw new Error('Resposta inválida do servidor');
-      }
-      
-    } catch (error) {
-      console.error('Erro ao gerar notícia:', error);
-      toast({
-        title: "Erro na geração",
-        description: "Não foi possível gerar a notícia. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-  
-  const handleCreateNote = async () => {
-    // Here you would save the edited content
-    if (editedTitle && editedContent) {
-      try {
-        // Get the current authenticated user ID
-        const { data: authData } = await supabase.auth.getUser();
-        const userId = authData?.user?.id || 'sistema';
-        
-        // Create new nota oficial with the edited content
-        const { data, error } = await supabase
-          .from('notas_oficiais')
-          .insert({
-            titulo: editedTitle,
-            texto: editedContent,
-            autor_id: userId,
-            problema_id: '00000000-0000-0000-0000-000000000000', // Using a placeholder, you'll need to update this
-            status: 'pendente'
-          })
-          .select('id')
-          .single();
-          
-        if (error) throw error;
-        
-        // If the anexos table exists, we can handle file attachments
-        if (anexosTableExists) {
-          // This is a stub for file attachment handling
-          // Will be implemented if the table exists
-          console.log('Nota anexos table exists, can handle attachments');
-        }
-        
-        toast({
-          title: "Nota criada",
-          description: "A nota oficial foi criada com sucesso!"
-        });
-        
-        // Redirect to notas list or another appropriate page
-        navigate('/dashboard/comunicacao/consultar-notas');
-      } catch (error) {
-        console.error('Erro ao criar nota:', error);
-        toast({
-          title: "Erro ao criar nota",
-          description: "Não foi possível criar a nota oficial. Tente novamente.",
-          variant: "destructive"
-        });
-      }
-    }
-    
-    setShowConfirmDialog(false);
-    setShowGeneratedContent(false);
-  };
-
   return {
-    releaseContent,
-    setReleaseContent,
     isSubmitting,
-    isGenerating,
-    showConfirmDialog,
-    setShowConfirmDialog,
-    showGeneratedContent,
-    setShowGeneratedContent,
-    generatedContent,
-    editedTitle,
-    setEditedTitle,
-    editedContent,
-    setEditedContent,
-    handleSaveRelease,
-    handleGenerateNews,
-    handleCreateNote
+    submitRelease
   };
 };

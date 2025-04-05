@@ -7,8 +7,7 @@ import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import NotasTable from '@/components/consultar-notas/NotasTable';
 import { NotaOficial } from '@/types/nota';
-import { toast } from '@/components/ui/use-toast';
-import { ensureNotaCompat } from '@/components/consultar-notas/NotaCompat';
+import { useToast } from '@/components/ui/use-toast';
 
 const ConsultarNotasTable = () => {
   const navigate = useNavigate();
@@ -38,16 +37,16 @@ const ConsultarNotasTable = () => {
           criado_em,
           autor_id,
           problema_id,
-          problema (
+          problema:problema_id (
             id,
             descricao,
             coordenacao_id,
-            coordenacao (id, descricao)
+            coordenacao:coordenacao_id (id, descricao)
           ),
           supervisao_tecnica_id,
-          supervisao_tecnica (id, descricao),
+          supervisao_tecnica:supervisao_tecnica_id (id, descricao),
           coordenacao_id,
-          area_coordenacao (id, descricao)
+          area_coordenacao:coordenacao_id (id, descricao)
         `)
         .order('criado_em', { ascending: false });
       
@@ -58,33 +57,39 @@ const ConsultarNotasTable = () => {
   
   // Process the notas to ensure they match our NotaOficial type
   const notas: NotaOficial[] = notasRaw.map(nota => {
-    // Create a compatible NotaOficial object
-    const notaOficial: NotaOficial = {
-      id: nota.id,
-      titulo: nota.titulo,
-      conteudo: nota.texto || '', // Use texto for conteudo
-      texto: nota.texto,
-      status: nota.status,
-      criado_em: nota.criado_em,
+    // Create a compatible NotaOficial object with safe fallbacks
+    return {
+      id: nota.id || '',
+      titulo: nota.titulo || '',
+      conteudo: nota.texto || '', // Map texto to conteudo
+      texto: nota.texto || '',
+      status: nota.status || '',
+      criado_em: nota.criado_em || '',
       autor: nota.autor_id ? { id: nota.autor_id, nome_completo: 'Usuário' } : undefined,
-      problema: nota.problema || undefined,
-      supervisao_tecnica: nota.supervisao_tecnica || undefined,
-      area_coordenacao: nota.area_coordenacao || undefined
+      problema: nota.problema ? {
+        id: nota.problema.id || '',
+        descricao: nota.problema.descricao || '',
+        coordenacao: nota.problema.coordenacao || undefined
+      } : undefined,
+      supervisao_tecnica: nota.supervisao_tecnica ? {
+        id: nota.supervisao_tecnica.id || '',
+        descricao: nota.supervisao_tecnica.descricao || '',
+        coordenacao_id: nota.supervisao_tecnica.coordenacao_id
+      } : undefined,
+      area_coordenacao: nota.area_coordenacao ? {
+        id: nota.area_coordenacao.id || '',
+        descricao: nota.area_coordenacao.descricao || ''
+      } : undefined
     };
-    
-    // Ensure backward compatibility
-    return ensureNotaCompat(notaOficial);
   });
 
   const handleViewNota = (nota: NotaOficial) => {
-    // Open the detail dialog or navigate to detail page
     navigate(`/dashboard/comunicacao/notas/detalhes?id=${nota.id}`);
   };
 
   const handleExportPDF = async (nota: NotaOficial) => {
     setExporting(true);
     try {
-      // PDF export functionality would go here
       toast({
         title: "Exportação iniciada",
         description: "O PDF está sendo gerado e será baixado em instantes.",

@@ -9,27 +9,45 @@ export const useTableExists = (tableName: string) => {
   useEffect(() => {
     const checkTableExists = async () => {
       try {
-        // Try to query the table using RPC instead of direct query
-        const { data, error } = await supabase.rpc('check_table_exists', {
-          table_name: tableName
-        });
+        // Try direct query first with error handling
+        try {
+          const { data, error } = await supabase
+            .from(tableName as any)
+            .select('id')
+            .limit(1);
+          
+          if (!error) {
+            setExists(true);
+            setIsLoading(false);
+            return;
+          }
+        } catch (directQueryError) {
+          // If direct query fails, continue with other approaches
+          console.log(`Direct query to ${tableName} failed:`, directQueryError);
+        }
         
-        if (error) {
-          // Fallback to a safer approach - check if we get valid result from specific query
+        // Try a safer approach using custom SQL query
+        const { data, error } = await supabase
+          .rpc('table_exists', { table_name: tableName })
+          .single();
+          
+        if (!error && data) {
+          setExists(data === true);
+        } else {
+          // Fallback to a metadata approach
           try {
-            const { error: queryError } = await supabase
-              .from(tableName as any)
-              .select('id')
-              .limit(1)
-              .throwOnError();
+            const { data: tablesData } = await supabase
+              .from('_metadata_tables')
+              .select('name')
+              .eq('name', tableName)
+              .maybeSingle();
             
-            setExists(!queryError);
-          } catch (err) {
-            console.log(`Table ${tableName} check failed:`, err);
+            setExists(!!tablesData);
+          } catch (metadataError) {
+            // Final fallback: assume the table doesn't exist if all checks fail
+            console.log(`All checks for table ${tableName} failed`);
             setExists(false);
           }
-        } else {
-          setExists(data === true);
         }
       } catch (err) {
         console.error(`Error checking if table ${tableName} exists:`, err);

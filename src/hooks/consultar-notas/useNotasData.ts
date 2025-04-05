@@ -1,128 +1,107 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { NotaOficial } from '@/types/nota';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { NotaOficial, UseNotasDataReturn } from '@/types/nota';
+import { useNotasQuery } from './useNotasQuery';
 
 export const useNotasData = (): UseNotasDataReturn => {
-  const [notas, setNotas] = useState<NotaOficial[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredNotas, setFilteredNotas] = useState<NotaOficial[]>([]);
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const { session, user } = useAuth();
-
-  const fetchNotas = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (!session || !user) {
-        console.log("Usuário não autenticado ao tentar carregar notas");
-        return;
-      }
-
-      console.log("Carregando notas como usuário:", user.id);
-
-      const { data, error } = await supabase
-        .from('notas_oficiais')
-        .select(`
-          *,
-          autor:autor_id (id, nome_completo),
-          aprovador:aprovador_id (id, nome_completo),
-          problema:problema_id (
-            id, 
-            descricao,
-            coordenacao:coordenacao_id (
-              id, 
-              descricao
-            )
-          ),
-          demanda:demanda_id (id, titulo)
-        `)
-        .order('criado_em', { ascending: false });
-        
-      if (error) {
-        console.error("Erro ao carregar notas:", error);
-        setError(error);
-        toast({
-          title: "Erro ao carregar notas",
-          description: "Não foi possível carregar as notas oficiais.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      console.log(`${data?.length || 0} notas carregadas`);
-      setNotas(data as NotaOficial[]);
-    } catch (err: any) {
-      setError(err);
-      toast({
-        title: "Erro inesperado",
-        description: err.message || "Ocorreu um erro ao carregar as notas.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotas();
-  }, [session, user]);
-
+  
+  const { 
+    data: notas = [], 
+    isLoading: loading, 
+    error,
+    refetch: refreshData 
+  } = useNotasQuery();
+  
+  // Filter notas based on search term
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredNotas(notas);
       return;
     }
-
+    
     const lowerSearchTerm = searchTerm.toLowerCase();
+    
     const filtered = notas.filter(nota => {
       const matchTitle = nota.titulo.toLowerCase().includes(lowerSearchTerm);
-      const matchContent = nota.conteudo.toLowerCase().includes(lowerSearchTerm);
-      const matchAutor = nota.autor?.nome_completo?.toLowerCase().includes(lowerSearchTerm);
-      const matchProblema = nota.problema?.descricao?.toLowerCase().includes(lowerSearchTerm);
-      const matchDemanda = nota.demanda?.titulo?.toLowerCase().includes(lowerSearchTerm);
-
-      return matchTitle || matchContent || matchAutor || matchProblema || matchDemanda;
+      const matchContent = nota.conteudo?.toLowerCase().includes(lowerSearchTerm) || 
+                          nota.texto?.toLowerCase().includes(lowerSearchTerm);
+      const matchProblem = nota.problema?.descricao.toLowerCase().includes(lowerSearchTerm);
+      
+      return matchTitle || matchContent || matchProblem;
     });
-
+    
     setFilteredNotas(filtered);
   }, [searchTerm, notas]);
 
   const handleDelete = async (id: string) => {
-    setDeleteLoading(true);
     try {
+      setDeleteLoading(true);
+      
+      // Instead of deleting, we'll update status to 'excluida'
       const { error } = await supabase
         .from('notas_oficiais')
-        .delete()
+        .update({ status: 'excluida' })
         .eq('id', id);
-
-      if (error) {
-        throw error;
-      }
-
-      setNotas(notas.filter(nota => nota.id !== id));
-      setFilteredNotas(filteredNotas.filter(nota => nota.id !== id));
+      
+      if (error) throw error;
+      
       toast({
-        title: "Nota oficial excluída",
-        description: "A nota foi removida com sucesso."
+        title: "Nota excluída",
+        description: "A nota foi excluída com sucesso."
       });
-    } catch (err: any) {
+      
+      setIsDeleteDialogOpen(false);
+      setSelectedNota(null);
+      
+      // Refresh data
+      await refreshData();
+      
+    } catch (error: any) {
+      console.error('Erro ao excluir nota:', error);
       toast({
         title: "Erro ao excluir nota",
-        description: err.message || "Ocorreu um erro ao excluir a nota.",
+        description: error.message || "Ocorreu um erro ao excluir a nota.",
         variant: "destructive"
       });
     } finally {
       setDeleteLoading(false);
     }
   };
-  
+
+  // Add simple date formatter utility
+  const formatDate = (date: string) => {
+    if (!date) return 'N/A';
+    
+    try {
+      const formattedDate = new Date(date).toLocaleDateString('pt-BR');
+      return formattedDate;
+    } catch (e) {
+      return 'Data inválida';
+    }
+  };
+
+  // Fetch notas function for direct use
+  const fetchNotas = async () => {
+    try {
+      await refreshData();
+    } catch (error: any) {
+      console.error('Error fetching notas:', error);
+      toast({
+        title: "Erro ao carregar notas",
+        description: "Não foi possível atualizar as notas.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     notas,
     loading,
@@ -132,12 +111,30 @@ export const useNotasData = (): UseNotasDataReturn => {
     filteredNotas,
     selectedNota,
     setSelectedNota,
-    isDetailOpen, 
+    isDetailOpen,
     setIsDetailOpen,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     deleteLoading,
     handleDelete,
-    refetch
+    refetch: refreshData,
+    // Extended properties for NotasContent
+    formatDate,
+    fetchNotas,
+    // Default values for other expected properties
+    searchQuery: searchTerm,
+    setSearchQuery: setSearchTerm,
+    statusFilter: '',
+    setStatusFilter: () => {},
+    areaFilter: '',
+    setAreaFilter: () => {},
+    dataInicioFilter: '',
+    setDataInicioFilter: () => {},
+    dataFimFilter: '',
+    setDataFimFilter: () => {},
+    deleteNota: handleDelete,
+    isAdmin: false,
+    updateNotaStatus: async () => {},
+    statusLoading: false
   };
 };

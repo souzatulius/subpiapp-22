@@ -17,12 +17,16 @@ export const useTemasOptions = () => {
       try {
         // If temas table exists, query it
         if (temasTableExists) {
-          const { data: temasData, error: temasError } = await supabase
-            .rpc('get_temas')
-            .select('id, descricao');
-          
-          if (!temasError && temasData && temasData.length > 0) {
-            return temasData as Tema[];
+          try {
+            const { data: temasData, error: temasError } = await supabase
+              .from('temas')
+              .select('id, descricao');
+            
+            if (!temasError && temasData && temasData.length > 0) {
+              return temasData as Tema[];
+            }
+          } catch (e) {
+            console.log('Error querying temas table:', e);
           }
         }
         

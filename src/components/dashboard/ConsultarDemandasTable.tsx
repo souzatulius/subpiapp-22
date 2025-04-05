@@ -40,8 +40,8 @@ const ConsultarDemandasTable = () => {
 
   // Convert the data to match our Demand type with safe fallbacks
   const demandas: Demand[] = demandasRaw.map(d => {
-    // First create a safe base object with all required properties
-    const safeDemand: Demand = {
+    // First create a safe base object with all required properties and normalize the data
+    return {
       id: d.id || '',
       titulo: d.titulo || '',
       status: d.status || '',
@@ -51,10 +51,11 @@ const ConsultarDemandasTable = () => {
       problema: d.problema ? {
         id: d.problema.id || '',
         descricao: d.problema.descricao || '',
-        coordenacao: d.problema.coordenacao || undefined
-      } : undefined,
+        coordenacao: d.problema.coordenacao || undefined,
+        supervisao_tecnica: null
+      } : null,
+      problema_id: d.problema_id || undefined,
       area_coordenacao: {
-        id: '', // Default empty values
         descricao: d.problema?.coordenacao?.descricao || 'Não informada'
       },
       supervisao_tecnica: {
@@ -77,8 +78,6 @@ const ConsultarDemandasTable = () => {
       anexos: null,
       perguntas: null
     };
-    
-    return safeDemand;
   });
 
   const handleViewDemand = (demand: Demand) => {
