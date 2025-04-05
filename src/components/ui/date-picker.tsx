@@ -25,7 +25,7 @@ export interface DatePickerProps {
 export function DatePicker({
   date,
   onSelect,
-  placeholder = "Selecione uma data",
+  placeholder = "Selecione",
   className,
   showTimeSelect = false
 }: DatePickerProps) {

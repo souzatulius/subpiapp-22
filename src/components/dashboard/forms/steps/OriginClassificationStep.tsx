@@ -2,8 +2,10 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio, Flag, Building, Phone, Users, MessageSquare, Mail } from 'lucide-react';
+import { Book, Newspaper, Monitor, MousePointer, Globe, HelpCircle, Mic, Tv, Radio as AudioRadio, Flag, Building, Phone, Users, MessageSquare, Mail } from 'lucide-react';
 import { ValidationError } from '@/lib/formValidationUtils';
+import { useOriginIcon } from '@/hooks/useOriginIcon';
+import { useMediaTypeIcon } from '@/hooks/useMediaTypeIcon';
 
 interface OriginClassificationStepProps {
   formData: {
@@ -47,40 +49,6 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
     }
   }, [showMediaFields, formData.tipo_midia_id]);
 
-  // Get origin icon based on description
-  const getOriginIcon = (descricao: string) => {
-    const iconMap: {
-      [key: string]: React.ReactNode;
-    } = {
-      "Imprensa": <Newspaper className="h-5 w-5" />,
-      "SMSUB": <Building className="h-5 w-5" />,
-      "SECOM": <MessageSquare className="h-5 w-5" />,
-      "Telefone": <Phone className="h-5 w-5" />,
-      "Email": <Mail className="h-5 w-5" />,
-      "Ouvidoria": <Users className="h-5 w-5" />,
-      "Outros": <Flag className="h-5 w-5" />
-    };
-    return iconMap[descricao] || <Flag className="h-5 w-5" />;
-  };
-
-  // Get media type icon based on description
-  const getMediaTypeIcon = (descricao: string) => {
-    const iconMap: {
-      [key: string]: React.ReactNode;
-    } = {
-      "Revista": <Book className="h-6 w-6" />,
-      "Impresso": <Newspaper className="h-6 w-6" />,
-      "Jornal Online": <Monitor className="h-6 w-6" />,
-      "Portal": <MousePointer className="h-6 w-6" />,
-      "Blog": <Globe className="h-6 w-6" />,
-      "Podcast": <Mic className="h-6 w-6" />,
-      "TV": <Tv className="h-6 w-6" />,
-      "Rádio": <Radio className="h-6 w-6" />,
-      "Outros": <HelpCircle className="h-6 w-6" />
-    };
-    return iconMap[descricao] || <HelpCircle className="h-6 w-6" />;
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -100,10 +68,10 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
                 formData.origem_id === origem.id ? "ring-2 ring-[#003570]" : ""
               } ${
                 hasError('origem_id') ? 'border-orange-500' : ''
-              }`} 
+              } hover:bg-[#002855] hover:text-white`} 
               onClick={() => handleSelectChange('origem_id', origem.id)}
             >
-              {getOriginIcon(origem.descricao)}
+              {useOriginIcon(origem, "h-8 w-8")}
               <span className="text-sm font-semibold">{origem.descricao}</span>
             </Button>
           ))}
@@ -131,10 +99,10 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
                   formData.tipo_midia_id === tipo.id ? "ring-2 ring-[#003570]" : ""
                 } ${
                   hasError('tipo_midia_id') ? 'border-orange-500' : ''
-                }`} 
+                } hover:bg-[#002855] hover:text-white`} 
                 onClick={() => handleSelectChange('tipo_midia_id', tipo.id)}
               >
-                {getMediaTypeIcon(tipo.descricao)}
+                {useMediaTypeIcon(tipo, "h-6 w-6")}
                 <span className="text-sm font-semibold">{tipo.descricao}</span>
               </Button>
             ))}
