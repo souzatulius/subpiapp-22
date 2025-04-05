@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { FileText, Send } from 'lucide-react';
+import WelcomeCard from '@/components/shared/WelcomeCard';
 
 const CadastrarRelease = () => {
   const [releaseContent, setReleaseContent] = useState('');
@@ -92,7 +93,14 @@ const CadastrarRelease = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="flex flex-col">
+      <WelcomeCard 
+        title="Releases e Notícias"
+        description="Cadastre releases recebidos e gere notícias para o site institucional."
+        icon={<FileText className="h-6 w-6 mr-2" />}
+        color="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
+      />
+      
+      <div className="flex flex-col mt-6">
         <h1 className="text-2xl font-bold mb-4">Cadastrar Novo Release</h1>
         
         <div className="mb-6">

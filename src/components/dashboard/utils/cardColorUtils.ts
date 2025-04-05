@@ -13,6 +13,7 @@ export const getColorClasses = (color: CardColor): string => {
     case 'gray-medium': return 'bg-[#D4D4D4] text-gray-800'; // Cinza Médio - dark text
     case 'orange-dark': return 'bg-[#F25C05] text-white'; // Laranja Escuro
     case 'orange-light': return 'bg-[#F89E66] text-white'; // Laranja Claro
+    case 'navy-dark': return 'bg-[#051A2C] text-white'; // Azul Marinho Escuro
     default: return 'bg-[#0066FF] text-white'; // Default to Azul Vivo
   }
 };
@@ -29,6 +30,7 @@ export const getHoverColorClasses = (color: CardColor): string => {
     case 'gray-medium': return 'hover:bg-[#C0C0C0]'; // Darker Cinza Médio
     case 'orange-dark': return 'hover:bg-[#D94D04]'; // Darker Laranja Escuro
     case 'orange-light': return 'hover:bg-[#F67A33]'; // Darker Laranja Claro
+    case 'navy-dark': return 'hover:bg-[#031525]'; // Darker Azul Marinho Escuro
     default: return 'hover:bg-[#0055D4]'; // Default to darker Azul Vivo
   }
 };
