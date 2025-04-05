@@ -54,15 +54,6 @@ const ForgotPassword = () => {
     }
   };
 
-  const scrollToForm = () => {
-    if (isMobile && formRef.current) {
-      formRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
-    }
-  };
-
   if (loading) {
     return (
       <AuthLayout>

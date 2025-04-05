@@ -26,15 +26,6 @@ const LoginForm = () => {
     handleGoogleLogin
   } = useLoginForm(navigate);
 
-  const scrollToForm = () => {
-    if (isMobile && formRef.current) {
-      formRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start'
-      });
-    }
-  };
-
   if (loading || authLoading) {
     return (
       <div className="h-full flex items-center justify-center p-8">
