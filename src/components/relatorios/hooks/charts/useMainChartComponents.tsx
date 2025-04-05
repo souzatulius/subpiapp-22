@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { BarChart } from '../../charts/BarChart';
 import { LineChart } from '../../charts/LineChart';
@@ -34,7 +33,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
+              { dataKey: 'Quantidade', name: 'Quantidade', color: '#0066FF' }
             ]}
           />
         ),
@@ -43,7 +42,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Solicitações', name: 'Solicitações', color: chartColors[0] }
+              { dataKey: 'Solicitações', name: 'Solicitações', color: '#0066FF' }
             ]}
           />
         ),
@@ -52,8 +51,8 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             lines={[
-              { dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] },
-              { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[2] }
+              { dataKey: 'Demandas', name: 'Respostas da coordenação', color: '#0066FF' },
+              { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: '#1D4ED8' }
             ]}
           />
         ),
@@ -62,7 +61,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Demandas', name: 'Demandas no mês', color: chartColors[1] }
+              { dataKey: 'Demandas', name: 'Demandas no mês', color: '#0066FF' }
             ]}
           />
         ),
@@ -71,7 +70,7 @@ export const useMainChartComponents = () => {
             data={[]}
             xAxisDataKey="name"
             bars={[
-              { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
+              { dataKey: 'Quantidade', name: 'Quantidade', color: '#0066FF' }
             ]}
           />
         )
@@ -104,7 +103,7 @@ export const useMainChartComponents = () => {
       'origemDemandas': (
         <PieChart 
           data={filteredOrigins.length > 0 ? filteredOrigins : reportsData.origins}
-          colorSet="orange"
+          colors={pieChartColors.default}
           showLabels={false}
           showOnlyPercentage={true}
         />
@@ -113,10 +112,10 @@ export const useMainChartComponents = () => {
         <LineChart 
           data={lineResponseTimesData}
           xAxisDataKey="name"
-          yAxisTicks={[10, 20, 50, 60, 90]} // Setting y-axis ticks as requested
+          yAxisTicks={[10, 20, 50, 60, 90]}
           lines={[
             { dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] },
-            { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[2] }
+            { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[1] }
           ]}
         />
       ),
@@ -125,7 +124,7 @@ export const useMainChartComponents = () => {
           data={barCoordinationsData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Demandas', name: 'Demandas no mês', color: chartColors[1] }
+            { dataKey: 'Demandas', name: 'Demandas no mês', color: chartColors[0] }
           ]}
         />
       ),
@@ -134,7 +133,7 @@ export const useMainChartComponents = () => {
           data={barMediaTypesData}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
+            { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
           ]}
         />
       )

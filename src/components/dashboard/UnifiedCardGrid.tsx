@@ -40,7 +40,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onHideCard,
   isMobileView = false,
   isEditMode = false,
-  disableWiggleEffect = true, // Changed default to true to disable wiggle effect
+  disableWiggleEffect = true, 
   showSpecialFeatures = true,
   quickDemandTitle,
   onQuickDemandTitleChange,
@@ -115,7 +115,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 color={card.color}
                 width={card.width}
                 height={card.height}
-                isDraggable={true}
+                isDraggable={isEditMode}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {
                   const cardToEdit = cards.find(c => c.id === id);

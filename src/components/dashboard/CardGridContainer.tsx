@@ -25,7 +25,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   specialCardsData = {}
 }) => {
   const handleCardsChange = (updatedCards: ActionCardItem[]) => {
-    // Now we properly call the onCardsChange prop to persist the reordering
+    // Call the parent component's onCardsChange to persist the reordering
     onCardsChange(updatedCards);
   };
 
@@ -38,7 +38,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
       onDeleteCard={onDeleteCard}
       isMobileView={isMobileView}
       isEditMode={isEditMode}
-      disableWiggleEffect={true} // Keep this set to true to disable wiggle effect
+      disableWiggleEffect={true}
       specialCardsData={specialCardsData}
       showSpecialFeatures={true}
     />

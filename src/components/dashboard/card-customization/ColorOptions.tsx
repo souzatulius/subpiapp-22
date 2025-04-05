@@ -10,14 +10,16 @@ interface ColorOptionsProps {
 }
 
 const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColor }) => {
-  // Updated color options with only the specified colors
+  // Updated color options with the complete color palette
   const colorOptions: Array<{value: string; display: string; className: string}> = [
     { value: 'blue-vivid', display: 'Azul Vivo', className: 'bg-[#0066FF] border-blue-600 text-white' },
-    { value: 'green-neon', display: 'Verde Neon', className: 'bg-[#00FF00] border-green-600' },
-    { value: 'gray-light', display: 'Cinza Claro', className: 'bg-[#F5F5F5] border-gray-300' },
+    { value: 'blue-dark', display: 'Azul Escuro', className: 'bg-[#1D4ED8] border-blue-900 text-white' },
+    { value: 'green-neon', display: 'Verde Neon', className: 'bg-[#66FF66] border-green-600' },
+    { value: 'lime-green', display: 'Verde Limão', className: 'bg-[#84cc16] border-lime-600' },
     { value: 'orange-dark', display: 'Laranja Escuro', className: 'bg-[#F25C05] border-orange-600 text-white' },
-    { value: 'yellow', display: 'Amarelo', className: 'bg-yellow-400 border-yellow-500' },
-    { value: 'blue-dark', display: 'Azul Escuro', className: 'bg-blue-800 border-blue-900 text-white' },
+    { value: 'orange-light', display: 'Laranja Claro', className: 'bg-[#F89E66] border-orange-300' },
+    { value: 'gray-light', display: 'Cinza Claro', className: 'bg-[#F5F5F5] border-gray-300' },
+    { value: 'gray-dark', display: 'Cinza Escuro', className: 'bg-[#4B5563] border-gray-700 text-white' },
   ];
 
   return (
