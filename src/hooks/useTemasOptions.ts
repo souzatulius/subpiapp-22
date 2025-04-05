@@ -18,27 +18,21 @@ export const useTemasOptions = () => {
       try {
         setIsLoading(true);
         
-        // Only try to fetch temas if the table exists
-        if (temasTableExists) {
-          const { data, error } = await supabase
-            .from('problemas') // Fallback to problemas table if temas doesn't exist
-            .select('id, descricao')
-            .order('descricao');
-            
-          if (error) throw error;
+        // Always use problemas table as fallback since temas doesn't exist
+        const { data, error } = await supabase
+          .from('problemas')
+          .select('id, descricao')
+          .order('descricao');
           
-          setTemas(data as Tema[]);
-        } else {
-          // If table doesn't exist, use problemas as fallback
-          const { data, error } = await supabase
-            .from('problemas')
-            .select('id, descricao')
-            .order('descricao');
-            
-          if (error) throw error;
-          
-          setTemas(data as Tema[]);
-        }
+        if (error) throw error;
+        
+        // Safely transform data to Tema type
+        const transformedData = (data || []).map(item => ({
+          id: item.id || '',
+          descricao: item.descricao || ''
+        }));
+        
+        setTemas(transformedData);
       } catch (error) {
         console.error('Error fetching temas:', error);
         // Provide some default temas as fallback

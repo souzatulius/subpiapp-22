@@ -42,7 +42,6 @@ export const useNotasQuery = (): UseNotasQueryResult => {
             supervisao_tecnica_id,
             supervisao_tecnica:supervisao_tecnica_id (id, descricao),
             coordenacao_id,
-            area_coordenacao:coordenacao_id (id, descricao),
             demanda_id,
             demanda:demanda_id (id, titulo)
           `)
@@ -50,25 +49,41 @@ export const useNotasQuery = (): UseNotasQueryResult => {
         
         if (error) throw error;
         
-        // Transform the data
+        // Transform the data with safe fallbacks
         const transformedData: NotaOficial[] = (data || []).map(item => {
-          return {
+          // Create a default type-safe object
+          const nota: NotaOficial = {
             id: item.id,
             titulo: item.titulo,
             conteudo: item.texto, // Map texto to conteudo for type compatibility
             texto: item.texto,
             status: item.status,
             criado_em: item.criado_em,
-            autor: item.autor,
-            aprovador: item.aprovador,
-            problema: item.problema,
-            supervisao_tecnica: item.supervisao_tecnica,
-            area_coordenacao: item.area_coordenacao,
-            demanda: item.demanda,
-            demanda_id: item.demanda_id,
-            coordenacao_id: item.coordenacao_id,
-            problema_id: item.problema_id
-          } as NotaOficial;
+            
+            // Handle potentially null or error objects with safe defaults
+            autor: item.autor || { id: '', nome_completo: '' },
+            aprovador: item.aprovador || null,
+            
+            problema: item.problema ? {
+              id: item.problema.id,
+              descricao: item.problema.descricao,
+              coordenacao: item.problema.coordenacao || null
+            } : null,
+            
+            supervisao_tecnica: item.supervisao_tecnica || null,
+            
+            area_coordenacao: (item.problema?.coordenacao) ? {
+              id: item.problema.coordenacao.id,
+              descricao: item.problema.coordenacao.descricao
+            } : null,
+            
+            demanda: item.demanda || null,
+            demanda_id: item.demanda_id || null,
+            coordenacao_id: item.coordenacao_id || null,
+            problema_id: item.problema_id || null
+          };
+          
+          return nota;
         });
         
         return transformedData;

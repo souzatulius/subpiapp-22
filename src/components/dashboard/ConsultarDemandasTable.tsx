@@ -31,7 +31,14 @@ const ConsultarDemandasTable = () => {
               coordenacao:coordenacao_id (id, descricao)
             ),
             coordenacao_id,
-            supervisao_tecnica_id
+            origem_id,
+            origem:origem_id(id, descricao),
+            tipo_midia_id,
+            tipo_midia:tipo_midia_id(id, descricao),
+            autor_id,
+            autor:autor_id(id, nome_completo),
+            bairro_id,
+            bairro:bairro_id(id, nome)
           `)
           .order('created_at', { ascending: false });
         
@@ -53,9 +60,8 @@ const ConsultarDemandasTable = () => {
     },
   });
 
-  // Convert the data to match our Demand type with safe fallbacks
-  const demandas: Demand[] = demandasRaw.map(d => {
-    // First create a safe base object with all required properties and normalize the data
+  // Create a safe transformation with fallbacks for all properties
+  const demandas: Demand[] = (demandasRaw || []).map((d: any) => {
     return {
       id: d?.id || '',
       titulo: d?.titulo || '',
@@ -63,35 +69,34 @@ const ConsultarDemandasTable = () => {
       prioridade: d?.prioridade || '',
       horario_publicacao: d?.horario_publicacao || '',
       prazo_resposta: d?.prazo_resposta || '',
-      problema: d?.problema ? {
-        id: d.problema.id || '',
-        descricao: d.problema.descricao || '',
-        coordenacao: d.problema.coordenacao || undefined,
-        supervisao_tecnica: null
-      } : null,
-      problema_id: d?.problema_id || undefined,
       area_coordenacao: {
         descricao: d?.problema?.coordenacao?.descricao || 'Não informada'
       },
+      problema: d?.problema ? {
+        id: d.problema.id || '',
+        descricao: d.problema.descricao || '',
+        coordenacao: d.problema.coordenacao || undefined
+      } : null,
+      problema_id: d?.problema_id || undefined,
       supervisao_tecnica: {
-        id: d?.supervisao_tecnica_id || '',
+        id: '', // We're not using this field anymore
         descricao: ''
       },
-      // Default values for other required properties
-      origem: { descricao: '' },
-      tipo_midia: { descricao: '' },
-      autor: { nome_completo: '' },
-      bairro: { nome: '' },
+      // Add required fallback properties to match the Demand type
+      origem: d?.origem || { descricao: '' },
+      tipo_midia: d?.tipo_midia || { descricao: '' },
+      bairro: d?.bairro || { nome: '' },
+      autor: d?.autor || { nome_completo: '' },
+      endereco: '',
       nome_solicitante: '',
       email_solicitante: '',
       telefone_solicitante: '',
       veiculo_imprensa: '',
-      endereco: '',
       detalhes_solicitacao: '',
+      perguntas: null,
       servico: { descricao: '' },
       arquivo_url: null,
-      anexos: null,
-      perguntas: null
+      anexos: null
     };
   });
 
@@ -101,8 +106,8 @@ const ConsultarDemandasTable = () => {
 
   return (
     <DemandasTable 
-      demandas={demandas as any}
-      onViewDemand={handleViewDemand as any}
+      demandas={demandas}
+      onViewDemand={handleViewDemand}
       isLoading={isLoading}
     />
   );

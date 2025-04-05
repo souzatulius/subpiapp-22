@@ -60,14 +60,16 @@ export const useReleaseForm = () => {
           } else if (fileData) {
             // If we successfully uploaded the file, now try to add reference in the database
             try {
-              // Try to use an existing anexos table if it exists
-              const { error: anexoError } = await supabase.rpc('add_nota_attachment', {
-                nota_id: notaData.id,
-                file_path: fileData.path
-              });
-              
-              if (anexoError) {
-                console.warn('Could not use RPC add_nota_attachment, attachment not linked to nota');
+              // Instead of using RPC, directly update the nota record
+              const { error: updateError } = await supabase
+                .from('notas_oficiais')
+                .update({ 
+                  arquivo_url: `${fileData.path}` 
+                })
+                .eq('id', notaData.id);
+                
+              if (updateError) {
+                console.warn('Could not update nota with attachment:', updateError);
               }
             } catch (e) {
               console.warn('Error linking attachment to nota:', e);

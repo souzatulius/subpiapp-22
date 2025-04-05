@@ -5,10 +5,10 @@ import DemandasTable from './DemandasTable';
 import DemandasSearchBar from './DemandasSearchBar';
 import { LoadingState } from './LoadingState';
 import DeleteDemandDialog from './DeleteDemandDialog';
-import { Demand } from '@/hooks/consultar-demandas/types';
 import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
 import { usePermissions } from '@/hooks/permissions';
 import DemandDetail from '@/components/demandas/DemandDetail';
+import { Demand } from '@/hooks/consultar-demandas/types';
 
 const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
@@ -93,9 +93,9 @@ const ConsultarDemandasContent = () => {
         onSearch={handleSearch}
       />
       <DemandasTable
-        demandas={demandas || []}
-        onViewDemand={handleViewDemand}
-        onDelete={handleDelete}
+        demandas={demandas as any}
+        onViewDemand={handleViewDemand as any}
+        onDelete={handleDelete as any}
         totalCount={totalCount}
         page={page}
         pageSize={pageSize}

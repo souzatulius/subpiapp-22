@@ -1,30 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import NotasTable from '@/components/consultar-notas/NotasTable';
 import { NotaOficial } from '@/types/nota';
-import { useToast } from '@/components/ui/use-toast';
 
 const ConsultarNotasTable = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [exporting, setExporting] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    try {
-      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
-    } catch (e) {
-      return 'Data inválida';
-    }
-  };
-  
-  const { data: notasRaw = [], isLoading, refetch } = useQuery({
+
+  const { data: notasRaw = [], isLoading } = useQuery({
     queryKey: ['notas-oficiais'],
     queryFn: async () => {
       try {
@@ -37,36 +24,57 @@ const ConsultarNotasTable = () => {
             status,
             criado_em,
             autor_id,
+            autor:autor_id (id, nome_completo),
+            aprovador_id,
+            aprovador:aprovador_id (id, nome_completo),
             problema_id,
             problema:problema_id (
-              id,
+              id, 
               descricao,
               coordenacao_id,
               coordenacao:coordenacao_id (id, descricao)
             ),
             supervisao_tecnica_id,
-            supervisao_tecnica:supervisao_tecnica_id (id, descricao),
-            coordenacao_id,
-            area_coordenacao:coordenacao_id (id, descricao)
+            coordenacao_id
           `)
           .order('criado_em', { ascending: false });
         
-        if (error) {
-          console.error("Error fetching notas:", error);
-          return [];
-        }
+        if (error) throw error;
         
         return data || [];
-      } catch (err) {
-        console.error("Exception when fetching notas:", err);
+      } catch (error) {
+        console.error("Error fetching notas:", error);
         return [];
       }
     },
   });
-  
-  // Process the notas to ensure they match our NotaOficial type
-  const notas: NotaOficial[] = notasRaw.map(nota => {
-    // Create a compatible NotaOficial object with safe fallbacks
+
+  // Add safe transformation with fallbacks
+  const notas: NotaOficial[] = (notasRaw || []).map((nota: any) => {
+    // Create a safe author object
+    const autor = nota?.autor || { id: '', nome_completo: '' };
+    const aprovador = nota?.aprovador || null;
+    
+    // Create a safe problema object with coordenacao
+    let problema = null;
+    let area_coordenacao = null;
+    
+    if (nota?.problema) {
+      problema = {
+        id: nota.problema.id || '',
+        descricao: nota.problema.descricao || '',
+        coordenacao: nota.problema.coordenacao || null
+      };
+      
+      // Extract area_coordenacao from problema if available
+      if (nota.problema.coordenacao) {
+        area_coordenacao = {
+          id: nota.problema.coordenacao.id || '',
+          descricao: nota.problema.coordenacao.descricao || ''
+        };
+      }
+    }
+    
     return {
       id: nota?.id || '',
       titulo: nota?.titulo || '',
@@ -74,63 +82,42 @@ const ConsultarNotasTable = () => {
       texto: nota?.texto || '',
       status: nota?.status || '',
       criado_em: nota?.criado_em || '',
-      autor: nota?.autor_id ? { id: nota.autor_id, nome_completo: 'Usuário' } : undefined,
-      problema: nota?.problema ? {
-        id: nota.problema.id || '',
-        descricao: nota.problema.descricao || '',
-        coordenacao: nota.problema.coordenacao || undefined
-      } : undefined,
-      supervisao_tecnica: nota?.supervisao_tecnica ? {
-        id: nota.supervisao_tecnica.id || '',
-        descricao: nota.supervisao_tecnica.descricao || '',
-      } : undefined,
-      area_coordenacao: nota?.area_coordenacao ? {
-        id: nota.area_coordenacao.id || '',
-        descricao: nota.area_coordenacao.descricao || ''
-      } : undefined
+      autor,
+      aprovador,
+      problema,
+      area_coordenacao,
+      supervisao_tecnica: null,
+      demanda: null,
+      demanda_id: null,
+      problema_id: nota?.problema_id || null,
+      coordenacao_id: nota?.coordenacao_id || null
     };
   });
 
-  const handleViewNota = (nota: NotaOficial) => {
-    navigate(`/dashboard/comunicacao/notas/detalhes?id=${nota.id}`);
-  };
-
-  const handleExportPDF = async (nota: NotaOficial) => {
-    setExporting(true);
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     try {
-      toast({
-        title: "Exportação iniciada",
-        description: "O PDF está sendo gerado e será baixado em instantes.",
-      });
-      
-      // Simulate delay for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "PDF exportado com sucesso",
-        description: "O arquivo foi baixado para o seu dispositivo.",
-      });
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      toast({
-        title: "Erro na exportação",
-        description: "Não foi possível gerar o PDF. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setExporting(false);
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+    } catch (e) {
+      return 'Data inválida';
     }
   };
 
+  const handleViewNota = (nota: NotaOficial) => {
+    navigate(`/dashboard/comunicacao/notas/detalhe?id=${nota.id}`);
+  };
+  
+  const handleEditNota = (id: string) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
+  };
+
   return (
-    <NotasTable
+    <NotasTable 
       notas={notas}
       loading={isLoading}
       formatDate={formatDate}
       onViewNota={handleViewNota}
-      onExportPDF={handleExportPDF}
-      exporting={exporting}
-      deleteLoading={deleteLoading}
+      onEditNota={handleEditNota}
     />
   );
 };

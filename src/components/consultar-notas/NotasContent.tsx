@@ -7,11 +7,37 @@ import NotasTable from './NotasTable';
 import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
 import NotasCards from './NotasCards';
-import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNotasData } from '@/hooks/consultar-notas/useNotasData';
 import { NotaOficial } from '@/types/nota';
+
+// Define local types needed for components
+interface NotasFilterLocalProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  dateRange: [Date | null, Date | null];
+  setDateRange: (range: [Date | null, Date | null]) => void;
+  viewMode: 'table' | 'cards';
+  setViewMode: React.Dispatch<React.SetStateAction<'table' | 'cards'>>;
+}
+
+interface NotasTableLocalProps {
+  notas: NotaOficial[];
+  loading: boolean;
+  formatDate: (dateString: string) => string;
+  onViewNota: (nota: NotaOficial) => void;
+  onEditNota?: (id: string) => void;
+  onDeleteNota?: (id: string) => void;
+}
+
+interface DeleteNotaDialogLocalProps {
+  isOpen: boolean;
+  onConfirm: () => void;
+  onCancel?: () => void;
+}
 
 const NotasContent = () => {
   const navigate = useNavigate();
@@ -20,15 +46,14 @@ const NotasContent = () => {
     setSearchTerm,
     statusFilter,
     setStatusFilter,
-    dateRange,
-    setDateRange,
     filteredNotas,
-    isLoading,
+    loading,
     handleDeleteNota,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     selectedNotaId,
-    setSelectedNotaId
+    setSelectedNotaId,
+    refetch
   } = useNotasData();
   
   // State for table vs cards view
@@ -37,6 +62,9 @@ const NotasContent = () => {
   // State for detail dialog
   const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  // Date range state
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   
   const handleViewNota = (nota: NotaOficial) => {
     setSelectedNota(nota);
@@ -88,8 +116,8 @@ const NotasContent = () => {
             setSearchTerm={setSearchTerm}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
-            dateRange={dateRange as [Date, Date]}
-            setDateRange={setDateRange as (range: [Date, Date]) => void}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
             viewMode={viewMode}
             setViewMode={setViewMode}
           />
@@ -99,7 +127,7 @@ const NotasContent = () => {
       {viewMode === 'table' ? (
         <NotasTable 
           notas={filteredNotas}
-          loading={isLoading}
+          loading={loading}
           formatDate={formatDate}
           onViewNota={handleViewNota}
           onEditNota={handleEditNota}
@@ -108,7 +136,7 @@ const NotasContent = () => {
       ) : (
         <NotasCards 
           notas={filteredNotas}
-          loading={isLoading}
+          loading={loading}
           formatDate={formatDate}
           onViewNota={handleViewNota}
           onEditNota={handleEditNota}
