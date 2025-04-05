@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useCardStatsData } from './reports/useCardStatsData';
-import { useChartStatsData } from './reports/useChartStatsData';
+import useChartStatsData from './reports/useChartStatsData';
 import { CardStats } from './reports/types';
 import { supabase } from '@/integrations/supabase/client';
 import { DateRange } from 'react-day-picker';
@@ -35,8 +35,10 @@ export const useReportsData = (initialFilters: ReportFilters = {}) => {
   
   const {
     reportsData,
+    isLoading: isLoadingCharts,
     fetchChartData,
-    isLoadingCharts
+    selectedMonth,
+    handleMonthChange
   } = useChartStatsData();
 
   // Log para debug
@@ -59,7 +61,7 @@ export const useReportsData = (initialFilters: ReportFilters = {}) => {
       
       // Em seguida, buscamos os dados para os gráficos
       console.log('Buscando dados para gráficos...');
-      await fetchChartData(filters);
+      await fetchChartData();
       console.log('Dados dos gráficos carregados com sucesso');
       
     } catch (error) {
@@ -104,6 +106,8 @@ export const useReportsData = (initialFilters: ReportFilters = {}) => {
     cardStats,
     filters,
     setFilters,
-    resetFilters
+    resetFilters,
+    selectedMonth,
+    handleMonthChange
   };
 };
