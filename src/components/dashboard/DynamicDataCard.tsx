@@ -41,10 +41,8 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
       case 'green-neon': return 'bg-[#00FF00]'; // Verde Neon
       case 'gray-light': return 'bg-[#F5F5F5]'; // Cinza Claro
       case 'orange-dark': return 'bg-[#F25C05]'; // Laranja Escuro
-      case 'orange-light': return 'bg-[#F89E66]'; // Laranja Claro
+      case 'yellow': return 'bg-yellow-400'; // Amarelo
       case 'blue-dark': return 'bg-blue-800'; // Azul Escuro
-      case 'lime-green': return 'bg-[#84cc16]'; // Verde Limão
-      case 'gray-dark': return 'bg-[#4B5563]'; // Cinza Escuro
       default: return 'bg-[#0066FF]'; // Default to Azul Vivo
     }
   };
@@ -54,8 +52,7 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
     switch (color) {
       case 'gray-light':
       case 'green-neon':
-      case 'orange-light':
-      case 'lime-green':
+      case 'yellow':
         return 'text-gray-800'; // Dark text for light backgrounds
       default:
         return 'text-white'; // White text for dark backgrounds
