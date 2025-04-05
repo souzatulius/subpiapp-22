@@ -5,29 +5,15 @@ import { ptBR } from 'date-fns/locale';
 import { CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Demanda } from '../types';
+import { getPriorityColor, formatPriority } from '@/utils/priorityUtils';
 
 interface DemandaHeaderProps {
   demanda: Demanda;
 }
 
 const DemandaHeader: React.FC<DemandaHeaderProps> = ({ demanda }) => {
-  const getPriorityText = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta': return 'Alta';
-      case 'media': return 'Média';
-      case 'baixa': return 'Baixa';
-      default: return 'Normal';
-    }
-  };
-
-  const getPriorityColor = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta': return 'bg-red-100 text-red-700 border-red-200';
-      case 'media': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'baixa': return 'bg-green-100 text-green-700 border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
+  const priorityColors = getPriorityColor(demanda.prioridade);
+  const priorityText = formatPriority(demanda.prioridade);
 
   const dataCriacao = demanda.horario_publicacao
     ? format(new Date(demanda.horario_publicacao), 'dd/MM/yyyy', { locale: ptBR })
@@ -43,9 +29,9 @@ const DemandaHeader: React.FC<DemandaHeaderProps> = ({ demanda }) => {
       </div>
       <Badge 
         variant="outline" 
-        className={`${getPriorityColor(demanda.prioridade)} px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300`}
+        className={`${priorityColors.bg} ${priorityColors.text} ${priorityColors.border} px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300`}
       >
-        Prioridade: {getPriorityText(demanda.prioridade)}
+        Prioridade: {priorityText}
       </Badge>
     </div>
   );

@@ -88,8 +88,8 @@ const RankingContent: React.FC<RankingContentProps> = ({
         </div>
       )}
       
-      {/* Seção de Upload Unificada */}
-      <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all">
+      {/* Seção de Upload Unificada - marked with upload-section class for hiding during PDF export */}
+      <Card className="p-4 bg-white border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-all upload-section">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div>
             <h2 className="text-lg font-semibold text-blue-800 flex items-center">

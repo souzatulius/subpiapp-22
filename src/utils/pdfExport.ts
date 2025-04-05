@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
 const elementsToHide = [
   '.navigation',
   '.button',
-  'button',
+  'button:not(.keep-in-pdf)',
   '.sidebar',
   'header',
   '.header',
@@ -20,6 +20,9 @@ const elementsToHide = [
   '.actions',
   '[role="dialog"]',
   '.dialog',
+  'footer',
+  '.footer',
+  '.upload-section', // Hide the upload section
 ];
 
 // Custom style to add to the document during export
@@ -28,13 +31,17 @@ const exportStyles = `
   .navigation, .button, button:not(.keep-in-pdf), 
   .sidebar, header, .header, .filter, .filters,
   .control, .controls, #mobile-nav, .mobile-nav,
-  .toolbar, .actions, [role="dialog"], .dialog {
+  .toolbar, .actions, [role="dialog"], .dialog,
+  footer, .footer, .upload-section {
     display: none !important;
   }
 
   /* Focus on content */
   .pdf-content, .chart-container {
     margin: 0 auto;
+    transform: scale(0.8); /* Scale to 80% */
+    transform-origin: top center;
+    width: 125% !important; /* Compensate for scaling */
   }
 
   /* Improved presentation of charts */
@@ -58,6 +65,12 @@ const exportStyles = `
   .title-container, .welcome-card {
     margin: 20px 0;
     text-align: center;
+  }
+  
+  /* Ensure cards don't break across pages */
+  .sortable-chart-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 `;
 
@@ -103,6 +116,12 @@ export const exportToPDF = async (pageTitle: string) => {
             (el as HTMLElement).style.display = 'none';
           });
         });
+        
+        // Also specifically hide the upload section
+        const uploadSection = documentClone.querySelector('.p-4.bg-white.border-orange-200:first-of-type');
+        if (uploadSection) {
+          (uploadSection as HTMLElement).style.display = 'none';
+        }
       }
     });
 

@@ -1,4 +1,3 @@
-
 export const getPriorityColor = (priority: string) => {
   switch (priority) {
     case 'alta':
@@ -54,7 +53,7 @@ export const calcularTempoRestante = (prazoResposta: string) => {
       className: 'text-orange-600 font-medium flex items-center gap-1',
     };
   } else {
-    // Vence em x dias - azul
+    // Vence em x dias - azul (fixed to blue as requested)
     return {
       label: `Vence em ${diffDays} dia(s)`,
       className: 'text-blue-600 font-medium flex items-center gap-1',

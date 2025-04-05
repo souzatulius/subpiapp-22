@@ -1,92 +1,89 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { CalendarClock, Calendar, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Demanda } from '../types';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { calcularTempoRestante } from '@/utils/priorityUtils';
+import { Demanda } from '../types';
+import { Clock, MapPin, AlertTriangle } from 'lucide-react';
+import { calcularTempoRestante, getPriorityColor } from '@/utils/priorityUtils';
 
 interface DemandaCardProps {
   demanda: Demanda;
-  isSelected: boolean;
+  isSelected?: boolean;
   onClick: () => void;
 }
 
-const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick }) => {
+const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected = false, onClick }) => {
+  // Format date
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'Não definido';
     try {
+      if (!dateString) return 'Data não disponível';
       return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
-    } catch (e) {
+    } catch (error) {
       return 'Data inválida';
     }
   };
 
-  const getPriorityColor = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta': return 'bg-red-100 text-red-700 border-red-200';
-      case 'media': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'baixa': return 'bg-green-100 text-green-700 border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
+  // Calculate remaining time
+  const tempoRestante = demanda.prazo_resposta 
+    ? calcularTempoRestante(demanda.prazo_resposta) 
+    : null;
 
-  const getPriorityText = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta': return 'Alta';
-      case 'media': return 'Média';
-      case 'baixa': return 'Baixa';
-      default: return 'Normal';
-    }
-  };
+  // Get priority color
+  const priorityColors = getPriorityColor(demanda.prioridade);
 
-  const tempoRestante = calcularTempoRestante(demanda.prazo_resposta);
+  // Format title
+  const title = demanda.titulo || 'Demanda sem título';
+  const shortTitle = title.length > 60 ? `${title.substring(0, 60)}...` : title;
+
+  // Origin name (safely accessing possibly undefined properties)
+  const origemNome = demanda.origem_nome || 'Origem não especificada';
 
   return (
     <Card 
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md border ${
-        isSelected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'
+      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+        isSelected ? 'ring-2 ring-orange-500 shadow-md' : 'hover:border-orange-200'
       }`}
       onClick={onClick}
     >
-      <CardContent className="p-4 space-y-3">
-        <div className="flex justify-between">
+      <CardHeader className="py-3 px-4">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-sm text-gray-700 font-medium">{shortTitle}</CardTitle>
           <Badge 
             variant="outline" 
-            className={getPriorityColor(demanda.prioridade)}
+            className={`${priorityColors.bg} ${priorityColors.text} ${priorityColors.border} text-xs`}
           >
-            {getPriorityText(demanda.prioridade)}
+            {demanda.prioridade === 'alta' ? 'Alta' : 
+              demanda.prioridade === 'media' ? 'Média' : 'Baixa'}
           </Badge>
-          
-          {demanda.tema?.descricao && (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              {demanda.tema.descricao}
-            </Badge>
-          )}
         </div>
-        
-        <h3 className="font-medium text-gray-900 line-clamp-2">{demanda.titulo}</h3>
-        
-        <div className="flex items-center text-sm text-gray-500 gap-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          <span>{formatDate(demanda.horario_publicacao)}</span>
+        <CardDescription className="text-xs mt-1">
+          {origemNome}
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="py-2 px-4">
+        <div className="text-xs text-gray-600">
+          <div className="flex items-center mb-1">
+            <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+            <span>{demanda.bairro || 'Local não especificado'}</span>
+          </div>
+          <div className="flex items-center">
+            <Clock className="h-3 w-3 mr-1 text-gray-400" />
+            <span>Criada em: {formatDate(demanda.horario_publicacao)}</span>
+          </div>
         </div>
-        
-        {demanda.prazo_resposta && tempoRestante && (
-          <div className={`flex items-center text-sm gap-1 ${tempoRestante.className}`}>
-            <Clock className="h-4 w-4" />
-            <span>{tempoRestante.label}</span>
-          </div>
-        )}
-        
-        {demanda.origem?.descricao && (
-          <div className="text-sm text-gray-500">
-            Origem: <span className="font-medium">{demanda.origem.descricao}</span>
-          </div>
-        )}
       </CardContent>
+      
+      <CardFooter className="py-2 px-4 border-t border-gray-100">
+        {tempoRestante && (
+          <div className={tempoRestante.className}>
+            <AlertTriangle className="h-3 w-3" />
+            <span className="text-xs">{tempoRestante.label}</span>
+          </div>
+        )}
+      </CardFooter>
     </Card>
   );
 };

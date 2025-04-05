@@ -1,42 +1,34 @@
 
 import React from 'react';
+import { Demanda } from '../types';
 import DemandaCard from './DemandaCard';
 import EmptyState from './EmptyState';
-import { Demanda } from '../types';
 
 interface DemandaListProps {
   demandas: Demanda[];
-  selectedDemanda: Demanda | null;
-  handleSelectDemanda: (demanda: Demanda) => void;
-  isLoading: boolean;
+  selectedDemandaId: string | null;
+  onSelectDemanda: (demanda: Demanda) => void;
+  loading: boolean;
 }
 
-const DemandaList: React.FC<DemandaListProps> = ({
-  demandas,
-  selectedDemanda,
-  handleSelectDemanda,
-  isLoading
+const DemandaList: React.FC<DemandaListProps> = ({ 
+  demandas, 
+  selectedDemandaId, 
+  onSelectDemanda,
+  loading 
 }) => {
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
-  
-  if (demandas.length === 0) {
-    return <EmptyState />;
+  if (demandas.length === 0 && !loading) {
+    return <EmptyState message="Nenhuma demanda encontrada com os filtros selecionados" />;
   }
   
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-3">
       {demandas.map(demanda => (
-        <DemandaCard 
-          key={demanda.id} 
-          demanda={demanda} 
-          selected={selectedDemanda?.id === demanda.id} 
-          onClick={() => handleSelectDemanda(demanda)} 
+        <DemandaCard
+          key={demanda.id}
+          demanda={demanda}
+          isSelected={selectedDemandaId === demanda.id}
+          onClick={() => onSelectDemanda(demanda)}
         />
       ))}
     </div>

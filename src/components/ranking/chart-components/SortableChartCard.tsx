@@ -1,15 +1,16 @@
+
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, EyeOff, ChevronDown, ChevronUp, LineChart, BarChart } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp, BarChart3, X } from 'lucide-react';
 
 interface SortableChartCardProps {
   id: string;
+  component: React.ReactNode;
   title: string;
   analysis: string;
-  component: React.ReactNode;
   isVisible: boolean;
   isAnalysisExpanded: boolean;
   showAnalysisOnly: boolean;
@@ -21,9 +22,9 @@ interface SortableChartCardProps {
 
 const SortableChartCard: React.FC<SortableChartCardProps> = ({
   id,
+  component,
   title,
   analysis,
-  component,
   isVisible,
   isAnalysisExpanded,
   showAnalysisOnly,
@@ -32,55 +33,109 @@ const SortableChartCard: React.FC<SortableChartCardProps> = ({
   onToggleView,
   disableCardContainer = false
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-  
-  // If card should not be visible, return null
+
+  // If the card is not visible, return null
   if (!isVisible) return null;
   
-  // If disableCardContainer is true, render just the component without the card wrapper
+  // If disableCardContainer is true, just render the component without the card wrapper
   if (disableCardContainer) {
     return (
-      <div ref={setNodeRef} style={style}>
+      <div 
+        ref={setNodeRef}
+        style={style}
+        className="sortable-chart-card"
+        {...attributes}
+        {...listeners}
+      >
         {component}
       </div>
     );
   }
-  
-  // Otherwise, render the full card
+
   return (
-    <div ref={setNodeRef} style={style}>
-      <Card className={`h-full overflow-hidden transition-opacity ${isDragging ? 'opacity-50' : 'opacity-100'}`}>
-        <CardHeader className="p-3 flex flex-row items-center justify-between bg-gray-50">
-          <CardTitle className="text-sm font-medium flex items-center cursor-grab" {...attributes} {...listeners}>
-            {showAnalysisOnly ? <LineChart className="h-4 w-4 mr-2" /> : <BarChart className="h-4 w-4 mr-2" />}
-            {title}
-          </CardTitle>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onToggleView} title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar apenas análise"}>
-              {showAnalysisOnly ? <BarChart className="h-4 w-4" /> : <LineChart className="h-4 w-4" />}
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className="sortable-chart-card"
+      {...attributes}
+      {...listeners}
+    >
+      <Card className="bg-white shadow-sm border-gray-200 overflow-hidden transition-all duration-300 ease-in-out">
+        {/* Header with title and controls */}
+        <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-white/80">
+          <div className="font-medium text-gray-700 flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-orange-500" />
+            <span>{title}</span>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            {!showAnalysisOnly && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleAnalysis}
+                className="h-7 w-7 text-gray-500 hover:text-orange-500"
+              >
+                {isAnalysisExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </Button>
+            )}
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleView}
+              className="h-7 w-7 text-gray-500 hover:text-orange-500"
+              title={showAnalysisOnly ? "Mostrar gráfico" : "Mostrar apenas análise"}
+            >
+              {showAnalysisOnly ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onToggleAnalysis} title={isAnalysisExpanded ? "Recolher análise" : "Expandir análise"}>
-              {isAnalysisExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onToggleVisibility} title="Ocultar gráfico">
-              <EyeOff className="h-4 w-4" />
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleVisibility}
+              className="h-7 w-7 text-gray-500 hover:text-red-500"
+            >
+              <X className="h-4 w-4" />
             </Button>
           </div>
-        </CardHeader>
-        <CardContent className="p-4">
-          {isAnalysisExpanded && (
-            <div className="mb-3 text-sm text-gray-700 bg-gray-50 p-2 rounded border border-gray-200">
-              <p>{analysis}</p>
+        </div>
+        
+        {/* Analysis section */}
+        {isAnalysisExpanded && (
+          <div className="p-3 border-b border-gray-100 bg-orange-50 text-sm text-gray-700">
+            {analysis}
+          </div>
+        )}
+        
+        {/* Chart content */}
+        {!showAnalysisOnly && (
+          <div className="p-4 bg-white">
+            {component}
+          </div>
+        )}
+        
+        {/* Only show analysis in this view mode */}
+        {showAnalysisOnly && (
+          <div className="p-4 bg-white text-sm text-gray-700">
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <h4 className="font-medium text-orange-700 mb-2">Análise:</h4>
+              {analysis}
             </div>
-          )}
-          
-          {!showAnalysisOnly && component}
-        </CardContent>
+          </div>
+        )}
       </Card>
     </div>
   );
