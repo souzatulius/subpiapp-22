@@ -96,14 +96,14 @@ const ResponderDemandaContent: React.FC = () => {
             {viewMode === 'cards' ? (
               <DemandaGrid 
                 demandas={filteredDemandas} 
-                selectedDemanda={selectedDemanda} 
+                selectedDemandaId={selectedDemanda?.id} 
                 handleSelectDemanda={handleSelectDemanda} 
                 isLoading={isLoadingDemandas} 
               />
             ) : (
               <DemandaList 
                 demandas={filteredDemandas} 
-                selectedDemanda={selectedDemanda} 
+                selectedDemandaId={selectedDemanda?.id} 
                 handleSelectDemanda={handleSelectDemanda} 
                 isLoading={isLoadingDemandas} 
               />

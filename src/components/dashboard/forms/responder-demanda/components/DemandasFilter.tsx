@@ -86,7 +86,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
       {isFilterOpen && (
         <div className="flex flex-wrap gap-4 animate-fadeInUp">
           <div className="w-full sm:w-auto flex-1">
-            <Select value={areaFilter} onValueChange={setAreaFilter}>
+            <Select value={areaFilter} onValueChange={setAreaFilter} defaultValue="todos">
               <SelectTrigger>
                 <SelectValue placeholder="Coordenação" />
               </SelectTrigger>
@@ -102,7 +102,7 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           </div>
 
           <div className="w-full sm:w-auto flex-1">
-            <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter}>
+            <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter} defaultValue="todos">
               <SelectTrigger>
                 <SelectValue placeholder="Prioridade" />
               </SelectTrigger>
