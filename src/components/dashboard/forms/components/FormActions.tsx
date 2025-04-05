@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -24,35 +23,29 @@ const FormActions: React.FC<FormActionsProps> = ({
     <div className="flex justify-between mt-8">
       <Button 
         type="button"
-        variant="outline" 
-        onClick={onPrevStep} 
-        disabled={isFirstStep} 
-        className="rounded-lg"
+        variant="outline"
+        onClick={onPrevStep}
+        disabled={isFirstStep}
       >
         Voltar
       </Button>
-      
+
       {isLastStep ? (
-        <Button 
+        <Button
           type="button"
-          onClick={onSubmit} 
-          disabled={isSubmitting} 
-          className="bg-[#003570] hover:bg-[#002855] rounded-lg"
+          variant="default"
+          onClick={onSubmit}
+          disabled={isSubmitting}
         >
           {isSubmitting ? "Enviando..." : "Finalizar"}
         </Button>
       ) : (
-        <Button 
+        <Button
           type="button"
-          onClick={onNextStep} 
-          className="bg-[#003570] hover:bg-[#002855] rounded-lg"
+          variant="default"
+          onClick={onNextStep}
         >
           Próximo
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       )}
-    </div>
-  );
-};
-
-export default FormActions;
