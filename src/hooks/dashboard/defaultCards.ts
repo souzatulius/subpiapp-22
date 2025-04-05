@@ -112,7 +112,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: 'Relatórios da Comunicação',
       path: '/dashboard/comunicacao/relatorios',
       iconId: 'bar-chart-2',
-      color: 'gray-medium',
+      color: 'deep-blue',
       width: '25',
       height: '2',
       type: 'standard',
@@ -148,8 +148,6 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
 
 // Cards padrão para o dashboard inicial
 export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem[] => {
-  // To avoid infinite recursion in type instantiation, return a simpler object structure
-  // Removed recursive references and complex conditional structures
   return [
     {
       id: 'nova-solicitacao',
@@ -234,7 +232,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       title: 'Relatórios da Comunicação',
       path: '/dashboard/comunicacao/relatorios',
       iconId: 'bar-chart-2',
-      color: 'gray-medium',
+      color: 'deep-blue',
       width: '25',
       height: '2',
       type: 'standard',

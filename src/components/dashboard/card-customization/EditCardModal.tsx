@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Sheet,
@@ -48,6 +47,7 @@ const COLOR_OPTIONS: ColorOption[] = [
   { value: "gray-medium", label: "Cinza Médio", class: "bg-[#D4D4D4]" },
   { value: "orange-dark", label: "Laranja Escuro", class: "bg-[#F25C05]" },
   { value: "orange-light", label: "Laranja Claro", class: "bg-[#F89E66]" },
+  { value: "deep-blue", label: "Azul Profundo", class: "bg-[#051A2C]" },
 ];
 
 const EditCardModal: React.FC<EditCardModalProps> = ({

@@ -12,6 +12,7 @@ export const getBgColor = (color: string): CardColor => {
     case 'gray-light': return 'gray-light' as CardColor;
     case 'gray-lighter': return 'gray-lighter' as CardColor;
     case 'gray-medium': return 'gray-medium' as CardColor;
+    case 'deep-blue': return 'deep-blue' as CardColor;
     // map legacy colors to new palette
     case 'grey-400': 
     case 'gray-400': 

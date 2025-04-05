@@ -22,6 +22,7 @@ const ColorOptions: React.FC<ColorOptionsProps> = ({ selectedColor, onSelectColo
     { value: 'gray-medium', display: 'Cinza Médio', className: 'bg-[#D4D4D4] border-gray-400 text-gray-800' },
     { value: 'orange-dark', display: 'Laranja Escuro', className: 'bg-[#F25C05] border-orange-600 text-white' },
     { value: 'orange-light', display: 'Laranja Claro', className: 'bg-[#F89E66] border-orange-400 text-white' },
+    { value: 'deep-blue', display: 'Azul Profundo', className: 'bg-[#051A2C] border-blue-950 text-white' },
   ];
 
   return (
