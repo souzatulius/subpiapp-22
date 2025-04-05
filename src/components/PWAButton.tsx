@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Smartphone, ChevronRight } from 'lucide-react';
+import { Smartphone, ChevronRight, X, ArrowRight } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const PWAButton: React.FC = () => {
@@ -18,6 +19,12 @@ const PWAButton: React.FC = () => {
       setCurrentStep(currentStep + 1);
     } else {
       toggleInstructions(); // Close if on last step
+    }
+  };
+
+  const goToStep = (step: number) => {
+    if (step >= 1 && step <= totalSteps) {
+      setCurrentStep(step);
     }
   };
 
@@ -47,16 +54,25 @@ const PWAButton: React.FC = () => {
               <h2 className="text-xl font-semibold text-center">Use a SubPi como app no celular!</h2>
               
               <div className="flex justify-between mt-4 text-sm">
-                <div className="flex items-center">
-                  <div className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>1</div>
+                <div 
+                  className="flex items-center cursor-pointer" 
+                  onClick={() => goToStep(1)}
+                >
+                  <div className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium transition-colors`}>1</div>
                   <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Chrome</span>
                 </div>
-                <div className="flex items-center">
-                  <div className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>2</div>
+                <div 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => goToStep(2)}
+                >
+                  <div className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium transition-colors`}>2</div>
                   <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Safari</span>
                 </div>
-                <div className="flex items-center">
-                  <div className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>3</div>
+                <div 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => goToStep(3)}
+                >
+                  <div className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium transition-colors`}>3</div>
                   <span className="ml-1 text-xs font-medium text-gray-600">Finalize</span>
                 </div>
               </div>
@@ -124,16 +140,17 @@ const PWAButton: React.FC = () => {
             <div className="border-t p-4 flex justify-between">
               <button
                 onClick={toggleInstructions}
-                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors border border-gray-200"
+                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-xl transition-colors border border-gray-200 flex items-center"
               >
+                <X className="mr-1.5 h-4 w-4" />
                 Fechar
               </button>
               <button 
                 onClick={goToNextStep}
-                className="bg-subpi-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                className="bg-subpi-blue text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors flex items-center"
               >
                 {currentStep === totalSteps ? 'Concluir' : 'Continuar'}
-                {currentStep !== totalSteps && <ChevronRight className="ml-1 h-4 w-4" />}
+                {currentStep !== totalSteps ? <ChevronRight className="ml-1 h-4 w-4" /> : <ArrowRight className="ml-1 h-4 w-4" />}
               </button>
             </div>
           </div>
