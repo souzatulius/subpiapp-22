@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -85,7 +86,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           ))}
         </div>
       ) : (
-        cards.length > 0 ? (
+        cards && cards.length > 0 ? (
           <div className="px-[30px] py-[30px]">
             <CardGridContainer
               cards={cards}

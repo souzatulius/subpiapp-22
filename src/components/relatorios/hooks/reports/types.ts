@@ -7,12 +7,13 @@ export interface CardStats {
   tempoMedioResposta: number;
   tempoRespostaVariacao: number;
   taxaAprovacao: number;
-  aprovacaoVariacao?: number;  // Adding the missing property
+  aprovacaoVariacao?: number;
   notasAprovadas: number;
   notasEditadas: number;
   noticiasPublicas?: number;
   totalReleases?: number;
   noticiasVariacao?: number;
+  notasAguardando?: number;
 }
 
 export interface ChartData {
@@ -22,4 +23,10 @@ export interface ChartData {
 export interface ReportsData {
   cardStats: CardStats;
   chartData: ChartData;
+  districts?: any[];
+  origins?: any[];
+  responseTimes?: any[];
+  problemas?: any[];
+  coordinations?: any[];
+  mediaTypes?: any[];
 }
