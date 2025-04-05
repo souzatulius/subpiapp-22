@@ -84,7 +84,9 @@ export const useComunicacaoDashboard = (
   };
 
   const handleSaveCardEdit = async (updatedCard: ActionCardItem) => {
-    const updatedCards = cards.map(card => 
+    if (!updatedCard || !cards) return;
+    
+    const updatedCards = cards.map((card) => 
       card.id === updatedCard.id ? { ...updatedCard } : card
     );
     
@@ -110,7 +112,9 @@ export const useComunicacaoDashboard = (
   };
 
   const handleCardHide = async (cardId: string) => {
-    const updatedCards = cards.map(card => 
+    if (!cardId || !cards) return;
+    
+    const updatedCards = cards.map((card) => 
       card.id === cardId ? { ...card, isHidden: true } : card
     );
     

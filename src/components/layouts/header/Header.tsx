@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between">
         {/* Left side with menu toggle - now hidden on mobile */}
-        <div className="w-1/4 flex items-center">
+        <div className="w-1/4 flex items-center gap-4">
           {showControls && toggleSidebar && !isMobile && (
             <Button
               variant="ghost"
