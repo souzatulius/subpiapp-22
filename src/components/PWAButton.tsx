@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Smartphone, ChevronRight } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -50,10 +51,12 @@ const PWAButton: React.FC = () => {
                 <div className="flex items-center">
                   <div className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>1</div>
                   <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Chrome</span>
+                  <div className={`h-1 w-6 ${currentStep > 1 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
                 </div>
                 <div className="flex items-center">
                   <div className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>2</div>
                   <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Safari</span>
+                  <div className={`h-1 w-6 ${currentStep > 2 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
                 </div>
                 <div className="flex items-center">
                   <div className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>3</div>
@@ -124,7 +127,7 @@ const PWAButton: React.FC = () => {
             <div className="border-t p-4 flex justify-between">
               <button
                 onClick={toggleInstructions}
-                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors border border-gray-200"
+                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
               >
                 Fechar
               </button>
