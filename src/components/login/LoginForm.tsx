@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
@@ -62,9 +61,10 @@ const LoginForm = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#003570] text-white py-3 px-4 hover:bg-blue-900 flex items-center justify-center rounded-xl"
+            className="w-full bg-[#003570] text-white py-3 px-6 text-base font-semibold flex items-center justify-center rounded-xl hover:bg-[#002c6d] transition-all duration-200"
           >
-            <LogIn className="mr-2 h-5 w-5" /> Entrar
+            <LogIn className="mr-2 h-5 w-5" />
+            Entrar
           </button>
 
           <div className="relative flex items-center justify-center my-4">
@@ -77,7 +77,10 @@ const LoginForm = () => {
       </form>
 
       <p className="mt-6 text-center text-sm text-[#6B7280]">
-        Não tem uma conta? <Link to="/register" className="text-[#f57c35] font-semibold hover:underline">Registre-se</Link>
+        Não tem uma conta?{' '}
+        <Link to="/register" className="text-[#f57c35] font-semibold hover:underline">
+          Registre-se
+        </Link>
       </p>
     </div>
   );
