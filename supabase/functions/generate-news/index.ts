@@ -28,11 +28,9 @@ serve(async (req) => {
 
     // Create a prompt for OpenAI with the new instructions
     const prompt = `
-      Com base no conteúdo do release, escreva uma notícia institucional clara, direta e adequada para publicação no site da Subprefeitura de Pinheiros.
+      Com base no conteúdo do release recebido pelo usuário da comunicação da Subprefeitura de Pinheiros, escreva uma notícia institucional clara, direta e adequada para publicação no site da Subprefeitura. Tente expandir o texto sem modificar as mensagens. Organize em ao menos 3 parágrafos, podendo chegar a 6 ou 8 no máximo.
 
       Gere apenas título e texto.
-
-      No texto, tente gerar ao menos 3 parágrafos. Contribua com sugestões que não alterem a mensagem principal.
 
       Não inclua subtítulo, legenda de imagem ou emojis.
 

@@ -51,7 +51,11 @@ const CadastrarRelease = () => {
       // Save release to database
       const { error } = await supabase
         .from('releases')
-        .insert({ conteudo: releaseContent })
+        .insert({ 
+          conteudo: releaseContent,
+          tipo: 'imprensa', // Adding required fields
+          autor_id: 'sistema' // Using a default value for now
+        });
       
       if (error) throw error;
       
