@@ -2,21 +2,16 @@
 import { useProblemsData } from './useProblemsData';
 import { useProblemOperations } from './useProblemOperations';
 
-// Create compatibility hook for ease of use
 export const useProblems = () => {
   const problemsData = useProblemsData();
-  const problemOperations = useProblemOperations(problemsData.fetchProblems);
-  
+  const problemOperations = useProblemOperations();
+
   return {
     ...problemsData,
-    ...problemOperations
+    ...problemOperations,
   };
 };
 
-export { 
-  useProblemsData,
-  useProblemOperations 
-};
-
-export type { Problem, Area } from './types';
-export { problemSchema } from './types';
+export * from './useProblemOperations';
+export * from './useProblemsData';
+export { type Problem, type Area, problemSchema } from './types';

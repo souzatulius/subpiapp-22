@@ -9,7 +9,7 @@ export const useTableExists = (tableName: string) => {
   useEffect(() => {
     const checkTableExists = async () => {
       try {
-        // Try direct query first with error handling
+        // Try direct query with error handling
         try {
           const { data, error } = await supabase
             .from(tableName as any)
@@ -26,29 +26,23 @@ export const useTableExists = (tableName: string) => {
           console.log(`Direct query to ${tableName} failed:`, directQueryError);
         }
         
-        // Try a safer approach using custom SQL query
-        const { data, error } = await supabase
-          .rpc('table_exists', { table_name: tableName })
-          .single();
+        // Call edge function to check table existence
+        try {
+          const { data, error } = await supabase.functions.invoke('table-exists', {
+            body: { table_name: tableName }
+          });
           
-        if (!error && data) {
-          setExists(data === true);
-        } else {
-          // Fallback to a metadata approach
-          try {
-            const { data: tablesData } = await supabase
-              .from('_metadata_tables')
-              .select('name')
-              .eq('name', tableName)
-              .maybeSingle();
-            
-            setExists(!!tablesData);
-          } catch (metadataError) {
-            // Final fallback: assume the table doesn't exist if all checks fail
-            console.log(`All checks for table ${tableName} failed`);
-            setExists(false);
+          if (!error && data) {
+            setExists(data.exists === true);
+            setIsLoading(false);
+            return;
           }
+        } catch (functionError) {
+          console.log(`Function check for table ${tableName} failed:`, functionError);
         }
+        
+        // Last resort - set to false
+        setExists(false);
       } catch (err) {
         console.error(`Error checking if table ${tableName} exists:`, err);
         setExists(false);
