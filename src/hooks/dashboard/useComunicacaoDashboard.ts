@@ -31,12 +31,12 @@ export const useComunicacaoDashboard = (
       try {
         const { data, error } = await supabase
           .from('user_dashboard')
-          .select('cards_config, department_id')
+          .select('cards_config, department')
           .eq('user_id', user.id)
-          .eq('department_id', department)
+          .eq('department', department)
           .single();
         
-        if (error || !data || !data.cards_config) {
+        if (error || !data) {
           // No saved configuration, use default
           const defaultCards = getCommunicationActionCards();
           setCards(defaultCards);
@@ -45,19 +45,15 @@ export const useComunicacaoDashboard = (
           if (!isPreview && user) {
             await supabase.from('user_dashboard').upsert({
               user_id: user.id,
-              department_id: department,
-              cards_config: JSON.stringify(defaultCards),
+              department: department,
+              cards_config: defaultCards,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });
           }
         } else {
-          // Parse JSON if needed
-          const userCards = typeof data.cards_config === 'string' 
-            ? JSON.parse(data.cards_config) 
-            : data.cards_config;
-            
-          setCards(userCards);
+          // Use saved configuration
+          setCards(data.cards_config || getCommunicationActionCards());
         }
       } catch (error) {
         console.error('Error fetching communication dashboard settings:', error);
@@ -96,11 +92,11 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: JSON.stringify(updatedCards),
+            cards_config: updatedCards,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
-          .eq('department_id', department);
+          .eq('department', department);
       } catch (error) {
         console.error('Error saving card updates:', error);
       }
@@ -120,11 +116,11 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: JSON.stringify(updatedCards),
+            cards_config: updatedCards,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
-          .eq('department_id', department);
+          .eq('department', department);
       } catch (error) {
         console.error('Error saving card visibility:', error);
       }
@@ -140,11 +136,11 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: JSON.stringify(updatedCards),
+            cards_config: updatedCards,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
-          .eq('department_id', department);
+          .eq('department', department);
       } catch (error) {
         console.error('Error saving card order:', error);
       }
@@ -161,11 +157,11 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: JSON.stringify(defaultCards),
+            cards_config: defaultCards,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
-          .eq('department_id', department);
+          .eq('department', department);
       } catch (error) {
         console.error('Error resetting dashboard:', error);
       }

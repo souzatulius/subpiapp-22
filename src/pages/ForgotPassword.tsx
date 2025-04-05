@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import AuthLayout from '@/components/AuthLayout';
@@ -98,8 +97,6 @@ const ForgotPassword = () => {
               Digite seu e-mail para receber um link de recuperação de senha.
             </p>
             
-            {/* Mobile button removed as requested */}
-            
             <form id="recovery-form" ref={formRef} onSubmit={handleResetPassword}>
               <div className="space-y-4">
                 <div>
@@ -110,7 +107,8 @@ const ForgotPassword = () => {
                     id="email" 
                     value={email} 
                     onChange={setEmail}
-                    error={emailError} 
+                    error={emailError}
+                    hideSuffix={true}
                   />
                   {emailError && <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>}
                 </div>

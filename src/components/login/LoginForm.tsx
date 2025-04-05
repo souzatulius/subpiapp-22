@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -120,8 +119,6 @@ const LoginForm = () => {
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
       <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
 
-      {/* Mobile button removed as requested */}
-
       <form id="login-form" ref={formRef} onSubmit={handleLogin}>
         <div className="space-y-4">
           <div>
@@ -131,6 +128,7 @@ const LoginForm = () => {
               value={email}
               onChange={setEmail}
               error={emailError}
+              hideSuffix={true}
             />
             {emailError && <p className="text-sm text-[#f57b35]">E-mail é obrigatório</p>}
           </div>
