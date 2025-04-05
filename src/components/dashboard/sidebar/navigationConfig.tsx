@@ -39,7 +39,7 @@ export const getNavigationSections = () => [
   {
     id: 'ranking',
     icon: <TrendingUp size={20} />,
-    label: 'Ranking da Zeladoria',
+    label: 'Top Zeladoria',
     path: '/dashboard/zeladoria/ranking-subs',
     isSection: false
   }

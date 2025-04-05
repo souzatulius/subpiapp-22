@@ -19,7 +19,7 @@ const RankingSubs = () => {
   };
   
   const handleExportPDF = () => {
-    exportToPDF('Ranking das Subprefeituras');
+    exportToPDF('Top Zeladoria');
   };
   
   return (
@@ -30,7 +30,7 @@ const RankingSubs = () => {
       transition={{ duration: 0.5 }}
     >
       <WelcomeCard 
-        title="Ranking das Subprefeituras"
+        title="Top Zeladoria"
         description="Dashboard de análise comparativa das ordens de serviço para acompanhamento de desempenho por distrito"
         icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-orange-500 to-orange-700"

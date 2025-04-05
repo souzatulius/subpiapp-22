@@ -34,7 +34,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       'notas': 'Notas de Imprensa',
       'consultar-notas': 'Notas de Imprensa',
       'relatorios': 'Relatórios',
-      'ranking-subs': 'Ranking da Zeladoria',
+      'ranking-subs': 'Top Zeladoria',
       'dashboard': 'Início',
       'comunicacao': 'Comunicação',
       'settings': 'Configurações',
@@ -119,6 +119,14 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       ];
     }
     
+    // Special case for the Zeladoria ranking path - hide "zeladoria" segment
+    if (path.includes('/dashboard/zeladoria/ranking-subs')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/zeladoria/ranking-subs', label: 'Top Zeladoria' }
+      ];
+    }
+    
     // Default case: use the path segments
     return null;
   };
@@ -126,16 +134,30 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   // Get custom breadcrumbs if defined for this route
   const customBreadcrumbs = generateCustomBreadcrumbs();
   
-  // Use the custom breadcrumbs if available, otherwise process the path segments
-  const breadcrumbItems = customBreadcrumbs || pathSegments
-    .filter(segment => segment !== '')
-    .map((segment, index) => {
-      const fullPath = pathSegments.slice(0, index + 1).join('/');
-      return {
-        path: '/' + fullPath,
-        label: getDisplayName(segment, fullPath)
-      };
-    });
+  // Filter out the "zeladoria" segment from the breadcrumb if using the default processor
+  const processPathSegments = () => {
+    if (customBreadcrumbs) return customBreadcrumbs;
+    
+    return pathSegments
+      .filter(segment => segment !== '' && segment !== 'zeladoria')
+      .map((segment, index) => {
+        // Reconstruct the full path without the filtered segments
+        const visibleSegments = pathSegments
+          .filter(seg => seg !== '' && seg !== 'zeladoria')
+          .slice(0, index + 1);
+        
+        // We need to keep the original structure for the path
+        const fullPathSegments = pathSegments.slice(0, pathSegments.indexOf(segment) + 1);
+        const fullPath = fullPathSegments.join('/');
+        
+        return {
+          path: '/' + fullPath,
+          label: getDisplayName(segment, visibleSegments.join('/'))
+        };
+      });
+  };
+  
+  const breadcrumbItems = processPathSegments();
   
   const handleNavigate = (path: string) => {
     // If this is a settings path and we have a special handler, use it

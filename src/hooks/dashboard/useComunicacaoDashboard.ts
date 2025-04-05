@@ -137,7 +137,7 @@ export const useComunicacaoDashboard = (
     }
   };
 
-  // Fixed the infinite type recursion by properly handling the parameter type
+  // Fixed the type recursion issue by explicitly typing the parameter
   const handleCardsReorder = async (newCards: ActionCardItem[]) => {
     setCards(newCards);
     
