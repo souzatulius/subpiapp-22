@@ -84,7 +84,7 @@ const PWAButton: React.FC = () => {
               </div>
             </div>
             
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
+            <div className="p-6 min-h-[200px] max-h-[60vh] overflow-y-auto">
               {currentStep === 1 && (
                 <div className="animate-fade-in">
                   <h3 className="text-lg font-medium mb-3">No Chrome</h3>

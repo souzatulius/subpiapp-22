@@ -85,8 +85,11 @@ const ForgotPassword = () => {
           </div>
         ) : (
           <>
-            <p className="text-[#6B7280] mb-6">
+            <p className="text-[#6B7280] mb-2">
               Digite seu e-mail para receber um link de recuperação de senha.
+            </p>
+            <p className="text-[#6B7280] mb-6 text-sm">
+              Confundiu? <Link to="/login" className="text-[#003570] hover:underline">Volte para o login</Link>
             </p>
             
             <form id="recovery-form" ref={formRef} onSubmit={handleResetPassword}>

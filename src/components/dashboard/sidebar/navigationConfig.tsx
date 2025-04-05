@@ -35,7 +35,7 @@ export const getNavigationSections = () => [
     path: '/dashboard/comunicacao/relatorios',
     isSection: false
   },
-  // Seção 5: Ranking das Subs
+  // Seção 5: Top Zeladoria
   {
     id: 'ranking',
     icon: <TrendingUp size={20} />,
