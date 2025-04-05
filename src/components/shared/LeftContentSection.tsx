@@ -15,7 +15,7 @@ const LeftContentSection: React.FC = () => {
   const isRegisterPage = location.pathname === '/register';
   return <div className="max-w-2xl mx-auto md:mx-0">
       <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1] md:leading-[1.1] mb-6">
-        <div className="text-[#002855] bg-slate-800">Demandas</div>
+        <div className="text-[#002855] bg-transparent">Demandas</div>
         <div className="text-[#f57c35]">com eficiência</div>
       </h1>
       
