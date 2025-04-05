@@ -156,7 +156,9 @@ const ActionCard = ({
             <div className="text-white mb-1">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
-            <h3 className="font-semibold text-white text-lg">{title}</h3>
+            <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance max-w-[90%]">
+  {title}
+</h3>
           </>
         )}
       </div>
