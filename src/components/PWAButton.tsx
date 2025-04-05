@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Smartphone } from 'lucide-react';
 
 const PWAButton: React.FC = () => {
@@ -8,6 +8,19 @@ const PWAButton: React.FC = () => {
   const toggleInstructions = () => {
     setIsOpen(!isOpen);
   };
+
+  // Prevent body scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   return (
     <div>
@@ -23,13 +36,16 @@ const PWAButton: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={toggleInstructions}>
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in" 
+          onClick={toggleInstructions}
+        >
           <div 
-            className="bg-white rounded-lg max-w-2xl w-full h-[90vh] overflow-y-auto animate-scale-in my-4 shadow-xl" 
+            className="bg-white rounded-2xl max-w-2xl w-full h-auto max-h-[90vh] overflow-hidden animate-scale-in my-4 shadow-xl" 
             onClick={e => e.stopPropagation()}
           >
             <div className="p-6">
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center">
                 <Smartphone className="h-8 w-8 text-subpi-blue" />
               </div>
               <h2 className="text-xl font-semibold text-center mb-6">Use a SubPi como app no celular!</h2>
@@ -92,7 +108,7 @@ const PWAButton: React.FC = () => {
                 </p>
               </div>
 
-              <div className="mt-6 flex justify-center pb-2">
+              <div className="mt-6 flex justify-center">
                 <button 
                   className="bg-subpi-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   onClick={toggleInstructions}
