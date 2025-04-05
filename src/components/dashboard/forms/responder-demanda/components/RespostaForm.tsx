@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Demanda } from '../types';
 import RespostaFormHeader from './RespostaFormHeader';
 import { normalizeQuestions } from '@/utils/questionFormatUtils';
@@ -70,49 +69,48 @@ const RespostaForm: React.FC<RespostaFormProps> = ({
       
       <RespostaFormHeader selectedDemanda={selectedDemanda} />
       
-      <Card className="border border-gray-200">
-        <CardContent className="p-6 space-y-8">
-          {/* Seção de metadados da demanda */}
-          <DemandaMetadataSection selectedDemanda={selectedDemanda} />
-          
-          <Separator />
-          
-          {/* Seção de detalhes da solicitação */}
-          {selectedDemanda.detalhes_solicitacao && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-subpi-blue">Detalhes da Solicitação</h3>
-              <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                <p className="text-sm text-gray-700 whitespace-pre-line">
-                  {selectedDemanda.detalhes_solicitacao}
-                </p>
-              </div>
+      {/* Seção de metadados da demanda - agora expandida a 100% do container */}
+      <div className="p-6 space-y-8 bg-white rounded-xl border border-gray-200 shadow-sm">
+        {/* Seção de metadados da demanda */}
+        <DemandaMetadataSection selectedDemanda={selectedDemanda} />
+        
+        <Separator />
+        
+        {/* Seção de detalhes da solicitação */}
+        {selectedDemanda.detalhes_solicitacao && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-subpi-blue">Detalhes da Solicitação</h3>
+            <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+              <p className="text-sm text-gray-700 whitespace-pre-line">
+                {selectedDemanda.detalhes_solicitacao}
+              </p>
             </div>
-          )}
-          
-          <Separator />
-          
-          {/* Seção de perguntas e respostas */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-subpi-blue">Perguntas e Respostas</h3>
-            <QuestionsAnswersSection
-              perguntas={selectedDemanda.perguntas}
-              resposta={resposta}
-              onRespostaChange={handleRespostaChange}
-            />
           </div>
-          
-          <Separator />
-          
-          {/* Seção de comentários */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-subpi-blue">Comentários Internos</h3>
-            <CommentsSection
-              comentarios={comentarios}
-              onChange={setComentarios}
-            />
-          </div>
-        </CardContent>
-      </Card>
+        )}
+        
+        <Separator />
+        
+        {/* Seção de perguntas e respostas */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-subpi-blue">Perguntas e Respostas</h3>
+          <QuestionsAnswersSection
+            perguntas={selectedDemanda.perguntas}
+            resposta={resposta}
+            onRespostaChange={handleRespostaChange}
+          />
+        </div>
+        
+        <Separator />
+        
+        {/* Seção de comentários */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-subpi-blue">Comentários Internos</h3>
+          <CommentsSection
+            comentarios={comentarios}
+            onChange={setComentarios}
+          />
+        </div>
+      </div>
       
       <div className="flex justify-end pt-4 border-t">
         <FormFooter 

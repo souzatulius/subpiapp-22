@@ -4,51 +4,28 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Demanda } from '../types';
 
 interface DemandaHeaderProps {
-  demanda: {
-    titulo: string;
-    horario_publicacao: string;
-    prioridade: string;
-  };
+  demanda: Demanda;
 }
 
 const DemandaHeader: React.FC<DemandaHeaderProps> = ({ demanda }) => {
-  // Updated to use orange for "alta" priority
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'alta':
-        return {
-          text: 'text-orange-700',
-          bg: 'bg-orange-50',
-          border: 'border-orange-200'
-        };
-      case 'media':
-        return {
-          text: 'text-yellow-700',
-          bg: 'bg-yellow-50',
-          border: 'border-yellow-200'
-        };
-      case 'baixa':
-      default:
-        return {
-          text: 'text-green-700',
-          bg: 'bg-green-50',
-          border: 'border-green-200'
-        };
+  const getPriorityText = (prioridade: string) => {
+    switch (prioridade) {
+      case 'alta': return 'Alta';
+      case 'media': return 'Média';
+      case 'baixa': return 'Baixa';
+      default: return 'Normal';
     }
   };
 
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'alta':
-        return 'Alta';
-      case 'media':
-        return 'Média';
-      case 'baixa':
-        return 'Baixa';
-      default:
-        return priority.charAt(0).toUpperCase() + priority.slice(1);
+  const getPriorityColor = (prioridade: string) => {
+    switch (prioridade) {
+      case 'alta': return 'bg-red-100 text-red-700 border-red-200';
+      case 'media': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'baixa': return 'bg-green-100 text-green-700 border-green-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
@@ -66,7 +43,7 @@ const DemandaHeader: React.FC<DemandaHeaderProps> = ({ demanda }) => {
       </div>
       <Badge 
         variant="outline" 
-        className={`${getPriorityColor(demanda.prioridade).text} ${getPriorityColor(demanda.prioridade).bg} ${getPriorityColor(demanda.prioridade).border} px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300`}
+        className={`${getPriorityColor(demanda.prioridade)} px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300`}
       >
         Prioridade: {getPriorityText(demanda.prioridade)}
       </Badge>

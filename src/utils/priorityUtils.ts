@@ -36,3 +36,28 @@ export const formatPriority = (priority: string) => {
     default: return priority.charAt(0).toUpperCase() + priority.slice(1);
   }
 };
+
+export const calcularTempoRestante = (prazoResposta: string) => {
+  if (!prazoResposta) return null;
+  
+  const diffTime = new Date(prazoResposta).getTime() - new Date().getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) {
+    return {
+      label: `Atrasada há ${Math.abs(diffDays)} dia(s)`,
+      className: 'text-red-600 font-medium flex items-center gap-1',
+    };
+  } else if (diffDays === 0) {
+    return {
+      label: 'Vence hoje',
+      className: 'text-orange-600 font-medium flex items-center gap-1',
+    };
+  } else {
+    // Vence em x dias - azul
+    return {
+      label: `Vence em ${diffDays} dia(s)`,
+      className: 'text-blue-600 font-medium flex items-center gap-1',
+    };
+  }
+};

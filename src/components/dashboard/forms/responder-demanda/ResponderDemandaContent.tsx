@@ -77,42 +77,40 @@ const ResponderDemandaContent: React.FC = () => {
       </div>
 
       {/* Content area - dynamically showing either list or details */}
-      <Card className="border border-gray-200 shadow-sm rounded-lg">
-        <CardContent className="p-6">
-          {selectedDemanda ? (
-            <RespostaForm 
-              selectedDemanda={selectedDemanda} 
-              resposta={resposta} 
-              setResposta={setResposta} 
-              comentarios={comentarios} 
-              setComentarios={setComentarios} 
-              onBack={handleBack} 
-              isLoading={isLoading} 
-              onSubmit={handleSubmitResposta}
-              handleRespostaChange={handleRespostaChange}
-              hideBackButton={true} // Hide the back button in the form as we now have it in the filter bar
-            />
-          ) : (
-            <>
-              {viewMode === 'cards' ? (
-                <DemandaGrid 
-                  demandas={filteredDemandas} 
-                  selectedDemanda={selectedDemanda} 
-                  handleSelectDemanda={handleSelectDemanda} 
-                  isLoading={isLoadingDemandas} 
-                />
-              ) : (
-                <DemandaList 
-                  demandas={filteredDemandas} 
-                  selectedDemanda={selectedDemanda} 
-                  handleSelectDemanda={handleSelectDemanda} 
-                  isLoading={isLoadingDemandas} 
-                />
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+      {selectedDemanda ? (
+        <RespostaForm 
+          selectedDemanda={selectedDemanda} 
+          resposta={resposta} 
+          setResposta={setResposta} 
+          comentarios={comentarios} 
+          setComentarios={setComentarios} 
+          onBack={handleBack} 
+          isLoading={isLoading} 
+          onSubmit={handleSubmitResposta}
+          handleRespostaChange={handleRespostaChange}
+          hideBackButton={true} // Hide the back button in the form as we now have it in the filter bar
+        />
+      ) : (
+        <Card className="border border-gray-200 shadow-sm rounded-lg">
+          <CardContent className="p-6">
+            {viewMode === 'cards' ? (
+              <DemandaGrid 
+                demandas={filteredDemandas} 
+                selectedDemanda={selectedDemanda} 
+                handleSelectDemanda={handleSelectDemanda} 
+                isLoading={isLoadingDemandas} 
+              />
+            ) : (
+              <DemandaList 
+                demandas={filteredDemandas} 
+                selectedDemanda={selectedDemanda} 
+                handleSelectDemanda={handleSelectDemanda} 
+                isLoading={isLoadingDemandas} 
+              />
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

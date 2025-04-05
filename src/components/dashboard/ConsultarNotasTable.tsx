@@ -113,8 +113,13 @@ const ConsultarNotasTable = () => {
     navigate(`/dashboard/comunicacao/notas/detalhe?id=${nota.id}`);
   };
   
-  const handleEditNota = (id: string) => {
-    navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
+  const handleEditNota = (nota: NotaOficial) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
+  };
+
+  const handleDeleteNota = () => {
+    // This is just a placeholder as we don't support deletion from this view
+    console.log('Delete not supported in this view');
   };
 
   return (
@@ -124,6 +129,7 @@ const ConsultarNotasTable = () => {
       formatDate={formatDate}
       onViewNota={handleViewNota}
       onEditNota={handleEditNota}
+      onDeleteNota={handleDeleteNota}
     />
   );
 };

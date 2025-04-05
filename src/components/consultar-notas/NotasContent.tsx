@@ -111,9 +111,9 @@ const NotasContent = () => {
           notas={filteredNotas}
           loading={loading}
           formatDate={formatDate}
-          onViewNota={handleViewNota}
-          onEditNota={handleEditNota}
-          onDeleteNota={handleDeleteClick}
+          onView={handleViewNota}
+          onEdit={handleEditNota}
+          onDelete={handleDeleteClick}
         />
       )}
       
@@ -132,7 +132,6 @@ const NotasContent = () => {
         isOpen={isDeleteDialogOpen}
         onClose={cancelDelete}
         onConfirm={confirmDelete}
-        onCancel={cancelDelete}
         notaTitle={selectedNota?.titulo || "esta nota"}
       />
     </div>
