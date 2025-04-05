@@ -61,10 +61,10 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
             )}
           </div>
           
-          {demanda.origem_id && (
+          {demanda.origem_id && demanda.origem && (
             <div className="flex flex-wrap gap-1">
               <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                {demanda.origem?.descricao || "Origem não especificada"}
+                {demanda.origem.descricao || "Origem não especificada"}
               </Badge>
             </div>
           )}
