@@ -50,14 +50,14 @@ export const useDashboardCards = () => {
         
         if (typeof data.cards_config === 'string') {
           try {
-            // Using a simpler type assertion to avoid deep type checking
-            parsedCards = JSON.parse(data.cards_config) as any[];
+            // Simplify the parsing to avoid deep type instantiation
+            parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
           } catch (e) {
             console.error('Error parsing cards_config:', e);
           }
         } else if (Array.isArray(data.cards_config)) {
-          // Direct assignment with simple type casting
-          parsedCards = data.cards_config as any[];
+          // Direct assignment with type assertion
+          parsedCards = data.cards_config as ActionCardItem[];
         }
 
         // Only use the parsed cards if they form a valid array
@@ -77,24 +77,25 @@ export const useDashboardCards = () => {
     fetchCards();
   }, [user, userDepartment, isDepartmentLoading]);
 
-  const persistCards = (updatedCards: ActionCardItem[]) => {
+  const persistCards = async (updatedCards: ActionCardItem[]) => {
     if (!user) return;
     
-    // Create a shallow copy of the array to avoid mutation issues
-    const cardsCopy = [...updatedCards];
+    // Create a distinct clone to avoid mutation issues
+    const cardsCopy = JSON.parse(JSON.stringify(updatedCards)) as ActionCardItem[];
     setCards(cardsCopy);
 
-    supabase
-      .from('user_dashboard')
-      .upsert({
-        user_id: user.id,
-        page: 'inicial',
-        cards_config: JSON.stringify(cardsCopy),
-        department_id: userDepartment || 'default'
-      })
-      .then(({ error }) => {
-        if (error) console.error('Erro ao salvar configuração de cards:', error);
-      });
+    try {
+      await supabase
+        .from('user_dashboard')
+        .upsert({
+          user_id: user.id,
+          page: 'inicial',
+          cards_config: JSON.stringify(cardsCopy),
+          department_id: userDepartment || 'default'
+        });
+    } catch (error) {
+      console.error('Erro ao salvar configuração de cards:', error);
+    }
   };
 
   const handleCardEdit = (cardToUpdate: ActionCardItem) => {

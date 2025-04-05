@@ -82,6 +82,9 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   };
   
   const renderIconComponent = (iconId: string) => {
+    // Handle case when iconId is not available
+    if (!iconId) return null;
+    
     const IconComponent = (LucideIcons as any)[iconId];
     if (!IconComponent) return null;
     return <IconComponent className="h-6 w-6" />;
@@ -178,7 +181,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                 }}
               >
                 <div className="relative h-full flex flex-col items-center justify-center text-center py-4">
-                  <div className={getTextColorForPreview(color) + " mb-2"}>
+                  <div className={`${getTextColorForPreview(color)} mb-2`}>
                     {renderIconComponent(iconId)}
                   </div>
                   <h3 className={`font-semibold ${getTextColorForPreview(color)} text-xl`}>
