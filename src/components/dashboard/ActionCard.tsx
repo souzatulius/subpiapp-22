@@ -119,22 +119,8 @@ const ActionCard = ({
   const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
   
-  // Format title to add line breaks if it has multiple words
-  const formatTitle = (title: string) => {
-    const words = title.split(' ');
-    if (words.length >= 2) {
-      // If there are 2 or more words, add a line break after the first word
-      const firstLine = words.slice(0, Math.ceil(words.length / 2)).join(' ');
-      const secondLine = words.slice(Math.ceil(words.length / 2)).join(' ');
-      return (
-        <>
-          <span className="block">{firstLine}</span>
-          <span className="block">{secondLine}</span>
-        </>
-      );
-    }
-    return title;
-  };
+  // We'll remove this handler since it's now managed by the parent component
+  // This prevents conflicts with the drag and drop functionality
   
   return (
     <div 
@@ -162,15 +148,15 @@ const ActionCard = ({
         </div>
       )}
       
-      <div className="relative h-full flex flex-col items-center justify-center text-center p-4">
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-3">
         {children ? (
           <>{children}</>
         ) : (
           <>
-            <div className="text-white mb-3">
+            <div className="text-white mb-1">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
-            <h3 className="font-semibold text-white text-lg leading-tight">{formatTitle(title)}</h3>
+            <h3 className="font-semibold text-white text-lg">{title}</h3>
           </>
         )}
       </div>

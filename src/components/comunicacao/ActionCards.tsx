@@ -164,7 +164,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <Card key={index} className="h-[160px] animate-pulse bg-gray-100">
             <CardContent className="p-4 flex items-center justify-center">
@@ -177,7 +177,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.filter(card => !card.isHidden).map((card, index) => (
         <div key={card.id || index} className="h-[160px]">
           {isEditMode ? (

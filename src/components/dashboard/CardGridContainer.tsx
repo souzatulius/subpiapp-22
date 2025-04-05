@@ -1,16 +1,17 @@
 
 import React from 'react';
+import UnifiedCardGrid from './UnifiedCardGrid';
 import { ActionCardItem } from '@/types/dashboard';
-import CardGrid from './CardGrid';
-import WelcomeMessage from './WelcomeMessage';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
   onCardsChange: (cards: ActionCardItem[]) => void;
-  onEditCard: (card: ActionCardItem) => void;
-  onHideCard: (id: string) => void;
+  onEditCard?: (card: ActionCardItem) => void;
+  onHideCard?: (id: string) => void;
+  onDeleteCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
+  specialCardsData?: any;
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
@@ -18,29 +19,29 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   onCardsChange,
   onEditCard,
   onHideCard,
+  onDeleteCard,
   isMobileView = false,
-  isEditMode = false
+  isEditMode = false,
+  specialCardsData = {}
 }) => {
+  const handleCardsChange = (updatedCards: ActionCardItem[]) => {
+    // Now we properly call the onCardsChange prop to persist the reordering
+    onCardsChange(updatedCards);
+  };
+
   return (
-    <div className="space-y-4">
-      {!isEditMode && <WelcomeMessage />}
-      
-      <CardGrid
-        cards={cards}
-        onCardsChange={onCardsChange}
-        onEditCard={onEditCard}
-        onDeleteCard={() => {}}
-        isMobileView={isMobileView}
-        onAddNewCard={() => {}}
-        specialCardsData={{
-          overdueCount: 0,
-          overdueItems: [],
-          notesToApprove: 0,
-          responsesToDo: 0,
-          isLoading: false
-        }}
-      />
-    </div>
+    <UnifiedCardGrid
+      cards={cards}
+      onCardsChange={handleCardsChange}
+      onEditCard={onEditCard}
+      onHideCard={onHideCard}
+      onDeleteCard={onDeleteCard}
+      isMobileView={isMobileView}
+      isEditMode={isEditMode}
+      disableWiggleEffect={true} // Keep this set to true to disable wiggle effect
+      specialCardsData={specialCardsData}
+      showSpecialFeatures={true}
+    />
   );
 };
 
