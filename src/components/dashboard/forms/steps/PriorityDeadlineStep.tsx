@@ -19,12 +19,13 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   handleSelectChange,
   errors = []
 }) => {
-  // Priorities definition
+  // Updated priorities to match the database constraints
+  // Using 'alta', 'media', 'baixa' values instead of numeric values
   const priorities = [
-    { id: '1', label: 'Urgente', icon: <Flame className="h-5 w-5 text-red-500" /> },
-    { id: '2', label: 'Alta', icon: <BellRing className="h-5 w-5 text-orange-500" /> },
-    { id: '3', label: 'Normal', icon: <BellRing className="h-5 w-5 text-blue-500" /> },
-    { id: '4', label: 'Baixa', icon: <BellRing className="h-5 w-5 text-green-500" /> }
+    { id: 'alta', label: 'Urgente', icon: <Flame className="h-5 w-5 text-red-500" /> },
+    { id: 'alta', label: 'Alta', icon: <BellRing className="h-5 w-5 text-orange-500" /> },
+    { id: 'media', label: 'Normal', icon: <BellRing className="h-5 w-5 text-blue-500" /> },
+    { id: 'baixa', label: 'Baixa', icon: <BellRing className="h-5 w-5 text-green-500" /> }
   ];
 
   const hasError = (field: string) => errors.some(err => err.field === field);
@@ -45,7 +46,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
         <div className="flex flex-wrap gap-3">
           {priorities.map(priority => (
             <Button 
-              key={priority.id} 
+              key={priority.id + priority.label} 
               type="button" 
               variant={formData.prioridade === priority.id ? "default" : "outline"} 
               className={`h-auto py-3 flex flex-col items-center justify-center gap-2 ${

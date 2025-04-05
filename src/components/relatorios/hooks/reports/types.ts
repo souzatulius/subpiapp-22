@@ -31,4 +31,5 @@ export interface ReportsData {
   mediaTypes?: any[];
   neighborhoods?: any[]; 
   statuses?: any[];
+  responsibles?: any[]; // Added missing property
 }
