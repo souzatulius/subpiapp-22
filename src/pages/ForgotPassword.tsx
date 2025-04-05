@@ -88,9 +88,6 @@ const ForgotPassword = () => {
             <p className="text-[#6B7280] mb-2">
               Digite seu e-mail para receber um link de recuperação de senha.
             </p>
-            <p className="text-[#6B7280] mb-6 text-sm">
-              Confundiu? <Link to="/login" className="text-[#003570] hover:underline">Volte para o login</Link>
-            </p>
             
             <form id="recovery-form" ref={formRef} onSubmit={handleResetPassword}>
               <div className="space-y-4">
@@ -115,6 +112,10 @@ const ForgotPassword = () => {
                 >
                   Enviar link
                 </button>
+                
+                <p className="text-center text-[#6B7280] mt-4">
+                  Confundiu? <Link to="/login" className="text-[#f57c35] font-bold hover:underline">Volte para o login</Link>
+                </p>
               </div>
             </form>
           </>

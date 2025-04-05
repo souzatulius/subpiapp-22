@@ -7,6 +7,7 @@ export interface CardStats {
   tempoMedioResposta: number;
   tempoRespostaVariacao: number;
   taxaAprovacao: number;
+  aprovacaoVariacao?: number;  // Adding the missing property
   notasAprovadas: number;
   notasEditadas: number;
   noticiasPublicas?: number;
@@ -16,4 +17,9 @@ export interface CardStats {
 
 export interface ChartData {
   [key: string]: any;
+}
+
+export interface ReportsData {
+  cardStats: CardStats;
+  chartData: ChartData;
 }

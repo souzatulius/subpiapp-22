@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
 import { cn } from "@/lib/utils";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EmailSuffixProps {
   id?: string;
@@ -28,6 +29,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [showSuffix, setShowSuffix] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   // Show suffix when user starts typing
   useEffect(() => {
@@ -86,6 +88,10 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
         ? 'border-gray-600' 
         : 'border-gray-300';
 
+  const placeholderText = isMobile 
+    ? "Apenas usuário (sem @smsub...)" 
+    : "Apenas usuário (sem @smsub.prefeitura.sp.gov.br)";
+
   return (
     <div 
       className={cn(
@@ -109,7 +115,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)} 
           className="h-full w-full border-0 bg-transparent px-4 py-3 text-base focus:outline-none focus:ring-0"
-          placeholder="Apenas usuário (sem @smsub...)"
+          placeholder={placeholderText}
           {...registerField}
         />
         {showSuffix && (
