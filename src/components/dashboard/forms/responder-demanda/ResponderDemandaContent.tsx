@@ -8,8 +8,6 @@ import DemandasFilter from './components/DemandasFilter';
 import DemandaList from './components/DemandaList';
 import DemandaGrid from './components/DemandaGrid';
 import RespostaForm from './components/RespostaForm';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 
 const ResponderDemandaContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');

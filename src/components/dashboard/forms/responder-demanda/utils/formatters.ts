@@ -6,7 +6,7 @@ export const formatPrioridade = (prioridade: string) => {
     case 'alta':
       return {
         label: 'Alta',
-        className: 'text-red-600 font-medium'
+        className: 'text-orange-600 font-medium'
       };
     case 'media':
       return {
@@ -33,9 +33,9 @@ export const calcularTempoRestante = (prazoResposta: string) => {
   if (diffDays < 0) {
     return {
       label: `Atrasada há ${Math.abs(diffDays)} dia(s)`,
-      className: 'text-red-600 font-medium flex items-center gap-1',
+      className: 'text-orange-600 font-medium flex items-center gap-1',
       iconName: 'AlertCircle',
-      iconClassName: 'text-red-500'
+      iconClassName: 'text-orange-500'
     };
   } else if (diffDays === 0) {
     return {

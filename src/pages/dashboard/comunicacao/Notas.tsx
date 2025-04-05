@@ -1,59 +1,51 @@
 
-import React from 'react';
-import { FileText } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { FileText, Send, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import { useNotasStats } from '@/hooks/comunicacao/useNotasStats';
+import { supabase } from '@/integrations/supabase/client';
+import NotaForm from '@/components/dashboard/forms/NotaForm';
+import { NotaFormSchema } from '@/components/dashboard/forms/schemas/notaFormSchema';
+import { useToast } from '@/components/ui/use-toast';
 
-const NotasDashboard = () => {
-  const statsData = useNotasStats();
-  const totalNotas = statsData?.totalNotas || 0;
+const Notas = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Get pending notes count
+  const { data: pendingNotesCount = 0 } = useQuery({
+    queryKey: ['pendingNotesCount'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('notas_oficiais')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pendente');
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return count || 0;
+    },
+  });
   
   return (
-    <motion.div 
-      className="max-w-7xl mx-auto"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="max-w-7xl mx-auto">
       <WelcomeCard
-        title="Notas Oficiais"
-        description="Gerencie e acompanhe notas oficiais da comunicação"
+        title="Nova Nota Oficial"
+        description="Crie e publique notas oficiais para imprensa e para o público"
         icon={<FileText className="h-6 w-6 mr-2" />}
-        statTitle="Notas"
-        statValue={totalNotas}
-        statDescription="Ver todas notas"
-        statSection="notas"
-        color="bg-gradient-to-r from-amber-500 to-amber-700"
+        color="bg-gradient-to-r from-purple-600 to-purple-800"
       />
       
-      <div className="mb-6 bg-white rounded-lg border border-orange-200 p-5 shadow-sm">
-        <h1 className="text-2xl font-bold text-orange-700 mb-3">Dashboard de Notas Oficiais</h1>
-        <p className="text-gray-600 mb-4">
-          Acompanhamento das notas oficiais da Subprefeitura de Pinheiros.
-        </p>
-        <div className="flex justify-between items-center">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-amber-500 mr-2"></span>
-              <span className="text-sm font-medium">Em Elaboração</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-amber-400 mr-2"></span>
-              <span className="text-sm font-medium">Em Aprovação</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-amber-300 mr-2"></span>
-              <span className="text-sm font-medium">Publicadas</span>
-            </div>
-          </div>
-          <div className="text-sm text-gray-500">
-            Coordenação de Comunicação - <span className="font-bold text-orange-600">COM</span>
-          </div>
-        </div>
+      <div className="mt-6">
+        <NotaForm />
       </div>
-    </motion.div>
+    </div>
   );
 };
 
-export default NotasDashboard;
+export default Notas;

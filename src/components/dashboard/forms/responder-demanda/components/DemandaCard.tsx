@@ -25,9 +25,9 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, c
     
     if (diffDays < 0) {
       iconName = 'AlertCircle';
-      iconClassName = 'text-red-500';
+      iconClassName = 'text-orange-500';
       label = `Atrasada há ${Math.abs(diffDays)} dia(s)`;
-      className = 'text-red-600 font-medium flex items-center gap-1';
+      className = 'text-orange-600 font-medium flex items-center gap-1';
     } else if (diffDays === 0) {
       iconName = 'AlertCircle';
       iconClassName = 'text-orange-500';
@@ -55,7 +55,32 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, selected, onClick, c
     );
   };
 
-  const priorityColors = getPriorityColor(demanda.prioridade);
+  // Updated to use orange for "alta" priority
+  const getPriorityColorCustom = (priority: string) => {
+    switch (priority) {
+      case 'alta':
+        return {
+          bg: 'bg-orange-100',
+          text: 'text-orange-800',
+          border: 'border-orange-200'
+        };
+      case 'media':
+        return {
+          bg: 'bg-yellow-100',
+          text: 'text-yellow-800',
+          border: 'border-yellow-200'
+        };
+      case 'baixa':
+      default:
+        return {
+          bg: 'bg-green-100',
+          text: 'text-green-800',
+          border: 'border-green-200'
+        };
+    }
+  };
+
+  const priorityColors = getPriorityColorCustom(demanda.prioridade);
 
   return (
     <Card 

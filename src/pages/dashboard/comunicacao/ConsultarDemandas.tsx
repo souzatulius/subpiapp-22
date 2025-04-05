@@ -1,24 +1,24 @@
 
 import React from 'react';
-import { Search, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { FileText } from 'lucide-react';
+import ConsultarDemandasTable from '@/components/dashboard/ConsultarDemandasTable';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import ConsultarDemandasContent from '@/components/consultar-demandas/ConsultarDemandasContent';
 
 const ConsultarDemandas = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="max-w-7xl mx-auto">
       <WelcomeCard
         title="Consultar Demandas"
-        description="Pesquise e visualize todas as solicitações"
-        icon={<Search className="h-6 w-6 mr-2" />}
-        statTitle="Demandas"
-        statIcon={<MessageSquare size={18} />}
-        statDescription="Total de demandas"
-        color="bg-gradient-to-r from-emerald-500 to-emerald-700"
+        description="Visualize o histórico completo de demandas de comunicação"
+        icon={<FileText className="h-6 w-6 mr-2" />}
+        color="bg-gradient-to-r from-cyan-600 to-cyan-800"
       />
       
       <div className="mt-6">
-        <ConsultarDemandasContent />
+        <ConsultarDemandasTable />
       </div>
     </div>
   );

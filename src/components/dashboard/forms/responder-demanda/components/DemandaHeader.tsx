@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatPriority, getPriorityColor } from '@/utils/priorityUtils';
 
 interface DemandaHeaderProps {
   demanda: {
@@ -15,6 +14,31 @@ interface DemandaHeaderProps {
 }
 
 const DemandaHeader: React.FC<DemandaHeaderProps> = ({ demanda }) => {
+  // Updated to use orange for "alta" priority
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'alta':
+        return {
+          text: 'text-orange-700',
+          bg: 'bg-orange-50',
+          border: 'border-orange-200'
+        };
+      case 'media':
+        return {
+          text: 'text-yellow-700',
+          bg: 'bg-yellow-50',
+          border: 'border-yellow-200'
+        };
+      case 'baixa':
+      default:
+        return {
+          text: 'text-green-700',
+          bg: 'bg-green-50',
+          border: 'border-green-200'
+        };
+    }
+  };
+
   const getPriorityText = (priority: string) => {
     switch (priority) {
       case 'alta':

@@ -81,25 +81,6 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
         >
           <Filter className="h-4 w-4" />
         </Button>
-
-        <div className="flex items-center border rounded-md overflow-hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`rounded-none ${viewMode === 'cards' ? 'bg-blue-50' : ''}`}
-            onClick={() => setViewMode('cards')}
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`rounded-none ${viewMode === 'list' ? 'bg-blue-50' : ''}`}
-            onClick={() => setViewMode('list')}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
       {isFilterOpen && (
