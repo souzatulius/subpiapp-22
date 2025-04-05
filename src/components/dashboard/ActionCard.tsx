@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -122,7 +123,7 @@ const ActionCard = ({
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
-              <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance py-0">
+              <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance">
                 {title}
               </h3>
             </div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply } from 'lucide-react';
@@ -43,7 +44,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="w-full">
+      <div className="w-full mb-6">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
@@ -60,14 +61,16 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       ) : (
         cards.length > 0 ? (
-          <CardGridContainer
-            cards={cards}
-            onCardsChange={cards => cards}
-            onEditCard={handleCardEdit}
-            onHideCard={handleCardHide}
-            isMobileView={isMobile}
-            isEditMode={isEditMode}
-          />
+          <div className="px-[30px] py-[30px]">
+            <CardGridContainer
+              cards={cards}
+              onCardsChange={cards => cards}
+              onEditCard={handleCardEdit}
+              onHideCard={handleCardHide}
+              isMobileView={isMobile}
+              isEditMode={isEditMode}
+            />
+          </div>
         ) : (
           <div className="p-6 text-center text-gray-500">
             Nenhum card disponível.
