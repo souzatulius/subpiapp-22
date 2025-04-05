@@ -53,14 +53,9 @@ const NotasContent = () => {
     navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
   };
   
-  const handleDeleteClick = (id: string) => {
-    // Find the nota by id first
-    const nota = filteredNotas.find(n => n.id === id);
-    if (nota) {
-      setSelectedNota(nota);
-      setSelectedNotaId(id);
-      setIsDeleteDialogOpen(true);
-    }
+  const handleDeleteClick = (nota: NotaOficial) => {
+    setSelectedNotaId(nota.id);
+    setIsDeleteDialogOpen(true);
   };
   
   const confirmDelete = () => {

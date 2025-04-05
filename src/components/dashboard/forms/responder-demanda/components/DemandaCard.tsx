@@ -17,7 +17,7 @@ interface DemandaCardProps {
 const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick }) => {
   const priorityColors = getPriorityColor(demanda.prioridade);
   
-  // Calculate days past deadline - check if prazo_resposta exists
+  // Calculate days past deadline - check if prazo_resposta exists (renamed from prazo_atendimento)
   const daysPastDeadline = demanda.prazo_resposta ? 
     Math.ceil((new Date().getTime() - new Date(demanda.prazo_resposta).getTime()) / (1000 * 3600 * 24)) : 
     null;
@@ -25,9 +25,9 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
   // Determine if the deadline is in the past
   const isOverdue = daysPastDeadline && daysPastDeadline > 0;
   
-  // Format relative time - check if horario_publicacao exists (instead of created_at)
-  const relativeTime = demanda.horario_publicacao ? 
-    formatDistanceToNow(new Date(demanda.horario_publicacao), { addSuffix: true, locale: ptBR }) : 
+  // Format relative time - check if created_at exists (renamed from criado_em)
+  const relativeTime = demanda.created_at ? 
+    formatDistanceToNow(new Date(demanda.created_at), { addSuffix: true, locale: ptBR }) : 
     'Data não disponível';
 
   return (
@@ -61,20 +61,20 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
             )}
           </div>
           
-          {demanda.origem_id && demanda.origens_demandas && (
+          {demanda.origem_id && (
             <div className="flex flex-wrap gap-1">
               <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                {demanda.origens_demandas?.descricao || 'Origem não especificada'}
+                {demanda.origem?.descricao || 'Origem não especificada'}
               </Badge>
             </div>
           )}
           
-          {(demanda.endereco || demanda.bairros?.nome) && (
+          {(demanda.endereco || demanda.bairro?.nome) && (
             <div className="text-sm flex items-start text-gray-600">
               <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
               <span className="line-clamp-2">
-                {demanda.endereco}{demanda.endereco && demanda.bairros?.nome ? ', ' : ''}
-                {demanda.bairros?.nome}
+                {demanda.endereco}{demanda.endereco && demanda.bairro?.nome ? ', ' : ''}
+                {demanda.bairro?.nome}
               </span>
             </div>
           )}

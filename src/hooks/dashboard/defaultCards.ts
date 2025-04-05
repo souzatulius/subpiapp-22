@@ -1,7 +1,9 @@
-import { ActionCardItem } from '@/types/dashboard';
+
+import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
 
+// Retorna o componente React correspondente ao iconId
 export const getIconComponentFromId = (iconId: string): React.ElementType => {
   const iconMap: Record<string, keyof typeof LucideIcons> = {
     'clipboard-list': 'ClipboardList',
@@ -27,6 +29,7 @@ export const getIconComponentFromId = (iconId: string): React.ElementType => {
   return LucideIcons[componentName] as React.ElementType || LucideIcons.ClipboardList;
 };
 
+// Action cards para a página de comunicação
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
     {
@@ -144,6 +147,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
   ];
 };
 
+// Cards padrão para o dashboard inicial
 export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem[] => {
   return [
     {
@@ -214,15 +218,16 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     },
     {
       id: 'ranking-zeladoria',
-      title: 'Ranking da Zeladoria',
+      title: 'Ranking de Zeladoria',
       iconId: 'trophy',
       path: '/dashboard/zeladoria/ranking-subs',
-      color: 'white',
-      width: '50',
-      height: '1',
+      color: 'gray-light',
+      width: '25',
+      height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 7,
+      textColor: 'text-gray-950' // Adding text color for the Ranking card
     },
     {
       id: 'relatorios-comunicacao',
@@ -263,4 +268,5 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
   ];
 };
 
+// Compatibilidade com código existente
 export const getDefaultCards = getInitialDashboardCards;
