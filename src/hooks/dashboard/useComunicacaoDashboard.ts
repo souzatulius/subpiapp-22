@@ -137,8 +137,9 @@ export const useComunicacaoDashboard = (
     }
   };
 
-  const handleCardsReorder = async (updatedCards: ActionCardItem[]) => {
-    setCards(updatedCards);
+  // Fixed the infinite type recursion by properly handling the parameter type
+  const handleCardsReorder = async (newCards: ActionCardItem[]) => {
+    setCards(newCards);
     
     // Save to database if user is logged in
     if (!isPreview && user) {
@@ -146,7 +147,7 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: JSON.stringify(updatedCards),
+            cards_config: JSON.stringify(newCards),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
