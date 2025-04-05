@@ -1,14 +1,15 @@
 
-export interface NotaOficial {
+export interface Demand {
   id: string;
   titulo: string;
-  conteudo: string;
   status: string;
-  criado_em?: string;
+  prioridade: string;
+  horario_publicacao?: string;
+  prazo_resposta?: string;
   created_at?: string;
-  autor?: {
+  area_coordenacao?: {
     id: string;
-    nome_completo: string;
+    descricao: string;
   };
   problema?: {
     id: string;
@@ -16,15 +17,16 @@ export interface NotaOficial {
     coordenacao?: {
       id: string;
       descricao: string;
-    }
+    };
+  };
+  endereco?: string;
+  bairro?: {
+    id: string;
+    nome: string;
   };
   supervisao_tecnica?: {
     id: string;
     descricao: string;
     coordenacao_id?: string;
-  };
-  area_coordenacao?: {
-    id: string;
-    descricao: string;
   };
 }
