@@ -75,39 +75,6 @@ export const useDashboardCards = () => {
     fetchCards();
   }, [user, userDepartment, isDepartmentLoading]);
 
-  // Add cleanup/save effect when user navigates away
-  useEffect(() => {
-    // Define the event handler for beforeunload
-    const saveOnExit = () => {
-      if (user && cards.length > 0) {
-        try {
-          // Use synchronous localStorage as a backup
-          localStorage.setItem('main_dashboard_backup', JSON.stringify({
-            userId: user.id,
-            cards: cards,
-            timestamp: new Date().toISOString()
-          }));
-        } catch (error) {
-          console.error('Error in auto-save to localStorage:', error);
-        }
-      }
-    };
-
-    // Add event listener for page unload
-    window.addEventListener('beforeunload', saveOnExit);
-    
-    // Cleanup function
-    return () => {
-      // Save changes when component unmounts
-      if (user && cards.length > 0) {
-        persistCards(cards);
-      }
-      
-      // Remove event listener
-      window.removeEventListener('beforeunload', saveOnExit);
-    };
-  }, [user, cards]);
-
   const persistCards = async (updatedCards: ActionCardItem[]) => {
     if (!user) return;
     

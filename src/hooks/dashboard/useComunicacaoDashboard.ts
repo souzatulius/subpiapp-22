@@ -97,51 +97,6 @@ export const useComunicacaoDashboard = (
     return () => clearTimeout(timeoutId);
   }, [user, isPreview, activeDepartment]);
 
-  // Add cleanup/save effect when user navigates away
-  useEffect(() => {
-    // Define the event handler for beforeunload
-    const saveOnExit = () => {
-      if (user && !isPreview && cards.length > 0) {
-        try {
-          // Use synchronous localStorage as a backup before the async operation
-          localStorage.setItem('comunicacao_dashboard_backup', JSON.stringify({
-            userId: user.id,
-            cards: cards,
-            timestamp: new Date().toISOString()
-          }));
-          
-          // Attempt to save to Supabase before unload
-          const cardsJson = JSON.stringify(cards);
-          const blob = new Blob([cardsJson], { type: 'application/json' });
-          navigator.sendBeacon(
-            `${supabase.supabaseUrl}/rest/v1/user_dashboard`,
-            new FormData([
-              ['user_id', user.id],
-              ['page', 'comunicacao'],
-              ['cards_config', cardsJson]
-            ])
-          );
-        } catch (error) {
-          console.error('Error in auto-save:', error);
-        }
-      }
-    };
-
-    // Add event listener for page unload
-    window.addEventListener('beforeunload', saveOnExit);
-    
-    // Cleanup function
-    return () => {
-      // Save changes when component unmounts
-      if (user && !isPreview && cards.length > 0) {
-        persistCards(cards);
-      }
-      
-      // Remove event listener
-      window.removeEventListener('beforeunload', saveOnExit);
-    };
-  }, [user, isPreview, cards]);
-
   const persistCards = async (updatedCards: ActionCardItem[]) => {
     if (!user || isPreview) return;
     
@@ -160,27 +115,6 @@ export const useComunicacaoDashboard = (
         });
     } catch (error) {
       console.error('Erro ao salvar configuração de cards:', error);
-    }
-  };
-
-  const resetDashboard = async () => {
-    if (!user || isPreview) return;
-    
-    // Get default cards
-    const defaultCards = getCommunicationActionCards();
-    
-    // Set cards to default
-    setCards(defaultCards);
-    
-    try {
-      // Remove the custom configuration from the database
-      await supabase
-        .from('user_dashboard')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('page', 'comunicacao');
-    } catch (error) {
-      console.error('Erro ao resetar dashboard:', error);
     }
   };
 
@@ -229,7 +163,6 @@ export const useComunicacaoDashboard = (
     toggleEditMode,
     handleSaveCardEdit,
     setIsEditModalOpen,
-    handleCardsReorder,
-    resetDashboard
+    handleCardsReorder
   };
 };
