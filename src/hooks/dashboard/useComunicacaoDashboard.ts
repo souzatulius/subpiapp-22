@@ -100,20 +100,17 @@ export const useComunicacaoDashboard = (
   const persistCards = async (updatedCards: ActionCardItem[]) => {
     if (!user || isPreview) return;
     
-    try {
-      // Create a JSON string to avoid circular reference issues
-      const cardsData = JSON.stringify(updatedCards);
-      
-      // Update the cards state
-      setCards(JSON.parse(cardsData));
+    // Create a distinct clone to avoid mutation issues
+    const cardsCopy = JSON.parse(JSON.stringify(updatedCards));
+    setCards(cardsCopy);
 
-      // Save to database
+    try {
       await supabase
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
           page: 'comunicacao',
-          cards_config: cardsData,
+          cards_config: JSON.stringify(cardsCopy),
           department_id: activeDepartment || 'default'
         });
     } catch (error) {
