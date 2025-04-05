@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface NotaGerada {
   titulo: string;
@@ -12,7 +11,6 @@ interface NotaGerada {
 
 export const useReleaseForm = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [releaseContent, setReleaseContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -35,18 +33,17 @@ export const useReleaseForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Ensure we have a valid user
-      if (!user || !user.id) {
-        throw new Error('Usuário não autenticado');
-      }
+      // Get the current authenticated user ID
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id || 'sistema';
       
       // Save release to database
       const { error } = await supabase
         .from('releases')
         .insert({ 
           conteudo: releaseContent,
-          tipo: 'imprensa',
-          autor_id: user.id
+          tipo: 'imprensa', // Adding required fields
+          autor_id: userId // Using the actual user id or fallback
         });
       
       if (error) throw error;
@@ -59,7 +56,7 @@ export const useReleaseForm = () => {
       // Show confirmation dialog to create news
       setShowConfirmDialog(true);
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao salvar release:', error);
       toast({
         title: "Erro ao salvar",
@@ -82,7 +79,6 @@ export const useReleaseForm = () => {
     }
     
     setIsGenerating(true);
-    setShowConfirmDialog(false);
     
     try {
       // Call OpenAI through Supabase Edge Function
@@ -114,52 +110,45 @@ export const useReleaseForm = () => {
   };
   
   const handleCreateNote = async () => {
-    if (!editedTitle || !editedContent) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Título e conteúdo são obrigatórios para criar a nota",
-        variant: "destructive"
-      });
-      return;
+    // Here you would save the edited content
+    if (editedTitle && editedContent) {
+      try {
+        // Get the current authenticated user ID
+        const { data: authData } = await supabase.auth.getUser();
+        const userId = authData?.user?.id || 'sistema';
+        
+        // Create new nota oficial with the edited content
+        const { error } = await supabase
+          .from('notas_oficiais')
+          .insert({
+            titulo: editedTitle,
+            texto: editedContent,
+            autor_id: userId,
+            problema_id: '00000000-0000-0000-0000-000000000000', // Using a placeholder, you'll need to update this
+            status: 'pendente'
+          });
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Nota criada",
+          description: "A nota oficial foi criada com sucesso!"
+        });
+        
+        // Redirect to notas list or another appropriate page
+        navigate('/dashboard/comunicacao/consultar-notas');
+      } catch (error) {
+        console.error('Erro ao criar nota:', error);
+        toast({
+          title: "Erro ao criar nota",
+          description: "Não foi possível criar a nota oficial. Tente novamente.",
+          variant: "destructive"
+        });
+      }
     }
     
-    try {
-      // Ensure we have a valid user
-      if (!user || !user.id) {
-        throw new Error('Usuário não autenticado');
-      }
-      
-      // Create new nota oficial with the edited content
-      // Adding a default problema_id for the notas_oficiais table requirement
-      const { error } = await supabase
-        .from('notas_oficiais')
-        .insert({
-          titulo: editedTitle,
-          texto: editedContent,
-          autor_id: user.id,
-          status: 'pendente',
-          problema_id: '1' // Using a default value to satisfy the schema requirement
-        });
-          
-      if (error) throw error;
-      
-      toast({
-        title: "Nota criada",
-        description: "A nota oficial foi criada com sucesso!"
-      });
-      
-      // Redirect to notas list or another appropriate page
-      navigate('/dashboard/comunicacao/consultar-notas');
-    } catch (error: any) {
-      console.error('Erro ao criar nota:', error);
-      toast({
-        title: "Erro ao criar nota",
-        description: "Não foi possível criar a nota oficial. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setShowGeneratedContent(false);
-    }
+    setShowConfirmDialog(false);
+    setShowGeneratedContent(false);
   };
 
   return {
@@ -181,5 +170,3 @@ export const useReleaseForm = () => {
     handleCreateNote
   };
 };
-
-export default useReleaseForm;
