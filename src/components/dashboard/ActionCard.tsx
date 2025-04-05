@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -83,19 +82,9 @@ const getBackgroundColor = (color: CardColor): string => {
   }
 };
 
+// Ícone agora sempre grande
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
-  switch (size) {
-    case 'sm':
-      return 'w-5 h-5';
-    case 'md':
-      return 'w-6 h-6';
-    case 'lg':
-      return 'w-8 h-8';
-    case 'xl':
-      return 'w-8 h-8';
-    default:
-      return 'w-6 h-6';
-  }
+  return 'w-10 h-10';
 };
 
 const ActionCard = ({
@@ -117,11 +106,8 @@ const ActionCard = ({
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
-  const iconSizeClass = getIconSize(isMobileView ? 'lg' : iconSize);
-  
-  // We'll remove this handler since it's now managed by the parent component
-  // This prevents conflicts with the drag and drop functionality
-  
+  const iconSizeClass = getIconSize();
+
   return (
     <div 
       className={`w-full h-full rounded-xl shadow-md overflow-hidden 
@@ -137,7 +123,6 @@ const ActionCard = ({
         </div>
       )}
 
-      {/* Only render controls if showControls is true */}
       {showControls && (onEdit || onDelete || onHide) && (
         <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <CardControls 
@@ -147,8 +132,8 @@ const ActionCard = ({
           />
         </div>
       )}
-      
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-3">
+
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-3 px-2">
         {children ? (
           <>{children}</>
         ) : (
@@ -156,9 +141,11 @@ const ActionCard = ({
             <div className="text-white mb-1">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
-            <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance max-w-[90%]">
-  {title}
-</h3>
+            <div className="line-clamp-2 max-w-[90%]">
+              <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance">
+                {title}
+              </h3>
+            </div>
           </>
         )}
       </div>
