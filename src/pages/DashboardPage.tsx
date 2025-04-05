@@ -73,7 +73,7 @@ const DashboardPage: React.FC = () => {
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
             {/* WelcomeCard with greeting parameter */}
-            <div className="w-full mb-3">
+            <div className="w-full mb-6">
               <WelcomeCard
                 title="Dashboard"
                 description="Bem-vindo ao seu dashboard personalizado."
