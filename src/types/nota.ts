@@ -16,29 +16,30 @@ export interface NotaOficial {
   aprovador?: {
     id: string;
     nome_completo: string;
-  };
+  } | null;
   problema?: {
     id: string;
     descricao: string;
     coordenacao?: {
       id: string;
       descricao: string;
-    }
-  };
+    } | null;
+  } | null;
   supervisao_tecnica?: {
     id: string;
     descricao: string;
     coordenacao_id?: string;
-  };
+  } | null;
   area_coordenacao?: {
     id: string;
     descricao: string;
-  };
+  } | null;
   demanda?: {
     id: string;
     titulo: string;
-  };
-  demanda_id?: string;
+  } | null;
+  demanda_id?: string | null;
+  problema_id?: string | null;
   historico_edicoes?: Array<{
     id: string;
     editor_id: string;
@@ -99,7 +100,6 @@ export interface UseNotasDataReturn {
   setDataInicioFilter?: (date: string) => void;
   dataFimFilter?: string;
   setDataFimFilter?: (date: string) => void;
-  handleDeleteNota?: (id: string) => Promise<void>;
   isAdmin?: boolean;
   updateNotaStatus?: (id: string, status: string) => Promise<void>;
   statusLoading?: boolean;

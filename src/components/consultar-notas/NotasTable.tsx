@@ -19,8 +19,9 @@ interface NotasTableProps {
   loading: boolean;
   formatDate: (dateString: string) => string;
   onViewNota?: (nota: NotaOficial) => void;
+  onEditNota?: (id: string) => void;
+  onDeleteNota?: (nota: NotaOficial) => void;
   onExportPDF?: (nota: NotaOficial) => void;
-  onDeleteClick?: (nota: NotaOficial) => void;
   onApproveNota?: (notaId: string) => Promise<void>;
   onRejectNota?: (notaId: string) => Promise<void>;
   exporting?: boolean;
@@ -33,8 +34,9 @@ const NotasTable: React.FC<NotasTableProps> = ({
   loading,
   formatDate,
   onViewNota,
+  onEditNota,
+  onDeleteNota,
   onExportPDF,
-  onDeleteClick,
   onApproveNota,
   onRejectNota,
   exporting = false,
@@ -169,11 +171,21 @@ const NotasTable: React.FC<NotasTableProps> = ({
                       <X className="h-4 w-4" />
                     </Button>
                   )}
-                  {onDeleteClick && (
+                  {onEditNota && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onDeleteClick(nota)}
+                      onClick={() => onEditNota(nota.id)}
+                      title="Editar"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {onDeleteNota && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDeleteNota(nota)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       title="Excluir"
                       disabled={deleteLoading}

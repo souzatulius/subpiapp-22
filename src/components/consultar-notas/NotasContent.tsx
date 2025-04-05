@@ -21,7 +21,7 @@ const NotasContent = () => {
     setStatusFilter,
     filteredNotas,
     loading,
-    handleDeleteNota,
+    handleDelete,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     selectedNotaId,
@@ -53,14 +53,14 @@ const NotasContent = () => {
     navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
   };
   
-  const handleDeleteClick = (id: string) => {
-    setSelectedNotaId(id);
+  const handleDeleteClick = (nota: NotaOficial) => {
+    setSelectedNotaId(nota.id);
     setIsDeleteDialogOpen(true);
   };
   
   const confirmDelete = () => {
-    if (selectedNotaId && handleDeleteNota) {
-      handleDeleteNota(selectedNotaId);
+    if (selectedNotaId) {
+      handleDelete(selectedNotaId);
     }
   };
   
@@ -84,18 +84,15 @@ const NotasContent = () => {
       
       <Card className="mb-6 border border-gray-200">
         <CardContent className="p-6">
-          {/* Explicit type casting to fix the props mismatch */}
           <NotasFilter 
-            {...{
-              searchTerm,
-              setSearchTerm,
-              statusFilter,
-              setStatusFilter,
-              dateRange,
-              setDateRange,
-              viewMode,
-              setViewMode
-            } as any}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
           />
         </CardContent>
       </Card>
@@ -133,8 +130,10 @@ const NotasContent = () => {
       {/* Delete Dialog */}
       <DeleteNotaDialog 
         isOpen={isDeleteDialogOpen}
+        onClose={cancelDelete}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+        notaTitle={selectedNota?.titulo || "esta nota"}
       />
     </div>
   );

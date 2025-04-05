@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { NotaOficial, UseNotasDataReturn } from './types';
+import { NotaOficial, UseNotasDataReturn } from '@/types/nota';
 import { useNotasQuery } from './useNotasQuery';
 
 export const useNotasData = (): UseNotasDataReturn => {
@@ -49,7 +49,7 @@ export const useNotasData = (): UseNotasDataReturn => {
   }, [notas, searchTerm, statusFilter]);
 
   // Handle delete nota
-  const handleDeleteNota = async (id: string) => {
+  const handleDelete = async (id: string) => {
     try {
       setDeleteLoading(true);
       const { error } = await supabase
@@ -95,10 +95,9 @@ export const useNotasData = (): UseNotasDataReturn => {
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     deleteLoading,
-    handleDelete: handleDeleteNota, // Rename to match the expected type
+    handleDelete,
     refetch,
     selectedNotaId,
-    setSelectedNotaId,
-    handleDeleteNota // Add this for backwards compatibility
+    setSelectedNotaId
   };
 };

@@ -96,8 +96,7 @@ const ConsultarNotasTable = () => {
       supervisao_tecnica: null,
       demanda: null,
       demanda_id: null,
-      problema_id: nota?.problema_id || null,
-      coordenacao_id: nota?.coordenacao_id || null
+      problema_id: nota?.problema_id || null
     };
   });
 
@@ -124,7 +123,7 @@ const ConsultarNotasTable = () => {
       loading={isLoading}
       formatDate={formatDate}
       onViewNota={handleViewNota}
-      onEditNota={handleEditNota as any}
+      onEditNota={handleEditNota}
     />
   );
 };

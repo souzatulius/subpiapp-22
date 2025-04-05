@@ -16,7 +16,7 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
   isOpen,
   onClose = () => {},
   onConfirm,
-  onCancel,
+  onCancel = () => {},
   notaTitle = "esta nota",
   hasDemanda = false
 }) => {

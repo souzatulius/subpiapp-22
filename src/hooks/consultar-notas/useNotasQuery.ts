@@ -41,7 +41,6 @@ export const useNotasQuery = (): UseNotasQueryResult => {
             ),
             supervisao_tecnica_id,
             supervisao_tecnica:supervisao_tecnica_id (id, descricao),
-            coordenacao_id,
             demanda_id,
             demanda:demanda_id (id, titulo)
           `)
@@ -103,7 +102,6 @@ export const useNotasQuery = (): UseNotasQueryResult => {
             
             demanda: item.demanda || null,
             demanda_id: item.demanda_id || null,
-            coordenacao_id: item.coordenacao_id || null,
             problema_id: item.problema_id || null
           };
           
