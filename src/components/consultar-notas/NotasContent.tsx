@@ -49,8 +49,8 @@ const NotasContent = () => {
     setSelectedNota(null);
   };
   
-  const handleEditNota = (id: string) => {
-    navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
+  const handleEditNota = (nota: NotaOficial) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
   };
   
   const handleDeleteClick = (nota: NotaOficial) => {

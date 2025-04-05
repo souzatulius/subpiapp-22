@@ -1,89 +1,85 @@
 
 import React from 'react';
-import { format } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { CalendarClock, MapPin } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Demanda } from '../types';
-import { Clock, MapPin, AlertTriangle } from 'lucide-react';
-import { calcularTempoRestante, getPriorityColor } from '@/utils/priorityUtils';
+import { getPriorityColor } from '@/utils/priorityUtils';
 
 interface DemandaCardProps {
   demanda: Demanda;
-  isSelected?: boolean;
+  isSelected: boolean;
   onClick: () => void;
 }
 
-const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected = false, onClick }) => {
-  // Format date
-  const formatDate = (dateString: string) => {
-    try {
-      if (!dateString) return 'Data não disponível';
-      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
-    } catch (error) {
-      return 'Data inválida';
-    }
-  };
-
-  // Calculate remaining time
-  const tempoRestante = demanda.prazo_resposta 
-    ? calcularTempoRestante(demanda.prazo_resposta) 
-    : null;
-
-  // Get priority color
+const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick }) => {
   const priorityColors = getPriorityColor(demanda.prioridade);
-
-  // Format title
-  const title = demanda.titulo || 'Demanda sem título';
-  const shortTitle = title.length > 60 ? `${title.substring(0, 60)}...` : title;
-
-  // Origin name (safely accessing possibly undefined properties)
-  const origemNome = demanda.origem_nome || 'Origem não especificada';
+  
+  // Calculate days past deadline
+  const daysPastDeadline = demanda.prazo_atendimento ? 
+    Math.ceil((new Date().getTime() - new Date(demanda.prazo_atendimento).getTime()) / (1000 * 3600 * 24)) : 
+    null;
+  
+  // Determine if the deadline is in the past
+  const isOverdue = daysPastDeadline && daysPastDeadline > 0;
+  
+  // Format relative time
+  const relativeTime = demanda.criado_em ? 
+    formatDistanceToNow(new Date(demanda.criado_em), { addSuffix: true, locale: ptBR }) : 
+    'Data não disponível';
 
   return (
     <Card 
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-        isSelected ? 'ring-2 ring-orange-500 shadow-md' : 'hover:border-orange-200'
+      className={`border transition-all duration-200 hover:shadow-md cursor-pointer ${
+        isSelected 
+          ? 'border-orange-500 ring-2 ring-orange-200 bg-orange-50' 
+          : 'border-gray-200 hover:border-orange-300'
       }`}
       onClick={onClick}
     >
-      <CardHeader className="py-3 px-4">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-sm text-gray-700 font-medium">{shortTitle}</CardTitle>
-          <Badge 
-            variant="outline" 
-            className={`${priorityColors.bg} ${priorityColors.text} ${priorityColors.border} text-xs`}
-          >
-            {demanda.prioridade === 'alta' ? 'Alta' : 
-              demanda.prioridade === 'media' ? 'Média' : 'Baixa'}
-          </Badge>
-        </div>
-        <CardDescription className="text-xs mt-1">
-          {origemNome}
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="py-2 px-4">
-        <div className="text-xs text-gray-600">
-          <div className="flex items-center mb-1">
-            <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-            <span>{demanda.bairro || 'Local não especificado'}</span>
+      <CardContent className="p-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between items-start">
+            <h3 className="font-medium text-gray-900 line-clamp-2">{demanda.titulo || "Sem título"}</h3>
+            <Badge 
+              variant="outline" 
+              className={`${priorityColors.bg} ${priorityColors.text} whitespace-nowrap ml-2`}
+            >
+              {demanda.prioridade}
+            </Badge>
           </div>
-          <div className="flex items-center">
-            <Clock className="h-3 w-3 mr-1 text-gray-400" />
-            <span>Criada em: {formatDate(demanda.horario_publicacao)}</span>
+          
+          <div className="text-sm flex items-center text-gray-600">
+            <CalendarClock className="h-4 w-4 mr-1 flex-shrink-0" /> 
+            {relativeTime}
+            {isOverdue && (
+              <span className="ml-2 text-blue-600 font-medium">
+                Vence há {daysPastDeadline} dia{daysPastDeadline > 1 ? 's' : ''}
+              </span>
+            )}
           </div>
+          
+          {demanda.origem && (
+            <div className="flex flex-wrap gap-1">
+              <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                {demanda.origem}
+              </Badge>
+            </div>
+          )}
+          
+          {(demanda.endereco || demanda.bairro_nome) && (
+            <div className="text-sm flex items-start text-gray-600">
+              <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+              <span className="line-clamp-2">
+                {demanda.endereco}{demanda.endereco && demanda.bairro_nome ? ', ' : ''}
+                {demanda.bairro_nome}
+              </span>
+            </div>
+          )}
         </div>
       </CardContent>
-      
-      <CardFooter className="py-2 px-4 border-t border-gray-100">
-        {tempoRestante && (
-          <div className={tempoRestante.className}>
-            <AlertTriangle className="h-3 w-3" />
-            <span className="text-xs">{tempoRestante.label}</span>
-          </div>
-        )}
-      </CardFooter>
     </Card>
   );
 };

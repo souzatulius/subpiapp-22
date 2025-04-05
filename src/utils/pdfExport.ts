@@ -23,6 +23,7 @@ const elementsToHide = [
   'footer',
   '.footer',
   '.upload-section', // Hide the upload section
+  '.welcome-card', // Hide the welcome card (header card)
 ];
 
 // Custom style to add to the document during export
@@ -32,7 +33,7 @@ const exportStyles = `
   .sidebar, header, .header, .filter, .filters,
   .control, .controls, #mobile-nav, .mobile-nav,
   .toolbar, .actions, [role="dialog"], .dialog,
-  footer, .footer, .upload-section {
+  footer, .footer, .upload-section, .welcome-card {
     display: none !important;
   }
 
@@ -42,6 +43,8 @@ const exportStyles = `
     transform: scale(0.8); /* Scale to 80% */
     transform-origin: top center;
     width: 125% !important; /* Compensate for scaling */
+    padding-left: 8% !important; /* Add left margin */
+    padding-right: 8% !important; /* Add right margin */
   }
 
   /* Improved presentation of charts */
@@ -60,17 +63,22 @@ const exportStyles = `
   body, .main-content {
     background-color: white !important;
   }
-
-  /* Show only title and main content */
-  .title-container, .welcome-card {
-    margin: 20px 0;
-    text-align: center;
-  }
   
   /* Ensure cards don't break across pages */
   .sortable-chart-card {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  /* Improved spacing */
+  .space-y-6 {
+    margin-top: 2rem !important;
+  }
+
+  /* Center content */
+  .container, .max-w-7xl {
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 `;
 
@@ -97,10 +105,6 @@ export const exportToPDF = async (pageTitle: string) => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     
-    // Add title to the first page
-    pdf.setFontSize(18);
-    pdf.text(pageTitle, pageWidth / 2, 20, { align: 'center' });
-
     // Capture the rendered content
     const canvas = await html2canvas(contentElement as HTMLElement, { 
       scale: 1.5, // Higher quality
@@ -117,11 +121,16 @@ export const exportToPDF = async (pageTitle: string) => {
           });
         });
         
-        // Also specifically hide the upload section
+        // Also specifically hide the upload section and welcome cards
         const uploadSection = documentClone.querySelector('.p-4.bg-white.border-orange-200:first-of-type');
         if (uploadSection) {
           (uploadSection as HTMLElement).style.display = 'none';
         }
+        
+        const welcomeCards = documentClone.querySelectorAll('.welcome-card');
+        welcomeCards.forEach(card => {
+          (card as HTMLElement).style.display = 'none';
+        });
       }
     });
 
@@ -131,7 +140,7 @@ export const exportToPDF = async (pageTitle: string) => {
     
     // Convert to image and add to PDF
     const imgData = canvas.toDataURL('image/jpeg', 1.0);
-    pdf.addImage(imgData, 'JPEG', 0, 30, pageWidth, imgHeight);
+    pdf.addImage(imgData, 'JPEG', 0, 10, pageWidth, imgHeight);
 
     // For longer content, ensure proper pagination
     if (pageCount > 1) {
@@ -141,7 +150,7 @@ export const exportToPDF = async (pageTitle: string) => {
           imgData,
           'JPEG',
           0,
-          -(pageHeight * i) + 30, // offset for each page
+          -(pageHeight * i) + 10, // offset for each page
           pageWidth,
           imgHeight
         );

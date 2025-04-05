@@ -12,7 +12,24 @@ export const useExportPDF = () => {
       const element = document.getElementById('notas-table');
       if (!element) return;
       
-      const canvas = await html2canvas(element);
+      // Hide header and other elements during export
+      const headerElements = document.querySelectorAll('header, .sidebar, .mobile-nav, footer');
+      headerElements.forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
+      
+      const canvas = await html2canvas(element, {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+      
+      // Restore visibility
+      headerElements.forEach(el => {
+        (el as HTMLElement).style.display = '';
+      });
+      
       const data = canvas.toDataURL('image/png');
       
       const pdf = new jsPDF();
