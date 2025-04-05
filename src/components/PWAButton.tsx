@@ -25,17 +25,14 @@ const PWAButton: React.FC = () => {
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={toggleInstructions}>
           <div 
-            className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-scale-in my-4 shadow-xl" 
+            className="bg-white rounded-lg max-w-2xl w-full h-[90vh] overflow-y-auto animate-scale-in my-4 shadow-xl" 
             onClick={e => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-center mb-4">
                 <Smartphone className="h-8 w-8 text-subpi-blue" />
               </div>
-              <h2 className="text-xl font-semibold text-center mb-2">Adicione SubPinheiros ao seu celular</h2>
-              <p className="text-center text-gray-600 mb-6">
-                Aproveite o acesso rápido como um aplicativo diretamente da tela inicial do seu dispositivo móvel.
-              </p>
+              <h2 className="text-xl font-semibold text-center mb-6">Use a SubPi como app no celular!</h2>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="border border-gray-200 rounded-lg p-4">
