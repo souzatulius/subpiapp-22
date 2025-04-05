@@ -6,8 +6,7 @@ import {
   BarChart2, 
   TrendingUp,
   FileText,
-  Sparkles,
-  LineChart
+  Sparkles
 } from 'lucide-react';
 
 // Navigation configuration for the sidebar
@@ -26,14 +25,6 @@ export const getNavigationSections = () => [
     icon: <MessageCircle size={20} />,
     label: 'Comunicação',
     path: '/dashboard/comunicacao',
-    isSection: false
-  },
-  // Seção 3: Ações da Comunicação
-  {
-    id: 'acoes-comunicacao',
-    icon: <LineChart size={20} />,
-    label: 'Ações da Comunicação',
-    path: '/dashboard/comunicacao/acoes',
     isSection: false
   },
   // Seção 4: Relatórios
