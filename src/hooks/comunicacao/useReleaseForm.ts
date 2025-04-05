@@ -130,13 +130,15 @@ export const useReleaseForm = () => {
       }
       
       // Create new nota oficial with the edited content
+      // Adding a default problema_id for the notas_oficiais table requirement
       const { error } = await supabase
         .from('notas_oficiais')
         .insert({
           titulo: editedTitle,
           texto: editedContent,
           autor_id: user.id,
-          status: 'pendente'
+          status: 'pendente',
+          problema_id: '1' // Using a default value to satisfy the schema requirement
         });
           
       if (error) throw error;

@@ -22,8 +22,18 @@ export const useChartConfigs = () => {
     mixed: chartColors
   };
 
+  // Add pieChartColors for the pie charts
+  const pieChartColors = [
+    '#f97316', // orange-500
+    '#0ea5e9', // sky-500
+    '#10b981', // emerald-500
+    '#8b5cf6', // violet-500
+    '#ec4899', // pink-500
+  ];
+
   return {
     chartColors,
-    colorSets
+    colorSets,
+    pieChartColors
   };
 };
