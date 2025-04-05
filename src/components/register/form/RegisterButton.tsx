@@ -1,32 +1,33 @@
-
 import React from 'react';
 import { UserPlus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RegisterButtonProps {
   isLoading: boolean;
 }
 
 const RegisterButton: React.FC<RegisterButtonProps> = ({ isLoading }) => {
-  if (isLoading) {
-    return (
-      <button 
-        type="button" 
-        className="w-full bg-[#003570] text-white py-3 px-4 hover:bg-blue-900 transition-all duration-200 flex items-center justify-center font-medium rounded-2xl opacity-75 cursor-not-allowed"
-        disabled
-      >
-        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
-        Processando...
-      </button>
-    );
-  }
-
   return (
-    <button 
-      type="submit" 
-      className="w-full bg-[#003570] text-white py-3 px-4 hover:bg-blue-900 transition-all duration-200 flex items-center justify-center font-medium rounded-2xl"
+    <Button
+      type="submit"
+      variant="default"
+      size="simple"
+      className="w-full flex items-center justify-center"
+      disabled={isLoading}
+      aria-busy={isLoading}
     >
-      <UserPlus className="mr-2 h-5 w-5" /> Cadastrar
-    </button>
+      {isLoading ? (
+        <>
+          <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+          Processando...
+        </>
+      ) : (
+        <>
+          <UserPlus className="mr-2 h-5 w-5" />
+          Cadastrar
+        </>
+      )}
+    </Button>
   );
 };
 
