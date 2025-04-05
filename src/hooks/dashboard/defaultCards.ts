@@ -62,7 +62,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: "Consultar Demandas",
       path: "/dashboard/comunicacao/demandas",
       iconId: "list-bullet",
-      color: 'gray-medium',
+      color: 'gray-lighter',
       width: '25',
       height: '2',
       type: 'standard',
@@ -74,7 +74,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: "Criar Nota",
       path: "/dashboard/comunicacao/criar-nota",
       iconId: "document-plus",
-      color: 'blue-dark',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
@@ -88,7 +88,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: "Aprovar Notas",
       path: "/dashboard/comunicacao/aprovar-nota",
       iconId: "check-circle",
-      color: 'gray-dark',
+      color: 'blue-dark',
       width: '25',
       height: '2',
       type: 'standard',
@@ -113,7 +113,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: 'Relatórios da Comunicação',
       path: '/dashboard/comunicacao/relatorios',
       iconId: 'bar-chart-2',
-      color: 'blue-vivid',
+      color: 'blue-light',
       width: '25',
       height: '2',
       type: 'standard',
@@ -125,7 +125,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: 'Gerar Notícia',
       path: '/dashboard/comunicacao/cadastrar-release',
       iconId: 'document-plus',
-      color: 'green-neon',
+      color: 'orange-dark',
       width: '25',
       height: '2',
       type: 'standard',
@@ -137,7 +137,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: 'Ver Releases e Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
-      color: 'blue-dark',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
@@ -149,14 +149,10 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
 
 // Cards padrão para o dashboard inicial
 export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem[] => {
-  const isComunicacao = coordenacaoId === 'comunicacao';
-  const isGabinete = coordenacaoId === 'gabinete';
-  const allowBadge = !isComunicacao && !isGabinete;
-
-  const cards: ActionCardItem[] = [];
-
-  if (isComunicacao) {
-    cards.push({
+  // To avoid infinite recursion in type instantiation, return a simpler object structure
+  // Removed recursive references and complex conditional structures
+  return [
+    {
       id: 'nova-solicitacao',
       title: 'Nova Solicitação',
       iconId: 'plus-circle',
@@ -167,46 +163,39 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       type: 'standard',
       displayMobile: true,
       mobileOrder: 1
-    });
-  }
-
-  cards.push({
-    id: 'responder-demandas',
-    title: 'Responder Demandas',
-    iconId: 'chat-bubble-left-right',
-    path: '/dashboard/comunicacao/responder',
-    color: 'orange-dark',
-    width: '25',
-    height: '2',
-    type: 'standard',
-    hasBadge: allowBadge,
-    badgeValue: "0",
-    displayMobile: true,
-    mobileOrder: 2
-  });
-
-  if (isComunicacao) {
-    cards.push({
+    },
+    {
+      id: 'responder-demandas',
+      title: 'Responder Demandas',
+      iconId: 'chat-bubble-left-right',
+      path: '/dashboard/comunicacao/responder',
+      color: 'orange-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      hasBadge: true,
+      badgeValue: "0",
+      displayMobile: true,
+      mobileOrder: 2
+    },
+    {
       id: 'consultar-demandas',
       title: 'Consultar Demandas',
       iconId: 'list-bullet',
       path: '/dashboard/comunicacao/demandas',
-      color: 'gray-medium',
+      color: 'gray-lighter',
       width: '25',
       height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
-    });
-  }
-
-  if (isComunicacao) {
-    cards.push({
+    },
+    {
       id: 'criar-nota',
       title: 'Criar Nota Oficial',
       iconId: 'document-plus',
       path: '/dashboard/comunicacao/criar-nota',
-      color: 'blue-dark',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
@@ -214,98 +203,70 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       badgeValue: '0',
       displayMobile: true,
       mobileOrder: 4
-    });
-  }
-
-  cards.push({
-    id: 'aprovar-notas',
-    title: 'Aprovar Notas',
-    iconId: 'check-circle',
-    path: '/dashboard/comunicacao/aprovar-nota',
-    color: 'gray-dark',
-    width: '25',
-    height: '2',
-    type: 'standard',
-    hasBadge: allowBadge,
-    badgeValue: '0',
-    displayMobile: true,
-    mobileOrder: 5
-  });
-
-  if (isComunicacao) {
-    cards.push({
-      id: 'consultar-notas',
-      title: 'Consultar Notas',
-      iconId: 'document-text',
-      path: '/dashboard/comunicacao/notas',
-      color: 'gray-lighter',
+    },
+    {
+      id: 'aprovar-notas',
+      title: 'Aprovar Notas',
+      iconId: 'check-circle',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      color: 'blue-dark',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      hasBadge: true,
+      badgeValue: '0',
+      displayMobile: true,
+      mobileOrder: 5
+    },
+    {
+      id: 'ranking-zeladoria',
+      title: 'Ranking de Zeladoria',
+      iconId: 'bar-chart-2',
+      path: '/dashboard/zeladoria/ranking-subs',
+      color: 'orange-light',
       width: '25',
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 6
-    });
-  }
-
-  cards.push({
-    id: 'ranking-zeladoria',
-    title: 'Ranking de Zeladoria',
-    iconId: 'bar-chart-2',
-    path: '/dashboard/zeladoria/ranking-subs',
-    color: 'orange-dark',
-    width: '25',
-    height: '2',
-    type: 'standard',
-    displayMobile: true,
-    mobileOrder: 7
-  });
-
-  if (isComunicacao || isGabinete) {
-    cards.push({
+      mobileOrder: 7
+    },
+    {
       id: 'relatorios-comunicacao',
       title: 'Relatórios da Comunicação',
       path: '/dashboard/comunicacao/relatorios',
       iconId: 'bar-chart-2',
-      color: 'blue-vivid',
+      color: 'blue-light',
       width: '25',
       height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 8
-    });
-  }
-
-  if (isComunicacao) {
-    cards.push({
+    },
+    {
       id: 'gerar-noticia',
       title: 'Gerar Notícia',
       path: '/dashboard/comunicacao/cadastrar-release',
       iconId: 'document-plus',
-      color: 'green-neon',
+      color: 'orange-dark',
       width: '25',
       height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 9
-    });
-  }
-
-  if (isComunicacao || isGabinete) {
-    cards.push({
+    },
+    {
       id: 'ver-releases',
       title: 'Ver Releases e Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
-      color: 'blue-dark',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 10
-    });
-  }
-
-  return cards;
+    }
+  ];
 };
 
 // Compatibilidade com código existente
