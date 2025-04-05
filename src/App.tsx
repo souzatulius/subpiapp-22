@@ -32,6 +32,7 @@ import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
 import CadastrarRelease from './pages/dashboard/comunicacao/CadastrarRelease';
 import ListarReleases from './pages/dashboard/comunicacao/ListarReleases';
+import AcoesComunicacao from './pages/dashboard/comunicacao/AcoesComunicacao';
 
 // Admin Pages
 import UserPermissionsList from './pages/admin/UserPermissionsList';
@@ -81,6 +82,7 @@ function App() {
                 <Route path="comunicacao/aprovar-nota" element={<AprovarNotaOficial />} />
                 <Route path="comunicacao/notas" element={<ConsultarNotas />} />
                 <Route path="comunicacao/relatorios" element={<RelatoriosPage />} />
+                <Route path="comunicacao/acoes" element={<AcoesComunicacao />} />
                 
                 {/* New Release routes */}
                 <Route path="comunicacao/cadastrar-release" element={<CadastrarRelease />} />
