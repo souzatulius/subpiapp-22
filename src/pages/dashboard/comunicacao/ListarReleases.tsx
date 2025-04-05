@@ -347,7 +347,7 @@ const ListarReleases = () => {
           <Card key={item.id} className="overflow-hidden group relative">
             <CardContent className="p-4">
               <div className="mb-2">
-                <Badge variant={item.tipo === 'release' ? 'outline' : 't'} className="mb-2">
+                <Badge variant={item.tipo === 'release' ? 'outline' : 'default'} className="mb-2">
                   {item.tipo === 'release' ? 'Release' : 'Notícia'}
                 </Badge>
               </div>
