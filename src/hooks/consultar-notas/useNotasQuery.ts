@@ -136,7 +136,9 @@ export const useNotasQuery = () => {
         return transformedData;
       } catch (error) {
         console.error("Error fetching notas:", error);
-        throw error;
+        // Return an empty array instead of throwing the error
+        // This ensures we don't try to access properties on the error object
+        return [];
       }
     }
   });

@@ -61,20 +61,20 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
             )}
           </div>
           
-          {demanda.origem_id && demanda.origem && (
+          {demanda.origem_id && demanda.origens_demandas && (
             <div className="flex flex-wrap gap-1">
               <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                {demanda.origem.descricao || "Origem não especificada"}
+                {demanda.origens_demandas.descricao || "Origem não especificada"}
               </Badge>
             </div>
           )}
           
-          {(demanda.endereco || (demanda.bairro && demanda.bairro.nome)) && (
+          {(demanda.endereco || (demanda.bairros && demanda.bairros.nome)) && (
             <div className="text-sm flex items-start text-gray-600">
               <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
               <span className="line-clamp-2">
-                {demanda.endereco}{demanda.endereco && demanda.bairro?.nome ? ', ' : ''}
-                {demanda.bairro?.nome}
+                {demanda.endereco}{demanda.endereco && demanda.bairros?.nome ? ', ' : ''}
+                {demanda.bairros?.nome}
               </span>
             </div>
           )}
