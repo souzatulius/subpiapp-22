@@ -60,7 +60,7 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none">
-      <Card className={cn("w-full border border-gray-200 hover:shadow-md transition-all", className)}>
+      <Card className={cn("w-full border border-blue-200 hover:shadow-md transition-all", className)}>
         <CardHeader className="p-3 pb-1 space-y-1">
           <div className="flex items-center justify-between">
             <CardTitle className="text-md font-semibold text-gray-800 flex items-center">
