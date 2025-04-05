@@ -52,6 +52,19 @@ export const useNotasQuery = () => {
         
         // Transform the data to ensure consistent structure
         const transformedData: NotaOficial[] = (data || []).map(item => {
+          // Early return to handle undefined/null items
+          if (!item) return {
+            id: '',
+            titulo: '',
+            conteudo: '',
+            texto: '',
+            status: '',
+            criado_em: '',
+            created_at: '',
+            atualizado_em: '',
+            updated_at: ''
+          };
+          
           // Handle autor safely
           const autor = item.autor ? {
             id: item.autor.id || '',
