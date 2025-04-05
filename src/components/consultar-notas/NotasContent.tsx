@@ -49,8 +49,8 @@ const NotasContent = () => {
     setSelectedNota(null);
   };
   
-  const handleEditNota = (nota: NotaOficial) => {
-    navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
+  const handleEditNota = (id: string) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
   };
   
   const handleDeleteClick = (nota: NotaOficial) => {
@@ -103,7 +103,7 @@ const NotasContent = () => {
           loading={loading}
           formatDate={formatDate}
           onViewNota={handleViewNota}
-          onEditNota={handleEditNota}
+          onEditNota={(nota: NotaOficial) => handleEditNota(nota.id)}
           onDeleteNota={handleDeleteClick}
         />
       ) : (
@@ -112,7 +112,7 @@ const NotasContent = () => {
           loading={loading}
           formatDate={formatDate}
           onView={handleViewNota}
-          onEdit={handleEditNota}
+          onEdit={(nota: NotaOficial) => handleEditNota(nota.id)}
           onDelete={handleDeleteClick}
         />
       )}

@@ -24,3 +24,20 @@ export interface Demanda {
     nome: string;
   };
 }
+
+export interface Resposta {
+    texto: string;
+    respostas?: { [key: string]: string };
+    comentarios?: string | null;
+}
+
+export interface Area {
+    id: string;
+    descricao: string;
+}
+
+export interface ResponderDemandaFormProps {
+    onClose: () => void;
+}
+
+export type ViewMode = 'list' | 'cards';

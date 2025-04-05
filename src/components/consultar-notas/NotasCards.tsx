@@ -12,7 +12,7 @@ interface NotasCardsProps {
   loading: boolean;
   formatDate: (dateString: string) => string;
   onView: (nota: NotaOficial) => void;
-  onEdit: (id: string) => void;
+  onEdit: (nota: NotaOficial) => void;
   onDelete: (nota: NotaOficial) => void;
 }
 
@@ -82,7 +82,7 @@ const NotasCards: React.FC<NotasCardsProps> = ({ notas, loading, formatDate, onV
               <Button size="sm" variant="ghost" onClick={() => onView(nota)}>
                 <Eye className="h-4 w-4" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => onEdit(nota.id)}>
+              <Button size="sm" variant="ghost" onClick={() => onEdit(nota)}>
                 <Edit className="h-4 w-4" />
               </Button>
               <Button size="sm" variant="ghost" onClick={() => onDelete(nota)}>
