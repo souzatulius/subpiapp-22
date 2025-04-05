@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import AuthLayout from '@/components/AuthLayout';
@@ -66,7 +67,7 @@ const ForgotPassword = () => {
     return (
       <AuthLayout>
         <div className="h-full flex items-center justify-center p-8">
-          <div className="loading-spinner animate-spin"></div>
+          <div className="animate-spin w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full"></div>
         </div>
       </AuthLayout>
     );

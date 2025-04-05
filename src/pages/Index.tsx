@@ -9,7 +9,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Header - explicitly hide user controls */}
       <Header showControls={false} hideUserMenu={true} />
 
@@ -22,7 +22,7 @@ const Index = () => {
         
         {/* Right side with blue background and background image (only on desktop) */}
         <div 
-          className="w-full md:w-1/2 bg-subpi-blue flex flex-col items-center justify-center p-8 relative animate-fade-right"
+          className="hidden md:flex md:w-1/2 bg-subpi-blue flex-col items-center justify-center p-8 relative animate-fade-right"
           style={!isMobile ? {
             backgroundImage: 'url("/lovable-uploads/93093cf9-6088-4d69-b6fa-f2aef9d9dddc.png")',
             backgroundSize: 'cover',
