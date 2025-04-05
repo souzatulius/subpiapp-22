@@ -61,6 +61,28 @@
   --ring: 0 0% 90%;
 }
 
+.welcome-card-container > div > div:first-child {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: #f9fafb; /* bg-gray-50 */
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-top: -1rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+/* Make sure cards flow beneath the sticky welcome card */
+.welcome-card-container > div > div:not(:first-child) {
+  padding-top: 1rem;
+  position: relative;
+  z-index: 30;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
