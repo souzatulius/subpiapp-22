@@ -146,7 +146,7 @@ const PWAButton: React.FC = () => {
             <div className="border-t p-4 flex justify-between">
               <button
                 onClick={toggleInstructions}
-                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 border border-gray-300 rounded-xl hover:bg-gray-50"
+                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-xl transition-colors flex items-center gap-2 border border-gray-300 hover:bg-gray-50"
               >
                 <X className="h-4 w-4" /> Fechar
               </button>
