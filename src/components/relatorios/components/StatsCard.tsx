@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpIcon, ArrowDownIcon, ArrowRightIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 
 interface StatsCardProps {
   title: string;
@@ -10,6 +9,7 @@ interface StatsCardProps {
   comparison?: string;
   trend?: 'up' | 'down' | 'neutral';
   isLoading?: boolean;
+  description?: string;
 }
 
 export const StatsCard: React.FC<StatsCardProps> = ({
@@ -17,48 +17,38 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   value,
   comparison,
   trend,
-  isLoading = false
+  isLoading = false,
+  description
 }) => {
-  const getTrendIcon = () => {
-    if (!trend) return null;
-    
-    switch (trend) {
-      case 'up':
-        return <ArrowUpIcon className="h-4 w-4 text-orange-500" />;
-      case 'down':
-        return <ArrowDownIcon className="h-4 w-4 text-orange-500" />;
-      case 'neutral':
-        return <ArrowRightIcon className="h-4 w-4 text-orange-500" />;
-      default:
-        return null;
+  // Format value with comma as decimal separator
+  const formatValue = (val: string | number): string => {
+    const stringValue = val.toString();
+    if (stringValue.includes('.')) {
+      return stringValue.replace('.', ',');
     }
+    return stringValue;
   };
 
   return (
-    <Card className="transition-all duration-300 border-orange-200 hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 bg-gradient-to-r from-orange-50 to-white">
-        <CardTitle className="text-sm font-medium text-gray-700">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <>
-            <Skeleton className="h-8 w-20 bg-orange-50 mb-2" />
-            <Skeleton className="h-3 w-32 bg-orange-50" />
-          </>
-        ) : (
-          <>
-            <div className="text-2xl font-bold text-orange-500">{value}</div>
-            {comparison && (
-              <p className="text-xs text-orange-500 flex items-center gap-1 mt-1">
-                {getTrendIcon()}
-                {comparison}
-              </p>
-            )}
-          </>
-        )}
-      </CardContent>
+    <Card className="p-4 border border-gray-200 hover:shadow-md transition-all">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-medium text-gray-700">{title}</h3>
+      </div>
+      
+      {isLoading ? (
+        <>
+          <Skeleton className="h-7 w-24 bg-gray-200 mb-2" />
+          <Skeleton className="h-4 w-full bg-gray-100 mb-1" />
+          <Skeleton className="h-4 w-3/4 bg-gray-100" />
+        </>
+      ) : (
+        <>
+          <p className="text-2xl font-bold text-gray-900 mb-2">{formatValue(value)}</p>
+          <p className="text-xs text-gray-600 line-clamp-2">
+            {description || comparison || ''}
+          </p>
+        </>
+      )}
     </Card>
   );
 };

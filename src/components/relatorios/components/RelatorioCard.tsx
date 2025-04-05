@@ -27,26 +27,35 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   value,
   isLoading = false
 }) => {
+  // Format value with comma as decimal separator
+  const formatValue = (val: string | number): string => {
+    const stringValue = val.toString();
+    if (stringValue.includes('.')) {
+      return stringValue.replace('.', ',');
+    }
+    return stringValue;
+  };
+  
   return (
-    <div className={`h-full border border-orange-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-xl ${className}`}>
-      <div className="pb-2 border-b border-orange-200 p-4 bg-gradient-to-r from-orange-50 to-white rounded-t-xl">
+    <div className={`h-full border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-lg ${className}`}>
+      <div className="pb-2 border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-orange-800">{title}</h3>
+          <h3 className="text-lg font-medium text-gray-700">{title}</h3>
           {badge && (
-            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1 bg-orange-200 text-orange-800 rounded-full">
+            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1">
               {badge.icon}
               {badge.text}
             </Badge>
           )}
         </div>
-        <div className="text-sm text-orange-600 mt-1">
-          {isLoading ? <Skeleton className="h-4 w-24 bg-orange-100 rounded" /> : description}
+        <div className="text-sm text-gray-600 mt-1">
+          {isLoading ? <Skeleton className="h-4 w-24 bg-gray-200 rounded" /> : description}
         </div>
-        {value && <div className="text-2xl font-bold text-orange-700 mt-1">{isLoading ? <Skeleton className="h-8 w-16 bg-orange-100 rounded" /> : value}</div>}
+        {value && <div className="text-2xl font-bold text-gray-900 mt-1">{isLoading ? <Skeleton className="h-8 w-16 bg-gray-200 rounded" /> : formatValue(value)}</div>}
       </div>
-      <div className="p-2">
+      <div className="p-4">
         {isLoading ? (
-          <Skeleton className="h-[250px] w-full bg-orange-50 rounded-lg" />
+          <Skeleton className="h-[250px] w-full bg-gray-200 rounded" />
         ) : (
           <div className="h-[250px] overflow-auto">
             {children}

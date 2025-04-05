@@ -1,22 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCardStatsData } from './hooks/reports/useCardStatsData';
-import { SortableKPICard } from './components/SortableKPICard';
 import { Clock, FileText, MessageSquare, Percent } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-
-interface CardData {
-  id: string;
-  title: string;
-  icon: JSX.Element;
-  value: string | number;
-  change?: number;
-  status: 'positive' | 'negative' | 'neutral';
-  description: string;
-  secondary?: string;
-}
+import InsightCard from '../ranking/insights/InsightCard';
 
 interface RelatoriosKPICardsProps {
   isEditMode?: boolean;
@@ -54,77 +43,61 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
     return () => clearInterval(interval);
   }, [fetchCardStats]);
 
-  const cardData: Record<string, CardData> = {
-    demandas: {
-      id: 'demandas',
-      title: 'Demandas',
-      icon: <MessageSquare className="h-5 w-5" />,
-      value: cardStats.totalDemandas,
-      change: cardStats.demandasVariacao,
-      status: cardStats.demandasVariacao >= 0 ? 'positive' : 'negative',
-      description: 'Hoje',
-      secondary: `Ontem foram ${cardStats.totalDemandas - (cardStats.totalDemandas * cardStats.demandasVariacao / 100)}`
-    },
-    notas: {
-      id: 'notas',
-      title: 'Notas',
-      icon: <FileText className="h-5 w-5" />,
-      value: cardStats.totalNotas,
-      change: cardStats.notasVariacao,
-      status: cardStats.notasVariacao >= 0 ? 'positive' : 'negative',
-      description: `Para a imprensa`,
-      secondary: `${Math.abs(cardStats.notasVariacao)}% ${cardStats.notasVariacao >= 0 ? 'maior' : 'menor'} que março`
-    },
-    tempo: {
-      id: 'tempo',
-      title: 'Resposta',
-      icon: <Clock className="h-5 w-5" />,
-      value: `${cardStats.tempoMedioResposta} horas`,
-      change: cardStats.tempoRespostaVariacao,
-      status: cardStats.tempoRespostaVariacao <= 0 ? 'positive' : 'negative', // Menor tempo é melhor
-      description: 'Média de tempo',
-      secondary: `${Math.abs(cardStats.tempoRespostaVariacao)}% ${cardStats.tempoRespostaVariacao <= 0 ? 'mais rápido' : 'mais lento'}`
-    },
-    aprovacao: {
-      id: 'aprovacao',
-      title: 'Aprovação',
-      icon: <Percent className="h-5 w-5" />,
-      value: `${cardStats.taxaAprovacao}%`,
-      change: cardStats.aprovacaoVariacao,
-      status: cardStats.aprovacaoVariacao >= 0 ? 'positive' : 'negative',
-      description: `${cardStats.notasAprovadas || 0} Notas aprovadas`,
-      secondary: `Editadas: ${cardStats.notasEditadas || 0}%`
-    }
+  // Format number with comma as decimal separator
+  const formatNumber = (value: number): string => {
+    return value.toString().replace('.', ',');
   };
+
+  // Format cards data
+  const getCardData = () => {
+    return {
+      demandas: {
+        title: 'Demandas',
+        value: formatNumber(cardStats.totalDemandas),
+        comment: `Hoje foram ${cardStats.totalDemandas} demandas. Ontem foram ${cardStats.totalDemandas - (cardStats.totalDemandas * cardStats.demandasVariacao / 100)}.`
+      },
+      notas: {
+        title: 'Notas',
+        value: formatNumber(cardStats.totalNotas),
+        comment: `Para a imprensa. ${Math.abs(cardStats.notasVariacao)}% ${cardStats.notasVariacao >= 0 ? 'maior' : 'menor'} que março.`
+      },
+      tempo: {
+        title: 'Resposta',
+        value: `${formatNumber(cardStats.tempoMedioResposta)} horas`,
+        comment: `Média de tempo. ${Math.abs(cardStats.tempoRespostaVariacao)}% ${cardStats.tempoRespostaVariacao <= 0 ? 'mais rápido' : 'mais lento'} que o período anterior.`
+      },
+      aprovacao: {
+        title: 'Aprovação',
+        value: `${formatNumber(cardStats.taxaAprovacao)}%`,
+        comment: `${cardStats.notasAprovadas || 0} Notas aprovadas. Editadas: ${cardStats.notasEditadas || 0}%.`
+      }
+    };
+  };
+
+  const cardData = getCardData();
 
   return (
     <DndContext 
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
-      modifiers={[]}
     >
       <SortableContext 
         items={cards}
         strategy={rectSortingStrategy}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {cards.map((cardId) => {
-            const card = cardData[cardId];
+            const card = cardData[cardId as keyof typeof cardData];
             return (
-              <SortableKPICard
-                key={card.id}
-                id={card.id}
-                title={card.title}
-                icon={card.icon}
-                value={card.value}
-                change={card.change}
-                status={card.status}
-                description={card.description}
-                secondary={card.secondary}
-                isLoading={isLoadingCards}
-                isEditMode={isEditMode}
-              />
+              <div key={cardId} id={cardId} className="transform transition-all duration-300">
+                <InsightCard
+                  title={card.title}
+                  value={card.value}
+                  comment={card.comment}
+                  isLoading={isLoadingCards}
+                />
+              </div>
             );
           })}
         </div>
