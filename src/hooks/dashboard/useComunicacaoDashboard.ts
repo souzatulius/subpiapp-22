@@ -1,196 +1,209 @@
-
-import { useState, useEffect } from 'react';
-import { ActionCardItem } from '@/types/dashboard';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { getCommunicationActionCards } from './defaultCards';
+import { toast } from '@/components/ui/use-toast';
 
-export const useComunicacaoDashboard = (
-  user: User | null,
-  isPreview = false,
-  department = 'comunicacao'
-) => {
-  const [cards, setCards] = useState<ActionCardItem[]>([]);
+interface DashboardConfig {
+  id: string;
+  user_id: string;
+  cards_config: string;
+  created_at: string;
+}
+
+export const useComunicacaoDashboard = () => {
+  const [dashboardConfig, setDashboardConfig] = useState<DashboardConfig | null>(null);
+  const [localConfig, setLocalConfig] = useState<DashboardConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
+
+  // Function to fetch dashboard configuration from the database
+  const fetchDashboardConfig = useCallback(async (userId: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('dashboard_config')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching dashboard config:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar a configuração do dashboard.',
+          variant: 'destructive'
+        });
+      }
+
+      setDashboardConfig(data);
+      setLocalConfig(data);
+    } catch (error) {
+      console.error('Unexpected error fetching dashboard config:', error);
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro inesperado ao carregar a configuração do dashboard.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Function to save dashboard configuration to the database
+  const saveConfigToDatabase = useCallback(async (config: { id: string; cards_config: string }) => {
+    try {
+      const { error } = await supabase
+        .from('dashboard_config')
+        .update({ cards_config: config.cards_config })
+        .eq('id', config.id);
+
+      if (error) {
+        console.error('Error saving dashboard config:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível salvar a configuração do dashboard.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Sucesso',
+          description: 'Configuração do dashboard salva com sucesso.',
+        });
+        setDashboardConfig(prev => ({ ...prev, cards_config: config.cards_config } as DashboardConfig));
+      }
+    } catch (error) {
+      console.error('Unexpected error saving dashboard config:', error);
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro inesperado ao salvar a configuração do dashboard.',
+        variant: 'destructive'
+      });
+    }
+  }, []);
+
+  // Function to create a new dashboard configuration in the database
+  const createConfigInDatabase = useCallback(async (userId: string) => {
+    try {
+      const initialConfig = JSON.stringify([
+        { "id": "urgencia-cards", "width": 6 },
+        { "id": "informativos-recentes", "width": 6 },
+        { "id": "enquetes-recentes", "width": 6 },
+        { "id": "feedbacks-recentes", "width": 6 }
+      ]);
+
+      const { data, error } = await supabase
+        .from('dashboard_config')
+        .insert([{ user_id: userId, cards_config: initialConfig }])
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error creating dashboard config:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível criar a configuração do dashboard.',
+          variant: 'destructive'
+        });
+      }
+
+      setDashboardConfig(data);
+      setLocalConfig(data);
+    } catch (error) {
+      console.error('Unexpected error creating dashboard config:', error);
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro inesperado ao criar a configuração do dashboard.',
+        variant: 'destructive'
+      });
+    }
+  }, []);
+
+  // Function to reorder cards - fixing the excessive type instantiation issue
+  const handleCardsReorder = useCallback((source: number, destination: number) => {
+    // Skip if cards haven't been loaded yet
+    if (!dashboardConfig || !dashboardConfig.cards_config) return;
+    
+    try {
+      // Parse the current cards configuration
+      let currentCards = JSON.parse(dashboardConfig.cards_config);
+      
+      // Make a copy of the cards array to avoid direct state mutation
+      const cardsArrayCopy = [...currentCards];
+      
+      // Perform the reordering
+      const [movedCard] = cardsArrayCopy.splice(source, 1);
+      cardsArrayCopy.splice(destination, 0, movedCard);
+      
+      // Update local state
+      setLocalConfig(prev => ({
+        ...prev,
+        cards_config: JSON.stringify(cardsArrayCopy)
+      }));
+      
+      // Update remote state
+      if (dashboardConfig.id) {
+        saveConfigToDatabase({
+          id: dashboardConfig.id,
+          cards_config: JSON.stringify(cardsArrayCopy)
+        });
+      }
+    } catch (error) {
+      console.error('Error reordering cards:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível reordenar os cards.',
+        variant: 'destructive'
+      });
+    }
+  }, [dashboardConfig, saveConfigToDatabase]);
+
+  // Function to reset the dashboard configuration to default
+  const handleResetDashboard = useCallback(async (userId: string) => {
+    if (!dashboardConfig) return;
+
+    try {
+      // Define the default card configuration
+      const defaultCardsConfig = JSON.stringify([
+        { "id": "urgencia-cards", "width": 6 },
+        { "id": "informativos-recentes", "width": 6 },
+        { "id": "enquetes-recentes", "width": 6 },
+        { "id": "feedbacks-recentes", "width": 6 }
+      ]);
+
+      // Update the dashboard configuration with the default settings
+      await saveConfigToDatabase({ id: dashboardConfig.id, cards_config: defaultCardsConfig });
+
+      // Update local state to reflect the changes
+      setLocalConfig(prev => ({ ...prev, cards_config: defaultCardsConfig } as DashboardConfig));
+      setDashboardConfig(prev => ({ ...prev, cards_config: defaultCardsConfig } as DashboardConfig));
+
+      toast({
+        title: 'Dashboard redefinido',
+        description: 'O dashboard foi redefinido para a configuração padrão.',
+      });
+    } catch (error) {
+      console.error('Error resetting dashboard:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível redefinir o dashboard.',
+        variant: 'destructive'
+      });
+    }
+  }, [dashboardConfig, saveConfigToDatabase]);
 
   useEffect(() => {
-    const fetchCards = async () => {
-      setIsLoading(true);
-      
-      if (isPreview || !user) {
-        // For preview mode or unauthenticated users, load default cards
-        const defaultCards = getCommunicationActionCards();
-        setCards(defaultCards);
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('user_dashboard')
-          .select('cards_config')
-          .eq('user_id', user.id)
-          .eq('department', department)
-          .single();
-        
-        if (error || !data) {
-          // No saved configuration, use default
-          const defaultCards = getCommunicationActionCards();
-          setCards(defaultCards);
-          
-          // Create user dashboard record with default config
-          if (!isPreview && user) {
-            await supabase.from('user_dashboard').upsert({
-              user_id: user.id,
-              department: department,
-              cards_config: JSON.stringify(defaultCards),
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-          }
-        } else {
-          // Use saved configuration
-          try {
-            const savedCards = JSON.parse(data.cards_config);
-            setCards(Array.isArray(savedCards) ? savedCards : getCommunicationActionCards());
-          } catch (e) {
-            console.error('Error parsing saved cards configuration:', e);
-            setCards(getCommunicationActionCards());
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching communication dashboard settings:', error);
-        // Fallback to default cards
-        const defaultCards = getCommunicationActionCards();
-        setCards(defaultCards);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchCards();
-  }, [user, department, isPreview]);
-
-  const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
-  };
-
-  const handleCardEdit = (card: ActionCardItem) => {
-    setSelectedCard(card);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveCardEdit = async (updatedCard: ActionCardItem) => {
-    if (!updatedCard || !cards) return;
-    
-    const updatedCards = cards.map((card) => 
-      card.id === updatedCard.id ? { ...updatedCard } : card
-    );
-    
-    setCards(updatedCards);
-    setIsEditModalOpen(false);
-    setSelectedCard(null);
-    
-    // Save to database if user is logged in
-    if (!isPreview && user) {
-      try {
-        await supabase
-          .from('user_dashboard')
-          .update({ 
-            cards_config: JSON.stringify(updatedCards),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id)
-          .eq('department', department);
-      } catch (error) {
-        console.error('Error saving card updates:', error);
-      }
+    const user = supabase.auth.user();
+    if (user) {
+      fetchDashboardConfig(user.id);
     }
-  };
-
-  const handleCardHide = async (cardId: string) => {
-    if (!cardId || !cards) return;
-    
-    const updatedCards = cards.map((card) => 
-      card.id === cardId ? { ...card, isHidden: true } : card
-    );
-    
-    setCards(updatedCards);
-    
-    // Save to database if user is logged in
-    if (!isPreview && user) {
-      try {
-        await supabase
-          .from('user_dashboard')
-          .update({ 
-            cards_config: JSON.stringify(updatedCards),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id)
-          .eq('department', department);
-      } catch (error) {
-        console.error('Error saving card visibility:', error);
-      }
-    }
-  };
-
-  // Fixed the type recursion issue by explicitly typing the parameter
-  const handleCardsReorder = async (newCards: ActionCardItem[]) => {
-    setCards(newCards);
-    
-    // Save to database if user is logged in
-    if (!isPreview && user) {
-      try {
-        await supabase
-          .from('user_dashboard')
-          .update({ 
-            cards_config: JSON.stringify(newCards),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id)
-          .eq('department', department);
-      } catch (error) {
-        console.error('Error saving card order:', error);
-      }
-    }
-  };
-
-  const resetDashboard = async () => {
-    const defaultCards = getCommunicationActionCards();
-    setCards(defaultCards);
-    
-    // Save to database if user is logged in
-    if (!isPreview && user) {
-      try {
-        await supabase
-          .from('user_dashboard')
-          .update({ 
-            cards_config: JSON.stringify(defaultCards),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id)
-          .eq('department', department);
-      } catch (error) {
-        console.error('Error resetting dashboard:', error);
-      }
-    }
-  };
+  }, [fetchDashboardConfig]);
 
   return {
-    cards,
+    dashboardConfig: localConfig,
     isLoading,
-    isEditMode,
-    isEditModalOpen,
-    selectedCard,
-    toggleEditMode,
-    handleCardEdit,
-    handleCardHide,
-    handleSaveCardEdit,
-    setIsEditModalOpen,
+    fetchDashboardConfig,
+    saveConfigToDatabase,
+    createConfigInDatabase,
     handleCardsReorder,
-    resetDashboard
+    handleResetDashboard,
+    setLocalConfig
   };
 };

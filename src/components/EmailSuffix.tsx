@@ -109,8 +109,6 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)} 
           className="h-full w-full border-0 bg-transparent px-4 py-3 text-base focus:outline-none focus:ring-0"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
           placeholder="Apenas usuário (sem @smsub...)"
           {...registerField}
         />
