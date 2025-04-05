@@ -31,7 +31,7 @@ export const useComunicacaoDashboard = (
       try {
         const { data, error } = await supabase
           .from('user_dashboard')
-          .select('cards_config, department')
+          .select('cards_config')
           .eq('user_id', user.id)
           .eq('department', department)
           .single();
@@ -46,14 +46,20 @@ export const useComunicacaoDashboard = (
             await supabase.from('user_dashboard').upsert({
               user_id: user.id,
               department: department,
-              cards_config: defaultCards,
+              cards_config: JSON.stringify(defaultCards),
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });
           }
         } else {
           // Use saved configuration
-          setCards(data.cards_config || getCommunicationActionCards());
+          try {
+            const savedCards = JSON.parse(data.cards_config);
+            setCards(Array.isArray(savedCards) ? savedCards : getCommunicationActionCards());
+          } catch (e) {
+            console.error('Error parsing saved cards configuration:', e);
+            setCards(getCommunicationActionCards());
+          }
         }
       } catch (error) {
         console.error('Error fetching communication dashboard settings:', error);
@@ -92,7 +98,7 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: updatedCards,
+            cards_config: JSON.stringify(updatedCards),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
@@ -116,7 +122,7 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: updatedCards,
+            cards_config: JSON.stringify(updatedCards),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
@@ -136,7 +142,7 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: updatedCards,
+            cards_config: JSON.stringify(updatedCards),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)
@@ -157,7 +163,7 @@ export const useComunicacaoDashboard = (
         await supabase
           .from('user_dashboard')
           .update({ 
-            cards_config: defaultCards,
+            cards_config: JSON.stringify(defaultCards),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id)

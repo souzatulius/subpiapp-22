@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -66,7 +65,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
 
-      {/* Reset dashboard button */}
+      {/* Reset dashboard button with updated text */}
       <div className="flex justify-end">
         <Button 
           variant="outline" 
@@ -75,7 +74,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           className="text-blue-600 border-blue-300 hover:bg-blue-50"
         >
           <RotateCcw className="h-4 w-4 mr-2" />
-          Resetar Dashboard
+          Resetar
         </Button>
       </div>
       

@@ -1,4 +1,3 @@
-
 import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
@@ -53,7 +52,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       width: '25',
       height: '2',
       type: 'standard',
-      hasBadge: false, // não exibir badge na página de comunicação
+      hasBadge: false,
       displayMobile: true,
       mobileOrder: 2
     },
@@ -113,7 +112,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: 'Relatórios da Comunicação',
       path: '/dashboard/comunicacao/relatorios',
       iconId: 'bar-chart-2',
-      color: 'blue-light',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
@@ -134,7 +133,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'ver-releases',
-      title: 'Ver Releases e Notícias',
+      title: 'Releases e Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
       color: 'gray-medium',
@@ -235,7 +234,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       title: 'Relatórios da Comunicação',
       path: '/dashboard/comunicacao/relatorios',
       iconId: 'bar-chart-2',
-      color: 'blue-light',
+      color: 'gray-medium',
       width: '25',
       height: '2',
       type: 'standard',
@@ -256,7 +255,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     },
     {
       id: 'ver-releases',
-      title: 'Ver Releases e Notícias',
+      title: 'Releases e Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
       color: 'gray-medium',

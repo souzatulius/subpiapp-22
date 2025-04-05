@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -79,22 +78,18 @@ const ActionCard = ({
   const navigate = useNavigate();
   const bgColor = getBackgroundColor(color);
   
-  // Get the icon directly from Lucide if possible
   const renderIcon = () => {
     if (!iconId) return null;
     
-    // First try to get the icon directly from Lucide
     const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
       return <LucideIcon className={getIconSize(iconSize)} />;
     }
     
-    // Fallback to the legacy method
     const FallbackIcon = getIconComponentFromId(iconId);
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
   
-  // Determine text color based on background color
   const getTextColor = (bgColor: string): string => {
     if (color === 'gray-light' || color === 'gray-lighter' || color === 'gray-medium' || 
         color === 'green-neon' || color === 'green-dark') {
@@ -130,12 +125,12 @@ const ActionCard = ({
         </div>
       )}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-3 px-2">
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
         {children ? (
           <>{children}</>
         ) : (
           <>
-            <div className={`mb-3 ${textColor}`}>
+            <div className={`mb-2.5 ${textColor}`}>
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%]">

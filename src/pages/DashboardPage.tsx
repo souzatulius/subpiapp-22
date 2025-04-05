@@ -86,11 +86,11 @@ const DashboardPage: React.FC = () => {
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
-            {/* WelcomeCard with greeting parameter */}
+            {/* WelcomeCard with updated description */}
             <div className="w-full mb-2">
               <WelcomeCard 
                 title="Dashboard" 
-                description="Bem-vindo ao seu dashboard personalizado." 
+                description="Mova e edite os cards para personalizar a sua tela!" 
                 icon={<Home className="h-6 w-6 mr-2" />} 
                 color="bg-gradient-to-r from-blue-800 to-blue-950"
                 userName={firstName}
@@ -98,7 +98,7 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
-            {/* Reset dashboard button */}
+            {/* Reset dashboard button with updated text */}
             <div className="flex justify-end mb-4">
               <Button 
                 variant="outline" 
@@ -107,7 +107,7 @@ const DashboardPage: React.FC = () => {
                 className="text-blue-600 border-blue-300 hover:bg-blue-50"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Resetar Dashboard
+                Resetar
               </Button>
             </div>
             
