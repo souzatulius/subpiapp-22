@@ -19,7 +19,7 @@ export const useTemasOptions = () => {
         if (temasTableExists) {
           try {
             const { data: temasData, error: temasError } = await supabase
-              .from('temas' as any)
+              .from('temas')
               .select('id, descricao');
             
             if (!temasError && temasData && temasData.length > 0) {

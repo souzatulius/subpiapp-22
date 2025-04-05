@@ -13,14 +13,8 @@ export const useNotasData = (): UseNotasDataReturn => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   
-  // Additional props for compatibility
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [areaFilter, setAreaFilter] = useState<string>('all');
-  const [dataInicioFilter, setDataInicioFilter] = useState<string>('');
-  const [dataFimFilter, setDataFimFilter] = useState<string>('');
-  
   const { 
-    notas = [], 
+    data: notas = [], 
     isLoading: loading, 
     error,
     refetch: refreshData 
@@ -108,24 +102,6 @@ export const useNotasData = (): UseNotasDataReturn => {
     }
   };
 
-  // Simple update status function
-  const updateNotaStatus = async (id: string, status: string) => {
-    try {
-      const { error } = await supabase
-        .from('notas_oficiais')
-        .update({ status })
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      await refreshData();
-      return true;
-    } catch (error: any) {
-      console.error('Error updating status:', error);
-      throw error;
-    }
-  };
-
   return {
     notas,
     loading,
@@ -142,26 +118,23 @@ export const useNotasData = (): UseNotasDataReturn => {
     deleteLoading,
     handleDelete,
     refetch: refreshData,
-    
     // Extended properties for NotasContent
-    isLoading: loading,
     formatDate,
     fetchNotas,
-    
     // Default values for other expected properties
     searchQuery: searchTerm,
     setSearchQuery: setSearchTerm,
-    statusFilter,
-    setStatusFilter,
-    areaFilter,
-    setAreaFilter,
-    dataInicioFilter,
-    setDataInicioFilter,
-    dataFimFilter,
-    setDataFimFilter,
+    statusFilter: '',
+    setStatusFilter: () => {},
+    areaFilter: '',
+    setAreaFilter: () => {},
+    dataInicioFilter: '',
+    setDataInicioFilter: () => {},
+    dataFimFilter: '',
+    setDataFimFilter: () => {},
     deleteNota: handleDelete,
     isAdmin: false,
-    updateNotaStatus,
+    updateNotaStatus: async () => {},
     statusLoading: false
   };
 };

@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
@@ -6,10 +7,12 @@ import { toast } from '@/components/ui/use-toast';
 import { useLoginForm } from '@/components/login/useLoginForm';
 import LoginFormFields from '@/components/login/LoginFormFields';
 import GoogleLoginButton from '@/components/login/GoogleLoginButton';
+
 const LoginForm = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const formRef = useRef<HTMLFormElement>(null);
+
   const {
     email,
     password,
@@ -22,21 +25,37 @@ const LoginForm = () => {
     handleLogin,
     handleGoogleLogin
   } = useLoginForm(navigate);
+
   if (loading || authLoading) {
-    return <div className="h-full flex items-center justify-center p-8">
+    return (
+      <div className="h-full flex items-center justify-center p-8">
         <div className="animate-spin w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full" />
-      </div>;
+      </div>
+    );
   }
-  return <div className="bg-white rounded-xl shadow-lg p-8 w-full px-[12px] mx-[40px]">
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-8 w-full">
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
       <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
 
       <form id="login-form" ref={formRef} onSubmit={handleLogin}>
         <div className="space-y-4">
-          <LoginFormFields email={email} password={password} emailError={emailError} passwordError={passwordError} onEmailChange={handleEmailChange} onPasswordChange={handlePasswordChange} />
+          <LoginFormFields 
+            email={email}
+            password={password}
+            emailError={emailError}
+            passwordError={passwordError}
+            onEmailChange={handleEmailChange}
+            onPasswordChange={handlePasswordChange}
+          />
 
           {/* Botão principal de login */}
-          <button type="submit" disabled={loading} className="w-full bg-[#003570] text-white py-3 px-6 text-base font-semibold flex items-center justify-center rounded-xl hover:bg-[#002c6d] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#003570] text-white py-3 px-6 text-base font-semibold flex items-center justify-center rounded-xl hover:bg-[#002c6d] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <LogIn className="mr-2 h-5 w-5" />
             Entrar
           </button>
@@ -60,6 +79,8 @@ const LoginForm = () => {
           </Link>
         </p>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default LoginForm;

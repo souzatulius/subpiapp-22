@@ -49,33 +49,32 @@ export const useReleaseForm = () => {
         const fileExt = file.name.split('.').pop();
         const fileName = `nota-${notaData.id}-${Date.now()}.${fileExt}`;
         
+        // Check if storage bucket exists before trying to upload
         try {
-          // Try file upload without being too strict about bucket availability
-          const fileUploadResult = await supabase.storage
-            .from('nota_attachments' as any)
+          const { data: fileData, error: fileError } = await supabase.storage
+            .from('nota_attachments')
             .upload(fileName, file);
           
-          if (fileUploadResult.error) {
-            console.warn('Error uploading file:', fileUploadResult.error);
-          } else if (fileUploadResult.data) {
-            console.log('File uploaded successfully', fileUploadResult.data);
-            
-            // Try to track the attachment in the database if such functionality exists
+          if (fileError) {
+            console.error('Error uploading file:', fileError);
+          } else if (fileData) {
+            // If we successfully uploaded the file, now try to add reference in the database
             try {
-              const { data: annexData } = await supabase
-                .from('nota_anexos' as any)
-                .insert({
-                  nota_id: notaData.id,
-                  arquivo_path: fileUploadResult.data.path
-                });
-                
-              console.log('Attachment tracked in database', annexData);
-            } catch (annexError) {
-              console.warn('Error tracking attachment (non-critical):', annexError);
+              // Try to use an existing anexos table if it exists
+              const { error: anexoError } = await supabase.rpc('add_nota_attachment', {
+                nota_id: notaData.id,
+                file_path: fileData.path
+              });
+              
+              if (anexoError) {
+                console.warn('Could not use RPC add_nota_attachment, attachment not linked to nota');
+              }
+            } catch (e) {
+              console.warn('Error linking attachment to nota:', e);
             }
           }
-        } catch (storageError) {
-          console.warn('Storage operation failed (non-critical):', storageError);
+        } catch (e) {
+          console.warn('Storage bucket nota_attachments may not exist:', e);
         }
       }
       

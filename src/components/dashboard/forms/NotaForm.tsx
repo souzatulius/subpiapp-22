@@ -1,191 +1,253 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { useReleaseForm, ReleaseFormValues } from '@/hooks/useReleaseForm';
-import { Demand } from '@/hooks/consultar-demandas/types';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Send, X, Upload, Trash2, Paperclip } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { NotaFormData, NotaFormSchema } from './schemas/notaFormSchema';
+import { useProblemasOptions } from '@/hooks/useProblemasOptions';
+import { useTemasOptions } from '@/hooks/useTemasOptions';
+import ProblemSelector from './components/ProblemSelector';
+import { useReleaseForm } from '@/hooks/useReleaseForm';
 
-interface NotaFormProps {
-  titulo: string;
-  setTitulo: (titulo: string) => void;
-  texto: string;
-  setTexto: (texto: string) => void;
-  handleSubmit: () => void;
-  isSubmitting: boolean;
-  selectedDemanda?: Demand | null;
-  formattedResponses?: any[];
-}
-
-const NotaForm: React.FC<NotaFormProps> = ({
-  titulo,
-  setTitulo,
-  texto,
-  setTexto,
-  handleSubmit,
-  isSubmitting,
-  selectedDemanda,
-  formattedResponses = []
-}) => {
-  const [isGeneratingSuggestion, setIsGeneratingSuggestion] = useState(false);
-  const { submitRelease } = useReleaseForm();
-
-  const handleGenerateSuggestion = async () => {
-    if (!selectedDemanda) {
-      toast({
-        title: "Erro",
-        description: "Nenhuma demanda selecionada para gerar sugestão.",
-        variant: "destructive"
-      });
-      return;
+const NotaForm = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { problemas } = useProblemasOptions();
+  const { temas } = useTemasOptions();
+  
+  // State for file handling
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const { isSubmitting, submitRelease } = useReleaseForm();
+  
+  // Initialize form with default values
+  const form = useForm<NotaFormData>({
+    resolver: zodResolver(NotaFormSchema),
+    defaultValues: {
+      titulo: '',
+      conteudo: '',
+      problema_id: '',
+      tema_id: '',
+      status: 'pendente'
     }
-
-    try {
-      setIsGeneratingSuggestion(true);
-      
-      // Get current date formatted in Portuguese
-      const currentDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-      
-      // Prepare problem summary from demand title
-      const problemSummary = selectedDemanda.titulo || '';
-      
-      // Prepare location information
-      const location = selectedDemanda.bairro?.nome || selectedDemanda.endereco || 'Região de Pinheiros';
-      
-      // Get demand theme/area
-      const theme = selectedDemanda.supervisao_tecnica?.descricao || selectedDemanda.area_coordenacao?.descricao || '';
-      
-      // Get deadline and status
-      const deadline = selectedDemanda.prazo_resposta 
-        ? format(new Date(selectedDemanda.prazo_resposta), "dd/MM/yyyy", { locale: ptBR })
-        : 'Não informado';
-      
-      const status = selectedDemanda.status || 'Em andamento';
-      
-      try {
-        const { data, error } = await supabase.functions.invoke('generate-note-suggestion', {
-          body: {
-            demandInfo: {
-              ...selectedDemanda,
-              problemSummary,
-              location,
-              theme,
-              deadline,
-              status,
-              currentDate
-            },
-            responses: formattedResponses
-          }
-        });
-
-        if (error) throw error;
-        
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        // Handle the response with separate titulo and nota fields
-        if (data.titulo && data.nota) {
-          // Set title and note content from the response
-          setTitulo(data.titulo);
-          setTexto(data.nota);
-          
-          toast({
-            title: "Sugestão gerada com sucesso!",
-            description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
-          });
-        } else {
-          // Handle legacy format or unexpected response format
-          if (data.suggestion) {
-            // Legacy format - set content from the generated suggestion
-            if (!titulo && problemSummary) {
-              setTitulo(problemSummary);
-            }
-            setTexto(data.suggestion);
-            
-            toast({
-              title: "Sugestão gerada com sucesso!",
-              description: "A sugestão de nota foi gerada e inserida no formulário. Você pode editá-la conforme necessário."
-            });
-          } else {
-            throw new Error("Formato de resposta inválido");
-          }
-        }
-      } catch (e) {
-        console.error("Error invoking function:", e);
-        toast({
-          title: "Erro ao gerar sugestão",
-          description: "Não foi possível gerar a sugestão de nota. Tente novamente mais tarde.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao gerar sugestão:', error);
-      toast({
-        title: "Erro ao gerar sugestão",
-        description: error.message || "Ocorreu um erro ao tentar gerar a sugestão de nota.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGeneratingSuggestion(false);
+  });
+  
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
     }
   };
-
+  
+  // Clear selected file
+  const handleClearFile = () => {
+    setFile(null);
+  };
+  
+  // Handle form submission
+  const onSubmit = async (data: NotaFormData) => {
+    try {
+      const success = await submitRelease(data, file);
+      
+      if (success) {
+        toast({
+          title: "Nota oficial criada com sucesso",
+          description: "A nota oficial foi enviada para revisão e publicação",
+          variant: "default"
+        });
+        
+        // Navigate to consultar-notas page
+        navigate('/dashboard/comunicacao/consultar-notas');
+      }
+    } catch (error: any) {
+      console.error('Erro ao criar nota oficial:', error);
+    }
+  };
+  
   return (
-    <>      
-      <div className="flex justify-between items-center mt-6">
-        <div className="flex-1">
-          <Label htmlFor="titulo">Título da Nota Oficial</Label>
-        </div>
-        <Button
-          variant="outline"
-          onClick={handleGenerateSuggestion}
-          disabled={isGeneratingSuggestion || !selectedDemanda}
-          className="ml-4 text-[#003570] border-[#003570] hover:bg-[#EEF2F8]"
-        >
-          <Sparkles className="h-4 w-4 mr-2" />
-          {isGeneratingSuggestion ? "Gerando..." : "Gerar sugestão"}
-        </Button>
-      </div>
-      
-      <div className="mt-2">
-        <Input 
-          id="titulo" 
-          value={titulo} 
-          onChange={(e) => setTitulo(e.target.value)} 
-          placeholder="Informe um título claro e objetivo"
-          className="rounded-lg"
-        />
-      </div>
-      
-      <div className="mt-4">
-        <Label htmlFor="texto">Texto da Nota Oficial</Label>
-        <Textarea 
-          id="texto" 
-          value={texto} 
-          onChange={(e) => setTexto(e.target.value)} 
-          placeholder="Digite o conteúdo da nota oficial..."
-          rows={10}
-          className="rounded-lg"
-        />
-      </div>
-      
-      <div className="flex justify-end pt-4 mt-4">
-        <Button 
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="bg-[#003570] hover:bg-[#002855] rounded-lg"
-        >
-          {isSubmitting ? "Enviando..." : "Enviar para Aprovação"}
-        </Button>
-      </div>
-    </>
+    <Card className="border-gray-200 shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-medium">Informações da Nota Oficial</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="titulo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Título da Nota</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      className="border-gray-300 rounded-xl focus-visible:ring-blue-500" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="tema_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Tema</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="border-gray-300 rounded-xl focus-visible:ring-blue-500">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {temas.map((tema) => (
+                          <SelectItem key={tema.id} value={tema.id}>
+                            {tema.descricao}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="problema_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Problema</FormLabel>
+                    <FormControl>
+                      <ProblemSelector
+                        value={field.value}
+                        onChange={field.onChange}
+                        problemas={problemas}
+                        className="border-gray-300 rounded-xl focus-visible:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="conteudo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Conteúdo da Nota</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      className="min-h-[200px] border-gray-300 rounded-xl focus-visible:ring-blue-500" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div>
+              <FormLabel className="text-gray-700 block mb-2">Anexo (opcional)</FormLabel>
+              
+              {!file ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                  <Paperclip className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                  <p className="text-sm text-gray-500 mb-3">Clique para anexar um arquivo à nota oficial</p>
+                  <Input
+                    type="file"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('file-upload')?.click()}
+                    className="rounded-xl"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Selecionar Arquivo
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-50">
+                  <div className="flex items-center">
+                    <Paperclip className="h-5 w-5 text-blue-500 mr-3" />
+                    <span className="font-medium text-sm">{file.name}</span>
+                    <span className="ml-2 text-xs text-gray-500">
+                      ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearFile}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end space-x-3 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/dashboard/comunicacao')}
+                className="rounded-xl"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancelar
+              </Button>
+              
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 rounded-xl"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="animate-spin mr-2">
+                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </span>
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Enviar Nota
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 

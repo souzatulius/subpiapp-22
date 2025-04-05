@@ -7,11 +7,11 @@ import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import NotasTable from '@/components/consultar-notas/NotasTable';
 import { NotaOficial } from '@/types/nota';
-import { useToast as useToastHook } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 const ConsultarNotasTable = () => {
   const navigate = useNavigate();
-  const { toast } = useToastHook();
+  const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   
@@ -45,7 +45,8 @@ const ConsultarNotasTable = () => {
           ),
           supervisao_tecnica_id,
           supervisao_tecnica:supervisao_tecnica_id (id, descricao),
-          coordenacao_id
+          coordenacao_id,
+          area_coordenacao:coordenacao_id (id, descricao)
         `)
         .order('criado_em', { ascending: false });
       
@@ -56,34 +57,29 @@ const ConsultarNotasTable = () => {
   
   // Process the notas to ensure they match our NotaOficial type
   const notas: NotaOficial[] = notasRaw.map(nota => {
-    // Use any to bypass TypeScript errors with potentially missing fields
-    const rawNota = nota as any;
-    
     // Create a compatible NotaOficial object with safe fallbacks
     return {
-      id: rawNota.id || '',
-      titulo: rawNota.titulo || '',
-      conteudo: rawNota.texto || '', // Map texto to conteudo for compatibility
-      texto: rawNota.texto || '',
-      status: rawNota.status || '',
-      criado_em: rawNota.criado_em || '',
-      autor: rawNota.autor_id ? { id: rawNota.autor_id, nome_completo: 'Usuário' } : undefined,
-      problema: rawNota.problema ? {
-        id: rawNota.problema.id || '',
-        descricao: rawNota.problema.descricao || '',
-        coordenacao: rawNota.problema.coordenacao || undefined
+      id: nota.id || '',
+      titulo: nota.titulo || '',
+      conteudo: nota.texto || '', // Map texto to conteudo
+      texto: nota.texto || '',
+      status: nota.status || '',
+      criado_em: nota.criado_em || '',
+      autor: nota.autor_id ? { id: nota.autor_id, nome_completo: 'Usuário' } : undefined,
+      problema: nota.problema ? {
+        id: nota.problema.id || '',
+        descricao: nota.problema.descricao || '',
+        coordenacao: nota.problema.coordenacao || undefined
       } : undefined,
-      supervisao_tecnica: rawNota.supervisao_tecnica ? {
-        id: rawNota.supervisao_tecnica.id || '',
-        descricao: rawNota.supervisao_tecnica.descricao || ''
+      supervisao_tecnica: nota.supervisao_tecnica ? {
+        id: nota.supervisao_tecnica.id || '',
+        descricao: nota.supervisao_tecnica.descricao || '',
+        coordenacao_id: nota.supervisao_tecnica.coordenacao_id
       } : undefined,
-      area_coordenacao: rawNota.problema?.coordenacao ? {
-        id: rawNota.problema.coordenacao.id || '',
-        descricao: rawNota.problema.coordenacao.descricao || ''
-      } : {
-        id: '',
-        descricao: 'Não informada'
-      }
+      area_coordenacao: nota.area_coordenacao ? {
+        id: nota.area_coordenacao.id || '',
+        descricao: nota.area_coordenacao.descricao || ''
+      } : undefined
     };
   });
 

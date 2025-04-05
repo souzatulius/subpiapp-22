@@ -31,7 +31,7 @@ export interface NotaOficial {
     coordenacao_id?: string;
   };
   area_coordenacao?: {
-    id?: string;
+    id: string;
     descricao: string;
   };
   demanda?: {
@@ -86,8 +86,7 @@ export interface UseNotasDataReturn {
   deleteLoading: boolean;
   handleDelete: (id: string) => Promise<void>;
   refetch: () => Promise<any>;
-  // Extended properties for compatibility
-  isLoading?: boolean;
+  // Extended properties needed by NotasContent
   searchQuery?: string;
   setSearchQuery?: (query: string) => void;
   statusFilter?: string;
@@ -95,10 +94,10 @@ export interface UseNotasDataReturn {
   formatDate?: (date: string) => string;
   areaFilter?: string;
   setAreaFilter?: (area: string) => void;
-  dataInicioFilter?: string | Date;
-  setDataInicioFilter?: (date: string | Date) => void;
-  dataFimFilter?: string | Date;
-  setDataFimFilter?: (date: string | Date) => void;
+  dataInicioFilter?: string;
+  setDataInicioFilter?: (date: string) => void;
+  dataFimFilter?: string;
+  setDataFimFilter?: (date: string) => void;
   deleteNota?: (id: string) => Promise<void>;
   isAdmin?: boolean;
   updateNotaStatus?: (id: string, status: string) => Promise<void>;

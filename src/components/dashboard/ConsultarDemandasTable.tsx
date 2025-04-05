@@ -41,36 +41,32 @@ const ConsultarDemandasTable = () => {
   // Convert the data to match our Demand type with safe fallbacks
   const demandas: Demand[] = demandasRaw.map(d => {
     // First create a safe base object with all required properties and normalize the data
-    // Use any type assertion to avoid TypeScript errors when dealing with potential SelectQueryErrors
-    const rawDemand = d as any;
-    
     return {
-      id: rawDemand.id || '',
-      titulo: rawDemand.titulo || '',
-      status: rawDemand.status || '',
-      prioridade: rawDemand.prioridade || '',
-      horario_publicacao: rawDemand.horario_publicacao || '',
-      prazo_resposta: rawDemand.prazo_resposta || '',
-      problema: rawDemand.problema ? {
-        id: rawDemand.problema.id || '',
-        descricao: rawDemand.problema.descricao || '',
-        coordenacao: rawDemand.problema.coordenacao || undefined,
+      id: d.id || '',
+      titulo: d.titulo || '',
+      status: d.status || '',
+      prioridade: d.prioridade || '',
+      horario_publicacao: d.horario_publicacao || '',
+      prazo_resposta: d.prazo_resposta || '',
+      problema: d.problema ? {
+        id: d.problema.id || '',
+        descricao: d.problema.descricao || '',
+        coordenacao: d.problema.coordenacao || undefined,
         supervisao_tecnica: null
       } : null,
-      problema_id: rawDemand.problema_id || undefined,
+      problema_id: d.problema_id || undefined,
       area_coordenacao: {
-        id: rawDemand.problema?.coordenacao?.id || '',
-        descricao: rawDemand.problema?.coordenacao?.descricao || 'Não informada'
+        descricao: d.problema?.coordenacao?.descricao || 'Não informada'
       },
       supervisao_tecnica: {
-        id: rawDemand.supervisao_tecnica_id || '',
+        id: d.supervisao_tecnica_id || '',
         descricao: ''
       },
       // Default values for other required properties
       origem: { descricao: '' },
       tipo_midia: { descricao: '' },
       autor: { nome_completo: '' },
-      bairro: { id: '', nome: '' },
+      bairro: { nome: '' },
       nome_solicitante: '',
       email_solicitante: '',
       telefone_solicitante: '',
