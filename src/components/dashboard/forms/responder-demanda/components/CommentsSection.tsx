@@ -17,12 +17,6 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      {!simplifiedText && (
-        <p className="text-sm text-gray-500">
-          Estes comentários são apenas para uso interno e não serão enviados ao solicitante. 
-          Utilize este espaço para registrar observações, esclarecimentos ou contexto adicional sobre esta demanda.
-        </p>
-      )}
       <Textarea
         value={comentarios}
         onChange={(e) => onChange(e.target.value)}

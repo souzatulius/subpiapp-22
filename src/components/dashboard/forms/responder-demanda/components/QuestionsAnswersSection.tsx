@@ -44,7 +44,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
             className="overflow-hidden border-gray-200 hover:shadow-md transition-all duration-300 rounded-xl"
           >
             <CardContent className="p-0">
-              <div className="bg-gray-500 p-4 text-white rounded-t-xl">
+              <div className="bg-gray-100 p-4 text-gray-800 rounded-t-xl">
                 <p className="text-base font-semibold">{pergunta}</p>
               </div>
               <div className="p-4">
