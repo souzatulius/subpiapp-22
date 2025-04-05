@@ -5,6 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { getCommunicationActionCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
 import { useDepartment } from './useDepartment';
+import { toast } from '@/hooks/use-toast';
 
 export const useComunicacaoDashboard = (
   user: User | null, 
@@ -46,6 +47,7 @@ export const useComunicacaoDashboard = (
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
+          .eq('page', 'comunicacao')
           .single();
         
         if (error) {
@@ -95,6 +97,27 @@ export const useComunicacaoDashboard = (
     return () => clearTimeout(timeoutId);
   }, [user, isPreview, activeDepartment]);
 
+  const persistCards = async (updatedCards: ActionCardItem[]) => {
+    if (!user || isPreview) return;
+    
+    // Create a distinct clone to avoid mutation issues
+    const cardsCopy = JSON.parse(JSON.stringify(updatedCards));
+    setCards(cardsCopy);
+
+    try {
+      await supabase
+        .from('user_dashboard')
+        .upsert({
+          user_id: user.id,
+          page: 'comunicacao',
+          cards_config: JSON.stringify(cardsCopy),
+          department_id: activeDepartment || 'default'
+        });
+    } catch (error) {
+      console.error('Erro ao salvar configuração de cards:', error);
+    }
+  };
+
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
@@ -108,43 +131,25 @@ export const useComunicacaoDashboard = (
     const updatedCards = cards.map(card => 
       card.id === id ? { ...card, isHidden: true } : card
     );
-    setCards(updatedCards);
-    
-    // Save user preferences if not in preview mode and user is logged in
-    if (!isPreview && user) {
-      supabase
-        .from('user_dashboard')
-        .upsert({
-          user_id: user.id,
-          cards_config: JSON.stringify(updatedCards),
-          department_id: activeDepartment
-        })
-        .then(({ error }) => {
-          if (error) console.error('Error saving card hide preference', error);
-        });
-    }
+    persistCards(updatedCards);
   };
 
   const handleSaveCardEdit = (updatedCard: ActionCardItem) => {
     const updatedCards = cards.map(card => 
       card.id === updatedCard.id ? updatedCard : card
     );
-    setCards(updatedCards);
+    persistCards(updatedCards);
     setIsEditModalOpen(false);
     
-    // Save user preferences if not in preview mode and user is logged in
-    if (!isPreview && user) {
-      supabase
-        .from('user_dashboard')
-        .upsert({
-          user_id: user.id,
-          cards_config: JSON.stringify(updatedCards),
-          department_id: activeDepartment
-        })
-        .then(({ error }) => {
-          if (error) console.error('Error saving card edit', error);
-        });
-    }
+    toast({
+      title: "Card atualizado",
+      description: "As alterações foram salvas com sucesso.",
+      variant: "default"
+    });
+  };
+
+  const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
+    persistCards(updatedCards);
   };
 
   return {
@@ -157,6 +162,7 @@ export const useComunicacaoDashboard = (
     handleCardHide,
     toggleEditMode,
     handleSaveCardEdit,
-    setIsEditModalOpen
+    setIsEditModalOpen,
+    handleCardsReorder
   };
 };

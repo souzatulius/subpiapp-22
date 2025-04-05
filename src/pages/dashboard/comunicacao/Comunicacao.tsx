@@ -35,7 +35,8 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     handleCardHide,
     toggleEditMode,
     handleSaveCardEdit,
-    setIsEditModalOpen
+    setIsEditModalOpen,
+    handleCardsReorder
   } = useComunicacaoDashboard(user, isPreview, department);
 
   if (!isPreview && !user) {
@@ -64,7 +65,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           <div className="px-[30px] py-[30px]">
             <CardGridContainer
               cards={cards}
-              onCardsChange={cards => cards}
+              onCardsChange={handleCardsReorder}
               onEditCard={handleCardEdit}
               onHideCard={handleCardHide}
               isMobileView={isMobile}
