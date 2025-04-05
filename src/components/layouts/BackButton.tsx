@@ -10,8 +10,8 @@ interface BackButtonProps {
   onClick?: () => void;
 }
 
-const BackButton: React.FC<BackButtonProps> = ({ 
-  destination, 
+const BackButton: React.FC<BackButtonProps> = ({
+  destination,
   className,
   title = "Voltar",
   onClick
@@ -33,9 +33,9 @@ const BackButton: React.FC<BackButtonProps> = ({
       variant="action"
       size="icon"
       onClick={handleClick}
-      className={`absolute top-6 left-6 z-10 ${className || ''}`}
       aria-label={title}
       title={title}
+      className={`absolute top-6 left-6 z-10 ${className || ''}`}
     >
       <ArrowLeft className="h-5 w-5" />
     </Button>
