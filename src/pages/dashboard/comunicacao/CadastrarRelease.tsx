@@ -1,163 +1,62 @@
-
 import React, { useState } from 'react';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { FileText, Send } from 'lucide-react';
-import WelcomeCard from '@/components/shared/WelcomeCard';
 
-const CadastrarRelease = () => {
-  const [releaseContent, setReleaseContent] = useState('');
-  const [isGeneratingNews, setIsGeneratingNews] = useState(false);
-  const [generatedNews, setGeneratedNews] = useState<{ titulo: string; conteudo: string } | null>(null);
+interface Noticia {
+  id: string;
+  titulo: string;
+  conteudo: string;
+}
 
-  const handleSaveRelease = async () => {
-    if (!releaseContent.trim()) {
-      toast({
-        title: "Erro ao salvar",
-        description: "O conteúdo do release não pode estar vazio.",
-        variant: "destructive",
-      });
-      return;
-    }
+const ListaNoticias = () => {
+  const [busca, setBusca] = useState('');
+  
+  const noticias: Noticia[] = [
+    { id: '1', titulo: 'Prefeitura inaugura nova praça', conteudo: 'Texto da notícia 1' },
+    { id: '2', titulo: 'Novo plano de mobilidade urbana', conteudo: 'Texto da notícia 2' },
+    { id: '3', titulo: 'Campanha de vacinação começa amanhã', conteudo: 'Texto da notícia 3' },
+  ];
 
-    try {
-      // Here you would implement the actual saving logic to your database
-      // For demonstration, we'll just show a success message
-      toast({
-        title: "Release salvo com sucesso",
-        description: "O conteúdo do release foi salvo com sucesso.",
-        variant: "success",
-      });
-
-      // Ask if user wants to generate news
-      const shouldGenerate = window.confirm("Release salvo com sucesso. Deseja gerar uma notícia a partir deste release?");
-      if (shouldGenerate) {
-        await handleGenerateNews();
-      }
-    } catch (error) {
-      console.error("Erro ao salvar release:", error);
-      toast({
-        title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar o release. Tente novamente.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleGenerateNews = async () => {
-    if (!releaseContent.trim()) {
-      toast({
-        title: "Erro ao gerar notícia",
-        description: "O conteúdo do release não pode estar vazio.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGeneratingNews(true);
-    setGeneratedNews(null);
-
-    try {
-      // Call the Supabase Edge Function to generate news
-      const { data, error } = await supabase.functions.invoke('generate-news', {
-        body: { releaseContent }
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (data && data.success && data.data) {
-        setGeneratedNews(data.data);
-        toast({
-          title: "Notícia gerada com sucesso",
-          description: "A notícia foi gerada com base no release fornecido.",
-          variant: "success",
-        });
-      } else {
-        throw new Error("Resposta inválida do serviço de geração de notícias");
-      }
-    } catch (error) {
-      console.error("Erro ao gerar notícia:", error);
-      toast({
-        title: "Erro ao gerar notícia",
-        description: "Ocorreu um erro ao gerar a notícia. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingNews(false);
-    }
-  };
+  const noticiasFiltradas = noticias.filter((noticia) =>
+    noticia.titulo.toLowerCase().includes(busca.toLowerCase())
+  );
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <WelcomeCard 
-        title="Releases e Notícias"
-        description="Cadastre releases recebidos e gere notícias para o site institucional."
-        icon={<FileText className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
-      />
-      
-      <div className="flex flex-col mt-6">
-        <h1 className="text-2xl font-bold mb-4">Cadastrar Novo Release</h1>
-        
-        <div className="mb-6">
-          <label htmlFor="release-content" className="block mb-2 font-medium">
-            Conteúdo do Release
-          </label>
-          <Textarea
-            id="release-content"
-            value={releaseContent}
-            onChange={(e) => setReleaseContent(e.target.value)}
-            placeholder="Cole aqui o texto integral do release recebido por e-mail."
-            className="min-h-[300px]"
-          />
-        </div>
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-sm">
+      <div className="relative w-full mb-6">
+        <svg
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
 
-        <div className="flex gap-4 mb-8">
-          <Button
-            onClick={handleSaveRelease}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Salvar Release
-          </Button>
-          
-          <Button
-            onClick={handleGenerateNews}
-            variant="action"
-            disabled={isGeneratingNews || !releaseContent.trim()}
-            className="flex items-center gap-2"
-          >
-            <Send className="h-4 w-4" />
-            {isGeneratingNews ? "Gerando..." : "Gerar Notícia"}
-          </Button>
-        </div>
-
-        {generatedNews && (
-          <div className="border rounded-xl p-6 bg-gray-50">
-            <h2 className="text-xl font-bold mb-4">Notícia Gerada</h2>
-            
-            <div className="mb-4">
-              <h3 className="font-semibold text-lg mb-2">Título</h3>
-              <div className="p-4 bg-white border rounded-lg">
-                {generatedNews.titulo}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Conteúdo</h3>
-              <div className="p-4 bg-white border rounded-lg whitespace-pre-line">
-                {generatedNews.conteudo}
-              </div>
-            </div>
-          </div>
-        )}
+        <input
+          type="search"
+          className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base shadow-sm transition-all duration-300 hover:border-gray-600 placeholder:text-gray-400 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-[#003570] disabled:cursor-not-allowed disabled:opacity-50 pl-9"
+          placeholder="Buscar notícias..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
       </div>
+
+      {noticiasFiltradas.length > 0 ? (
+        <ul className="space-y-3">
+          {noticiasFiltradas.map((noticia) => (
+            <li key={noticia.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="text-lg font-semibold">{noticia.titulo}</h3>
+              <p className="text-sm text-gray-600 mt-1">{noticia.conteudo}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500 text-sm">Nenhuma notícia encontrada.</p>
+      )}
     </div>
   );
 };
 
-export default CadastrarRelease;
+export default ListaNoticias;
