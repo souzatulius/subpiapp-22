@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,8 +33,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       title: 'Cadastrar Demanda',
       subtitle: 'Registre novas solicitações da imprensa',
       iconId: 'PlusCircle',
-      path: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar`,
-      color: 'blue' as CardColor,
+      path: `${baseUrl ? `/${baseUrl}` : ''}/cadastrar',
+      color: 'blue-vivid' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
@@ -47,8 +46,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       title: 'Responder Demanda',
       subtitle: 'Responda às demandas pendentes',
       iconId: 'MessageSquare',
-      path: `${baseUrl ? `/${baseUrl}` : ''}/responder`,
-      color: 'green' as CardColor,
+      path: `${baseUrl ? `/${baseUrl}` : ''}/responder',
+      color: 'green-neon' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
@@ -60,8 +59,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       title: 'Criar Nota Oficial',
       subtitle: 'Elabore notas oficiais',
       iconId: 'FileText',
-      path: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota`,
-      color: 'orange' as CardColor,
+      path: `${baseUrl ? `/${baseUrl}` : ''}/criar-nota',
+      color: 'orange-dark' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
@@ -73,8 +72,8 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       title: 'Aprovar Notas',
       subtitle: 'Revise e aprove notas oficiais',
       iconId: 'CheckCircle',
-      path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`,
-      color: 'purple-light' as CardColor,
+      path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota',
+      color: 'yellow' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Sheet,
@@ -38,17 +37,12 @@ const SUGGESTED_ICONS = [
 ];
 
 const COLOR_OPTIONS: ColorOption[] = [
-  { value: "gray-400", label: "Gray 400", class: "bg-gray-400" },
-  { value: "gray-800", label: "Gray 800", class: "bg-gray-800" },
-  { value: "gray-950", label: "Gray 950", class: "bg-gray-950" },
-  { value: "blue-700", label: "Blue 700", class: "bg-blue-700" },
-  { value: "blue-900", label: "Blue 900", class: "bg-blue-900" },
-  { value: "blue-960", label: "Blue 960", class: "bg-blue-960" },
-  { value: "orange-400", label: "Orange 400", class: "bg-orange-400" },
-  { value: "orange-500", label: "Orange 500", class: "bg-orange-500" },
-  { value: "gray-200", label: "Gray 200", class: "bg-gray-200" },
-  { value: "lime-500", label: "Lime 500", class: "bg-lime-500" },
-  { value: "neutral-200", label: "Neutral 200", class: "bg-neutral-200" },
+  { value: "blue-vivid", label: "Azul Vivo", class: "bg-[#0066FF]" },
+  { value: "green-neon", label: "Verde Neon", class: "bg-[#00FF00]" },
+  { value: "gray-light", label: "Cinza Claro", class: "bg-[#F5F5F5]" },
+  { value: "orange-dark", label: "Laranja Escuro", class: "bg-[#F25C05]" },
+  { value: "yellow", label: "Amarelo", class: "bg-yellow-400" },
+  { value: "blue-dark", label: "Azul Escuro", class: "bg-blue-800" },
 ];
 
 const EditCardModal: React.FC<EditCardModalProps> = ({
@@ -58,7 +52,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   card
 }) => {
   const [title, setTitle] = useState("");
-  const [color, setColor] = useState<CardColor>("blue-700");
+  const [color, setColor] = useState<CardColor>("blue-vivid");
   const [iconId, setIconId] = useState("layout-dashboard");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -66,7 +60,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   useEffect(() => {
     if (card) {
       setTitle(card.title);
-      setColor(card.color);
+      setColor(card.color as CardColor);
       setIconId(card.iconId);
     }
   }, [card, isOpen]);
@@ -110,6 +104,14 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
     
     return allIcons;
   };
+  
+  // Helper to get text color based on background color
+  const getTextColorForPreview = (colorValue: CardColor): string => {
+    if (colorValue === 'gray-light' || colorValue === 'green-neon' || colorValue === 'yellow') {
+      return 'text-gray-800';
+    }
+    return 'text-white';
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -148,18 +150,21 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
           
           <div className="grid gap-2">
             <Label>Cor</Label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               {COLOR_OPTIONS.map((colorOption) => (
                 <div
                   key={colorOption.value}
-                  className={`h-10 rounded-md cursor-pointer border-2 ${
+                  className={`h-12 rounded-md cursor-pointer border-2 flex items-center justify-center ${
                     color === colorOption.value 
-                      ? 'border-blue-500' 
+                      ? 'border-blue-500 ring-2 ring-offset-2 ring-blue-500' 
                       : 'border-transparent'
                   } ${colorOption.class}`}
                   onClick={() => setColor(colorOption.value)}
-                  title={colorOption.label}
-                />
+                >
+                  <span className={getTextColorForPreview(colorOption.value)}>
+                    {colorOption.label}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
@@ -167,12 +172,21 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
           <div className="mt-4">
             <Label>Prévia</Label>
             <div className="mt-2 border p-4 rounded-md">
-              <div className={`w-full h-40 rounded-xl shadow-md overflow-hidden ${color ? `bg-${color}` : 'bg-blue-700'}`}>
+              <div 
+                className={`w-full h-40 rounded-xl shadow-md overflow-hidden transition-all`}
+                style={{
+                  backgroundColor: COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-', '').includes('[') 
+                    ? COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-[', '').replace(']', '') 
+                    : color === 'yellow' ? '#FACC15' : color === 'blue-dark' ? '#1E40AF' : '#0066FF'
+                }}
+              >
                 <div className="relative h-full flex flex-col items-center justify-center text-center py-4">
-                  <div className="text-white mb-2">
+                  <div className={getTextColorForPreview(color) + " mb-2"}>
                     {renderIconComponent(iconId)}
                   </div>
-                  <h3 className="font-semibold text-white text-xl">{title || "Título do Card"}</h3>
+                  <h3 className={`font-semibold ${getTextColorForPreview(color)} text-xl`}>
+                    {title || "Título do Card"}
+                  </h3>
                 </div>
               </div>
             </div>

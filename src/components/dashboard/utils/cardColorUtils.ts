@@ -3,78 +3,35 @@ import { CardColor } from '@/types/dashboard';
 
 export const getColorClasses = (color: CardColor): string => {
   switch (color) {
-    case 'blue': return 'bg-blue-500 text-white';
-    case 'green': return 'bg-green-500 text-white';
-    case 'orange': return 'bg-orange-500 text-white';
-    case 'gray-light': return 'bg-gray-200 text-gray-800';
-    case 'gray-dark': return 'bg-gray-700 text-white';
-    case 'blue-dark': return 'bg-blue-700 text-white';
-    case 'orange-light': return 'bg-orange-300 text-gray-800';
-    case 'gray-ultra-light': return 'bg-gray-100 text-gray-800';
-    case 'lime': return 'bg-lime-500 text-white';
-    case 'orange-600': return 'bg-orange-600 text-white';
-    case 'blue-light': return 'bg-blue-300 text-gray-800';
-    case 'green-light': return 'bg-green-300 text-gray-800';
-    case 'purple-light': return 'bg-purple-300 text-gray-800';
-    // Additional color mappings
-    case 'gray-400': return 'bg-gray-400 text-white';
-    case 'gray-800': return 'bg-gray-800 text-white';
-    case 'gray-950': return 'bg-gray-950 text-white';
-    case 'blue-700': return 'bg-blue-700 text-white';
-    case 'blue-900': return 'bg-blue-900 text-white';
-    case 'blue-960': return 'bg-blue-900 text-white';
-    case 'orange-400': return 'bg-orange-400 text-white';
-    case 'orange-500': return 'bg-orange-500 text-white';
-    case 'gray-200': return 'bg-gray-200 text-gray-800';
-    case 'lime-500': return 'bg-lime-500 text-white';
-    case 'neutral-200': return 'bg-gray-200 text-gray-800';
-    default: return 'bg-blue-500 text-white';
+    case 'blue-vivid': return 'bg-[#0066FF] text-white'; // Azul Vivo
+    case 'green-neon': return 'bg-[#00FF00] text-gray-800'; // Verde Neon - dark text
+    case 'gray-light': return 'bg-[#F5F5F5] text-gray-800'; // Cinza Claro - dark text
+    case 'orange-dark': return 'bg-[#F25C05] text-white'; // Laranja Escuro
+    case 'yellow': return 'bg-yellow-400 text-gray-800'; // Amarelo - dark text
+    case 'blue-dark': return 'bg-blue-800 text-white'; // Azul Escuro
+    default: return 'bg-[#0066FF] text-white'; // Default to Azul Vivo
   }
 };
 
 export const getHoverColorClasses = (color: CardColor): string => {
   switch (color) {
-    case 'blue': return 'hover:bg-blue-600';
-    case 'green': return 'hover:bg-green-600';
-    case 'orange': return 'hover:bg-orange-600';
-    case 'gray-light': return 'hover:bg-gray-300';
-    case 'gray-dark': return 'hover:bg-gray-800';
-    case 'blue-dark': return 'hover:bg-blue-800';
-    case 'orange-light': return 'hover:bg-orange-400';
-    case 'gray-ultra-light': return 'hover:bg-gray-200';
-    case 'lime': return 'hover:bg-lime-600';
-    case 'orange-600': return 'hover:bg-orange-700';
-    case 'blue-light': return 'hover:bg-blue-400';
-    case 'green-light': return 'hover:bg-green-400';
-    case 'purple-light': return 'hover:bg-purple-400';
-    // Additional hover color mappings
-    case 'gray-400': return 'hover:bg-gray-500';
-    case 'gray-800': return 'hover:bg-gray-900';
-    case 'gray-950': return 'hover:bg-black';
-    case 'blue-700': return 'hover:bg-blue-800';
-    case 'blue-900': return 'hover:bg-blue-950';
-    case 'blue-960': return 'hover:bg-blue-950';
-    case 'orange-400': return 'hover:bg-orange-500';
-    case 'orange-500': return 'hover:bg-orange-600';
-    case 'gray-200': return 'hover:bg-gray-300';
-    case 'lime-500': return 'hover:bg-lime-600';
-    case 'neutral-200': return 'hover:bg-gray-300';
-    default: return 'hover:bg-blue-600';
+    case 'blue-vivid': return 'hover:bg-blue-600'; // Slightly darker Azul Vivo
+    case 'green-neon': return 'hover:bg-green-400'; // Slightly darker Verde Neon
+    case 'gray-light': return 'hover:bg-gray-200'; // Slightly darker Cinza Claro
+    case 'orange-dark': return 'hover:bg-orange-600'; // Slightly darker Laranja Escuro
+    case 'yellow': return 'hover:bg-yellow-500'; // Slightly darker Amarelo
+    case 'blue-dark': return 'hover:bg-blue-900'; // Slightly darker Azul Escuro
+    default: return 'hover:bg-blue-600'; // Default to darker Azul Vivo
   }
 };
 
 export const getTextColorClass = (color: CardColor): string => {
   switch (color) {
     case 'gray-light':
-    case 'gray-ultra-light':
-    case 'blue-light':
-    case 'green-light':
-    case 'orange-light':
-    case 'purple-light':
-    case 'gray-200':
-    case 'neutral-200':
-      return 'text-gray-800';
+    case 'green-neon':
+    case 'yellow':
+      return 'text-gray-800'; // Dark text on light backgrounds
     default:
-      return 'text-white';
+      return 'text-white'; // White text on dark backgrounds
   }
 };

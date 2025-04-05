@@ -4,6 +4,7 @@ import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
 import { MoveIcon } from 'lucide-react';
+
 export interface ActionCardProps {
   id: string;
   title: string;
@@ -26,63 +27,30 @@ export interface ActionCardProps {
   isMobileView?: boolean;
   showControls?: boolean;
 }
+
 const getBackgroundColor = (color: CardColor): string => {
   switch (color) {
-    case 'blue':
-      return 'bg-blue-500';
-    case 'green':
-      return 'bg-green-500';
-    case 'orange':
-      return 'bg-orange-500';
+    case 'blue-vivid':
+      return 'bg-[#0066FF]'; // Azul Vivo
+    case 'green-neon':
+      return 'bg-[#00FF00]'; // Verde Neon  
     case 'gray-light':
-      return 'bg-gray-200';
-    case 'gray-dark':
-      return 'bg-gray-700';
+      return 'bg-[#F5F5F5]'; // Cinza Claro
+    case 'orange-dark':
+      return 'bg-[#F25C05]'; // Laranja Escuro
+    case 'yellow':
+      return 'bg-yellow-400'; // Amarelo
     case 'blue-dark':
-      return 'bg-blue-700';
-    case 'orange-light':
-      return 'bg-orange-300';
-    case 'gray-ultra-light':
-      return 'bg-gray-100';
-    case 'lime':
-      return 'bg-lime-500';
-    case 'orange-600':
-      return 'bg-orange-600';
-    case 'blue-light':
-      return 'bg-blue-300';
-    case 'green-light':
-      return 'bg-green-300';
-    case 'purple-light':
-      return 'bg-purple-300';
-    case 'gray-400':
-      return 'bg-gray-400';
-    case 'gray-800':
-      return 'bg-gray-800';
-    case 'gray-950':
-      return 'bg-gray-950';
-    case 'blue-700':
-      return 'bg-blue-700';
-    case 'blue-900':
-      return 'bg-blue-900';
-    case 'blue-960':
-      return 'bg-blue-900';
-    case 'orange-400':
-      return 'bg-orange-400';
-    case 'orange-500':
-      return 'bg-orange-500';
-    case 'gray-200':
-      return 'bg-gray-200';
-    case 'lime-500':
-      return 'bg-lime-500';
-    case 'neutral-200':
-      return 'bg-gray-200';
+      return 'bg-blue-800'; // Azul Escuro
     default:
-      return 'bg-blue-500';
+      return 'bg-[#0066FF]'; // Default to Azul Vivo
   }
 };
+
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   return 'w-10 h-10';
 };
+
 const ActionCard = ({
   id,
   title,
@@ -103,6 +71,17 @@ const ActionCard = ({
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize();
+  
+  // Determine text color based on background color
+  const getTextColor = (bgColor: string): string => {
+    if (color === 'gray-light' || color === 'green-neon') {
+      return 'text-gray-800'; // Dark text for light backgrounds
+    }
+    return 'text-white'; // White text for dark backgrounds
+  };
+  
+  const textColor = getTextColor(bgColor);
+
   return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
@@ -119,11 +98,11 @@ const ActionCard = ({
 
       <div className="relative h-full flex flex-col items-center justify-center text-center py-3 px-2">
         {children ? <>{children}</> : <>
-            <div className="text-white mb-3">
+            <div className={`mb-3 ${textColor}`}>
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
-              <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance">
+              <h3 className={`font-semibold ${textColor} text-lg leading-tight break-words text-balance`}>
                 {title}
               </h3>
             </div>
@@ -131,4 +110,5 @@ const ActionCard = ({
       </div>
     </div>;
 };
+
 export default ActionCard;

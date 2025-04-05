@@ -37,37 +37,47 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
   // Get the background color based on the color prop
   const getBgColor = (): string => {
     switch (color) {
-      case 'blue': return 'bg-blue-500';
-      case 'green': return 'bg-green-500';
-      case 'orange': return 'bg-orange-500';
-      case 'gray-light': return 'bg-gray-200';
-      case 'gray-dark': return 'bg-gray-700';
-      case 'blue-dark': return 'bg-blue-700';
-      case 'orange-light': return 'bg-orange-300';
-      case 'gray-ultra-light': return 'bg-gray-100';
-      case 'lime': return 'bg-lime-500';
-      case 'orange-600': return 'bg-orange-600';
-      default: return 'bg-blue-500';
+      case 'blue-vivid': return 'bg-[#0066FF]'; // Azul Vivo
+      case 'green-neon': return 'bg-[#00FF00]'; // Verde Neon
+      case 'gray-light': return 'bg-[#F5F5F5]'; // Cinza Claro
+      case 'orange-dark': return 'bg-[#F25C05]'; // Laranja Escuro
+      case 'yellow': return 'bg-yellow-400'; // Amarelo
+      case 'blue-dark': return 'bg-blue-800'; // Azul Escuro
+      default: return 'bg-[#0066FF]'; // Default to Azul Vivo
     }
   };
+
+  // Get text color based on background color
+  const getTextColor = (): string => {
+    switch (color) {
+      case 'gray-light':
+      case 'green-neon':
+      case 'yellow':
+        return 'text-gray-800'; // Dark text for light backgrounds
+      default:
+        return 'text-white'; // White text for dark backgrounds
+    }
+  };
+
+  const bgColorClass = getBgColor();
+  const textColorClass = getTextColor();
 
   console.log(`DynamicDataCard: ${title} - dataSourceKey: ${dataSourceKey}, loading: ${loading}, data:`, data);
 
   return (
     <div 
-      className={`w-full h-full rounded-md ${shadowClass} transition-all hover:shadow-lg ${borderClass} flex flex-col`}
-      style={{ backgroundColor: getBgColor() }}
+      className={`w-full h-full rounded-md ${shadowClass} transition-all hover:shadow-lg ${borderClass} flex flex-col ${bgColorClass}`}
     >
       <div className="flex items-center gap-2 p-4 pb-2">
-        <div className="text-white">{icon}</div>
-        <h4 className="text-md font-semibold text-white">{title}</h4>
+        <div className={textColorClass}>{icon}</div>
+        <h4 className={`text-md font-semibold ${textColorClass}`}>{title}</h4>
       </div>
       
       <div className="flex-1 flex items-center p-4 pt-0">
         {loading ? (
           <Skeleton className="h-7 w-24 bg-white/30" />
         ) : (
-          <p className="text-2xl font-bold text-white">
+          <p className={`text-2xl font-bold ${textColorClass}`}>
             {Array.isArray(data) ? valueFormatter(data?.length ?? 0) : valueFormatter(0)}
           </p>
         )}
