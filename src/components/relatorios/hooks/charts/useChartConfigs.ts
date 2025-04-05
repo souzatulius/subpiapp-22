@@ -2,16 +2,17 @@
 import { useMemo } from 'react';
 
 export const useChartConfigs = () => {
-  // Enhanced color palette with standardized colors
-  const chartColors = useMemo(() => ['#0066FF', '#1D4ED8', '#66FF66', '#F25C05', '#D4D4D4'], []);
+  // Enhanced color palette with standardized colors for gray theme
+  const chartColors = useMemo(() => ['#444444', '#666666', '#888888', '#AAAAAA', '#D3D3D3'], []);
   
   // Color sets for different chart types
   const pieChartColors = useMemo(() => {
     return {
-      default: ['#0066FF', '#1D4ED8', '#66FF66', '#F25C05', '#D4D4D4'],
-      blue: ['#0066FF', '#1D4ED8', '#3B82F6', '#60A5FA', '#93C5FD'],
-      lightBlue: ['#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE', '#EFF6FF'],
-      status: ['#22c55e', '#0066FF', '#ef4444', '#71717a', '#27272a']
+      default: ['#444444', '#666666', '#888888', '#AAAAAA', '#D3D3D3'],
+      blue: ['#444444', '#555555', '#666666', '#777777', '#888888'],
+      lightBlue: ['#777777', '#888888', '#999999', '#AAAAAA', '#CCCCCC'],
+      gray: ['#333333', '#555555', '#777777', '#999999', '#BBBBBB'],
+      status: ['#555555', '#666666', '#777777', '#888888', '#999999']
     };
   }, []);
   

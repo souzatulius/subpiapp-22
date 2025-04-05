@@ -8,6 +8,7 @@ import { RelatoriosKPICards } from '@/components/relatorios/RelatoriosKPICards';
 import { RelatoriosGraphCards } from '@/components/relatorios/RelatoriosGraphCards';
 import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
+import { motion } from 'framer-motion';
 
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
@@ -31,13 +32,18 @@ const RelatoriosPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto pdf-content">
+    <motion.div 
+      className="max-w-7xl mx-auto pdf-content"
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.5 }}
+    >
       {/* WelcomeCard com largura total */}
       <WelcomeCard
         title="Relatórios"
         description="Visualize estatísticas e relatórios de comunicação"
         icon={<PieChart className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-blue-500 to-blue-700"
+        color="bg-gradient-to-r from-gray-600 to-gray-800"
       />
 
       {/* Botões apenas com ícones abaixo do WelcomeCard */}
@@ -46,27 +52,27 @@ const RelatoriosPage = () => {
           variant="outline" 
           size="icon"
           onClick={handlePrint}
-          className="h-9 w-9 shadow-sm hover:shadow transition-all"
+          className="h-9 w-9 bg-white hover:bg-gray-100 border-gray-200 shadow-sm hover:shadow transition-all"
           title="Imprimir"
         >
-          <Printer className="h-4 w-4" />
+          <Printer className="h-4 w-4 text-gray-600" />
         </Button>
         
         <Button 
           variant="outline"
           size="icon"
           onClick={handleExportPDF}
-          className="h-9 w-9 shadow-sm hover:shadow transition-all"
+          className="h-9 w-9 bg-white hover:bg-gray-100 border-gray-200 shadow-sm hover:shadow transition-all"
           title="Exportar PDF"
         >
-          <FileDown className="h-4 w-4" />
+          <FileDown className="h-4 w-4 text-gray-600" />
         </Button>
         
         <Button 
           variant="default" 
           size="icon"
           onClick={() => setIsFilterOpen(true)}
-          className="h-9 w-9 bg-blue-500 hover:bg-blue-600 shadow-sm hover:shadow transition-all"
+          className="h-9 w-9 bg-gray-600 hover:bg-gray-700 shadow-sm hover:shadow transition-all"
           title="Filtros"
         >
           <SlidersHorizontal className="h-4 w-4" />
@@ -94,7 +100,7 @@ const RelatoriosPage = () => {
           
           <DragOverlay>
             {isDragging ? (
-              <div className="w-64 h-32 bg-blue-50 border border-blue-200 rounded-lg opacity-80 flex items-center justify-center text-blue-600">
+              <div className="w-64 h-32 bg-gray-50 border border-gray-200 rounded-lg opacity-80 flex items-center justify-center text-gray-600">
                 <SlidersHorizontal className="h-5 w-5 mr-2" />
                 Movendo card...
               </div>
@@ -102,7 +108,7 @@ const RelatoriosPage = () => {
           </DragOverlay>
         </DndContext>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -152,6 +152,27 @@ export const useComunicacaoDashboard = (
     persistCards(updatedCards);
   };
 
+  const resetDashboard = async () => {
+    if (!user || isPreview) return;
+    
+    // Get default cards for the communication dashboard
+    const defaultCards = getCommunicationActionCards();
+    
+    // Set cards to defaults
+    setCards(defaultCards);
+    
+    try {
+      // Remove custom configuration from database
+      await supabase
+        .from('user_dashboard')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('page', 'comunicacao');
+    } catch (error) {
+      console.error('Erro ao resetar dashboard:', error);
+    }
+  };
+
   return {
     cards,
     isEditMode,
@@ -163,6 +184,7 @@ export const useComunicacaoDashboard = (
     toggleEditMode,
     handleSaveCardEdit,
     setIsEditModalOpen,
-    handleCardsReorder
+    handleCardsReorder,
+    resetDashboard
   };
 };

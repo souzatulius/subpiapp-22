@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SortableGraphCard } from './components/SortableGraphCard';
 import { useReportsData } from './hooks/useReportsData';
@@ -167,19 +166,19 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   };
 
   const cardIcons: Record<string, React.ReactNode> = {
-    distribuicaoPorTemas: <BarChart3 className="h-5 w-5 text-orange-500" />,
-    origemDemandas: <PieChart className="h-5 w-5 text-orange-500" />,
-    tempoMedioResposta: <Clock className="h-5 w-5 text-orange-500" />,
-    performanceArea: <TrendingUp className="h-5 w-5 text-orange-500" />,
-    notasEmitidas: <LineChart className="h-5 w-5 text-orange-500" />,
-    notasPorTema: <MessageSquare className="h-5 w-5 text-orange-500" />,
-    evolucaoMensal: <TrendingUp className="h-5 w-5 text-orange-500" />,
-    indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-orange-500" />,
+    distribuicaoPorTemas: <BarChart3 className="h-5 w-5 text-gray-500" />,
+    origemDemandas: <PieChart className="h-5 w-5 text-gray-500" />,
+    tempoMedioResposta: <Clock className="h-5 w-5 text-gray-500" />,
+    performanceArea: <TrendingUp className="h-5 w-5 text-gray-500" />,
+    notasEmitidas: <LineChart className="h-5 w-5 text-gray-500" />,
+    notasPorTema: <MessageSquare className="h-5 w-5 text-gray-500" />,
+    evolucaoMensal: <TrendingUp className="h-5 w-5 text-gray-500" />,
+    indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-gray-500" />,
   };
 
   const renderEmptyDataMessage = (cardId: string) => (
     <div className="h-[250px] flex flex-col items-center justify-center text-slate-400 p-4 text-center">
-      <AlertCircle className="h-10 w-10 mb-3 text-orange-300" />
+      <AlertCircle className="h-10 w-10 mb-3 text-gray-300" />
       <h4 className="font-medium text-slate-500 mb-1">Dados insuficientes</h4>
       <p className="text-sm">
         Não há dados suficientes para gerar este gráfico. Por favor, verifique os filtros aplicados ou tente novamente mais tarde.
@@ -219,7 +218,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                 >
                   {isLoading ? (
                     <div className="h-[250px] flex items-center justify-center">
-                      <div className="h-8 w-8 border-4 border-t-orange-500 border-r-transparent border-b-orange-300 border-l-transparent rounded-full animate-spin"></div>
+                      <div className="h-8 w-8 border-4 border-t-gray-500 border-r-transparent border-b-gray-300 border-l-transparent rounded-full animate-spin"></div>
                     </div>
                   ) : chartComponent ? (
                     <div className="h-[250px] p-2">

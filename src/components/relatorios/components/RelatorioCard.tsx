@@ -37,21 +37,21 @@ export const RelatorioCard: React.FC<RelatorioCardProps> = ({
   };
   
   return (
-    <div className={`h-full border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-lg ${className}`}>
-      <div className="pb-2 border-b border-blue-200 p-4 bg-gradient-to-r from-blue-50 to-white">
+    <div className={`h-full border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white rounded-lg ${className}`}>
+      <div className="pb-2 border-b border-gray-200 p-4 bg-gradient-to-r from-gray-50 to-white">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-blue-700">{title}</h3>
+          <h3 className="text-sm sm:text-base font-medium text-gray-700">{title}</h3>
           {badge && (
-            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1 bg-blue-500">
+            <Badge variant={badge.variant || "default"} className="ml-2 flex items-center gap-1 bg-gray-500">
               {badge.icon}
               {badge.text}
             </Badge>
           )}
         </div>
-        <div className="text-sm text-gray-600 mt-1">
+        <div className="text-xs text-gray-600 mt-1">
           {isLoading ? <Skeleton className="h-4 w-24 bg-gray-200 rounded" /> : description}
         </div>
-        {value && <div className="text-2xl font-bold text-blue-600 mt-1">{isLoading ? <Skeleton className="h-8 w-16 bg-gray-200 rounded" /> : formatValue(value)}</div>}
+        {value && <div className="text-lg sm:text-xl font-semibold text-gray-600 mt-1">{isLoading ? <Skeleton className="h-8 w-16 bg-gray-200 rounded" /> : formatValue(value)}</div>}
       </div>
       <div className="p-4">
         {isLoading ? (
