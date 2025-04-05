@@ -1,13 +1,10 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AuthLayout from '@/components/AuthLayout';
 import AttentionBox from '@/components/ui/attention-box';
-
 const EmailVerified = () => {
-  return (
-    <AuthLayout>
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full">
+  return <AuthLayout>
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full mx-[60px] px-[20px]">
         <h2 className="text-2xl font-bold mb-4 text-slate-900">
           Email Verificado com Sucesso
         </h2>
@@ -26,8 +23,6 @@ const EmailVerified = () => {
           Voltar para Login
         </Link>
       </div>
-    </AuthLayout>
-  );
+    </AuthLayout>;
 };
-
 export default EmailVerified;
