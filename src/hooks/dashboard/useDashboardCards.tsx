@@ -96,6 +96,34 @@ export const useDashboardCards = () => {
     }
   };
 
+  const resetDashboard = async () => {
+    if (!user) return;
+    
+    // Get default cards based on user department
+    const normalizedDepartment = userDepartment
+      ? userDepartment
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+      : undefined;
+    
+    const defaultCards = getInitialDashboardCards(normalizedDepartment);
+    
+    // Set cards to default
+    setCards(defaultCards);
+    
+    try {
+      // Remove the custom configuration from the database
+      await supabase
+        .from('user_dashboard')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('page', 'inicial');
+    } catch (error) {
+      console.error('Erro ao resetar dashboard:', error);
+    }
+  };
+
   const handleCardEdit = (cardToUpdate: ActionCardItem) => {
     const updatedCards = cards.map(card =>
       card.id === cardToUpdate.id ? cardToUpdate : card
@@ -119,7 +147,8 @@ export const useDashboardCards = () => {
     isLoading: isLoading || isDepartmentLoading,
     handleCardEdit,
     handleCardHide,
-    handleCardsReorder
+    handleCardsReorder,
+    resetDashboard
   };
 };
 

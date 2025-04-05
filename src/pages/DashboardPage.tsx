@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Home } from 'lucide-react';
+import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserData } from '@/hooks/useUserData';
@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,7 +36,8 @@ const DashboardPage: React.FC = () => {
     isLoading,
     handleCardEdit: saveCardEdit,
     handleCardHide,
-    handleCardsReorder
+    handleCardsReorder,
+    resetDashboard
   } = useDashboardCards();
 
   const toggleSidebar = () => {
@@ -61,6 +63,15 @@ const DashboardPage: React.FC = () => {
     });
   };
 
+  const handleResetDashboard = () => {
+    resetDashboard();
+    toast({
+      title: "Dashboard resetado",
+      description: "O seu dashboard foi restaurado para a configuração padrão.",
+      variant: "default"
+    });
+  };
+
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
@@ -76,7 +87,7 @@ const DashboardPage: React.FC = () => {
           <BreadcrumbBar />
           <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
             {/* WelcomeCard with greeting parameter */}
-            <div className="w-full mb-6">
+            <div className="w-full mb-2">
               <WelcomeCard 
                 title="Dashboard" 
                 description="Bem-vindo ao seu dashboard personalizado." 
@@ -85,6 +96,19 @@ const DashboardPage: React.FC = () => {
                 userName={firstName}
                 greeting={true}
               />
+            </div>
+            
+            {/* Reset dashboard button */}
+            <div className="flex justify-end mb-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleResetDashboard}
+                className="text-blue-600 border-blue-300 hover:bg-blue-50"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Resetar Dashboard
+              </Button>
             </div>
             
             {/* Content container with better height calculation and scrolling behavior */}

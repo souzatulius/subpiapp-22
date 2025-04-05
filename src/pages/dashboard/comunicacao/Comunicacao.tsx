@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { MessageSquareReply } from 'lucide-react';
+import { MessageSquareReply, RotateCcw } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import WelcomeCard from '@/components/shared/WelcomeCard';
@@ -11,6 +11,8 @@ import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -36,8 +38,18 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     toggleEditMode,
     handleSaveCardEdit,
     setIsEditModalOpen,
-    handleCardsReorder
+    handleCardsReorder,
+    resetDashboard
   } = useComunicacaoDashboard(user, isPreview, department);
+
+  const handleResetDashboard = () => {
+    resetDashboard();
+    toast({
+      title: "Dashboard resetado",
+      description: "O dashboard de comunicação foi restaurado para a configuração padrão.",
+      variant: "default"
+    });
+  };
 
   if (!isPreview && !user) {
     return <LoadingIndicator />;
@@ -45,13 +57,26 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="w-full mb-6">
+      <div className="w-full mb-2">
         <WelcomeCard
           title="Comunicação"
           description="Gerencie demandas e notas oficiais"
           icon={<MessageSquareReply className="h-6 w-6 mr-2" />}
           color="bg-gradient-to-r from-[#0066FF] to-blue-700"
         />
+      </div>
+
+      {/* Reset dashboard button */}
+      <div className="flex justify-end">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleResetDashboard}
+          className="text-blue-600 border-blue-300 hover:bg-blue-50"
+        >
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Resetar Dashboard
+        </Button>
       </div>
       
       {isLoading ? (
