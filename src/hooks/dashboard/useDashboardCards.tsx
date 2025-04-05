@@ -75,5 +75,34 @@ export const useDashboardCards = (userId?: string | null, departmentId?: string)
     }
   };
 
-  return { cards, setCards, isLoading, saveCards };
+  // Add the methods required by DashboardPage.tsx
+  const handleCardEdit = (card: ActionCardItem) => {
+    // This function will be called when a card is edited
+    return card;
+  };
+
+  const handleCardHide = (id: string) => {
+    // This function will be called when a card is hidden
+    const updatedCards = cards.map(card => 
+      card.id === id ? { ...card, isHidden: true } : card
+    );
+    setCards(updatedCards);
+    saveCards(updatedCards);
+  };
+
+  const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
+    // This function will be called when cards are reordered
+    setCards(updatedCards);
+    saveCards(updatedCards);
+  };
+
+  return { 
+    cards, 
+    setCards, 
+    isLoading, 
+    saveCards, 
+    handleCardEdit, 
+    handleCardHide, 
+    handleCardsReorder 
+  };
 };
