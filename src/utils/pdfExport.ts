@@ -121,16 +121,24 @@ export const exportToPDF = async (pageTitle: string) => {
           });
         });
         
-        // Also specifically hide the upload section and welcome cards
-        const uploadSection = documentClone.querySelector('.p-4.bg-white.border-orange-200:first-of-type');
-        if (uploadSection) {
-          (uploadSection as HTMLElement).style.display = 'none';
-        }
-        
+        // Also specifically hide the welcome card headers 
         const welcomeCards = documentClone.querySelectorAll('.welcome-card');
         welcomeCards.forEach(card => {
           (card as HTMLElement).style.display = 'none';
         });
+        
+        // Hide header and title elements specific to the ranking and relatorios pages
+        const pageHeaderElements = documentClone.querySelectorAll('h1.text-2xl');
+        pageHeaderElements.forEach(el => {
+          (el as HTMLElement).style.display = 'none';
+        });
+
+        // Apply additional margin to content for better spacing
+        const contentContainer = documentClone.querySelector('.pdf-content') || documentClone.querySelector('main');
+        if (contentContainer) {
+          (contentContainer as HTMLElement).style.paddingLeft = '8%';
+          (contentContainer as HTMLElement).style.paddingRight = '8%';
+        }
       }
     });
 
