@@ -34,6 +34,8 @@ const CadastrarRelease = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showGeneratedContent, setShowGeneratedContent] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<NotaGerada | null>(null);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedContent, setEditedContent] = useState('');
   
   const handleSaveRelease = async () => {
     if (!releaseContent.trim()) {
@@ -48,13 +50,17 @@ const CadastrarRelease = () => {
     setIsSubmitting(true);
     
     try {
+      // Get the current authenticated user ID
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id || 'sistema';
+      
       // Save release to database
       const { error } = await supabase
         .from('releases')
         .insert({ 
           conteudo: releaseContent,
           tipo: 'imprensa', // Adding required fields
-          autor_id: 'sistema' // Using a default value for now
+          autor_id: userId // Using the actual user id or fallback
         });
       
       if (error) throw error;
@@ -99,8 +105,14 @@ const CadastrarRelease = () => {
       
       if (error) throw error;
       
-      setGeneratedContent(data.data);
-      setShowGeneratedContent(true);
+      if (data?.data) {
+        setGeneratedContent(data.data);
+        setEditedTitle(data.data.titulo || '');
+        setEditedContent(data.data.conteudo || '');
+        setShowGeneratedContent(true);
+      } else {
+        throw new Error('Resposta inválida do servidor');
+      }
       
     } catch (error) {
       console.error('Erro ao gerar notícia:', error);
@@ -115,16 +127,43 @@ const CadastrarRelease = () => {
   };
   
   const handleCreateNote = async () => {
-    // Navigate to CriarNotaOficial with pre-filled content
-    if (generatedContent) {
-      // Here you would save the generated content or pass it to the next page
-      toast({
-        title: "Redirecionando",
-        description: "Você será redirecionado para criar a nota oficial."
-      });
-      // Example: navigate to create note page with state
-      // navigate('/dashboard/comunicacao/criar-nota-oficial', { state: { titulo: generatedContent.titulo, conteudo: generatedContent.conteudo } });
+    // Here you would save the edited content
+    if (editedTitle && editedContent) {
+      try {
+        // Get the current authenticated user ID
+        const { data: authData } = await supabase.auth.getUser();
+        const userId = authData?.user?.id || 'sistema';
+        
+        // Create new nota oficial with the edited content
+        const { error } = await supabase
+          .from('notas_oficiais')
+          .insert({
+            titulo: editedTitle,
+            texto: editedContent,
+            autor_id: userId,
+            problema_id: '00000000-0000-0000-0000-000000000000', // Using a placeholder, you'll need to update this
+            status: 'pendente'
+          });
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Nota criada",
+          description: "A nota oficial foi criada com sucesso!"
+        });
+        
+        // Redirect to notas list or another appropriate page
+        navigate('/dashboard/comunicacao/consultar-notas');
+      } catch (error) {
+        console.error('Erro ao criar nota:', error);
+        toast({
+          title: "Erro ao criar nota",
+          description: "Não foi possível criar a nota oficial. Tente novamente.",
+          variant: "destructive"
+        });
+      }
     }
+    
     setShowConfirmDialog(false);
     setShowGeneratedContent(false);
   };
@@ -202,7 +241,7 @@ const CadastrarRelease = () => {
           <DialogHeader>
             <DialogTitle>Notícia Gerada</DialogTitle>
             <DialogDescription>
-              Conteúdo gerado com base no release fornecido
+              Conteúdo gerado com base no release fornecido. Você pode editar o texto antes de salvar.
             </DialogDescription>
           </DialogHeader>
           
@@ -210,19 +249,25 @@ const CadastrarRelease = () => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-lg">Título</h3>
-                <Badge variant="warning">Sugestão</Badge>
+                <Badge variant="warning">Edite conforme necessário</Badge>
               </div>
-              <p className="p-3 bg-gray-50 rounded-md">{generatedContent?.titulo}</p>
+              <Textarea 
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="p-3 bg-gray-50 rounded-md"
+              />
             </div>
             
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-lg">Conteúdo</h3>
-                <Badge variant="warning">Sugestão</Badge>
+                <Badge variant="warning">Edite conforme necessário</Badge>
               </div>
-              <div className="p-3 bg-gray-50 rounded-md whitespace-pre-line">
-                {generatedContent?.conteudo}
-              </div>
+              <Textarea 
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="p-3 bg-gray-50 rounded-md min-h-[300px]"
+              />
             </div>
           </div>
           
