@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useDepartment } from './useDepartment';
-import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
+import { useDepartment } from './useDepartment';
+import { getDefaultActionCards } from './defaultCards';
 
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
@@ -13,82 +13,74 @@ export const useDashboardCards = () => {
   const { userDepartment, isLoading: isDepartmentLoading } = useDepartment(user);
 
   useEffect(() => {
-    if (isDepartmentLoading) return;
-
     const fetchCards = async () => {
       if (!user) {
-        setCards([]);
         setIsLoading(false);
         return;
       }
 
-      // Normalize department value for comparison
-      const normalizedDepartment = userDepartment
-        ? userDepartment
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-        : undefined;
-
-      const defaultCards = getInitialDashboardCards(normalizedDepartment);
-
       try {
+        // First get default cards based on department
+        const defaultCards = getDefaultActionCards();
+        
+        // Then try to fetch user customizations
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
-          .eq('page', 'inicial')
+          .eq('page', 'dashboard')
           .single();
-
-        if (error || !data?.cards_config) {
-          setCards(defaultCards);
-          return;
-        }
-
-        // Safe parsing of card config data
-        let parsedCards: ActionCardItem[] = [];
         
-        if (typeof data.cards_config === 'string') {
+        if (error) {
+          console.log('No custom dashboard found, using defaults');
+          setCards(defaultCards);
+        } else if (data && data.cards_config) {
           try {
-            parsedCards = JSON.parse(data.cards_config);
+            const customCards = typeof data.cards_config === 'string' 
+              ? JSON.parse(data.cards_config) 
+              : data.cards_config;
+            
+            if (Array.isArray(customCards) && customCards.length > 0) {
+              setCards(customCards);
+            } else {
+              setCards(defaultCards);
+            }
           } catch (e) {
-            console.error('Error parsing cards_config:', e);
+            console.error('Error parsing cards config', e);
+            setCards(defaultCards);
           }
-        } else if (Array.isArray(data.cards_config)) {
-          parsedCards = data.cards_config;
-        }
-
-        // Only use the parsed cards if they form a valid array
-        if (Array.isArray(parsedCards) && parsedCards.length > 0) {
-          setCards(parsedCards);
         } else {
           setCards(defaultCards);
         }
       } catch (error) {
-        console.error('Error fetching dashboard cards:', error);
-        setCards(defaultCards);
+        console.error('Error fetching dashboard cards', error);
+        // Fallback to default cards on error
+        setCards(getDefaultActionCards());
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCards();
-  }, [user, userDepartment, isDepartmentLoading]);
+  }, [user, userDepartment]);
 
   const persistCards = async (updatedCards: ActionCardItem[]) => {
     if (!user) return;
     
-    // Create a distinct clone to avoid mutation issues
-    const cardsCopy = JSON.parse(JSON.stringify(updatedCards));
-    setCards(cardsCopy);
-
     try {
+      // Create a JSON string to avoid circular reference issues
+      const cardsData = JSON.stringify(updatedCards);
+      
+      // Update the cards state 
+      setCards(JSON.parse(cardsData));
+
+      // Save to database
       await supabase
         .from('user_dashboard')
         .upsert({
           user_id: user.id,
-          page: 'inicial',
-          cards_config: JSON.stringify(cardsCopy),
+          page: 'dashboard',
+          cards_config: cardsData,
           department_id: userDepartment || 'default'
         });
     } catch (error) {
@@ -96,15 +88,15 @@ export const useDashboardCards = () => {
     }
   };
 
-  const handleCardEdit = (cardToUpdate: ActionCardItem) => {
-    const updatedCards = cards.map(card =>
-      card.id === cardToUpdate.id ? cardToUpdate : card
+  const handleCardEdit = (card: ActionCardItem) => {
+    const updatedCards = cards.map(c => 
+      c.id === card.id ? card : c
     );
     persistCards(updatedCards);
   };
 
   const handleCardHide = (id: string) => {
-    const updatedCards = cards.map(card =>
+    const updatedCards = cards.map(card => 
       card.id === id ? { ...card, isHidden: true } : card
     );
     persistCards(updatedCards);
@@ -116,12 +108,9 @@ export const useDashboardCards = () => {
 
   return {
     cards,
-    isLoading: isLoading || isDepartmentLoading,
+    isLoading,
     handleCardEdit,
     handleCardHide,
     handleCardsReorder
   };
 };
-
-// Add default export to support both import styles
-export default useDashboardCards;

@@ -25,7 +25,7 @@ const PWAButton: React.FC = () => {
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={toggleInstructions}>
           <div 
-            className="bg-white rounded-lg max-w-2xl w-full h-[90vh] overflow-y-auto animate-scale-in my-4 shadow-xl" 
+            className="bg-white rounded-xl max-w-2xl w-full overflow-hidden animate-scale-in my-4 shadow-xl" 
             onClick={e => e.stopPropagation()}
           >
             <div className="p-6">
@@ -92,7 +92,7 @@ const PWAButton: React.FC = () => {
                 </p>
               </div>
 
-              <div className="mt-6 flex justify-center pb-2">
+              <div className="mt-6 flex justify-center">
                 <button 
                   className="bg-subpi-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   onClick={toggleInstructions}
