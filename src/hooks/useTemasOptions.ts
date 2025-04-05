@@ -27,7 +27,7 @@ export const useTemasOptions = () => {
         if (error) throw error;
         
         // Safely transform data to Tema type
-        const transformedData = (data || []).map(item => ({
+        const transformedData: Tema[] = (data || []).map(item => ({
           id: item.id || '',
           descricao: item.descricao || ''
         }));

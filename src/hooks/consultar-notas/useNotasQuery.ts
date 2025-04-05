@@ -55,26 +55,50 @@ export const useNotasQuery = (): UseNotasQueryResult => {
           const nota: NotaOficial = {
             id: item.id,
             titulo: item.titulo,
-            conteudo: item.texto, // Map texto to conteudo for type compatibility
-            texto: item.texto,
+            conteudo: item.texto || '', // Map texto to conteudo for type compatibility
+            texto: item.texto || '',
             status: item.status,
             criado_em: item.criado_em,
             
             // Handle potentially null or error objects with safe defaults
-            autor: item.autor || { id: '', nome_completo: '' },
-            aprovador: item.aprovador || null,
+            autor: item.autor ? {
+              id: typeof item.autor === 'object' && item.autor !== null && 'id' in item.autor 
+                ? String(item.autor.id) 
+                : '',
+              nome_completo: typeof item.autor === 'object' && item.autor !== null && 'nome_completo' in item.autor 
+                ? String(item.autor.nome_completo) 
+                : ''
+            } : { id: '', nome_completo: '' },
+            
+            aprovador: item.aprovador ? {
+              id: typeof item.aprovador === 'object' && item.aprovador !== null && 'id' in item.aprovador 
+                ? String(item.aprovador.id) 
+                : '',
+              nome_completo: typeof item.aprovador === 'object' && item.aprovador !== null && 'nome_completo' in item.aprovador 
+                ? String(item.aprovador.nome_completo) 
+                : ''
+            } : null,
             
             problema: item.problema ? {
-              id: item.problema.id,
-              descricao: item.problema.descricao,
-              coordenacao: item.problema.coordenacao || null
+              id: typeof item.problema === 'object' && item.problema !== null && 'id' in item.problema 
+                ? String(item.problema.id) 
+                : '',
+              descricao: typeof item.problema === 'object' && item.problema !== null && 'descricao' in item.problema 
+                ? String(item.problema.descricao) 
+                : '',
+              coordenacao: typeof item.problema === 'object' && item.problema !== null && 'coordenacao' in item.problema
+                ? item.problema.coordenacao
+                : null
             } : null,
             
             supervisao_tecnica: item.supervisao_tecnica || null,
             
-            area_coordenacao: (item.problema?.coordenacao) ? {
-              id: item.problema.coordenacao.id,
-              descricao: item.problema.coordenacao.descricao
+            area_coordenacao: (typeof item.problema === 'object' && 
+                              item.problema !== null && 
+                              'coordenacao' in item.problema && 
+                              item.problema.coordenacao) ? {
+              id: String(item.problema.coordenacao.id),
+              descricao: String(item.problema.coordenacao.descricao)
             } : null,
             
             demanda: item.demanda || null,

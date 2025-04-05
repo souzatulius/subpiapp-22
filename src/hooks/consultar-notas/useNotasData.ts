@@ -95,9 +95,10 @@ export const useNotasData = (): UseNotasDataReturn => {
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     deleteLoading,
-    handleDeleteNota,
+    handleDelete: handleDeleteNota, // Rename to match the expected type
     refetch,
     selectedNotaId,
-    setSelectedNotaId
+    setSelectedNotaId,
+    handleDeleteNota // Add this for backwards compatibility
   };
 };

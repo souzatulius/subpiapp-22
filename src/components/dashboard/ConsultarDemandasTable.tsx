@@ -61,7 +61,7 @@ const ConsultarDemandasTable = () => {
   });
 
   // Create a safe transformation with fallbacks for all properties
-  const demandas: Demand[] = (demandasRaw || []).map((d: any) => {
+  const demandas = (demandasRaw || []).map((d: any): Demand => {
     return {
       id: d?.id || '',
       titulo: d?.titulo || '',
@@ -70,6 +70,7 @@ const ConsultarDemandasTable = () => {
       horario_publicacao: d?.horario_publicacao || '',
       prazo_resposta: d?.prazo_resposta || '',
       area_coordenacao: {
+        id: d?.problema?.coordenacao?.id || '',
         descricao: d?.problema?.coordenacao?.descricao || 'Não informada'
       },
       problema: d?.problema ? {
@@ -83,8 +84,8 @@ const ConsultarDemandasTable = () => {
         descricao: ''
       },
       // Add required fallback properties to match the Demand type
-      origem: d?.origem || { descricao: '' },
-      tipo_midia: d?.tipo_midia || { descricao: '' },
+      origem: d?.origem || { id: '', descricao: '' },
+      tipo_midia: d?.tipo_midia || { id: '', descricao: '' },
       bairro: d?.bairro || { nome: '' },
       autor: d?.autor || { nome_completo: '' },
       endereco: '',
@@ -94,7 +95,7 @@ const ConsultarDemandasTable = () => {
       veiculo_imprensa: '',
       detalhes_solicitacao: '',
       perguntas: null,
-      servico: { descricao: '' },
+      servico: { id: '', descricao: '' },
       arquivo_url: null,
       anexos: null
     };
@@ -106,8 +107,8 @@ const ConsultarDemandasTable = () => {
 
   return (
     <DemandasTable 
-      demandas={demandas}
-      onViewDemand={handleViewDemand}
+      demandas={demandas as any}
+      onViewDemand={handleViewDemand as any}
       isLoading={isLoading}
     />
   );

@@ -60,12 +60,13 @@ export const useReleaseForm = () => {
           } else if (fileData) {
             // If we successfully uploaded the file, now try to add reference in the database
             try {
-              // Instead of using RPC, directly update the nota record
+              // Update archivo_url field (ensure this field exists in your table)
+              const updateData: Record<string, any> = {};
+              updateData.arquivo_url = fileData.path;
+              
               const { error: updateError } = await supabase
                 .from('notas_oficiais')
-                .update({ 
-                  arquivo_url: `${fileData.path}` 
-                })
+                .update(updateData)
                 .eq('id', notaData.id);
                 
               if (updateError) {

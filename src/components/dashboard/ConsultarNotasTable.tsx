@@ -52,8 +52,15 @@ const ConsultarNotasTable = () => {
   // Add safe transformation with fallbacks
   const notas: NotaOficial[] = (notasRaw || []).map((nota: any) => {
     // Create a safe author object
-    const autor = nota?.autor || { id: '', nome_completo: '' };
-    const aprovador = nota?.aprovador || null;
+    const autor = nota?.autor ? {
+      id: nota.autor.id || '',
+      nome_completo: nota.autor.nome_completo || ''
+    } : { id: '', nome_completo: '' };
+    
+    const aprovador = nota?.aprovador ? {
+      id: nota.aprovador.id || '',
+      nome_completo: nota.aprovador.nome_completo || ''
+    } : null;
     
     // Create a safe problema object with coordenacao
     let problema = null;
@@ -117,7 +124,7 @@ const ConsultarNotasTable = () => {
       loading={isLoading}
       formatDate={formatDate}
       onViewNota={handleViewNota}
-      onEditNota={handleEditNota}
+      onEditNota={handleEditNota as any}
     />
   );
 };

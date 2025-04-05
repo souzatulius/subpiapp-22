@@ -86,19 +86,20 @@ export interface UseNotasDataReturn {
   deleteLoading: boolean;
   handleDelete: (id: string) => Promise<void>;
   refetch: () => Promise<any>;
+  selectedNotaId: string | null;
+  setSelectedNotaId: (id: string | null) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
   // Extended properties needed by NotasContent
   searchQuery?: string;
   setSearchQuery?: (query: string) => void;
-  statusFilter?: string;
-  setStatusFilter?: (status: string) => void;
-  formatDate?: (date: string) => string;
   areaFilter?: string;
   setAreaFilter?: (area: string) => void;
   dataInicioFilter?: string;
   setDataInicioFilter?: (date: string) => void;
   dataFimFilter?: string;
   setDataFimFilter?: (date: string) => void;
-  deleteNota?: (id: string) => Promise<void>;
+  handleDeleteNota?: (id: string) => Promise<void>;
   isAdmin?: boolean;
   updateNotaStatus?: (id: string, status: string) => Promise<void>;
   statusLoading?: boolean;

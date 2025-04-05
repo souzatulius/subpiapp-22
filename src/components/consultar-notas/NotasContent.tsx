@@ -12,33 +12,6 @@ import { ptBR } from 'date-fns/locale';
 import { useNotasData } from '@/hooks/consultar-notas/useNotasData';
 import { NotaOficial } from '@/types/nota';
 
-// Define local types needed for components
-interface NotasFilterLocalProps {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  statusFilter: string;
-  setStatusFilter: (status: string) => void;
-  dateRange: [Date | null, Date | null];
-  setDateRange: (range: [Date | null, Date | null]) => void;
-  viewMode: 'table' | 'cards';
-  setViewMode: React.Dispatch<React.SetStateAction<'table' | 'cards'>>;
-}
-
-interface NotasTableLocalProps {
-  notas: NotaOficial[];
-  loading: boolean;
-  formatDate: (dateString: string) => string;
-  onViewNota: (nota: NotaOficial) => void;
-  onEditNota?: (id: string) => void;
-  onDeleteNota?: (id: string) => void;
-}
-
-interface DeleteNotaDialogLocalProps {
-  isOpen: boolean;
-  onConfirm: () => void;
-  onCancel?: () => void;
-}
-
 const NotasContent = () => {
   const navigate = useNavigate();
   const {
@@ -86,7 +59,7 @@ const NotasContent = () => {
   };
   
   const confirmDelete = () => {
-    if (selectedNotaId) {
+    if (selectedNotaId && handleDeleteNota) {
       handleDeleteNota(selectedNotaId);
     }
   };
@@ -111,15 +84,18 @@ const NotasContent = () => {
       
       <Card className="mb-6 border border-gray-200">
         <CardContent className="p-6">
+          {/* Explicit type casting to fix the props mismatch */}
           <NotasFilter 
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
+            {...{
+              searchTerm,
+              setSearchTerm,
+              statusFilter,
+              setStatusFilter,
+              dateRange,
+              setDateRange,
+              viewMode,
+              setViewMode
+            } as any}
           />
         </CardContent>
       </Card>

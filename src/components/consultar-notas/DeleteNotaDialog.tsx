@@ -5,23 +5,30 @@ import AttentionBox from '@/components/ui/attention-box';
 
 interface DeleteNotaDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onConfirm: () => void;
-  notaTitle: string;
-  hasDemanda: boolean;
+  onCancel?: () => void;
+  notaTitle?: string;
+  hasDemanda?: boolean;
 }
 
 const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
   isOpen,
-  onClose,
+  onClose = () => {},
   onConfirm,
-  notaTitle,
-  hasDemanda
+  onCancel,
+  notaTitle = "esta nota",
+  hasDemanda = false
 }) => {
-  return <AlertDialog open={isOpen} onOpenChange={onClose}>
+  const handleClose = () => {
+    if (onClose) onClose();
+    if (onCancel) onCancel();
+  };
+
+  return <AlertDialog open={isOpen} onOpenChange={handleClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          
+          <AlertDialogTitle>Excluir Nota</AlertDialogTitle>
           <AlertDialogDescription className="text-gray-700">
             <p className="mb-4">
               Você tem certeza que deseja excluir a nota <strong>"{notaTitle}"</strong>?
@@ -38,7 +45,7 @@ const DeleteNotaDialog: React.FC<DeleteNotaDialogProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel onClick={onCancel}>Cancelar</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700 text-white">
             Excluir
           </AlertDialogAction>
