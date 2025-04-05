@@ -7,6 +7,7 @@ import ChartCategorySection from './ChartCategorySection';
 import FilterDialog from './filters/FilterDialog';
 import ActionsSection from './ActionsSection';
 import { ChartItemsProvider } from './hooks/ChartItemsContext';
+import { ChartVisibility } from './types';
 
 interface RankingContentProps {
   filterDialogOpen: boolean;
@@ -21,20 +22,35 @@ const RankingContent: React.FC<RankingContentProps> = ({
   disableCardContainers = false,
   hideUploadSection = false
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState('efficiency');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [filters, setFilters] = useState({
     status: ['Todos'],
     serviceTypes: ['Todos'],
     distritos: ['Todos']
   });
-  const [chartVisibility, setChartVisibility] = useState({
-    evolution: true,
+  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>({
+    statusDistribution: true,
+    topCompanies: true,
+    districtDistribution: true,
+    servicesByDepartment: true,
+    servicesByDistrict: true,
+    timeComparison: true,
+    dailyDemands: true,
+    statusTransition: true,
+    closureTime: true,
+    neighborhoodComparison: true,
+    districtEfficiencyRadar: true,
+    externalDistricts: true,
+    efficiencyImpact: true,
+    criticalStatus: true,
+    serviceDiversity: true,
+    districtPerformance: true,
     serviceTypes: true,
     resolutionTime: true,
-    districtPerformance: true,
+    responsibility: true,
+    evolution: true,
     departmentComparison: true,
-    oldestPendingList: true,
-    responsibility: true
+    oldestPendingList: true
   });
 
   const handleFiltersChange = (newFilters) => {
@@ -66,13 +82,20 @@ const RankingContent: React.FC<RankingContentProps> = ({
         </div>
         
         <ChartCategorySection 
-          selectedCategory={selectedCategory}
+          activeCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
+          categories={['all', 'trends', 'performance', 'distribution']}
         />
         
         <ChartsSection 
-          category={selectedCategory} 
-          disableContainers={disableCardContainers}
+          chartData={{}}
+          isLoading={false}
+          chartVisibility={chartVisibility}
+          sgzData={[]}
+          painelData={[]}
+          onSimulateIdealRanking={() => {}}
+          isSimulationActive={false}
+          disableCardContainers={disableCardContainers}
         />
       </div>
       
@@ -82,7 +105,12 @@ const RankingContent: React.FC<RankingContentProps> = ({
         filters={filters}
         onFiltersChange={handleFiltersChange}
         chartVisibility={chartVisibility}
-        onChartVisibilityChange={handleChartVisibilityChange}
+        onChartVisibilityChange={(chartName, isVisible) => {
+          setChartVisibility(prev => ({
+            ...prev,
+            [chartName]: isVisible
+          }));
+        }}
         onResetFilters={() => setFilters({
           status: ['Todos'],
           serviceTypes: ['Todos'],
