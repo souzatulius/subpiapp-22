@@ -38,12 +38,12 @@ const SUGGESTED_ICONS = [
 ];
 
 const COLOR_OPTIONS: ColorOption[] = [
-  { value: "blue-vivid", label: "Azul Vivo", class: "bg-[#0066FF]" },
-  { value: "green-neon", label: "Verde Neon", class: "bg-[#00FF00]" },
-  { value: "gray-light", label: "Cinza Claro", class: "bg-[#F5F5F5]" },
-  { value: "orange-dark", label: "Laranja Escuro", class: "bg-[#F25C05]" },
-  { value: "yellow", label: "Amarelo", class: "bg-yellow-400" },
-  { value: "blue-dark", label: "Azul Escuro", class: "bg-blue-800" },
+  { value: "blue-vivid", label: "", class: "bg-[#0066FF]" },
+  { value: "blue-dark", label: "", class: "bg-[#1D4ED8]" },
+  { value: "green-neon", label: "", class: "bg-[#66FF66]" },
+  { value: "gray-light", label: "", class: "bg-[#F5F5F5]" },
+  { value: "orange-dark", label: "", class: "bg-[#F25C05]" },
+  { value: "yellow", label: "", class: "bg-yellow-400" },
 ];
 
 const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
@@ -151,21 +151,18 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
           
           <div className="grid gap-2">
             <Label>Cor</Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-wrap gap-3">
               {COLOR_OPTIONS.map((colorOption) => (
                 <div
                   key={colorOption.value}
-                  className={`h-12 rounded-md cursor-pointer border-2 flex items-center justify-center ${
+                  className={`h-10 w-10 rounded-full cursor-pointer transition-all ${
                     color === colorOption.value 
-                      ? 'border-blue-500 ring-2 ring-offset-2 ring-blue-500' 
-                      : 'border-transparent'
+                      ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' 
+                      : 'hover:scale-110'
                   } ${colorOption.class}`}
                   onClick={() => setColor(colorOption.value)}
-                >
-                  <span className={getTextColorForPreview(colorOption.value)}>
-                    {colorOption.label}
-                  </span>
-                </div>
+                  title={colorOption.value}
+                />
               ))}
             </div>
           </div>
@@ -178,7 +175,7 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
                 style={{
                   backgroundColor: COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-', '').includes('[') 
                     ? COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-[', '').replace(']', '') 
-                    : color === 'yellow' ? '#FACC15' : color === 'blue-dark' ? '#1E40AF' : '#0066FF'
+                    : color === 'yellow' ? '#FACC15' : color === 'blue-dark' ? '#1D4ED8' : '#0066FF'
                 }}
               >
                 <div className="relative h-full flex flex-col items-center justify-center text-center py-4">

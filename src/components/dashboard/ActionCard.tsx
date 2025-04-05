@@ -33,7 +33,7 @@ const getBackgroundColor = (color: CardColor): string => {
     case 'blue-vivid':
       return 'bg-[#0066FF]'; // Azul Vivo
     case 'green-neon':
-      return 'bg-[#00FF00]'; // Verde Neon  
+      return 'bg-[#66FF66]'; // Verde Neon  
     case 'gray-light':
       return 'bg-[#F5F5F5]'; // Cinza Claro
     case 'orange-dark':
@@ -41,7 +41,7 @@ const getBackgroundColor = (color: CardColor): string => {
     case 'yellow':
       return 'bg-yellow-400'; // Amarelo
     case 'blue-dark':
-      return 'bg-blue-800'; // Azul Escuro
+      return 'bg-[#1D4ED8]'; // Azul Escuro
     default:
       return 'bg-[#0066FF]'; // Default to Azul Vivo
   }
