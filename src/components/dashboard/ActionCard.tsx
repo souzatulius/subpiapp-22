@@ -82,7 +82,6 @@ const getBackgroundColor = (color: CardColor): string => {
   }
 };
 
-// Ícone agora sempre grande
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   return 'w-10 h-10';
 };
@@ -138,7 +137,7 @@ const ActionCard = ({
           <>{children}</>
         ) : (
           <>
-            <div className="text-white mb-1">
+            <div className="text-white mb-3">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
