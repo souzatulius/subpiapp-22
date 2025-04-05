@@ -60,10 +60,6 @@ const ProfileMenu: React.FC = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="focus:outline-none flex items-center gap-2">
-            <div className="hidden md:block text-right mr-2">
-              <p className="text-sm font-medium">{displayName}</p>
-              <p className="text-xs text-gray-500">{userProfile?.email}</p>
-            </div>
             <AvatarDisplay 
               nome={displayName}
               imageSrc={photoUrl}
@@ -72,10 +68,6 @@ const ProfileMenu: React.FC = () => {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
-          <div className="p-3">
-            <p className="font-medium">{displayName}</p>
-            <p className="text-xs text-gray-500 mt-1">{userProfile?.email}</p>
-          </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setIsChangePhotoModalOpen(true)} className="cursor-pointer py-2">
             <User className="mr-2 h-4 w-4" />

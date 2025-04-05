@@ -48,7 +48,10 @@ export const useNotasQuery = () => {
           `)
           .order('criado_em', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching notas:", error);
+          return [];
+        }
         
         // Transform the data to ensure consistent structure
         const transformedData: NotaOficial[] = (data || []).map((item: any) => {
@@ -137,7 +140,6 @@ export const useNotasQuery = () => {
       } catch (error) {
         console.error("Error fetching notas:", error);
         // Return an empty array instead of throwing the error
-        // This ensures we don't try to access properties on the error object
         return [];
       }
     }

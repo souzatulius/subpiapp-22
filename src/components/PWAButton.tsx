@@ -57,7 +57,7 @@ const PWAButton: React.FC = () => {
                 <div className="flex items-center">
                   <button 
                     onClick={() => goToStep(1)}
-                    className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
+                    className={`h-6 w-6 rounded-full ${currentStep === 1 ? 'bg-orange-500 text-white' : currentStep > 1 ? 'bg-[#003570] text-white' : 'bg-gray-200 text-gray-600'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
                   >
                     1
                   </button>
@@ -66,7 +66,7 @@ const PWAButton: React.FC = () => {
                 <div className="flex items-center">
                   <button 
                     onClick={() => goToStep(2)}
-                    className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
+                    className={`h-6 w-6 rounded-full ${currentStep === 2 ? 'bg-orange-500 text-white' : currentStep > 2 ? 'bg-[#003570] text-white' : 'bg-gray-200 text-gray-600'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
                   >
                     2
                   </button>
@@ -75,7 +75,7 @@ const PWAButton: React.FC = () => {
                 <div className="flex items-center">
                   <button 
                     onClick={() => goToStep(3)}
-                    className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
+                    className={`h-6 w-6 rounded-full ${currentStep === 3 ? 'bg-orange-500 text-white' : currentStep > 3 ? 'bg-[#003570] text-white' : 'bg-gray-200 text-gray-600'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
                   >
                     3
                   </button>
