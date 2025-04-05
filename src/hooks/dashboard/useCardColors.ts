@@ -4,10 +4,14 @@ import { CardColor } from '@/types/dashboard';
 export const getBgColor = (color: string): CardColor => {
   switch (color) {
     case 'blue': return 'blue-vivid' as CardColor;
+    case 'blue-light': return 'blue-light' as CardColor;
     case 'green': return 'green-neon' as CardColor;
+    case 'green-dark': return 'green-dark' as CardColor;
     case 'orange': return 'orange-dark' as CardColor;
+    case 'orange-light': return 'orange-light' as CardColor;
     case 'gray-light': return 'gray-light' as CardColor;
-    case 'blue-dark': return 'blue-dark' as CardColor;
+    case 'gray-lighter': return 'gray-lighter' as CardColor;
+    case 'gray-medium': return 'gray-medium' as CardColor;
     // map legacy colors to new palette
     case 'grey-400': 
     case 'gray-400': 

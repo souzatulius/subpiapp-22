@@ -38,11 +38,16 @@ const SUGGESTED_ICONS = [
 ];
 
 const COLOR_OPTIONS: ColorOption[] = [
-  { value: "blue-vivid", label: "", class: "bg-[#0066FF]" },
-  { value: "blue-dark", label: "", class: "bg-[#1D4ED8]" },
-  { value: "green-neon", label: "", class: "bg-[#66FF66]" },
-  { value: "gray-light", label: "", class: "bg-[#F5F5F5]" },
-  { value: "orange-dark", label: "", class: "bg-[#F25C05]" },
+  { value: "blue-vivid", label: "Azul Vivo", class: "bg-[#0066FF]" },
+  { value: "blue-light", label: "Azul Claro", class: "bg-[#66B2FF]" },
+  { value: "blue-dark", label: "Azul Escuro", class: "bg-[#1D4ED8]" },
+  { value: "green-neon", label: "Verde Neon", class: "bg-[#66FF66]" },
+  { value: "green-dark", label: "Verde Escuro", class: "bg-[#00CC00]" },
+  { value: "gray-light", label: "Cinza Claro", class: "bg-[#F5F5F5]" },
+  { value: "gray-lighter", label: "Cinza Mais Claro", class: "bg-[#FAFAFA]" },
+  { value: "gray-medium", label: "Cinza Médio", class: "bg-[#D4D4D4]" },
+  { value: "orange-dark", label: "Laranja Escuro", class: "bg-[#F25C05]" },
+  { value: "orange-light", label: "Laranja Claro", class: "bg-[#F89E66]" },
 ];
 
 const EditCardModal: React.FC<EditCardModalProps> = ({
@@ -110,7 +115,9 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   
   // Helper to get text color based on background color
   const getTextColorForPreview = (colorValue: CardColor): string => {
-    if (colorValue === 'gray-light' || colorValue === 'green-neon') {
+    if (colorValue === 'gray-light' || colorValue === 'gray-lighter' || 
+        colorValue === 'gray-medium' || colorValue === 'green-neon' || 
+        colorValue === 'green-dark') {
       return 'text-gray-800';
     }
     return 'text-white';
@@ -163,7 +170,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                       : 'hover:scale-110'
                   } ${colorOption.class}`}
                   onClick={() => setColor(colorOption.value)}
-                  title={colorOption.value}
+                  title={colorOption.label}
                 />
               ))}
             </div>
@@ -175,9 +182,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
               <div 
                 className={`w-full h-40 rounded-xl shadow-md overflow-hidden transition-all`}
                 style={{
-                  backgroundColor: COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-', '').includes('[') 
-                    ? COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-[', '').replace(']', '') 
-                    : color === 'blue-dark' ? '#1D4ED8' : '#0066FF'
+                  backgroundColor: COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-[', '').replace(']', '') 
                 }}
               >
                 <div className="relative h-full flex flex-col items-center justify-center text-center py-4">

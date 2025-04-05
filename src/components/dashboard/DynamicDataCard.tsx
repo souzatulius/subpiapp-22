@@ -38,10 +38,15 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
   const getBgColor = (): string => {
     switch (color) {
       case 'blue-vivid': return 'bg-[#0066FF]'; // Azul Vivo
-      case 'green-neon': return 'bg-[#66FF66]'; // Verde Neon
-      case 'gray-light': return 'bg-[#F5F5F5]'; // Cinza Claro
-      case 'orange-dark': return 'bg-[#F25C05]'; // Laranja Escuro
+      case 'blue-light': return 'bg-[#66B2FF]'; // Azul Claro
       case 'blue-dark': return 'bg-[#1D4ED8]'; // Azul Escuro
+      case 'green-neon': return 'bg-[#66FF66]'; // Verde Neon
+      case 'green-dark': return 'bg-[#00CC00]'; // Verde Escuro
+      case 'gray-light': return 'bg-[#F5F5F5]'; // Cinza Claro
+      case 'gray-lighter': return 'bg-[#FAFAFA]'; // Cinza Mais Claro
+      case 'gray-medium': return 'bg-[#D4D4D4]'; // Cinza Médio
+      case 'orange-dark': return 'bg-[#F25C05]'; // Laranja Escuro
+      case 'orange-light': return 'bg-[#F89E66]'; // Laranja Claro
       default: return 'bg-[#0066FF]'; // Default to Azul Vivo
     }
   };
@@ -50,7 +55,10 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
   const getTextColor = (): string => {
     switch (color) {
       case 'gray-light':
+      case 'gray-lighter':
+      case 'gray-medium':
       case 'green-neon':
+      case 'green-dark':
         return 'text-gray-800'; // Dark text for light backgrounds
       default:
         return 'text-white'; // White text for dark backgrounds

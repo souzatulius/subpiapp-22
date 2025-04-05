@@ -1,11 +1,17 @@
+
 import { ReactNode } from 'react';
 
 export type CardColor =
   | 'blue-vivid' // #0066FF - Azul Vivo
+  | 'blue-light' // #66B2FF - Azul Claro
+  | 'blue-dark' // #1D4ED8 - Azul Escuro
   | 'green-neon' // #66FF66 - Verde Neon
+  | 'green-dark' // #00CC00 - Verde Escuro
   | 'gray-light' // #F5F5F5 - Cinza Claro
+  | 'gray-lighter' // #FAFAFA - Cinza Mais Claro
+  | 'gray-medium' // #D4D4D4 - Cinza Médio
   | 'orange-dark' // #F25C05 - Laranja Escuro
-  | 'blue-dark'; // #1D4ED8 - Azul Escuro
+  | 'orange-light'; // #F89E66 - Laranja Claro
 
 export type CardWidth = '25' | '33' | '50' | '75' | '100';
 export type CardHeight = '1' | '2';
