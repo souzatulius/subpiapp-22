@@ -15,7 +15,10 @@ export const useRespostaForm = (
   const [resposta, setResposta] = useState<Record<string, string>>({});
   const [comentarios, setComentarios] = useState<string>('');
   
+  // Pass showSuccessToast: true to the useRespostaSubmission hook
+  // to control where the success message is shown
   const { isSubmitting, submitResposta } = useRespostaSubmission({
+    showSuccessToast: true, // Let the submission hook handle the success toast
     onSuccess: () => {
       // Update local state to remove the answered demand
       if (selectedDemanda) {
@@ -26,10 +29,7 @@ export const useRespostaForm = (
         setResposta({});
         setComentarios('');
         
-        toast({
-          title: "Resposta enviada",
-          description: "A demanda foi respondida com sucesso."
-        });
+        // Remove duplicate toast here - we'll let useRespostaSubmission handle it
       }
     },
     onError: (error) => {

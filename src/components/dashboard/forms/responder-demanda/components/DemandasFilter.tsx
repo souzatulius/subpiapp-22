@@ -107,10 +107,10 @@ const DemandasFilter: React.FC<DemandasFilterProps> = ({
           <div className="w-full sm:w-auto flex-1">
             <Select value={areaFilter} onValueChange={setAreaFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="Filtrar por área" />
+                <SelectValue placeholder="Coordenação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos">Todas as áreas</SelectItem>
+                <SelectItem value="todos">Todas as coordenações</SelectItem>
                 {areas.map((area) => (
                   <SelectItem key={area.id} value={area.id}>
                     {area.nome}

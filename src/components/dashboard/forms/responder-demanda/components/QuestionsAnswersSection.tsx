@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
@@ -66,10 +67,10 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
         {normalizedQuestions.map((pergunta: string, index: number) => (
           <Card
             key={`question-${index}`}
-            className="overflow-hidden border-orange-200 hover:shadow-md transition-all duration-300 rounded-xl"
+            className="overflow-hidden border-gray-200 hover:shadow-md transition-all duration-300 rounded-xl"
           >
             <CardContent className="p-0">
-              <div className="bg-orange-500 p-4 text-white rounded-t-xl">
+              <div className="bg-gray-700 p-4 text-white rounded-t-xl">
                 <p className="text-base font-semibold">{pergunta}</p>
               </div>
               <div className="p-4">
