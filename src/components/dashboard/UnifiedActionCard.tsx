@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -49,13 +50,11 @@ interface UnifiedActionCardProps {
   isMobileView?: boolean;
   textColor?: string;
   dragHandleProps?: DragHandleProps;
+  style?: React.CSSProperties;
 }
 
-interface SortableUnifiedActionCardProps extends UnifiedActionCardProps {
-  dragHandleProps?: DragHandleProps;
-}
-
-const UnifiedActionCard = React.forwardRef<HTMLDivElement, UnifiedActionCardProps>(
+// Exporting the UnifiedActionCard component
+export const UnifiedActionCard = React.forwardRef<HTMLDivElement, UnifiedActionCardProps>(
   (
     {
       id,
@@ -89,7 +88,8 @@ const UnifiedActionCard = React.forwardRef<HTMLDivElement, UnifiedActionCardProp
       hasSubtitle,
       isMobileView,
       textColor,
-      dragHandleProps
+      dragHandleProps,
+      style
     },
     ref
   ) => {
@@ -188,6 +188,7 @@ const UnifiedActionCard = React.forwardRef<HTMLDivElement, UnifiedActionCardProp
     return (
       <Card
         ref={ref}
+        style={style}
         className={cn(
           "relative flex flex-col justify-between overflow-hidden border border-gray-200 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md",
           backgroundColorClass,
@@ -291,7 +292,7 @@ export const SortableUnifiedActionCard = ({
   hasSubtitle,
   isMobileView,
   textColor = ''
-}: SortableUnifiedActionCardProps) => {
+}: UnifiedActionCardProps) => {
   const {
     attributes,
     listeners,
@@ -308,9 +309,9 @@ export const SortableUnifiedActionCard = ({
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 1000 : 1,
-    position: isDragging ? 'relative' : 'static',
+    position: isDragging ? 'relative' as 'relative' : 'static' as 'static',
     opacity: isDragging ? 0.8 : 1
-  } as React.CSSProperties;
+  };
 
   return (
     <UnifiedActionCard
@@ -347,8 +348,8 @@ export const SortableUnifiedActionCard = ({
       isMobileView={isMobileView}
       textColor={textColor}
       dragHandleProps={{
-        ...attributes,
-        ...listeners
+        attributes,
+        listeners
       }}
     >
       {children}

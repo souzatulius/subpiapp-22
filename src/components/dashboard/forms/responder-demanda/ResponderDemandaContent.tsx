@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDemandasData } from './hooks/useDemandasData';
 import { useRespostaForm } from './hooks/useRespostaForm';
@@ -58,7 +57,7 @@ const ResponderDemandaContent: React.FC = () => {
   }));
   
   return (
-    <div className="animate-fade-in container mx-auto px-4">
+    <div className="container mx-auto p-4">
       {/* Unified filter bar that's always visible */}
       <div className="mb-6">
         <DemandasFilter 
@@ -94,18 +93,18 @@ const ResponderDemandaContent: React.FC = () => {
         <Card className="border border-gray-200 shadow-sm rounded-lg">
           <CardContent className="p-6">
             {viewMode === 'cards' ? (
-              <DemandaGrid 
-                demandas={filteredDemandas} 
-                selectedDemandaId={selectedDemanda?.id} 
-                handleSelectDemanda={handleSelectDemanda} 
-                isLoading={isLoadingDemandas} 
+              <DemandaGrid
+                demandas={filteredDemandas}
+                selectedDemandaId={selectedDemanda?.id || null}
+                onSelectDemanda={handleSelectDemanda}
+                loading={isLoading}
               />
             ) : (
-              <DemandaList 
-                demandas={filteredDemandas} 
-                selectedDemandaId={selectedDemanda?.id} 
-                handleSelectDemanda={handleSelectDemanda} 
-                isLoading={isLoadingDemandas} 
+              <DemandaList
+                demandas={filteredDemandas}
+                selectedDemandaId={selectedDemanda?.id || null}
+                onSelectDemanda={handleSelectDemanda}
+                loading={isLoading}
               />
             )}
           </CardContent>

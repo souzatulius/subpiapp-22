@@ -1,7 +1,6 @@
-
-import React, { useState, useEffect } from 'react';
-import { PlusCircle, MessageSquare, FileText, CheckCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart3, FileText, PenLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { UnifiedActionCard } from '@/components/dashboard/UnifiedActionCard';
 import { ActionCardItem, CardColor } from '@/types/dashboard';
