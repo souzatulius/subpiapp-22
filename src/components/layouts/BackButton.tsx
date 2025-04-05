@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ const BackButton: React.FC<BackButtonProps> = ({
   onClick
 }) => {
   const navigate = useNavigate();
-  
+
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -28,13 +27,14 @@ const BackButton: React.FC<BackButtonProps> = ({
       navigate(-1);
     }
   };
-  
+
   return (
-    <Button 
+    <Button
       variant="action"
-      size="icon" 
+      size="icon"
       onClick={handleClick}
-      className={`absolute top-6 left-6 z-10 bg-[#f57737] hover:bg-[#e56726] text-white ${className || ''}`}
+      className={`absolute top-6 left-6 z-10 ${className || ''}`}
+      aria-label={title}
       title={title}
     >
       <ArrowLeft className="h-5 w-5" />
