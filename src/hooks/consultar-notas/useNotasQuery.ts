@@ -51,7 +51,7 @@ export const useNotasQuery = () => {
         if (error) throw error;
         
         // Transform the data to ensure consistent structure
-        const transformedData: NotaOficial[] = (data || []).map(item => {
+        const transformedData: NotaOficial[] = (data || []).map((item: any) => {
           // Early return to handle undefined/null items
           if (!item) return {
             id: '',
