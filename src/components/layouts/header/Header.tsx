@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { UserProfileMenu } from './index';
 import { Menu } from 'lucide-react';
 import { useUserProfile } from './useUserProfile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface HeaderProps {
   showControls?: boolean;
@@ -18,6 +19,7 @@ const Header: React.FC<HeaderProps> = ({
   hideUserMenu = false
 }) => {
   const { userProfile } = useUserProfile();
+  const isMobile = useIsMobile();
   
   // Get first and second name if available
   const getDisplayName = () => {
@@ -32,14 +34,14 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between">
-        {/* Left side with menu toggle */}
+        {/* Left side with menu toggle - now hidden on mobile */}
         <div className="w-1/4 flex items-center">
-          {showControls && toggleSidebar && (
+          {showControls && toggleSidebar && !isMobile && (
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="lg:hidden"
+              className="lg:flex hidden"
               aria-label="Menu"
             >
               <Menu className="h-5 w-5" />

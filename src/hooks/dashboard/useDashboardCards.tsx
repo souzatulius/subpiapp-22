@@ -50,14 +50,12 @@ export const useDashboardCards = () => {
         
         if (typeof data.cards_config === 'string') {
           try {
-            // Simplify the parsing to avoid deep type instantiation
-            parsedCards = JSON.parse(data.cards_config) as ActionCardItem[];
+            parsedCards = JSON.parse(data.cards_config);
           } catch (e) {
             console.error('Error parsing cards_config:', e);
           }
         } else if (Array.isArray(data.cards_config)) {
-          // Direct assignment with type assertion
-          parsedCards = data.cards_config as ActionCardItem[];
+          parsedCards = data.cards_config;
         }
 
         // Only use the parsed cards if they form a valid array
@@ -81,7 +79,7 @@ export const useDashboardCards = () => {
     if (!user) return;
     
     // Create a distinct clone to avoid mutation issues
-    const cardsCopy = JSON.parse(JSON.stringify(updatedCards)) as ActionCardItem[];
+    const cardsCopy = JSON.parse(JSON.stringify(updatedCards));
     setCards(cardsCopy);
 
     try {
