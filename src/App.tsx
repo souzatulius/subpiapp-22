@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,42 +6,47 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { useState } from "react";
 
-// Pages
+// Páginas públicas
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import EmailVerified from "./pages/EmailVerified";
 import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
-import Settings from "./pages/Settings";
 import AuthCallback from "./components/AuthCallback";
+
+// Layouts e proteção
 import ProtectedRoute from "./components/layouts/ProtectedRoute";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 
-// Dashboard Pages
-import CadastrarDemanda from './pages/dashboard/comunicacao/CadastrarDemanda';
-import ResponderDemandas from './pages/dashboard/comunicacao/ResponderDemandas';
-import CriarNotaOficial from './pages/dashboard/comunicacao/CriarNotaOficial';
-import AprovarNotaOficial from './pages/dashboard/comunicacao/AprovarNotaOficial';
-import RelatoriosPage from './pages/dashboard/comunicacao/Relatorios';
-import ConsultarDemandas from './pages/dashboard/comunicacao/ConsultarDemandas';
-import ConsultarNotas from './pages/dashboard/comunicacao/ConsultarNotas';
-import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
-import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
-import CadastrarRelease from './pages/dashboard/comunicacao/CadastrarRelease';
-import ListarReleases from './pages/dashboard/comunicacao/ListarReleases';
+// Páginas principais do usuário
+import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings";
 
-// Admin Pages
-import UserPermissionsList from './pages/admin/UserPermissionsList';
+// Comunicação
+import CadastrarDemanda from "./pages/dashboard/comunicacao/CadastrarDemanda";
+import ResponderDemandas from "./pages/dashboard/comunicacao/ResponderDemandas";
+import CriarNotaOficial from "./pages/dashboard/comunicacao/CriarNotaOficial";
+import AprovarNotaOficial from "./pages/dashboard/comunicacao/AprovarNotaOficial";
+import RelatoriosPage from "./pages/dashboard/comunicacao/Relatorios";
+import ConsultarDemandas from "./pages/dashboard/comunicacao/ConsultarDemandas";
+import ConsultarNotas from "./pages/dashboard/comunicacao/ConsultarNotas";
+import ComunicacaoDashboard from "./pages/dashboard/comunicacao/Comunicacao";
+import CadastrarRelease from "./pages/dashboard/comunicacao/CadastrarRelease";
+import ListarReleases from "./pages/dashboard/comunicacao/ListarReleases";
+
+// Zeladoria
+import RankingSubs from "./pages/dashboard/zeladoria/RankingSubs";
+
+// Admin
+import UserPermissionsList from "./pages/admin/UserPermissionsList";
 
 function App() {
-  // Create a new QueryClient instance within the component
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minute
-        gcTime: 5 * 60 * 1000, // 5 minutes (renamed from cacheTime)
+        staleTime: 60 * 1000,
+        gcTime: 5 * 60 * 1000,
         refetchOnWindowFocus: false
       }
     }
@@ -56,23 +60,26 @@ function App() {
           <Sonner />
           <AuthProvider>
             <Routes>
+
+              {/* Rotas públicas */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/email-verified" element={<EmailVerified />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
-              
-              {/* Dashboard route */}
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+              {/* Rotas protegidas fora do layout */}
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-              {/* Admin routes */}
+              {/* Área administrativa */}
               <Route path="/admin/users-permissions" element={<ProtectedRoute><UserPermissionsList /></ProtectedRoute>} />
 
-              {/* Dashboard with shared layout */}
+              {/* Rotas com layout compartilhado */}
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                {/* Comunicação routes - updated paths */}
+                <Route index element={<Dashboard />} />
+
+                {/* Comunicação */}
                 <Route path="comunicacao" element={<ComunicacaoDashboard />} />
                 <Route path="comunicacao/cadastrar" element={<CadastrarDemanda />} />
                 <Route path="comunicacao/responder" element={<ResponderDemandas />} />
@@ -81,16 +88,14 @@ function App() {
                 <Route path="comunicacao/aprovar-nota" element={<AprovarNotaOficial />} />
                 <Route path="comunicacao/notas" element={<ConsultarNotas />} />
                 <Route path="comunicacao/relatorios" element={<RelatoriosPage />} />
-                
-                {/* New Release routes */}
                 <Route path="comunicacao/cadastrar-release" element={<CadastrarRelease />} />
                 <Route path="comunicacao/releases" element={<ListarReleases />} />
-                
-                {/* Zeladoria routes */}
+
+                {/* Zeladoria */}
                 <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />
               </Route>
 
-              {/* 404 route */}
+              {/* Página 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
