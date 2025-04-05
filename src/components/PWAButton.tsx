@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Smartphone, ChevronRight } from 'lucide-react';
+import { Smartphone, ChevronRight, X } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const PWAButton: React.FC = () => {
@@ -19,6 +19,12 @@ const PWAButton: React.FC = () => {
       setCurrentStep(currentStep + 1);
     } else {
       toggleInstructions(); // Close if on last step
+    }
+  };
+
+  const goToStep = (step: number) => {
+    if (step >= 1 && step <= totalSteps) {
+      setCurrentStep(step);
     }
   };
 
@@ -49,17 +55,30 @@ const PWAButton: React.FC = () => {
               
               <div className="flex justify-between mt-4 text-sm">
                 <div className="flex items-center">
-                  <div className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>1</div>
+                  <button 
+                    onClick={() => goToStep(1)}
+                    className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
+                  >
+                    1
+                  </button>
                   <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Chrome</span>
-                  <div className={`h-1 w-6 ${currentStep > 1 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
                 </div>
                 <div className="flex items-center">
-                  <div className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>2</div>
+                  <button 
+                    onClick={() => goToStep(2)}
+                    className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
+                  >
+                    2
+                  </button>
                   <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Safari</span>
-                  <div className={`h-1 w-6 ${currentStep > 2 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
                 </div>
                 <div className="flex items-center">
-                  <div className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>3</div>
+                  <button 
+                    onClick={() => goToStep(3)}
+                    className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity`}
+                  >
+                    3
+                  </button>
                   <span className="ml-1 text-xs font-medium text-gray-600">Finalize</span>
                 </div>
               </div>
@@ -127,16 +146,16 @@ const PWAButton: React.FC = () => {
             <div className="border-t p-4 flex justify-between">
               <button
                 onClick={toggleInstructions}
-                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
+                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 border border-gray-300 rounded-xl hover:bg-gray-50"
               >
-                Fechar
+                <X className="h-4 w-4" /> Fechar
               </button>
               <button 
                 onClick={goToNextStep}
-                className="bg-subpi-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                className="bg-subpi-blue text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2"
               >
                 {currentStep === totalSteps ? 'Concluir' : 'Continuar'}
-                {currentStep !== totalSteps && <ChevronRight className="ml-1 h-4 w-4" />}
+                {currentStep !== totalSteps && <ChevronRight className="h-4 w-4" />}
               </button>
             </div>
           </div>
