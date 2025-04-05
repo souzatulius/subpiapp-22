@@ -40,7 +40,7 @@ const RankingSubs = () => {
         <Button
           variant="outline"
           size="icon"
-          className="bg-white hover:bg-gray-100 border-gray-200"
+          className="bg-white hover:bg-gray-100 border-gray-200 keep-in-pdf"
           onClick={handlePrint}
         >
           <Printer className="h-5 w-5 text-gray-600" />
@@ -49,7 +49,7 @@ const RankingSubs = () => {
         <Button
           variant="outline"
           size="icon"
-          className="bg-white hover:bg-gray-100 border-gray-200"
+          className="bg-white hover:bg-gray-100 border-gray-200 keep-in-pdf"
           onClick={handleExportPDF}
         >
           <FileText className="h-5 w-5 text-gray-600" />
@@ -70,7 +70,8 @@ const RankingSubs = () => {
           <RankingContent 
             filterDialogOpen={filterDialogOpen} 
             setFilterDialogOpen={setFilterDialogOpen} 
-            disableCardContainers={true} 
+            disableCardContainers={true}
+            hideUploadSection={true}
           />
         </DemoDataProvider>
       </div>

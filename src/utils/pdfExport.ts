@@ -20,6 +20,8 @@ const elementsToHide = [
   '.actions',
   '[role="dialog"]',
   '.dialog',
+  '.upload-section', // Hide upload section
+  '.bottom-nav',     // Hide bottom navigation
 ];
 
 // Custom style to add to the document during export
@@ -28,19 +30,22 @@ const exportStyles = `
   .navigation, .button, button:not(.keep-in-pdf), 
   .sidebar, header, .header, .filter, .filters,
   .control, .controls, #mobile-nav, .mobile-nav,
-  .toolbar, .actions, [role="dialog"], .dialog {
+  .toolbar, .actions, [role="dialog"], .dialog,
+  .upload-section, .bottom-nav {
     display: none !important;
   }
 
   /* Focus on content */
   .pdf-content, .chart-container {
     margin: 0 auto;
+    transform: scale(0.8); /* Scale content to 80% */
+    transform-origin: top center;
   }
 
   /* Improved presentation of charts */
   .chart-card, .card {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
     margin-bottom: 1rem;
   }
 
@@ -96,6 +101,20 @@ export const exportToPDF = async (pageTitle: string) => {
       logging: false,
       windowWidth: 1200, // Fixed width for consistency
       onclone: (documentClone) => {
+        // Apply additional styling to the cloned document
+        const exportStyleElement = documentClone.createElement('style');
+        exportStyleElement.innerHTML = `
+          .chart-card, .recharts-wrapper, .card { 
+            break-inside: avoid !important; 
+            page-break-inside: avoid !important;
+          }
+          .pdf-content {
+            transform: scale(0.8);
+            transform-origin: top center;
+          }
+        `;
+        documentClone.head.appendChild(exportStyleElement);
+        
         // Hide elements in the cloned document that should not appear in the PDF
         elementsToHide.forEach(selector => {
           const elements = documentClone.querySelectorAll(selector);
@@ -103,6 +122,12 @@ export const exportToPDF = async (pageTitle: string) => {
             (el as HTMLElement).style.display = 'none';
           });
         });
+        
+        // Hide the upload section specifically
+        const uploadSection = documentClone.querySelector('.upload-section');
+        if (uploadSection) {
+          (uploadSection as HTMLElement).style.display = 'none';
+        }
       }
     });
 
@@ -112,21 +137,23 @@ export const exportToPDF = async (pageTitle: string) => {
     
     // Convert to image and add to PDF
     const imgData = canvas.toDataURL('image/jpeg', 1.0);
-    pdf.addImage(imgData, 'JPEG', 0, 30, pageWidth, imgHeight);
 
-    // For longer content, ensure proper pagination
-    if (pageCount > 1) {
-      for (let i = 1; i < pageCount; i++) {
-        pdf.addPage();
-        pdf.addImage(
-          imgData,
-          'JPEG',
-          0,
-          -(pageHeight * i) + 30, // offset for each page
-          pageWidth,
-          imgHeight
-        );
-      }
+    // For longer content, ensure proper pagination and avoid splitting cards across pages
+    let heightLeft = imgHeight;
+    let position = 30; // Start position after title
+    let pageNumber = 1;
+
+    // Add first page
+    pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, imgHeight);
+    heightLeft -= (pageHeight - position);
+
+    // Add subsequent pages if needed
+    while (heightLeft > 0) {
+      pageNumber++;
+      position = -(pageHeight * (pageNumber - 1)) + 30;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, imgHeight);
+      heightLeft -= pageHeight;
     }
 
     // Save the PDF
