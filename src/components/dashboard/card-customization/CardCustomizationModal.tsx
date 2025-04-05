@@ -112,16 +112,6 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
     
     return allIcons;
   };
-  
-  // Helper to get text color based on background color
-  const getTextColorForPreview = (colorValue: CardColor): string => {
-    if (colorValue === 'gray-light' || colorValue === 'gray-lighter' || 
-        colorValue === 'gray-medium' || colorValue === 'green-neon' || 
-        colorValue === 'green-dark') {
-      return 'text-gray-800';
-    }
-    return 'text-white';
-  };
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -173,27 +163,6 @@ const CardCustomizationModal: React.FC<CardCustomizationModalProps> = ({
                   title={colorOption.label}
                 />
               ))}
-            </div>
-          </div>
-          
-          <div className="mt-4">
-            <Label>Prévia</Label>
-            <div className="mt-2 border p-4 rounded-md">
-              <div 
-                className={`w-full h-40 rounded-xl shadow-md overflow-hidden transition-all`}
-                style={{
-                  backgroundColor: COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-[', '').replace(']', '') 
-                }}
-              >
-                <div className="relative h-full flex flex-col items-center justify-center text-center py-4">
-                  <div className={`${getTextColorForPreview(color)} mb-2`}>
-                    {renderIconComponent(iconId)}
-                  </div>
-                  <h3 className={`font-semibold ${getTextColorForPreview(color)} text-xl`}>
-                    {title || "Título do Card"}
-                  </h3>
-                </div>
-              </div>
             </div>
           </div>
         </div>
