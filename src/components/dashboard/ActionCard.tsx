@@ -3,7 +3,6 @@ import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
 import { MoveIcon } from 'lucide-react';
-
 export interface ActionCardProps {
   id: string;
   title: string;
@@ -26,7 +25,6 @@ export interface ActionCardProps {
   isMobileView?: boolean;
   showControls?: boolean;
 }
-
 const getBackgroundColor = (color: CardColor): string => {
   switch (color) {
     case 'blue':
@@ -81,11 +79,9 @@ const getBackgroundColor = (color: CardColor): string => {
       return 'bg-blue-500';
   }
 };
-
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   return 'w-10 h-10';
 };
-
 const ActionCard = ({
   id,
   title,
@@ -106,50 +102,32 @@ const ActionCard = ({
   const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize();
-
-  return (
-    <div 
-      className={`w-full h-full rounded-xl shadow-md overflow-hidden 
+  return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColor} group relative`}
-    >
-      {isDraggable && (
-        <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
+        active:scale-95 ${bgColor} group relative`}>
+      {isDraggable && <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
           <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
             <MoveIcon className="h-3.5 w-3.5" />
           </div>
-        </div>
-      )}
+        </div>}
 
-      {showControls && (onEdit || onDelete || onHide) && (
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <CardControls 
-            onEdit={onEdit ? () => onEdit(id) : undefined} 
-            onDelete={onDelete ? () => onDelete(id) : undefined}
-            onHide={onHide ? () => onHide(id) : undefined}
-          />
-        </div>
-      )}
+      {showControls && (onEdit || onDelete || onHide) && <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <CardControls onEdit={onEdit ? () => onEdit(id) : undefined} onDelete={onDelete ? () => onDelete(id) : undefined} onHide={onHide ? () => onHide(id) : undefined} />
+        </div>}
 
       <div className="relative h-full flex flex-col items-center justify-center text-center py-3 px-2">
-        {children ? (
-          <>{children}</>
-        ) : (
-          <>
+        {children ? <>{children}</> : <>
             <div className="text-white mb-3">
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
-              <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance">
+              <h3 className="font-semibold text-white text-lg leading-tight break-words text-balance py-0">
                 {title}
               </h3>
             </div>
-          </>
-        )}
+          </>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ActionCard;
