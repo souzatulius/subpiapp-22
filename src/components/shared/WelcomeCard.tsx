@@ -52,7 +52,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
       <CardContent className="p-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
-            <h2 className="text-2xl font-bold mb-3 flex items-center">
+            <h2 className="text-2xl font-bold mb-5 flex items-center">
               {icon}
               {greeting && userName ? `Olá, ${userName}!` : title}
             </h2>
