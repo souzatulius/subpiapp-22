@@ -1,26 +1,129 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import WelcomeCard from '@/components/shared/WelcomeCard';
-import { FileText } from 'lucide-react';
+import { FileText, Save, Wand2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
-interface Noticia {
-  id: string;
+interface ReleaseFormData {
+  conteudo: string;
+}
+
+interface NotaGerada {
   titulo: string;
   conteudo: string;
 }
 
 const CadastrarRelease = () => {
-  const [busca, setBusca] = useState('');
+  const navigate = useNavigate();
+  const [releaseContent, setReleaseContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showGeneratedContent, setShowGeneratedContent] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<NotaGerada | null>(null);
   
-  const noticias: Noticia[] = [
-    { id: '1', titulo: 'Prefeitura inaugura nova praça', conteudo: 'Texto da notícia 1' },
-    { id: '2', titulo: 'Novo plano de mobilidade urbana', conteudo: 'Texto da notícia 2' },
-    { id: '3', titulo: 'Campanha de vacinação começa amanhã', conteudo: 'Texto da notícia 3' },
-  ];
+  const handleSaveRelease = async () => {
+    if (!releaseContent.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Insira o conteúdo do release para continuar",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  const noticiasFiltradas = noticias.filter((noticia) =>
-    noticia.titulo.toLowerCase().includes(busca.toLowerCase())
-  );
+    setIsSubmitting(true);
+    
+    try {
+      // Save release to database
+      const { error } = await supabase
+        .from('releases')
+        .insert({ conteudo: releaseContent })
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Release salvo",
+        description: "O conteúdo do release foi salvo com sucesso!"
+      });
+      
+      // Show confirmation dialog to create news
+      setShowConfirmDialog(true);
+      
+    } catch (error) {
+      console.error('Erro ao salvar release:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o release. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handleGenerateNews = async () => {
+    if (!releaseContent.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Insira o conteúdo do release para gerar a notícia",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsGenerating(true);
+    
+    try {
+      // Call OpenAI through Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('generate-news', {
+        body: { releaseContent }
+      });
+      
+      if (error) throw error;
+      
+      setGeneratedContent(data.data);
+      setShowGeneratedContent(true);
+      
+    } catch (error) {
+      console.error('Erro ao gerar notícia:', error);
+      toast({
+        title: "Erro na geração",
+        description: "Não foi possível gerar a notícia. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+  
+  const handleCreateNote = async () => {
+    // Navigate to CriarNotaOficial with pre-filled content
+    if (generatedContent) {
+      // Here you would save the generated content or pass it to the next page
+      toast({
+        title: "Redirecionando",
+        description: "Você será redirecionado para criar a nota oficial."
+      });
+      // Example: navigate to create note page with state
+      // navigate('/dashboard/comunicacao/criar-nota-oficial', { state: { titulo: generatedContent.titulo, conteudo: generatedContent.conteudo } });
+    }
+    setShowConfirmDialog(false);
+    setShowGeneratedContent(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -31,42 +134,104 @@ const CadastrarRelease = () => {
         color="bg-gradient-to-r from-orange-500 to-orange-700"
       />
 
-      <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-sm">
-        <div className="relative w-full mb-6">
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.3-4.3" />
-          </svg>
-
-          <input
-            type="search"
-            className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base shadow-sm transition-all duration-300 hover:border-gray-600 placeholder:text-gray-400 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-[#003570] disabled:cursor-not-allowed disabled:opacity-50 pl-9"
-            placeholder="Buscar notícias..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+      <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">Novo Release</h2>
+        
+        <div className="mb-6">
+          <Textarea 
+            value={releaseContent}
+            onChange={(e) => setReleaseContent(e.target.value)}
+            placeholder="Cole aqui o texto do release recebido por e-mail"
+            className="min-h-[400px]"
           />
         </div>
-
-        {noticiasFiltradas.length > 0 ? (
-          <ul className="space-y-3">
-            {noticiasFiltradas.map((noticia) => (
-              <li key={noticia.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold">{noticia.titulo}</h3>
-                <p className="text-sm text-gray-600 mt-1">{noticia.conteudo}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500 text-sm">Nenhuma notícia encontrada.</p>
-        )}
+        
+        <div className="flex flex-wrap gap-3 justify-end">
+          <Button 
+            variant="default" 
+            onClick={handleSaveRelease}
+            disabled={isSubmitting}
+            className="flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            Salvar
+          </Button>
+          
+          <Button 
+            variant="action" 
+            onClick={handleGenerateNews}
+            disabled={isGenerating}
+            className="flex items-center gap-2"
+          >
+            <Wand2 className="h-4 w-4" />
+            Gerar Notícia
+            {isGenerating && (
+              <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin ml-2"></div>
+            )}
+          </Button>
+        </div>
       </div>
+      
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar notícia</DialogTitle>
+            <DialogDescription>
+              Deseja criar uma notícia com base neste release?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Não
+            </Button>
+            <Button variant="action" onClick={handleGenerateNews}>
+              Sim, gerar notícia
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Generated Content Dialog */}
+      <Dialog open={showGeneratedContent} onOpenChange={setShowGeneratedContent}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Notícia Gerada</DialogTitle>
+            <DialogDescription>
+              Conteúdo gerado com base no release fornecido
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 my-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-lg">Título</h3>
+                <Badge variant="warning">Sugestão</Badge>
+              </div>
+              <p className="p-3 bg-gray-50 rounded-md">{generatedContent?.titulo}</p>
+            </div>
+            
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-lg">Conteúdo</h3>
+                <Badge variant="warning">Sugestão</Badge>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-md whitespace-pre-line">
+                {generatedContent?.conteudo}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowGeneratedContent(false)}>
+              Fechar
+            </Button>
+            <Button variant="action" onClick={handleCreateNote}>
+              Criar Nota Oficial
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
