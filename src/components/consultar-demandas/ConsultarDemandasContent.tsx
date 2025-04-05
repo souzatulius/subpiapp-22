@@ -5,8 +5,8 @@ import DemandasTable from './DemandasTable';
 import DemandasSearchBar from './DemandasSearchBar';
 import { LoadingState } from './LoadingState';
 import DeleteDemandDialog from './DeleteDemandDialog';
-import { useDemandasData } from '@/hooks/consultar-demandas';
-import { Demand } from '@/types/demand';
+import { Demand } from '@/hooks/consultar-demandas/types';
+import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
 import { usePermissions } from '@/hooks/permissions';
 import DemandDetail from '@/components/demandas/DemandDetail';
 
@@ -107,7 +107,7 @@ const ConsultarDemandasContent = () => {
       {/* Detail Dialog */}
       {selectedDemand && (
         <DemandDetail 
-          demand={selectedDemand} 
+          demand={selectedDemand as any} 
           isOpen={isDetailOpen} 
           onClose={handleCloseDetail}
         />

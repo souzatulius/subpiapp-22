@@ -27,31 +27,40 @@ const ConsultarNotasTable = () => {
   const { data: notasRaw = [], isLoading, refetch } = useQuery({
     queryKey: ['notas-oficiais'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('notas_oficiais')
-        .select(`
-          id,
-          titulo,
-          texto,
-          status,
-          criado_em,
-          autor_id,
-          problema_id,
-          problema:problema_id (
+      try {
+        const { data, error } = await supabase
+          .from('notas_oficiais')
+          .select(`
             id,
-            descricao,
+            titulo,
+            texto,
+            status,
+            criado_em,
+            autor_id,
+            problema_id,
+            problema:problema_id (
+              id,
+              descricao,
+              coordenacao_id,
+              coordenacao:coordenacao_id (id, descricao)
+            ),
+            supervisao_tecnica_id,
+            supervisao_tecnica:supervisao_tecnica_id (id, descricao),
             coordenacao_id,
-            coordenacao:coordenacao_id (id, descricao)
-          ),
-          supervisao_tecnica_id,
-          supervisao_tecnica:supervisao_tecnica_id (id, descricao),
-          coordenacao_id,
-          area_coordenacao:coordenacao_id (id, descricao)
-        `)
-        .order('criado_em', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+            area_coordenacao:coordenacao_id (id, descricao)
+          `)
+          .order('criado_em', { ascending: false });
+        
+        if (error) {
+          console.error("Error fetching notas:", error);
+          return [];
+        }
+        
+        return data || [];
+      } catch (err) {
+        console.error("Exception when fetching notas:", err);
+        return [];
+      }
     },
   });
   
@@ -59,24 +68,23 @@ const ConsultarNotasTable = () => {
   const notas: NotaOficial[] = notasRaw.map(nota => {
     // Create a compatible NotaOficial object with safe fallbacks
     return {
-      id: nota.id || '',
-      titulo: nota.titulo || '',
-      conteudo: nota.texto || '', // Map texto to conteudo
-      texto: nota.texto || '',
-      status: nota.status || '',
-      criado_em: nota.criado_em || '',
-      autor: nota.autor_id ? { id: nota.autor_id, nome_completo: 'Usuário' } : undefined,
-      problema: nota.problema ? {
+      id: nota?.id || '',
+      titulo: nota?.titulo || '',
+      conteudo: nota?.texto || '', // Map texto to conteudo
+      texto: nota?.texto || '',
+      status: nota?.status || '',
+      criado_em: nota?.criado_em || '',
+      autor: nota?.autor_id ? { id: nota.autor_id, nome_completo: 'Usuário' } : undefined,
+      problema: nota?.problema ? {
         id: nota.problema.id || '',
         descricao: nota.problema.descricao || '',
         coordenacao: nota.problema.coordenacao || undefined
       } : undefined,
-      supervisao_tecnica: nota.supervisao_tecnica ? {
+      supervisao_tecnica: nota?.supervisao_tecnica ? {
         id: nota.supervisao_tecnica.id || '',
         descricao: nota.supervisao_tecnica.descricao || '',
-        coordenacao_id: nota.supervisao_tecnica.coordenacao_id
       } : undefined,
-      area_coordenacao: nota.area_coordenacao ? {
+      area_coordenacao: nota?.area_coordenacao ? {
         id: nota.area_coordenacao.id || '',
         descricao: nota.area_coordenacao.descricao || ''
       } : undefined

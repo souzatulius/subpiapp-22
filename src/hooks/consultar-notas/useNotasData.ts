@@ -1,140 +1,130 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { NotaOficial, UseNotasDataReturn } from '@/types/nota';
+import { NotaOficial } from '@/types/nota';
 import { useNotasQuery } from './useNotasQuery';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface UseNotasDataReturn {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  dateRange: [Date | null, Date | null];
+  setDateRange: (range: [Date | null, Date | null]) => void;
+  notas: NotaOficial[];
+  isLoading: boolean;
+  error: Error | null;
+  refetch: () => Promise<any>;
+  handleDeleteNota: (notaId: string) => Promise<void>;
+  isDeleteDialogOpen: boolean;
+  setIsDeleteDialogOpen: (isOpen: boolean) => void;
+  selectedNotaId: string | null;
+  setSelectedNotaId: (id: string | null) => void;
+  filteredNotas: NotaOficial[];
+}
 
 export const useNotasData = (): UseNotasDataReturn => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todos');
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [filteredNotas, setFilteredNotas] = useState<NotaOficial[]>([]);
-  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedNotaId, setSelectedNotaId] = useState<string | null>(null);
   
-  const { 
-    data: notas = [], 
-    isLoading: loading, 
-    error,
-    refetch: refreshData 
-  } = useNotasQuery();
+  // Use the query hook
+  const { data: notas = [], isLoading, error, refetch } = useNotasQuery();
   
-  // Filter notas based on search term
+  // Filter notas based on search term, status, and date range
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredNotas(notas);
+    if (!notas) {
+      setFilteredNotas([]);
       return;
     }
     
-    const lowerSearchTerm = searchTerm.toLowerCase();
+    let filtered = [...notas];
     
-    const filtered = notas.filter(nota => {
-      const matchTitle = nota.titulo.toLowerCase().includes(lowerSearchTerm);
-      const matchContent = nota.conteudo?.toLowerCase().includes(lowerSearchTerm) || 
-                          nota.texto?.toLowerCase().includes(lowerSearchTerm);
-      const matchProblem = nota.problema?.descricao.toLowerCase().includes(lowerSearchTerm);
-      
-      return matchTitle || matchContent || matchProblem;
-    });
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(nota => 
+        nota.titulo.toLowerCase().includes(term) || 
+        nota.conteudo.toLowerCase().includes(term) ||
+        nota.problema?.descricao.toLowerCase().includes(term)
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter && statusFilter !== 'todos') {
+      filtered = filtered.filter(nota => nota.status === statusFilter);
+    }
+    
+    // Apply date range filter
+    const [startDate, endDate] = dateRange;
+    if (startDate) {
+      filtered = filtered.filter(nota => {
+        const notaDate = new Date(nota.criado_em);
+        return notaDate >= startDate;
+      });
+    }
+    
+    if (endDate) {
+      filtered = filtered.filter(nota => {
+        const notaDate = new Date(nota.criado_em);
+        return notaDate <= endDate;
+      });
+    }
     
     setFilteredNotas(filtered);
-  }, [searchTerm, notas]);
-
-  const handleDelete = async (id: string) => {
+  }, [notas, searchTerm, statusFilter, dateRange]);
+  
+  // Handle deletion of a nota
+  const handleDeleteNota = async (notaId: string) => {
     try {
-      setDeleteLoading(true);
-      
-      // Instead of deleting, we'll update status to 'excluida'
       const { error } = await supabase
         .from('notas_oficiais')
-        .update({ status: 'excluida' })
-        .eq('id', id);
-      
+        .delete()
+        .eq('id', notaId);
+        
       if (error) throw error;
       
       toast({
-        title: "Nota excluída",
-        description: "A nota foi excluída com sucesso."
+        title: "Nota excluída com sucesso",
+        description: "A nota oficial foi removida do sistema."
       });
       
+      // Refresh the data
+      refetch();
+      
+      // Close the dialog
       setIsDeleteDialogOpen(false);
-      setSelectedNota(null);
-      
-      // Refresh data
-      await refreshData();
-      
+      setSelectedNotaId(null);
     } catch (error: any) {
-      console.error('Erro ao excluir nota:', error);
+      console.error('Error deleting nota:', error);
       toast({
         title: "Erro ao excluir nota",
         description: error.message || "Ocorreu um erro ao excluir a nota.",
         variant: "destructive"
       });
-    } finally {
-      setDeleteLoading(false);
     }
   };
-
-  // Add simple date formatter utility
-  const formatDate = (date: string) => {
-    if (!date) return 'N/A';
-    
-    try {
-      const formattedDate = new Date(date).toLocaleDateString('pt-BR');
-      return formattedDate;
-    } catch (e) {
-      return 'Data inválida';
-    }
-  };
-
-  // Fetch notas function for direct use
-  const fetchNotas = async () => {
-    try {
-      await refreshData();
-    } catch (error: any) {
-      console.error('Error fetching notas:', error);
-      toast({
-        title: "Erro ao carregar notas",
-        description: "Não foi possível atualizar as notas.",
-        variant: "destructive"
-      });
-    }
-  };
-
+  
   return {
-    notas,
-    loading,
-    error,
     searchTerm,
     setSearchTerm,
-    filteredNotas,
-    selectedNota,
-    setSelectedNota,
-    isDetailOpen,
-    setIsDetailOpen,
+    statusFilter,
+    setStatusFilter,
+    dateRange,
+    setDateRange,
+    notas,
+    isLoading,
+    error,
+    refetch,
+    handleDeleteNota,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
-    deleteLoading,
-    handleDelete,
-    refetch: refreshData,
-    // Extended properties for NotasContent
-    formatDate,
-    fetchNotas,
-    // Default values for other expected properties
-    searchQuery: searchTerm,
-    setSearchQuery: setSearchTerm,
-    statusFilter: '',
-    setStatusFilter: () => {},
-    areaFilter: '',
-    setAreaFilter: () => {},
-    dataInicioFilter: '',
-    setDataInicioFilter: () => {},
-    dataFimFilter: '',
-    setDataFimFilter: () => {},
-    deleteNota: handleDelete,
-    isAdmin: false,
-    updateNotaStatus: async () => {},
-    statusLoading: false
+    selectedNotaId,
+    setSelectedNotaId,
+    filteredNotas
   };
 };

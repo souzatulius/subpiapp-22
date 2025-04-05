@@ -10,36 +10,41 @@ export const useDemandasActions = (refetch: () => Promise<any>) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const handleSelectDemand = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedDemand(null);
+  };
+
   const handleDeleteConfirm = async () => {
     if (!selectedDemand) return;
-    
-    setDeleteLoading(true);
-    console.log('Iniciando ocultação da demanda:', selectedDemand.id);
-    
+
     try {
-      // Update the demanda status to 'oculta' instead of deleting it
-      const { error: demandaError } = await supabase
+      setDeleteLoading(true);
+      const { error } = await supabase
         .from('demandas')
-        .update({ status: 'oculta' })
+        .delete()
         .eq('id', selectedDemand.id);
-        
-      if (demandaError) {
-        console.error('Erro ao ocultar demanda:', demandaError);
-        throw demandaError;
-      }
-      
+
+      if (error) throw error;
+
       toast({
-        title: "Demanda ocultada",
-        description: "A demanda foi ocultada com sucesso e não aparecerá mais nas listagens."
+        title: "Demanda excluída com sucesso",
+        description: "A demanda foi permanentemente removida."
       });
-      
+
       setIsDeleteDialogOpen(false);
-      refetch();
+      setSelectedDemand(null);
+      await refetch();
     } catch (error: any) {
-      console.error('Erro completo na ocultação:', error);
+      console.error('Error deleting demand:', error);
       toast({
-        title: "Erro ao ocultar demanda",
-        description: error.message || "Ocorreu um erro desconhecido ao ocultar a demanda.",
+        title: "Erro ao excluir demanda",
+        description: error.message || "Ocorreu um erro ao excluir a demanda.",
         variant: "destructive"
       });
     } finally {
@@ -55,6 +60,8 @@ export const useDemandasActions = (refetch: () => Promise<any>) => {
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     deleteLoading,
+    handleSelectDemand,
+    handleCloseDetail,
     handleDeleteConfirm
   };
 };

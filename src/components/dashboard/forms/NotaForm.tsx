@@ -17,6 +17,15 @@ import { useTemasOptions } from '@/hooks/useTemasOptions';
 import ProblemSelector from './components/ProblemSelector';
 import { useReleaseForm } from '@/hooks/useReleaseForm';
 
+// Define the ReleaseFormValues interface to match what the hook expects
+interface ReleaseFormValues {
+  titulo: string;
+  conteudo: string;
+  problema_id?: string;
+  tema_id?: string;
+  status?: "pendente" | "rejeitada" | "publicada";
+}
+
 const NotaForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -57,7 +66,16 @@ const NotaForm = () => {
   // Handle form submission
   const onSubmit = async (data: NotaFormData) => {
     try {
-      const success = await submitRelease(data, file);
+      // Ensure all required fields are present
+      const formValues: ReleaseFormValues = {
+        titulo: data.titulo,
+        conteudo: data.conteudo,
+        problema_id: data.problema_id || undefined,
+        tema_id: data.tema_id || undefined,
+        status: data.status || 'pendente'
+      };
+      
+      const success = await submitRelease(formValues as any, file);
       
       if (success) {
         toast({

@@ -1,59 +1,62 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useTableExists } from './useTableExists';
+import { useTemasTableExists } from './useTableExists';
 
-interface Tema {
+export interface Tema {
   id: string;
   descricao: string;
 }
 
 export const useTemasOptions = () => {
-  const { exists: temasTableExists, isLoading: checkingTable } = useTableExists('temas');
-  
-  const { data: temas = [], isLoading: loadingTemas } = useQuery({
-    queryKey: ['temas-or-problems'],
-    queryFn: async () => {
-      try {
-        // If temas table exists, query it
-        if (temasTableExists) {
-          try {
-            const { data: temasData, error: temasError } = await supabase
-              .from('temas')
-              .select('id, descricao');
-            
-            if (!temasError && temasData && temasData.length > 0) {
-              return temasData as Tema[];
-            }
-          } catch (e) {
-            console.log('Error querying temas table:', e);
-          }
-        }
-        
-        // Fallback to problemas table
-        const { data: problemasData, error: problemasError } = await supabase
-          .from('problemas')
-          .select('id, descricao')
-          .order('descricao');
-        
-        if (problemasError) throw problemasError;
-        
-        // Map the problem data to the tema interface for compatibility
-        return (problemasData || []).map(problem => ({
-          id: problem.id,
-          descricao: problem.descricao
-        })) as Tema[];
-        
-      } catch (error) {
-        console.error('Error fetching temas or problems:', error);
-        return [] as Tema[];
-      }
-    },
-    enabled: !checkingTable, // Only run query after checking if table exists
-  });
+  const [temas, setTemas] = useState<Tema[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { exists: temasTableExists, loading: checkingTable } = useTemasTableExists();
 
-  return {
-    temas,
-    isLoading: checkingTable || loadingTemas
-  };
+  useEffect(() => {
+    const fetchTemas = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Only try to fetch temas if the table exists
+        if (temasTableExists) {
+          const { data, error } = await supabase
+            .from('problemas') // Fallback to problemas table if temas doesn't exist
+            .select('id, descricao')
+            .order('descricao');
+            
+          if (error) throw error;
+          
+          setTemas(data as Tema[]);
+        } else {
+          // If table doesn't exist, use problemas as fallback
+          const { data, error } = await supabase
+            .from('problemas')
+            .select('id, descricao')
+            .order('descricao');
+            
+          if (error) throw error;
+          
+          setTemas(data as Tema[]);
+        }
+      } catch (error) {
+        console.error('Error fetching temas:', error);
+        // Provide some default temas as fallback
+        setTemas([
+          { id: 'default-1', descricao: 'Zeladoria' },
+          { id: 'default-2', descricao: 'Comunicação' },
+          { id: 'default-3', descricao: 'Infraestrutura' }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Only fetch when we know table status
+    if (!checkingTable) {
+      fetchTemas();
+    }
+  }, [temasTableExists, checkingTable]);
+
+  return { temas, isLoading };
 };

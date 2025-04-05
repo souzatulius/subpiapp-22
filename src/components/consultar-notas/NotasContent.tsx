@@ -1,164 +1,137 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import NotasFilter from './NotasFilter';
 import NotasTable from './NotasTable';
-import NotasCards from './NotasCards';
-import { useNotasData } from '@/hooks/consultar-notas/useNotasData';
-import { useExportPDF } from '@/hooks/consultar-notas/useExportPDF';
-import { Button } from '@/components/ui/button';
-import { List, Grid } from 'lucide-react';
-import { NotaOficial } from '@/types/nota';
+import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
+import NotasCards from './NotasCards';
+import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useNotasData } from '@/hooks/consultar-notas/useNotasData';
+import { NotaOficial } from '@/types/nota';
 
-const NotasContent: React.FC = () => {
+const NotasContent = () => {
+  const navigate = useNavigate();
   const {
-    loading,
-    notas,
-    isLoading,
-    searchQuery,
-    setSearchQuery,
+    searchTerm,
+    setSearchTerm,
     statusFilter,
     setStatusFilter,
-    formatDate,
+    dateRange,
+    setDateRange,
     filteredNotas,
-    areaFilter,
-    setAreaFilter,
-    dataInicioFilter,
-    setDataInicioFilter,
-    dataFimFilter,
-    setDataFimFilter,
-    deleteNota,
-    deleteLoading,
-    isAdmin,
-    updateNotaStatus,
-    statusLoading
+    isLoading,
+    handleDeleteNota,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    selectedNotaId,
+    setSelectedNotaId
   } = useNotasData();
   
-  const { handleExportPDF, exporting } = useExportPDF();
+  // State for table vs cards view
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
-  const [selectedNote, setSelectedNote] = useState<NotaOficial | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  // Modify these functions to return promises to match the expected type
-  const handleApproveNota = async (notaId: string): Promise<void> => {
-    await updateNotaStatus(notaId, 'aprovado');
+  
+  // State for detail dialog
+  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  const handleViewNota = (nota: NotaOficial) => {
+    setSelectedNota(nota);
+    setIsDetailOpen(true);
   };
-
-  const handleRejectNota = async (notaId: string): Promise<void> => {
-    await updateNotaStatus(notaId, 'rejeitado');
+  
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedNota(null);
   };
-
-  const handleDeleteClick = (nota: NotaOficial) => {
-    setSelectedNote(nota);
+  
+  const handleEditNota = (id: string) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
+  };
+  
+  const handleDeleteClick = (id: string) => {
+    setSelectedNotaId(id);
     setIsDeleteDialogOpen(true);
   };
-
-  const handleDeleteConfirm = async () => {
-    if (selectedNote) {
-      await deleteNota(selectedNote.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedNote(null);
+  
+  const confirmDelete = () => {
+    if (selectedNotaId) {
+      handleDeleteNota(selectedNotaId);
     }
   };
-
-  const handleViewNota = (nota: NotaOficial) => {
-    // Implement view functionality
-    console.log("View nota:", nota.id);
+  
+  const cancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setSelectedNotaId(null);
   };
-
-  // For debug purposes, log the filtered notes
-  useEffect(() => {
-    console.log('Filtered notas:', filteredNotas);
-  }, [filteredNotas]);
-
+  
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+    } catch (e) {
+      return 'Data inválida';
+    }
+  };
+  
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Consultar Notas Oficiais</h1>
-      </div>
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-2xl font-semibold mb-6">Consultar Notas Oficiais</h1>
       
-      {/* Separate filter box with rounded borders and shadow */}
-      <div className="bg-white rounded-xl shadow-md p-4 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h2 className="text-lg font-medium">Filtros e Pesquisa</h2>
-            <p className="text-sm text-gray-500">Use os filtros abaixo para encontrar notas específicas</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={viewMode === 'table' ? 'bg-gray-100' : ''}
-              onClick={() => setViewMode('table')}
-              aria-label="Visualização em tabela"
-            >
-              <List className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={viewMode === 'cards' ? 'bg-gray-100' : ''}
-              onClick={() => setViewMode('cards')}
-              aria-label="Visualização em cards"
-            >
-              <Grid className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        <NotasFilter
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          areaFilter={areaFilter}
-          setAreaFilter={setAreaFilter}
-          dataInicioFilter={dataInicioFilter}
-          setDataInicioFilter={setDataInicioFilter}
-          dataFimFilter={dataFimFilter}
-          setDataFimFilter={setDataFimFilter}
-          handleExportPDF={handleExportPDF}
+      <Card className="mb-6 border border-gray-200">
+        <CardContent className="p-6">
+          <NotasFilter 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            dateRange={dateRange as [Date, Date]}
+            setDateRange={setDateRange as (range: [Date, Date]) => void}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
+        </CardContent>
+      </Card>
+      
+      {viewMode === 'table' ? (
+        <NotasTable 
+          notas={filteredNotas}
+          loading={isLoading}
+          formatDate={formatDate}
+          onViewNota={handleViewNota}
+          onEditNota={handleEditNota}
+          onDeleteNota={handleDeleteClick}
         />
-      </div>
-        
-      {/* Results container */}
-      <div className="bg-white rounded-xl shadow p-6" id="notas-table">
-        {viewMode === 'table' ? (
-          <NotasTable
-            notas={filteredNotas as NotaOficial[]}
-            loading={isLoading}
-            formatDate={formatDate}
-            onViewNota={handleViewNota}
-            onExportPDF={handleExportPDF}
-            onDeleteClick={handleDeleteClick}
-            exporting={exporting}
-            deleteLoading={deleteLoading}
-            onApproveNota={isAdmin ? handleApproveNota : undefined}
-            onRejectNota={isAdmin ? handleRejectNota : undefined}
-            isAdmin={isAdmin}
-          />
-        ) : (
-          <NotasCards 
-            notas={filteredNotas as NotaOficial[]}
-            loading={isLoading}
-            formatDate={formatDate}
-            onDeleteNota={handleDeleteClick}
-            deleteLoading={deleteLoading}
-          />
-        )}
-      </div>
-
-      {/* Delete confirmation dialog */}
-      {selectedNote && (
-        <DeleteNotaDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => setIsDeleteDialogOpen(false)}
-          onConfirm={handleDeleteConfirm}
-          notaTitle={selectedNote.titulo}
-          hasDemanda={!!selectedNote.demanda_id}
+      ) : (
+        <NotasCards 
+          notas={filteredNotas}
+          loading={isLoading}
+          formatDate={formatDate}
+          onViewNota={handleViewNota}
+          onEditNota={handleEditNota}
+          onDeleteNota={handleDeleteClick}
         />
       )}
+      
+      {/* Detail Dialog */}
+      {selectedNota && (
+        <NotaDetailDialog 
+          nota={selectedNota}
+          isOpen={isDetailOpen}
+          onClose={handleCloseDetail}
+          formatDate={formatDate}
+        />
+      )}
+      
+      {/* Delete Dialog */}
+      <DeleteNotaDialog 
+        isOpen={isDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 };

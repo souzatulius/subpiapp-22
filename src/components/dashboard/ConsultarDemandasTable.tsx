@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DemandasTable from '@/components/consultar-demandas/DemandasTable';
 import { Demand } from '@/hooks/consultar-demandas/types';
+import { toast } from '@/components/ui/use-toast';
 
 const ConsultarDemandasTable = () => {
   const navigate = useNavigate();
@@ -12,29 +13,43 @@ const ConsultarDemandasTable = () => {
   const { data: demandasRaw = [], isLoading } = useQuery({
     queryKey: ['demandas'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('demandas')
-        .select(`
-          id,
-          titulo,
-          status,
-          prioridade,
-          horario_publicacao,
-          prazo_resposta,
-          problema_id,
-          problema:problema_id (
-            id, 
-            descricao,
+      try {
+        const { data, error } = await supabase
+          .from('demandas')
+          .select(`
+            id,
+            titulo,
+            status,
+            prioridade,
+            horario_publicacao,
+            prazo_resposta,
+            problema_id,
+            problema:problema_id (
+              id, 
+              descricao,
+              coordenacao_id,
+              coordenacao:coordenacao_id (id, descricao)
+            ),
             coordenacao_id,
-            coordenacao:coordenacao_id (id, descricao)
-          ),
-          coordenacao_id,
-          supervisao_tecnica_id
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+            supervisao_tecnica_id
+          `)
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error("Error fetching demands:", error);
+          toast({
+            title: "Erro ao carregar demandas",
+            description: error.message,
+            variant: "destructive",
+          });
+          return [];
+        }
+        
+        return data || [];
+      } catch (err) {
+        console.error("Exception when fetching demands:", err);
+        return [];
+      }
     },
   });
 
@@ -42,24 +57,24 @@ const ConsultarDemandasTable = () => {
   const demandas: Demand[] = demandasRaw.map(d => {
     // First create a safe base object with all required properties and normalize the data
     return {
-      id: d.id || '',
-      titulo: d.titulo || '',
-      status: d.status || '',
-      prioridade: d.prioridade || '',
-      horario_publicacao: d.horario_publicacao || '',
-      prazo_resposta: d.prazo_resposta || '',
-      problema: d.problema ? {
+      id: d?.id || '',
+      titulo: d?.titulo || '',
+      status: d?.status || '',
+      prioridade: d?.prioridade || '',
+      horario_publicacao: d?.horario_publicacao || '',
+      prazo_resposta: d?.prazo_resposta || '',
+      problema: d?.problema ? {
         id: d.problema.id || '',
         descricao: d.problema.descricao || '',
         coordenacao: d.problema.coordenacao || undefined,
         supervisao_tecnica: null
       } : null,
-      problema_id: d.problema_id || undefined,
+      problema_id: d?.problema_id || undefined,
       area_coordenacao: {
-        descricao: d.problema?.coordenacao?.descricao || 'Não informada'
+        descricao: d?.problema?.coordenacao?.descricao || 'Não informada'
       },
       supervisao_tecnica: {
-        id: d.supervisao_tecnica_id || '',
+        id: d?.supervisao_tecnica_id || '',
         descricao: ''
       },
       // Default values for other required properties
@@ -86,8 +101,8 @@ const ConsultarDemandasTable = () => {
 
   return (
     <DemandasTable 
-      demandas={demandas}
-      onViewDemand={handleViewDemand}
+      demandas={demandas as any}
+      onViewDemand={handleViewDemand as any}
       isLoading={isLoading}
     />
   );
