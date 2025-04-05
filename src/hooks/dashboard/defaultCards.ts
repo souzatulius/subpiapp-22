@@ -1,3 +1,4 @@
+
 import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
@@ -218,9 +219,9 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     {
       id: 'ranking-zeladoria',
       title: 'Ranking de Zeladoria',
-      iconId: 'bar-chart-2',
+      iconId: 'trophy',
       path: '/dashboard/zeladoria/ranking-subs',
-      color: 'orange-light',
+      color: 'gray-light',  // Changed from orange-light to gray-light for a white background with dark blue content
       width: '25',
       height: '2',
       type: 'standard',

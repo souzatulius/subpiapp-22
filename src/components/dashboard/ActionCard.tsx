@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
@@ -93,6 +94,10 @@ const ActionCard = ({
   const getTextColor = (bgColor: string): string => {
     if (color === 'gray-light' || color === 'gray-lighter' || color === 'gray-medium' || 
         color === 'green-neon' || color === 'green-dark') {
+      // Special case for Ranking Zeladoria card - always blue text
+      if (id === 'ranking-zeladoria') {
+        return 'text-blue-800';
+      }
       return 'text-gray-800'; // Dark text for light backgrounds
     }
     return 'text-white'; // White text for dark backgrounds
