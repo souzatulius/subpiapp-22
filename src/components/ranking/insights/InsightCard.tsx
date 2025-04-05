@@ -39,7 +39,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
   return (
     <Card className={`p-3 border ${isSimulated ? 'border-blue-300 bg-blue-50/50' : 'border-gray-200'} hover:shadow-md transition-all`}>
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-sm font-medium text-blue-700">{title}</h3>
+        <h3 className="text-sm font-medium text-gray-800">{title}</h3>
         {isSimulated && <Sparkles className="h-4 w-4 text-blue-500" />}
       </div>
       
@@ -52,7 +52,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
       ) : (
         <>
           <div className="flex items-center">
-            <p className="text-2xl font-bold text-blue-600 mb-1">{formatValue(value)}</p>
+            <p className="text-2xl font-bold text-orange-500 mb-1">{formatValue(value)}</p>
             {trendIcon && <span className="ml-2 mt-[-5px]">{trendIcon}</span>}
           </div>
           <p className="text-xs text-gray-600 line-clamp-2" title={comment}>
