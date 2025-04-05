@@ -1,128 +1,188 @@
 
 import { useState, useEffect } from 'react';
-import { ActionCardItem } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { useDepartment } from './useDepartment';
-import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
+import { useDefaultDashboardConfig } from './useDefaultDashboardConfig';
+import { ActionCardItem } from '@/types/dashboard';
+import { toast } from '@/hooks/use-toast';
 
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const { userDepartment, isLoading: isDepartmentLoading } = useDepartment(user);
+  const { config: defaultConfig, isLoading: isLoadingDefault } = useDefaultDashboardConfig();
 
+  // Load cards for the current user
   useEffect(() => {
-    if (isDepartmentLoading) return;
-
     const fetchCards = async () => {
       if (!user) {
-        setCards([]);
+        // If no user, just use the default cards
+        setCards(defaultConfig || []);
         setIsLoading(false);
         return;
       }
-
-      // Normalize department value for comparison
-      const normalizedDepartment = userDepartment
-        ? userDepartment
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-        : undefined;
-
-      const defaultCards = getInitialDashboardCards(normalizedDepartment);
 
       try {
         const { data, error } = await supabase
           .from('user_dashboard')
           .select('cards_config')
           .eq('user_id', user.id)
-          .eq('page', 'inicial')
           .single();
 
-        if (error || !data?.cards_config) {
-          setCards(defaultCards);
-          return;
-        }
-
-        // Safe parsing of card config data
-        let parsedCards: ActionCardItem[] = [];
-        
-        if (typeof data.cards_config === 'string') {
-          try {
-            // Using a simpler type assertion to avoid deep type checking
-            parsedCards = JSON.parse(data.cards_config) as any[];
-          } catch (e) {
-            console.error('Error parsing cards_config:', e);
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No record found, use default cards
+            setCards(defaultConfig || []);
+          } else {
+            console.error('Error fetching user dashboard:', error);
+            toast({
+              title: 'Erro ao carregar dashboard',
+              description: 'Não foi possível carregar suas configurações do dashboard.',
+              variant: 'destructive',
+            });
           }
-        } else if (Array.isArray(data.cards_config)) {
-          // Direct assignment with simple type casting
-          parsedCards = data.cards_config as any[];
+        } else if (data) {
+          // Parse the cards data
+          try {
+            const parsedCards = JSON.parse(data.cards_config);
+            setCards(Array.isArray(parsedCards) ? parsedCards : []);
+          } catch (parseError) {
+            console.error('Error parsing cards config:', parseError);
+            setCards(defaultConfig || []);
+          }
         }
-
-        // Only use the parsed cards if they form a valid array
-        if (Array.isArray(parsedCards) && parsedCards.length > 0) {
-          setCards(parsedCards);
-        } else {
-          setCards(defaultCards);
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard cards:', error);
-        setCards(defaultCards);
+      } catch (err) {
+        console.error('Error in fetchCards:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCards();
-  }, [user, userDepartment, isDepartmentLoading]);
+    if (!isLoadingDefault) {
+      fetchCards();
+    }
+  }, [user, defaultConfig, isLoadingDefault]);
 
-  const persistCards = (updatedCards: ActionCardItem[]) => {
-    if (!user) return;
-    
-    // Create a shallow copy of the array to avoid mutation issues
-    const cardsCopy = [...updatedCards];
-    setCards(cardsCopy);
-
-    supabase
-      .from('user_dashboard')
-      .upsert({
-        user_id: user.id,
-        page: 'inicial',
-        cards_config: JSON.stringify(cardsCopy),
-        department_id: userDepartment || 'default'
-      })
-      .then(({ error }) => {
-        if (error) console.error('Erro ao salvar configuração de cards:', error);
+  // Handle card editing (updating a card)
+  const handleCardEdit = async (updatedCard: ActionCardItem) => {
+    try {
+      // Find the card to update
+      const updatedCards = cards.map(card => 
+        card.id === updatedCard.id ? { ...card, ...updatedCard } : card
+      );
+      
+      setCards(updatedCards);
+      
+      if (user) {
+        await saveToDatabase(updatedCards);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating card:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o card.',
+        variant: 'destructive',
       });
+      return false;
+    }
   };
 
-  const handleCardEdit = (cardToUpdate: ActionCardItem) => {
-    const updatedCards = cards.map(card =>
-      card.id === cardToUpdate.id ? cardToUpdate : card
-    );
-    persistCards(updatedCards);
+  // Handle hiding a card
+  const handleCardHide = async (cardId: string) => {
+    try {
+      // Mark the card as hidden
+      const updatedCards = cards.map(card => 
+        card.id === cardId ? { ...card, isHidden: true } : card
+      );
+      
+      setCards(updatedCards);
+      
+      if (user) {
+        await saveToDatabase(updatedCards);
+      }
+      
+      toast({
+        title: 'Card ocultado',
+        description: 'O card foi ocultado do seu dashboard.',
+        variant: 'default',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error hiding card:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível ocultar o card.',
+        variant: 'destructive',
+      });
+      return false;
+    }
   };
 
-  const handleCardHide = (id: string) => {
-    const updatedCards = cards.map(card =>
-      card.id === id ? { ...card, isHidden: true } : card
-    );
-    persistCards(updatedCards);
+  // Handle reordering cards
+  const handleCardsReorder = async (newCards: ActionCardItem[]) => {
+    try {
+      setCards(newCards);
+      
+      if (user) {
+        await saveToDatabase(newCards);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error reordering cards:', error);
+      return false;
+    }
   };
 
-  const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
-    persistCards(updatedCards);
+  // Helper function to save cards to the database
+  const saveToDatabase = async (cardsToSave: ActionCardItem[]) => {
+    if (!user) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_dashboard')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+      
+      if (data) {
+        // Update existing record
+        await supabase
+          .from('user_dashboard')
+          .update({ 
+            cards_config: JSON.stringify(cardsToSave),
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+      } else {
+        // Create new record
+        await supabase
+          .from('user_dashboard')
+          .insert({ 
+            user_id: user.id,
+            cards_config: JSON.stringify(cardsToSave)
+          });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving to database:', error);
+      return false;
+    }
   };
 
   return {
     cards,
-    isLoading: isLoading || isDepartmentLoading,
+    isLoading: isLoading || isLoadingDefault,
     handleCardEdit,
     handleCardHide,
-    handleCardsReorder
+    handleCardsReorder,
   };
 };
-
-// Add default export to support both import styles
-export default useDashboardCards;

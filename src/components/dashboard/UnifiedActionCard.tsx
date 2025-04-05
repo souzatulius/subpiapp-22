@@ -163,6 +163,21 @@ export function UnifiedActionCard({
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
+  const formatTitle = (title: string) => {
+    const words = title.split(' ');
+    if (words.length >= 2) {
+      const firstLine = words.slice(0, Math.ceil(words.length / 2)).join(' ');
+      const secondLine = words.slice(Math.ceil(words.length / 2)).join(' ');
+      return (
+        <>
+          <span className="block">{firstLine}</span>
+          <span className="block">{secondLine}</span>
+        </>
+      );
+    }
+    return title;
+  };
+  
   const handleCardClick = () => {
     if (path && !isEditing) {
       navigate(path);
