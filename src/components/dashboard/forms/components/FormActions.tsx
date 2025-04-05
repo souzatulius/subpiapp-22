@@ -17,11 +17,11 @@ const FormActions: React.FC<FormActionsProps> = ({
   isLastStep,
   isFirstStep,
   isSubmitting,
-  onSubmit
+  onSubmit,
 }) => {
   return (
     <div className="flex justify-between mt-8">
-      <Button 
+      <Button
         type="button"
         variant="outline"
         onClick={onPrevStep}
@@ -49,3 +49,8 @@ const FormActions: React.FC<FormActionsProps> = ({
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       )}
+    </div>
+  );
+};
+
+export default FormActions;
