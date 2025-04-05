@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
@@ -79,19 +80,11 @@ const LoginForm = () => {
       </form>
 
       <div className="mt-6 text-center space-y-2">
-        {/* Botão menor: Acessar ou Solicitar Acesso */}
-        <Link
-          to="/register"
-          className="inline-flex items-center justify-center rounded-xl border-2 border-[#f57c35] bg-transparent text-[#f57c35] py-2.5 px-5 text-sm font-medium transition-all duration-300 hover:bg-[#f57c35] hover:text-white hover:shadow-lg"
-        >
-          Solicitar Acesso
-        </Link>
-
-        {/* Link abaixo, opcional */}
+        {/* Nova mensagem para cadastro */}
         <p className="text-sm text-[#6B7280]">
-          Esqueceu a senha?{' '}
-          <Link to="/forgot-password" className="text-[#003570] font-semibold hover:underline">
-            Recuperar
+          Não tem login?{' '}
+          <Link to="/register" className="text-[#003570] font-semibold hover:underline">
+            Faça o seu cadastro
           </Link>
         </p>
       </div>
