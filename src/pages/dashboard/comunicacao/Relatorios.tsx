@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PieChart, SlidersHorizontal, Printer, FileDown, Eye, Search } from 'lucide-react';
+import { PieChart, SlidersHorizontal, Printer, FileDown } from 'lucide-react';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { Button } from "@/components/ui/button";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
@@ -37,7 +37,7 @@ const RelatoriosPage = () => {
         title="Relatórios"
         description="Visualize estatísticas e relatórios de comunicação"
         icon={<PieChart className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-orange-500 to-orange-700"
+        color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
 
       {/* Botões apenas com ícones abaixo do WelcomeCard */}
@@ -66,7 +66,7 @@ const RelatoriosPage = () => {
           variant="default" 
           size="icon"
           onClick={() => setIsFilterOpen(true)}
-          className="h-9 w-9 bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow transition-all"
+          className="h-9 w-9 bg-blue-500 hover:bg-blue-600 shadow-sm hover:shadow transition-all"
           title="Filtros"
         >
           <SlidersHorizontal className="h-4 w-4" />
@@ -94,7 +94,7 @@ const RelatoriosPage = () => {
           
           <DragOverlay>
             {isDragging ? (
-              <div className="w-64 h-32 bg-orange-50 border border-orange-200 rounded-lg opacity-80 flex items-center justify-center text-orange-600">
+              <div className="w-64 h-32 bg-blue-50 border border-blue-200 rounded-lg opacity-80 flex items-center justify-center text-blue-600">
                 <SlidersHorizontal className="h-5 w-5 mr-2" />
                 Movendo card...
               </div>

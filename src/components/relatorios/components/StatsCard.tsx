@@ -30,9 +30,9 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   };
 
   return (
-    <Card className="p-4 border border-gray-200 hover:shadow-md transition-all">
+    <Card className="p-4 border border-blue-200 hover:shadow-md transition-all">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-gray-700">{title}</h3>
+        <h3 className="text-sm font-medium text-blue-700">{title}</h3>
       </div>
       
       {isLoading ? (
@@ -43,7 +43,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         </>
       ) : (
         <>
-          <p className="text-2xl font-bold text-gray-900 mb-2">{formatValue(value)}</p>
+          <p className="text-2xl font-bold text-blue-600 mb-2">{formatValue(value)}</p>
           <p className="text-xs text-gray-600 line-clamp-2">
             {description || comparison || ''}
           </p>

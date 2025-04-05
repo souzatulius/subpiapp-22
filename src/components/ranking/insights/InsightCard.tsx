@@ -35,10 +35,10 @@ const InsightCard: React.FC<InsightCardProps> = ({
   };
 
   return (
-    <Card className={`p-4 border ${isSimulated ? 'border-orange-300 bg-orange-50/50' : 'border-gray-200'} hover:shadow-md transition-all`}>
+    <Card className={`p-4 border ${isSimulated ? 'border-blue-300 bg-blue-50/50' : 'border-gray-200'} hover:shadow-md transition-all`}>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-gray-700">{title}</h3>
-        {isSimulated && <Sparkles className="h-4 w-4 text-orange-500" />}
+        <h3 className="text-sm font-medium text-blue-700">{title}</h3>
+        {isSimulated && <Sparkles className="h-4 w-4 text-blue-500" />}
       </div>
       
       {isLoading ? (
@@ -49,7 +49,7 @@ const InsightCard: React.FC<InsightCardProps> = ({
         </>
       ) : (
         <>
-          <p className="text-2xl font-bold text-gray-900 mb-2">{formatValue(value)}</p>
+          <p className="text-2xl font-bold text-blue-600 mb-2">{formatValue(value)}</p>
           <p className="text-xs text-gray-600 line-clamp-2" title={comment}>
             {comment}
           </p>
