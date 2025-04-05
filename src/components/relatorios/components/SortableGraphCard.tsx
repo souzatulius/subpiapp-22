@@ -1,126 +1,111 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { BarChart3, Info, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Eye, EyeOff, GripVertical, MessageSquare } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 interface SortableGraphCardProps {
   id: string;
   title: string;
   description?: string;
+  children: React.ReactNode;
   isVisible: boolean;
   showAnalysis: boolean;
   analysis?: string;
-  isLoading?: boolean;
-  children: React.ReactNode;
-  onToggleVisibility?: () => void;
-  onToggleAnalysis?: () => void;
-  onToggleView?: () => void;
+  isLoading: boolean;
+  onToggleVisibility: () => void;
+  onToggleAnalysis: () => void;
+  className?: string;
+  hideMenuIcon?: boolean;
 }
 
 export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
   id,
   title,
   description,
+  children,
   isVisible,
   showAnalysis,
   analysis,
-  isLoading = false,
-  children,
+  isLoading,
   onToggleVisibility,
   onToggleAnalysis,
-  onToggleView
+  className,
+  hideMenuIcon = false
 }) => {
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging
   } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: 'relative' as const,
-    zIndex: isDragging ? 1 : 'auto' as any
-  };
-
-  if (!isVisible) return null;
-
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <div className="h-[250px] flex items-center justify-center">
-          <div className="h-8 w-8 border-4 border-t-gray-500 border-r-transparent border-b-gray-300 border-l-transparent rounded-full animate-spin"></div>
-        </div>
-      );
-    }
-
-    if (showAnalysis) {
-      return (
-        <div className="h-[250px] p-6 flex flex-col items-center justify-center text-center">
-          <AlertTriangle className="h-10 w-10 mb-3 text-gray-400" />
-          <h4 className="font-medium text-lg text-gray-800 mb-2">{title}</h4>
-          <p className="text-gray-600">{analysis || 'Nenhuma análise disponível para este gráfico.'}</p>
-        </div>
-      );
-    }
-
-    return children;
   };
 
   return (
-    <Card
-      ref={setNodeRef}
-      style={style}
-      className="chart-card bg-white border-gray-200 shadow-sm hover:shadow transition-all"
-    >
-      <CardHeader className="pb-2 flex flex-row items-center justify-between bg-gradient-to-r from-gray-50 to-white">
-        <div className="flex items-center">
-          <div
-            {...attributes}
-            {...listeners}
-            className="cursor-grab mr-2 text-gray-400 hover:text-gray-600"
-          >
-            <GripVertical className="h-4 w-4" />
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none">
+      <Card className={cn("w-full border border-gray-200 hover:shadow-md transition-all", className)}>
+        <CardHeader className="p-3 pb-1 space-y-1">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-md font-semibold text-gray-800 flex items-center">
+              <BarChart3 className="h-4 w-4 mr-2 text-gray-500" />
+              {title}
+            </CardTitle>
+            {!hideMenuIcon && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={onToggleVisibility}>
+                    {isVisible ? 'Ocultar gráfico' : 'Exibir gráfico'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onToggleAnalysis}>
+                    {showAnalysis ? 'Ocultar análise' : 'Mostrar análise'}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Exportar dados</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
-          <div>
-            <CardTitle className="text-base text-gray-700">{title}</CardTitle>
-            {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
+          {description && <CardDescription className="text-xs text-gray-500">{description}</CardDescription>}
+        </CardHeader>
+        <CardContent className="p-3 pt-1">
+          <div className="relative h-full">
+            {children}
           </div>
-        </div>
-        <div className="flex gap-1 print:hidden">
-          {onToggleAnalysis && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-gray-500 hover:text-gray-800"
-              onClick={onToggleAnalysis}
-            >
-              <MessageSquare className="h-4 w-4" />
-            </Button>
+          
+          {showAnalysis && analysis && (
+            <div className="mt-2 bg-blue-50 rounded-md p-2 border border-blue-100">
+              <div className="flex items-start gap-2">
+                <Info className="h-4 w-4 text-blue-500 mt-0.5" />
+                <div className="text-xs text-blue-700">
+                  {analysis}
+                </div>
+              </div>
+            </div>
           )}
-
-          {onToggleView && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-gray-500 hover:text-gray-800"
-              onClick={onToggleView}
-            >
-              {showAnalysis ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        {renderContent()}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

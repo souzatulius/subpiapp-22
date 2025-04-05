@@ -40,10 +40,10 @@ const RelatoriosPage = () => {
     >
       {/* WelcomeCard com largura total */}
       <WelcomeCard
-        title="Relatórios"
-        description="Visualize estatísticas e relatórios de comunicação"
+        title="Relatórios da Comunicação"
+        description="Ações e estatísticas da área"
         icon={<PieChart className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-gray-600 to-gray-800"
+        color="bg-gradient-to-r from-gray-600 to-blue-700"
       />
 
       {/* Botões apenas com ícones abaixo do WelcomeCard */}
@@ -86,14 +86,14 @@ const RelatoriosPage = () => {
       </div>
 
       {/* Conteúdo principal com apenas visualização de gráficos */}
-      <div className="mt-6 chart-container">
+      <div className="mt-4 chart-container">
         <DndContext
           sensors={sensors}
           onDragStart={() => setIsDragging(true)}
           onDragEnd={() => setIsDragging(false)}
           onDragCancel={() => setIsDragging(false)}
         >
-          <div className="space-y-8">
+          <div className="space-y-4">
             <RelatoriosKPICards />
             <RelatoriosGraphCards />
           </div>

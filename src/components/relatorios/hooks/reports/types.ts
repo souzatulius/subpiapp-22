@@ -7,27 +7,13 @@ export interface CardStats {
   tempoMedioResposta: number;
   tempoRespostaVariacao: number;
   taxaAprovacao: number;
-  aprovacaoVariacao: number;
-  notasAguardando?: number;
-  notasEditadas?: number;
-  notasAprovadas?: number; // Add the missing property
+  notasAprovadas: number;
+  notasEditadas: number;
+  noticiasPublicas?: number;
+  totalReleases?: number;
+  noticiasVariacao?: number;
 }
 
-export interface ChartDataItem {
-  name: string;
-  value: number;
-  district?: string; // Para itens com relação distrito/bairro
-}
-
-export interface ReportsData {
-  districts: ChartDataItem[];
-  neighborhoods: ChartDataItem[];
-  origins: ChartDataItem[];
-  mediaTypes: ChartDataItem[];
-  responseTimes: ChartDataItem[];
-  problemas: ChartDataItem[];
-  coordinations: ChartDataItem[];
-  statuses: ChartDataItem[];
-  responsibles: ChartDataItem[];
-  approvals: ChartDataItem[];
+export interface ChartData {
+  [key: string]: any;
 }

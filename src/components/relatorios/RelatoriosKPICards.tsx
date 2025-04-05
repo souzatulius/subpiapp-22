@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCardStatsData } from './hooks/reports/useCardStatsData';
-import { Clock, FileText, MessageSquare, Percent } from 'lucide-react';
+import { Clock, FileText, MessageSquare, Percent, Globe, TrendingUp, TrendingDown } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -14,7 +14,7 @@ interface RelatoriosKPICardsProps {
 export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMode = false }) => {
   const { cardStats, fetchCardStats, isLoadingCards } = useCardStatsData();
   const [cards, setCards] = useLocalStorage<string[]>('relatorios-kpi-order', [
-    'demandas', 'notas', 'tempo', 'aprovacao'
+    'demandas', 'notas', 'tempo', 'aprovacao', 'noticias'
   ]);
 
   const sensors = useSensors(
@@ -48,28 +48,48 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
     return value.toString().replace('.', ',');
   };
 
+  // Get trend icon based on variation
+  const getTrendIcon = (variation: number) => {
+    if (variation > 0) {
+      return <TrendingUp className="h-3 w-3 text-green-500" />;
+    } else if (variation < 0) {
+      return <TrendingDown className="h-3 w-3 text-red-500" />;
+    }
+    return null;
+  };
+
   // Format cards data
   const getCardData = () => {
     return {
       demandas: {
         title: 'Demandas',
         value: formatNumber(cardStats.totalDemandas),
-        comment: `Hoje foram ${cardStats.totalDemandas} demandas. Ontem foram ${cardStats.totalDemandas - (cardStats.totalDemandas * cardStats.demandasVariacao / 100)}.`
+        comment: `Hoje foram ${cardStats.totalDemandas} demandas. Ontem foram ${cardStats.totalDemandas - (cardStats.totalDemandas * cardStats.demandasVariacao / 100)}.`,
+        icon: getTrendIcon(cardStats.demandasVariacao)
       },
       notas: {
         title: 'Notas',
         value: formatNumber(cardStats.totalNotas),
-        comment: `Para a imprensa. ${Math.abs(cardStats.notasVariacao)}% ${cardStats.notasVariacao >= 0 ? 'maior' : 'menor'} que março.`
+        comment: `Para a imprensa. ${Math.abs(cardStats.notasVariacao)}% ${cardStats.notasVariacao >= 0 ? 'maior' : 'menor'} que março.`,
+        icon: getTrendIcon(cardStats.notasVariacao)
       },
       tempo: {
         title: 'Resposta',
         value: `${formatNumber(cardStats.tempoMedioResposta)} horas`,
-        comment: `Média de tempo. ${Math.abs(cardStats.tempoRespostaVariacao)}% ${cardStats.tempoRespostaVariacao <= 0 ? 'mais rápido' : 'mais lento'} que o período anterior.`
+        comment: `Média de tempo. ${Math.abs(cardStats.tempoRespostaVariacao)}% ${cardStats.tempoRespostaVariacao <= 0 ? 'mais rápido' : 'mais lento'} que o período anterior.`,
+        icon: getTrendIcon(-cardStats.tempoRespostaVariacao)
       },
       aprovacao: {
         title: 'Aprovação',
         value: `${formatNumber(cardStats.taxaAprovacao)}%`,
-        comment: `${cardStats.notasAprovadas || 0} Notas aprovadas. Editadas: ${cardStats.notasEditadas || 0}%.`
+        comment: `${cardStats.notasAprovadas || 0} Notas aprovadas. Editadas: ${cardStats.notasEditadas || 0}%.`,
+        icon: getTrendIcon(cardStats.taxaAprovacao - 80) // Comparing to a baseline of 80%
+      },
+      noticias: {
+        title: 'Notícias no site',
+        value: formatNumber(cardStats.noticiasPublicas || 5),
+        comment: `Releases cadastrados na semana: ${cardStats.totalReleases || 8}`,
+        icon: getTrendIcon(cardStats.noticiasVariacao || 10)
       }
     };
   };
@@ -96,6 +116,7 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
                   value={card.value}
                   comment={card.comment}
                   isLoading={isLoadingCards}
+                  trendIcon={card.icon}
                 />
               </div>
             );

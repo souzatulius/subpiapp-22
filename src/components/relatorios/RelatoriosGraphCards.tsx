@@ -196,7 +196,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
         items={cardsOrder}
         strategy={rectSortingStrategy}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {cardsOrder
             .filter(cardId => visibleCards.includes(cardId))
             .map((cardId) => {
@@ -215,13 +215,14 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                   isLoading={isLoading}
                   onToggleVisibility={() => handleToggleVisibility(card.id)}
                   onToggleAnalysis={() => handleToggleAnalysis(card.id)}
+                  hideMenuIcon={true}
                 >
                   {isLoading ? (
-                    <div className="h-[250px] flex items-center justify-center">
+                    <div className="h-[220px] flex items-center justify-center">
                       <div className="h-8 w-8 border-4 border-t-gray-500 border-r-transparent border-b-gray-300 border-l-transparent rounded-full animate-spin"></div>
                     </div>
                   ) : chartComponent ? (
-                    <div className="h-[250px] p-2">
+                    <div className="h-[220px] p-2">
                       {chartComponent}
                     </div>
                   ) : (

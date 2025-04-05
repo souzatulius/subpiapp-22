@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -18,23 +19,26 @@ export const useComunicacaoDashboard = () => {
   const fetchDashboardConfig = useCallback(async (userId: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      // Use typed response to avoid excessive type instantiation
+      const response = await supabase
         .from('dashboard_config')
         .select('*')
         .eq('user_id', userId)
         .single();
 
-      if (error) {
-        console.error('Error fetching dashboard config:', error);
+      if (response.error) {
+        console.error('Error fetching dashboard config:', response.error);
         toast({
           title: 'Erro',
           description: 'Não foi possível carregar a configuração do dashboard.',
           variant: 'destructive'
         });
+      } else {
+        // Type cast to ensure proper typing
+        const data = response.data as DashboardConfig;
+        setDashboardConfig(data);
+        setLocalConfig(data);
       }
-
-      setDashboardConfig(data);
-      setLocalConfig(data);
     } catch (error) {
       console.error('Unexpected error fetching dashboard config:', error);
       toast({
@@ -50,13 +54,13 @@ export const useComunicacaoDashboard = () => {
   // Function to save dashboard configuration to the database
   const saveConfigToDatabase = useCallback(async (config: { id: string; cards_config: string }) => {
     try {
-      const { error } = await supabase
+      const response = await supabase
         .from('dashboard_config')
         .update({ cards_config: config.cards_config })
         .eq('id', config.id);
 
-      if (error) {
-        console.error('Error saving dashboard config:', error);
+      if (response.error) {
+        console.error('Error saving dashboard config:', response.error);
         toast({
           title: 'Erro',
           description: 'Não foi possível salvar a configuração do dashboard.',
@@ -67,7 +71,7 @@ export const useComunicacaoDashboard = () => {
           title: 'Sucesso',
           description: 'Configuração do dashboard salva com sucesso.',
         });
-        setDashboardConfig(prev => ({ ...prev, cards_config: config.cards_config } as DashboardConfig));
+        setDashboardConfig(prev => prev ? { ...prev, cards_config: config.cards_config } : null);
       }
     } catch (error) {
       console.error('Unexpected error saving dashboard config:', error);
@@ -89,23 +93,25 @@ export const useComunicacaoDashboard = () => {
         { "id": "feedbacks-recentes", "width": 6 }
       ]);
 
-      const { data, error } = await supabase
+      const response = await supabase
         .from('dashboard_config')
         .insert([{ user_id: userId, cards_config: initialConfig }])
         .select('*')
         .single();
 
-      if (error) {
-        console.error('Error creating dashboard config:', error);
+      if (response.error) {
+        console.error('Error creating dashboard config:', response.error);
         toast({
           title: 'Erro',
           description: 'Não foi possível criar a configuração do dashboard.',
           variant: 'destructive'
         });
+      } else {
+        // Type cast to ensure proper typing
+        const data = response.data as DashboardConfig;
+        setDashboardConfig(data);
+        setLocalConfig(data);
       }
-
-      setDashboardConfig(data);
-      setLocalConfig(data);
     } catch (error) {
       console.error('Unexpected error creating dashboard config:', error);
       toast({
@@ -133,10 +139,10 @@ export const useComunicacaoDashboard = () => {
       cardsArrayCopy.splice(destination, 0, movedCard);
       
       // Update local state
-      setLocalConfig(prev => ({
+      setLocalConfig(prev => prev ? {
         ...prev,
         cards_config: JSON.stringify(cardsArrayCopy)
-      }));
+      } : null);
       
       // Update remote state
       if (dashboardConfig.id) {
@@ -172,8 +178,8 @@ export const useComunicacaoDashboard = () => {
       await saveConfigToDatabase({ id: dashboardConfig.id, cards_config: defaultCardsConfig });
 
       // Update local state to reflect the changes
-      setLocalConfig(prev => ({ ...prev, cards_config: defaultCardsConfig } as DashboardConfig));
-      setDashboardConfig(prev => ({ ...prev, cards_config: defaultCardsConfig } as DashboardConfig));
+      setLocalConfig(prev => prev ? { ...prev, cards_config: defaultCardsConfig } : null);
+      setDashboardConfig(prev => prev ? { ...prev, cards_config: defaultCardsConfig } : null);
 
       toast({
         title: 'Dashboard redefinido',
@@ -190,10 +196,13 @@ export const useComunicacaoDashboard = () => {
   }, [dashboardConfig, saveConfigToDatabase]);
 
   useEffect(() => {
-    const user = supabase.auth.user();
-    if (user) {
-      fetchDashboardConfig(user.id);
-    }
+    const session = supabase.auth.getSession();
+    session.then(({ data }) => {
+      const user = data.session?.user;
+      if (user) {
+        fetchDashboardConfig(user.id);
+      }
+    });
   }, [fetchDashboardConfig]);
 
   return {
