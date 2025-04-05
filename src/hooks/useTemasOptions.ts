@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useTableExists } from './useTableExists';
 
 interface Tema {
   id: string;
@@ -8,32 +9,47 @@ interface Tema {
 }
 
 export const useTemasOptions = () => {
-  const { data: temas = [], isLoading } = useQuery({
-    queryKey: ['temas'],
+  const { exists: temasTableExists, isLoading: checkingTable } = useTableExists('temas');
+  
+  const { data: temas = [], isLoading: loadingTemas } = useQuery({
+    queryKey: ['temas-or-problems'],
     queryFn: async () => {
       try {
-        // First, check if temas table exists by querying problemas table as a fallback
-        const { data, error } = await supabase
+        // If temas table exists, query it
+        if (temasTableExists) {
+          const { data: temasData, error: temasError } = await supabase
+            .rpc('get_temas')
+            .select('id, descricao');
+          
+          if (!temasError && temasData && temasData.length > 0) {
+            return temasData as Tema[];
+          }
+        }
+        
+        // Fallback to problemas table
+        const { data: problemasData, error: problemasError } = await supabase
           .from('problemas')
           .select('id, descricao')
           .order('descricao');
         
-        if (error) throw error;
+        if (problemasError) throw problemasError;
         
         // Map the problem data to the tema interface for compatibility
-        return data.map(problem => ({
+        return (problemasData || []).map(problem => ({
           id: problem.id,
           descricao: problem.descricao
         })) as Tema[];
+        
       } catch (error) {
-        console.error('Error fetching temas:', error);
+        console.error('Error fetching temas or problems:', error);
         return [] as Tema[];
       }
     },
+    enabled: !checkingTable, // Only run query after checking if table exists
   });
 
   return {
     temas,
-    isLoading
+    isLoading: checkingTable || loadingTemas
   };
 };

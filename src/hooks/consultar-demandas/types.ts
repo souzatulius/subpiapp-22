@@ -7,6 +7,7 @@ export interface Demand {
   horario_publicacao: string;
   prazo_resposta: string;
   area_coordenacao: {
+    id?: string;
     descricao: string;
   } | null;
   servico: {
@@ -19,6 +20,7 @@ export interface Demand {
     descricao: string;
   } | null;
   bairro: {
+    id?: string;
     nome: string;
   } | null;
   autor: {
@@ -38,13 +40,18 @@ export interface Demand {
     supervisao_tecnica?: {
       id: string;
       descricao: string;
-      coordenacao_id: string;
+      coordenacao_id?: string;
+    } | null;
+    coordenacao?: {
+      id: string;
+      descricao: string;
     } | null;
   } | null;
   supervisao_tecnica_id?: string;
   supervisao_tecnica?: {
     id: string;
     descricao: string;
+    coordenacao_id?: string;
   } | null;
   arquivo_url: string | null; 
   anexos: string[] | null; 

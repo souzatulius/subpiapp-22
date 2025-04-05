@@ -9,16 +9,30 @@ export const useTableExists = (tableName: string) => {
   useEffect(() => {
     const checkTableExists = async () => {
       try {
-        // Try to query the table
-        const { error } = await supabase
-          .from(tableName)
-          .select('id')
-          .limit(1);
+        // Try to query the table using RPC instead of direct query
+        const { data, error } = await supabase.rpc('check_table_exists', {
+          table_name: tableName
+        });
         
-        // If there's no error, or the error is not a "relation does not exist" error,
-        // we assume the table exists
-        setExists(!error || !error.message.includes('relation') || !error.message.includes('does not exist'));
+        if (error) {
+          // Fallback to a safer approach - check if we get valid result from specific query
+          try {
+            const { error: queryError } = await supabase
+              .from(tableName as any)
+              .select('id')
+              .limit(1)
+              .throwOnError();
+            
+            setExists(!queryError);
+          } catch (err) {
+            console.log(`Table ${tableName} check failed:`, err);
+            setExists(false);
+          }
+        } else {
+          setExists(data === true);
+        }
       } catch (err) {
+        console.error(`Error checking if table ${tableName} exists:`, err);
         setExists(false);
       } finally {
         setIsLoading(false);

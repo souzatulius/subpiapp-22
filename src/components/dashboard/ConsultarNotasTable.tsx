@@ -7,7 +7,8 @@ import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import NotasTable from '@/components/consultar-notas/NotasTable';
 import { NotaOficial } from '@/types/nota';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/components/ui/use-toast';
+import { ensureNotaCompat } from '@/components/consultar-notas/NotaCompat';
 
 const ConsultarNotasTable = () => {
   const navigate = useNavigate();
@@ -17,10 +18,14 @@ const ConsultarNotasTable = () => {
   
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+    } catch (e) {
+      return 'Data inválida';
+    }
   };
   
-  const { data: notas = [], isLoading, refetch } = useQuery({
+  const { data: notasRaw = [], isLoading, refetch } = useQuery({
     queryKey: ['notas-oficiais'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -31,31 +36,44 @@ const ConsultarNotasTable = () => {
           texto,
           status,
           criado_em,
-          created_at,
-          autor:user_id (id, nome_completo),
+          autor_id,
+          problema_id,
           problema (
             id,
             descricao,
+            coordenacao_id,
             coordenacao (id, descricao)
           ),
+          supervisao_tecnica_id,
           supervisao_tecnica (id, descricao),
+          coordenacao_id,
           area_coordenacao (id, descricao)
         `)
-        .order('created_at', { ascending: false });
+        .order('criado_em', { ascending: false });
       
       if (error) throw error;
-      
-      // Transform the data to match our NotaOficial type
-      return (data || []).map(nota => ({
-        ...nota,
-        conteudo: nota.texto || '', // Map texto to conteudo for type compatibility
-        demanda_id: (nota as any).demanda_id,
-        autor: nota.autor || undefined,
-        problema: nota.problema || undefined,
-        supervisao_tecnica: nota.supervisao_tecnica || undefined,
-        area_coordenacao: nota.area_coordenacao || undefined
-      })) as NotaOficial[];
+      return data || [];
     },
+  });
+  
+  // Process the notas to ensure they match our NotaOficial type
+  const notas: NotaOficial[] = notasRaw.map(nota => {
+    // Create a compatible NotaOficial object
+    const notaOficial: NotaOficial = {
+      id: nota.id,
+      titulo: nota.titulo,
+      conteudo: nota.texto || '', // Use texto for conteudo
+      texto: nota.texto,
+      status: nota.status,
+      criado_em: nota.criado_em,
+      autor: nota.autor_id ? { id: nota.autor_id, nome_completo: 'Usuário' } : undefined,
+      problema: nota.problema || undefined,
+      supervisao_tecnica: nota.supervisao_tecnica || undefined,
+      area_coordenacao: nota.area_coordenacao || undefined
+    };
+    
+    // Ensure backward compatibility
+    return ensureNotaCompat(notaOficial);
   });
 
   const handleViewNota = (nota: NotaOficial) => {

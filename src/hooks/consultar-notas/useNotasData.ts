@@ -1,284 +1,143 @@
-
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { UseNotasDataReturn } from '@/types/nota';
+import { NotaOficial } from '@/types/nota';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export const useNotasData = (): UseNotasDataReturn => {
+  const [notas, setNotas] = useState<NotaOficial[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notas, setNotas] = useState<any[]>([]);
-  const [filteredNotas, setFilteredNotas] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [areaFilter, setAreaFilter] = useState('all');
-  const [dataInicioFilter, setDataInicioFilter] = useState<Date | undefined>(undefined);
-  const [dataFimFilter, setDataFimFilter] = useState<Date | undefined>(undefined);
+  const [error, setError] = useState<Error | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredNotas, setFilteredNotas] = useState<NotaOficial[]>([]);
+  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [statusLoading, setStatusLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(true); // Default to true for now
-  
-  const fetchNotas = useCallback(async () => {
+  const { session, user } = useAuth();
+
+  const fetchNotas = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      
+      if (!session || !user) {
+        console.log("Usuário não autenticado ao tentar carregar notas");
+        return;
+      }
+
+      console.log("Carregando notas como usuário:", user.id);
+
       const { data, error } = await supabase
         .from('notas_oficiais')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select(`
+          *,
+          autor:autor_id (id, nome_completo),
+          aprovador:aprovador_id (id, nome_completo),
+          problema:problema_id (
+            id, 
+            descricao,
+            coordenacao:coordenacao_id (
+              id, 
+              descricao
+            )
+          ),
+          demanda:demanda_id (id, titulo)
+        `)
+        .order('criado_em', { ascending: false });
         
       if (error) {
-        throw error;
+        console.error("Erro ao carregar notas:", error);
+        setError(error);
+        toast({
+          title: "Erro ao carregar notas",
+          description: "Não foi possível carregar as notas oficiais.",
+          variant: "destructive"
+        });
+        return;
       }
-      
-      setNotas(data || []);
-      setFilteredNotas(data || []);
-      return data;
-    } catch (error: any) {
-      console.error('Error fetching notas:', error);
+
+      console.log(`${data?.length || 0} notas carregadas`);
+      setNotas(data as NotaOficial[]);
+    } catch (err: any) {
+      setError(err);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar as notas oficiais',
-        variant: 'destructive',
+        title: "Erro inesperado",
+        description: err.message || "Ocorreu um erro ao carregar as notas.",
+        variant: "destructive"
       });
-      return [];
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  // Apply filters whenever filter states change
   useEffect(() => {
-    if (!notas.length) return;
+    fetchNotas();
+  }, [session, user]);
 
-    let filtered = [...notas];
-
-    // Apply search query filter
-    if (searchQuery) {
-      filtered = filtered.filter(nota => 
-        nota.titulo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        nota.texto?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredNotas(notas);
+      return;
     }
 
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(nota => nota.status === statusFilter);
-    }
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    const filtered = notas.filter(nota => {
+      const matchTitle = nota.titulo.toLowerCase().includes(lowerSearchTerm);
+      const matchContent = nota.conteudo.toLowerCase().includes(lowerSearchTerm);
+      const matchAutor = nota.autor?.nome_completo?.toLowerCase().includes(lowerSearchTerm);
+      const matchProblema = nota.problema?.descricao?.toLowerCase().includes(lowerSearchTerm);
+      const matchDemanda = nota.demanda?.titulo?.toLowerCase().includes(lowerSearchTerm);
 
-    // Apply area filter
-    if (areaFilter !== 'all') {
-      filtered = filtered.filter(nota => nota.supervisao_tecnica_id === areaFilter);
-    }
-
-    // Apply date filters
-    if (dataInicioFilter) {
-      const startDate = new Date(dataInicioFilter);
-      filtered = filtered.filter(nota => {
-        const notaDate = new Date(nota.criado_em || nota.created_at);
-        return notaDate >= startDate;
-      });
-    }
-
-    if (dataFimFilter) {
-      const endDate = new Date(dataFimFilter);
-      endDate.setHours(23, 59, 59, 999); // End of day
-      filtered = filtered.filter(nota => {
-        const notaDate = new Date(nota.criado_em || nota.created_at);
-        return notaDate <= endDate;
-      });
-    }
+      return matchTitle || matchContent || matchAutor || matchProblema || matchDemanda;
+    });
 
     setFilteredNotas(filtered);
-  }, [notas, searchQuery, statusFilter, areaFilter, dataInicioFilter, dataFimFilter]);
+  }, [searchTerm, notas]);
 
-  // Format date helper
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return '';
-    
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-  
-  const viewNotaDetails = async (notaId: string): Promise<void> => {
+  const handleDelete = async (id: string) => {
+    setDeleteLoading(true);
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('notas_oficiais')
-        .select('*')
-        .eq('id', notaId)
-        .single();
-        
+        .delete()
+        .eq('id', id);
+
       if (error) {
         throw error;
       }
-      
-      // You would typically set this data to a state or show it in a modal
-      console.log('Nota details:', data);
-      
-    } catch (error: any) {
-      console.error('Error fetching nota details:', error);
+
+      setNotas(notas.filter(nota => nota.id !== id));
+      setFilteredNotas(filteredNotas.filter(nota => nota.id !== id));
       toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os detalhes da nota',
-        variant: 'destructive',
+        title: "Nota oficial excluída",
+        description: "A nota foi removida com sucesso."
       });
-    }
-  };
-  
-  // Wrapper function to make return type Promise<void>
-  const handleDeleteNota = async (notaId: string): Promise<void> => {
-    try {
-      setDeleteLoading(true);
-      const result = await deleteNota(notaId);
-      if (!result) {
-        throw new Error('Falha ao deletar nota');
-      }
-    } catch (error: any) {
-      console.error('Error deleting nota:', error);
+    } catch (err: any) {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível deletar a nota',
-        variant: 'destructive',
+        title: "Erro ao excluir nota",
+        description: err.message || "Ocorreu um erro ao excluir a nota.",
+        variant: "destructive"
       });
     } finally {
       setDeleteLoading(false);
     }
   };
   
-  const deleteNota = async (notaId: string): Promise<boolean> => {
-    try {
-      const { error } = await supabase
-        .from('notas_oficiais')
-        .delete()
-        .eq('id', notaId);
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Update the local state to remove the deleted nota
-      setNotas(notas.filter(nota => nota.id !== notaId));
-      setFilteredNotas(filteredNotas.filter(nota => nota.id !== notaId));
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Nota oficial deletada com sucesso',
-        variant: 'success',
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error('Error deleting nota:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível deletar a nota oficial',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-  
-  // Wrapper function to make return type Promise<void>
-  const handleUpdateNotaStatus = async (notaId: string, newStatus: string): Promise<void> => {
-    try {
-      setStatusLoading(true);
-      const result = await updateNotaStatus(notaId, newStatus);
-      if (!result) {
-        throw new Error('Falha ao atualizar status da nota');
-      }
-    } catch (error: any) {
-      console.error('Error updating nota status:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar o status da nota',
-        variant: 'destructive',
-      });
-    } finally {
-      setStatusLoading(false);
-    }
-  };
-  
-  const updateNotaStatus = async (notaId: string, newStatus: string): Promise<boolean> => {
-    try {
-      const { error } = await supabase
-        .from('notas_oficiais')
-        .update({ status: newStatus })
-        .eq('id', notaId);
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Update the local state to reflect the status change
-      const updatedNotas = notas.map(nota => {
-        if (nota.id === notaId) {
-          return { ...nota, status: newStatus };
-        }
-        return nota;
-      });
-      
-      setNotas(updatedNotas);
-      
-      // Apply the same update to filtered notas
-      const updatedFilteredNotas = filteredNotas.map(nota => {
-        if (nota.id === notaId) {
-          return { ...nota, status: newStatus };
-        }
-        return nota;
-      });
-      
-      setFilteredNotas(updatedFilteredNotas);
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Status da nota oficial atualizado com sucesso',
-        variant: 'success',
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error('Error updating nota status:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar o status da nota oficial',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-  
-  // On component mount, fetch notas
-  useEffect(() => {
-    fetchNotas();
-  }, [fetchNotas]);
-  
   return {
-    loading,
     notas,
-    fetchNotas,
-    viewNotaDetails,
-    deleteNota: handleDeleteNota,
-    updateNotaStatus: handleUpdateNotaStatus,
-    isLoading: loading,
-    searchQuery,
-    setSearchQuery,
-    statusFilter,
-    setStatusFilter,
-    formatDate,
+    loading,
+    error,
+    searchTerm,
+    setSearchTerm,
     filteredNotas,
-    areaFilter,
-    setAreaFilter,
-    dataInicioFilter,
-    setDataInicioFilter,
-    dataFimFilter,
-    setDataFimFilter,
+    selectedNota,
+    setSelectedNota,
+    isDetailOpen, 
+    setIsDetailOpen,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
     deleteLoading,
-    isAdmin,
-    statusLoading
+    handleDelete,
+    refetch
   };
 };

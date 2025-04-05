@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Table, 
@@ -91,8 +90,8 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
 
   const getCoordination = (demand: Demand) => {
     // Get coordination information from the problem-related data
-    if (demand.problema?.supervisao_tecnica?.coordenacao_id) {
-      return 'Não informada';
+    if (demand.problema?.coordenacao?.descricao) {
+      return demand.problema.coordenacao.descricao;
     }
     
     // Try to get the coordination from area_coordenacao
