@@ -74,7 +74,7 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
                 formData.problema_id === problema.id ? "bg-orange-500 text-white" : ""
               } ${
                 hasError('problema_id') ? 'border-orange-500' : ''
-              }`} 
+              } hover:bg-[#002855] hover:text-white`} 
               onClick={() => handleSelectChange('problema_id', problema.id)}
             >
               {getProblemIcon(problema)}
@@ -97,7 +97,7 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
             searchQuery={serviceSearch}
             onSearchChange={handleLocalServiceSearch}
             onServiceSelect={handleServiceSelect}
-            onToggleNaoSabe={(checked) => handleSelectChange('nao_sabe_servico', checked)}
+            onToggleNaoSabe={(checked) => handleSelectChange('nao_sabe_servico', Boolean(checked))}
             errors={errors}
           />
           
@@ -106,6 +106,7 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
               id="nao-sabe-servico" 
               checked={formData.nao_sabe_servico} 
               onCheckedChange={(checked) => handleSelectChange('nao_sabe_servico', Boolean(checked))}
+              className="border-[#003570] data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500 rounded-full h-5 w-5"
             />
             <Label htmlFor="nao-sabe-servico" className="text-sm cursor-pointer">
               Não sei qual serviço selecionar

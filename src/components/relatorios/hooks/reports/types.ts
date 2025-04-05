@@ -29,5 +29,6 @@ export interface ReportsData {
   problemas?: any[];
   coordinations?: any[];
   mediaTypes?: any[];
-  neighborhoods?: any[]; // Added the missing property
+  neighborhoods?: any[]; 
+  statuses?: any[];
 }

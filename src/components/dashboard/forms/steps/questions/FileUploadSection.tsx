@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, Trash2, X, ImageIcon } from 'lucide-react';
+import { Upload, FileText, Trash2, X, ImageIcon, File, FileImage } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
@@ -122,6 +122,21 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     return `${fileName.substring(0, 8)}...${fileExt ? `.${fileExt}` : ''}`;
   };
 
+  // Determine file type and return appropriate icon
+  const getFileIcon = (url: string) => {
+    if (isImageFile(url)) {
+      return <img src={url} alt="thumbnail" className="h-full w-full object-contain" />;
+    } else if (url.toLowerCase().endsWith('.pdf')) {
+      return <FileText className="h-12 w-12 text-red-500" />;
+    } else if (url.toLowerCase().match(/\.(docx?|rtf)$/)) {
+      return <FileText className="h-12 w-12 text-blue-500" />;
+    } else if (url.toLowerCase().match(/\.(xlsx?|csv)$/)) {
+      return <FileText className="h-12 w-12 text-green-500" />;
+    } else {
+      return <File className="h-12 w-12 text-gray-500" />;
+    }
+  };
+
   // Determine if it's an image file
   const isImageFile = (url: string) => {
     return /\.(jpg|jpeg|png|gif|bmp|webp|heic)$/i.test(url);
@@ -158,6 +173,39 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             onChange={handleFileChange}
             disabled={uploading}
           />
+          
+          {/* Files Preview inside the upload area */}
+          {anexos.length > 0 && (
+            <div className="mt-4 border-t pt-4 border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {anexos.map((fileUrl, index) => (
+                  <div 
+                    key={index} 
+                    className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition"
+                  >
+                    <div className="relative h-28 bg-gray-100 flex items-center justify-center p-2">
+                      {getFileIcon(fileUrl)}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeFile(index)}
+                        className="absolute top-0 right-0 text-red-500 hover:text-red-700 p-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="p-2 text-center">
+                      <p className="text-xs font-medium text-gray-700 truncate" title={fileUrl.split('/').pop()}>
+                        {getShortenedFileName(fileUrl)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Button 
             type="button" 
             variant="outline" 
@@ -170,46 +218,6 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           </Button>
         </div>
       </div>
-
-      {/* Files Preview */}
-      {anexos.length > 0 && (
-        <div className="mt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {anexos.map((fileUrl, index) => (
-              <div 
-                key={index} 
-                className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition"
-              >
-                <div className="relative h-28 bg-gray-100 flex items-center justify-center p-2">
-                  {isImageFile(fileUrl) ? (
-                    <img 
-                      src={fileUrl} 
-                      alt="thumbnail" 
-                      className="h-full object-contain max-w-full rounded-t-md"
-                    />
-                  ) : (
-                    <FileText className="h-12 w-12 text-blue-500" />
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeFile(index)}
-                    className="absolute top-0 right-0 text-red-500 hover:text-red-700 p-1"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="p-2 text-center">
-                  <p className="text-xs font-medium text-gray-700 truncate" title={fileUrl.split('/').pop()}>
-                    {getShortenedFileName(fileUrl)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
