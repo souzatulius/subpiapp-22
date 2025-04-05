@@ -43,7 +43,6 @@ const COLOR_OPTIONS: ColorOption[] = [
   { value: "green-neon", label: "", class: "bg-[#66FF66]" },
   { value: "gray-light", label: "", class: "bg-[#F5F5F5]" },
   { value: "orange-dark", label: "", class: "bg-[#F25C05]" },
-  { value: "yellow", label: "", class: "bg-yellow-400" },
 ];
 
 const EditCardModal: React.FC<EditCardModalProps> = ({
@@ -108,7 +107,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   
   // Helper to get text color based on background color
   const getTextColorForPreview = (colorValue: CardColor): string => {
-    if (colorValue === 'gray-light' || colorValue === 'green-neon' || colorValue === 'yellow') {
+    if (colorValue === 'gray-light' || colorValue === 'green-neon') {
       return 'text-gray-800';
     }
     return 'text-white';
@@ -175,7 +174,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                 style={{
                   backgroundColor: COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-', '').includes('[') 
                     ? COLOR_OPTIONS.find(c => c.value === color)?.class.replace('bg-[', '').replace(']', '') 
-                    : color === 'yellow' ? '#FACC15' : color === 'blue-dark' ? '#1D4ED8' : '#0066FF'
+                    : color === 'blue-dark' ? '#1D4ED8' : '#0066FF'
                 }}
               >
                 <div className="relative h-full flex flex-col items-center justify-center text-center py-4">

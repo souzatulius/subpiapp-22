@@ -38,8 +38,6 @@ const getBackgroundColor = (color: CardColor): string => {
       return 'bg-[#F5F5F5]'; // Cinza Claro
     case 'orange-dark':
       return 'bg-[#F25C05]'; // Laranja Escuro
-    case 'yellow':
-      return 'bg-yellow-400'; // Amarelo
     case 'blue-dark':
       return 'bg-[#1D4ED8]'; // Azul Escuro
     default:

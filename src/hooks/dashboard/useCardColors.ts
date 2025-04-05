@@ -7,7 +7,6 @@ export const getBgColor = (color: string): CardColor => {
     case 'green': return 'green-neon' as CardColor;
     case 'orange': return 'orange-dark' as CardColor;
     case 'gray-light': return 'gray-light' as CardColor;
-    case 'yellow': return 'yellow' as CardColor;
     case 'blue-dark': return 'blue-dark' as CardColor;
     // map legacy colors to new palette
     case 'grey-400': 
@@ -24,6 +23,10 @@ export const getBgColor = (color: string): CardColor => {
     case 'gray-200': return 'gray-light' as CardColor;
     case 'lime-500':
     case 'lime': return 'green-neon' as CardColor;
+    // Yellow color mapping - map to orange-dark as a replacement
+    case 'yellow':
+    case 'yellow-400':
+    case 'yellow-500': return 'orange-dark' as CardColor;
     default: return 'blue-vivid' as CardColor;
   }
 };

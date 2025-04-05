@@ -74,7 +74,7 @@ const ActionCards: React.FC<ActionCardsProps> = ({
       subtitle: 'Revise e aprove notas oficiais',
       iconId: 'CheckCircle',
       path: `${baseUrl ? `/${baseUrl}` : ''}/aprovar-nota`,
-      color: 'yellow' as CardColor,
+      color: 'blue-dark' as CardColor,
       width: '25',
       height: '1',
       type: 'standard',
