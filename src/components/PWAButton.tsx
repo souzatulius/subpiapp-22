@@ -38,7 +38,7 @@ const PWAButton: React.FC = () => {
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={toggleInstructions}>
           <div 
-            className="bg-white rounded-lg max-w-md w-full overflow-hidden animate-scale-in shadow-xl" 
+            className="bg-white rounded-2xl max-w-md w-full overflow-hidden animate-scale-in shadow-xl" 
             onClick={e => e.stopPropagation()}
           >
             <div className="p-5 border-b">
@@ -50,14 +50,17 @@ const PWAButton: React.FC = () => {
               <div className="flex justify-between mt-4 text-sm">
                 <div className="flex items-center">
                   <div className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>1</div>
+                  <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Chrome</span>
                   <div className={`h-1 w-6 ${currentStep > 1 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
                 </div>
                 <div className="flex items-center">
                   <div className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>2</div>
+                  <span className="ml-1 mr-2 text-xs font-medium text-gray-600">Safari</span>
                   <div className={`h-1 w-6 ${currentStep > 2 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
                 </div>
                 <div className="flex items-center">
                   <div className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>3</div>
+                  <span className="ml-1 text-xs font-medium text-gray-600">Finalize</span>
                 </div>
               </div>
             </div>
