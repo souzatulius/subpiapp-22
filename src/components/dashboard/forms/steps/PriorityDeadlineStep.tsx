@@ -19,8 +19,8 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   handleSelectChange,
   errors = []
 }) => {
-  // Updated priorities to match the database constraints
-  // Using 'alta', 'media', 'baixa' values instead of numeric values
+  // Updated priorities to match the database constraints with valid values
+  // Using 'alta', 'media', 'baixa' values
   const priorities = [
     { id: 'alta', label: 'Urgente', icon: <Flame className="h-5 w-5 text-red-500" /> },
     { id: 'alta', label: 'Alta', icon: <BellRing className="h-5 w-5 text-orange-500" /> },

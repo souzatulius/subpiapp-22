@@ -42,6 +42,11 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         ? formData.arquivo_url 
         : null;
       
+      // Ensure prioridade is a valid value that matches database constraints
+      const validPrioridade = ['alta', 'media', 'baixa'].includes(formData.prioridade) 
+        ? formData.prioridade
+        : 'media'; // Default to 'media' if the value is not valid
+      
       // Prepare the payload - remove fields that don't exist in the demandas table
       // and ensure all UUID fields have valid values (not empty strings)
       const payload = {
@@ -49,7 +54,7 @@ export const useDemandFormSubmit = (resetForm: () => void, onClose: () => void) 
         problema_id: formData.problema_id || null,
         origem_id: formData.origem_id || null,
         tipo_midia_id: formData.tipo_midia_id || null,
-        prioridade: formData.prioridade,
+        prioridade: validPrioridade,
         prazo_resposta: formData.prazo_resposta,
         nome_solicitante: formData.nome_solicitante,
         telefone_solicitante: formData.telefone_solicitante,
