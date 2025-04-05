@@ -28,7 +28,7 @@ const ConsultarNotasTable = () => {
         .select(`
           id,
           titulo,
-          conteudo,
+          texto,
           status,
           criado_em,
           created_at,
@@ -44,7 +44,17 @@ const ConsultarNotasTable = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as NotaOficial[];
+      
+      // Transform the data to match our NotaOficial type
+      return (data || []).map(nota => ({
+        ...nota,
+        conteudo: nota.texto || '', // Map texto to conteudo for type compatibility
+        demanda_id: (nota as any).demanda_id,
+        autor: nota.autor || undefined,
+        problema: nota.problema || undefined,
+        supervisao_tecnica: nota.supervisao_tecnica || undefined,
+        area_coordenacao: nota.area_coordenacao || undefined
+      })) as NotaOficial[];
     },
   });
 

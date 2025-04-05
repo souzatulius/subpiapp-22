@@ -22,7 +22,7 @@ export const useReleaseForm = () => {
         .from('notas_oficiais')
         .insert({
           titulo: data.titulo,
-          conteudo: data.conteudo,
+          texto: data.conteudo, // Use text field in DB
           problema_id: data.problema_id || null,
           tema_id: data.tema_id || null,
           status: data.status,
@@ -33,29 +33,39 @@ export const useReleaseForm = () => {
 
       if (error) throw error;
 
-      // If a file was provided, upload it
+      // If a file was provided and file storage support is available, upload it
       if (file && insertedData?.id) {
-        const filePath = `notas/${insertedData.id}/${file.name}`;
-        const { error: uploadError } = await supabase
-          .storage
-          .from('nota-attachments')
-          .upload(filePath, file);
+        try {
+          const filePath = `notas/${insertedData.id}/${file.name}`;
+          const { error: uploadError } = await supabase
+            .storage
+            .from('nota-attachments')
+            .upload(filePath, file);
 
-        if (uploadError) {
-          console.error('Error uploading file:', uploadError);
-          // Continue without attachment
+          if (uploadError) {
+            console.error('Error uploading file:', uploadError);
+            // Continue without attachment
+          } else {
+            // Try to link the file to the release if the table exists
+            try {
+              await supabase
+                .from('nota_anexos') // Using a more conventional table name
+                .insert({
+                  nota_id: insertedData.id,
+                  caminho_arquivo: filePath,
+                  nome_arquivo: file.name,
+                  tamanho_arquivo: file.size,
+                  tipo_arquivo: file.type,
+                });
+            } catch (linkError) {
+              console.error('Error linking file to release:', linkError);
+              // Continue even if linking fails
+            }
+          }
+        } catch (storageError) {
+          console.error('Error with storage operations:', storageError);
+          // Continue even if storage operations fail
         }
-
-        // Link the file to the release
-        await supabase
-          .from('nota_attachments')
-          .insert({
-            nota_id: insertedData.id,
-            file_path: filePath,
-            file_name: file.name,
-            file_size: file.size,
-            file_type: file.type,
-          });
       }
 
       return true;

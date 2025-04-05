@@ -1,19 +1,22 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { Demand } from './types';
 import { useDemandasQuery } from './useDemandasQuery';
 import { useDemandasActions } from './useDemandasActions';
-import { Demand, UseDemandasDataReturn } from './types';
 
-export const useDemandasData = (): UseDemandasDataReturn => {
+export const useDemandasData = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredDemandas, setFilteredDemandas] = useState<Demand[]>([]);
   
   const {
     data: demandas = [],
     isLoading,
     error,
-    refetch
+    refetch,
   } = useDemandasQuery();
-
+  
   const {
     selectedDemand,
     setSelectedDemand,
@@ -23,15 +26,27 @@ export const useDemandasData = (): UseDemandasDataReturn => {
     setIsDeleteDialogOpen,
     deleteLoading,
     handleDeleteConfirm
-  } = useDemandasActions(async () => {
-    await refetch();
-  });
+  } = useDemandasActions(refetch);
 
-  const filteredDemandas = demandas.filter((demand: Demand) => 
-    demand.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (demand.servico?.descricao || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (demand.area_coordenacao?.descricao || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter demandas based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredDemandas(demandas);
+      return;
+    }
+    
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    
+    const filtered = demandas.filter(demanda => {
+      const matchTitle = demanda.titulo.toLowerCase().includes(lowerSearchTerm);
+      const matchArea = demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowerSearchTerm);
+      const matchProblem = demanda.problema?.descricao.toLowerCase().includes(lowerSearchTerm);
+      
+      return matchTitle || matchArea || matchProblem;
+    });
+    
+    setFilteredDemandas(filtered);
+  }, [searchTerm, demandas]);
 
   return {
     searchTerm,
