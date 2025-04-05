@@ -32,4 +32,5 @@ export interface ReportsData {
   neighborhoods?: any[]; 
   statuses?: any[];
   responsibles?: any[]; // Added missing property
+  approvals?: any[]; // Add the missing property to fix build errors
 }

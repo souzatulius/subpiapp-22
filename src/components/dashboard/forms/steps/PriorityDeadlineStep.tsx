@@ -73,18 +73,12 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
         >
           Prazo para resposta {hasError('prazo_resposta') && <span className="text-orange-500">*</span>}
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DatePicker
-            date={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined}
-            onSelect={(date) => handleSelectChange('prazo_resposta', date ? date.toISOString() : '')}
-            placeholder="Selecione a data"
-            className={hasError('prazo_resposta') ? 'border-orange-500' : ''}
-          />
+        <div className="w-full">
           <DatePicker
             date={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined}
             onSelect={(date) => handleSelectChange('prazo_resposta', date ? date.toISOString() : '')}
             showTimeSelect={true}
-            placeholder="Selecione o horário"
+            placeholder="Selecione a data e horário"
             className={hasError('prazo_resposta') ? 'border-orange-500' : ''}
           />
         </div>

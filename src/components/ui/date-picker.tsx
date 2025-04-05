@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
@@ -40,24 +39,63 @@ export function DatePicker({
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
   const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
+    // Allow the user to type and validate the input
     if (type === 'hours') {
-      const hours = parseInt(value);
+      // Validate hours (0-23)
+      let hours = parseInt(value);
       if (!isNaN(hours) && hours >= 0 && hours <= 23) {
         setSelectedHours(value.padStart(2, '0'));
+      } else if (value === '') {
+        // Allow empty input for typing
+        setSelectedHours(value);
       }
     } else {
-      const minutes = parseInt(value);
+      // Validate minutes (0-59)
+      let minutes = parseInt(value);
       if (!isNaN(minutes) && minutes >= 0 && minutes <= 59) {
         setSelectedMinutes(value.padStart(2, '0'));
+      } else if (value === '') {
+        // Allow empty input for typing
+        setSelectedMinutes(value);
       }
     }
 
-    // Update the date with the new time
+    // Only update the date if we have a valid value and a date is selected
+    if (date && (
+        (type === 'hours' && !isNaN(parseInt(value)) && parseInt(value) >= 0 && parseInt(value) <= 23) || 
+        (type === 'minutes' && !isNaN(parseInt(value)) && parseInt(value) >= 0 && parseInt(value) <= 59)
+    )) {
+      const newDate = new Date(date);
+      const hoursValue = type === 'hours' ? parseInt(value) : parseInt(selectedHours || '0');
+      const minutesValue = type === 'minutes' ? parseInt(value) : parseInt(selectedMinutes || '0');
+      
+      newDate.setHours(hoursValue, minutesValue);
+      onSelect(newDate);
+    }
+  };
+
+  // Handle time input blur to format correctly
+  const handleTimeBlur = (type: 'hours' | 'minutes') => {
+    if (type === 'hours') {
+      if (selectedHours === '') {
+        setSelectedHours('00');
+      } else {
+        setSelectedHours(selectedHours.padStart(2, '0'));
+      }
+    } else {
+      if (selectedMinutes === '') {
+        setSelectedMinutes('00');
+      } else {
+        setSelectedMinutes(selectedMinutes.padStart(2, '0'));
+      }
+    }
+
+    // Update date with formatted time
     if (date) {
       const newDate = new Date(date);
       newDate.setHours(
-        type === 'hours' ? parseInt(value) : parseInt(selectedHours),
-        type === 'minutes' ? parseInt(value) : parseInt(selectedMinutes)
+        parseInt(selectedHours || '0'),
+        parseInt(selectedMinutes || '0')
       );
       onSelect(newDate);
     }
@@ -71,7 +109,10 @@ export function DatePicker({
 
     if (showTimeSelect) {
       // Keep the user-selected time when changing the date
-      selectedDate.setHours(parseInt(selectedHours), parseInt(selectedMinutes));
+      selectedDate.setHours(
+        parseInt(selectedHours || '0'), 
+        parseInt(selectedMinutes || '0')
+      );
     }
     
     onSelect(selectedDate);
@@ -119,6 +160,7 @@ export function DatePicker({
                 <Input
                   value={selectedHours}
                   onChange={(e) => handleTimeChange('hours', e.target.value)}
+                  onBlur={() => handleTimeBlur('hours')}
                   className="w-16 text-center"
                   maxLength={2}
                 />
@@ -126,6 +168,7 @@ export function DatePicker({
                 <Input
                   value={selectedMinutes}
                   onChange={(e) => handleTimeChange('minutes', e.target.value)}
+                  onBlur={() => handleTimeBlur('minutes')}
                   className="w-16 text-center"
                   maxLength={2}
                 />
