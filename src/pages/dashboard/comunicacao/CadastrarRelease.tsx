@@ -33,7 +33,7 @@ const CadastrarRelease = () => {
         title="Cadastro de Releases"
         description="Crie e publique novas notícias e releases para divulgação na imprensa"
         icon={<FileText className="h-6 w-6 mr-2 text-white" />}
-        color="bg-gradient-to-r from-blue-700 to-blue-800" // Changed to match comunicacao gradient
+        color="bg-gradient-to-r from-orange-500 to-orange-700"
       />
 
       <ReleaseForm

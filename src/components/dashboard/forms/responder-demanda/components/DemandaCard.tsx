@@ -17,17 +17,17 @@ interface DemandaCardProps {
 const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick }) => {
   const priorityColors = getPriorityColor(demanda.prioridade);
   
-  // Calculate days past deadline - check if prazo_resposta exists (renamed from prazo_atendimento)
-  const daysPastDeadline = demanda.prazo_resposta ? 
-    Math.ceil((new Date().getTime() - new Date(demanda.prazo_resposta).getTime()) / (1000 * 3600 * 24)) : 
+  // Calculate days past deadline
+  const daysPastDeadline = demanda.prazo_atendimento ? 
+    Math.ceil((new Date().getTime() - new Date(demanda.prazo_atendimento).getTime()) / (1000 * 3600 * 24)) : 
     null;
   
   // Determine if the deadline is in the past
   const isOverdue = daysPastDeadline && daysPastDeadline > 0;
   
-  // Format relative time - check if created_at exists (renamed from criado_em)
-  const relativeTime = demanda.created_at ? 
-    formatDistanceToNow(new Date(demanda.created_at), { addSuffix: true, locale: ptBR }) : 
+  // Format relative time
+  const relativeTime = demanda.criado_em ? 
+    formatDistanceToNow(new Date(demanda.criado_em), { addSuffix: true, locale: ptBR }) : 
     'Data não disponível';
 
   return (
@@ -61,20 +61,20 @@ const DemandaCard: React.FC<DemandaCardProps> = ({ demanda, isSelected, onClick 
             )}
           </div>
           
-          {demanda.origem_id && (
+          {demanda.origem && (
             <div className="flex flex-wrap gap-1">
               <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                {demanda.origem?.descricao || 'Origem não especificada'}
+                {demanda.origem}
               </Badge>
             </div>
           )}
           
-          {(demanda.endereco || demanda.bairro?.nome) && (
+          {(demanda.endereco || demanda.bairro_nome) && (
             <div className="text-sm flex items-start text-gray-600">
               <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
               <span className="line-clamp-2">
-                {demanda.endereco}{demanda.endereco && demanda.bairro?.nome ? ', ' : ''}
-                {demanda.bairro?.nome}
+                {demanda.endereco}{demanda.endereco && demanda.bairro_nome ? ', ' : ''}
+                {demanda.bairro_nome}
               </span>
             </div>
           )}
