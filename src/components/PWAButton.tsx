@@ -1,12 +1,25 @@
 
 import React, { useState } from 'react';
-import { Smartphone } from 'lucide-react';
+import { Smartphone, ChevronRight } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const PWAButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  
+  const totalSteps = 3;
 
   const toggleInstructions = () => {
     setIsOpen(!isOpen);
+    setCurrentStep(1); // Reset to first step when opening
+  };
+
+  const goToNextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      toggleInstructions(); // Close if on last step
+    }
   };
 
   return (
@@ -25,21 +38,34 @@ const PWAButton: React.FC = () => {
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={toggleInstructions}>
           <div 
-            className="bg-white rounded-lg max-w-2xl w-full h-[90vh] overflow-y-auto animate-scale-in my-4 shadow-xl" 
+            className="bg-white rounded-lg max-w-md w-full overflow-hidden animate-scale-in shadow-xl" 
             onClick={e => e.stopPropagation()}
           >
-            <div className="p-6">
-              <div className="flex justify-center mb-4">
-                <Smartphone className="h-8 w-8 text-subpi-blue" />
+            <div className="p-5 border-b">
+              <div className="flex justify-center mb-3">
+                <Smartphone className="h-7 w-7 text-subpi-blue" />
               </div>
-              <h2 className="text-xl font-semibold text-center mb-6">Use a SubPi como app no celular!</h2>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center mb-3">
-                    <div className="h-6 w-6 rounded-full bg-subpi-blue text-white flex items-center justify-center text-sm font-medium">1</div>
-                    <h3 className="ml-2 font-medium">No Chrome</h3>
-                  </div>
+              <h2 className="text-xl font-semibold text-center">Use a SubPi como app no celular!</h2>
+              
+              <div className="flex justify-between mt-4 text-sm">
+                <div className="flex items-center">
+                  <div className={`h-6 w-6 rounded-full ${currentStep >= 1 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>1</div>
+                  <div className={`h-1 w-6 ${currentStep > 1 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
+                </div>
+                <div className="flex items-center">
+                  <div className={`h-6 w-6 rounded-full ${currentStep >= 2 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>2</div>
+                  <div className={`h-1 w-6 ${currentStep > 2 ? 'bg-subpi-blue' : 'bg-gray-200'}`}></div>
+                </div>
+                <div className="flex items-center">
+                  <div className={`h-6 w-6 rounded-full ${currentStep >= 3 ? 'bg-subpi-blue text-white' : 'bg-gray-200'} flex items-center justify-center text-sm font-medium`}>3</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              {currentStep === 1 && (
+                <div className="animate-fade-in">
+                  <h3 className="text-lg font-medium mb-3">No Chrome</h3>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start">
                       <span className="text-subpi-orange mr-2">•</span>
@@ -59,12 +85,11 @@ const PWAButton: React.FC = () => {
                     </li>
                   </ul>
                 </div>
-
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center mb-3">
-                    <div className="h-6 w-6 rounded-full bg-subpi-blue text-white flex items-center justify-center text-sm font-medium">2</div>
-                    <h3 className="ml-2 font-medium">No Safari</h3>
-                  </div>
+              )}
+              
+              {currentStep === 2 && (
+                <div className="animate-fade-in">
+                  <h3 className="text-lg font-medium mb-3">No Safari</h3>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start">
                       <span className="text-subpi-orange mr-2">•</span>
@@ -84,22 +109,32 @@ const PWAButton: React.FC = () => {
                     </li>
                   </ul>
                 </div>
-              </div>
-
-              <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-sm">
-                  Após adicionar, você poderá acessar o sistema diretamente pelo ícone na tela inicial, como um aplicativo nativo.
-                </p>
-              </div>
-
-              <div className="mt-6 flex justify-center pb-2">
-                <button 
-                  className="bg-subpi-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  onClick={toggleInstructions}
-                >
-                  Fechar
-                </button>
-              </div>
+              )}
+              
+              {currentStep === 3 && (
+                <div className="animate-fade-in">
+                  <h3 className="text-lg font-medium mb-3">Após adicionar</h3>
+                  <p className="text-sm">
+                    Após adicionar, você poderá acessar o sistema diretamente pelo ícone na tela inicial, como um aplicativo nativo.
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="border-t p-4 flex justify-between">
+              <button
+                onClick={toggleInstructions}
+                className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
+              >
+                Fechar
+              </button>
+              <button 
+                onClick={goToNextStep}
+                className="bg-subpi-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+              >
+                {currentStep === totalSteps ? 'Concluir' : 'Continuar'}
+                {currentStep !== totalSteps && <ChevronRight className="ml-1 h-4 w-4" />}
+              </button>
             </div>
           </div>
         </div>
@@ -121,15 +156,16 @@ const PWAButton: React.FC = () => {
               transform: scale(1);
             }
           }
-          @keyframes slideIn {
+          @keyframes fadeIn {
             from {
-              transform: translateY(100%);
               opacity: 0;
             }
             to {
-              transform: translateY(0);
               opacity: 1;
             }
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
           }
         `}
       </style>

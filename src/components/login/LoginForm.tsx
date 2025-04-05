@@ -1,9 +1,8 @@
+
 import React, { useState, useRef } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import EmailSuffix from '@/components/EmailSuffix';
-import PasswordRequirements from '@/components/PasswordRequirements';
-import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
 import { toast } from '@/components/ui/use-toast';
@@ -16,20 +15,13 @@ const LoginForm = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   const {
-    password,
-    setPassword,
-    showRequirements,
-    setShowRequirements,
-    requirements
-  } = usePasswordValidation();
-
-  const {
     signIn,
     signInWithGoogle,
     isLoading: authLoading
   } = useAuth();
 
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
@@ -141,7 +133,6 @@ const LoginForm = () => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                onFocus={() => setShowRequirements(true)}
                 className={`pr-10 ${passwordError ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`}
                 placeholder="••••••••"
               />
@@ -153,11 +144,7 @@ const LoginForm = () => {
                 {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
               </button>
             </div>
-            <PasswordRequirements 
-              password={password}
-              requirements={requirements} 
-              visible={showRequirements && password.length > 0} 
-            />
+            {passwordError && <p className="mt-1 text-sm text-[#f57b35]">Senha é obrigatória</p>}
             <div className="mt-2">
               <Link to="/forgot-password" className="text-[#f57c35] font-semibold hover:underline">Esqueceu sua senha?</Link>
             </div>
