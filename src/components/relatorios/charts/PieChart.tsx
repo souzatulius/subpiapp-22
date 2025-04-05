@@ -22,15 +22,15 @@ export const PieChart: React.FC<PieChartProps> = ({
     
     switch (colorSet) {
       case 'blue':
-        return ['#0066FF', '#1D4ED8', '#3B82F6', '#60A5FA', '#93C5FD'];
+        return ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'];
       case 'orange':
-        return ['#F5B700', '#F89E66', '#F25C05', '#FB923C', '#FED7AA'];
+        return ['#f97316', '#fb923c', '#fdba74', '#fed7aa', '#ffedd5'];
       case 'green':
-        return ['#84cc16', '#22c55e', '#4ade80', '#86efac', '#bbf7d0'];
+        return ['#22c55e', '#4ade80', '#86efac', '#bbf7d0', '#dcfce7'];
       case 'status':
-        return ['#22c55e', '#0066FF', '#ef4444', '#4B5563', '#D4D4D4'];
+        return ['#22c55e', '#f97316', '#ef4444', '#64748b', '#94a3b8'];
       default:
-        return ['#0066FF', '#1D4ED8', '#F5B700', '#D4D4D4', '#4B5563'];
+        return ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'];
     }
   };
 

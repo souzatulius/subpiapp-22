@@ -4,7 +4,6 @@ import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
 import { MoveIcon } from 'lucide-react';
-import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 
 export interface ActionCardProps {
   id: string;
@@ -29,6 +28,25 @@ export interface ActionCardProps {
   showControls?: boolean;
 }
 
+const getBackgroundColor = (color: CardColor): string => {
+  switch (color) {
+    case 'blue-vivid':
+      return 'bg-[#0066FF]'; // Azul Vivo
+    case 'green-neon':
+      return 'bg-[#66FF66]'; // Verde Neon  
+    case 'gray-light':
+      return 'bg-[#F5F5F5]'; // Cinza Claro
+    case 'orange-dark':
+      return 'bg-[#F25C05]'; // Laranja Escuro
+    case 'yellow':
+      return 'bg-yellow-400'; // Amarelo
+    case 'blue-dark':
+      return 'bg-[#1D4ED8]'; // Azul Escuro
+    default:
+      return 'bg-[#0066FF]'; // Default to Azul Vivo
+  }
+};
+
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   return 'w-10 h-10';
 };
@@ -50,15 +68,24 @@ const ActionCard = ({
   showControls = true
 }: ActionCardProps) => {
   const navigate = useNavigate();
-  const bgColorClass = getColorClasses(color);
+  const bgColor = getBackgroundColor(color);
   const IconComponent = getIconComponentFromId(iconId);
   const iconSizeClass = getIconSize();
-  const textColorClass = getTextColorClass(color);
+  
+  // Determine text color based on background color
+  const getTextColor = (bgColor: string): string => {
+    if (color === 'gray-light' || color === 'green-neon') {
+      return 'text-gray-800'; // Dark text for light backgrounds
+    }
+    return 'text-white'; // White text for dark backgrounds
+  };
+  
+  const textColor = getTextColor(bgColor);
 
   return <div className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColorClass} group relative`}>
+        active:scale-95 ${bgColor} group relative`}>
       {isDraggable && <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
           <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
             <MoveIcon className="h-3.5 w-3.5" />
@@ -71,11 +98,11 @@ const ActionCard = ({
 
       <div className="relative h-full flex flex-col items-center justify-center text-center py-3 px-2">
         {children ? <>{children}</> : <>
-            <div className={`mb-3 ${textColorClass}`}>
+            <div className={`mb-3 ${textColor}`}>
               {IconComponent && <IconComponent className={iconSizeClass} />}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
-              <h3 className={`font-semibold ${textColorClass} text-lg leading-tight break-words text-balance`}>
+              <h3 className={`font-semibold ${textColor} text-lg leading-tight break-words text-balance`}>
                 {title}
               </h3>
             </div>

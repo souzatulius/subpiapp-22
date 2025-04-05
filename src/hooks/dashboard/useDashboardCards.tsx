@@ -1,79 +1,128 @@
 
 import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useDepartment } from './useDepartment';
+import { getInitialDashboardCards } from './defaultCards';
 import { supabase } from '@/integrations/supabase/client';
-import { getDashboardCards } from '@/services/dashboardService';
-import { defaultComunicacaoCards } from '@/data/dashboardCards';
-import { toast } from '@/hooks/use-toast';
 
-export const useDashboardCards = (userId?: string | null, departmentId?: string) => {
+export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { userDepartment, isLoading: isDepartmentLoading } = useDepartment(user);
 
   useEffect(() => {
-    const loadCards = async () => {
-      if (!userId) {
-        setCards(defaultComunicacaoCards);
+    if (isDepartmentLoading) return;
+
+    const fetchCards = async () => {
+      if (!user) {
+        setCards([]);
         setIsLoading(false);
         return;
       }
 
+      // Normalize department value for comparison
+      const normalizedDepartment = userDepartment
+        ? userDepartment
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+        : undefined;
+
+      const defaultCards = getInitialDashboardCards(normalizedDepartment);
+
       try {
-        setIsLoading(true);
-        const userCards = await getDashboardCards(userId, departmentId);
+        const { data, error } = await supabase
+          .from('user_dashboard')
+          .select('cards_config')
+          .eq('user_id', user.id)
+          .eq('page', 'inicial')
+          .single();
+
+        if (error || !data?.cards_config) {
+          setCards(defaultCards);
+          return;
+        }
+
+        // Safe parsing of card config data
+        let parsedCards: ActionCardItem[] = [];
         
-        if (userCards && userCards.length > 0) {
-          setCards(userCards);
+        if (typeof data.cards_config === 'string') {
+          try {
+            // Using a simpler type assertion to avoid deep type checking
+            parsedCards = JSON.parse(data.cards_config) as any[];
+          } catch (e) {
+            console.error('Error parsing cards_config:', e);
+          }
+        } else if (Array.isArray(data.cards_config)) {
+          // Direct assignment with simple type casting
+          parsedCards = data.cards_config as any[];
+        }
+
+        // Only use the parsed cards if they form a valid array
+        if (Array.isArray(parsedCards) && parsedCards.length > 0) {
+          setCards(parsedCards);
         } else {
-          // Fallback to default cards if no user-specific cards are found
-          setCards(defaultComunicacaoCards);
+          setCards(defaultCards);
         }
       } catch (error) {
-        console.error('Error loading dashboard cards:', error);
-        toast({
-          title: 'Erro ao carregar cards',
-          description: 'Não foi possível carregar seus cards personalizados.',
-          variant: 'destructive',
-        });
-        setCards(defaultComunicacaoCards);
+        console.error('Error fetching dashboard cards:', error);
+        setCards(defaultCards);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadCards();
-  }, [userId, departmentId]);
+    fetchCards();
+  }, [user, userDepartment, isDepartmentLoading]);
 
-  const saveCards = async (updatedCards: ActionCardItem[]) => {
-    if (!userId) return false;
+  const persistCards = (updatedCards: ActionCardItem[]) => {
+    if (!user) return;
+    
+    // Create a shallow copy of the array to avoid mutation issues
+    const cardsCopy = [...updatedCards];
+    setCards(cardsCopy);
 
-    try {
-      const { data, error } = await supabase
-        .from('user_dashboard')
-        .upsert(
-          {
-            user_id: userId,
-            cards_config: JSON.stringify(updatedCards),
-            department_id: departmentId || 'comunicacao',
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: 'user_id,department_id' }
-        );
-
-      if (error) throw error;
-      
-      setCards(updatedCards);
-      return true;
-    } catch (error) {
-      console.error('Error saving dashboard cards:', error);
-      toast({
-        title: 'Erro ao salvar cards',
-        description: 'Não foi possível salvar suas configurações.',
-        variant: 'destructive',
+    supabase
+      .from('user_dashboard')
+      .upsert({
+        user_id: user.id,
+        page: 'inicial',
+        cards_config: JSON.stringify(cardsCopy),
+        department_id: userDepartment || 'default'
+      })
+      .then(({ error }) => {
+        if (error) console.error('Erro ao salvar configuração de cards:', error);
       });
-      return false;
-    }
   };
 
-  return { cards, setCards, isLoading, saveCards };
+  const handleCardEdit = (cardToUpdate: ActionCardItem) => {
+    const updatedCards = cards.map(card =>
+      card.id === cardToUpdate.id ? cardToUpdate : card
+    );
+    persistCards(updatedCards);
+  };
+
+  const handleCardHide = (id: string) => {
+    const updatedCards = cards.map(card =>
+      card.id === id ? { ...card, isHidden: true } : card
+    );
+    persistCards(updatedCards);
+  };
+
+  const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
+    persistCards(updatedCards);
+  };
+
+  return {
+    cards,
+    isLoading: isLoading || isDepartmentLoading,
+    handleCardEdit,
+    handleCardHide,
+    handleCardsReorder
+  };
 };
+
+// Add default export to support both import styles
+export default useDashboardCards;
