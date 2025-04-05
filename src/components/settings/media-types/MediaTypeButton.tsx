@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MediaType } from '@/hooks/useMediaTypes';
@@ -15,20 +14,25 @@ const MediaTypeButton: React.FC<MediaTypeButtonProps> = ({
   isSelected,
   onClick
 }) => {
-  // Use our custom hook to get the icon
   const icon = useMediaTypeIcon(mediaType);
 
   return (
     <Button
       type="button"
       variant={isSelected ? "default" : "outline"}
-      className={`h-24 w-full py-3 flex flex-col items-center justify-center gap-2 rounded-xl selection-button
-        ${isSelected ? "bg-orange-500 text-white" : "hover:bg-orange-500 hover:text-white"}
+      size="simple"
+      className={`
+        h-24 w-full flex flex-col items-center justify-center gap-2 
+        rounded-2xl transition-all
+        ${isSelected ? "bg-[#003570] text-white" : "hover:bg-orange-500 hover:text-white"}
       `}
       onClick={onClick}
+      aria-pressed={isSelected}
     >
       {icon}
-      <span className="text-sm font-semibold text-center">{mediaType.descricao}</span>
+      <span className="text-sm font-semibold text-center">
+        {mediaType.descricao}
+      </span>
     </Button>
   );
 };
