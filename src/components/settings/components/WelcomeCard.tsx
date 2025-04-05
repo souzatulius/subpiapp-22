@@ -32,7 +32,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold mb-6 flex items-center">
+            <h2 className="text-2xl font-bold mb-5 flex items-center">
               <Settings className="h-6 w-6 mr-2" />
               Central de Configurações
             </h2>
