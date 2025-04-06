@@ -30,12 +30,12 @@ const LeftContentSection: React.FC = () => {
             </Link>
           </Button> : <>
             <Button asChild className={`rounded-xl py-2 px-6 flex items-center shadow-md transition-all duration-300 ${isLoginPage ? "bg-gray-400 text-gray-100 cursor-not-allowed hover:bg-gray-400 hover:shadow-md" : "bg-[#002855] hover:bg-[#001f40] text-white hover:shadow-lg"}`} disabled={isLoginPage}>
-              <Link to={isLoginPage ? "#" : "/login"}>
+              <Link to={isLoginPage ? "#" : "/login"} className="h-12">
                 Acessar <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button asChild variant="outline" className={`rounded-xl bg-transparent border-2 py-2 px-6 shadow-md transition-all duration-300 ${isRegisterPage ? "border-gray-400 text-gray-400 cursor-not-allowed hover:border-gray-400 hover:bg-transparent hover:text-gray-400 hover:shadow-md" : "border-[#f57c35] text-[#f57c35] hover:bg-[#f57c35] hover:text-white hover:shadow-lg"}`} disabled={isRegisterPage}>
-              <Link to={isRegisterPage ? "#" : "/register"}>
+              <Link to={isRegisterPage ? "#" : "/register"} className="h-12">
                 Solicitar Acesso
               </Link>
             </Button>
