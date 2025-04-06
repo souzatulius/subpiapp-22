@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
 import { cn } from "@/lib/utils";
@@ -32,12 +31,10 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Show suffix when user starts typing
   useEffect(() => {
     setShowSuffix(value.length > 0 && !hideSuffix);
   }, [value, hideSuffix]);
 
-  // Clean the input value to ensure no suffix is included
   useEffect(() => {
     if (value && value.includes('@')) {
       const username = value.split('@')[0];
@@ -47,7 +44,6 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
     }
   }, [value, onChange]);
 
-  // Handle outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
@@ -62,13 +58,11 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    // Clean any @ or domain that might have been pasted
     const cleanedValue = inputValue.split('@')[0];
     onChange(cleanedValue);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // Prevent cursor from going beyond the end of the user input
     if (e.key === "ArrowRight") {
       const input = inputRef.current;
       if (input) {
@@ -80,7 +74,6 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
     }
   };
 
-  // Style classes for the container
   const containerBorderColor = error 
     ? 'border-[#f57b35]' 
     : isFocused
