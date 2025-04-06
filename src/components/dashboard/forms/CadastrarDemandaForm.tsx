@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -125,7 +126,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 
   return (
     <div className="animate-fade-in" ref={formRef}>
-      <Card className="border border-gray-200 rounded-lg shadow-sm">
+      <Card className="border border-gray-200 rounded-2xl shadow-sm">
         <div className="p-4 lg:p-5">
           <div className="mb-4">
             {FORM_STEPS && activeStep >= 0 && activeStep < FORM_STEPS.length && (
@@ -152,7 +153,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
           </div>
           
           {showValidationAlert && validationErrors.length > 0 && activeStep === FORM_STEPS.length - 1 && (
-            <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
+            <Alert variant="destructive" className="mb-4 bg-orange-50 border-orange-200 text-orange-800 rounded-xl">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               <AlertTitle>Campos obrigatórios não preenchidos</AlertTitle>
               <AlertDescription>

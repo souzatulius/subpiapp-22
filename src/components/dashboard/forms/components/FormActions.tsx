@@ -27,7 +27,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         variant="outline"
         onClick={onPrevStep}
         disabled={isFirstStep}
-        className="hover:bg-gray-100 hover:text-gray-800"
+        className="hover:bg-gray-100 hover:text-gray-800 rounded-2xl"
       >
         Voltar
       </Button>
@@ -38,7 +38,7 @@ const FormActions: React.FC<FormActionsProps> = ({
           variant="action"
           onClick={onSubmit}
           disabled={isSubmitting}
-          className="bg-orange-500 hover:bg-orange-600"
+          className="bg-orange-500 hover:bg-orange-600 rounded-2xl"
         >
           {isSubmitting ? "Enviando..." : "Finalizar"}
         </Button>
@@ -47,7 +47,7 @@ const FormActions: React.FC<FormActionsProps> = ({
           type="button"
           variant="action"
           onClick={onNextStep}
-          className="bg-orange-500 hover:bg-orange-600"
+          className="bg-orange-500 hover:bg-orange-600 rounded-2xl"
         >
           Próximo
           <ArrowRight className="ml-2 h-4 w-4" />
