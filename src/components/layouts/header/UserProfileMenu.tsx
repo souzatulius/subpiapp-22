@@ -34,9 +34,12 @@ const UserProfileMenu: React.FC = () => {
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado do sistema."
       });
-      navigate('/login');
+      // Garantir que o usuário sempre seja redirecionado para a página de login
+      navigate('/login', { replace: true });
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+      // Mesmo em caso de erro, tentar redirecionar para a página de login
+      navigate('/login', { replace: true });
     }
   };
 

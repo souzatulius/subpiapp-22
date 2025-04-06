@@ -29,9 +29,12 @@ const ProfileMenu: React.FC = () => {
     try {
       setIsSigningOut(true);
       await supabase.auth.signOut();
-      navigate('/login');
+      // Garantir redirecionamento para login após logout
+      navigate('/login', { replace: true });
     } catch (error) {
       console.error('Error signing out:', error);
+      // Mesmo em caso de erro, redirecionar para login
+      navigate('/login', { replace: true });
     } finally {
       setIsSigningOut(false);
     }
