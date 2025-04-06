@@ -30,6 +30,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
   const [showSuffix, setShowSuffix] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Show suffix when user starts typing
   useEffect(() => {
@@ -94,6 +95,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
 
   return (
     <div 
+      ref={containerRef}
       className={cn(
         `relative flex h-12 w-full rounded-xl border ${containerBorderColor} bg-white shadow-sm transition-all duration-300`,
         className
@@ -119,15 +121,11 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
           {...registerField}
         />
         {showSuffix && (
-          <span 
-            className="pointer-events-none absolute top-1/2 transform -translate-y-1/2 text-base text-gray-500"
-            style={{ 
-              left: `calc(${4 + value.length * 0.6}em)`,
-              transition: 'left 0.1s ease-out',
-            }}
-          >
-            {suffix}
-          </span>
+          <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none overflow-hidden">
+            <span className="text-gray-500 whitespace-nowrap text-ellipsis">
+              {suffix}
+            </span>
+          </div>
         )}
       </div>
     </div>
