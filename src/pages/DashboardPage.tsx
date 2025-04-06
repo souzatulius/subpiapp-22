@@ -31,8 +31,6 @@ const DashboardPage: React.FC = () => {
   const {
     firstName
   } = useUserData(user?.id);
-  
-  // Use the full hook for dashboard cards
   const {
     cards,
     isLoading,
@@ -58,10 +56,20 @@ const DashboardPage: React.FC = () => {
   const handleSaveCard = (updatedCard: Partial<ActionCardItem>) => {
     saveCardEdit(updatedCard as ActionCardItem);
     setIsEditCardModalOpen(false);
+    toast({
+      title: "Card atualizado",
+      description: "As alterações foram salvas com sucesso.",
+      variant: "default"
+    });
   };
 
   const handleResetDashboard = () => {
     resetDashboard();
+    toast({
+      title: "Dashboard resetado",
+      description: "O seu dashboard foi restaurado para a configuração padrão.",
+      variant: "default"
+    });
   };
 
   if (!user) {
@@ -90,17 +98,8 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
-            {/* Dashboard actions */}
-            <div className="flex justify-between items-center mb-4">
-              <Button 
-                variant={isEditMode ? "default" : "outline"} 
-                size="sm" 
-                onClick={toggleEditMode}
-                className={isEditMode ? "bg-blue-600 text-white" : "text-blue-600 border-blue-300 hover:bg-blue-50"}
-              >
-                {isEditMode ? "Modo de Edição Ativo" : "Editar Dashboard"}
-              </Button>
-              
+            {/* Reset dashboard button with updated text */}
+            <div className="flex justify-end mb-4">
               <Button 
                 variant="outline" 
                 size="sm" 

@@ -181,7 +181,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       title: 'Consultar Demandas',
       iconId: 'list-bullet',
       path: '/dashboard/comunicacao/demandas',
-      color: 'deep-blue', // Changed from gray-lighter to deep-blue (gray-950)
+      color: 'gray-lighter',
       width: '25',
       height: '2',
       type: 'standard',
@@ -221,7 +221,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       title: 'Ranking de Zeladoria',
       iconId: 'trophy',
       path: '/dashboard/zeladoria/ranking-subs',
-      color: 'gray-light',  // Use gray-light for a white background with dark text
+      color: 'gray-light',  // Changed from orange-light to gray-light for a white background with dark blue content
       width: '25',
       height: '2',
       type: 'standard',

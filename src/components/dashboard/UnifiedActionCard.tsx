@@ -168,8 +168,6 @@ export function UnifiedActionCard({
       navigate(path);
     }
   };
-
-  const isRankingCard = id === 'ranking-zeladoria';
   
   const renderCardContent = () => {
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
