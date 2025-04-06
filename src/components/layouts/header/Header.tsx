@@ -21,16 +21,6 @@ const Header: React.FC<HeaderProps> = ({
   const { userProfile } = useUserProfile();
   const isMobile = useIsMobile();
   
-  // Get first and second name if available
-  const getDisplayName = () => {
-    if (!userProfile?.nome_completo) return '';
-    const nameParts = userProfile.nome_completo.split(' ');
-    if (nameParts.length >= 2) {
-      return `${nameParts[0]} ${nameParts[1]}`;
-    }
-    return nameParts[0];
-  };
-
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between gap-4">
@@ -64,12 +54,6 @@ const Header: React.FC<HeaderProps> = ({
         <div className="w-1/4 flex items-center justify-end">
           {showControls && !hideUserMenu && (
             <div className="flex items-center">
-              {userProfile && !isMobile && (
-                <div className="text-right mr-3 hidden sm:block">
-                  <p className="font-bold text-[#003570]">{getDisplayName()}</p>
-                  <p className="text-xs text-gray-500">{userProfile.email}</p>
-                </div>
-              )}
               <UserProfileMenu />
             </div>
           )}
