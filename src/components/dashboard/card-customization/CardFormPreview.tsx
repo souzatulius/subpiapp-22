@@ -35,8 +35,8 @@ const CardFormPreview: React.FC<CardFormPreviewProps> = ({
   
   // Generate text color based on background
   const getTextColor = (bgColor: string) => {
-    const darkColors = ['blue-dark', 'gray-dark', 'orange-light', 'gray-ultra-light'];
-    return darkColors.includes(bgColor) ? 'text-white' : 'text-gray-800';
+    const lightColors = ['green-neon', 'green-dark', 'gray-light', 'gray-lighter', 'gray-medium'];
+    return lightColors.includes(bgColor) ? 'text-gray-800' : 'text-white';
   };
 
   // Find data source label

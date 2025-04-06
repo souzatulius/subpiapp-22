@@ -41,6 +41,22 @@ export const getColorClass = (color: string): string => {
       return 'bg-lime-500 text-white border-lime-600';
     case 'gray-ultra-light':
       return 'bg-gray-25 text-gray-700 border-gray-50';
+    case 'deep-blue':
+      return 'bg-[#051A2C] text-white border-blue-950';
+    case 'blue-vivid':
+      return 'bg-[#0066FF] text-white border-blue-600';
+    case 'blue-light':
+      return 'bg-[#66B2FF] text-white border-blue-400';
+    case 'green-neon':
+      return 'bg-[#66FF66] text-gray-800 border-green-400';
+    case 'green-dark':
+      return 'bg-[#00CC00] text-gray-800 border-green-700';
+    case 'gray-lighter':
+      return 'bg-[#FAFAFA] text-gray-800 border-gray-200';
+    case 'gray-medium':
+      return 'bg-[#D4D4D4] text-gray-800 border-gray-400';
+    case 'orange-dark':
+      return 'bg-[#F25C05] text-white border-orange-600';
     default:
       return 'bg-blue-50 text-blue-950 border-blue-100';
   }

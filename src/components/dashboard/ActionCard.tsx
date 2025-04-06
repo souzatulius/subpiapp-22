@@ -51,6 +51,8 @@ const getBackgroundColor = (color: CardColor): string => {
       return 'bg-[#F25C05]'; // Laranja Escuro
     case 'orange-light':
       return 'bg-[#F89E66]'; // Laranja Claro
+    case 'deep-blue':
+      return 'bg-[#051A2C]'; // Azul Profundo
     default:
       return 'bg-[#0066FF]'; // Default to Azul Vivo
   }
