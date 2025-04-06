@@ -41,7 +41,7 @@ const RegisterForm = ({
       });
     }
   };
-  return <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md mx-auto my-[2px]">
+  return <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8 w-full max-w-md mx-auto my-[2px]">
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Cadastre-se</h2>
       <p className="text-[#6B7280] mb-6">Preencha seus dados para solicitar acesso à plataforma.</p>
 

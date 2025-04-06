@@ -5,7 +5,7 @@ import AuthLayout from '@/components/AuthLayout';
 import AttentionBox from '@/components/ui/attention-box';
 const EmailVerified = () => {
   return <AuthLayout>
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md mx-auto">
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8 w-full max-w-md mx-auto">
         <h2 className="text-2xl font-bold mb-4 text-slate-900">
           Email Verificado com Sucesso
         </h2>

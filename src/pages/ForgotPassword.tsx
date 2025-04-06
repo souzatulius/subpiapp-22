@@ -61,7 +61,7 @@ const ForgotPassword = () => {
   }
 
   return <AuthLayout>
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md mx-auto">
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8 w-full max-w-md mx-auto">
         <h2 className="text-2xl font-bold text-[#111827] mb-2">Recuperar Senha</h2>
         
         {success ? <div className="text-center py-6">

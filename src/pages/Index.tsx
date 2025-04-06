@@ -16,7 +16,7 @@ const Index = () => {
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Content */}
-        <div className="w-full md:w-1/2 px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 px-4 sm:px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
           <LeftContentSection />
         </div>
         
