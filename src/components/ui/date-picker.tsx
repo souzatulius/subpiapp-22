@@ -19,6 +19,21 @@ export interface DatePickerProps {
   showTimeSelect?: boolean;
 }
 
+/**
+ * DatePicker component
+ * 
+ * A full-featured date picker component with optional time selection.
+ * Allows users to select dates from a calendar and optionally set a specific time.
+ * 
+ * The component uses the date-fns library for date manipulation and formatting,
+ * and displays dates in Brazilian Portuguese format.
+ * 
+ * @param date - The currently selected date (or undefined if no date selected)
+ * @param onSelect - Callback fired when a date is selected
+ * @param placeholder - Placeholder text shown when no date is selected
+ * @param className - Additional CSS classes
+ * @param showTimeSelect - Whether to show time selection controls (hours/minutes)
+ */
 export function DatePicker({
   date,
   onSelect,
@@ -33,9 +48,11 @@ export function DatePicker({
     return now;
   }, []);
 
+  // Track time input values separately for better input control
   const [selectedHours, setSelectedHours] = React.useState<string>(date ? format(date, 'HH') : '12');
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
+  // Update time states when date prop changes
   React.useEffect(() => {
     if (date) {
       setSelectedHours(format(date, 'HH'));
@@ -43,6 +60,17 @@ export function DatePicker({
     }
   }, [date]);
 
+  /**
+   * Handles changes to the time inputs (hours or minutes)
+   * Validates that the input is a valid number within the appropriate range:
+   * - Hours: 0-23
+   * - Minutes: 0-59
+   * 
+   * Updates the date with the new time values when appropriate
+   * 
+   * @param type - Whether we're changing 'hours' or 'minutes'
+   * @param value - The new input value
+   */
   const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
     // Handle the input changes
     if (type === 'hours') {
@@ -74,7 +102,13 @@ export function DatePicker({
     }
   };
 
-  // Focus handler to clear the field for easier input
+  /**
+   * Focus handler to clear the field for easier input
+   * When a time field gets focus, we clear it to let the user
+   * enter a new value from scratch more easily
+   * 
+   * @param type - Whether we're focusing on 'hours' or 'minutes'
+   */
   const handleFocus = (type: 'hours' | 'minutes') => {
     if (type === 'hours') {
       setSelectedHours('');
@@ -83,7 +117,13 @@ export function DatePicker({
     }
   };
 
-  // Handle time input blur to format correctly
+  /**
+   * Handle time input blur to format correctly
+   * When a time field loses focus, we ensure it has a valid
+   * format (padding with zeros as needed) and update the date
+   * 
+   * @param type - Whether we're handling 'hours' or 'minutes' blur
+   */
   const handleTimeBlur = (type: 'hours' | 'minutes') => {
     if (type === 'hours') {
       if (selectedHours === '') {

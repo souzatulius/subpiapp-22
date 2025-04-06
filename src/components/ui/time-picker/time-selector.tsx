@@ -15,6 +15,24 @@ interface TimeSelectorProps {
   onMinutesBlur: () => void;
 }
 
+/**
+ * TimeSelector component
+ * 
+ * A component that provides an interface for selecting time values (hours and minutes)
+ * using specialized input fields with proper validation and formatting.
+ * 
+ * The component displays two TimeInput components separated by a colon,
+ * allowing users to enter hours (00-23) and minutes (00-59) separately.
+ * 
+ * @param selectedHours - The current hours value
+ * @param selectedMinutes - The current minutes value
+ * @param onHoursChange - Callback when hours value changes
+ * @param onMinutesChange - Callback when minutes value changes
+ * @param onHoursFocus - Callback when hours input is focused
+ * @param onMinutesFocus - Callback when minutes input is focused
+ * @param onHoursBlur - Callback when hours input loses focus
+ * @param onMinutesBlur - Callback when minutes input loses focus
+ */
 export function TimeSelector({
   selectedHours,
   selectedMinutes,
