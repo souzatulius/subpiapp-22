@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
@@ -38,39 +39,55 @@ export function DatePicker({
   const [selectedHours, setSelectedHours] = React.useState<string>(date ? format(date, 'HH') : '12');
   const [selectedMinutes, setSelectedMinutes] = React.useState<string>(date ? format(date, 'mm') : '00');
 
+  React.useEffect(() => {
+    if (date) {
+      setSelectedHours(format(date, 'HH'));
+      setSelectedMinutes(format(date, 'mm'));
+    }
+  }, [date]);
+
   const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
-    // Allow the user to type and validate the input
+    // Replace current value instead of appending
     if (type === 'hours') {
       // Validate hours (0-23)
-      let hours = parseInt(value);
-      if (!isNaN(hours) && hours >= 0 && hours <= 23) {
+      const numValue = parseInt(value, 10);
+      if (!isNaN(numValue) && numValue >= 0 && numValue <= 23) {
         setSelectedHours(value.padStart(2, '0'));
       } else if (value === '') {
-        // Allow empty input for typing
-        setSelectedHours(value);
+        setSelectedHours('');
       }
     } else {
       // Validate minutes (0-59)
-      let minutes = parseInt(value);
-      if (!isNaN(minutes) && minutes >= 0 && minutes <= 59) {
+      const numValue = parseInt(value, 10);
+      if (!isNaN(numValue) && numValue >= 0 && numValue <= 59) {
         setSelectedMinutes(value.padStart(2, '0'));
       } else if (value === '') {
-        // Allow empty input for typing
-        setSelectedMinutes(value);
+        setSelectedMinutes('');
       }
     }
 
     // Only update the date if we have a valid value and a date is selected
-    if (date && (
-        (type === 'hours' && !isNaN(parseInt(value)) && parseInt(value) >= 0 && parseInt(value) <= 23) || 
-        (type === 'minutes' && !isNaN(parseInt(value)) && parseInt(value) >= 0 && parseInt(value) <= 59)
-    )) {
-      const newDate = new Date(date);
-      const hoursValue = type === 'hours' ? parseInt(value) : parseInt(selectedHours || '0');
-      const minutesValue = type === 'minutes' ? parseInt(value) : parseInt(selectedMinutes || '0');
+    if (date && value !== '') {
+      const hours = type === 'hours' ? 
+        (value === '' ? 0 : parseInt(value, 10)) : 
+        parseInt(selectedHours || '0', 10);
       
-      newDate.setHours(hoursValue, minutesValue);
+      const minutes = type === 'minutes' ? 
+        (value === '' ? 0 : parseInt(value, 10)) : 
+        parseInt(selectedMinutes || '0', 10);
+      
+      const newDate = new Date(date);
+      newDate.setHours(hours, minutes);
       onSelect(newDate);
+    }
+  };
+
+  // Focus handler to clear the field for easier input
+  const handleFocus = (type: 'hours' | 'minutes') => {
+    if (type === 'hours') {
+      setSelectedHours('');
+    } else {
+      setSelectedMinutes('');
     }
   };
 
@@ -94,8 +111,8 @@ export function DatePicker({
     if (date) {
       const newDate = new Date(date);
       newDate.setHours(
-        parseInt(selectedHours || '0'),
-        parseInt(selectedMinutes || '0')
+        parseInt(selectedHours || '0', 10),
+        parseInt(selectedMinutes || '0', 10)
       );
       onSelect(newDate);
     }
@@ -110,8 +127,8 @@ export function DatePicker({
     if (showTimeSelect) {
       // Keep the user-selected time when changing the date
       selectedDate.setHours(
-        parseInt(selectedHours || '0'), 
-        parseInt(selectedMinutes || '0')
+        parseInt(selectedHours || '0', 10), 
+        parseInt(selectedMinutes || '0', 10)
       );
     }
     
@@ -160,6 +177,7 @@ export function DatePicker({
                 <Input
                   value={selectedHours}
                   onChange={(e) => handleTimeChange('hours', e.target.value)}
+                  onFocus={() => handleFocus('hours')}
                   onBlur={() => handleTimeBlur('hours')}
                   className="w-16 text-center"
                   maxLength={2}
@@ -168,6 +186,7 @@ export function DatePicker({
                 <Input
                   value={selectedMinutes}
                   onChange={(e) => handleTimeChange('minutes', e.target.value)}
+                  onFocus={() => handleFocus('minutes')}
                   onBlur={() => handleTimeBlur('minutes')}
                   className="w-16 text-center"
                   maxLength={2}
