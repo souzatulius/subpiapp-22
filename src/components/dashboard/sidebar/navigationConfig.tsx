@@ -35,11 +35,11 @@ export const getNavigationSections = () => [
     path: '/dashboard/comunicacao/relatorios',
     isSection: false
   },
-  // Seção 5: Top Zeladoria
+  // Seção 5: Zeladoria
   {
     id: 'ranking',
     icon: <TrendingUp size={20} />,
-    label: 'Top Zeladoria',
+    label: 'Zeladoria',
     path: '/dashboard/zeladoria/ranking-subs',
     isSection: false
   }

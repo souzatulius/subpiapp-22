@@ -9,9 +9,9 @@ interface MobileBottomNavProps {
 
 const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   const navItems = getNavigationSections().map(item => {
-    // Rename "Top Zeladoria" to just "Ranking" for mobile
+    // Rename "Top Zeladoria" to "Zeladoria" for mobile
     if (item.id === 'ranking') {
-      return { ...item, label: 'Top' };
+      return { ...item, label: 'Zeladoria' };
     }
     return item;
   });

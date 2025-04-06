@@ -31,7 +31,7 @@ const RankingSubs = () => {
     >
       <WelcomeCard 
         title="Ranking da Zeladoria"
-        description="Acompanhamento de desempenho e análises de projetos, obras e manutenção."
+        description="Acompanhamento de desempenho e análises de ações, projetos e obras."
         icon={<BarChart3 className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-orange-500 to-orange-700"
       />

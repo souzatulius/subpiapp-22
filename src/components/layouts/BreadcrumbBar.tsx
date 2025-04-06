@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
@@ -34,7 +35,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       'notas': 'Notas de Imprensa',
       'consultar-notas': 'Notas de Imprensa',
       'relatorios': 'Relatórios',
-      'ranking-subs': 'Top Zeladoria',
+      'ranking-subs': 'Ranking da Zeladoria',
       'dashboard': 'Início',
       'comunicacao': 'Comunicação',
       'settings': 'Configurações',
@@ -123,7 +124,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
     if (path.includes('/dashboard/zeladoria/ranking-subs')) {
       return [
         { path: '/dashboard', label: 'Início' },
-        { path: '/dashboard/zeladoria/ranking-subs', label: 'Top Zeladoria' }
+        { path: '/dashboard/zeladoria/ranking-subs', label: 'Ranking da Zeladoria' }
       ];
     }
     
