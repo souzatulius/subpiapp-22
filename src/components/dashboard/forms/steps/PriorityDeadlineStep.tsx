@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DatePicker } from '@/components/ui/date-picker';
+import { DatePicker } from '@/components/ui/date-picker/index';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { BellRing, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -54,7 +54,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
                   "ring-2 ring-[#003570]" : 
                   ""}
                 ${hasError('prioridade') ? 'border-orange-500' : ''}
-                hover:bg-orange-500 hover:text-white rounded-2xl group`}
+                hover:bg-orange-500 hover:text-white group`}
               onClick={() => handleSelectChange('prioridade', priority.id)}
             >
               <div className="group-hover:text-white">
