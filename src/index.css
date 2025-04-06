@@ -180,16 +180,24 @@
   @apply bg-gray-100 text-gray-800;
 }
 
+/* Fix for circular dependency - replaced @apply with direct classes */
 .selection-button.selected, 
-.selection-button[data-state="selected"],
-.bg-orange-500.selection-button:hover {
-  @apply bg-orange-500 text-white;
+.selection-button[data-state="selected"] {
+  background-color: #f97316; /* bg-orange-500 equivalent */
+  color: white;
 }
 
+/* Fixed the hover state for selected buttons */
 .selection-button.selected:hover, 
-.selection-button[data-state="selected"]:hover,
+.selection-button[data-state="selected"]:hover {
+  background-color: #ea580c; /* bg-orange-600 equivalent */
+  color: white;
+}
+
+/* Fixed orange button hover state */
 .bg-orange-500.selection-button:hover {
-  @apply bg-orange-600 text-white;
+  background-color: #ea580c; /* bg-orange-600 equivalent */
+  color: white;
 }
 
 /* Badges styling */
