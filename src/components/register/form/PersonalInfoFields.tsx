@@ -73,7 +73,6 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
           value={email}
           onChange={(value) => handleChange({ target: { name: 'email', value } } as React.ChangeEvent<HTMLInputElement>)}
           error={errors.email}
-          hideSuffix={true}
         />
         {errors.email && <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>}
       </div>

@@ -1,16 +1,13 @@
-
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 // Format an email to include the domain if it's not already present
 export const completeEmailWithDomain = (email: string): string => {
-  const emailDomain = '@smsub.prefeitura.sp.gov.br';
-  
-  if (!email.includes('@')) {
-    return `${email}${emailDomain}`;
-  }
-  
-  return email;
+  if (!email) return '';
+  // If the email already has a domain, return it as is
+  if (email.includes('@')) return email;
+  // Otherwise, append the domain
+  return `${email}@smsub.prefeitura.sp.gov.br`;
 };
 
 // Show an error message from auth operations

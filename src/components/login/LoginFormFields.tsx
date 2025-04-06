@@ -33,7 +33,6 @@ const LoginFormFields: React.FC<LoginFormFieldsProps> = ({
           value={email}
           onChange={onEmailChange}
           error={emailError}
-          hideSuffix={true}
         />
         {emailError && <p className="text-sm text-[#f57b35]">E-mail é obrigatório</p>}
       </div>

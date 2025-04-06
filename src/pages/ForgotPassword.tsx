@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import AuthLayout from '@/components/AuthLayout';
@@ -6,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { completeEmailWithDomain } from '@/lib/authUtils';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -13,6 +15,7 @@ const ForgotPassword = () => {
   const [success, setSuccess] = useState(false);
   const isMobile = useIsMobile();
   const formRef = useRef<HTMLFormElement>(null);
+
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
@@ -48,6 +51,7 @@ const ForgotPassword = () => {
       setLoading(false);
     }
   };
+
   if (loading) {
     return <AuthLayout>
         <div className="h-full flex items-center justify-center p-8">
@@ -55,6 +59,7 @@ const ForgotPassword = () => {
         </div>
       </AuthLayout>;
   }
+
   return <AuthLayout>
       <div className="bg-white rounded-xl shadow-lg p-8 w-full mx-[60px] px-[20px]">
         <h2 className="text-2xl font-bold text-[#111827] mb-2">Recuperar Senha</h2>
@@ -82,7 +87,12 @@ const ForgotPassword = () => {
                   <label htmlFor="email" className="block text-sm font-medium text-[#111827] mb-1">
                     E-mail
                   </label>
-                  <EmailSuffix id="email" value={email} onChange={setEmail} error={emailError} hideSuffix={true} />
+                  <EmailSuffix 
+                    id="email" 
+                    value={email} 
+                    onChange={setEmail} 
+                    error={emailError} 
+                  />
                   {emailError && <p className="mt-1 text-sm text-[#f57b35]">E-mail é obrigatório</p>}
                 </div>
                 
@@ -99,4 +109,5 @@ const ForgotPassword = () => {
       </div>
     </AuthLayout>;
 };
+
 export default ForgotPassword;
