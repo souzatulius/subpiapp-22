@@ -2,17 +2,14 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
-import { CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
-  PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "./input";
-import { Label } from "./label";
+import { DateTimePickerContent } from "./date-picker/date-time-picker-content";
 
 export interface DatePickerProps {
   date?: Date;
@@ -123,23 +120,6 @@ export function DatePicker({
     }
   };
 
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (!selectedDate) {
-      onSelect(undefined);
-      return;
-    }
-
-    if (showTimeSelect) {
-      // Keep the user-selected time when changing the date
-      selectedDate.setHours(
-        parseInt(selectedHours || '0', 10), 
-        parseInt(selectedMinutes || '0', 10)
-      );
-    }
-    
-    onSelect(selectedDate);
-  };
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -161,46 +141,20 @@ export function DatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={handleDateSelect}
-          disabled={(date) => date < today}
-          locale={ptBR}
-          className={cn("p-3 pointer-events-auto")}
-        />
-
-        {showTimeSelect && (
-          <div className="p-3 border-t">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-gray-500" />
-                <Label>Horário</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Input
-                  value={selectedHours}
-                  onChange={(e) => handleTimeChange('hours', e.target.value)}
-                  onFocus={() => handleFocus('hours')}
-                  onBlur={() => handleTimeBlur('hours')}
-                  className="w-16 text-center"
-                  maxLength={2}
-                />
-                <span>:</span>
-                <Input
-                  value={selectedMinutes}
-                  onChange={(e) => handleTimeChange('minutes', e.target.value)}
-                  onFocus={() => handleFocus('minutes')}
-                  onBlur={() => handleTimeBlur('minutes')}
-                  className="w-16 text-center"
-                  maxLength={2}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </PopoverContent>
+      <DateTimePickerContent
+        date={date}
+        onSelect={onSelect}
+        showTimeSelect={showTimeSelect}
+        selectedHours={selectedHours}
+        selectedMinutes={selectedMinutes}
+        onHoursChange={(value) => handleTimeChange('hours', value)}
+        onMinutesChange={(value) => handleTimeChange('minutes', value)}
+        onHoursFocus={() => handleFocus('hours')}
+        onMinutesFocus={() => handleFocus('minutes')}
+        onHoursBlur={() => handleTimeBlur('hours')}
+        onMinutesBlur={() => handleTimeBlur('minutes')}
+        today={today}
+      />
     </Popover>
   );
 }
