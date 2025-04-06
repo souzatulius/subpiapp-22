@@ -1,153 +1,163 @@
-
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
-import CardControls from './card-parts/CardControls';
-import { MoveIcon } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { CardColor, CardWidth, CardHeight } from '@/types/dashboard';
+import { CardControls } from './card-parts/CardControls';
 
 export interface ActionCardProps {
   id: string;
   title: string;
+  subtitle?: string;
   iconId: string;
   path: string;
   color: CardColor;
   isDraggable?: boolean;
-  width?: CardWidth;
-  height?: CardHeight;
-  type?: CardType;
-  onEdit?: (id: string) => void;
+  isCustom?: boolean;
+  onEdit?: () => void;
   onDelete?: (id: string) => void;
   onHide?: (id: string) => void;
-  isCustom?: boolean;
-  dataSourceKey?: string;
-  displayMobile?: boolean;
-  mobileOrder?: number;
-  children?: React.ReactNode;
   iconSize?: 'sm' | 'md' | 'lg' | 'xl';
   isMobileView?: boolean;
   showControls?: boolean;
+  hasBadge?: boolean;
+  badgeValue?: string;
+  children?: React.ReactNode;
 }
-
-const getBackgroundColor = (color: CardColor): string => {
-  switch (color) {
-    case 'blue-vivid':
-      return 'bg-[#0066FF]'; // Azul Vivo
-    case 'blue-light':
-      return 'bg-[#66B2FF]'; // Azul Claro
-    case 'blue-dark':
-      return 'bg-[#1D4ED8]'; // Azul Escuro
-    case 'green-neon':
-      return 'bg-[#66FF66]'; // Verde Neon
-    case 'green-dark':
-      return 'bg-[#00CC00]'; // Verde Escuro
-    case 'gray-light':
-      return 'bg-[#F5F5F5]'; // Cinza Claro
-    case 'gray-lighter':
-      return 'bg-[#FAFAFA]'; // Cinza Mais Claro
-    case 'gray-medium':
-      return 'bg-[#D4D4D4]'; // Cinza Médio
-    case 'orange-dark':
-      return 'bg-[#F25C05]'; // Laranja Escuro
-    case 'orange-light':
-      return 'bg-[#F89E66]'; // Laranja Claro
-    default:
-      return 'bg-[#0066FF]'; // Default to Azul Vivo
-  }
-};
-
-const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
-  return 'w-10 h-10';
-};
 
 const ActionCard = ({
   id,
   title,
+  subtitle,
   iconId,
   path,
   color,
   isDraggable = false,
+  isCustom = false,
   onEdit,
   onDelete,
   onHide,
-  isCustom = false,
   iconSize = 'md',
   isMobileView = false,
-  children,
-  showControls = true
+  showControls = true,
+  hasBadge = false,
+  badgeValue,
+  children
 }: ActionCardProps) => {
   const navigate = useNavigate();
-  const bgColor = getBackgroundColor(color);
   
-  const renderIcon = () => {
-    if (!iconId) return null;
-    
-    const LucideIcon = (LucideIcons as any)[iconId];
-    if (LucideIcon) {
-      return <LucideIcon className={getIconSize(iconSize)} />;
+  // Determine if this is the Ranking da Zeladoria card to apply special styling
+  const isRankingCard = id === 'ranking-zeladoria' || title.includes('Ranking');
+  
+  // Apply special text color for Ranking card
+  const textColorClass = isRankingCard && color === 'gray-light' 
+    ? 'text-gray-950' 
+    : color === 'gray-light' || color === 'gray-lighter' 
+      ? 'text-gray-800' 
+      : 'text-white';
+  
+  // Apply special icon color for Ranking card
+  const iconColorClass = isRankingCard && color === 'gray-light'
+    ? 'text-gray-950'
+    : color === 'gray-light' || color === 'gray-lighter'
+      ? 'text-gray-700'
+      : 'text-white';
+  
+  const handleCardClick = () => {
+    if (path) {
+      navigate(path);
     }
-    
-    const FallbackIcon = getIconComponentFromId(iconId);
-    return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
   
-  const getTextColor = (bgColor: string): string => {
-    if (color === 'gray-light' || color === 'gray-lighter' || color === 'gray-medium' || 
-        color === 'green-neon' || color === 'green-dark') {
-      // Special case for Ranking Zeladoria card - always blue text
-      if (id === 'ranking-zeladoria') {
-        return 'text-blue-800';
-      }
-      return 'text-gray-800'; // Dark text for light backgrounds
-    }
-    return 'text-white'; // White text for dark backgrounds
-  };
+  const IconRenderer = getIconComponentFromId(iconId);
   
-  const textColor = getTextColor(bgColor);
-
+  function getIconSizeClass(size: string): string {
+    switch (size) {
+      case 'sm': return 'h-4 w-4';
+      case 'md': return 'h-5 w-5';
+      case 'lg': return 'h-6 w-6';
+      case 'xl': return 'h-8 w-8';
+      default: return 'h-5 w-5';
+    }
+  }
+  
   return (
-    <div 
-      className={`w-full h-full rounded-xl shadow-md overflow-hidden 
-        ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
-        transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColor} group relative`}
+    <div
+      className={`w-full h-full rounded-xl overflow-hidden transition-all duration-200
+        ${color === 'gray-light' || color === 'gray-lighter' ? 'border border-gray-200' : ''}
+        ${isDraggable ? 'cursor-move' : path ? 'cursor-pointer hover:shadow-md' : ''}
+      `}
+      onClick={handleCardClick}
     >
-      {isDraggable && (
-        <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
-          <div className="p-1.5 rounded-full bg-white bg-opacity-60 text-gray-600">
-            <MoveIcon className="h-3.5 w-3.5" />
+      <div
+        className={`h-full flex flex-col justify-center p-4 bg-white
+          ${getCardColorClass(color)}
+        `}
+      >
+        <div className="flex items-center">
+          {iconId && (
+            <div className={`mr-3 ${iconColorClass} ${getIconSizeClass(iconSize)}`}>
+              <IconRenderer iconId={iconId} className="h-full w-full" />
+            </div>
+          )}
+          
+          <div className="flex-1 min-w-0">
+            <h3 
+              className={`text-base font-semibold ${textColorClass} truncate`}
+              title={title}
+            >
+              {title}
+            </h3>
+            
+            {subtitle && (
+              <p className={`text-sm mt-1 ${textColorClass} opacity-80 truncate`}>
+                {subtitle}
+              </p>
+            )}
           </div>
+          
+          {hasBadge && badgeValue && (
+            <div className="ml-2 bg-white bg-opacity-25 rounded-full px-2 py-0.5 text-xs font-medium">
+              {badgeValue}
+            </div>
+          )}
         </div>
-      )}
-
-      {showControls && (onEdit || onDelete || onHide) && (
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        
+        {children && (
+          <div className="mt-2">
+            {children}
+          </div>
+        )}
+      </div>
+      
+      {showControls && isDraggable && onEdit && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-1">
           <CardControls 
-            onEdit={onEdit ? () => onEdit(id) : undefined} 
-            onDelete={onDelete ? () => onDelete(id) : undefined} 
-            onHide={onHide ? () => onHide(id) : undefined} 
+            onEdit={onEdit} 
+            onDelete={isCustom ? onDelete : undefined} 
+            onHide={onHide}
           />
         </div>
       )}
-
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
-        {children ? (
-          <>{children}</>
-        ) : (
-          <>
-            <div className={`mb-2.5 ${textColor}`}>
-              {renderIcon()}
-            </div>
-            <div className="line-clamp-2 max-w-[90%]">
-              <h3 className={`font-semibold ${textColor} text-lg leading-tight break-words text-balance`}>
-                {title}
-              </h3>
-            </div>
-          </>
-        )}
-      </div>
     </div>
   );
 };
+
+function getCardColorClass(color: string): string {
+  // Map colors to Tailwind CSS classes
+  switch (color) {
+    case 'blue-vivid': return 'bg-[#0066FF] text-white';
+    case 'blue-light': return 'bg-[#66B2FF] text-white';
+    case 'blue-dark': return 'bg-[#1D4ED8] text-white';
+    case 'green-neon': return 'bg-[#66FF66] text-gray-800';
+    case 'green-dark': return 'bg-[#00CC00] text-white';
+    case 'gray-light': return 'bg-white text-gray-800';
+    case 'gray-lighter': return 'bg-gray-50 text-gray-800';
+    case 'gray-medium': return 'bg-gray-200 text-gray-800';
+    case 'orange-dark': return 'bg-[#F25C05] text-white';
+    case 'orange-light': return 'bg-[#F89E66] text-white';
+    case 'deep-blue': return 'bg-gray-950 text-white';  // Using gray-950 for 'deep-blue'
+    default: return 'bg-blue-600 text-white';
+  }
+}
 
 export default ActionCard;

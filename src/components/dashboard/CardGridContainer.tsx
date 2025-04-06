@@ -25,7 +25,8 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   specialCardsData = {}
 }) => {
   const handleCardsChange = (updatedCards: ActionCardItem[]) => {
-    // Now we properly call the onCardsChange prop to persist the reordering
+    console.log('Cards reordered, saving changes:', updatedCards);
+    // Properly call the onCardsChange prop to persist the reordering
     onCardsChange(updatedCards);
   };
 
