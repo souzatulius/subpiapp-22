@@ -35,7 +35,12 @@ export const getHoverColorClasses = (color: CardColor): string => {
   }
 };
 
-export const getTextColorClass = (color: CardColor): string => {
+export const getTextColorClass = (color: CardColor, cardId?: string): string => {
+  // Special case for Ranking Zeladoria card - always use gray-950 text
+  if (cardId === 'ranking-zeladoria') {
+    return 'text-gray-950';
+  }
+  
   switch (color) {
     case 'gray-light':
     case 'gray-lighter':

@@ -94,9 +94,9 @@ const ActionCard = ({
   const getTextColor = (bgColor: string): string => {
     if (color === 'gray-light' || color === 'gray-lighter' || color === 'gray-medium' || 
         color === 'green-neon' || color === 'green-dark') {
-      // Special case for Ranking Zeladoria card - always blue text
+      // Special case for Ranking Zeladoria card - always gray-950 text
       if (id === 'ranking-zeladoria') {
-        return 'text-blue-800';
+        return 'text-gray-950';
       }
       return 'text-gray-800'; // Dark text for light backgrounds
     }

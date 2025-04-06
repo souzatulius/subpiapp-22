@@ -43,7 +43,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Consultar Demandas",
         path: "/dashboard/comunicacao/demandas",
         iconId: "list-filter",
-        color: getBgColor('grey-800'),
+        color: getBgColor('gray-950'), // Changed from grey-800 to gray-950
         width: "25",
         height: "1",
         type: "standard",
