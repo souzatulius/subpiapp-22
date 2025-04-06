@@ -97,7 +97,7 @@ const EmailSuffix: React.FC<EmailSuffixProps> = ({
     <div 
       ref={containerRef}
       className={cn(
-        `relative flex h-12 w-full rounded-xl border ${containerBorderColor} bg-white shadow-sm transition-all duration-300`,
+        `relative flex h-12 w-full rounded-xl border ${containerBorderColor} bg-transparent shadow-sm transition-all duration-300`,
         className
       )}
       onClick={() => {

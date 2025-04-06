@@ -45,7 +45,7 @@ const LoginFormFields: React.FC<LoginFormFieldsProps> = ({
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={e => onPasswordChange(e.target.value)}
-            className={`pr-10 ${passwordError ? 'border-[#f57b35] focus:ring-[#f57b35]' : ''}`}
+            className={`pr-10 ${passwordError ? 'border-[#f57b35] focus:border-[#f57b35]' : ''}`}
             placeholder="••••••••"
           />
           <button
