@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useSupabaseAuth';
@@ -54,7 +53,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
     handleServiceSearch
   } = useDemandForm(user?.id, onClose);
 
-  // Efeito para rolar para o topo quando mudar de etapa
   useEffect(() => {
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -62,7 +60,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   }, [activeStep]);
 
   useEffect(() => {
-    // Extract origine_id from URL if present
     const searchParams = new URLSearchParams(location.search);
     const origemId = searchParams.get('origem_id');
     
@@ -82,7 +79,6 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
   };
 
   const handleNextStep = () => {
-    // Ensure that FORM_STEPS and activeStep are valid before accessing
     if (FORM_STEPS && activeStep >= 0 && activeStep < FORM_STEPS.length) {
       if (activeStep === FORM_STEPS.length - 1) {
         if (validateFormBeforeSubmit()) {
@@ -129,16 +125,14 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
 
   return (
     <div className="animate-fade-in" ref={formRef}>
-      <Card className="border border-gray-200 rounded-lg">
-        <div className="p-6">
-          <div className="mb-6">
-            {/* Safe access to FORM_STEPS[activeStep] */}
+      <Card className="border border-gray-200 rounded-lg shadow-sm">
+        <div className="p-4 lg:p-5">
+          <div className="mb-4">
             {FORM_STEPS && activeStep >= 0 && activeStep < FORM_STEPS.length && (
-              <h3 className="form-step-title">
+              <h3 className="form-step-title text-xl font-semibold text-gray-800">
                 {FORM_STEPS[activeStep].title}
               </h3>
             )}
-            {/* Only render description if it exists */}
             {FORM_STEPS && 
              activeStep >= 0 && 
              activeStep < FORM_STEPS.length && 
@@ -149,7 +143,7 @@ const CadastrarDemandaForm: React.FC<CadastrarDemandaFormProps> = ({
             )}
           </div>
           
-          <div className="mb-6">
+          <div className="mb-5">
             <FormSteps 
               steps={FORM_STEPS} 
               activeStep={activeStep} 

@@ -12,7 +12,7 @@ const CadastrarDemanda = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full mx-auto">
       <WelcomeCard
         title="Nova Solicitação"
         description="Cadastre uma nova solicitação de comunicação"
@@ -20,7 +20,7 @@ const CadastrarDemanda = () => {
         color="bg-gradient-to-r from-blue-600 to-blue-800"
       />
       
-      <div className="mt-6">
+      <div className="mt-4">
         <CadastrarDemandaForm onClose={onClose} />
       </div>
     </div>

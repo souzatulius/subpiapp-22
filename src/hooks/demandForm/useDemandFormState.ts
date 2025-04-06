@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { DemandFormData } from './types';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,13 +108,10 @@ export const useDemandFormState = (
     }
   }, [formData.problema_id, problemas]);
 
-  // Auto-generate title based on selected problem, service, bairro and address
   useEffect(() => {
     if (formData.problema_id || formData.servico_id || formData.bairro_id || formData.endereco) {
-      // Generate title suggestion
       const suggestedTitle = generateTitleSuggestion(formData, problemas, servicos, filteredBairros);
       
-      // Only update if we have a suggestion and the current title is empty
       if (suggestedTitle && (!formData.titulo || formData.titulo.trim() === '')) {
         setFormData(prev => ({
           ...prev,
