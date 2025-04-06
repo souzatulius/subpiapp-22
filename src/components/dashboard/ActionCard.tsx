@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import { CardColor, CardWidth, CardHeight } from '@/types/dashboard';
-import { CardControls } from './card-parts/CardControls';
+import CardControls from './card-parts/CardControls';
 
 export interface ActionCardProps {
   id: string;
@@ -22,6 +22,9 @@ export interface ActionCardProps {
   hasBadge?: boolean;
   badgeValue?: string;
   children?: React.ReactNode;
+  width?: CardWidth;
+  height?: CardHeight;
+  type?: string;
 }
 
 const ActionCard = ({
@@ -41,7 +44,10 @@ const ActionCard = ({
   showControls = true,
   hasBadge = false,
   badgeValue,
-  children
+  children,
+  width,
+  height,
+  type
 }: ActionCardProps) => {
   const navigate = useNavigate();
   

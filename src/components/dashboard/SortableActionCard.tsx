@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -122,12 +121,9 @@ const SortableActionCard: React.FC<SortableActionCardProps> = ({
           onDelete={onDelete}
           onEdit={handleEdit}
           onHide={onHide}
-          width={card.width}
-          height={card.height}
-          isCustom={card.isCustom}
-          type={card.type}
           iconSize={isMobileView ? 'lg' : 'xl'}
           isMobileView={isMobileView}
+          isCustom={card.isCustom}
         />
       )}
     </div>
