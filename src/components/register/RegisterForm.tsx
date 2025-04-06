@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import EmailSuffix from '@/components/EmailSuffix';
@@ -40,7 +41,7 @@ const RegisterForm = ({
       });
     }
   };
-  return <div className="bg-white rounded-xl shadow-lg p-8 w-full my-[2px] mx-[20px] px-[60px]">
+  return <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md mx-auto my-[2px]">
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Cadastre-se</h2>
       <p className="text-[#6B7280] mb-6">Preencha seus dados para solicitar acesso à plataforma.</p>
 

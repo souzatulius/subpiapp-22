@@ -28,7 +28,7 @@ const LoginForm = () => {
         <div className="animate-spin w-10 h-10 border-4 border-[#003570] border-t-transparent rounded-full" />
       </div>;
   }
-  return <div className="bg-white rounded-xl shadow-lg p-8 w-full mx-[60px]">
+  return <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-2 text-slate-900">Entrar</h2>
       <p className="text-[#6B7280] mb-6">Digite seu e-mail e senha para acessar a plataforma.</p>
 
