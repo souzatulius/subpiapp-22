@@ -48,8 +48,8 @@ const Settings = () => {
           
           <main className="flex-1 overflow-hidden">
             <BreadcrumbBar onSettingsClick={handleBackClick} />
-            <div className="max-w-7xl mx-auto">
-              <div className="overflow-y-auto p-6 pb-24 md:pb-6">
+            <div className="max-w-full mx-auto">
+              <div className="overflow-y-auto p-4 pb-24 md:pb-4">
                 {activeSection === 'dashboard' ? (
                   <div>
                     <SettingsDashboard searchQuery={searchQuery} />

@@ -19,7 +19,7 @@ A reusable layout component for dashboard pages that provides:
 2. **Responsive Design**:
    - Uses `useIsMobile()` hook to adapt layout for different screen sizes
    - Different navigation patterns for mobile vs desktop
-   - Appropriate padding and spacing for different viewport sizes
+   - Minimal padding for maximized content area
 
 3. **Implementation**:
    ```tsx
@@ -46,11 +46,11 @@ The main header component appears at the top of all authenticated pages with a t
 ### Standard Containers and Spacing
 
 1. **Maximum Width**:
-   - `max-w-7xl mx-auto` to center content with reasonable maximum width
+   - `max-w-full mx-auto` to allow content to use maximum available width
 
 2. **Standard Padding**:
-   - Desktop: `p-6`
-   - Mobile: `p-6 pb-20 md:pb-6` (extra bottom padding on mobile for the navigation bar)
+   - Desktop: `p-4`
+   - Mobile: `p-4 pb-20 md:pb-4` (extra bottom padding on mobile for the navigation bar)
 
 3. **Content Layout Patterns**:
    - WelcomeCard at the top of most pages
@@ -109,8 +109,8 @@ Most pages follow this general structure:
       <BreadcrumbBar />
       
       {/* Content container */}
-      <div className="max-w-7xl mx-auto">
-        <div className="p-6 pb-20 md:pb-6">
+      <div className="max-w-full mx-auto">
+        <div className="p-4 pb-20 md:pb-4">
           {/* Welcome card */}
           <WelcomeCard
             title={title}

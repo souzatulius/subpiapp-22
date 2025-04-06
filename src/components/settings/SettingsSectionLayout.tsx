@@ -29,7 +29,7 @@ const SettingsSectionLayout: React.FC<SettingsSectionLayoutProps> = ({
   
   return (
     <div className="space-y-6">
-      <div className={`p-6 ${color} text-white rounded-xl shadow-md`}>
+      <div className={`p-4 ${color} text-white rounded-xl shadow-md`}>
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
@@ -57,7 +57,7 @@ const SettingsSectionLayout: React.FC<SettingsSectionLayoutProps> = ({
         </div>
       </div>
       
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl shadow-sm p-4">
         {children}
       </div>
     </div>

@@ -87,7 +87,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 
   if (!displayedCards || displayedCards.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-4 text-center text-gray-500">
         Nenhum card disponível para exibir.
       </div>
     );
@@ -99,7 +99,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className={`w-full grid gap-y-3 gap-x-4 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+      <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
         <SortableContext items={displayedCards.map(card => card.id)}>
           {displayedCards.map(card => (
             <div

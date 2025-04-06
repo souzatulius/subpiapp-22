@@ -85,7 +85,7 @@ const DashboardPage: React.FC = () => {
         
         <main className="flex-1 overflow-auto">
           <BreadcrumbBar />
-          <div className="max-w-7xl mx-auto p-6 pb-16 md:pb-6">
+          <div className="max-w-full mx-auto p-4 pb-16 md:pb-4">
             {/* WelcomeCard with updated description */}
             <div className="w-full mb-2">
               <WelcomeCard 
@@ -126,8 +126,8 @@ const DashboardPage: React.FC = () => {
                   ))}
                 </div>
               ) : cards && cards.length > 0 ? (
-                <ScrollArea className="h-full w-full pr-4">
-                  <div className="pb-4 px-[30px] py-[30px]">
+                <ScrollArea className="h-full w-full pr-2">
+                  <div className="pb-4 px-2 py-2">
                     <CardGridContainer 
                       cards={cards.filter(card => !card.isHidden)} 
                       onCardsChange={handleCardsReorder}
@@ -139,7 +139,7 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </ScrollArea>
               ) : (
-                <div className="p-6 text-center text-gray-500">
+                <div className="p-4 text-center text-gray-500">
                   Nenhum card disponível.
                 </div>
               )}

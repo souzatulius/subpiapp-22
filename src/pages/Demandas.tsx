@@ -28,7 +28,7 @@ const Demandas = () => {
         {/* Main content */}
         <div className="flex-1 overflow-auto">
           <BreadcrumbBar />
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-full mx-auto">
             <Layout>
               <DemandasContent />
             </Layout>

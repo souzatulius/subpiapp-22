@@ -87,7 +87,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         </div>
       ) : (
         cards && cards.length > 0 ? (
-          <div className="px-[30px] py-[30px]">
+          <div className="px-2 py-2">
             <CardGridContainer
               cards={cards}
               onCardsChange={handleCardsReorder}
@@ -98,7 +98,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
             />
           </div>
         ) : (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-4 text-center text-gray-500">
             Nenhum card disponível.
           </div>
         )
