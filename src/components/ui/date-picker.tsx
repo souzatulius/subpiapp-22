@@ -47,34 +47,29 @@ export function DatePicker({
   }, [date]);
 
   const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
-    // Replace current value instead of appending
+    // Handle the input changes
     if (type === 'hours') {
-      // Validate hours (0-23)
-      const numValue = parseInt(value, 10);
-      if (!isNaN(numValue) && numValue >= 0 && numValue <= 23) {
-        setSelectedHours(value.padStart(2, '0'));
-      } else if (value === '') {
-        setSelectedHours('');
+      // For valid numeric values or empty string
+      if (value === '' || (value.match(/^\d+$/) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 23)) {
+        setSelectedHours(value);
       }
     } else {
-      // Validate minutes (0-59)
-      const numValue = parseInt(value, 10);
-      if (!isNaN(numValue) && numValue >= 0 && numValue <= 59) {
-        setSelectedMinutes(value.padStart(2, '0'));
-      } else if (value === '') {
-        setSelectedMinutes('');
+      // For valid numeric values or empty string
+      if (value === '' || (value.match(/^\d+$/) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 59)) {
+        setSelectedMinutes(value);
       }
     }
 
-    // Only update the date if we have a valid value and a date is selected
+    // Only update the date if we have a valid date selected
     if (date && value !== '') {
-      const hours = type === 'hours' ? 
-        (value === '' ? 0 : parseInt(value, 10)) : 
-        parseInt(selectedHours || '0', 10);
+      let hours = parseInt(selectedHours || '0', 10);
+      let minutes = parseInt(selectedMinutes || '0', 10);
       
-      const minutes = type === 'minutes' ? 
-        (value === '' ? 0 : parseInt(value, 10)) : 
-        parseInt(selectedMinutes || '0', 10);
+      if (type === 'hours' && value !== '') {
+        hours = parseInt(value, 10);
+      } else if (type === 'minutes' && value !== '') {
+        minutes = parseInt(value, 10);
+      }
       
       const newDate = new Date(date);
       newDate.setHours(hours, minutes);
@@ -97,13 +92,23 @@ export function DatePicker({
       if (selectedHours === '') {
         setSelectedHours('00');
       } else {
-        setSelectedHours(selectedHours.padStart(2, '0'));
+        const numValue = parseInt(selectedHours, 10);
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= 23) {
+          setSelectedHours(numValue.toString().padStart(2, '0'));
+        } else {
+          setSelectedHours('00');
+        }
       }
     } else {
       if (selectedMinutes === '') {
         setSelectedMinutes('00');
       } else {
-        setSelectedMinutes(selectedMinutes.padStart(2, '0'));
+        const numValue = parseInt(selectedMinutes, 10);
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= 59) {
+          setSelectedMinutes(numValue.toString().padStart(2, '0'));
+        } else {
+          setSelectedMinutes('00');
+        }
       }
     }
 
