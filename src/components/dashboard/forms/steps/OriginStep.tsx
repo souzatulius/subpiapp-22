@@ -56,7 +56,7 @@ const OriginStep: React.FC<OriginStepProps> = ({
               type="button" 
               variant={formData.origem_id === origem.id ? "default" : "outline"} 
               className={`h-auto py-3 flex flex-col items-center justify-center gap-2 selection-button rounded-xl ${
-                formData.origem_id === origem.id ? "bg-orange-500 text-white" : ""
+                formData.origem_id === origem.id ? "bg-orange-500 hover:bg-orange-600 text-white" : ""
               } ${
                 hasFieldError('origem_id', errors) ? 'border-orange-500' : ''
               }`} 

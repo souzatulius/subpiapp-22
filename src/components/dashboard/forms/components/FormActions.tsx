@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -26,6 +27,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         variant="outline"
         onClick={onPrevStep}
         disabled={isFirstStep}
+        className="hover:bg-gray-100 hover:text-gray-800"
       >
         Voltar
       </Button>
@@ -33,17 +35,19 @@ const FormActions: React.FC<FormActionsProps> = ({
       {isLastStep ? (
         <Button
           type="button"
-          variant="default"
+          variant="action"
           onClick={onSubmit}
           disabled={isSubmitting}
+          className="bg-orange-500 hover:bg-orange-600"
         >
           {isSubmitting ? "Enviando..." : "Finalizar"}
         </Button>
       ) : (
         <Button
           type="button"
-          variant="default"
+          variant="action"
           onClick={onNextStep}
+          className="bg-orange-500 hover:bg-orange-600"
         >
           Próximo
           <ArrowRight className="ml-2 h-4 w-4" />

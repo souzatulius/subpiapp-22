@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -39,11 +40,15 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
+    // Se o botão tiver uma classe bg-orange-500, modificamos o variant para 'action' para melhorar transições
+    const hasOrangeClass = className?.includes('bg-orange-500');
+    const effectiveVariant = hasOrangeClass ? 'action' : variant;
+    
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
         ref={ref}
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant: effectiveVariant, size, className }))}
         {...props}
       />
     );

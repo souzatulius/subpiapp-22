@@ -175,8 +175,21 @@
   @apply transition-all duration-200 rounded-xl;
 }
 
-.selection-button:hover, .selection-button.selected {
+/* Corrigido o contraste e o flash visual */
+.selection-button:hover {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.selection-button.selected, 
+.selection-button[data-state="selected"],
+.bg-orange-500.selection-button:hover {
   @apply bg-orange-500 text-white;
+}
+
+.selection-button.selected:hover, 
+.selection-button[data-state="selected"]:hover,
+.bg-orange-500.selection-button:hover {
+  @apply bg-orange-600 text-white;
 }
 
 /* Badges styling */

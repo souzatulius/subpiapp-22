@@ -36,7 +36,7 @@ const MediaTypeSelector: React.FC<MediaTypeSelectorProps> = ({
             type="button" 
             variant={formData.tipo_midia_id === tipo.id ? "default" : "outline"} 
             className={`h-auto py-3 flex flex-col items-center justify-center gap-2 selection-button ${
-              formData.tipo_midia_id === tipo.id ? "bg-orange-500 text-white" : ""
+              formData.tipo_midia_id === tipo.id ? "bg-orange-500 hover:bg-orange-600 text-white" : ""
             } ${
               hasFieldError('tipo_midia_id', errors) ? 'border-orange-500' : ''
             }`} 

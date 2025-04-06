@@ -71,10 +71,10 @@ const ProblemStep: React.FC<ProblemStepProps> = ({
               type="button" 
               variant={formData.problema_id === problema.id ? "default" : "outline"} 
               className={`h-auto py-3 px-2 flex flex-col items-center justify-center gap-2 selection-button ${
-                formData.problema_id === problema.id ? "bg-orange-500 text-white" : ""
+                formData.problema_id === problema.id ? "bg-orange-500 hover:bg-orange-600 text-white" : ""
               } ${
                 hasError('problema_id') ? 'border-orange-500' : ''
-              } hover:bg-[#002855] hover:text-white`} 
+              }`} 
               onClick={() => handleSelectChange('problema_id', problema.id)}
             >
               {getProblemIcon(problema)}

@@ -43,7 +43,7 @@ const TemaSelector: React.FC<TemaSelectorProps> = ({
               type="button"
               variant={selectedProblemId === problema.id ? "default" : "outline"}
               className={`w-full h-auto py-3 flex flex-col items-center justify-center gap-2 rounded-xl
-                ${selectedProblemId === problema.id ? "ring-2 ring-[#003570]" : ""}
+                ${selectedProblemId === problema.id ? "bg-orange-500 hover:bg-orange-600 text-white ring-2 ring-orange-300" : ""}
                 ${hasFieldError('problema_id', errors) ? 'border-orange-500' : ''}
               `}
               onClick={() => handleProblemClick(problema.id)}
