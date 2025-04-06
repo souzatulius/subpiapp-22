@@ -53,7 +53,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
                 formData.prioridade === priority.id ? "ring-2 ring-[#003570]" : ""
               } ${
                 hasError('prioridade') ? 'border-orange-500' : ''
-              } hover:bg-[#002855] hover:text-white`} 
+              } hover:bg-orange-500 hover:text-white rounded-2xl`} 
               onClick={() => handleSelectChange('prioridade', priority.id)}
             >
               {priority.icon}
