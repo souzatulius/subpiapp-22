@@ -15,6 +15,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
+        style={{WebkitBoxShadow: "0 0 0 1000px transparent inset"}}
         {...props}
       />
     )
