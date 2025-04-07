@@ -81,6 +81,14 @@ const ConsultarDemandasContent = () => {
     navigate(`/dashboard/comunicacao/responder?id=${id}`);
   };
 
+  const handleCreateNote = (demandId: string) => {
+    navigate(`/dashboard/comunicacao/notas/criar?demandId=${demandId}`);
+  };
+
+  const handleViewNote = (notaId: string) => {
+    navigate(`/dashboard/comunicacao/notas/detalhe?id=${notaId}`);
+  };
+
   const handleDelete = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDeleteModalOpen(true);
@@ -172,6 +180,8 @@ const ConsultarDemandasContent = () => {
           demandas={demandas as any}
           onViewDemand={handleViewDemand as any}
           onDelete={handleDelete as any}
+          onCreateNote={handleCreateNote}
+          onViewNote={handleViewNote}
           totalCount={totalCount}
           page={page}
           pageSize={pageSize}
@@ -187,6 +197,8 @@ const ConsultarDemandasContent = () => {
           demand={selectedDemand as any} 
           isOpen={isDetailOpen} 
           onClose={handleCloseDetail}
+          onCreateNote={handleCreateNote}
+          onViewNote={handleViewNote}
         />
       )}
       

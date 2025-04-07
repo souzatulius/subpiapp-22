@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Edit, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronLeft, Edit, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import { NotaOficial } from '@/types/nota';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -14,6 +14,7 @@ interface NotaDetailProps {
   onRejeitar: () => Promise<void>;
   onEditar: () => void;
   isSubmitting: boolean;
+  comments?: string[];
 }
 
 const NotaDetail: React.FC<NotaDetailProps> = ({ 
@@ -22,9 +23,11 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
   onAprovar, 
   onRejeitar, 
   onEditar,
-  isSubmitting 
+  isSubmitting,
+  comments = []
 }) => {
   const [showHistory, setShowHistory] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Data desconhecida';
@@ -34,6 +37,10 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
 
   const toggleHistory = () => {
     setShowHistory(!showHistory);
+  };
+
+  const toggleComments = () => {
+    setShowComments(!showComments);
   };
 
   return (
@@ -107,7 +114,7 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
             
             <div className="flex items-center gap-1">
               <span className="font-medium">Criada:</span>
-              <span>{formatDate(nota.criado_em)}</span>
+              <span>{formatDate(nota.criado_em || nota.created_at || '')}</span>
             </div>
           </div>
         </div>
@@ -116,9 +123,39 @@ const NotaDetail: React.FC<NotaDetailProps> = ({
           <div className="border-b pb-4 mb-4">
             <div 
               className="whitespace-pre-wrap text-gray-700"
-              dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br/>') }}
+              dangerouslySetInnerHTML={{ __html: (nota.conteudo || nota.texto || '').replace(/\n/g, '<br/>') }}
             />
           </div>
+          
+          {/* Comments section */}
+          {comments && comments.length > 0 && (
+            <div className="mb-4">
+              <button 
+                onClick={toggleComments}
+                className="w-full flex items-center justify-between py-2 text-left font-medium text-gray-600 hover:text-gray-900"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Comentários ({comments.length})</span>
+                </div>
+                {showComments ? (
+                  <ChevronUp className="h-5 w-5" />
+                ) : (
+                  <ChevronDown className="h-5 w-5" />
+                )}
+              </button>
+              
+              {showComments && (
+                <div className="pt-2 pb-4 text-sm text-gray-600 space-y-3 border-t mt-2">
+                  {comments.map((comment, index) => (
+                    <div key={index} className="p-3 bg-gray-50 rounded-md">
+                      {comment}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           
           {/* Accordion history section */}
           <div>

@@ -11,9 +11,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Eye, Trash, FileText } from 'lucide-react';
+import { Eye, Trash, FileText, FilePlus } from 'lucide-react';
 import { DemandaStatusBadge } from '@/components/ui/status-badge';
-import { Demand } from '@/hooks/consultar-demandas';
+import { Demand } from '@/hooks/consultar-demandas/types';
 import { LoadingState } from './LoadingState';
 import { getPriorityColor } from '@/utils/priorityUtils';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,8 @@ interface DemandasTableProps {
   onDeleteClick?: (demand: Demand) => void;
   onEdit?: (id: string) => void;
   onDelete?: (demand: Demand) => void;
+  onCreateNote?: (demandId: string) => void;
+  onViewNote?: (notaId: string) => void;
   totalCount?: number;
   page?: number;
   pageSize?: number;
@@ -42,6 +44,8 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   onDeleteClick,
   onEdit,
   onDelete,
+  onCreateNote,
+  onViewNote,
   totalCount,
   page,
   pageSize,
@@ -122,6 +126,8 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
             const priorityInfo = formatPriority(demand.prioridade);
             const coordination = getCoordination(demand);
             const hasNota = demand.notas && demand.notas.length > 0;
+            const canCreateNote = demand.status === 'respondida' || demand.status === 'em_andamento';
+            const firstNota = hasNota ? demand.notas[0] : null;
 
             return (
               <TableRow key={demand.id} className="hover:bg-gray-50">
@@ -146,10 +152,12 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                 </TableCell>
                 <TableCell>
                   {hasNota ? (
-                    <Badge variant="outline" className="bg-green-100 text-green-800">
+                    <Badge variant="outline" className="bg-green-100 text-green-800 cursor-pointer" onClick={() => onViewNote && firstNota && onViewNote(firstNota.id)}>
                       <FileText className="h-3 w-3 mr-1" /> Sim
                     </Badge>
-                  ) : 'Não'}
+                  ) : (
+                    <span>Não</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
@@ -161,6 +169,30 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
+                    
+                    {canCreateNote && !hasNota && onCreateNote && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onCreateNote(demand.id)}
+                        className="text-blue-600 hover:text-blue-700"
+                        title="Criar Nota"
+                      >
+                        <FilePlus className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    {hasNota && onViewNote && firstNota && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onViewNote(firstNota.id)}
+                        className="text-green-600 hover:text-green-700"
+                        title="Ver Nota"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    )}
                     
                     {(showDeleteOption || isAdmin) && (
                       <Button
