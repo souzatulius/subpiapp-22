@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -124,8 +125,11 @@ export const useNotaForm = (onClose: () => void) => {
           id: respostaData.id,
           demanda_id: respostaData.demanda_id,
           texto: respostaData.texto,
+          usuario_id: respostaData.usuario_id,
+          criado_em: respostaData.criado_em,
           comentarios: respostaData.comentarios
-        } : null
+        } : null,
+        notas: [] // Adding missing notas field
       };
       
       setSelectedDemanda(demanda);
@@ -202,8 +206,11 @@ export const useNotaForm = (onClose: () => void) => {
           id: respostaData.id,
           demanda_id: respostaData.demanda_id,
           texto: respostaData.texto,
+          usuario_id: respostaData.usuario_id,
+          criado_em: respostaData.criado_em,
           comentarios: respostaData.comentarios
-        } : null
+        } : null,
+        notas: [] // Adding missing notas field
       });
       
       setStep('create-nota');
@@ -255,7 +262,7 @@ export const useNotaForm = (onClose: () => void) => {
       
       // Get coordination ID from problema or area_coordenacao
       const coordinationId = selectedDemanda.problema?.coordenacao?.id || 
-                             selectedDemanda.area_coordenacao?.id || null;
+                           selectedDemanda.area_coordenacao?.id || null;
       
       const { data, error } = await supabase
         .from('notas_oficiais')

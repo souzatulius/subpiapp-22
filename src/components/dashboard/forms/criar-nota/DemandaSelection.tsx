@@ -3,11 +3,11 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { Search } from 'lucide-react'; // Changed from MagnifyingGlassIcon to Search from lucide-react
 import { Button } from '@/components/ui/button';
-import { Demand } from '@/types/demand';
 import { Eye } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Demand } from '@/types/demand';
 
 interface DemandaSelectionProps {
   filteredDemandas: Demand[];
@@ -48,7 +48,7 @@ const DemandaSelection: React.FC<DemandaSelectionProps> = ({
                 className="pl-10"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                <Search className="h-5 w-5 text-gray-400" />
               </div>
             </div>
           </div>

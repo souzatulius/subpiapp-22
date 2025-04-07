@@ -40,7 +40,7 @@ const ConsultarDemandasTable = () => {
             autor:autor_id(id, nome_completo),
             bairro_id,
             bairro:bairro_id(id, nome),
-            respostas:respostas_demandas(id, texto),
+            respostas:respostas_demandas(id, texto, comentarios),
             notas:notas_oficiais(id, titulo)
           `)
           .order('created_at', { ascending: false });
@@ -101,9 +101,12 @@ const ConsultarDemandasTable = () => {
       arquivo_url: null,
       anexos: null,
       resposta: d?.respostas && d.respostas.length > 0 ? {
+        id: d.respostas[0].id,
         demanda_id: d.id,
         texto: d.respostas[0].texto,
-        id: d.respostas[0].id
+        usuario_id: '', // Add the required fields
+        criado_em: '',
+        comentarios: d.respostas[0].comentarios
       } : null,
       notas: d?.notas || []
     };
@@ -127,8 +130,8 @@ const ConsultarDemandasTable = () => {
 
   return (
     <DemandasTable 
-      demandas={demandas as any}
-      onViewDemand={handleViewDemand as any}
+      demandas={demandas}
+      onViewDemand={handleViewDemand}
       onCreateNote={handleCreateNote}
       onViewNote={handleViewNote}
       onEditNote={handleEditNote}
