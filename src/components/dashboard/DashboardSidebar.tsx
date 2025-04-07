@@ -30,8 +30,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
         )
       }
     >
-      <div className="flex-shrink-0 w-7 h-7">{icon}</div>
-      {!isCollapsed && <span>{label}</span>}
+      <div className="flex-shrink-0 w-10 h-10">{icon}</div>
+      {!isCollapsed && <span className="text-lg font-bold">{label}</span>}
     </NavLink>
   );
 };
