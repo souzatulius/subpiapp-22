@@ -79,7 +79,16 @@ export interface Demand {
   arquivo_url: string | null;
   anexos: string[] | null;
   servico_id?: string;
-  notas?: Note[] | null; // Added to fix build error
+  notas?: Note[] | null;
+  comentarios?: Array<{
+    texto: string;
+    autor: string;
+    data: string;
+  }>;
+  respostas?: Array<{
+    id: string;
+    texto: string;
+  }>;
 }
 
 export interface DemandResponse {
@@ -101,4 +110,5 @@ export interface Note {
   demanda_id: string;
   titulo: string;
   autor_id: string;
+  status?: string;
 }

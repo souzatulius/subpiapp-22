@@ -61,7 +61,15 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
                 ${formData.prioridade === priority.id ? 'text-white' : ''}
                 transition-colors
               `}>
-                {priority.icon}
+                {formData.prioridade === priority.id ? (
+                  <div className="text-white">
+                    {priority.icon}
+                  </div>
+                ) : (
+                  <div>
+                    {priority.icon}
+                  </div>
+                )}
               </div>
               <span className="text-sm font-semibold">
                 {priority.label}

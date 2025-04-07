@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import NotaForm from '@/components/dashboard/forms/NotaForm';
 import { NotaFormSchema } from '@/components/dashboard/forms/schemas/notaFormSchema';
 import { useToast } from '@/components/ui/use-toast';
+import NotasContent from '@/components/consultar-notas/NotasContent';
 
 const Notas = () => {
   const { toast } = useToast();
@@ -31,6 +32,14 @@ const Notas = () => {
       return count || 0;
     },
   });
+
+  const handleViewNote = (notaId: string) => {
+    navigate(`/dashboard/comunicacao/notas/detalhe?id=${notaId}`);
+  };
+
+  const handleEditNote = (notaId: string) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${notaId}`);
+  };
   
   return (
     <div className="max-w-7xl mx-auto">
@@ -42,7 +51,7 @@ const Notas = () => {
       />
       
       <div className="mt-6">
-        <NotaForm />
+        <NotasContent onViewNote={handleViewNote} onEditNote={handleEditNote} />
       </div>
     </div>
   );
