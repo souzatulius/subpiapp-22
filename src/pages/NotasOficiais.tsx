@@ -14,11 +14,13 @@ import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
+import { useScrollFade } from '@/hooks/useScrollFade';
 
 const NotasOficiais = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeForm, setActiveForm] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -50,7 +52,10 @@ const NotasOficiais = () => {
   const renderMainContent = () => {
     return (
       <div className="space-y-6">
-        <div className="pb-4 border-b border-gray-200">
+        <div 
+          className="pb-4 border-b border-gray-200"
+          style={isMobile ? scrollFadeStyles : undefined}
+        >
           <h1 className="text-2xl font-bold text-gray-900">Notas Oficiais</h1>
           <p className="mt-2 text-sm text-gray-600">
             Gerencie demandas da imprensa, crie e aprove notas oficiais
@@ -157,15 +162,31 @@ const NotasOficiais = () => {
   return (
     <AdminProtectedRoute>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header showControls={true} toggleSidebar={toggleSidebar} />
+        {/* Fixed breadcrumb for mobile */}
+        {isMobile && (
+          <div className="fixed top-0 left-0 right-0 z-40 bg-white">
+            <BreadcrumbBar />
+          </div>
+        )}
+        
+        {/* Header with fade effect on mobile */}
+        <div 
+          style={isMobile ? scrollFadeStyles : undefined}
+          className={`${isMobile ? 'transition-all duration-300' : ''}`}
+        >
+          <Header showControls={true} toggleSidebar={toggleSidebar} />
+        </div>
         
         <div className="flex flex-1 overflow-hidden">
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <div className="flex-1 overflow-auto">
-            <BreadcrumbBar />
+          <div className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
+            {!isMobile && <BreadcrumbBar />}
+            
             <Layout>
-              {renderForm()}
+              <div className={`${isMobile ? 'pb-32' : ''}`}>
+                {renderForm()}
+              </div>
             </Layout>
           </div>
         </div>

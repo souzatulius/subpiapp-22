@@ -9,6 +9,7 @@ import MobileSettingsNav from '@/components/settings/MobileSettingsNav';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import AdminProtectedRoute from '@/components/layouts/AdminProtectedRoute';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useScrollFade } from '@/hooks/useScrollFade';
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,6 +18,7 @@ const Settings = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
   
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -40,23 +42,44 @@ const Settings = () => {
   return (
     <AdminProtectedRoute>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header showControls={true} toggleSidebar={toggleSidebar} />
+        {/* Fixed breadcrumb for mobile */}
+        {isMobile && (
+          <div className="fixed top-0 left-0 right-0 z-40 bg-white">
+            <BreadcrumbBar onSettingsClick={handleBackClick} />
+          </div>
+        )}
+        
+        {/* Header with fade effect on mobile */}
+        <div 
+          style={isMobile ? scrollFadeStyles : undefined}
+          className={`${isMobile ? 'transition-all duration-300' : ''}`}
+        >
+          <Header showControls={true} toggleSidebar={toggleSidebar} />
+        </div>
         
         <div className="flex flex-1 overflow-hidden">
           {/* Somente mostrar sidebar no desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className="flex-1 overflow-hidden">
-            <BreadcrumbBar onSettingsClick={handleBackClick} />
+          <main className={`flex-1 overflow-hidden ${isMobile ? 'pt-10' : ''}`}>
+            {/* Desktop breadcrumb */}
+            {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
+            
             <div className="max-w-full mx-auto">
-              <div className="overflow-y-auto p-4 pb-24 md:pb-4">
+              <div className={`overflow-y-auto p-4 ${isMobile ? 'pb-32' : 'pb-4'}`}>
                 {activeSection === 'dashboard' ? (
-                  <div>
+                  <div
+                    style={isMobile ? scrollFadeStyles : undefined}
+                    className={`${isMobile ? 'transition-all duration-300' : ''}`}
+                  >
                     <SettingsDashboard searchQuery={searchQuery} />
                   </div>
                 ) : (
                   <div>
-                    <h1 className={`text-2xl font-bold mb-6`}>
+                    <h1 
+                      className={`text-2xl font-bold mb-6`}
+                      style={isMobile ? scrollFadeStyles : undefined}
+                    >
                       {getSectionTitle(activeSection)}
                     </h1>
                     <SettingsContent activeSection={activeSection} />
