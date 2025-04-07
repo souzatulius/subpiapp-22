@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProcessos } from '@/hooks/esic/useProcessos';
 import { useJustificativas } from '@/hooks/esic/useJustificativas';
@@ -10,8 +9,9 @@ import JustificativaForm from '@/components/esic/JustificativaForm';
 import ESICWelcomeCard from '@/components/esic/ESICWelcomeCard';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Loader2, FilePlus, FileQuestion } from 'lucide-react';
+import { Loader2, FilePlus, FileQuestion, FileText } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import WelcomeCard from '@/components/shared/WelcomeCard';
 
 type ScreenState = 'list' | 'create' | 'edit' | 'view' | 'justify';
 
@@ -114,7 +114,6 @@ const ESICPage: React.FC = () => {
   
   const handleAddJustificativa = () => {
     if (selectedProcesso && selectedProcesso.status !== 'concluido') {
-      // Update status to aguardando_justificativa if it's not already
       if (selectedProcesso.status === 'novo_processo') {
         updateProcesso({
           id: selectedProcesso.id,
@@ -179,7 +178,6 @@ const ESICPage: React.FC = () => {
             title: 'Status atualizado',
             description: `O status do processo foi alterado.`,
           });
-          // Update selected processo with new status
           setSelectedProcesso(prev => prev ? { ...prev, status } : null);
         },
       }
@@ -200,7 +198,6 @@ const ESICPage: React.FC = () => {
             title: 'Situação atualizada',
             description: `A situação do processo foi alterada.`,
           });
-          // Update selected processo with new situação
           setSelectedProcesso(prev => prev ? { ...prev, situacao } : null);
         },
       }
@@ -209,7 +206,13 @@ const ESICPage: React.FC = () => {
   
   return (
     <div className="container py-6 space-y-6">
-      {/* Header area - always shown */}
+      <WelcomeCard 
+        title="Sistema e-SIC"
+        description="Gerencie processos e justificativas para as solicitações recebidas via Sistema Eletrônico do Serviço de Informação ao Cidadão."
+        icon={<FileText className="h-6 w-6 mr-2" />}
+        color="bg-gradient-to-r from-blue-600 to-blue-800"
+      />
+      
       {screen === 'list' && (
         <div className="flex justify-between items-center">
           <ESICWelcomeCard onNovoProcesso={() => setScreen('create')} />
@@ -222,7 +225,6 @@ const ESICPage: React.FC = () => {
         </div>
       )}
       
-      {/* Main content area */}
       <main>
         {screen === 'list' && (
           <>
@@ -320,7 +322,6 @@ const ESICPage: React.FC = () => {
         )}
       </main>
       
-      {/* Confirmation Dialog for Delete */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

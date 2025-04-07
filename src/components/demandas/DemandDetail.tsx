@@ -83,7 +83,18 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
         return;
       }
 
-      setNota(data);
+      if (data) {
+        const notaData = {
+          ...data,
+          texto: data.texto || '',
+          titulo: data.titulo || '',
+          conteudo: data.texto || ''
+        } as NotaOficial;
+        
+        setNota(notaData);
+      } else {
+        setNota(null);
+      }
     } catch (error) {
       console.error('Error in fetchNota:', error);
     }

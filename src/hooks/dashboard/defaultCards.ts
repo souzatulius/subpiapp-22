@@ -1,4 +1,3 @@
-
 import { ActionCardItem, CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
 import React from 'react';
@@ -143,12 +142,155 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'standard',
       displayMobile: true,
       mobileOrder: 9
+    },
+    {
+      id: 'esic',
+      title: 'e-SIC',
+      path: '/dashboard/esic',
+      iconId: 'file-text',
+      color: 'blue-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10
     }
   ];
 };
 
 // Cards padrão para o dashboard inicial
 export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem[] => {
+  if (coordenacaoId === 'comunicacao') {
+    return [
+      {
+        id: 'nova-solicitacao',
+        title: 'Nova',
+        iconId: 'plus-circle',
+        path: '/dashboard/comunicacao/cadastrar',
+        color: 'blue-vivid',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 1
+      },
+      {
+        id: 'responder-demandas',
+        title: 'Responder Demandas',
+        iconId: 'chat-bubble-left-right',
+        path: '/dashboard/comunicacao/responder',
+        color: 'orange-dark',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        hasBadge: true,
+        badgeValue: "0",
+        displayMobile: true,
+        mobileOrder: 2
+      },
+      {
+        id: 'consultar-demandas',
+        title: 'Consultar Demandas',
+        iconId: 'list-bullet',
+        path: '/dashboard/comunicacao/demandas',
+        color: 'deep-blue',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 3
+      },
+      {
+        id: 'criar-nota',
+        title: 'Nova Nota',
+        iconId: 'document-plus',
+        path: '/dashboard/comunicacao/criar-nota',
+        color: 'gray-medium',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        hasBadge: true,
+        badgeValue: '0',
+        displayMobile: true,
+        mobileOrder: 4
+      },
+      {
+        id: 'aprovar-notas',
+        title: 'Aprovar Notas',
+        iconId: 'check-circle',
+        path: '/dashboard/comunicacao/aprovar-nota',
+        color: 'blue-dark',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        hasBadge: true,
+        badgeValue: '0',
+        displayMobile: true,
+        mobileOrder: 5
+      },
+      {
+        id: 'ranking-zeladoria',
+        title: 'Ranking de Zeladoria',
+        iconId: 'trophy',
+        path: '/dashboard/zeladoria/ranking-subs',
+        color: 'gray-light',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 7
+      },
+      {
+        id: 'relatorios-comunicacao',
+        title: 'Relatórios da Comunicação',
+        path: '/dashboard/comunicacao/relatorios',
+        iconId: 'bar-chart-2',
+        color: 'deep-blue',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 8
+      },
+      {
+        id: 'gerar-noticia',
+        title: 'Notícias',
+        path: '/dashboard/comunicacao/cadastrar-release',
+        iconId: 'document-plus',
+        color: 'orange-dark',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 9
+      },
+      {
+        id: 'ver-releases',
+        title: 'Notícias',
+        path: '/dashboard/comunicacao/releases',
+        iconId: 'file-text',
+        color: 'gray-medium',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 10
+      },
+      {
+        id: 'esic',
+        title: 'e-SIC',
+        path: '/dashboard/esic',
+        iconId: 'file-text',
+        color: 'blue-light',
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 11
+      }
+    ];
+  }
+  
   return [
     {
       id: 'nova-solicitacao',

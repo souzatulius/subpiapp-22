@@ -15,6 +15,7 @@ export const useProcessos = () => {
   const { data: processos, isLoading, error, refetch } = useQuery({
     queryKey: ['esic-processos'],
     queryFn: async () => {
+      console.log('Fetching esic processes...');
       const { data, error } = await supabase
         .from('esic_processos')
         .select(`
@@ -24,6 +25,7 @@ export const useProcessos = () => {
         .order('criado_em', { ascending: false });
 
       if (error) {
+        console.error('Error fetching processos:', error);
         toast({
           title: 'Erro ao carregar processos',
           description: error.message,
@@ -32,6 +34,7 @@ export const useProcessos = () => {
         throw error;
       }
 
+      console.log('Fetched esic processes:', data);
       return data as unknown as ESICProcesso[];
     },
   });

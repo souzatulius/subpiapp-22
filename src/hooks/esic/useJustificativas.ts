@@ -15,6 +15,7 @@ export const useJustificativas = (processoId?: string) => {
     queryFn: async () => {
       if (!processoId) return [];
 
+      console.log('Fetching justificativas for processo:', processoId);
       const { data, error } = await supabase
         .from('esic_justificativas')
         .select(`
@@ -25,6 +26,7 @@ export const useJustificativas = (processoId?: string) => {
         .order('criado_em', { ascending: false });
 
       if (error) {
+        console.error('Error fetching justificativas:', error);
         toast({
           title: 'Erro ao carregar justificativas',
           description: error.message,
@@ -33,6 +35,7 @@ export const useJustificativas = (processoId?: string) => {
         throw error;
       }
 
+      console.log('Fetched justificativas:', data);
       return data as unknown as ESICJustificativa[];
     },
     enabled: !!processoId,
