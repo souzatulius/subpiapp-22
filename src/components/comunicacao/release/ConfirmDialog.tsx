@@ -1,14 +1,16 @@
 
 import React from 'react';
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Sparkles } from 'lucide-react';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,24 +24,24 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm
 }) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Criar notícia</DialogTitle>
-          <DialogDescription>
-            Deseja criar uma notícia com base neste release?
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Não
-          </Button>
-          <Button variant="action" onClick={onConfirm}>
-            Sim, gerar notícia
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Gerar notícia automaticamente?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Nosso sistema de IA pode transformar o release em uma notícia para publicação.
+            Deseja gerar uma notícia a partir deste release?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Não, obrigado</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            Gerar Notícia
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

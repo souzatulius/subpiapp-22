@@ -37,14 +37,14 @@ export const useReleaseForm = () => {
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData?.user?.id || 'sistema';
       
-      // Save release to database - Fixed the tipo value to match database constraints
+      // Save release to database
       const { error } = await supabase
         .from('releases')
         .insert({ 
           conteudo: releaseContent,
-          tipo: 'imprensa',      // Ensure this matches the allowed values in the check constraint
+          tipo: 'release',  // We're saving it as a release
           autor_id: userId,
-          status: 'pendente'     // Add status field with default value
+          status: 'pendente'
         });
       
       if (error) throw error;
@@ -111,55 +111,52 @@ export const useReleaseForm = () => {
   };
   
   const handleCreateNote = async () => {
-    // Here you would save the edited content
     if (editedTitle && editedContent) {
       try {
         // Get the current authenticated user ID
         const { data: authData } = await supabase.auth.getUser();
         const userId = authData?.user?.id || 'sistema';
         
-        // Fetch a valid problema_id from the database to use as default
-        const { data: problemasData, error: problemasError } = await supabase
-          .from('problemas')
-          .select('id')
-          .limit(1);
+        // Save the original release first to get its ID
+        const { data: releaseData, error: releaseError } = await supabase
+          .from('releases')
+          .insert({ 
+            conteudo: releaseContent,
+            tipo: 'release',  // This is the original release
+            autor_id: userId,
+            status: 'pendente'
+          })
+          .select()
+          .single();
         
-        if (problemasError) throw problemasError;
+        if (releaseError) throw releaseError;
         
-        // Get the first problema_id or use a fallback
-        const defaultProblemaId = problemasData && problemasData.length > 0 
-          ? problemasData[0].id 
-          : null;
-        
-        if (!defaultProblemaId) {
-          throw new Error('Não foi possível encontrar um problema válido para associar à nota');
-        }
-        
-        // Create new nota oficial with the edited content
-        const { error } = await supabase
-          .from('notas_oficiais')
+        // Create the news with reference to the original release
+        const { error: newsError } = await supabase
+          .from('releases')
           .insert({
             titulo: editedTitle,
-            texto: editedContent,
+            conteudo: editedContent,
+            tipo: 'noticia',  // This is the generated news
             autor_id: userId,
-            problema_id: defaultProblemaId,
+            release_origem_id: releaseData?.id, // Link to the original release
             status: 'pendente'
           });
           
-        if (error) throw error;
+        if (newsError) throw newsError;
         
         toast({
-          title: "Nota criada",
-          description: "A nota oficial foi criada com sucesso!"
+          title: "Notícia criada",
+          description: "A notícia foi criada com sucesso!"
         });
         
-        // Redirect to notas list or another appropriate page
-        navigate('/dashboard/comunicacao/consultar-notas');
+        // Redirect to releases list
+        navigate('/dashboard/comunicacao/releases');
       } catch (error) {
-        console.error('Erro ao criar nota:', error);
+        console.error('Erro ao criar notícia:', error);
         toast({
-          title: "Erro ao criar nota",
-          description: "Não foi possível criar a nota oficial. Tente novamente.",
+          title: "Erro ao criar notícia",
+          description: "Não foi possível criar a notícia. Tente novamente.",
           variant: "destructive"
         });
       }

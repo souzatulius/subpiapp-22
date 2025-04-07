@@ -1,26 +1,24 @@
 
 import React from 'react';
-import { 
+import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-
-interface NotaGerada {
-  titulo: string;
-  conteudo: string;
-}
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Save, X } from 'lucide-react';
 
 interface GeneratedContentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  generatedContent: NotaGerada | null;
+  generatedContent: {
+    titulo: string;
+    conteudo: string;
+  } | null;
   editedTitle: string;
   editedContent: string;
   onEditedTitleChange: (title: string) => void;
@@ -39,49 +37,43 @@ const GeneratedContentDialog: React.FC<GeneratedContentDialogProps> = ({
   onCreateNote
 }) => {
   if (!generatedContent) return null;
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Notícia Gerada</DialogTitle>
-          <DialogDescription>
-            Conteúdo gerado com base no release fornecido. Você pode editar o texto antes de salvar.
-          </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 my-4">
+        <div className="space-y-4 py-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-lg">Título</h3>
-              <Badge variant="warning">Edite conforme necessário</Badge>
-            </div>
-            <Textarea 
+            <p className="text-sm font-medium mb-2">Título</p>
+            <Input 
               value={editedTitle}
               onChange={(e) => onEditedTitleChange(e.target.value)}
-              className="p-3 bg-gray-50 rounded-md"
+              placeholder="Título da notícia"
             />
           </div>
           
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-lg">Conteúdo</h3>
-              <Badge variant="warning">Edite conforme necessário</Badge>
-            </div>
+            <p className="text-sm font-medium mb-2">Conteúdo</p>
             <Textarea 
               value={editedContent}
               onChange={(e) => onEditedContentChange(e.target.value)}
-              className="p-3 bg-gray-50 rounded-md min-h-[300px]"
+              placeholder="Conteúdo da notícia"
+              className="min-h-[300px]"
             />
           </div>
         </div>
         
-        <DialogFooter className="gap-2">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fechar
+            <X className="h-4 w-4 mr-2" />
+            Cancelar
           </Button>
-          <Button variant="action" onClick={onCreateNote}>
-            Criar Nota Oficial
+          <Button onClick={onCreateNote}>
+            <Save className="h-4 w-4 mr-2" />
+            Salvar Notícia
           </Button>
         </DialogFooter>
       </DialogContent>

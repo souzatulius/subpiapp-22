@@ -1443,6 +1443,7 @@ export type Database = {
           id: string
           publicada: boolean | null
           release_origem_id: string | null
+          status: string | null
           tipo: string
           titulo: string | null
         }
@@ -1454,6 +1455,7 @@ export type Database = {
           id?: string
           publicada?: boolean | null
           release_origem_id?: string | null
+          status?: string | null
           tipo: string
           titulo?: string | null
         }
@@ -1465,6 +1467,7 @@ export type Database = {
           id?: string
           publicada?: boolean | null
           release_origem_id?: string | null
+          status?: string | null
           tipo?: string
           titulo?: string | null
         }
