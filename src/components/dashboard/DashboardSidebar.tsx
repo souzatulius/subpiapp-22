@@ -1,61 +1,41 @@
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ButtonIcon } from '@radix-ui/react-select';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import SidebarSection from './sidebar/SidebarSection';
+import { getNavigationSections } from './sidebar/navigationConfig';
 import { useAdminCheck } from './sidebar/useAdminCheck';
-import { navigationConfig } from './sidebar/navigationConfig';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
-  className?: string;
 }
 
-const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, className }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isAdmin = useAdminCheck();
+const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
+  isOpen
+}) => {
+  const { user } = useAuth();
+  const { isAdmin } = useAdminCheck(user);
   
-  const isActiveRoute = (route: string) => {
-    return location.pathname === route;
-  };
-  
-  const isActiveSection = (routes: string[]) => {
-    return routes.some(route => location.pathname.startsWith(route));
-  };
-  
+  // Get navigation sections from config
+  const navSections = getNavigationSections();
+
   return (
-    <aside 
-      className={cn(
-        "w-56 h-full bg-white border-r border-gray-200 transition-all overflow-hidden",
-        isOpen ? "lg:w-56" : "lg:w-16",
-        className
-      )}
-    >
-      <ScrollArea className="h-full px-3">
-        <div className="py-4">
-          {navigationConfig.map((section, index) => {
-            // Skip admin section for non-admin users
-            if (section.title === 'Admin' && !isAdmin) {
-              return null;
-            }
-            
-            return (
+    <aside className={`bg-[#051b2c] transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'} flex-shrink-0 overflow-x-hidden`}>
+      <nav className="py-6">
+        <ul className="space-y-2 px-3">
+          {navSections.map((section) => (
+            <li key={section.id} className="flex flex-col">
               <SidebarSection
-                key={`section-${index}`}
-                title={section.title}
-                items={section.items}
+                id={section.id}
+                icon={section.icon}
+                label={section.label}
+                isSection={section.isSection}
                 isOpen={isOpen}
-                isActiveRoute={isActiveRoute}
-                isActiveSection={isActiveSection}
+                path={section.path}
               />
-            );
-          })}
-        </div>
-      </ScrollArea>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </aside>
   );
 };

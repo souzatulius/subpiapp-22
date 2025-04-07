@@ -38,8 +38,7 @@ const ConsultarDemandasTable = () => {
             autor_id,
             autor:autor_id(id, nome_completo),
             bairro_id,
-            bairro:bairro_id(id, nome),
-            notas:notas_oficiais(id, titulo, status)
+            bairro:bairro_id(id, nome)
           `)
           .order('created_at', { ascending: false });
         
@@ -84,8 +83,6 @@ const ConsultarDemandasTable = () => {
         id: '', // We're not using this field anymore
         descricao: ''
       },
-      // Include notas in the transformation
-      notas: d?.notas || [],
       // Add required fallback properties to match the Demand type
       origem: d?.origem || { id: '', descricao: '' },
       tipo_midia: d?.tipo_midia || { id: '', descricao: '' },
@@ -108,20 +105,10 @@ const ConsultarDemandasTable = () => {
     navigate(`/dashboard/comunicacao/responder?id=${demand.id}`);
   };
 
-  const handleCreateNote = (demandId: string) => {
-    navigate(`/dashboard/comunicacao/notas/criar?demandId=${demandId}`);
-  };
-
-  const handleViewNote = (notaId: string) => {
-    navigate(`/dashboard/comunicacao/notas/detalhe?id=${notaId}`);
-  };
-
   return (
     <DemandasTable 
       demandas={demandas as any}
       onViewDemand={handleViewDemand as any}
-      onCreateNote={handleCreateNote}
-      onViewNote={handleViewNote}
       isLoading={isLoading}
     />
   );
