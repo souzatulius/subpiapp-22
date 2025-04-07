@@ -2,7 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText } from 'lucide-react';
-import ConsultarDemandasTable from '@/components/dashboard/ConsultarDemandasTable';
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import ConsultarDemandasContent from '@/components/consultar-demandas/ConsultarDemandasContent';
 

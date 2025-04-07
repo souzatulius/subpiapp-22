@@ -72,8 +72,8 @@ const DashboardLayout: React.FC = () => {
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           
-          <div className="max-w-full mx-auto">
-            <div className={`p-4 pb-20 md:pb-4 ${isMobile ? 'pb-32' : ''}`}>
+          <div className="max-w-7xl mx-auto">
+            <div className={`p-4 ${isMobile ? 'pb-32' : 'pb-20'}`}>
               <Outlet />
             </div>
           </div>

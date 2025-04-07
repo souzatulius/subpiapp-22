@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DemandasTable from './DemandasTable';
@@ -25,7 +24,6 @@ const ConsultarDemandasContent = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [showFilters, setShowFilters] = useState(false);
   
-  // Add filter states
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [coordenacao, setCoordenacao] = useState<string>('todos');
   const [tema, setTema] = useState<string>('todos');
@@ -43,7 +41,6 @@ const ConsultarDemandasContent = () => {
     applyFilters,
   } = useDemandasData();
 
-  // Add pagination state directly in this component
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const totalCount = demandas ? demandas.length : 0;
@@ -122,7 +119,7 @@ const ConsultarDemandasContent = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
         <DemandasSearchBar
           searchTerm={searchTerm}
@@ -181,7 +178,6 @@ const ConsultarDemandasContent = () => {
         />
       )}
       
-      {/* Detail Dialog */}
       {selectedDemand && (
         <DemandDetail 
           demand={selectedDemand as any} 
@@ -190,7 +186,6 @@ const ConsultarDemandasContent = () => {
         />
       )}
       
-      {/* Delete Dialog */}
       {selectedDemand && (
         <DeleteDemandDialog
           isOpen={isDeleteModalOpen}

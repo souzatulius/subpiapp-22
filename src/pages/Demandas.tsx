@@ -44,9 +44,9 @@ const Demandas = () => {
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           
-          <div className="max-w-full mx-auto">
+          <div className="max-w-7xl mx-auto">
             <Layout>
-              <div className={`${isMobile ? 'pb-32' : ''}`}>
+              <div className={`${isMobile ? 'pb-32' : 'pb-20'}`}>
                 <DemandasContent />
               </div>
             </Layout>
