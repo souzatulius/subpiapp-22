@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DatePicker } from '@/components/ui/date-picker/index';
+import { DatePicker } from '@/components/ui/date-picker';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { BellRing, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,7 +51,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
               variant={formData.prioridade === priority.id ? "default" : "outline"} 
               className={`h-auto py-3 flex flex-col items-center justify-center gap-2
                 ${formData.prioridade === priority.id ? 
-                  "bg-[#003570] text-white ring-2 ring-[#003570] border-none" : 
+                  "bg-orange-600 text-white border-none" : 
                   "border-none"}
                 ${hasError('prioridade') ? 'border-orange-500' : ''}
                 hover:bg-orange-600 hover:text-white hover:border-none group transition-all`}
@@ -83,6 +83,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             date={formData.prazo_resposta ? new Date(formData.prazo_resposta) : undefined}
             onSelect={(date) => handleSelectChange('prazo_resposta', date ? date.toISOString() : '')}
             showTimeSelect={true}
+            useDropdownTimeSelect={true}
             placeholder="Selecione a data e horário"
             className={hasError('prazo_resposta') ? 'border-orange-500' : ''}
           />

@@ -17,6 +17,7 @@ export interface DatePickerProps {
   placeholder?: string;
   className?: string;
   showTimeSelect?: boolean;
+  useDropdownTimeSelect?: boolean;
 }
 
 /**
@@ -33,13 +34,15 @@ export interface DatePickerProps {
  * @param placeholder - Placeholder text shown when no date is selected
  * @param className - Additional CSS classes
  * @param showTimeSelect - Whether to show time selection controls (hours/minutes)
+ * @param useDropdownTimeSelect - Whether to use dropdown selects for time selection instead of text inputs
  */
 export function DatePicker({
   date,
   onSelect,
   placeholder = "Selecione",
   className,
-  showTimeSelect = false
+  showTimeSelect = false,
+  useDropdownTimeSelect = false
 }: DatePickerProps) {
   // Get today's date at midnight for date comparison
   const today = React.useMemo(() => {
@@ -194,6 +197,7 @@ export function DatePicker({
         onHoursBlur={() => handleTimeBlur('hours')}
         onMinutesBlur={() => handleTimeBlur('minutes')}
         today={today}
+        useDropdownTimeSelect={useDropdownTimeSelect}
       />
     </Popover>
   );

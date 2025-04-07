@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
@@ -148,7 +147,6 @@ const NotaForm: React.FC<NotaFormProps> = ({
           id="titulo" 
           value={titulo} 
           onChange={(e) => setTitulo(e.target.value)} 
-          placeholder="Informe um título claro e objetivo"
           className="rounded-lg"
         />
       </div>
@@ -159,7 +157,6 @@ const NotaForm: React.FC<NotaFormProps> = ({
           id="texto" 
           value={texto} 
           onChange={(e) => setTexto(e.target.value)} 
-          placeholder="Digite o conteúdo da nota oficial..."
           rows={10}
           className="rounded-lg"
         />
