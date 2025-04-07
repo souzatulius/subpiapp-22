@@ -28,10 +28,10 @@ export const useDemandasQuery = () => {
           origem:origem_id(id, descricao),
           problema_id,
           problema:problema_id(id, descricao,
-            supervisao_tecnica:supervisao_tecnica_id (
+            coordenacao:coordenacao_id (
               id, 
               descricao,
-              coordenacao_id
+              sigla
             )
           ),
           tipo_midia_id,
@@ -67,6 +67,22 @@ export const useDemandasQuery = () => {
         .select('*');
         
       if (respostasError) throw respostasError;
+      
+      // Get notas for all demands
+      const { data: notasData, error: notasError } = await supabase
+        .from('notas_oficiais')
+        .select('id, demanda_id, titulo, autor_id');
+        
+      if (notasError) throw notasError;
+      
+      // Create a map of demand_id to notas
+      const notasMap = (notasData || []).reduce((acc, nota) => {
+        if (!acc[nota.demanda_id]) {
+          acc[nota.demanda_id] = [];
+        }
+        acc[nota.demanda_id].push(nota);
+        return acc;
+      }, {} as Record<string, any[]>);
       
       // Create a map of demand_id to response
       const respostasMap = (respostasData || []).reduce((acc, resposta) => {
@@ -116,11 +132,11 @@ export const useDemandasQuery = () => {
           // Set default values for potentially missing fields
           servico: item.servico || { descricao: '' },
           area_coordenacao: item.area_coordenacao || { descricao: '' },
-          supervisao_tecnica_id: item.problema?.supervisao_tecnica?.id,
-          supervisao_tecnica: item.problema?.supervisao_tecnica,
           perguntas: perguntasObj,
           // Add response data if available
-          resposta: respostasMap[item.id] || null
+          resposta: respostasMap[item.id] || null,
+          // Add notas data if available
+          notas: notasMap[item.id] || []
         };
         
         return result as unknown as Demand;

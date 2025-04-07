@@ -9,6 +9,9 @@ import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
 import { usePermissions } from '@/hooks/permissions';
 import DemandDetail from '@/components/demandas/DemandDetail';
 import { Demand } from '@/hooks/consultar-demandas/types';
+import DemandaCards from './DemandaCards';
+import FilterBar from './FilterBar';
+import { DateRange } from 'react-day-picker';
 
 const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
@@ -17,6 +20,13 @@ const ConsultarDemandasContent = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const { isAdmin } = usePermissions();
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+  
+  // Add filter states
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [coordenacao, setCoordenacao] = useState<string>('todos');
+  const [tema, setTema] = useState<string>('todos');
+  const [status, setStatus] = useState<string>('todos');
 
   const {
     filteredDemandas: demandas,
@@ -27,6 +37,7 @@ const ConsultarDemandasContent = () => {
     handleDeleteConfirm,
     selectedDemand: hookSelectedDemand,
     setSelectedDemand: hookSetSelectedDemand,
+    applyFilters,
   } = useDemandasData();
 
   // Add pagination state directly in this component
@@ -36,7 +47,17 @@ const ConsultarDemandasContent = () => {
 
   useEffect(() => {
     refetch();
-  }, [searchTerm, refetch]);
+  }, [refetch]);
+
+  useEffect(() => {
+    applyFilters({
+      searchTerm,
+      dateRange,
+      coordenacao,
+      tema,
+      status
+    });
+  }, [searchTerm, dateRange, coordenacao, tema, status, applyFilters]);
 
   const handleSearch = (term: string) => {
     updateSearchTerm(term);
@@ -76,6 +97,15 @@ const ConsultarDemandasContent = () => {
     setSelectedDemand(null);
   };
 
+  const resetFilters = () => {
+    setDateRange(undefined);
+    setCoordenacao('todos');
+    setTema('todos');
+    setStatus('todos');
+    setSearchTerm('');
+    updateSearchTerm('');
+  };
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -86,23 +116,45 @@ const ConsultarDemandasContent = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-semibold mb-4">Consultar Demandas</h1>
       <DemandasSearchBar
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         onSearch={handleSearch}
       />
-      <DemandasTable
-        demandas={demandas as any}
-        onViewDemand={handleViewDemand as any}
-        onDelete={handleDelete as any}
-        totalCount={totalCount}
-        page={page}
-        pageSize={pageSize}
-        setPage={setPage}
-        setPageSize={setPageSize}
-        isAdmin={isAdmin}
+      
+      <FilterBar
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        coordenacao={coordenacao}
+        onCoordenacaoChange={setCoordenacao}
+        tema={tema}
+        onTemaChange={setTema}
+        status={status}
+        onStatusChange={setStatus}
+        onResetFilters={resetFilters}
       />
+      
+      {viewMode === 'cards' ? (
+        <DemandaCards
+          demandas={demandas as any}
+          isLoading={isLoading}
+          onSelectDemand={handleViewDemand as any}
+        />
+      ) : (
+        <DemandasTable
+          demandas={demandas as any}
+          onViewDemand={handleViewDemand as any}
+          onDelete={handleDelete as any}
+          totalCount={totalCount}
+          page={page}
+          pageSize={pageSize}
+          setPage={setPage}
+          setPageSize={setPageSize}
+          isAdmin={isAdmin}
+        />
+      )}
       
       {/* Detail Dialog */}
       {selectedDemand && (

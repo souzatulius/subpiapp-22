@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Table, 
@@ -10,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Eye, Trash } from 'lucide-react';
+import { Eye, Trash, FileText } from 'lucide-react';
 import { DemandaStatusBadge } from '@/components/ui/status-badge';
 import { Demand } from '@/hooks/consultar-demandas';
 import { LoadingState } from './LoadingState';
@@ -103,16 +104,16 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   };
 
   return (
-    <div className="border rounded-md overflow-hidden">
+    <div className="border rounded-lg overflow-hidden shadow-sm">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-gray-50">
           <TableRow>
             <TableHead>Título</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Prioridade</TableHead>
             <TableHead>Coordenação</TableHead>
-            <TableHead>Data de Criação</TableHead>
             <TableHead>Prazo</TableHead>
+            <TableHead>Nota</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -120,9 +121,10 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
           {demandas.map((demand) => {
             const priorityInfo = formatPriority(demand.prioridade);
             const coordination = getCoordination(demand);
+            const hasNota = demand.notas && demand.notas.length > 0;
 
             return (
-              <TableRow key={demand.id}>
+              <TableRow key={demand.id} className="hover:bg-gray-50">
                 <TableCell className="font-medium">{demand.titulo}</TableCell>
                 <TableCell>
                   <DemandaStatusBadge status={demand.status} size="sm" />
@@ -137,16 +139,17 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                 </TableCell>
                 <TableCell>{coordination}</TableCell>
                 <TableCell>
-                  {demand.horario_publicacao ? 
-                    format(new Date(demand.horario_publicacao), 'dd/MM/yyyy', { locale: ptBR }) : 
-                    'N/A'
-                  }
-                </TableCell>
-                <TableCell>
                   {demand.prazo_resposta ? 
                     format(new Date(demand.prazo_resposta), 'dd/MM/yyyy', { locale: ptBR }) : 
                     'N/A'
                   }
+                </TableCell>
+                <TableCell>
+                  {hasNota ? (
+                    <Badge variant="outline" className="bg-green-100 text-green-800">
+                      <FileText className="h-3 w-3 mr-1" /> Sim
+                    </Badge>
+                  ) : 'Não'}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">

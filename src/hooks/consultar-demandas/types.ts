@@ -13,7 +13,11 @@ export interface Demand {
   problema: {
     id: string;
     descricao: string;
-    coordenacao?: any;
+    coordenacao?: {
+      id: string;
+      descricao: string;
+      sigla?: string;
+    };
   } | null;
   problema_id?: string;
   supervisao_tecnica: {
@@ -47,6 +51,15 @@ export interface Demand {
   };
   arquivo_url: string | null;
   anexos: any[] | null;
+  resposta?: DemandResponse | null;
+  notas?: Note[] | null;
+}
+
+export interface Note {
+  id: string;
+  demanda_id: string;
+  titulo: string;
+  autor_id: string;
 }
 
 export interface DemandResponse {
