@@ -36,6 +36,16 @@ export const useDemandasData = () => {
         
         if (demandasError) throw demandasError;
         
+        // Fetch all demanda IDs that have responses
+        const { data: respostasData, error: respostasError } = await supabase
+          .from('respostas_demandas')
+          .select('demanda_id');
+          
+        if (respostasError) throw respostasError;
+        
+        // Create a set of demanda IDs that have responses
+        const demandasComRespostas = new Set(respostasData?.map(resposta => resposta.demanda_id) || []);
+        
         // Buscar todas as notas oficiais para verificar quais demandas já possuem notas
         const { data: notasData, error: notasError } = await supabase
           .from('notas_oficiais')
@@ -46,16 +56,19 @@ export const useDemandasData = () => {
         // Criar um conjunto de IDs de demandas que já possuem notas
         const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
         
-        // Filtrar para incluir apenas demandas que não possuem notas associadas
-        const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
+        // Filter to include only demands that have responses but don't have notes
+        const demandasFiltradas = allDemandas.filter(demanda => 
+          demandasComRespostas.has(demanda.id) && !demandasComNotas.has(demanda.id)
+        );
         
         console.log('All demandas:', allDemandas.length);
+        console.log('Demandas with responses:', demandasComRespostas.size);
         console.log('Demandas with notas:', demandasComNotas.size);
-        console.log('Demandas without notas:', demandasSemNotas.length);
+        console.log('Filtered demandas:', demandasFiltradas.length);
         
         // Buscar informações do problema para cada demanda
         const demandasProcessadas = await Promise.all(
-          demandasSemNotas.map(async (demanda) => {
+          demandasFiltradas.map(async (demanda) => {
             if (demanda.problema_id) {
               const { data: problemaData } = await supabase
                 .from('problemas')

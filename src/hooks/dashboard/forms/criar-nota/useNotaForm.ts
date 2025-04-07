@@ -1,167 +1,294 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { Demand, ResponseQA } from '@/types/demand';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { Demand, ResponseQA } from './types';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { normalizeQuestions } from '@/utils/questionFormatUtils';
 
 export const useNotaForm = (onClose: () => void) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [selectedDemandaId, setSelectedDemandaId] = useState('');
   const [selectedDemanda, setSelectedDemanda] = useState<Demand | null>(null);
-  const [demandaResponse, setDemandaResponse] = useState<string | null>(null);
   const [titulo, setTitulo] = useState('');
   const [texto, setTexto] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState<'select-demand' | 'create-note'>('select-demand');
-
-  const fetchDemandResponse = async (demandaId: string) => {
+  const [step, setStep] = useState<'select-demand' | 'create-nota'>('select-demand');
+  const [formattedResponses, setFormattedResponses] = useState<ResponseQA[]>([]);
+  const [demandaRespostas, setDemandaRespostas] = useState<any>(null);
+  
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check for demandaId in query params
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const demandaId = searchParams.get('demandaId');
+    
+    if (demandaId) {
+      fetchDemanda(demandaId);
+    }
+  }, [location]);
+  
+  const fetchDemanda = async (demandaId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: demandaData, error: demandaError } = await supabase
+        .from('demandas')
+        .select(`
+          *,
+          problema:problema_id (
+            id, 
+            descricao,
+            coordenacao_id,
+            coordenacao:coordenacao_id (id, descricao)
+          ),
+          origem:origem_id (id, descricao),
+          tipo_midia:tipo_midia_id (id, descricao),
+          bairro:bairro_id (id, nome)
+        `)
+        .eq('id', demandaId)
+        .single();
+      
+      if (demandaError) throw demandaError;
+      
+      // Fetch resposta for this demanda
+      const { data: respostaData, error: respostaError } = await supabase
         .from('respostas_demandas')
         .select('*')
         .eq('demanda_id', demandaId)
-        .limit(1);
+        .maybeSingle();
       
-      if (error) throw error;
+      if (respostaError) throw respostaError;
       
-      if (data && data.length > 0) {
-        setDemandaResponse(data[0].texto);
-      } else {
-        setDemandaResponse(null);
+      if (!respostaData) {
+        toast({
+          title: "Demanda sem resposta",
+          description: "Esta demanda ainda não possui uma resposta. Responda à demanda antes de criar uma nota.",
+          variant: "destructive"
+        });
+        
+        setStep('select-demand');
+        return;
+      }
+      
+      // Set demanda resposta state
+      setDemandaRespostas(respostaData);
+      
+      // Process the question and response pairs
+      if (demandaData.perguntas && respostaData?.respostas) {
+        const questions = normalizeQuestions(demandaData.perguntas);
+        const responses = typeof respostaData.respostas === 'string' 
+          ? JSON.parse(respostaData.respostas) 
+          : respostaData.respostas;
+        
+        const formattedQA = questions.map((q, index) => ({
+          question: q,
+          answer: responses[index.toString()] || ''
+        }));
+        
+        setFormattedResponses(formattedQA);
+      }
+      
+      // Prepare demanda data
+      const demanda: Demand = {
+        id: demandaData.id,
+        titulo: demandaData.titulo,
+        status: demandaData.status,
+        prioridade: demandaData.prioridade,
+        horario_publicacao: demandaData.horario_publicacao,
+        prazo_resposta: demandaData.prazo_resposta,
+        area_coordenacao: {
+          id: demandaData.problema?.coordenacao?.id || '',
+          descricao: demandaData.problema?.coordenacao?.descricao || 'Não informada'
+        },
+        problema: demandaData.problema,
+        problema_id: demandaData.problema_id,
+        supervisao_tecnica: {
+          id: '',
+          descricao: ''
+        },
+        origem: demandaData.origem,
+        tipo_midia: demandaData.tipo_midia,
+        bairro: demandaData.bairro,
+        autor: { nome_completo: '' },
+        endereco: demandaData.endereco,
+        nome_solicitante: demandaData.nome_solicitante,
+        email_solicitante: demandaData.email_solicitante,
+        telefone_solicitante: demandaData.telefone_solicitante,
+        veiculo_imprensa: demandaData.veiculo_imprensa,
+        detalhes_solicitacao: demandaData.detalhes_solicitacao,
+        perguntas: demandaData.perguntas,
+        servico: { id: '', descricao: '' },
+        arquivo_url: demandaData.arquivo_url,
+        anexos: demandaData.anexos,
+        resposta: respostaData ? {
+          id: respostaData.id,
+          demanda_id: respostaData.demanda_id,
+          texto: respostaData.texto,
+          comentarios: respostaData.comentarios
+        } : null
+      };
+      
+      setSelectedDemanda(demanda);
+      setStep('create-nota');
+      
+      // Default title based on demanda
+      if (demanda.titulo) {
+        setTitulo(`Nota Oficial: ${demanda.titulo}`);
       }
     } catch (error) {
-      console.error('Erro ao carregar respostas da demanda:', error);
+      console.error('Error fetching demanda:', error);
       toast({
-        title: "Erro ao carregar respostas",
-        description: "Não foi possível carregar as respostas da demanda.",
+        title: "Erro ao carregar demanda",
+        description: "Não foi possível carregar os detalhes da demanda.",
         variant: "destructive"
       });
     }
   };
-
-  const handleDemandaSelect = (demandaId: string, demandas: Demand[]) => {
-    setSelectedDemandaId(demandaId);
+  
+  const handleDemandaSelect = async (demandaId: string, demandas: Demand[]) => {
+    // Find the demanda in the list
+    const demanda = demandas.find(d => d.id === demandaId);
     
-    // Find the selected demand
-    const selected = demandas.find(d => d.id === demandaId);
-    if (selected) {
-      setSelectedDemanda(selected);
-      // Fetch responses for this demand
-      fetchDemandResponse(demandaId);
+    if (!demanda) {
+      toast({
+        title: "Demanda não encontrada",
+        description: "A demanda selecionada não foi encontrada.",
+        variant: "destructive"
+      });
+      return;
     }
     
-    setStep('create-note');
+    // Fetch resposta for this demanda
+    try {
+      const { data: respostaData, error: respostaError } = await supabase
+        .from('respostas_demandas')
+        .select('*')
+        .eq('demanda_id', demandaId)
+        .maybeSingle();
+      
+      if (respostaError) throw respostaError;
+      
+      if (!respostaData) {
+        toast({
+          title: "Demanda sem resposta",
+          description: "Esta demanda ainda não possui uma resposta. Responda à demanda antes de criar uma nota.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Set demanda resposta state
+      setDemandaRespostas(respostaData);
+      
+      // Process the question and response pairs
+      if (demanda.perguntas && respostaData?.respostas) {
+        const questions = normalizeQuestions(demanda.perguntas);
+        const responses = typeof respostaData.respostas === 'string' 
+          ? JSON.parse(respostaData.respostas) 
+          : respostaData.respostas;
+        
+        const formattedQA = questions.map((q, index) => ({
+          question: q,
+          answer: responses[index.toString()] || ''
+        }));
+        
+        setFormattedResponses(formattedQA);
+      }
+      
+      // Set selected demanda and move to next step
+      setSelectedDemanda({
+        ...demanda,
+        resposta: respostaData ? {
+          id: respostaData.id,
+          demanda_id: respostaData.demanda_id,
+          texto: respostaData.texto,
+          comentarios: respostaData.comentarios
+        } : null
+      });
+      
+      setStep('create-nota');
+      
+      // Default title based on demanda
+      if (demanda.titulo) {
+        setTitulo(`Nota Oficial: ${demanda.titulo}`);
+      }
+    } catch (error) {
+      console.error('Error fetching demanda resposta:', error);
+      toast({
+        title: "Erro ao carregar resposta",
+        description: "Não foi possível carregar as respostas desta demanda.",
+        variant: "destructive"
+      });
+    }
   };
-
-  const handleBackToSelection = () => {
-    setStep('select-demand');
-    setSelectedDemanda(null);
-    setDemandaResponse(null);
-  };
-
+  
   const handleSubmit = async () => {
-    // Validação
-    if (!titulo.trim()) {
-      toast({
-        title: "Título obrigatório",
-        description: "Por favor, informe um título para a nota oficial.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!texto.trim()) {
-      toast({
-        title: "Conteúdo obrigatório",
-        description: "Por favor, informe o conteúdo da nota oficial.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     if (!selectedDemanda) {
       toast({
-        title: "Demanda inválida",
-        description: "Selecione uma demanda válida.",
+        title: "Demanda não selecionada",
+        description: "Selecione uma demanda para criar a nota.",
         variant: "destructive"
       });
       return;
     }
-
+    
+    if (!texto.trim()) {
+      toast({
+        title: "Texto vazio",
+        description: "O texto da nota não pode estar vazio.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!titulo.trim()) {
+      toast({
+        title: "Título vazio",
+        description: "O título da nota não pode estar vazio.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
       
-      // Buscar o ID do problema associado à área da demanda
-      const { data: problemaData, error: problemaError } = await supabase
-        .from('problemas')
-        .select('id')
-        .limit(1);
+      // Get coordination ID from problema or area_coordenacao
+      const coordinationId = selectedDemanda.problema?.coordenacao?.id || 
+                             selectedDemanda.area_coordenacao?.id || null;
       
-      if (problemaError) throw problemaError;
-      
-      let problemaId;
-      
-      if (!problemaData || problemaData.length === 0) {
-        // Se não houver problema cadastrado, criar um padrão
-        // Use selectedDemanda.coordenacao_id if available, or use a default
-        const coordenacaoId = selectedDemanda.coordenacao_id || null;
-        
-        const { data: newProblema, error: newProblemaError } = await supabase
-          .from('problemas')
-          .insert({ 
-            descricao: 'Problema Padrão',
-            coordenacao_id: coordenacaoId
-          })
-          .select();
-          
-        if (newProblemaError) throw newProblemaError;
-        
-        problemaId = newProblema[0].id;
-      } else {
-        problemaId = problemaData[0].id;
-      }
-      
-      // Create the note with existing problema - REMOVING coordenacao_id as it doesn't exist
       const { data, error } = await supabase
         .from('notas_oficiais')
         .insert({
-          titulo,
-          texto,
+          titulo: titulo,
+          texto: texto,
+          problema_id: selectedDemanda.problema_id,
           autor_id: user?.id,
-          status: 'pendente',
-          demanda_id: selectedDemandaId,
-          problema_id: problemaId
+          demanda_id: selectedDemanda.id,
+          coordenacao_id: coordinationId
         })
-        .select();
+        .select()
+        .single();
       
       if (error) throw error;
       
-      // Update the demand status to reflect that a note has been created
-      const { error: updateError } = await supabase
-        .from('demandas')
-        .update({ status: 'respondida' })
-        .eq('id', selectedDemandaId);
-        
-      if (updateError) {
-        console.error('Error updating demand status:', updateError);
-        // Don't throw here, we still want to show success for the note creation
-      }
-      
       toast({
-        title: "Nota oficial criada com sucesso!",
-        description: "A nota foi enviada para aprovação.",
+        title: "Nota criada com sucesso",
+        description: "A nota oficial foi criada e está aguardando aprovação.",
       });
       
-      // Redirect to dashboard
-      navigate('/dashboard');
-    } catch (error: any) {
-      console.error('Erro ao criar nota oficial:', error);
+      // If an onClose function is provided, call it (for modal contexts)
+      if (typeof onClose === 'function') {
+        onClose();
+      } else {
+        // Otherwise, navigate back to the notas page
+        navigate('/dashboard/comunicacao/notas');
+      }
+    } catch (error) {
+      console.error('Erro ao criar nota:', error);
       toast({
-        title: "Erro ao criar nota oficial",
-        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        title: "Erro ao criar nota",
+        description: "Não foi possível criar a nota oficial.",
         variant: "destructive"
       });
     } finally {
@@ -169,43 +296,7 @@ export const useNotaForm = (onClose: () => void) => {
     }
   };
   
-  const getCoordinationForProblem = async (problemId: string): Promise<string | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('problemas')
-        .select('coordenacao_id')
-        .eq('id', problemId)
-        .single();
-      
-      if (error) throw error;
-      return data?.coordenacao_id || null;
-    } catch (error) {
-      console.error('Error getting coordination for problem:', error);
-      return null;
-    }
-  };
-
-  const formatResponses = (responseText: string | null): ResponseQA[] => {
-    if (!responseText) return [];
-    
-    // Split by double newlines to get question-answer pairs
-    const pairs = responseText.split('\n\n');
-    return pairs.map(pair => {
-      const lines = pair.split('\n');
-      if (lines.length >= 2) {
-        // Extract question and answer
-        const question = lines[0].replace('Pergunta: ', '');
-        const answer = lines[1].replace('Resposta: ', '');
-        return { question, answer };
-      }
-      return { question: '', answer: '' };
-    }).filter(qa => qa.question && qa.answer);
-  };
-
-  const formattedResponses = formatResponses(demandaResponse);
-
   return {
-    selectedDemandaId,
     selectedDemanda,
     titulo,
     setTitulo,
@@ -214,8 +305,8 @@ export const useNotaForm = (onClose: () => void) => {
     isSubmitting,
     step,
     formattedResponses,
+    demandaRespostas,
     handleDemandaSelect,
-    handleBackToSelection,
     handleSubmit
   };
 };

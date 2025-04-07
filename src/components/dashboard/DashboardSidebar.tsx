@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/button';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
+  className?: string; // Add className prop
 }
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
-  isOpen
+  isOpen,
+  className = '' // Default to empty string
 }) => {
   const { user } = useAuth();
   const { isAdmin } = useAdminCheck(user);
@@ -26,7 +28,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   };
 
   return (
-    <aside className={`bg-[#051b2c] transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} flex-shrink-0 overflow-x-hidden relative`}>
+    <aside className={`bg-[#051b2c] transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} flex-shrink-0 overflow-x-hidden relative ${className}`}>
       {/* Toggle button */}
       <div className="absolute right-[-12px] top-4 z-10">
         <Button 

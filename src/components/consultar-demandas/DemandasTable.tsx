@@ -11,12 +11,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Eye, Trash, FileText } from 'lucide-react';
+import { Eye, Trash, FileText, Edit, Check, X } from 'lucide-react';
 import { DemandaStatusBadge } from '@/components/ui/status-badge';
 import { Demand } from '@/hooks/consultar-demandas';
 import { LoadingState } from './LoadingState';
 import { getPriorityColor } from '@/utils/priorityUtils';
 import { Badge } from '@/components/ui/badge';
+import { NotaOficial } from '@/types/nota';
+import { useNavigate } from 'react-router-dom';
 
 interface DemandasTableProps {
   demandas: Demand[];
@@ -33,6 +35,11 @@ interface DemandasTableProps {
   isAdmin?: boolean;
   showDeleteOption?: boolean;
   isLoading?: boolean;
+  onCreateNote?: (demand: Demand) => void;
+  onViewNote?: (nota: NotaOficial) => void;
+  onEditNote?: (nota: NotaOficial) => void;
+  onApproveNote?: (nota: NotaOficial) => void;
+  onRejectNote?: (nota: NotaOficial) => void;
 }
 
 const DemandasTable: React.FC<DemandasTableProps> = ({
@@ -49,8 +56,15 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   setPageSize,
   isAdmin,
   showDeleteOption = false,
-  isLoading = false
+  isLoading = false,
+  onCreateNote,
+  onViewNote,
+  onEditNote,
+  onApproveNote,
+  onRejectNote
 }) => {
+  const navigate = useNavigate();
+
   const handleViewOrEdit = (demand: Demand) => {
     if (onViewDemand) {
       onViewDemand(demand);
@@ -64,6 +78,15 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
       onDeleteClick(demand);
     } else if (onDelete) {
       onDelete(demand);
+    }
+  };
+  
+  const handleCreateNote = (demand: Demand) => {
+    if (onCreateNote) {
+      onCreateNote(demand);
+    } else {
+      // Default navigation to create note page with demand ID
+      navigate(`/dashboard/comunicacao/criar-nota?demandaId=${demand.id}`);
     }
   };
 
@@ -102,6 +125,14 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
     
     return 'Não informada';
   };
+  
+  const hasNota = (demand: Demand) => {
+    return demand.notas && demand.notas.length > 0;
+  };
+  
+  const hasResponsta = (demand: Demand) => {
+    return demand.resposta && demand.resposta.texto;
+  };
 
   return (
     <div className="border rounded-lg overflow-hidden shadow-sm">
@@ -121,7 +152,9 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
           {demandas.map((demand) => {
             const priorityInfo = formatPriority(demand.prioridade);
             const coordination = getCoordination(demand);
-            const hasNota = demand.notas && demand.notas.length > 0;
+            const demandHasNota = hasNota(demand);
+            const demandHasResponsta = hasResponsta(demand);
+            const firstNota = demandHasNota && demand.notas ? demand.notas[0] : null;
 
             return (
               <TableRow key={demand.id} className="hover:bg-gray-50">
@@ -145,11 +178,24 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                   }
                 </TableCell>
                 <TableCell>
-                  {hasNota ? (
+                  {demandHasNota ? (
                     <Badge variant="outline" className="bg-green-100 text-green-800">
                       <FileText className="h-3 w-3 mr-1" /> Sim
                     </Badge>
-                  ) : 'Não'}
+                  ) : (
+                    demandHasResponsta ? (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                        onClick={() => handleCreateNote(demand)}
+                      >
+                        <FileText className="h-3 w-3 mr-1" /> Gerar Nota
+                      </Button>
+                    ) : (
+                      'Não'
+                    )
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
@@ -161,6 +207,54 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
+                    
+                    {demandHasNota && firstNota && onViewNote && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onViewNote(firstNota as any)}
+                        title="Visualizar Nota"
+                        className="text-blue-600"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    {demandHasNota && firstNota && onEditNote && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onEditNote(firstNota as any)}
+                        title="Editar Nota"
+                        className="text-amber-600"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    {demandHasNota && firstNota && onApproveNote && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onApproveNote(firstNota as any)}
+                        title="Aprovar Nota"
+                        className="text-green-600"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    {demandHasNota && firstNota && onRejectNote && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onRejectNote(firstNota as any)}
+                        title="Recusar Nota"
+                        className="text-red-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                     
                     {(showDeleteOption || isAdmin) && (
                       <Button

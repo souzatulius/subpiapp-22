@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DemandasTable from '@/components/consultar-demandas/DemandasTable';
 import { Demand } from '@/hooks/consultar-demandas/types';
 import { toast } from '@/components/ui/use-toast';
+import { NotaOficial } from '@/types/nota';
 
 const ConsultarDemandasTable = () => {
   const navigate = useNavigate();
@@ -38,7 +39,9 @@ const ConsultarDemandasTable = () => {
             autor_id,
             autor:autor_id(id, nome_completo),
             bairro_id,
-            bairro:bairro_id(id, nome)
+            bairro:bairro_id(id, nome),
+            respostas:respostas_demandas(id, texto),
+            notas:notas_oficiais(id, titulo)
           `)
           .order('created_at', { ascending: false });
         
@@ -96,18 +99,39 @@ const ConsultarDemandasTable = () => {
       perguntas: null,
       servico: { id: '', descricao: '' },
       arquivo_url: null,
-      anexos: null
+      anexos: null,
+      resposta: d?.respostas && d.respostas.length > 0 ? {
+        demanda_id: d.id,
+        texto: d.respostas[0].texto,
+        id: d.respostas[0].id
+      } : null,
+      notas: d?.notas || []
     };
   });
 
   const handleViewDemand = (demand: Demand) => {
     navigate(`/dashboard/comunicacao/responder?id=${demand.id}`);
   };
+  
+  const handleViewNote = (nota: NotaOficial) => {
+    navigate(`/dashboard/comunicacao/notas/detalhe?id=${nota.id}`);
+  };
+  
+  const handleEditNote = (nota: NotaOficial) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
+  };
+  
+  const handleCreateNote = (demand: Demand) => {
+    navigate(`/dashboard/comunicacao/criar-nota?demandaId=${demand.id}`);
+  };
 
   return (
     <DemandasTable 
       demandas={demandas as any}
       onViewDemand={handleViewDemand as any}
+      onCreateNote={handleCreateNote}
+      onViewNote={handleViewNote}
+      onEditNote={handleEditNote}
       isLoading={isLoading}
     />
   );
