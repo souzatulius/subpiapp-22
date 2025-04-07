@@ -37,7 +37,7 @@ export const getPriorityColor = (priority: string) => {
   return priorityColors[priority] || { 
     bg: 'bg-gray-100', 
     text: 'text-gray-800', 
-    border: 'border-gray-200',
+    border: 'border-gray-300',
     hoverBg: 'hover:bg-[#002855]',
     selectedBg: 'bg-orange-500'
   };
@@ -48,8 +48,8 @@ export const getPriorityStyles = (priority: string, isSelected: boolean) => {
   const colors = getPriorityColor(priority);
   
   if (isSelected) {
-    return 'bg-orange-500 text-white border-none hover:bg-orange-600';
+    return 'bg-orange-500 text-white border-transparent hover:bg-orange-600';
   }
   
-  return `${colors.bg} ${colors.text} ${colors.border} ${colors.hoverBg} hover:text-white`;
+  return `${colors.bg} ${colors.text} border-gray-300 ${colors.hoverBg} hover:text-white`;
 };

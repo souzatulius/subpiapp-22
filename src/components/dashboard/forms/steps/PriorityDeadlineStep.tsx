@@ -4,6 +4,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { ValidationError } from '@/lib/formValidationUtils';
 import { BellRing, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getPriorityStyles } from '@/utils/priorityUtils';
 
 interface PriorityDeadlineStepProps {
   formData: {
@@ -48,22 +49,22 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
             <Button 
               key={priority.id + priority.label} 
               type="button" 
-              variant={formData.prioridade === priority.id ? "default" : "outline"} 
-              className={`h-auto py-3 flex flex-col items-center justify-center gap-2
+              variant="outline" 
+              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 border-gray-300
                 ${formData.prioridade === priority.id ? 
-                  "bg-orange-500 text-white border-none hover:bg-orange-600" : 
-                  "border-none hover:bg-[#002855] hover:text-white"}
+                  "bg-orange-500 text-white border-transparent hover:bg-orange-600" : 
+                  "hover:text-white hover:bg-[#002855]"}
                 ${hasError('prioridade') ? 'border-orange-500' : ''}
                 transition-all duration-300`}
               onClick={() => handleSelectChange('prioridade', priority.id)}
             >
               <div className={`
                 ${formData.prioridade === priority.id ? 'text-white' : ''}
-                group-hover:text-white transition-colors
+                transition-colors
               `}>
                 {priority.icon}
               </div>
-              <span className={`text-sm font-semibold`}>
+              <span className="text-sm font-semibold">
                 {priority.label}
               </span>
             </Button>
