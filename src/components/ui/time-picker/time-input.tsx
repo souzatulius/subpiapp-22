@@ -39,9 +39,9 @@ export function TimeInput({
    * @param e - The keyboard event
    */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow: backspace(8), delete(46), tab(9), escape(27), enter(13), period(110)
+    // Allow: backspace(8), delete(46), tab(9), escape(27), enter(13), arrow keys (37-40)
     if (
-      [8, 46, 9, 27, 13, 110].indexOf(e.keyCode) !== -1 ||
+      [8, 46, 9, 27, 13, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
       // Allow: numbers 0-9 on main keyboard
       (e.keyCode >= 48 && e.keyCode <= 57) ||
       // Allow: numpad numbers 0-9
@@ -66,6 +66,7 @@ export function TimeInput({
       className={`w-16 text-center ${className}`}
       maxLength={2} // Limit to two digits (00-99)
       placeholder={placeholder}
+      aria-label="Time input"
     />
   );
 }

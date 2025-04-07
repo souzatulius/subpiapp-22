@@ -49,18 +49,20 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
               key={priority.id + priority.label} 
               type="button" 
               variant={formData.prioridade === priority.id ? "default" : "outline"} 
-              className={`h-auto py-3 flex flex-col items-center justify-center gap-2 border-none
+              className={`h-auto py-3 flex flex-col items-center justify-center gap-2
                 ${formData.prioridade === priority.id ? 
-                  "ring-2 ring-[#003570]" : 
-                  ""}
+                  "bg-[#003570] text-white ring-2 ring-[#003570] border-none" : 
+                  "border-none"}
                 ${hasError('prioridade') ? 'border-orange-500' : ''}
-                hover:bg-orange-500 hover:text-white group`}
+                hover:bg-orange-600 hover:text-white hover:border-none group transition-all`}
               onClick={() => handleSelectChange('prioridade', priority.id)}
             >
-              <div className="group-hover:text-white">
+              <div className={`transition-colors ${formData.prioridade === priority.id ? 'text-white' : ''} group-hover:text-white`}>
                 {priority.icon}
               </div>
-              <span className="text-sm font-semibold group-hover:text-white">{priority.label}</span>
+              <span className={`text-sm font-semibold transition-colors ${formData.prioridade === priority.id ? 'text-white' : ''} group-hover:text-white`}>
+                {priority.label}
+              </span>
             </Button>
           ))}
         </div>
