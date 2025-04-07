@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import * as authService from '@/services/authService';
 import { isUserApproved, createAdminNotification, updateUserProfile } from '@/lib/authUtils';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -16,6 +18,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
   const [isApproved, setIsApproved] = useState<boolean | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const initialize = async () => {
@@ -29,8 +32,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const approved = await isUserApproved(data.session.user.id);
           setIsApproved(approved);
           
-          if (approved && window.location.pathname === '/login') {
+          if (approved && location.pathname === '/login') {
             navigate('/dashboard');
+          } else if (!approved && data.session && location.pathname !== '/email-verified') {
+            // Redirect to email-verified page if user is not approved
+            toast.info("Seu acesso ainda não foi aprovado por um administrador.");
+            navigate('/email-verified');
           }
         }
 
@@ -42,8 +49,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const approved = await isUserApproved(newSession.user.id);
             setIsApproved(approved);
             
-            if (approved && window.location.pathname === '/login') {
+            if (approved && location.pathname === '/login') {
               navigate('/dashboard');
+            } else if (!approved && newSession && location.pathname !== '/email-verified') {
+              // Redirect to email-verified page if user is not approved
+              toast.info("Seu acesso ainda não foi aprovado por um administrador.");
+              navigate('/email-verified');
             }
           } else {
             setIsApproved(null);
@@ -61,7 +72,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     initialize();
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const handleUpdateUserProfile = async (userId: string, userData: any) => {
     return updateUserProfile(userId, userData);
@@ -96,6 +107,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsApproved(approved);
       
       if (!approved) {
+        // Redirect to email-verified page if user is not approved
+        navigate('/email-verified');
         return { 
           error: { 
             message: 'User not approved'
