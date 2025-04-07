@@ -9,6 +9,8 @@ import { toast } from '@/components/ui/use-toast';
 
 const ConsultarDemandasTable = () => {
   const navigate = useNavigate();
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
   
   const { data: demandasRaw = [], isLoading } = useQuery({
     queryKey: ['demandas'],
@@ -107,9 +109,14 @@ const ConsultarDemandasTable = () => {
 
   return (
     <DemandasTable 
-      demandas={demandas as any}
-      onViewDemand={handleViewDemand as any}
+      demandas={demandas}
+      onViewDemand={handleViewDemand}
       isLoading={isLoading}
+      totalCount={demandas.length}
+      page={page}
+      pageSize={pageSize}
+      setPage={setPage}
+      setPageSize={setPageSize}
     />
   );
 };

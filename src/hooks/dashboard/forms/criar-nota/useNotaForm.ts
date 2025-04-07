@@ -94,21 +94,22 @@ export const useNotaForm = (onClose: () => void) => {
     try {
       setIsSubmitting(true);
       
-      // Buscar o ID do problema associado à área da demanda
+      // Get problema data to associate with the note
       const { data: problemaData, error: problemaError } = await supabase
         .from('problemas')
-        .select('id')
-        .limit(1);
+        .select('id, coordenacao_id')
+        .eq('id', selectedDemanda.problema_id)
+        .maybeSingle();
       
-      if (problemaError) throw problemaError;
+      if (problemaError && problemaError.code !== 'PGRST116') {
+        throw problemaError;
+      }
       
-      let problemaId;
+      let problemaId = selectedDemanda.problema_id;
+      let coordenacaoId = problemaData?.coordenacao_id || null;
       
-      if (!problemaData || problemaData.length === 0) {
-        // Se não houver problema cadastrado, criar um padrão
-        // Use selectedDemanda.coordenacao_id if available, or use a default
-        const coordenacaoId = selectedDemanda.coordenacao_id || null;
-        
+      if (!problemaId) {
+        // If no problema_id found on demand, create a default one
         const { data: newProblema, error: newProblemaError } = await supabase
           .from('problemas')
           .insert({ 
@@ -120,11 +121,9 @@ export const useNotaForm = (onClose: () => void) => {
         if (newProblemaError) throw newProblemaError;
         
         problemaId = newProblema[0].id;
-      } else {
-        problemaId = problemaData[0].id;
       }
       
-      // Create the note with existing problema - REMOVING coordenacao_id as it doesn't exist
+      // Create the note including coordenacao_id from the problema
       const { data, error } = await supabase
         .from('notas_oficiais')
         .insert({
@@ -133,7 +132,8 @@ export const useNotaForm = (onClose: () => void) => {
           autor_id: user?.id,
           status: 'pendente',
           demanda_id: selectedDemandaId,
-          problema_id: problemaId
+          problema_id: problemaId,
+          coordenacao_id: coordenacaoId
         })
         .select();
       
@@ -142,7 +142,7 @@ export const useNotaForm = (onClose: () => void) => {
       // Update the demand status to reflect that a note has been created
       const { error: updateError } = await supabase
         .from('demandas')
-        .update({ status: 'respondida' })
+        .update({ status: 'aguardando_aprovacao' })
         .eq('id', selectedDemandaId);
         
       if (updateError) {
@@ -169,22 +169,6 @@ export const useNotaForm = (onClose: () => void) => {
     }
   };
   
-  const getCoordinationForProblem = async (problemId: string): Promise<string | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('problemas')
-        .select('coordenacao_id')
-        .eq('id', problemId)
-        .single();
-      
-      if (error) throw error;
-      return data?.coordenacao_id || null;
-    } catch (error) {
-      console.error('Error getting coordination for problem:', error);
-      return null;
-    }
-  };
-
   const formatResponses = (responseText: string | null): ResponseQA[] => {
     if (!responseText) return [];
     

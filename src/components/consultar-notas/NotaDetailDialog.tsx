@@ -1,125 +1,176 @@
 
-import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
+import React, { useState } from 'react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User, Building, FileDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { NotaOficial } from '@/types/nota';
-import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
+import { Edit, CheckCircle, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface NotaDetailDialogProps {
   nota: NotaOficial;
   isOpen: boolean;
   onClose: () => void;
-  formatDate: (dateString: string) => string;
+  formatDate: (date: string) => string;
+  refetch?: () => Promise<void>;
 }
 
 const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({ 
   nota, 
   isOpen, 
-  onClose,
-  formatDate
+  onClose, 
+  formatDate,
+  refetch 
 }) => {
-  const { exportNotaToPDF, exporting } = useExportNotaPDF(formatDate);
-  
-  const handleExportPDF = () => {
-    exportNotaToPDF(nota);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  if (!nota) return null;
+
+  const handleEdit = () => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
+    onClose();
   };
 
-  const formatStatus = (status: string): string => {
-    const statusMap: Record<string, string> = {
-      'em_andamento': 'Demanda respondida',
-    };
+  const updateNotaStatus = async (status: string) => {
+    if (!nota) return;
     
-    return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1);
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .update({ 
+          status: status,
+          aprovador_id: status === 'aprovada' ? user?.id : null
+        })
+        .eq('id', nota.id);
+
+      if (error) throw error;
+
+      toast({
+        title: `Nota ${status === 'aprovada' ? 'aprovada' : 'rejeitada'} com sucesso!`,
+        description: status === 'aprovada' 
+          ? "A nota foi aprovada e está pronta para publicação."
+          : "A nota foi rejeitada e o autor será notificado."
+      });
+
+      // Update the demand status based on note status
+      if (nota.demanda_id) {
+        const newDemandStatus = status === 'aprovada' ? 'concluida' : 'aguardando_nota';
+        
+        const { error: demandError } = await supabase
+          .from('demandas')
+          .update({ status: newDemandStatus })
+          .eq('id', nota.demanda_id);
+          
+        if (demandError) {
+          console.error('Error updating demand status:', demandError);
+        }
+      }
+
+      // Refresh the note data if refetch is provided
+      if (refetch) {
+        await refetch();
+      }
+      
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar nota",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const autorNome = nota.autor?.nome_completo || "Autor desconhecido";
-  const areaNome = nota.supervisao_tecnica?.descricao || "Área não especificada";
-  const dataCriacao = nota.criado_em || nota.created_at || "";
-  const dataAtualizacao = nota.atualizado_em || nota.updated_at || "";
-  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">{nota.titulo}</DialogTitle>
+          <div className="flex justify-between items-start">
+            <DialogTitle className="text-xl font-semibold">{nota.titulo}</DialogTitle>
+            <Badge>{nota.status}</Badge>
+          </div>
         </DialogHeader>
         
-        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-gray-500 my-2">
-          <div className="flex items-center">
-            <User className="w-4 h-4 mr-1" />
-            <span>{autorNome}</span>
-          </div>
-          <div className="flex items-center">
-            <Building className="w-4 h-4 mr-1" />
-            <span>{areaNome}</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar className="w-4 h-4 mr-1" />
-            <span>{formatDate(dataCriacao)}</span>
-          </div>
-          {nota.atualizado_em && nota.atualizado_em !== nota.criado_em && (
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-1" />
-              <span>Atualizado em: {formatDate(dataAtualizacao)}</span>
+        <div className="space-y-4 mt-4">
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
+            <div>
+              <span className="font-medium">Autor:</span> {nota.autor?.nome_completo || 'Não informado'}
             </div>
-          )}
-        </div>
-        
-        <div className="relative border border-gray-200 rounded-md p-4 bg-white">
-          <div className="absolute top-2 right-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-            {formatStatus(nota.status)}
+            <div>
+              <span className="font-medium">Criada em:</span> {formatDate(nota.criado_em || nota.created_at || '')}
+            </div>
+            {nota.aprovador && (
+              <div>
+                <span className="font-medium">Aprovada por:</span> {nota.aprovador.nome_completo}
+              </div>
+            )}
+            {nota.problema?.coordenacao && (
+              <div>
+                <span className="font-medium">Coordenação:</span> {nota.problema.coordenacao.descricao}
+              </div>
+            )}
           </div>
           
-          <div className="prose max-w-none mt-4" dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br />') }} />
+          <div className="prose max-w-none pt-4 border-t">
+            <div
+              className="whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br/>') }}
+            />
+          </div>
         </div>
         
-        {nota.historico_edicoes && nota.historico_edicoes.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-medium mb-2">Histórico de Edições</h3>
-            <div className="space-y-4">
-              {nota.historico_edicoes.map((edicao) => (
-                <div key={edicao.id} className="border border-gray-200 rounded-md p-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-sm font-medium">
-                      {edicao.editor?.nome_completo || "Editor desconhecido"}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {formatDate(edicao.criado_em)}
-                    </span>
-                  </div>
-                  <div className="text-sm">
-                    <p className="mb-1"><span className="font-medium">Título anterior:</span> {edicao.titulo_anterior}</p>
-                    <p><span className="font-medium">Título novo:</span> {edicao.titulo_novo}</p>
-                  </div>
-                  {edicao.texto_anterior !== edicao.texto_novo && (
-                    <div className="text-sm mt-2">
-                      <p className="text-xs text-gray-500">Texto também foi modificado</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+        <DialogFooter className="flex justify-between">
+          <div>
+            <Button 
+              variant="outline"
+              onClick={handleEdit}
+              className="gap-1"
+            >
+              <Edit className="h-4 w-4" /> Editar
+            </Button>
           </div>
-        )}
-        
-        <DialogFooter className="mt-6">
-          <Button 
-            variant="outline" 
-            onClick={handleExportPDF}
-            disabled={exporting}
-            className="flex items-center"
-          >
-            <FileDown className="w-4 h-4 mr-1" />
-            {exporting ? 'Exportando...' : 'Exportar PDF'}
-          </Button>
-          <Button onClick={onClose}>Fechar</Button>
+          
+          <div className="flex gap-2">
+            {nota.status === 'pendente' && (
+              <>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => updateNotaStatus('rejeitada')}
+                  disabled={isUpdating}
+                  className="gap-1"
+                >
+                  <X className="h-4 w-4" /> Recusar
+                </Button>
+                
+                <Button 
+                  variant="default" 
+                  onClick={() => updateNotaStatus('aprovada')}
+                  disabled={isUpdating}
+                  className="gap-1"
+                >
+                  <CheckCircle className="h-4 w-4" /> Aprovar
+                </Button>
+              </>
+            )}
+            
+            <Button variant="outline" onClick={onClose}>
+              Fechar
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,740 +1,348 @@
-
 import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Json } from '@/integrations/supabase/types';
-import { toast } from '@/components/ui/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { AlertCircle, Clock, CheckCircle2, Archive, XCircle, MapPin, Phone, Mail, User, Calendar, FileText, MessageSquare, Loader2, Download, Eye, Image, Paperclip, File } from 'lucide-react';
+import { Download, Eye, FileEdit, CheckCircle, X, FileText, LucideEdit } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
+import { useUserProfiles } from '@/hooks/useUserProfiles';
+import { NotaOficial } from '@/types/nota';
 
-interface Demand {
-  id: string;
-  titulo: string;
-  status: string;
-  prioridade: string;
-  horario_publicacao: string;
-  prazo_resposta: string;
-  area_coordenacao: {
-    descricao: string;
-  } | null;
-  servico: {
-    descricao: string;
-  } | null;
-  origem: {
-    descricao: string;
-  } | null;
-  tipo_midia: {
-    descricao: string;
-  } | null;
-  bairro: {
-    nome: string;
-  } | null;
-  autor: {
-    nome_completo: string;
-  } | null;
-  endereco: string | null;
-  nome_solicitante: string | null;
-  email_solicitante: string | null;
-  telefone_solicitante: string | null;
-  veiculo_imprensa: string | null;
-  detalhes_solicitacao: string | null;
-  perguntas: Record<string, string> | null;
-  arquivo_url: string | null;
-  anexos: string[] | null;
-}
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return 'Data não informada';
+  try {
+    return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+  } catch (e) {
+    return 'Data inválida';
+  }
+};
 
 interface DemandDetailProps {
-  demand: Demand | null;
+  demand: any;
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface Resposta {
-  id: string;
-  demanda_id: string;
-  texto: string;
-  respostas: Record<string, string> | null;
-  usuario_id: string;
-  criado_em: string;
-  comentarios: string | null;
-}
-
-// Form schema for responses
-const formSchema = z.object({
-  responses: z.record(z.string().min(1, "A resposta é obrigatória"))
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-const DemandDetail: React.FC<DemandDetailProps> = ({
-  demand,
-  isOpen,
-  onClose
-}) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [resposta, setResposta] = useState<Resposta | null>(null);
-  const [isLoadingResposta, setIsLoadingResposta] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-
-  // Set up the form with default values based on questions
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      responses: demand?.perguntas ? Object.keys(demand.perguntas).reduce((acc, key) => {
-        acc[key] = "";
-        return acc;
-      }, {} as Record<string, string>) : {}
-    }
-  });
+const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const { profiles } = useUserProfiles();
+  const [activeTab, setActiveTab] = useState('details');
+  const [responseData, setResponseData] = useState<any>(null);
+  const [nota, setNota] = useState<NotaOficial | null>(null);
+  const [isUpdatingNota, setIsUpdatingNota] = useState(false);
 
   // Fetch response data when demand changes
   useEffect(() => {
-    const fetchResposta = async () => {
-      if (!demand) return;
-      
-      setIsLoadingResposta(true);
-      
-      try {
-        const { data, error } = await supabase
-          .from('respostas_demandas')
-          .select('*')
-          .eq('demanda_id', demand.id)
-          .maybeSingle();
-          
-        if (error) throw error;
-        
-        if (data) {
-          // Parse the respostas field properly
-          let parsedRespostas: Record<string, string> | null = null;
-          
-          if (data.respostas) {
-            // If it's a string, try to parse it as JSON
-            if (typeof data.respostas === 'string') {
-              try {
-                parsedRespostas = JSON.parse(data.respostas);
-              } catch (e) {
-                console.error('Error parsing respostas as JSON:', e);
-                parsedRespostas = null;
-              }
-            } 
-            // If it's already an object, use it directly
-            else if (typeof data.respostas === 'object') {
-              parsedRespostas = data.respostas as Record<string, string>;
-            }
-          }
-          
-          const formattedResposta: Resposta = {
-            id: data.id,
-            demanda_id: data.demanda_id,
-            texto: data.texto,
-            respostas: parsedRespostas,
-            usuario_id: data.usuario_id,
-            criado_em: data.criado_em,
-            comentarios: data.comentarios
-          };
-          
-          setResposta(formattedResposta);
-          
-          // If there's a response with answer data, populate the form
-          if (formattedResposta.respostas) {
-            form.reset({
-              responses: formattedResposta.respostas
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching response:', error);
-      } finally {
-        setIsLoadingResposta(false);
+    if (demand?.id) {
+      fetchResponseData(demand.id);
+      fetchNota(demand.id);
+    }
+  }, [demand]);
+
+  const fetchResponseData = async (demandId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('respostas_demandas')
+        .select('*')
+        .eq('demanda_id', demandId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching response data:', error);
+        return;
       }
-    };
+
+      setResponseData(data);
+    } catch (error) {
+      console.error('Error in fetchResponseData:', error);
+    }
+  };
+
+  const fetchNota = async (demandId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('notas_oficiais')
+        .select(`
+          *,
+          autor:autor_id(nome_completo),
+          aprovador:aprovador_id(nome_completo),
+          problema:problema_id(
+            id,
+            descricao,
+            coordenacao:coordenacao_id(id, descricao)
+          )
+        `)
+        .eq('demanda_id', demandId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching nota:', error);
+        return;
+      }
+
+      setNota(data);
+    } catch (error) {
+      console.error('Error in fetchNota:', error);
+    }
+  };
+
+  const handleCreateNota = () => {
+    navigate(`/dashboard/comunicacao/notas/criar?id=${demand.id}`);
+  };
+
+  const handleEditNota = () => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${nota?.id}`);
+  };
+
+  const handleViewNota = () => {
+    navigate(`/dashboard/comunicacao/notas/visualizar?id=${nota?.id}`);
+  };
+
+  const updateNotaStatus = async (status: string) => {
+    if (!nota) return;
     
-    if (isOpen && demand) {
-      fetchResposta();
-    }
-  }, [demand, isOpen, form]);
+    setIsUpdatingNota(true);
+    try {
+      const { error } = await supabase
+        .from('notas_oficiais')
+        .update({ 
+          status: status,
+          aprovador_id: status === 'aprovada' ? profiles[0]?.id : null
+        })
+        .eq('id', nota.id);
 
-  // Reset form when demand changes
-  useEffect(() => {
-    if (demand?.perguntas && !resposta) {
-      const defaultResponses = Object.keys(demand.perguntas).reduce((acc, key) => {
-        acc[key] = "";
-        return acc;
-      }, {} as Record<string, string>);
-      form.reset({
-        responses: defaultResponses
-      });
-    }
-  }, [demand, form, resposta]);
+      if (error) throw error;
 
-  const submitResponseMutation = useMutation({
-    mutationFn: async (data: FormValues) => {
-      if (!demand) throw new Error("Demanda não encontrada");
-      
-      // Format the response text with questions and answers
-      const responseText = Object.entries(data.responses).map(([key, value]) => {
-        const question = demand.perguntas?.[key] || key;
-        return `Pergunta: ${question}\nResposta: ${value}`;
-      }).join('\n\n');
-
-      // If there's already a response, update it
-      if (resposta) {
-        const {
-          error
-        } = await supabase.from('respostas_demandas').update({
-          texto: responseText,
-          respostas: data.responses
-        }).eq('id', resposta.id);
-        
-        if (error) throw error;
-      } else {
-        // Otherwise, create a new response
-        const {
-          error
-        } = await supabase.from('respostas_demandas').insert({
-          demanda_id: demand.id,
-          texto: responseText,
-          respostas: data.responses,
-          usuario_id: (await supabase.auth.getUser()).data.user?.id
-        });
-        
-        if (error) throw error;
-      }
-
-      // Update the demand status to 'em_andamento'
-      const {
-        error: updateError
-      } = await supabase.from('demandas').update({
-        status: 'em_andamento'
-      }).eq('id', demand.id);
-      
-      if (updateError) throw updateError;
-    },
-    onSuccess: () => {
       toast({
-        title: "Respostas enviadas",
-        description: "As respostas foram salvas com sucesso",
-        variant: "default"
+        title: `Nota ${status === 'aprovada' ? 'aprovada' : 'rejeitada'} com sucesso!`,
+        description: status === 'aprovada' 
+          ? "A nota foi aprovada e está pronta para publicação."
+          : "A nota foi rejeitada e o autor será notificado."
       });
-      queryClient.invalidateQueries({
-        queryKey: ['demandas']
-      });
-      onClose();
-    },
-    onError: error => {
-      console.error("Error submitting response:", error);
+
+      // Refresh the nota data
+      fetchNota(demand.id);
+    } catch (error: any) {
       toast({
-        title: "Erro ao enviar respostas",
-        description: error.message || "Ocorreu um erro ao enviar as respostas.",
+        title: "Erro ao atualizar nota",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação.",
         variant: "destructive"
       });
-    },
-    onSettled: () => {
-      setIsSubmitting(false);
+    } finally {
+      setIsUpdatingNota(false);
     }
-  });
-
-  const onSubmit = (data: FormValues) => {
-    setIsSubmitting(true);
-    submitResponseMutation.mutate(data);
-  };
-
-  // Helper function to get status icon
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pendente':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'em_andamento':
-        return <AlertCircle className="h-5 w-5 text-blue-500" />;
-      case 'concluida':
-      case 'respondida':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case 'arquivada':
-        return <Archive className="h-5 w-5 text-gray-500" />;
-      case 'cancelada':
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return null;
-    }
-  };
-
-  // Helper function to get status text
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case 'pendente':
-        return 'Pendente';
-      case 'em_andamento':
-        return 'Em Andamento';
-      case 'respondida':
-        return 'Respondida';
-      case 'concluida':
-        return 'Concluída';
-      case 'arquivada':
-        return 'Arquivada';
-      case 'cancelada':
-        return 'Cancelada';
-      default:
-        return status;
-    }
-  };
-
-  // Helper function to get priority color
-  const getPriorityColor = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta':
-        return 'text-red-600';
-      case 'media':
-        return 'text-yellow-600';
-      case 'baixa':
-        return 'text-green-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
-
-  // Helper function to format priority text
-  const formatPriority = (prioridade: string) => {
-    switch (prioridade) {
-      case 'alta':
-        return 'Alta';
-      case 'media':
-        return 'Média';
-      case 'baixa':
-        return 'Baixa';
-      default:
-        return prioridade;
-    }
-  };
-
-  const getFileIcon = (fileUrl: string) => {
-    if (!fileUrl) return <File className="h-5 w-5" />;
-    
-    const extension = fileUrl.split('.').pop()?.toLowerCase();
-    
-    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension || '')) {
-      return <Image className="h-5 w-5 text-blue-500" />;
-    } else if (['pdf'].includes(extension || '')) {
-      return <FileText className="h-5 w-5 text-red-500" />;
-    } else if (['doc', 'docx'].includes(extension || '')) {
-      return <FileText className="h-5 w-5 text-blue-700" />;
-    } else if (['xls', 'xlsx'].includes(extension || '')) {
-      return <FileText className="h-5 w-5 text-green-700" />;
-    } else {
-      return <Paperclip className="h-5 w-5 text-gray-500" />;
-    }
-  };
-
-  const isImageFile = (fileUrl: string) => {
-    if (!fileUrl) return false;
-    const extension = fileUrl.split('.').pop()?.toLowerCase();
-    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension || '');
-  };
-
-  const getFileName = (fileUrl: string) => {
-    if (!fileUrl) return 'Arquivo';
-    return fileUrl.split('/').pop() || 'Arquivo';
-  };
-
-  const handleFilePreview = (url: string) => {
-    if (isImageFile(url)) {
-      setPreviewUrl(url);
-      setPreviewOpen(true);
-    } else {
-      window.open(url, '_blank');
-    }
-  };
-
-  const handleFileDownload = (url: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = getFileName(url);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Render previously saved responses
-  const renderSavedResponses = () => {
-    if (!resposta || !resposta.respostas || !demand?.perguntas) return null;
-    
-    return (
-      <div className="space-y-4 mt-4">
-        <h3 className="text-lg font-medium text-blue-700">Respostas Salvas</h3>
-        {Object.entries(resposta.respostas).map(([key, answer]) => {
-          const question = demand.perguntas?.[key] || key;
-          return (
-            <div key={key} className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-              <h4 className="font-medium text-blue-800">{question}</h4>
-              <p className="mt-2 text-blue-900 whitespace-pre-line">{answer}</p>
-            </div>
-          );
-        })}
-        
-        {resposta.comentarios && (
-          <div className="mt-4">
-            <h4 className="font-medium text-gray-700">Comentários Internos</h4>
-            <p className="mt-1 text-gray-600 whitespace-pre-line bg-gray-50 p-3 rounded border border-gray-200">
-              {resposta.comentarios}
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderAttachments = () => {
-    if (!demand) return null;
-
-    // Handle single arquivo_url
-    if (demand.arquivo_url && !demand.anexos?.includes(demand.arquivo_url)) {
-      return (
-        <div className="space-y-4 mt-4">
-          <h3 className="text-base font-medium">Anexos</h3>
-          <div className="flex flex-wrap gap-4">
-            <div className="border rounded-lg overflow-hidden bg-gray-50 flex flex-col">
-              <div className="p-2 h-40 flex items-center justify-center">
-                {isImageFile(demand.arquivo_url) ? (
-                  <img 
-                    src={demand.arquivo_url} 
-                    alt="Anexo" 
-                    className="max-h-full max-w-full object-contain"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center">
-                    {getFileIcon(demand.arquivo_url)}
-                    <span className="mt-2 text-sm text-gray-700 max-w-[150px] truncate">
-                      {getFileName(demand.arquivo_url)}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="p-2 border-t bg-white flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => handleFilePreview(demand.arquivo_url || '')}
-                  title="Visualizar"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => handleFileDownload(demand.arquivo_url || '')}
-                  title="Download"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Handle multiple anexos
-    if (demand.anexos && demand.anexos.length > 0) {
-      return (
-        <div className="space-y-4 mt-4">
-          <h3 className="text-base font-medium">Anexos</h3>
-          <div className="flex flex-wrap gap-4">
-            {demand.anexos.map((anexo, index) => (
-              <div key={index} className="border rounded-lg overflow-hidden bg-gray-50 flex flex-col">
-                <div className="p-2 h-40 flex items-center justify-center">
-                  {isImageFile(anexo) ? (
-                    <img 
-                      src={anexo} 
-                      alt={`Anexo ${index + 1}`} 
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      {getFileIcon(anexo)}
-                      <span className="mt-2 text-sm text-gray-700 max-w-[150px] truncate">
-                        {getFileName(anexo)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-2 border-t bg-white flex justify-end gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={() => handleFilePreview(anexo)}
-                    title="Visualizar"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={() => handleFileDownload(anexo)}
-                    title="Download"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    return null;
   };
 
   if (!demand) return null;
 
+  // Format response data
+  const formatResponseData = () => {
+    if (!responseData || !responseData.texto) return [];
+    
+    const lines = responseData.texto.split('\n\n');
+    return lines.map(line => {
+      const parts = line.split('\n');
+      if (parts.length >= 2) {
+        return {
+          question: parts[0].replace('Pergunta: ', ''),
+          answer: parts[1].replace('Resposta: ', '')
+        };
+      }
+      return null;
+    }).filter(Boolean);
+  };
+
+  const formattedResponses = formatResponseData();
+
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-50">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">{demand.titulo}</DialogTitle>
-            <DialogDescription className="flex items-center gap-2 text-base">
-              {getStatusIcon(demand.status)}
-              <span>{formatStatus(demand.status)}</span>
-              <span className="mx-2">•</span>
-              <span className={`font-medium ${getPriorityColor(demand.prioridade)}`}>
-                Prioridade: {formatPriority(demand.prioridade)}
-              </span>
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">{demand.titulo}</DialogTitle>
+          <div className="flex items-center space-x-2 mt-2">
+            <Badge variant={
+              demand.status === 'pendente' ? 'destructive' :
+              demand.status === 'em_andamento' ? 'warning' :
+              demand.status === 'respondida' || demand.status === 'aguardando_nota' ? 'default' :
+              'success'
+            }>
+              {demand.status}
+            </Badge>
+            <span className="text-sm text-gray-500">
+              Prioridade: <Badge variant="outline">{demand.prioridade}</Badge>
+            </span>
+          </div>
+        </DialogHeader>
+        
+        <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-3">
+            <TabsTrigger value="details">Detalhes</TabsTrigger>
+            <TabsTrigger value="responses" disabled={!formattedResponses.length}>
+              Respostas
+            </TabsTrigger>
+            <TabsTrigger value="nota" disabled={!nota}>
+              Nota Oficial
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium">Solicitante</h4>
+                  <p className="text-sm text-gray-500">{demand.nome_solicitante || 'Não informado'}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium">Email</h4>
+                  <p className="text-sm text-gray-500">{demand.email_solicitante || 'Não informado'}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium">Telefone</h4>
+                  <p className="text-sm text-gray-500">{demand.telefone_solicitante || 'Não informado'}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium">Veículo de Imprensa</h4>
+                  <p className="text-sm text-gray-500">{demand.veiculo_imprensa || 'Não informado'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium">Endereço</h4>
+                <p className="text-sm text-gray-500">{demand.endereco || 'Não informado'}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium">Detalhes da Solicitação</h4>
+                <p className="text-sm text-gray-500">{demand.detalhes_solicitacao || 'Não informado'}</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium">Bairro</h4>
+                  <p className="text-sm text-gray-500">{demand.bairro?.nome || 'Não informado'}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium">Data de Publicação</h4>
+                  <p className="text-sm text-gray-500">{formatDate(demand.horario_publicacao)}</p>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="responses" className="space-y-4 mt-4">
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Respostas da Demanda</h3>
+              
+              {formattedResponses.length > 0 ? (
+                formattedResponses.map((item, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div className="font-medium">{item.question}</div>
+                    <div className="text-gray-700">{item.answer}</div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">Nenhuma resposta encontrada para esta demanda.</p>
+              )}
 
-          <div className="space-y-6">
-            {/* Main information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Área</h3>
-                <p className="text-base">{demand.area_coordenacao?.descricao || 'Não especificado'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Serviço</h3>
-                <p className="text-base">{demand.servico?.descricao || 'Não especificado'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Origem</h3>
-                <p className="text-base">{demand.origem?.descricao || 'Não especificado'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Tipo de Mídia</h3>
-                <p className="text-base">{demand.tipo_midia?.descricao || 'Não especificado'}</p>
-              </div>
-              
-              <div className="flex items-start gap-2">
-                <Calendar className="h-4 w-4 mt-0.5 text-gray-500" />
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Data de Criação</h3>
-                  <p className="text-base">
-                    {demand.horario_publicacao ? format(new Date(demand.horario_publicacao), 'dd/MM/yyyy HH:mm', {
-                    locale: ptBR
-                  }) : 'Não disponível'}
-                  </p>
+              {responseData?.comentarios && (
+                <div className="mt-6">
+                  <h4 className="font-medium mb-2">Comentários:</h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="whitespace-pre-wrap">{responseData.comentarios}</p>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex items-start gap-2">
-                <Calendar className="h-4 w-4 mt-0.5 text-gray-500" />
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Prazo</h3>
-                  <p className="text-base">
-                    {demand.prazo_resposta ? format(new Date(demand.prazo_resposta), 'dd/MM/yyyy', {
-                    locale: ptBR
-                  }) : 'Sem prazo definido'}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
-            
-            <Separator />
-            
-            {/* Location information */}
-            <div className="space-y-4">
-              <h3 className="text-base font-medium">Localização</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5 text-gray-500" />
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Bairro</h3>
-                    <p className="text-base">{demand.bairro?.nome || 'Não especificado'}</p>
-                  </div>
+          </TabsContent>
+          
+          <TabsContent value="nota" className="space-y-4 mt-4">
+            {nota ? (
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-lg font-semibold">{nota.titulo}</h3>
+                  <Badge>{nota.status}</Badge>
                 </div>
                 
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5 text-gray-500" />
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Endereço</h3>
-                    <p className="text-base">{demand.endereco || 'Não especificado'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Requester information */}
-            <div className="space-y-4">
-              <h3 className="text-base font-medium">Informações do Solicitante</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-2">
-                  <User className="h-4 w-4 mt-0.5 text-gray-500" />
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Nome</h3>
-                    <p className="text-base">{demand.nome_solicitante || 'Não especificado'}</p>
-                  </div>
+                <div className="text-sm text-gray-500 space-y-1">
+                  <div>Autor: {nota.autor?.nome_completo || 'Não informado'}</div>
+                  <div>Criado em: {formatDate(nota.criado_em)}</div>
+                  {nota.aprovador && (
+                    <div>Aprovado por: {nota.aprovador?.nome_completo || 'Não informado'}</div>
+                  )}
                 </div>
                 
-                <div className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 mt-0.5 text-gray-500" />
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                    <p className="text-base">{demand.email_solicitante || 'Não especificado'}</p>
-                  </div>
+                <div className="prose max-w-none border-t pt-4 mt-4">
+                  <div 
+                    className="whitespace-pre-wrap text-gray-700"
+                    dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br/>') }}
+                  />
                 </div>
                 
-                <div className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 mt-0.5 text-gray-500" />
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Telefone</h3>
-                    <p className="text-base">{demand.telefone_solicitante || 'Não especificado'}</p>
-                  </div>
-                </div>
-                
-                {demand.veiculo_imprensa && (
-                  <div className="flex items-start gap-2">
-                    <FileText className="h-4 w-4 mt-0.5 text-gray-500" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Veículo de Imprensa</h3>
-                      <p className="text-base">{demand.veiculo_imprensa}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {demand.detalhes_solicitacao && (
-              <>
-                <Separator />
-                <div className="space-y-2">
-                  <h3 className="text-base font-medium">Detalhes da Solicitação</h3>
-                  <p className="text-base whitespace-pre-line">{demand.detalhes_solicitacao}</p>
-                </div>
-              </>
-            )}
-            
-            {/* Render attachments */}
-            {(demand.arquivo_url || (demand.anexos && demand.anexos.length > 0)) && (
-              <>
-                <Separator />
-                {renderAttachments()}
-              </>
-            )}
-            
-            {/* Display Saved Responses */}
-            {resposta && (
-              <>
-                <Separator />
-                {renderSavedResponses()}
-              </>
-            )}
-            
-            {/* Questions & Responses Section */}
-            {!resposta && demand.perguntas && Object.keys(demand.perguntas).length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
-                    Perguntas e Respostas
-                  </h3>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleViewNota}
+                  >
+                    <Eye className="h-4 w-4 mr-2" /> Visualizar
+                  </Button>
                   
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      {Object.entries(demand.perguntas).map(([key, question]) => (
-                        <FormField
-                          key={key}
-                          control={form.control}
-                          name={`responses.${key}`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-base font-medium">{question}</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  {...field}
-                                  placeholder="Digite sua resposta aqui..."
-                                  className="min-h-[100px] focus:border-[#003570] focus:ring-[#003570]"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      ))}
+                  <Button 
+                    variant="outline" 
+                    onClick={handleEditNota}
+                  >
+                    <LucideEdit className="h-4 w-4 mr-2" /> Editar
+                  </Button>
+                  
+                  {nota.status === 'pendente' && (
+                    <>
+                      <Button 
+                        variant="destructive" 
+                        onClick={() => updateNotaStatus('rejeitada')}
+                        disabled={isUpdatingNota}
+                      >
+                        <X className="h-4 w-4 mr-2" /> Recusar
+                      </Button>
                       
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>
-                          Cancelar
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                          {isSubmitting ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Enviando...
-                            </>
-                          ) : 'Enviar Respostas'}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
+                      <Button 
+                        variant="default" 
+                        onClick={() => updateNotaStatus('aprovada')}
+                        disabled={isUpdatingNota}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" /> Aprovar
+                      </Button>
+                    </>
+                  )}
                 </div>
-              </>
+              </div>
+            ) : (
+              <p className="text-gray-500">Nenhuma nota oficial encontrada para esta demanda.</p>
+            )}
+          </TabsContent>
+        </Tabs>
+        
+        <DialogFooter className="flex justify-between items-center">
+          <div>
+            {(demand.status === 'respondida' || demand.status === 'aguardando_nota') && !nota && (
+              <Button 
+                onClick={handleCreateNota}
+                className="flex items-center"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Gerar Nota Oficial
+              </Button>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Image Preview Dialog */}
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-2 bg-black/90">
-          <div className="flex justify-end">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setPreviewOpen(false)}
-              className="text-white hover:bg-black/50"
-            >
-              <XCircle className="h-6 w-6" />
-            </Button>
-          </div>
-          <div className="flex items-center justify-center h-full">
-            {previewUrl && (
-              <img 
-                src={previewUrl} 
-                alt="Visualização" 
-                className="max-h-[80vh] max-w-full object-contain"
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+          
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

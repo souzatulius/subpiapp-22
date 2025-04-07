@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Demand } from '@/hooks/consultar-demandas/types';
@@ -15,6 +16,7 @@ export interface DemandasTableProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
   isAdmin?: boolean;
+  isLoading?: boolean;
 }
 
 const DemandasTable: React.FC<DemandasTableProps> = ({
@@ -27,6 +29,7 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   setPage,
   setPageSize,
   isAdmin = false,
+  isLoading = false,
 }) => {
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -41,6 +44,14 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const currentDemandas = demandas.slice(startIndex, endIndex);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -69,7 +80,9 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                   {demanda.titulo}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {format(new Date(demanda.criado_em), 'dd/MM/yyyy')}
+                  {demanda.horario_publicacao ? 
+                    format(new Date(demanda.horario_publicacao), 'dd/MM/yyyy') : 
+                    'Data não disponível'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <Badge>{demanda.status}</Badge>
