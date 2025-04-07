@@ -53,9 +53,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Right side - User profile */}
         <div className="w-1/4 flex items-center justify-end">
           {showControls && !hideUserMenu && (
-            <div className="flex items-center">
-              <UserProfileMenu />
-            </div>
+            <UserProfileMenu />
           )}
         </div>
       </div>

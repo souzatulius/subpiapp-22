@@ -52,52 +52,72 @@ const UserProfileMenu: React.FC = () => {
     return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`;
   };
 
+  // Extract first two names from user's full name
+  const getFirstTwoNames = () => {
+    if (!userProfile?.nome_completo) return 'Usuário';
+    
+    const nameParts = userProfile.nome_completo.split(' ');
+    if (nameParts.length === 1) return nameParts[0];
+    
+    return `${nameParts[0]} ${nameParts[1]}`;
+  };
+
   return (
-    <div className="relative">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Avatar className="h-9 w-9 cursor-pointer border border-white/20 bg-blue-900 hover:bg-orange-500 transition-colors">
-            {userProfile?.foto_perfil_url ? (
-              <img src={userProfile.foto_perfil_url} alt="Foto de perfil" className="object-cover" />
-            ) : (
-              <AvatarFallback className="bg-blue-900 hover:bg-orange-500 transition-colors text-white text-base font-semibold">
-                {getInitials()}
-              </AvatarFallback>
-            )}
-          </Avatar>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate('/profile')}>
-            <User className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/settings/notifications')}>
-            <Bell className="mr-2 h-4 w-4" />
-            <span>Gerenciar Notificações</span>
-            {unreadCount > 0 && (
-              <span className="ml-auto bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/settings')}>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Configurações</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Sair</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      
-      {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 h-4 w-4 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">
-          {unreadCount > 9 ? '9+' : unreadCount}
-        </span>
+    <div className="flex items-center">
+      {/* User info - visible only on desktop */}
+      {!isMobile && userProfile && (
+        <div className="mr-3 text-right hidden md:block">
+          <p className="text-blue-900 font-semibold">{getFirstTwoNames()}</p>
+          <p className="text-gray-500 text-sm">{userProfile.email}</p>
+        </div>
       )}
+      
+      <div className="relative">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="h-9 w-9 cursor-pointer border border-white/20 bg-blue-900 hover:bg-orange-500 transition-colors">
+              {userProfile?.foto_perfil_url ? (
+                <img src={userProfile.foto_perfil_url} alt="Foto de perfil" className="object-cover" />
+              ) : (
+                <AvatarFallback className="bg-blue-900 hover:bg-orange-500 transition-colors text-white text-base font-semibold">
+                  {getInitials()}
+                </AvatarFallback>
+              )}
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/profile')}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Perfil</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/settings/notifications')}>
+              <Bell className="mr-2 h-4 w-4" />
+              <span>Gerenciar Notificações</span>
+              {unreadCount > 0 && (
+                <span className="ml-auto bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Configurações</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sair</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 h-4 w-4 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </div>
     </div>
   );
 };
