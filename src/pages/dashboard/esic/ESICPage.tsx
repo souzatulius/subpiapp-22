@@ -1,32 +1,35 @@
+
 import React, { useState } from 'react';
 import { useProcessos } from '@/hooks/esic/useProcessos';
 import { useJustificativas } from '@/hooks/esic/useJustificativas';
 import { ESICProcesso, ESICProcessoFormValues, ESICJustificativaFormValues } from '@/types/esic';
-import ProcessoForm from '@/components/esic/ProcessoForm';
-import ProcessoItem from '@/components/esic/ProcessoItem';
-import ProcessoDetails from '@/components/esic/ProcessoDetails';
-import JustificativaForm from '@/components/esic/JustificativaForm';
-import ESICWelcomeCard from '@/components/esic/ESICWelcomeCard';
-import ProcessoList from '@/components/esic/ProcessoList';
-import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { Loader2, FilePlus, FileQuestion, FileText } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import WelcomeCard from '@/components/shared/WelcomeCard';
+import { FileText } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { useProcessoDialog } from '@/hooks/esic/useProcessoDialog';
+import DeleteProcessoDialog from '@/components/esic/dialogs/DeleteProcessoDialog';
+import ProcessosList from '@/components/esic/screens/ProcessosList';
+import ProcessoCreate from '@/components/esic/screens/ProcessoCreate';
+import ProcessoEdit from '@/components/esic/screens/ProcessoEdit';
+import ProcessoView from '@/components/esic/screens/ProcessoView';
+import JustificativaCreate from '@/components/esic/screens/JustificativaCreate';
 
 type ScreenState = 'list' | 'create' | 'edit' | 'view' | 'justify';
 
 const ESICPage: React.FC = () => {
   const [screen, setScreen] = useState<ScreenState>('list');
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [processoToDelete, setProcessoToDelete] = useState<string | null>(null);
-  
   const { toast } = useToast();
+  
+  const { 
+    deleteConfirmOpen, 
+    processoToDelete, 
+    openDeleteDialog, 
+    resetDeleteDialogState 
+  } = useProcessoDialog();
   
   const { 
     processos, 
     isLoading, 
-    error, 
     selectedProcesso, 
     setSelectedProcesso,
     createProcesso,
@@ -34,8 +37,7 @@ const ESICPage: React.FC = () => {
     deleteProcesso,
     isCreating,
     isUpdating,
-    isDeleting,
-    refetch
+    isDeleting
   } = useProcessos();
   
   const {
@@ -47,6 +49,7 @@ const ESICPage: React.FC = () => {
     isGenerating,
   } = useJustificativas(selectedProcesso?.id);
   
+  // Handler functions
   const handleCreateProcesso = (values: ESICProcessoFormValues) => {
     createProcesso(values, {
       onSuccess: () => {
@@ -84,8 +87,7 @@ const ESICPage: React.FC = () => {
   };
   
   const handleDeleteProcesso = (id: string) => {
-    setProcessoToDelete(id);
-    setDeleteConfirmOpen(true);
+    openDeleteDialog(id);
   };
   
   const confirmDeleteProcesso = () => {
@@ -93,8 +95,7 @@ const ESICPage: React.FC = () => {
     
     deleteProcesso(processoToDelete, {
       onSuccess: () => {
-        setDeleteConfirmOpen(false);
-        setProcessoToDelete(null);
+        resetDeleteDialogState();
         toast({
           title: 'Processo excluído com sucesso',
           description: 'O processo foi removido do sistema.',
@@ -214,97 +215,66 @@ const ESICPage: React.FC = () => {
         color="bg-gradient-to-r from-blue-600 to-blue-800"
       />
       
-      {screen === 'list' && (
-        <div className="flex justify-between items-center">
-          <ESICWelcomeCard onNovoProcesso={() => setScreen('create')} />
-          <Button 
-            onClick={() => setScreen('create')}
-            className="flex md:hidden"
-          >
-            <FilePlus className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
-      
       <main>
         {screen === 'list' && (
-          <ProcessoList
+          <ProcessosList 
             processos={processos}
             isLoading={isLoading}
-            onSelectProcesso={handleViewProcesso}
+            onCreateProcesso={() => setScreen('create')}
+            onViewProcesso={handleViewProcesso}
             onEditProcesso={handleEditProcesso}
             onDeleteProcesso={handleDeleteProcesso}
           />
         )}
         
         {screen === 'create' && (
-          <ProcessoForm 
-            onSubmit={handleCreateProcesso} 
+          <ProcessoCreate 
+            onSubmit={handleCreateProcesso}
             isLoading={isCreating}
             onCancel={() => setScreen('list')}
           />
         )}
         
         {screen === 'edit' && selectedProcesso && (
-          <ProcessoForm 
-            onSubmit={handleUpdateProcesso} 
-            initialValues={selectedProcesso}
+          <ProcessoEdit 
+            processo={selectedProcesso}
+            onSubmit={handleUpdateProcesso}
             isLoading={isUpdating}
-            mode="edit"
             onCancel={() => setScreen('view')}
           />
         )}
         
         {screen === 'view' && selectedProcesso && (
-          <ProcessoDetails 
+          <ProcessoView 
             processo={selectedProcesso}
             justificativas={justificativas}
+            isJustificativasLoading={isJustificativasLoading}
             onBack={() => setScreen('list')}
             onEdit={handleEditProcesso}
             onAddJustificativa={handleAddJustificativa}
             onUpdateStatus={handleUpdateStatus}
             onUpdateSituacao={handleUpdateSituacao}
-            isJustificativasLoading={isJustificativasLoading}
           />
         )}
         
         {screen === 'justify' && selectedProcesso && (
-          <div className="space-y-4">
-            <Button variant="ghost" onClick={() => setScreen('view')} className="p-0">
-              <FilePlus className="h-4 w-4 mr-2" />
-              Voltar para Detalhes
-            </Button>
-            
-            <JustificativaForm 
-              onSubmit={handleCreateJustificativa}
-              onGenerateAI={handleGenerateJustificativa}
-              isLoading={isJustificativaCreating}
-              isGenerating={isGenerating}
-              processoTexto={selectedProcesso.texto}
-            />
-          </div>
+          <JustificativaCreate 
+            processoTexto={selectedProcesso.texto}
+            onSubmit={handleCreateJustificativa}
+            onGenerateAI={handleGenerateJustificativa}
+            isLoading={isJustificativaCreating}
+            isGenerating={isGenerating}
+            onBack={() => setScreen('view')}
+          />
         )}
       </main>
       
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Processo</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza de que deseja excluir este processo? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteProcesso} className="bg-red-600 hover:bg-red-700">
-              {isDeleting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteProcessoDialog 
+        open={deleteConfirmOpen}
+        onOpenChange={(open) => !open && resetDeleteDialogState()}
+        onConfirm={confirmDeleteProcesso}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };
