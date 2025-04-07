@@ -35,7 +35,7 @@ const Notas = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <WelcomeCard
-        title="Nova Nota Oficial"
+        title="Notas"
         description="Crie e publique notas oficiais para imprensa e para o público"
         icon={<FileText className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-purple-600 to-purple-800"

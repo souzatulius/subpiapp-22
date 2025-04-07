@@ -14,7 +14,7 @@ const CriarNotaOficial = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <WelcomeCard
-        title="Criar Nota Oficial"
+        title="Nova Nota"
         description="Elabore uma nova nota oficial de comunicação"
         icon={<FileEdit className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-700 to-blue-900"

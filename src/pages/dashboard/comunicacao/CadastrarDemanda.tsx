@@ -14,7 +14,7 @@ const CadastrarDemanda = () => {
   return (
     <div className="w-full mx-auto">
       <WelcomeCard
-        title="Nova Solicitação"
+        title="Nova"
         description="Cadastre uma nova solicitação de comunicação"
         icon={<PlusCircle className="h-6 w-6 mr-2" />}
         color="bg-gradient-to-r from-blue-600 to-blue-800"

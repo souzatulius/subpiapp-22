@@ -31,7 +31,7 @@ const CadastrarRelease = () => {
   return (
     <div className="space-y-6">
       <WelcomeCard
-        title="Cadastro de Releases"
+        title="Nova Notícia"
         description="Crie e publique novas notícias e releases para divulgação na imprensa"
         icon={<FileText className="h-6 w-6 mr-2 text-white" />}
         color="bg-gradient-to-r from-blue-500 to-blue-700"

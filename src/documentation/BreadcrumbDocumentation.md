@@ -1,3 +1,4 @@
+
 # Breadcrumb Implementation Documentation
 
 This document describes the current implementation of breadcrumbs throughout the application to establish a consistent pattern for future development.
@@ -27,6 +28,12 @@ The breadcrumb bar is implemented in `src/components/layouts/BreadcrumbBar.tsx`.
 2. **Display Name Mapping**:
    - Maps URL segments to user-friendly display names
    - Contains a dictionary of standard page names
+   - Uses concise naming convention:
+     - "Novo" for new release creation
+     - "Nova" for new demand creation
+     - "Notícias" for releases
+     - "Notas" for official notes
+     - Full names for more specific actions (e.g., "Aprovar Notas")
 
 3. **Hidden Segments**:
    - Certain paths are explicitly hidden from breadcrumb display:

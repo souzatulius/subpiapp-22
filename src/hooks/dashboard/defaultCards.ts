@@ -34,7 +34,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
     {
       id: 'nova-solicitacao',
-      title: "Nova Solicitação",
+      title: "Nova",
       path: "/dashboard/comunicacao/cadastrar",
       iconId: "plus-circle",
       color: 'blue-vivid',
@@ -71,7 +71,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'criar-nota',
-      title: "Criar Nota",
+      title: "Nova Nota",
       path: "/dashboard/comunicacao/criar-nota",
       iconId: "document-plus",
       color: 'gray-medium',
@@ -98,7 +98,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'consultar-notas',
-      title: "Consultar Notas",
+      title: "Notas",
       path: "/dashboard/comunicacao/notas",
       iconId: "document-text",
       color: 'gray-lighter',
@@ -122,7 +122,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'gerar-noticia',
-      title: 'Gerar Notícia',
+      title: 'Notícias',
       path: '/dashboard/comunicacao/cadastrar-release',
       iconId: 'document-plus',
       color: 'orange-dark',
@@ -134,7 +134,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'ver-releases',
-      title: 'Releases e Notícias',
+      title: 'Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
       color: 'gray-medium',
@@ -152,7 +152,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
   return [
     {
       id: 'nova-solicitacao',
-      title: 'Nova Solicitação',
+      title: 'Nova',
       iconId: 'plus-circle',
       path: '/dashboard/comunicacao/cadastrar',
       color: 'blue-vivid',
@@ -181,7 +181,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       title: 'Consultar Demandas',
       iconId: 'list-bullet',
       path: '/dashboard/comunicacao/demandas',
-      color: 'deep-blue', // Updated from gray-lighter to deep-blue which maps to gray-950
+      color: 'deep-blue',
       width: '25',
       height: '2',
       type: 'standard',
@@ -190,7 +190,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     },
     {
       id: 'criar-nota',
-      title: 'Criar Nota Oficial',
+      title: 'Nova Nota',
       iconId: 'document-plus',
       path: '/dashboard/comunicacao/criar-nota',
       color: 'gray-medium',
@@ -221,7 +221,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       title: 'Ranking de Zeladoria',
       iconId: 'trophy',
       path: '/dashboard/zeladoria/ranking-subs',
-      color: 'gray-light',  // Keep as gray-light for a white background
+      color: 'gray-light',
       width: '25',
       height: '2',
       type: 'standard',
@@ -242,7 +242,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     },
     {
       id: 'gerar-noticia',
-      title: 'Gerar Notícia',
+      title: 'Notícias',
       path: '/dashboard/comunicacao/cadastrar-release',
       iconId: 'document-plus',
       color: 'orange-dark',
@@ -254,7 +254,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     },
     {
       id: 'ver-releases',
-      title: 'Releases e Notícias',
+      title: 'Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
       color: 'gray-medium',

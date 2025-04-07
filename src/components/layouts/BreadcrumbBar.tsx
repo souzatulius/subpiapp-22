@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
@@ -26,16 +25,16 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   const getDisplayName = (segment: string, fullPath: string) => {
     // Custom display names for specific paths
     const customRoutes: Record<string, string> = {
-      'cadastrar-release': 'Novo Release',
-      'releases': 'Releases e Notícias',
-      'cadastrar-demanda': 'Nova Solicitação',
-      'cadastrar': 'Nova Solicitação',
+      'cadastrar-release': 'Novo',
+      'releases': 'Notícias',
+      'cadastrar-demanda': 'Nova',
+      'cadastrar': 'Nova',
       'demandas': 'Demandas',
       'consultar-demandas': 'Demandas',
-      'criar-nota': 'Gerar Nota',
+      'criar-nota': 'Nova',
       'aprovar-nota': 'Aprovar Notas',
-      'notas': 'Notas de Imprensa',
-      'consultar-notas': 'Notas de Imprensa',
+      'notas': 'Notas',
+      'consultar-notas': 'Notas',
       'relatorios': 'Relatórios',
       'ranking-subs': 'Ranking da Zeladoria',
       'dashboard': 'Início',
@@ -63,8 +62,8 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       return [
         { path: '/dashboard', label: 'Início' },
         { path: '/dashboard/comunicacao', label: 'Comunicação' },
-        { path: '/dashboard/comunicacao/releases', label: 'Releases e Notícias' },
-        { path: '/dashboard/comunicacao/cadastrar-release', label: 'Novo Release' }
+        { path: '/dashboard/comunicacao/releases', label: 'Notícias' },
+        { path: '/dashboard/comunicacao/cadastrar-release', label: 'Novo' }
       ];
     }
     
@@ -72,7 +71,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       return [
         { path: '/dashboard', label: 'Início' },
         { path: '/dashboard/comunicacao', label: 'Comunicação' },
-        { path: '/dashboard/comunicacao/releases', label: 'Releases e Notícias' }
+        { path: '/dashboard/comunicacao/releases', label: 'Notícias' }
       ];
     }
     
@@ -80,7 +79,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       return [
         { path: '/dashboard', label: 'Início' },
         { path: '/dashboard/comunicacao', label: 'Comunicação' },
-        { path: '/dashboard/comunicacao/notas', label: 'Notas de Imprensa' },
+        { path: '/dashboard/comunicacao/notas', label: 'Notas' },
         { path: '/dashboard/comunicacao/aprovar-nota', label: 'Aprovar Notas' }
       ];
     }
@@ -98,8 +97,8 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       return [
         { path: '/dashboard', label: 'Início' },
         { path: '/dashboard/comunicacao', label: 'Comunicação' },
-        { path: '/dashboard/comunicacao/notas', label: 'Notas de Imprensa' },
-        { path: '/dashboard/comunicacao/criar-nota', label: 'Gerar Nota' }
+        { path: '/dashboard/comunicacao/notas', label: 'Notas' },
+        { path: '/dashboard/comunicacao/criar-nota', label: 'Nova' }
       ];
     }
     
@@ -109,7 +108,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
         { path: '/dashboard', label: 'Início' },
         { path: '/dashboard/comunicacao', label: 'Comunicação' },
         { path: '/dashboard/comunicacao/demandas', label: 'Demandas' },
-        { path: path, label: 'Nova Solicitação' }
+        { path: path, label: 'Nova' }
       ];
     }
     
@@ -118,7 +117,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       return [
         { path: '/dashboard', label: 'Início' },
         { path: '/dashboard/comunicacao', label: 'Comunicação' },
-        { path: '/dashboard/comunicacao/notas', label: 'Notas de Imprensa' }
+        { path: '/dashboard/comunicacao/notas', label: 'Notas' }
       ];
     }
     
