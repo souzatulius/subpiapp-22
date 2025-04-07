@@ -107,6 +107,7 @@ export const useReleaseForm = () => {
       });
     } finally {
       setIsGenerating(false);
+      setShowConfirmDialog(false);
     }
   };
   
