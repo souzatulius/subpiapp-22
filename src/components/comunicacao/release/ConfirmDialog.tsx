@@ -16,13 +16,23 @@ interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  onCancel?: () => void;
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
   onOpenChange,
-  onConfirm
+  onConfirm,
+  onCancel
 }) => {
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      onOpenChange(false);
+    }
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -34,7 +44,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Não, obrigado</AlertDialogCancel>
+          <AlertDialogCancel onClick={handleCancel}>Não, obrigado</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
             Gerar Notícia

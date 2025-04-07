@@ -166,6 +166,12 @@ export const useReleaseForm = () => {
     setShowGeneratedContent(false);
   };
 
+  const handleCancelGeneration = () => {
+    setShowConfirmDialog(false);
+    // Redirect to releases list when user clicks "No"
+    navigate('/dashboard/comunicacao/releases');
+  };
+
   return {
     releaseContent,
     setReleaseContent,
@@ -182,6 +188,7 @@ export const useReleaseForm = () => {
     setEditedContent,
     handleSaveRelease,
     handleGenerateNews,
-    handleCreateNote
+    handleCreateNote,
+    handleCancelGeneration
   };
 };

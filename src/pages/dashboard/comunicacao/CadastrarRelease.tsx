@@ -24,7 +24,8 @@ const CadastrarRelease = () => {
     setEditedContent,
     handleSaveRelease,
     handleGenerateNews,
-    handleCreateNote
+    handleCreateNote,
+    handleCancelGeneration
   } = useReleaseForm();
 
   return (
@@ -49,6 +50,7 @@ const CadastrarRelease = () => {
         open={showConfirmDialog}
         onOpenChange={setShowConfirmDialog}
         onConfirm={handleGenerateNews}
+        onCancel={handleCancelGeneration}
       />
       
       <GeneratedContentDialog
@@ -60,6 +62,7 @@ const CadastrarRelease = () => {
         onEditedTitleChange={setEditedTitle}
         onEditedContentChange={setEditedContent}
         onCreateNote={handleCreateNote}
+        isLoading={isGenerating}
       />
     </div>
   );
