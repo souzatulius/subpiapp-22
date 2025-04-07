@@ -100,7 +100,7 @@ export const updateUserProfile = async (userId: string, userData: any): Promise<
         cargo_id: userData.cargo_id,
         supervisao_tecnica_id: userData.supervisao_tecnica_id,
         coordenacao_id: userData.coordenacao_id,
-        status: 'pendente', // Explicitamente definir o status como pendente
+        status: 'pendente', // Explicitly set status as 'pendente'
       })
       .eq('id', userId);
     

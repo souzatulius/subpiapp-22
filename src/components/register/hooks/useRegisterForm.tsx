@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { validatePasswordsMatch, formatPhone, formatDate } from '@/lib/formValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
+import { showAuthError, completeEmailWithDomain, createAdminNotification } from '@/lib/authUtils';
 import { toast } from '@/components/ui/use-toast';
 import { FormData } from '../types';
 
@@ -108,19 +108,28 @@ export const useRegisterForm = () => {
 
     try {
       const completeEmail = completeEmailWithDomain(formData.email);
-      const { error } = await signUp(completeEmail, password, {
+      const { error, data } = await signUp(completeEmail, password, {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
         cargo_id: formData.role,
         supervisao_tecnica_id: formData.area || null,
         coordenacao_id: formData.coordenacao,
-        status: 'pendente' // Definir status explicitamente como pendente
+        status: 'pendente' // Explicitly set status as 'pendente'
       });
 
       if (error) {
         showAuthError(error);
       } else {
+        // Create notification for admins about the new user registration
+        if (data?.user) {
+          await createAdminNotification(
+            data.user.id, 
+            formData.name,
+            completeEmail
+          );
+        }
+        
         toast({
           title: "Cadastro realizado com sucesso",
           description: "Seu acesso será avaliado por um administrador em breve.",
