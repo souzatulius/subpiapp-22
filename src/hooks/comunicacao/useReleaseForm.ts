@@ -37,13 +37,14 @@ export const useReleaseForm = () => {
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData?.user?.id || 'sistema';
       
-      // Save release to database
+      // Save release to database - Fixed the tipo value to match database constraints
       const { error } = await supabase
         .from('releases')
         .insert({ 
           conteudo: releaseContent,
-          tipo: 'imprensa', // Adding required fields
-          autor_id: userId // Using the actual user id or fallback
+          tipo: 'imprensa',      // Ensure this matches the allowed values in the check constraint
+          autor_id: userId,
+          status: 'pendente'     // Add status field with default value
         });
       
       if (error) throw error;
@@ -117,6 +118,23 @@ export const useReleaseForm = () => {
         const { data: authData } = await supabase.auth.getUser();
         const userId = authData?.user?.id || 'sistema';
         
+        // Fetch a valid problema_id from the database to use as default
+        const { data: problemasData, error: problemasError } = await supabase
+          .from('problemas')
+          .select('id')
+          .limit(1);
+        
+        if (problemasError) throw problemasError;
+        
+        // Get the first problema_id or use a fallback
+        const defaultProblemaId = problemasData && problemasData.length > 0 
+          ? problemasData[0].id 
+          : null;
+        
+        if (!defaultProblemaId) {
+          throw new Error('Não foi possível encontrar um problema válido para associar à nota');
+        }
+        
         // Create new nota oficial with the edited content
         const { error } = await supabase
           .from('notas_oficiais')
@@ -124,7 +142,7 @@ export const useReleaseForm = () => {
             titulo: editedTitle,
             texto: editedContent,
             autor_id: userId,
-            problema_id: '00000000-0000-0000-0000-000000000000', // Using a placeholder, you'll need to update this
+            problema_id: defaultProblemaId,
             status: 'pendente'
           });
           
