@@ -32,6 +32,7 @@ import RankingSubs from './pages/dashboard/zeladoria/RankingSubs';
 import ComunicacaoDashboard from './pages/dashboard/comunicacao/Comunicacao';
 import CadastrarRelease from './pages/dashboard/comunicacao/CadastrarRelease';
 import ListarReleases from './pages/dashboard/comunicacao/ListarReleases';
+import ESICPage from './pages/dashboard/esic/ESICPage';
 
 // Admin Pages
 import UserPermissionsList from './pages/admin/UserPermissionsList';
@@ -85,6 +86,9 @@ function App() {
                 {/* New Release routes */}
                 <Route path="comunicacao/cadastrar-release" element={<CadastrarRelease />} />
                 <Route path="comunicacao/releases" element={<ListarReleases />} />
+                
+                {/* e-SIC routes */}
+                <Route path="esic" element={<ESICPage />} />
                 
                 {/* Zeladoria routes */}
                 <Route path="zeladoria/ranking-subs" element={<RankingSubs />} />

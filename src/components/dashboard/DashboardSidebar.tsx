@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, FileText, BarChart2, Settings, MessageSquare } from 'lucide-react';
+import { Home, FileText, BarChart2, Settings, MessageSquare, CircleHelp } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/cn';
 import { BarChart } from 'lucide-react';
@@ -66,6 +66,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
             to="/dashboard/comunicacao/notas"
             icon={<MessageSquare className="h-5 w-5" />}
             label="Notas Oficiais"
+            isCollapsed={!isOpen}
+          />
+          <SidebarItem
+            to="/dashboard/esic"
+            icon={<CircleHelp className="h-5 w-5" />}
+            label="e-SIC"
             isCollapsed={!isOpen}
           />
           <SidebarItem

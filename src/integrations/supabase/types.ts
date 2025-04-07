@@ -509,6 +509,77 @@ export type Database = {
         }
         Relationships: []
       }
+      esic_justificativas: {
+        Row: {
+          atualizado_em: string
+          autor_id: string
+          criado_em: string
+          gerado_por_ia: boolean
+          id: string
+          processo_id: string
+          texto: string
+        }
+        Insert: {
+          atualizado_em?: string
+          autor_id: string
+          criado_em?: string
+          gerado_por_ia?: boolean
+          id?: string
+          processo_id: string
+          texto: string
+        }
+        Update: {
+          atualizado_em?: string
+          autor_id?: string
+          criado_em?: string
+          gerado_por_ia?: boolean
+          id?: string
+          processo_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esic_justificativas_processo_id_fkey"
+            columns: ["processo_id"]
+            isOneToOne: false
+            referencedRelation: "esic_processos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      esic_processos: {
+        Row: {
+          atualizado_em: string
+          autor_id: string
+          criado_em: string
+          data_processo: string
+          id: string
+          situacao: string
+          status: string
+          texto: string
+        }
+        Insert: {
+          atualizado_em?: string
+          autor_id: string
+          criado_em?: string
+          data_processo: string
+          id?: string
+          situacao: string
+          status: string
+          texto: string
+        }
+        Update: {
+          atualizado_em?: string
+          autor_id?: string
+          criado_em?: string
+          data_processo?: string
+          id?: string
+          situacao?: string
+          status?: string
+          texto?: string
+        }
+        Relationships: []
+      }
       historico_demandas: {
         Row: {
           coordenacao_id: string | null
