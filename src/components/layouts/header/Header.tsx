@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
   
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
-      <div className="w-full flex h-16 items-center justify-between gap-4">
+      <div className="w-full flex h-16 items-center justify-between gap-4 px-[3%]">
         {/* Left side with menu toggle - now hidden on mobile */}
         <div className="w-1/4 flex items-center gap-4">
           {showControls && toggleSidebar && !isMobile && (
