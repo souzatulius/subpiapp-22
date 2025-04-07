@@ -57,7 +57,6 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
             dateRange={dateRange} 
             onRangeChange={onDateRangeChange} 
             align="start"
-            locale={ptBR}
           />
         </div>
         
