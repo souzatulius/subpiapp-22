@@ -12,8 +12,6 @@ import { Demand } from '@/hooks/consultar-demandas/types';
 import DemandaCards from './DemandaCards';
 import FilterBar from './FilterBar';
 import { DateRange } from 'react-day-picker';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
 const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
@@ -23,7 +21,6 @@ const ConsultarDemandasContent = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const { isAdmin } = usePermissions();
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
-  const [showFilters, setShowFilters] = useState(false);
   
   // Add filter states
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -109,10 +106,6 @@ const ConsultarDemandasContent = () => {
     updateSearchTerm('');
   };
 
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-
   if (isLoading) {
     return <LoadingState />;
   }
@@ -123,43 +116,25 @@ const ConsultarDemandasContent = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-        <DemandasSearchBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSearch={handleSearch}
-        />
-        
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-1.5"
-          onClick={toggleFilters}
-        >
-          <Filter className="h-4 w-4" />
-          Filtros
-          {showFilters ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
+      <DemandasSearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSearch={handleSearch}
+      />
       
-      {showFilters && (
-        <FilterBar
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          coordenacao={coordenacao}
-          onCoordenacaoChange={setCoordenacao}
-          tema={tema}
-          onTemaChange={setTema}
-          status={status}
-          onStatusChange={setStatus}
-          onResetFilters={resetFilters}
-        />
-      )}
+      <FilterBar
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        coordenacao={coordenacao}
+        onCoordenacaoChange={setCoordenacao}
+        tema={tema}
+        onTemaChange={setTema}
+        status={status}
+        onStatusChange={setStatus}
+        onResetFilters={resetFilters}
+      />
       
       {viewMode === 'cards' ? (
         <DemandaCards
