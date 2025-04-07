@@ -3,7 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserProfileMenu } from './index';
-import { Menu } from 'lucide-react';
 import { useUserProfile } from './useUserProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -24,19 +23,9 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="w-full flex h-16 items-center justify-between">
-        {/* Left side - only show menu toggle on mobile */}
+        {/* Left side - Removido o botão de menu */}
         <div className="w-1/4 flex items-center gap-4 relative">
-          {showControls && toggleSidebar && isMobile && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="flex lg:hidden hover:text-white hover:bg-[#002855]"
-              aria-label="Menu"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
+          {/* Espaço vazio onde estava o botão de menu */}
         </div>
         
         {/* Center - Logo */}
