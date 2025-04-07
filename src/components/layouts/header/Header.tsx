@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({
               className="ml-4"
               aria-label={isMobile ? "Abrir menu" : "Alternar visibilidade do menu"}
             >
-              <Menu className="w-10 h-10" />
+              <Menu className="w-10 h-10 text-gray-500" />
             </Button>
           )}
         </div>
