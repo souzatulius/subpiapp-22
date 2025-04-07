@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProcessos } from '@/hooks/esic/useProcessos';
 import { useJustificativas } from '@/hooks/esic/useJustificativas';
@@ -12,16 +13,11 @@ import ProcessoCreate from '@/components/esic/screens/ProcessoCreate';
 import ProcessoEdit from '@/components/esic/screens/ProcessoEdit';
 import ProcessoView from '@/components/esic/screens/ProcessoView';
 import JustificativaCreate from '@/components/esic/screens/JustificativaCreate';
-import LatestESICProcesses from '@/components/dashboard/LatestESICProcesses';
-import { useSearchParams } from 'react-router-dom';
 
 type ScreenState = 'list' | 'create' | 'edit' | 'view' | 'justify';
 
 const ESICPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const viewProcessoId = searchParams.get('view');
-  
-  const [screen, setScreen] = useState<ScreenState>(viewProcessoId ? 'view' : 'list');
+  const [screen, setScreen] = useState<ScreenState>('list');
   const { toast } = useToast();
   
   const { 
@@ -53,16 +49,7 @@ const ESICPage: React.FC = () => {
     isGenerating,
   } = useJustificativas(selectedProcesso?.id);
   
-  React.useEffect(() => {
-    if (viewProcessoId && processos) {
-      const processo = processos.find(p => p.id === viewProcessoId);
-      if (processo) {
-        setSelectedProcesso(processo);
-        setScreen('view');
-      }
-    }
-  }, [viewProcessoId, processos, setSelectedProcesso]);
-  
+  // Handler functions
   const handleCreateProcesso = (values: ESICProcessoFormValues) => {
     createProcesso(values, {
       onSuccess: () => {
@@ -230,19 +217,14 @@ const ESICPage: React.FC = () => {
       
       <main>
         {screen === 'list' && (
-          <>
-            <LatestESICProcesses />
-            <div className="mt-8">
-              <ProcessosList 
-                processos={processos}
-                isLoading={isLoading}
-                onCreateProcesso={() => setScreen('create')}
-                onViewProcesso={handleViewProcesso}
-                onEditProcesso={handleEditProcesso}
-                onDeleteProcesso={handleDeleteProcesso}
-              />
-            </div>
-          </>
+          <ProcessosList 
+            processos={processos}
+            isLoading={isLoading}
+            onCreateProcesso={() => setScreen('create')}
+            onViewProcesso={handleViewProcesso}
+            onEditProcesso={handleEditProcesso}
+            onDeleteProcesso={handleDeleteProcesso}
+          />
         )}
         
         {screen === 'create' && (

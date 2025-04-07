@@ -51,7 +51,22 @@ const DashboardLayout: React.FC = () => {
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        {/* The sidebar toggle button is now hidden (removed) */}
+        {/* Collapse button (desktop only) */}
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="absolute left-0 top-24 bg-white shadow-md hover:bg-gray-100 z-30 rounded-r-md rounded-l-none border border-l-0"
+            aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
+          >
+            {sidebarOpen ? (
+              <ChevronLeft className="h-7 w-7" />
+            ) : (
+              <ChevronRight className="h-7 w-7" />
+            )}
+          </Button>
+        )}
         
         <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300 ${!isMobile ? (sidebarOpen ? 'ml-64' : 'ml-16') : ''}`}>
           {/* Desktop breadcrumb */}
