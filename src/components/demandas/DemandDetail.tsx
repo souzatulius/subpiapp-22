@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useUserProfiles } from '@/hooks/useUserProfiles';
 import { NotaOficial } from '@/types/nota';
+import { ensureNotaCompat } from '@/components/consultar-notas/NotaCompat';
 
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'Data não informada';
@@ -67,8 +68,8 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
         .from('notas_oficiais')
         .select(`
           *,
-          autor:autor_id(nome_completo),
-          aprovador:aprovador_id(nome_completo),
+          autor:autor_id(id, nome_completo),
+          aprovador:aprovador_id(id, nome_completo),
           problema:problema_id(
             id,
             descricao,
@@ -84,13 +85,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
       }
 
       if (data) {
-        const notaData = {
-          ...data,
-          texto: data.texto || '',
-          titulo: data.titulo || '',
-          conteudo: data.texto || ''
-        } as NotaOficial;
-        
+        const notaData = ensureNotaCompat(data as unknown as NotaOficial);
         setNota(notaData);
       } else {
         setNota(null);
@@ -286,7 +281,7 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
                 <div className="prose max-w-none border-t pt-4 mt-4">
                   <div 
                     className="whitespace-pre-wrap text-gray-700"
-                    dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br/>') }}
+                    dangerouslySetInnerHTML={{ __html: (nota.texto || nota.conteudo).replace(/\n/g, '<br/>') }}
                   />
                 </div>
                 
