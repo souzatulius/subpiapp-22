@@ -1,141 +1,70 @@
-
-import React, { useState, useEffect } from 'react';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { subDays } from 'date-fns';
+import React, { useState, useCallback } from 'react';
 import { DateRange } from 'react-day-picker';
-import { supabase } from '@/integrations/supabase/client';
-import { ReportFilters } from '../hooks/useReportsData';
+import { Card, CardContent } from '@/components/ui/card';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/utils/cn';
 
 interface RelatoriosFiltersProps {
-  filters: ReportFilters;
-  onFiltersChange: (filters: ReportFilters) => void;
+  className?: string;
+  dateRange: DateRange | undefined;
+  onRangeChange: (range: DateRange | undefined) => void;
+  searchTerm: string;
+  onSearchTermChange: (term: string) => void;
+  onApplyFilters: () => void;
   onResetFilters: () => void;
 }
 
-export const RelatoriosFilters: React.FC<RelatoriosFiltersProps> = ({ 
-  filters, 
-  onFiltersChange, 
-  onResetFilters 
+const RelatoriosFilters: React.FC<RelatoriosFiltersProps> = ({
+  className,
+  dateRange,
+  onRangeChange,
+  searchTerm,
+  onSearchTermChange,
+  onApplyFilters,
+  onResetFilters,
 }) => {
-  const [coordenacoes, setCoordenacoes] = useState<{id: string, descricao: string}[]>([]);
-  const [problemas, setProblemas] = useState<{id: string, descricao: string}[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchFilterOptions = async () => {
-      setLoading(true);
-      try {
-        // Fetch coordenações
-        const { data: coordData, error: coordError } = await supabase
-          .from('coordenacoes')
-          .select('id, descricao')
-          .order('descricao');
-        
-        if (coordError) throw coordError;
-        setCoordenacoes(coordData || []);
-        
-        // Fetch problemas
-        const { data: probData, error: probError } = await supabase
-          .from('problemas')
-          .select('id, descricao')
-          .order('descricao');
-        
-        if (probError) throw probError;
-        setProblemas(probData || []);
-      } catch (error) {
-        console.error('Erro ao buscar opções de filtro:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchFilterOptions();
-  }, []);
-  
-  const handleDateRangeChange = (range: DateRange) => {
-    onFiltersChange({
-      ...filters,
-      dateRange: range
-    });
-  };
-  
-  const handleCoordenacaoChange = (value: string) => {
-    onFiltersChange({
-      ...filters,
-      coordenacao: value === 'todos' ? undefined : value
-    });
-  };
-  
-  const handleProblemaChange = (value: string) => {
-    onFiltersChange({
-      ...filters,
-      problema: value === 'todos' ? undefined : value
-    });
-  };
-  
   return (
-    <div className="space-y-6">
-      <div>
-        <Label className="text-sm mb-1 block">Período</Label>
-        <DateRangePicker 
-          dateRange={filters.dateRange || { from: subDays(new Date(), 90), to: new Date() }} 
-          onRangeChange={handleDateRangeChange} 
-        />
-      </div>
-      
-      <div>
-        <Label className="text-sm mb-1 block">Coordenação</Label>
-        <Select 
-          value={filters.coordenacao || 'todos'} 
-          onValueChange={handleCoordenacaoChange}
-          disabled={loading}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione a coordenação" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todas</SelectItem>
-            {coordenacoes.map(coord => (
-              <SelectItem key={coord.id} value={coord.id}>
-                {coord.descricao}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div>
-        <Label className="text-sm mb-1 block">Tema / Problema</Label>
-        <Select 
-          value={filters.problema || 'todos'} 
-          onValueChange={handleProblemaChange}
-          disabled={loading}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione o tema" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos</SelectItem>
-            {problemas.map(prob => (
-              <SelectItem key={prob.id} value={prob.id}>
-                {prob.descricao}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <Button 
-        variant="outline" 
-        onClick={onResetFilters} 
-        className="w-full"
-      >
-        Limpar filtros
-      </Button>
-    </div>
+    <Card className={cn("w-full", className)}>
+      <CardContent className="grid gap-4">
+        <h2 className="text-lg font-semibold">Filtros</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Date Range Picker */}
+          <div>
+            <Label htmlFor="date">Período</Label>
+            <DateRangePicker
+              value={dateRange}
+              onChange={onRangeChange}
+            />
+          </div>
+
+          {/* Search Term Input */}
+          <div>
+            <Label htmlFor="search">Pesquisar</Label>
+            <Input
+              type="search"
+              id="search"
+              placeholder="Pesquisar..."
+              value={searchTerm}
+              onChange={(e) => onSearchTermChange(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="ghost" onClick={onResetFilters}>
+            Limpar Filtros
+          </Button>
+          <Button type="button" onClick={onApplyFilters}>
+            Aplicar Filtros
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

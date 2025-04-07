@@ -32,7 +32,16 @@ export const useUserProfiles = () => {
 
         if (error) throw error;
         
-        setProfiles(data || []);
+        // Transform data to match the UserProfile interface
+        const transformedData = data?.map(user => ({
+          id: user.id,
+          nome_completo: user.nome_completo,
+          email: user.email,
+          cargo: user.cargo?.descricao || undefined,
+          departamento: user.coordenacao?.descricao || undefined
+        })) || [];
+        
+        setProfiles(transformedData);
       } catch (err: any) {
         setError(err.message);
         console.error('Error fetching user profiles:', err);
