@@ -2,45 +2,92 @@
 import React from 'react';
 import { 
   Home, 
-  MessageCircle, 
-  BarChart2, 
-  TrendingUp,
-  FileText,
-  Sparkles
+  FileText, 
+  Mail, 
+  MessageSquare, 
+  Settings, 
+  Edit, 
+  List,
+  Send,
+  Bell,
+  Newspaper,
+  FileQuestion
 } from 'lucide-react';
 
-// Navigation configuration for the sidebar
-export const getNavigationSections = () => [
-  // Seção 1: Início
-  {
-    id: 'inicio',
-    icon: <Home size={20} />,
-    label: 'Início',
-    path: '/dashboard',
-    isSection: false
-  },
-  // Seção 2: Comunicação
-  {
-    id: 'comunicacao',
-    icon: <MessageCircle size={20} />,
-    label: 'Comunicação',
-    path: '/dashboard/comunicacao',
-    isSection: false
-  },
-  // Seção 4: Relatórios
-  {
-    id: 'relatorios',
-    icon: <BarChart2 size={20} />,
-    label: 'Relatórios',
-    path: '/dashboard/comunicacao/relatorios',
-    isSection: false
-  },
-  // Seção 5: Zeladoria
-  {
-    id: 'ranking',
-    icon: <TrendingUp size={20} />,
-    label: 'Zeladoria',
-    path: '/dashboard/zeladoria/ranking-subs',
-    isSection: false
-  }
-];
+export const getNavigationSections = () => {
+  return [
+    {
+      id: 'home',
+      label: 'Página Inicial',
+      path: '/dashboard',
+      icon: <Home size={20} />,
+      isSection: false,
+    },
+    {
+      id: 'comunicacao',
+      label: 'Comunicação',
+      path: '/dashboard/comunicacao',
+      icon: <MessageSquare size={20} />,
+      isSection: true,
+      items: [
+        {
+          id: 'cadastrar',
+          label: 'Cadastrar Demanda',
+          path: '/dashboard/comunicacao/cadastrar',
+          icon: <Edit size={16} />,
+        },
+        {
+          id: 'consultar',
+          label: 'Consultar Demandas',
+          path: '/dashboard/comunicacao/consultar',
+          icon: <List size={16} />,
+        },
+        {
+          id: 'responder',
+          label: 'Responder Demandas',
+          path: '/dashboard/comunicacao/responder',
+          icon: <Send size={16} />,
+        },
+        {
+          id: 'notas',
+          label: 'Notas Oficiais',
+          path: '/dashboard/comunicacao/notas',
+          icon: <FileText size={16} />,
+        },
+        {
+          id: 'criar-nota',
+          label: 'Criar Nota',
+          path: '/dashboard/comunicacao/criar-nota',
+          icon: <FileText size={16} />,
+        },
+        {
+          id: 'aprovar-nota',
+          label: 'Aprovar Nota',
+          path: '/dashboard/comunicacao/aprovar-nota',
+          icon: <Bell size={16} />,
+        },
+        {
+          id: 'consultar-notas',
+          label: 'Consultar Notas',
+          path: '/dashboard/comunicacao/consultar-notas',
+          icon: <Newspaper size={16} />,
+        },
+        {
+          id: 'relatorios',
+          label: 'Relatórios',
+          path: '/dashboard/comunicacao/relatorios',
+          icon: <FileQuestion size={16} />,
+        },
+      ],
+    },
+    {
+      id: 'settings',
+      label: 'Configurações',
+      path: '/settings',
+      icon: <Settings size={20} />,
+      isSection: false,
+    },
+  ];
+};
+
+export default getNavigationSections;

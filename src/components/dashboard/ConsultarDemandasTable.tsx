@@ -83,7 +83,6 @@ const ConsultarDemandasTable = () => {
         id: '', // We're not using this field anymore
         descricao: ''
       },
-      // Add required fallback properties to match the Demand type
       origem: d?.origem || { id: '', descricao: '' },
       tipo_midia: d?.tipo_midia || { id: '', descricao: '' },
       bairro: d?.bairro || { nome: '' },

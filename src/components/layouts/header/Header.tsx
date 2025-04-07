@@ -3,7 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserProfileMenu } from './index';
-import { Menu } from 'lucide-react';
 import { useUserProfile } from './useUserProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -15,7 +14,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ 
   showControls = false, 
-  toggleSidebar,
   hideUserMenu = false
 }) => {
   const { userProfile } = useUserProfile();
@@ -24,37 +22,9 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm print:hidden">
       <div className="w-full flex h-16 items-center justify-between">
-        {/* Left side with menu toggle - with positioning for desktop */}
+        {/* Left side - empty now that we've removed the menu button */}
         <div className="w-1/4 flex items-center gap-4 relative">
-          {showControls && toggleSidebar && (
-            <>
-              {/* Desktop menu button - positioned to align with sidebar icons */}
-              {!isMobile && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleSidebar}
-                  className="absolute top-[6px] -left-[4px] lg:flex hidden hover:text-white hover:bg-[#002855]"
-                  aria-label="Menu"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              )}
-              
-              {/* Mobile menu button - stays in normal flow */}
-              {isMobile && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleSidebar}
-                  className="flex lg:hidden hover:text-white hover:bg-[#002855]"
-                  aria-label="Menu"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              )}
-            </>
-          )}
+          {/* Menu button removed */}
         </div>
         
         {/* Center - Logo */}

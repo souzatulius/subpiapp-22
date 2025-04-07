@@ -9,13 +9,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useScrollFade } from '@/hooks/useScrollFade';
 
 const DashboardLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
   const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 print:bg-white">
@@ -31,7 +27,7 @@ const DashboardLayout: React.FC = () => {
         style={isMobile ? scrollFadeStyles : undefined}
         className={`${isMobile ? 'transition-all duration-300' : ''} print:hidden`}
       >
-        <Header showControls={true} toggleSidebar={toggleSidebar} />
+        <Header showControls={true} hideUserMenu={false} />
       </div>
       
       <div className="flex flex-1 overflow-hidden">
