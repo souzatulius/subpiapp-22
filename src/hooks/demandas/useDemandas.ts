@@ -28,7 +28,8 @@ export const useDemandas = (filterStatus: string = 'pendente') => {
             origem:origem_id (id, descricao),
             tipo_midia:tipo_midia_id (id, descricao),
             bairro:bairro_id (id, nome),
-            autor:autor_id (id, nome_completo)
+            autor:autor_id (id, nome_completo),
+            servico:servico_id (id, descricao)
           `)
           .eq('status', filterStatus)
           .order('created_at', { ascending: false });
@@ -43,7 +44,16 @@ export const useDemandas = (filterStatus: string = 'pendente') => {
           return [];
         }
 
-        return data || [];
+        // Transform data to match the expected Demand type
+        return (data || []).map(item => {
+          return {
+            ...item,
+            area_coordenacao: {
+              descricao: item.coordenacao?.descricao || ''
+            },
+            servico: item.servico || { descricao: '' }
+          } as Demand;
+        });
       } catch (error: any) {
         console.error('Exception fetching demandas:', error);
         toast({
