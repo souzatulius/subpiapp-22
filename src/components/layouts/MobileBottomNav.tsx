@@ -47,8 +47,8 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   // Get all navigation items
   const allNavItems = getNavigationSections();
   
-  // Filter for only the specified navigation items: Comunicação, Relatórios, Zeladoria (Ranking)
-  const allowedPages = ['comunicacao', 'relatorios', 'ranking'];
+  // Filter for only the specified navigation items: Dashboard, Comunicação, Relatórios, Zeladoria (Ranking)
+  const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking', 'esic'];
   
   // Filter by department and allowed pages, then map for mobile
   const navItems = allNavItems

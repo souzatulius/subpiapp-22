@@ -4,7 +4,8 @@ import {
   BarChart2,
   FileText,
   MessageSquareReply,
-  Trophy
+  Trophy,
+  LayoutDashboard
 } from 'lucide-react';
 
 export type NavigationItem = {
@@ -17,6 +18,12 @@ export type NavigationItem = {
 
 export const getNavigationSections = (): NavigationItem[] => {
   return [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      path: '/dashboard',
+      icon: <LayoutDashboard className="w-8 h-8" />,
+    },
     {
       id: 'comunicacao',
       label: 'Comunicação',

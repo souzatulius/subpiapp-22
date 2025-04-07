@@ -81,8 +81,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   // Get navigation items from centralized config
   const allNavigationItems = getNavigationSections();
   
-  // Filter for only the specified navigation items: Comunicação, Relatórios, Zeladoria (Ranking)
-  const allowedPages = ['comunicacao', 'relatorios', 'ranking'];
+  // Filter for only the specified navigation items: Dashboard, Comunicação, Relatórios, Zeladoria (Ranking)
+  const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking', 'esic'];
   
   const navigationItems = allNavigationItems
     .filter(item => allowedPages.includes(item.id))
@@ -97,8 +97,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
     <aside
       className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-screen sticky top-0 transition-all duration-300 ease-in-out`}
     >
-      <nav className="space-y-2 flex flex-col h-full">
-        <div className="space-y-1">
+      <nav className="space-y-4 flex flex-col h-full">
+        <div className="space-y-4">
           {navigationItems.map((item) => (
             <SidebarItem
               key={item.id}
