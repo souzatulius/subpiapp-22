@@ -41,7 +41,7 @@ const DashboardPage: React.FC = () => {
     resetDashboard
   } = useDashboardCards(userCoordenaticaoId);
 
-  const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
+  const scrollFadeStyles = useScrollFade();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);

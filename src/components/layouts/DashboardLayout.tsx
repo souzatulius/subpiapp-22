@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 const DashboardLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -73,9 +74,14 @@ const DashboardLayout: React.FC = () => {
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto">
-            <div className={`p-4 ${isMobile ? 'pb-32' : 'pb-20'}`}>
+            <motion.div 
+              className={`p-4 ${isMobile ? 'pb-32' : 'pb-20'}`}
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ duration: 0.5 }}
+            >
               <Outlet />
-            </div>
+            </motion.div>
           </div>
         </main>
       </div>
