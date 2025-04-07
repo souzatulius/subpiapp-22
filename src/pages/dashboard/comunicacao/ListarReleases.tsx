@@ -435,7 +435,7 @@ const ListarReleases = () => {
     }
 
     return (
-      <div className="border rounded-md">
+      <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -560,7 +560,7 @@ const ListarReleases = () => {
         title="Releases e Notícias"
         description="Gerencie os releases recebidos e as notícias criadas"
         icon={<FileText className="h-6 w-6 text-white" />}
-        color="bg-gradient-to-r from-blue-500 to-blue-600"
+        color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
 
       <div className="mt-5">
