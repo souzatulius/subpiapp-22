@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ButtonIcon } from '@radix-ui/react-select';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';

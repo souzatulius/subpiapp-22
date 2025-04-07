@@ -11,9 +11,10 @@ interface BreadcrumbItem {
 
 interface BreadcrumbBarProps {
   className?: string;
+  onSettingsClick?: () => void;
 }
 
-const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ className }) => {
+const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ className, onSettingsClick }) => {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
   
@@ -60,7 +61,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ className }) => {
     <div className={cn("bg-white border-b border-gray-200", className)}>
       <div className="max-w-screen-xl mx-auto px-4 py-2">
         <div className="flex items-center space-x-1 text-sm">
-          <Link to="/dashboard" className="flex items-center text-gray-500 hover:text-gray-700">
+          <Link to="/dashboard" className="flex items-center text-gray-500 hover:text-gray-700" onClick={onSettingsClick && location.pathname === '/settings' ? onSettingsClick : undefined}>
             <Home className="h-4 w-4" />
           </Link>
           
