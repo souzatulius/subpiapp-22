@@ -129,6 +129,19 @@ export const useInitialCards = (userDepartment: string | null) => {
         displayMobile: true,
         mobileOrder: 9,
         allowedDepartments: ['comunicacao', 'gabinete']
+      },
+      {
+        id: 'esic',
+        title: 'e-SIC',
+        path: '/dashboard/esic',
+        iconId: 'file-text',
+        color: getBgColor('blue-light'),
+        width: '25',
+        height: '1',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 10,
+        allowedDepartments: ['comunicacao', 'gabinete']
       }
     ];
 

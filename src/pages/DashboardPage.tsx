@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useUserData } from '@/hooks/useUserData';
+import { useUserData } from '@/hooks/dashboard/useUserData';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import Header from '@/components/layouts/Header';
+import Header from '@/components/layouts/header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
@@ -30,7 +29,8 @@ const DashboardPage: React.FC = () => {
     user
   } = useAuth();
   const {
-    firstName
+    firstName,
+    userCoordenaticaoId
   } = useUserData(user?.id);
   const {
     cards,
@@ -39,9 +39,8 @@ const DashboardPage: React.FC = () => {
     handleCardHide,
     handleCardsReorder,
     resetDashboard
-  } = useDashboardCards();
+  } = useDashboardCards(userCoordenaticaoId);
 
-  // Apply scroll fade effect for mobile
   const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
 
   const toggleSidebar = () => {
@@ -82,15 +81,12 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Fixed header wrapper for mobile */}
       {isMobile && (
         <div className="fixed top-0 left-0 right-0 z-40 bg-white">
-          {/* BreadcrumbBar is not affected by the fade effect */}
           <BreadcrumbBar />
         </div>
       )}
       
-      {/* Header with fade effect on mobile */}
       <div 
         style={isMobile ? scrollFadeStyles : undefined}
         className={`${isMobile ? 'transition-all duration-300' : ''}`}
@@ -102,11 +98,9 @@ const DashboardPage: React.FC = () => {
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
-          {/* Breadcrumb is positioned differently based on mobile/desktop */}
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-full mx-auto p-4 pb-16 md:pb-4">
-            {/* WelcomeCard with fade effect on mobile */}
             <div 
               className="w-full mb-2"
               style={isMobile ? scrollFadeStyles : undefined}
@@ -121,7 +115,6 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
-            {/* Reset dashboard button with same fade effect on mobile */}
             <div 
               className="flex justify-end mb-4"
               style={isMobile ? scrollFadeStyles : undefined}
@@ -137,7 +130,6 @@ const DashboardPage: React.FC = () => {
               </Button>
             </div>
             
-            {/* Content container with better spacing for mobile */}
             <div 
               className={`relative ${isMobile ? 'pb-32' : ''}`} 
               style={{
@@ -174,7 +166,6 @@ const DashboardPage: React.FC = () => {
         </main>
       </div>
       
-      {/* Edit Card Modal */}
       {selectedCard && (
         <EditCardModal
           isOpen={isEditCardModalOpen}

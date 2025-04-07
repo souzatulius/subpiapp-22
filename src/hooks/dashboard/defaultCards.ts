@@ -153,7 +153,8 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 10
+      mobileOrder: 10,
+      allowedDepartments: ['comunicacao', 'gabinete']
     }
   ];
 };
@@ -286,7 +287,8 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
         height: '2',
         type: 'standard',
         displayMobile: true,
-        mobileOrder: 11
+        mobileOrder: 11,
+        allowedDepartments: ['comunicacao', 'gabinete']
       }
     ];
   }
@@ -405,6 +407,19 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       type: 'standard',
       displayMobile: true,
       mobileOrder: 10
+    },
+    {
+      id: 'esic',
+      title: 'e-SIC',
+      path: '/dashboard/esic',
+      iconId: 'file-text',
+      color: 'blue-light',
+      width: '25',
+      height: '2',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10,
+      allowedDepartments: ['comunicacao', 'gabinete']
     }
   ];
 };

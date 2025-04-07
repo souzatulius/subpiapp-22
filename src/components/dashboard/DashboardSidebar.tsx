@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/cn';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -38,13 +40,54 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const [userDepartment, setUserDepartment] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Base sidebar width calculation
   const sidebarWidth = isOpen ? "w-64" : "w-16";
   const sidebarPadding = isOpen ? "px-4" : "px-2";
   
+  // Fetch user department
+  useEffect(() => {
+    const fetchUserDepartment = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('coordenacao_id')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user department:', error);
+        } else if (data) {
+          setUserDepartment(data.coordenacao_id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user department:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserDepartment();
+  }, [user]);
+  
   // Get navigation items from centralized config
-  const navigationItems = getNavigationSections();
+  const allNavigationItems = getNavigationSections();
+  
+  // Filter navigation items based on user's department
+  const navigationItems = allNavigationItems.filter(item => {
+    if (item.allowedDepartments && item.allowedDepartments.length > 0) {
+      return !userDepartment || item.allowedDepartments.includes(userDepartment);
+    }
+    return true;
+  });
   
   return (
     <aside

@@ -1,55 +1,95 @@
 
 import React from 'react';
-import { 
-  Home, 
-  MessageCircle, 
-  BarChart2, 
-  TrendingUp,
+import {
+  BarChart2,
+  CheckCircle,
   FileText,
-  Sparkles,
-  CircleHelp
+  HelpCircle,
+  Home,
+  List,
+  MessageSquare,
+  MessageSquareReply,
+  PlusCircle,
+  Settings,
+  Trophy
 } from 'lucide-react';
 
-// Navigation configuration for the sidebar
-export const getNavigationSections = () => [
-  // Seção 1: Início
-  {
-    id: 'inicio',
-    icon: <Home size={20} />,
-    label: 'Início',
-    path: '/dashboard',
-    isSection: false
-  },
-  // Seção 2: Comunicação
-  {
-    id: 'comunicacao',
-    icon: <MessageCircle size={20} />,
-    label: 'Comunicação',
-    path: '/dashboard/comunicacao',
-    isSection: false
-  },
-  // Seção 3: e-SIC
-  {
-    id: 'esic',
-    icon: <CircleHelp size={20} />,
-    label: 'e-SIC',
-    path: '/dashboard/esic',
-    isSection: false
-  },
-  // Seção 4: Relatórios
-  {
-    id: 'relatorios',
-    icon: <BarChart2 size={20} />,
-    label: 'Relatórios',
-    path: '/dashboard/comunicacao/relatorios',
-    isSection: false
-  },
-  // Seção 5: Zeladoria
-  {
-    id: 'ranking',
-    icon: <TrendingUp size={20} />,
-    label: 'Zeladoria',
-    path: '/dashboard/zeladoria/ranking-subs',
-    isSection: false
-  }
-];
+export type NavigationItem = {
+  id: string;
+  label: string;
+  path: string;
+  icon: React.ReactNode;
+  allowedDepartments?: string[];
+};
+
+export const getNavigationSections = (): NavigationItem[] => {
+  return [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      path: '/dashboard',
+      icon: <Home className="w-10 h-10" />,
+    },
+    {
+      id: 'comunicacao',
+      label: 'Comunicação',
+      path: '/dashboard/comunicacao',
+      icon: <MessageSquareReply className="w-10 h-10" />,
+    },
+    {
+      id: 'responder',
+      label: 'Responder',
+      path: '/dashboard/comunicacao/responder',
+      icon: <MessageSquare className="w-10 h-10" />,
+    },
+    {
+      id: 'demandas',
+      label: 'Demandas',
+      path: '/dashboard/comunicacao/demandas',
+      icon: <List className="w-10 h-10" />,
+    },
+    {
+      id: 'notas',
+      label: 'Notas',
+      path: '/dashboard/comunicacao/notas',
+      icon: <FileText className="w-10 h-10" />,
+    },
+    {
+      id: 'aprovar',
+      label: 'Aprovar',
+      path: '/dashboard/comunicacao/aprovar-nota',
+      icon: <CheckCircle className="w-10 h-10" />,
+    },
+    {
+      id: 'ranking',
+      label: 'Top Zeladoria',
+      path: '/dashboard/zeladoria/ranking-subs',
+      icon: <Trophy className="w-10 h-10" />,
+    },
+    {
+      id: 'relatorios',
+      label: 'Relatórios',
+      path: '/dashboard/comunicacao/relatorios',
+      icon: <BarChart2 className="w-10 h-10" />,
+    },
+    {
+      id: 'esic',
+      label: 'e-SIC',
+      path: '/dashboard/esic',
+      icon: <FileText className="w-10 h-10" />,
+      allowedDepartments: ['comunicacao', 'gabinete'],
+    },
+    {
+      id: 'ajuda',
+      label: 'Ajuda',
+      path: '/dashboard/ajuda',
+      icon: <HelpCircle className="w-10 h-10" />,
+    },
+    {
+      id: 'configuracoes',
+      label: 'Configurações',
+      path: '/dashboard/configuracoes',
+      icon: <Settings className="w-10 h-10" />,
+    },
+  ];
+};

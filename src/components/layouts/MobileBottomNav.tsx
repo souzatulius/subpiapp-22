@@ -1,20 +1,67 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface MobileBottomNavProps {
   className?: string;
 }
 
 const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
-  const navItems = getNavigationSections().map(item => {
-    // Rename "Top Zeladoria" to "Zeladoria" for mobile
-    if (item.id === 'ranking') {
-      return { ...item, label: 'Zeladoria' };
-    }
-    return item;
-  });
+  const { user } = useAuth();
+  const [userDepartment, setUserDepartment] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Fetch user department
+  useEffect(() => {
+    const fetchUserDepartment = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('coordenacao_id')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user department:', error);
+        } else if (data) {
+          setUserDepartment(data.coordenacao_id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user department:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserDepartment();
+  }, [user]);
+  
+  // Get all navigation items
+  const allNavItems = getNavigationSections();
+  
+  // Filter by department and map for mobile
+  const navItems = allNavItems
+    .filter(item => {
+      if (item.allowedDepartments && item.allowedDepartments.length > 0) {
+        return !userDepartment || item.allowedDepartments.includes(userDepartment);
+      }
+      return true;
+    })
+    .map(item => {
+      // Rename "Top Zeladoria" to "Zeladoria" for mobile
+      if (item.id === 'ranking') {
+        return { ...item, label: 'Zeladoria' };
+      }
+      return item;
+    });
   
   const location = useLocation();
 
