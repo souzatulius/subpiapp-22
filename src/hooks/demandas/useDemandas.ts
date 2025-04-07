@@ -51,6 +51,7 @@ export const useDemandas = (filterStatus: string = 'pendente') => {
             area_coordenacao: {
               descricao: item.coordenacao?.descricao || ''
             },
+            supervisao_tecnica: item.supervisao_tecnica || { id: undefined, descricao: '' },
             servico: item.servico || { descricao: '' }
           } as Demand;
         });
