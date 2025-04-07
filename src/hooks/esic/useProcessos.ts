@@ -38,22 +38,22 @@ export const useProcessos = () => {
       
       // Transform the data to match the ESICProcesso interface
       // This will handle potential errors with the join
-      const processedData = data.map((item: any) => {
-        return {
-          id: item.id,
-          data_processo: item.data_processo,
-          situacao: item.situacao,
-          status: item.status,
-          texto: item.texto,
-          autor_id: item.autor_id,
-          criado_em: item.criado_em,
-          atualizado_em: item.atualizado_em,
-          autor: item.autor?.error ? { nome_completo: 'Usuário' } : item.autor
-        };
-      });
+      const processedData = data.map((item: any) => ({
+        id: item.id,
+        data_processo: item.data_processo,
+        situacao: item.situacao,
+        status: item.status,
+        texto: item.texto,
+        autor_id: item.autor_id,
+        criado_em: item.criado_em,
+        atualizado_em: item.atualizado_em,
+        autor: item.autor?.error ? { nome_completo: 'Usuário' } : item.autor
+      }));
 
       return processedData as ESICProcesso[];
     },
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    retry: 2, // Retry failed requests up to 2 times
   });
 
   // Create new process
