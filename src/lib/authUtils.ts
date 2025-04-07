@@ -1,3 +1,4 @@
+
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -70,6 +71,7 @@ export const createAdminNotification = async (
       mensagem: `${userName} (${email}) solicitou acesso ao sistema.`,
       tipo: 'user_registration',
       usuario_id: userId,
+      referencia_tipo: 'usuario',
     });
     
     console.log('Notificação de novo registro criada com sucesso');
@@ -98,6 +100,7 @@ export const updateUserProfile = async (userId: string, userData: any): Promise<
         cargo_id: userData.cargo_id,
         supervisao_tecnica_id: userData.supervisao_tecnica_id,
         coordenacao_id: userData.coordenacao_id,
+        status: 'pendente', // Explicitamente definir o status como pendente
       })
       .eq('id', userId);
     

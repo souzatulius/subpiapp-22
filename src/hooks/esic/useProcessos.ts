@@ -35,7 +35,7 @@ export const useProcessos = () => {
       }
 
       console.log('Fetched esic processes:', data);
-      return data as unknown as ESICProcesso[];
+      return data as ESICProcesso[];
     },
   });
 

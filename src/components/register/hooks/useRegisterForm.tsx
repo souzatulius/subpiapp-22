@@ -5,6 +5,7 @@ import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { validatePasswordsMatch, formatPhone, formatDate } from '@/lib/formValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain } from '@/lib/authUtils';
+import { toast } from '@/components/ui/use-toast';
 import { FormData } from '../types';
 
 export const useRegisterForm = () => {
@@ -113,12 +114,17 @@ export const useRegisterForm = () => {
         whatsapp: formData.whatsapp,
         cargo_id: formData.role,
         supervisao_tecnica_id: formData.area || null,
-        coordenacao_id: formData.coordenacao
+        coordenacao_id: formData.coordenacao,
+        status: 'pendente' // Definir status explicitamente como pendente
       });
 
       if (error) {
         showAuthError(error);
       } else {
+        toast({
+          title: "Cadastro realizado com sucesso",
+          description: "Seu acesso será avaliado por um administrador em breve.",
+        });
         navigate('/login');
       }
     } catch (error: any) {
