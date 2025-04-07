@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ESICProcesso, statusLabels, situacaoLabels } from '@/types/esic';
-import { FileText, Pencil, Trash2, FileCheck } from 'lucide-react';
+import { FileText, Pencil, Trash2 } from 'lucide-react';
 
 interface ProcessoItemProps {
   processo: ESICProcesso;
@@ -57,7 +57,7 @@ const ProcessoItem: React.FC<ProcessoItemProps> = ({
   onDelete 
 }) => {
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>

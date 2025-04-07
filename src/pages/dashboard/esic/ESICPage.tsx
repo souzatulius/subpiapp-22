@@ -7,6 +7,7 @@ import ProcessoItem from '@/components/esic/ProcessoItem';
 import ProcessoDetails from '@/components/esic/ProcessoDetails';
 import JustificativaForm from '@/components/esic/JustificativaForm';
 import ESICWelcomeCard from '@/components/esic/ESICWelcomeCard';
+import ProcessoList from '@/components/esic/ProcessoList';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Loader2, FilePlus, FileQuestion, FileText } from 'lucide-react';
@@ -227,50 +228,13 @@ const ESICPage: React.FC = () => {
       
       <main>
         {screen === 'list' && (
-          <>
-            {isLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-red-500">Erro ao carregar processos</p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => refetch()} 
-                  className="mt-4"
-                >
-                  Tentar novamente
-                </Button>
-              </div>
-            ) : processos && processos.length > 0 ? (
-              <div className="space-y-4">
-                {processos.map((processo) => (
-                  <ProcessoItem
-                    key={processo.id}
-                    processo={processo}
-                    onSelect={handleViewProcesso}
-                    onEdit={handleEditProcesso}
-                    onDelete={handleDeleteProcesso}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <FileQuestion className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-700 mb-2">
-                  Nenhum processo encontrado
-                </h3>
-                <p className="text-gray-500 mb-4">
-                  Comece criando um novo processo para o sistema e-SIC.
-                </p>
-                <Button onClick={() => setScreen('create')}>
-                  <FilePlus className="mr-2 h-4 w-4" />
-                  Criar Processo
-                </Button>
-              </div>
-            )}
-          </>
+          <ProcessoList
+            processos={processos}
+            isLoading={isLoading}
+            onSelectProcesso={handleViewProcesso}
+            onEditProcesso={handleEditProcesso}
+            onDeleteProcesso={handleDeleteProcesso}
+          />
         )}
         
         {screen === 'create' && (
