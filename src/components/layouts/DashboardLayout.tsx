@@ -53,20 +53,8 @@ const DashboardLayout: React.FC = () => {
           <>
             <DashboardSidebar isOpen={sidebarOpen} />
             
-            {/* Collapse button (desktop only) */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="absolute left-0 top-24 bg-white shadow-md hover:bg-gray-100 z-30 rounded-r-md rounded-l-none border border-l-0"
-              aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
-            >
-              {sidebarOpen ? (
-                <ChevronLeft className="h-5 w-5" />
-              ) : (
-                <ChevronRight className="h-5 w-5" />
-              )}
-            </Button>
+            {/* Collapse button (desktop only) - now hidden */}
+            {/* The collapse button was here but has been removed as requested */}
           </>
         )}
         
