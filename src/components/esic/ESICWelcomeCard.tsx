@@ -1,35 +1,16 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle } from 'lucide-react';
 
-interface ESICWelcomeCardProps {
-  onNovoProcesso: () => void;
-}
+interface ESICWelcomeCardProps {}
 
-const ESICWelcomeCard: React.FC<ESICWelcomeCardProps> = ({ onNovoProcesso }) => {
+const ESICWelcomeCard: React.FC<ESICWelcomeCardProps> = () => {
   return (
-    <Card className="shadow-md bg-white">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-bold">Processos e-SIC</CardTitle>
-        <CardDescription className="text-gray-500">
-          Gerenciar processos e justificativas para as solicitações recebidas via e-SIC.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pb-2">
-        <p className="text-gray-600">
-          Cadastre processos e-SIC, adicione justificativas manualmente ou com auxílio de IA, 
-          e gerencie os status de cada processo de maneira simplificada.
-        </p>
-      </CardContent>
-      <CardFooter>
-        <Button onClick={onNovoProcesso}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Novo Processo
-        </Button>
-      </CardFooter>
-    </Card>
+    <div className="bg-gradient-to-r from-blue-100 to-sky-100 p-4 rounded-xl shadow-sm">
+      <h2 className="text-xl font-bold text-blue-900 mb-2">Sistema de Informação ao Cidadão (e-SIC)</h2>
+      <p className="text-blue-800">
+        Acompanhe, gerencie e responda às solicitações de informação feitas ao Sistema de Informação ao Cidadão.
+      </p>
+    </div>
   );
 };
 

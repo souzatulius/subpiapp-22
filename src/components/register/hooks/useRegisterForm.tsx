@@ -5,7 +5,7 @@ import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { validatePasswordsMatch, formatPhone, formatDate } from '@/lib/formValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { showAuthError, completeEmailWithDomain, createAdminNotification } from '@/lib/authUtils';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { FormData } from '../types';
 
 export const useRegisterForm = () => {
@@ -130,11 +130,8 @@ export const useRegisterForm = () => {
           );
         }
         
-        toast({
-          title: "Cadastro realizado com sucesso",
-          description: "Seu acesso será avaliado por um administrador em breve.",
-        });
-        navigate('/login');
+        toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
+        navigate('/email-verified');
       }
     } catch (error: any) {
       console.error('Erro ao registrar:', error);
