@@ -20,7 +20,7 @@ export const useProcessos = () => {
         .from('esic_processos')
         .select(`
           *,
-          autor:autor_id(nome_completo)
+          autor:usuarios(nome_completo)
         `)
         .order('criado_em', { ascending: false });
 
@@ -35,7 +35,24 @@ export const useProcessos = () => {
       }
 
       console.log('Fetched esic processes:', data);
-      return data as ESICProcesso[];
+      
+      // Transform the data to match the ESICProcesso interface
+      // This will handle potential errors with the join
+      const processedData = data.map((item: any) => {
+        return {
+          id: item.id,
+          data_processo: item.data_processo,
+          situacao: item.situacao,
+          status: item.status,
+          texto: item.texto,
+          autor_id: item.autor_id,
+          criado_em: item.criado_em,
+          atualizado_em: item.atualizado_em,
+          autor: item.autor?.error ? { nome_completo: 'Usuário' } : item.autor
+        };
+      });
+
+      return processedData as ESICProcesso[];
     },
   });
 
