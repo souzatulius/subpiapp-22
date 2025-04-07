@@ -95,10 +95,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   
   return (
     <aside
-      className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full fixed left-0 top-16 bottom-0 overflow-y-auto transition-all duration-300 ease-in-out`}
+      className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-screen sticky top-0 transition-all duration-300 ease-in-out`}
     >
-      <nav className="space-y-6 flex flex-col h-full">
-        <div className="space-y-6">
+      <nav className="space-y-4 flex flex-col h-full">
+        <div className="space-y-4">
           {navigationItems.map((item) => (
             <SidebarItem
               key={item.id}

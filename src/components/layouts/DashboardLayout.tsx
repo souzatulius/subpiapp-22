@@ -68,7 +68,7 @@ const DashboardLayout: React.FC = () => {
           </Button>
         )}
         
-        <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300 ${!isMobile ? (sidebarOpen ? 'ml-64' : 'ml-16') : ''}`}>
+        <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           

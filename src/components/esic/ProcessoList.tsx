@@ -126,12 +126,12 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           <h3 className="text-lg font-medium text-gray-700">
             {searchTerm || statusFilter !== 'todos' || situacaoFilter !== 'todos' 
               ? 'Nenhum processo encontrado com os filtros aplicados' 
-              : 'Nenhum processo do e-SIC encontrado'}
+              : 'Nenhum processo encontrado'}
           </h3>
           <p className="text-gray-500 mt-2">
             {searchTerm || statusFilter !== 'todos' || situacaoFilter !== 'todos' 
               ? 'Tente ajustar os filtros de busca' 
-              : 'Comece criando um novo processo no sistema'}
+              : 'Comece criando um novo processo'}
           </p>
         </Card>
       )}
