@@ -17,8 +17,14 @@ import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditModeToggle from '@/components/dashboard/EditModeToggle';
 
 const DashboardPage: React.FC = () => {
-  const { viewType, isLoadingDashboard } = useDashboardState();
-  const { firstName } = useDashboardConfig();
+  const { viewType, isLoadingDashboard, actionCards, setActionCards, firstName } = useDashboardState();
+  const { firstName: configFirstName } = useDashboardConfig();
+
+  // Function to handle adding new cards
+  const handleAddNewCard = () => {
+    console.log('Add new card');
+    // Implementation would go here in a real application
+  };
 
   return (
     <div className="container py-6 space-y-8">
@@ -30,13 +36,17 @@ const DashboardPage: React.FC = () => {
             onToggle={() => {}} 
           />
         </div>
-        <DashboardHeader />
+        <DashboardHeader firstName={firstName || configFirstName} />
       </header>
 
-      <DashboardActions />
+      <DashboardActions onAddNewCard={handleAddNewCard} />
       
       <div className="grid grid-cols-1 gap-6">
-        <UnifiedCardGrid />
+        <UnifiedCardGrid 
+          cards={actionCards || []} 
+          onCardsChange={setActionCards}
+          isEditMode={false}
+        />
       </div>
     </div>
   );
