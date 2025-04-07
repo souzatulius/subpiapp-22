@@ -55,7 +55,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
                   ${isActive ? 'bg-white text-[#051b2c]' : 'text-gray-400'}`
               }}
             >
-              <div className="text-[#f57737]">
+              <div className="text-[#f57737] w-7 h-7">
                 {item.icon}
               </div>
               <span className="text-xs mt-1 truncate">{item.label}</span>

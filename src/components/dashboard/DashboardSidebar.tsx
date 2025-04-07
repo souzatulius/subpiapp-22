@@ -30,7 +30,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
         )
       }
     >
-      <div className="flex-shrink-0">{icon}</div>
+      <div className="flex-shrink-0 w-7 h-7">{icon}</div>
       {!isCollapsed && <span>{label}</span>}
     </NavLink>
   );
@@ -48,7 +48,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   
   return (
     <aside
-      className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full transition-all duration-300 ease-in-out`}
+      className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-screen sticky top-0 transition-all duration-300 ease-in-out`}
     >
       <nav className="space-y-2 flex flex-col h-full">
         <div className="space-y-1">

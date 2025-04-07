@@ -61,9 +61,9 @@ const DashboardLayout: React.FC = () => {
             aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
           >
             {sidebarOpen ? (
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-7 w-7" />
             ) : (
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-7 w-7" />
             )}
           </Button>
         )}
