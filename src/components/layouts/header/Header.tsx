@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({
                   variant="ghost"
                   size="icon"
                   onClick={toggleSidebar}
-                  className="absolute top-[2px] -left-[4px] lg:flex hidden"
+                  className="absolute top-[6px] -left-[4px] lg:flex hidden hover:text-white hover:bg-[#002855]"
                   aria-label="Menu"
                 >
                   <Menu className="h-5 w-5" />
@@ -47,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({
                   variant="ghost"
                   size="icon"
                   onClick={toggleSidebar}
-                  className="flex lg:hidden"
+                  className="flex lg:hidden hover:text-white hover:bg-[#002855]"
                   aria-label="Menu"
                 >
                   <Menu className="h-5 w-5" />
