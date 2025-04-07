@@ -40,7 +40,9 @@ const ProfileMenu: React.FC = () => {
     }
   };
 
-  const goToProfile = () => {
+  const goToProfile = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     navigate('/settings');
   };
 
@@ -62,7 +64,10 @@ const ProfileMenu: React.FC = () => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="focus:outline-none flex items-center gap-2">
+          <button 
+            className="focus:outline-none flex items-center gap-2"
+            onClick={(e) => e.preventDefault()}
+          >
             <AvatarDisplay 
               nome={displayName}
               imageSrc={photoUrl}
@@ -72,25 +77,49 @@ const ProfileMenu: React.FC = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsChangePhotoModalOpen(true)} className="cursor-pointer py-2">
+          <DropdownMenuItem 
+            onClick={(e) => {
+              e.preventDefault();
+              setIsChangePhotoModalOpen(true);
+            }} 
+            className="cursor-pointer py-2"
+          >
             <User className="mr-2 h-4 w-4" />
             <span>Alterar foto</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsEditProfileModalOpen(true)} className="cursor-pointer py-2">
+          <DropdownMenuItem 
+            onClick={(e) => {
+              e.preventDefault();
+              setIsEditProfileModalOpen(true);
+            }} 
+            className="cursor-pointer py-2"
+          >
             <User className="mr-2 h-4 w-4" />
             <span>Editar Perfil</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsAccountSettingsModalOpen(true)} className="cursor-pointer py-2">
+          <DropdownMenuItem 
+            onClick={(e) => {
+              e.preventDefault();
+              setIsAccountSettingsModalOpen(true);
+            }} 
+            className="cursor-pointer py-2"
+          >
             <Bell className="mr-2 h-4 w-4" />
             <span>Ajustes de Notificações</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={goToProfile} className="cursor-pointer py-2">
+          <DropdownMenuItem 
+            onClick={goToProfile} 
+            className="cursor-pointer py-2"
+          >
             <Settings className="mr-2 h-4 w-4" />
             <span>Configurações</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 
-            onClick={handleSignOut} 
+            onClick={(e) => {
+              e.preventDefault();
+              handleSignOut();
+            }} 
             disabled={isSigningOut}
             className="cursor-pointer text-destructive focus:text-destructive py-2"
           >
