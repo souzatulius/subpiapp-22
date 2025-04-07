@@ -1,4 +1,5 @@
 
+
 export interface Demand {
   id: string;
   titulo: string;
@@ -71,3 +72,4 @@ export interface DemandResponse {
   respostas?: any;
   comentarios?: string;
 }
+
