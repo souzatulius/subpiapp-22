@@ -12,6 +12,8 @@ import NotasCards from './NotasCards';
 import NotasFilter from './NotasFilter';
 import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
+import { NotaOficial } from '@/types/nota';
+import { ensureNotaCompat, prepareNotas } from './NotaCompat';
 
 interface NotasContentProps {
   onViewNote?: (notaId: string) => void;
@@ -26,9 +28,21 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedNotaId, setSelectedNotaId] = useState<string | null>(null);
+  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
+  
+  // Helper to format date
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR');
+    } catch (e) {
+      return 'Data inválida';
+    }
+  };
   
   // Fetch notas oficiais
-  const { data: notas = [], isLoading } = useQuery({
+  const { data: notasRaw = [], isLoading } = useQuery({
     queryKey: ['notas_oficiais'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,7 +55,7 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
           criado_em,
           atualizado_em,
           autor_id,
-          autor:autor_id(nome_completo),
+          autor:autor_id(id, nome_completo),
           problema_id,
           problema:problema_id(descricao),
           demanda_id,
@@ -50,7 +64,35 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
         .order('criado_em', { ascending: false });
         
       if (error) throw error;
-      return data;
+      
+      // Transform data to match NotaOficial type
+      const transformed = (data || []).map(nota => {
+        // Handle possible SelectQueryError in autor
+        const autor = typeof nota.autor === 'object' && nota.autor !== null
+          ? { 
+              id: nota.autor.id || nota.autor_id,
+              nome_completo: nota.autor.nome_completo || 'Autor desconhecido'
+            }
+          : { id: nota.autor_id, nome_completo: 'Autor desconhecido' };
+          
+        return {
+          id: nota.id,
+          titulo: nota.titulo,
+          texto: nota.texto,
+          conteudo: nota.texto, // Map texto to conteudo for compatibility
+          status: nota.status,
+          criado_em: nota.criado_em,
+          atualizado_em: nota.atualizado_em,
+          autor_id: nota.autor_id,
+          autor: autor,
+          problema_id: nota.problema_id,
+          problema: nota.problema,
+          demanda_id: nota.demanda_id,
+          demanda: nota.demanda
+        } as NotaOficial;
+      });
+      
+      return transformed;
     }
   });
   
@@ -58,7 +100,7 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
     setShowFilters(!showFilters);
   };
   
-  const filteredNotas = notas.filter(nota => {
+  const filteredNotas = notasRaw.filter(nota => {
     // Apply status filter if any are selected
     if (selectedStatus.length > 0 && !selectedStatus.includes(nota.status)) {
       return false;
@@ -78,26 +120,28 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
     return true;
   });
   
-  const handleViewNota = (notaId: string) => {
+  const handleViewNota = (nota: NotaOficial) => {
     if (onViewNote) {
-      onViewNote(notaId);
+      onViewNote(nota.id);
     } else {
-      setSelectedNotaId(notaId);
+      setSelectedNota(nota);
+      setSelectedNotaId(nota.id);
       setIsDetailOpen(true);
     }
   };
   
-  const handleEditNota = (notaId: string) => {
+  const handleEditNota = (nota: NotaOficial) => {
     if (onEditNote) {
-      onEditNote(notaId);
+      onEditNote(nota.id);
     } else {
       // Implement default edit behavior if needed
-      console.log("Edit nota", notaId);
+      console.log("Edit nota", nota.id);
     }
   };
   
-  const handleDeleteNota = (notaId: string) => {
-    setSelectedNotaId(notaId);
+  const handleDeleteNota = (nota: NotaOficial) => {
+    setSelectedNota(nota);
+    setSelectedNotaId(nota.id);
     setIsDeleteOpen(true);
   };
   
@@ -156,15 +200,19 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
             <TabsContent value="tabela" className="m-0">
               <NotasTable 
                 notas={filteredNotas}
-                onView={handleViewNota}
-                onEdit={handleEditNota}
-                onDelete={handleDeleteNota}
+                loading={isLoading}
+                formatDate={formatDate}
+                onViewNota={handleViewNota}
+                onEditNota={handleEditNota}
+                onDeleteNota={handleDeleteNota}
               />
             </TabsContent>
             
             <TabsContent value="cards" className="m-0">
               <NotasCards 
                 notas={filteredNotas}
+                loading={isLoading}
+                formatDate={formatDate}
                 onView={handleViewNota}
                 onEdit={handleEditNota}
                 onDelete={handleDeleteNota}
@@ -175,6 +223,8 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
           <div className="sm:hidden">
             <NotasCards 
               notas={filteredNotas}
+              loading={isLoading}
+              formatDate={formatDate}
               onView={handleViewNota}
               onEdit={handleEditNota}
               onDelete={handleDeleteNota}
@@ -183,16 +233,17 @@ const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) =
         </>
       )}
       
-      {selectedNotaId && (
+      {selectedNota && (
         <>
           <NotaDetailDialog
-            notaId={selectedNotaId}
+            nota={selectedNota}
             open={isDetailOpen}
             onOpenChange={setIsDetailOpen}
+            formatDate={formatDate}
           />
           
           <DeleteNotaDialog
-            notaId={selectedNotaId}
+            nota={selectedNota}
             open={isDeleteOpen}
             onOpenChange={setIsDeleteOpen}
           />

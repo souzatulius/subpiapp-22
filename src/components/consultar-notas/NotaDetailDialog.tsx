@@ -10,42 +10,43 @@ import {
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User, Building, FileDown } from 'lucide-react';
 import { NotaOficial } from '@/types/nota';
-import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
 
-interface NotaDetailDialogProps {
+export interface NotaDetailDialogProps {
   nota: NotaOficial;
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   formatDate: (dateString: string) => string;
 }
 
 const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({ 
   nota, 
-  isOpen, 
-  onClose,
+  open, 
+  onOpenChange,
   formatDate
 }) => {
-  const { exportNotaToPDF, exporting } = useExportNotaPDF(formatDate);
-  
   const handleExportPDF = () => {
-    exportNotaToPDF(nota);
+    // TODO: Implement PDF export functionality
+    console.log("Export PDF", nota.id);
   };
 
   const formatStatus = (status: string): string => {
     const statusMap: Record<string, string> = {
       'em_andamento': 'Demanda respondida',
+      'pendente': 'Pendente',
+      'aprovada': 'Aprovada',
+      'rejeitada': 'Rejeitada',
     };
     
     return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   const autorNome = nota.autor?.nome_completo || "Autor desconhecido";
-  const areaNome = nota.supervisao_tecnica?.descricao || "Área não especificada";
+  const areaNome = nota.area_coordenacao?.descricao || nota.supervisao_tecnica?.descricao || "Área não especificada";
   const dataCriacao = nota.criado_em || nota.created_at || "";
   const dataAtualizacao = nota.atualizado_em || nota.updated_at || "";
   
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">{nota.titulo}</DialogTitle>
@@ -77,7 +78,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
             {formatStatus(nota.status)}
           </div>
           
-          <div className="prose max-w-none mt-4" dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br />') }} />
+          <div className="prose max-w-none mt-4" dangerouslySetInnerHTML={{ __html: (nota.texto || nota.conteudo || '').replace(/\n/g, '<br />') }} />
         </div>
         
         {nota.historico_edicoes && nota.historico_edicoes.length > 0 && (
@@ -113,13 +114,12 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
           <Button 
             variant="outline" 
             onClick={handleExportPDF}
-            disabled={exporting}
             className="flex items-center"
           >
             <FileDown className="w-4 h-4 mr-1" />
-            {exporting ? 'Exportando...' : 'Exportar PDF'}
+            Exportar PDF
           </Button>
-          <Button onClick={onClose}>Fechar</Button>
+          <Button onClick={() => onOpenChange(false)}>Fechar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

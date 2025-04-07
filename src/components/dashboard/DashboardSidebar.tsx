@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import SidebarSection from './sidebar/SidebarSection';
 import { useAdminCheck } from './sidebar/useAdminCheck';
-import { navigationConfig } from './sidebar/navigationConfig';
+import navigationConfig from './sidebar/navigationConfig';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -45,7 +45,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, className }
             return (
               <SidebarSection
                 key={`section-${index}`}
-                title={section.title}
+                name={section.title}
                 items={section.items}
                 isOpen={isOpen}
                 isActiveRoute={isActiveRoute}

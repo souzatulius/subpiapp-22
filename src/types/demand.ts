@@ -52,18 +52,23 @@ export interface Demand {
     descricao: string;
   } | null;
   area_coordenacao: {
+    id?: string;
     descricao: string;
   } | null;
   origem: {
+    id?: string;
     descricao: string;
   } | null;
   tipo_midia: {
+    id?: string;
     descricao: string;
   } | null;
   bairro: {
+    id?: string;
     nome: string;
   } | null;
   autor: {
+    id?: string;
     nome_completo: string;
   } | null;
   endereco: string | null;
@@ -74,6 +79,7 @@ export interface Demand {
   detalhes_solicitacao: string | null;
   perguntas: Record<string, string> | null | any;
   servico: {
+    id?: string;
     descricao: string;
   } | null;
   arquivo_url: string | null;
