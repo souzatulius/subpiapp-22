@@ -33,7 +33,7 @@ export const useJustificativas = (processoId?: string) => {
         throw error;
       }
 
-      return data as ESICJustificativa[];
+      return data as unknown as ESICJustificativa[];
     },
     enabled: !!processoId,
   });

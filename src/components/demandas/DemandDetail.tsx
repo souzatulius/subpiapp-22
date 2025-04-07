@@ -35,7 +35,6 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
   const [nota, setNota] = useState<NotaOficial | null>(null);
   const [isUpdatingNota, setIsUpdatingNota] = useState(false);
 
-  // Fetch response data when demand changes
   useEffect(() => {
     if (demand?.id) {
       fetchResponseData(demand.id);
@@ -124,7 +123,6 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
           : "A nota foi rejeitada e o autor será notificado."
       });
 
-      // Refresh the nota data
       fetchNota(demand.id);
     } catch (error: any) {
       toast({
@@ -139,7 +137,6 @@ const DemandDetail: React.FC<DemandDetailProps> = ({ demand, isOpen, onClose }) 
 
   if (!demand) return null;
 
-  // Format response data
   const formatResponseData = () => {
     if (!responseData || !responseData.texto) return [];
     

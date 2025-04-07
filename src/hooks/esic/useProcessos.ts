@@ -32,7 +32,7 @@ export const useProcessos = () => {
         throw error;
       }
 
-      return data as ESICProcesso[];
+      return data as unknown as ESICProcesso[];
     },
   });
 

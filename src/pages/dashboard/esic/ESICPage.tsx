@@ -165,7 +165,7 @@ const ESICPage: React.FC = () => {
     );
   };
   
-  const handleUpdateStatus = (status: string) => {
+  const handleUpdateStatus = (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => {
     if (!selectedProcesso) return;
     
     updateProcesso(
@@ -177,7 +177,7 @@ const ESICPage: React.FC = () => {
         onSuccess: () => {
           toast({
             title: 'Status atualizado',
-            description: `O status do processo foi alterado para "${status}".`,
+            description: `O status do processo foi alterado.`,
           });
           // Update selected processo with new status
           setSelectedProcesso(prev => prev ? { ...prev, status } : null);
@@ -186,7 +186,7 @@ const ESICPage: React.FC = () => {
     );
   };
   
-  const handleUpdateSituacao = (situacao: string) => {
+  const handleUpdateSituacao = (situacao: 'em_tramitacao' | 'prazo_prorrogado' | 'concluido') => {
     if (!selectedProcesso) return;
     
     updateProcesso(
@@ -198,7 +198,7 @@ const ESICPage: React.FC = () => {
         onSuccess: () => {
           toast({
             title: 'Situação atualizada',
-            description: `A situação do processo foi alterada para "${situacao}".`,
+            description: `A situação do processo foi alterada.`,
           });
           // Update selected processo with new situação
           setSelectedProcesso(prev => prev ? { ...prev, situacao } : null);
