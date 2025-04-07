@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 bg-white shadow-sm print:hidden">
       <div className="w-full flex h-16 items-center justify-between">
         {/* Left side with menu toggle - with positioning for desktop */}
         <div className="w-1/4 flex items-center gap-4 relative">
