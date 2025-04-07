@@ -69,13 +69,31 @@ export const setupAuthListener = async (callback: (session: any) => void) => {
  */
 export const signUp = async (email: string, password: string, userData: any) => {
   try {
+    // Ensure userData is well-formed
+    const cleanMetadata = { ...userData };
+    
+    // Clean up any undefined or null values that might cause database errors
+    Object.keys(cleanMetadata).forEach(key => {
+      if (cleanMetadata[key] === undefined || cleanMetadata[key] === null) {
+        delete cleanMetadata[key];
+      }
+    });
+    
+    console.log('Signing up user with data:', { email, metadata: cleanMetadata });
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: userData
+        data: cleanMetadata
       }
     });
+    
+    if (error) {
+      console.error('Supabase signup error:', error);
+    } else {
+      console.log('User signed up successfully:', data);
+    }
     
     return { data, error };
   } catch (error) {

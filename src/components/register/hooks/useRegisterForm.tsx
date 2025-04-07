@@ -123,15 +123,24 @@ export const useRegisterForm = () => {
       } else {
         // Create notification for admins about the new user registration
         if (data?.user) {
-          await createAdminNotification(
-            data.user.id, 
-            formData.name,
-            completeEmail
-          );
+          try {
+            await createAdminNotification(
+              data.user.id, 
+              formData.name,
+              completeEmail
+            );
+            
+            toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
+            navigate('/email-verified');
+          } catch (notificationError) {
+            console.error("Erro ao criar notificação, mas usuário foi cadastrado:", notificationError);
+            toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
+            navigate('/email-verified');
+          }
+        } else {
+          toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
+          navigate('/email-verified');
         }
-        
-        toast.success("Cadastro realizado com sucesso! Verifique seu email para validar o cadastro.");
-        navigate('/email-verified');
       }
     } catch (error: any) {
       console.error('Erro ao registrar:', error);
