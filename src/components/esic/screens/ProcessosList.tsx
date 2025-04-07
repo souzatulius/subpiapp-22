@@ -2,7 +2,6 @@
 import React from 'react';
 import { ESICProcesso } from '@/types/esic';
 import ProcessoList from '@/components/esic/ProcessoList';
-import ESICWelcomeCard from '@/components/esic/ESICWelcomeCard';
 import { Button } from '@/components/ui/button';
 import { FilePlus } from 'lucide-react';
 
@@ -25,8 +24,8 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
 }) => {
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <ESICWelcomeCard />
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Processos e-SIC</h1>
         <Button 
           onClick={onCreateProcesso}
           variant="action"
@@ -36,7 +35,7 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         </Button>
       </div>
       
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-6">
         <Button 
           onClick={onCreateProcesso}
           variant="action"

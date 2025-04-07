@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,9 +51,33 @@ export const useProcessos = () => {
 
       return processedData as ESICProcesso[];
     },
-    refetchOnWindowFocus: false, // Prevent unnecessary refetches
-    retry: 2, // Retry failed requests up to 2 times
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
+
+  // Setup real-time subscription to process changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('esic-processos-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'esic_processos'
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          // Invalidate the query to refetch processes
+          queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Create new process
   const createProcessoMutation = useMutation({
@@ -89,6 +112,7 @@ export const useProcessos = () => {
       return data[0] as ESICProcesso;
     },
     onSuccess: () => {
+      // We're now using the real-time subscription, but we'll keep this for belt-and-suspenders
       queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
     },
   });
@@ -119,6 +143,7 @@ export const useProcessos = () => {
       return data[0] as ESICProcesso;
     },
     onSuccess: () => {
+      // We're now using the real-time subscription, but we'll keep this for belt-and-suspenders
       queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
     },
   });
@@ -148,6 +173,7 @@ export const useProcessos = () => {
       return id;
     },
     onSuccess: () => {
+      // We're now using the real-time subscription, but we'll keep this for belt-and-suspenders
       queryClient.invalidateQueries({ queryKey: ['esic-processos'] });
       setSelectedProcesso(null);
     },
