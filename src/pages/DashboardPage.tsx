@@ -18,6 +18,7 @@ import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { useScrollFade } from '@/hooks/useScrollFade';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,6 +40,9 @@ const DashboardPage: React.FC = () => {
     handleCardsReorder,
     resetDashboard
   } = useDashboardCards();
+
+  // Apply scroll fade effect for mobile
+  const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -78,16 +82,35 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header showControls={true} toggleSidebar={toggleSidebar} />
+      {/* Fixed header wrapper for mobile */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 right-0 z-40 bg-white">
+          {/* BreadcrumbBar is not affected by the fade effect */}
+          <BreadcrumbBar />
+        </div>
+      )}
+      
+      {/* Header with fade effect on mobile */}
+      <div 
+        style={isMobile ? scrollFadeStyles : undefined}
+        className={`${isMobile ? 'transition-all duration-300' : ''}`}
+      >
+        <Header showControls={true} toggleSidebar={toggleSidebar} />
+      </div>
       
       <div className="flex flex-1 overflow-hidden">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 overflow-auto">
-          <BreadcrumbBar />
+        <main className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
+          {/* Breadcrumb is positioned differently based on mobile/desktop */}
+          {!isMobile && <BreadcrumbBar />}
+          
           <div className="max-w-full mx-auto p-4 pb-16 md:pb-4">
-            {/* WelcomeCard with updated description */}
-            <div className="w-full mb-2">
+            {/* WelcomeCard with fade effect on mobile */}
+            <div 
+              className="w-full mb-2"
+              style={isMobile ? scrollFadeStyles : undefined}
+            >
               <WelcomeCard 
                 title="Dashboard" 
                 description="Mova e edite os cards para personalizar a sua tela!" 
@@ -98,8 +121,11 @@ const DashboardPage: React.FC = () => {
               />
             </div>
             
-            {/* Reset dashboard button with updated text */}
-            <div className="flex justify-end mb-4">
+            {/* Reset dashboard button with same fade effect on mobile */}
+            <div 
+              className="flex justify-end mb-4"
+              style={isMobile ? scrollFadeStyles : undefined}
+            >
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -111,12 +137,12 @@ const DashboardPage: React.FC = () => {
               </Button>
             </div>
             
-            {/* Content container with better height calculation and scrolling behavior */}
+            {/* Content container with better spacing for mobile */}
             <div 
-              className="relative" 
+              className={`relative ${isMobile ? 'pb-32' : ''}`} 
               style={{
-                height: "calc(100vh - 300px)",
-                minHeight: "500px"
+                height: isMobile ? "auto" : "calc(100vh - 300px)",
+                minHeight: isMobile ? "auto" : "500px"
               }}
             >
               {isLoading ? (
@@ -126,7 +152,7 @@ const DashboardPage: React.FC = () => {
                   ))}
                 </div>
               ) : cards && cards.length > 0 ? (
-                <ScrollArea className="h-full w-full pr-2">
+                <div className="h-full w-full pr-2">
                   <div className="pb-4 px-2 py-2">
                     <CardGridContainer 
                       cards={cards.filter(card => !card.isHidden)} 
@@ -137,7 +163,7 @@ const DashboardPage: React.FC = () => {
                       isEditMode={isEditMode}
                     />
                   </div>
-                </ScrollArea>
+                </div>
               ) : (
                 <div className="p-4 text-center text-gray-500">
                   Nenhum card disponível.

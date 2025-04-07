@@ -9,6 +9,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BreadcrumbBarProps {
   onSettingsClick?: () => void;
@@ -17,6 +18,7 @@ interface BreadcrumbBarProps {
 const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Remove leading slash and split path into segments
   const pathSegments = location.pathname.substring(1).split('/');
@@ -171,7 +173,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   };
   
   return (
-    <div className="px-6 py-2 text-xs text-gray-500">
+    <div className={`px-6 py-2 text-xs text-gray-500 ${isMobile ? 'bg-white z-40' : ''}`}>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

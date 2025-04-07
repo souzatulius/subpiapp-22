@@ -48,6 +48,13 @@
       line-height: 1.2; /* Espaçamento normal para desktop */
     }
   }
+  
+  /* Adiciona espaço para o breadcrumb fixo no mobile */
+  @media (max-width: 767px) {
+    body {
+      padding-top: 40px; /* Altura aproximada do breadcrumb */
+    }
+  }
 }
 
 .dark {
