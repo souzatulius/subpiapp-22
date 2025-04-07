@@ -47,7 +47,7 @@ export const useProcessos = () => {
         autor_id: item.autor_id,
         criado_em: item.criado_em,
         atualizado_em: item.atualizado_em,
-        autor: item.autor?.error ? { nome_completo: 'Usuário' } : item.autor
+        autor: item.autor?.nome_completo ? { nome_completo: item.autor.nome_completo } : { nome_completo: 'Usuário' }
       }));
 
       return processedData as ESICProcesso[];

@@ -13,8 +13,8 @@ BEGIN
     aniversario, 
     whatsapp, 
     cargo_id, 
-    coordenacao_id,
     supervisao_tecnica_id,
+    coordenacao_id,
     status
   )
   VALUES (
@@ -24,8 +24,8 @@ BEGIN
     NULLIF(new.raw_user_meta_data->>'aniversario', NULLIF(new.raw_user_meta_data->>'birthday', ''))::date,
     NULLIF(new.raw_user_meta_data->>'whatsapp', ''),
     NULLIF(new.raw_user_meta_data->>'cargo_id', NULLIF(new.raw_user_meta_data->>'role_id', '')),
-    NULLIF(new.raw_user_meta_data->>'coordenacao_id', ''),
     NULLIF(new.raw_user_meta_data->>'supervisao_tecnica_id', NULLIF(new.raw_user_meta_data->>'area_id', '')),
+    NULLIF(new.raw_user_meta_data->>'coordenacao_id', ''),
     'pendente'
   );
   RETURN new;
