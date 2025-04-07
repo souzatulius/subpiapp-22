@@ -50,8 +50,6 @@ import {
 import WelcomeCard from '@/components/shared/WelcomeCard';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { formatDateTime } from '@/lib/utils';
 
 interface Release {
@@ -558,8 +556,8 @@ const ListarReleases = () => {
     >
       <WelcomeCard
         title="Releases e Notícias"
-        description="Gerencie os releases recebidos e as notícias criadas"
-        icon={<FileText className="h-6 w-6 text-white" />}
+        description="Gerencie as notícias do site da Subprefeitura."
+        icon={<FileText className="h-6 w-6 mr-3" />}
         color="bg-gradient-to-r from-blue-500 to-blue-700"
       />
 
