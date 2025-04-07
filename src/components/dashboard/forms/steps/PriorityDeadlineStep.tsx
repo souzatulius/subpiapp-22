@@ -21,10 +21,9 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
   errors = []
 }) => {
   // Updated priorities to match the database constraints with valid values
-  // Using 'alta', 'media', 'baixa' values
+  // Using 'alta', 'media', 'baixa' values - Removed the "Alta" option as requested
   const priorities = [
     { id: 'alta', label: 'Urgente', icon: <Flame className="h-5 w-5 text-red-500" /> },
-    { id: 'alta', label: 'Alta', icon: <BellRing className="h-5 w-5 text-orange-500" /> },
     { id: 'media', label: 'Normal', icon: <BellRing className="h-5 w-5 text-blue-500" /> },
     { id: 'baixa', label: 'Baixa', icon: <BellRing className="h-5 w-5 text-green-500" /> }
   ];
@@ -40,7 +39,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
       <div>
         <label 
           htmlFor="prioridade" 
-          className={`block mb-2 ${hasError('prioridade') ? 'text-orange-500 font-semibold' : ''}`}
+          className={`block mb-2 text-base font-medium ${hasError('prioridade') ? 'text-orange-500 font-semibold' : ''}`}
         >
           Prioridade da solicitação {hasError('prioridade') && <span className="text-orange-500">*</span>}
         </label>
@@ -53,7 +52,7 @@ const PriorityDeadlineStep: React.FC<PriorityDeadlineStepProps> = ({
               className={`h-auto py-3 flex flex-col items-center justify-center gap-2 border-gray-300
                 ${formData.prioridade === priority.id ? 
                   "bg-orange-500 text-white border-transparent hover:bg-orange-600" : 
-                  "hover:text-white hover:bg-[#002855]"}
+                  "hover:bg-gray-100 hover:text-gray-800"}
                 ${hasError('prioridade') ? 'border-orange-500' : ''}
                 transition-all duration-300`}
               onClick={() => handleSelectChange('prioridade', priority.id)}

@@ -29,11 +29,14 @@ const UserProfileMenu: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       toast({
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado do sistema."
       });
+      
       // Garantir que o usuário sempre seja redirecionado para a página de login
       navigate('/login', { replace: true });
     } catch (error) {

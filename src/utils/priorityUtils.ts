@@ -15,21 +15,21 @@ export const getPriorityColor = (priority: string) => {
       bg: 'bg-red-100', 
       text: 'text-red-800', 
       border: 'border-red-200',
-      hoverBg: 'hover:bg-[#002855]',
+      hoverBg: 'hover:bg-gray-100',
       selectedBg: 'bg-orange-500'
     },
     'media': { 
       bg: 'bg-yellow-100', 
       text: 'text-yellow-800', 
       border: 'border-yellow-200',
-      hoverBg: 'hover:bg-[#002855]',
+      hoverBg: 'hover:bg-gray-100',
       selectedBg: 'bg-orange-500'
     },
     'baixa': { 
       bg: 'bg-green-100', 
       text: 'text-green-800', 
       border: 'border-green-200',
-      hoverBg: 'hover:bg-[#002855]',
+      hoverBg: 'hover:bg-gray-100',
       selectedBg: 'bg-orange-500'
     }
   };
@@ -38,7 +38,7 @@ export const getPriorityColor = (priority: string) => {
     bg: 'bg-gray-100', 
     text: 'text-gray-800', 
     border: 'border-gray-300',
-    hoverBg: 'hover:bg-[#002855]',
+    hoverBg: 'hover:bg-gray-100',
     selectedBg: 'bg-orange-500'
   };
 };
@@ -51,5 +51,5 @@ export const getPriorityStyles = (priority: string, isSelected: boolean) => {
     return 'bg-orange-500 text-white border-transparent hover:bg-orange-600';
   }
   
-  return `${colors.bg} ${colors.text} border-gray-300 ${colors.hoverBg} hover:text-white`;
+  return `${colors.bg} ${colors.text} border-gray-300 hover:bg-gray-100 hover:text-gray-800`;
 };

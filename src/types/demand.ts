@@ -79,6 +79,7 @@ export interface Demand {
   arquivo_url: string | null;
   anexos: string[] | null;
   servico_id?: string;
+  notas?: Note[] | null; // Added to fix build error
 }
 
 export interface DemandResponse {
@@ -93,4 +94,11 @@ export interface ResponseQA {
 
 export interface CriarNotaFormProps {
   onClose: () => void;
+}
+
+export interface Note {
+  id: string;
+  demanda_id: string;
+  titulo: string;
+  autor_id: string;
 }
