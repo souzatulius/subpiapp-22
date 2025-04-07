@@ -47,8 +47,12 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   // Get all navigation items
   const allNavItems = getNavigationSections();
   
-  // Filter by department and map for mobile
+  // Filter for only the specified navigation items: Comunicação, Relatórios, Zeladoria (Ranking)
+  const allowedPages = ['comunicacao', 'relatorios', 'ranking'];
+  
+  // Filter by department and allowed pages, then map for mobile
   const navItems = allNavItems
+    .filter(item => allowedPages.includes(item.id))
     .filter(item => {
       if (item.allowedDepartments && item.allowedDepartments.length > 0) {
         return !userDepartment || item.allowedDepartments.includes(userDepartment);
@@ -102,7 +106,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
                   ${isActive ? 'bg-white text-[#051b2c]' : 'text-gray-400'}`
               }}
             >
-              <div className="text-[#f57737] w-10 h-10">
+              <div className="text-[#f57737] w-8 h-8">
                 {item.icon}
               </div>
               <span className="text-xs mt-1 truncate font-bold">{item.label}</span>

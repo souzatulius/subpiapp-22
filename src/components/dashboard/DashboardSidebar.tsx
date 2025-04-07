@@ -32,7 +32,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
         )
       }
     >
-      <div className="flex-shrink-0 w-10 h-10">{icon}</div>
+      <div className="flex-shrink-0 w-8 h-8">{icon}</div>
       {!isCollapsed && <span className="text-lg font-bold">{label}</span>}
     </NavLink>
   );
@@ -81,13 +81,17 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   // Get navigation items from centralized config
   const allNavigationItems = getNavigationSections();
   
-  // Filter navigation items based on user's department
-  const navigationItems = allNavigationItems.filter(item => {
-    if (item.allowedDepartments && item.allowedDepartments.length > 0) {
-      return !userDepartment || item.allowedDepartments.includes(userDepartment);
-    }
-    return true;
-  });
+  // Filter for only the specified navigation items: Comunicação, Relatórios, Zeladoria (Ranking)
+  const allowedPages = ['comunicacao', 'relatorios', 'ranking'];
+  
+  const navigationItems = allNavigationItems
+    .filter(item => allowedPages.includes(item.id))
+    .filter(item => {
+      if (item.allowedDepartments && item.allowedDepartments.length > 0) {
+        return !userDepartment || item.allowedDepartments.includes(userDepartment);
+      }
+      return true;
+    });
   
   return (
     <aside
