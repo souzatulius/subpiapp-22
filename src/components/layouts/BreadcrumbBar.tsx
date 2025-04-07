@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
@@ -42,6 +43,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       'settings': 'Configurações',
       'profile': 'Meu Perfil',
       'usuarios': 'Usuários',
+      'esic': 'e-SIC',  // Updated to show "e-SIC" instead of "Esic"
     };
     
     // Check if we have a custom name for the full path
@@ -126,6 +128,14 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
       return [
         { path: '/dashboard', label: 'Início' },
         { path: '/dashboard/zeladoria/ranking-subs', label: 'Ranking da Zeladoria' }
+      ];
+    }
+    
+    // Special case for e-SIC path
+    if (path.includes('/dashboard/esic')) {
+      return [
+        { path: '/dashboard', label: 'Início' },
+        { path: '/dashboard/esic', label: 'e-SIC' }
       ];
     }
     
