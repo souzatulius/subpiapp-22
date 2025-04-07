@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '@/components/layouts/header';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -7,14 +7,27 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useScrollFade } from '@/hooks/useScrollFade';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const DashboardLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
   const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
 
+  // Load sidebar state from localStorage
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebarOpen');
+    if (savedState !== null) {
+      setSidebarOpen(savedState === 'true');
+    }
+  }, []);
+
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    const newState = !sidebarOpen;
+    setSidebarOpen(newState);
+    // Save to localStorage
+    localStorage.setItem('sidebarOpen', String(newState));
   };
 
   return (
@@ -31,14 +44,33 @@ const DashboardLayout: React.FC = () => {
         style={isMobile ? scrollFadeStyles : undefined}
         className={`${isMobile ? 'transition-all duration-300' : ''}`}
       >
-        <Header showControls={true} toggleSidebar={toggleSidebar} />
+        <Header showControls={true} toggleSidebar={isMobile ? toggleSidebar : undefined} />
       </div>
       
       <div className="flex flex-1 overflow-hidden">
         {/* Only show sidebar on desktop */}
-        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+        {!isMobile && (
+          <>
+            <DashboardSidebar isOpen={sidebarOpen} />
+            
+            {/* Collapse button (desktop only) */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="absolute left-0 top-24 bg-white shadow-md hover:bg-gray-100 z-30 rounded-r-md rounded-l-none border border-l-0"
+              aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
+            >
+              {sidebarOpen ? (
+                <ChevronLeft className="h-5 w-5" />
+              ) : (
+                <ChevronRight className="h-5 w-5" />
+              )}
+            </Button>
+          </>
+        )}
         
-        <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''}`}>
+        <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           

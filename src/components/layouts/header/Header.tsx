@@ -24,36 +24,18 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="w-full flex h-16 items-center justify-between">
-        {/* Left side with menu toggle - with positioning for desktop */}
+        {/* Left side - only show menu toggle on mobile */}
         <div className="w-1/4 flex items-center gap-4 relative">
-          {showControls && toggleSidebar && (
-            <>
-              {/* Desktop menu button - positioned to align with sidebar icons */}
-              {!isMobile && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleSidebar}
-                  className="absolute top-[6px] -left-[4px] lg:flex hidden hover:text-white hover:bg-[#002855]"
-                  aria-label="Menu"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              )}
-              
-              {/* Mobile menu button - stays in normal flow */}
-              {isMobile && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleSidebar}
-                  className="flex lg:hidden hover:text-white hover:bg-[#002855]"
-                  aria-label="Menu"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              )}
-            </>
+          {showControls && toggleSidebar && isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="flex lg:hidden hover:text-white hover:bg-[#002855]"
+              aria-label="Menu"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
           )}
         </div>
         
