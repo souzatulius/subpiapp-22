@@ -53,7 +53,4 @@ export interface Demand {
     id: string;
     texto: string;
   }>;
-  autor?: {
-    nome_completo: string;
-  };
 }

@@ -51,10 +51,7 @@ const Notas = () => {
       />
       
       <div className="mt-6">
-        <NotasContent 
-          onViewNote={handleViewNote} 
-          onEditNote={handleEditNote} 
-        />
+        <NotasContent onViewNote={handleViewNote} onEditNote={handleEditNote} />
       </div>
     </div>
   );

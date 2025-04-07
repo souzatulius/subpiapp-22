@@ -1,74 +1,176 @@
 
 import React from 'react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { Search, Download, FileDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
-export interface NotasFilterProps {
-  selectedStatus: string[];
-  setSelectedStatus: React.Dispatch<React.SetStateAction<string[]>>;
+interface NotasFilterProps {
+  searchQuery?: string;
+  setSearchQuery?: (value: string) => void;
+  searchTerm?: string;
+  setSearchTerm?: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  areaFilter?: string;
+  setAreaFilter?: (value: string) => void;
+  dataInicioFilter?: Date | undefined;
+  setDataInicioFilter?: (date: Date | undefined) => void;
+  dataFimFilter?: Date | undefined;
+  setDataFimFilter?: (date: Date | undefined) => void;
+  dateRange?: [Date | null, Date | null];
+  setDateRange?: (range: [Date | null, Date | null]) => void;
+  viewMode?: 'table' | 'cards';
+  setViewMode?: (mode: 'table' | 'cards') => void;
+  handleExportPDF?: () => void;
 }
 
-const NotasFilter: React.FC<NotasFilterProps> = ({ 
-  selectedStatus, 
-  setSelectedStatus 
+const NotasFilter: React.FC<NotasFilterProps> = ({
+  searchQuery = '',
+  setSearchQuery = () => {},
+  searchTerm = '',
+  setSearchTerm = () => {},
+  statusFilter,
+  setStatusFilter,
+  areaFilter = 'all',
+  setAreaFilter = () => {},
+  dataInicioFilter,
+  setDataInicioFilter = () => {},
+  dataFimFilter,
+  setDataFimFilter = () => {},
+  dateRange = [null, null],
+  setDateRange = () => {},
+  viewMode,
+  setViewMode,
+  handleExportPDF = () => {}
 }) => {
-  // Status options
-  const statusOptions = [
-    { value: 'pendente', label: 'Pendente' },
-    { value: 'aprovada', label: 'Aprovada' },
-    { value: 'rejeitada', label: 'Rejeitada' },
-    { value: 'rascunho', label: 'Rascunho' },
-    { value: 'excluida', label: 'Excluída' }
-  ];
-
-  // Toggle a status in the selectedStatus array
-  const toggleStatus = (status: string) => {
-    setSelectedStatus(prev => 
-      prev.includes(status)
-        ? prev.filter(s => s !== status)
-        : [...prev, status]
-    );
+  // Use either searchQuery or searchTerm based on what's provided
+  const actualSearchTerm = searchQuery || searchTerm;
+  const handleSearchChange = (value: string) => {
+    if (setSearchQuery) setSearchQuery(value);
+    if (setSearchTerm) setSearchTerm(value);
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-4">
-      <div>
-        <Label htmlFor="status-filter">Status</Label>
-        <Select
-          value={selectedStatus.length === 1 ? selectedStatus[0] : 'multiple'}
-          onValueChange={(value) => {
-            if (value !== 'multiple') {
-              toggleStatus(value);
-            }
-          }}
-        >
-          <SelectTrigger id="status-filter" className="w-full">
-            <SelectValue placeholder="Selecione o status">
-              {selectedStatus.length === 0 
-                ? 'Todos os status' 
-                : selectedStatus.length === 1 
-                  ? statusOptions.find(o => o.value === selectedStatus[0])?.label 
-                  : `${selectedStatus.length} status selecionados`}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map(option => (
-              <SelectItem 
-                key={option.value} 
-                value={option.value}
+    <div className="space-y-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="text"
+            placeholder="Buscar por título, autor ou área..."
+            value={actualSearchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        
+        <div className="flex flex-wrap gap-3">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os status</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="aprovado">Aprovado</SelectItem>
+              <SelectItem value="rejeitado">Rejeitado</SelectItem>
+              <SelectItem value="publicado">Publicado</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {setAreaFilter && (
+            <Select value={areaFilter} onValueChange={setAreaFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Área" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as áreas</SelectItem>
+                <SelectItem value="comunicacao">Comunicação</SelectItem>
+                <SelectItem value="areas_verdes">Áreas Verdes</SelectItem>
+                <SelectItem value="manutencao_viaria">Manutenção Viária</SelectItem>
+                <SelectItem value="fiscalizacao">Fiscalização</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          
+          <Button 
+            onClick={handleExportPDF} 
+            variant="outline" 
+            className="flex items-center gap-1"
+          >
+            <FileDown className="h-4 w-4" />
+            Exportar PDF
+          </Button>
+
+          {viewMode && setViewMode && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('table')}
               >
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+                Tabela
+              </Button>
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+              >
+                Cards
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
+      
+      {/* Date filters - either use dateRange or individual date filters */}
+      {(setDateRange || setDataInicioFilter || setDataFimFilter) && (
+        <div className="flex flex-wrap gap-3 items-center">
+          {setDateRange && (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">De:</span>
+                <DatePicker 
+                  date={dateRange[0]} 
+                  onSelect={(date) => setDateRange([date, dateRange[1]])}
+                  placeholder="Selecione"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Até:</span>
+                <DatePicker 
+                  date={dateRange[1]} 
+                  onSelect={(date) => setDateRange([dateRange[0], date])}
+                  placeholder="Selecione"
+                />
+              </div>
+            </>
+          )}
+          
+          {(setDataInicioFilter || setDataFimFilter) && !setDateRange && (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">De:</span>
+                <DatePicker 
+                  date={dataInicioFilter} 
+                  onSelect={setDataInicioFilter}
+                  placeholder="Selecione"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Até:</span>
+                <DatePicker 
+                  date={dataFimFilter} 
+                  onSelect={setDataFimFilter}
+                  placeholder="Selecione"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

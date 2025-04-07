@@ -98,7 +98,7 @@ const ConsultarDemandasTable = () => {
       veiculo_imprensa: '',
       detalhes_solicitacao: '',
       perguntas: null,
-      servico: null,
+      servico: { id: '', descricao: '' },
       arquivo_url: null,
       anexos: null
     };

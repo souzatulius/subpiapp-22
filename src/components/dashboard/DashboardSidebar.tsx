@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ButtonIcon } from '@radix-ui/react-select';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import SidebarSection from './sidebar/SidebarSection';
 import { useAdminCheck } from './sidebar/useAdminCheck';
-import navigationConfig from './sidebar/navigationConfig';
+import { navigationConfig } from './sidebar/navigationConfig';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, className }
             return (
               <SidebarSection
                 key={`section-${index}`}
-                name={section.title}
+                title={section.title}
                 items={section.items}
                 isOpen={isOpen}
                 isActiveRoute={isActiveRoute}

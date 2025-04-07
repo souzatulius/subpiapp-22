@@ -1,254 +1,139 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Input } from '@/components/ui/input';
-import { Search, ListFilter } from 'lucide-react';
-import NotasTable from './NotasTable';
-import NotasCards from './NotasCards';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import NotasFilter from './NotasFilter';
+import NotasTable from './NotasTable';
 import NotaDetailDialog from './NotaDetailDialog';
 import DeleteNotaDialog from './DeleteNotaDialog';
+import NotasCards from './NotasCards';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useNotasData } from '@/hooks/consultar-notas/useNotasData';
 import { NotaOficial } from '@/types/nota';
-import { ensureNotaCompat, prepareNotas } from './NotaCompat';
 
-interface NotasContentProps {
-  onViewNote?: (notaId: string) => void;
-  onEditNote?: (notaId: string) => void;
-}
-
-const NotasContent: React.FC<NotasContentProps> = ({ onViewNote, onEditNote }) => {
-  const [activeTab, setActiveTab] = useState<string>('tabela');
-  const [showFilters, setShowFilters] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedNotaId, setSelectedNotaId] = useState<string | null>(null);
-  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
+const NotasContent = () => {
+  const navigate = useNavigate();
+  const {
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+    filteredNotas,
+    loading,
+    handleDelete,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    selectedNotaId,
+    setSelectedNotaId,
+    refetch
+  } = useNotasData();
   
-  // Helper to format date
+  // State for table vs cards view
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  
+  // State for detail dialog
+  const [selectedNota, setSelectedNota] = useState<NotaOficial | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  // Date range state
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  
+  const handleViewNota = (nota: NotaOficial) => {
+    setSelectedNota(nota);
+    setIsDetailOpen(true);
+  };
+  
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedNota(null);
+  };
+  
+  const handleEditNota = (id: string) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
+  };
+  
+  const handleDeleteClick = (nota: NotaOficial) => {
+    setSelectedNotaId(nota.id);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  const confirmDelete = () => {
+    if (selectedNotaId) {
+      handleDelete(selectedNotaId);
+    }
+  };
+  
+  const cancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setSelectedNotaId(null);
+  };
+  
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('pt-BR');
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch (e) {
       return 'Data inválida';
     }
   };
   
-  // Fetch notas oficiais
-  const { data: notasRaw = [], isLoading } = useQuery({
-    queryKey: ['notas_oficiais'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('notas_oficiais')
-        .select(`
-          id,
-          titulo,
-          texto,
-          status,
-          criado_em,
-          atualizado_em,
-          autor_id,
-          autor:autor_id(id, nome_completo),
-          problema_id,
-          problema:problema_id(descricao),
-          demanda_id,
-          demanda:demanda_id(titulo, status)
-        `)
-        .order('criado_em', { ascending: false });
-        
-      if (error) throw error;
-      
-      // Transform data to match NotaOficial type
-      const transformed = (data || []).map(nota => {
-        // Handle possible SelectQueryError in autor
-        const autor = typeof nota.autor === 'object' && nota.autor !== null
-          ? { 
-              id: nota.autor.id || nota.autor_id,
-              nome_completo: nota.autor.nome_completo || 'Autor desconhecido'
-            }
-          : { id: nota.autor_id, nome_completo: 'Autor desconhecido' };
-          
-        return {
-          id: nota.id,
-          titulo: nota.titulo,
-          texto: nota.texto,
-          conteudo: nota.texto, // Map texto to conteudo for compatibility
-          status: nota.status,
-          criado_em: nota.criado_em,
-          atualizado_em: nota.atualizado_em,
-          autor_id: nota.autor_id,
-          autor: autor,
-          problema_id: nota.problema_id,
-          problema: nota.problema,
-          demanda_id: nota.demanda_id,
-          demanda: nota.demanda
-        } as NotaOficial;
-      });
-      
-      return transformed;
-    }
-  });
-  
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-  
-  const filteredNotas = notasRaw.filter(nota => {
-    // Apply status filter if any are selected
-    if (selectedStatus.length > 0 && !selectedStatus.includes(nota.status)) {
-      return false;
-    }
-    
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        nota.titulo?.toLowerCase().includes(query) ||
-        nota.texto?.toLowerCase().includes(query) ||
-        nota.problema?.descricao?.toLowerCase().includes(query) ||
-        nota.autor?.nome_completo?.toLowerCase().includes(query)
-      );
-    }
-    
-    return true;
-  });
-  
-  const handleViewNota = (nota: NotaOficial) => {
-    if (onViewNote) {
-      onViewNote(nota.id);
-    } else {
-      setSelectedNota(nota);
-      setSelectedNotaId(nota.id);
-      setIsDetailOpen(true);
-    }
-  };
-  
-  const handleEditNota = (nota: NotaOficial) => {
-    if (onEditNote) {
-      onEditNote(nota.id);
-    } else {
-      // Implement default edit behavior if needed
-      console.log("Edit nota", nota.id);
-    }
-  };
-  
-  const handleDeleteNota = (nota: NotaOficial) => {
-    setSelectedNota(nota);
-    setSelectedNotaId(nota.id);
-    setIsDeleteOpen(true);
-  };
-  
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Buscar notas..."
-            className="pl-9 w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={toggleFilters}
-            className="flex items-center gap-2"
-          >
-            <ListFilter className="h-4 w-4" />
-            Filtros
-          </Button>
-          
-          <Tabs 
-            value={activeTab} 
-            onValueChange={setActiveTab}
-            className="hidden sm:flex"
-          >
-            <TabsList>
-              <TabsTrigger value="tabela">Tabela</TabsTrigger>
-              <TabsTrigger value="cards">Cards</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-2xl font-semibold mb-6">Consultar Notas Oficiais</h1>
       
-      {showFilters && (
-        <NotasFilter
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
+      <Card className="mb-6 border border-gray-200">
+        <CardContent className="p-6">
+          <NotasFilter 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
+        </CardContent>
+      </Card>
+      
+      {viewMode === 'table' ? (
+        <NotasTable 
+          notas={filteredNotas}
+          loading={loading}
+          formatDate={formatDate}
+          onViewNota={handleViewNota}
+          onEditNota={(nota: NotaOficial) => handleEditNota(nota.id)}
+          onDeleteNota={handleDeleteClick}
+        />
+      ) : (
+        <NotasCards 
+          notas={filteredNotas}
+          loading={loading}
+          formatDate={formatDate}
+          onView={handleViewNota}
+          onEdit={(nota: NotaOficial) => handleEditNota(nota.id)}
+          onDelete={handleDeleteClick}
         />
       )}
       
-      {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <LoadingSpinner size="lg" />
-        </div>
-      ) : (
-        <>
-          <div className="hidden sm:block">
-            <TabsContent value="tabela" className="m-0">
-              <NotasTable 
-                notas={filteredNotas}
-                loading={isLoading}
-                formatDate={formatDate}
-                onViewNota={handleViewNota}
-                onEditNota={handleEditNota}
-                onDeleteNota={handleDeleteNota}
-              />
-            </TabsContent>
-            
-            <TabsContent value="cards" className="m-0">
-              <NotasCards 
-                notas={filteredNotas}
-                loading={isLoading}
-                formatDate={formatDate}
-                onView={handleViewNota}
-                onEdit={handleEditNota}
-                onDelete={handleDeleteNota}
-              />
-            </TabsContent>
-          </div>
-          
-          <div className="sm:hidden">
-            <NotasCards 
-              notas={filteredNotas}
-              loading={isLoading}
-              formatDate={formatDate}
-              onView={handleViewNota}
-              onEdit={handleEditNota}
-              onDelete={handleDeleteNota}
-            />
-          </div>
-        </>
+      {/* Detail Dialog */}
+      {selectedNota && (
+        <NotaDetailDialog 
+          nota={selectedNota}
+          isOpen={isDetailOpen}
+          onClose={handleCloseDetail}
+          formatDate={formatDate}
+        />
       )}
       
-      {selectedNota && (
-        <>
-          <NotaDetailDialog
-            nota={selectedNota}
-            open={isDetailOpen}
-            onOpenChange={setIsDetailOpen}
-            formatDate={formatDate}
-          />
-          
-          <DeleteNotaDialog
-            nota={selectedNota}
-            open={isDeleteOpen}
-            onOpenChange={setIsDeleteOpen}
-          />
-        </>
-      )}
+      {/* Delete Dialog */}
+      <DeleteNotaDialog 
+        isOpen={isDeleteDialogOpen}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        notaTitle={selectedNota?.titulo || "esta nota"}
+      />
     </div>
   );
 };
