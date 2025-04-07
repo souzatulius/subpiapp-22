@@ -1,134 +1,125 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Calendar, Clock, User, Building, FileDown } from 'lucide-react';
 import { NotaOficial } from '@/types/nota';
-import { NotaStatusBadge } from '@/components/ui/status-badge';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Edit, Check, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useExportNotaPDF } from '@/hooks/consultar-notas/useExportNotaPDF';
 
 interface NotaDetailDialogProps {
   nota: NotaOficial;
   isOpen: boolean;
   onClose: () => void;
-  formatDate?: (date: string) => string;
-  onApprove?: (nota: NotaOficial) => void;
-  onReject?: (nota: NotaOficial) => void;
+  formatDate: (dateString: string) => string;
 }
 
-const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
-  nota,
-  isOpen,
+const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({ 
+  nota, 
+  isOpen, 
   onClose,
-  formatDate = (date) => format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ptBR }),
-  onApprove,
-  onReject
+  formatDate
 }) => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const { exportNotaToPDF, exporting } = useExportNotaPDF(formatDate);
   
-  const handleEdit = () => {
-    navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
+  const handleExportPDF = () => {
+    exportNotaToPDF(nota);
   };
-  
-  const handleApprove = () => {
-    if (onApprove) {
-      onApprove(nota);
-    }
+
+  const formatStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      'em_andamento': 'Demanda respondida',
+    };
+    
+    return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1);
   };
-  
-  const handleReject = () => {
-    if (onReject) {
-      onReject(nota);
-    }
-  };
-  
-  const isPendente = nota.status === 'pendente';
+
+  const autorNome = nota.autor?.nome_completo || "Autor desconhecido";
+  const areaNome = nota.supervisao_tecnica?.descricao || "Área não especificada";
+  const dataCriacao = nota.criado_em || nota.created_at || "";
+  const dataAtualizacao = nota.atualizado_em || nota.updated_at || "";
   
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex justify-between items-start">
-            <DialogTitle className="text-xl font-bold">{nota.titulo}</DialogTitle>
-            <NotaStatusBadge status={nota.status} />
-          </div>
+          <DialogTitle className="text-xl">{nota.titulo}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row justify-between gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">Autor:</span>{' '}
-              <span className="font-medium">{nota.autor?.nome_completo || 'Não informado'}</span>
-            </div>
-            
-            <div>
-              <span className="text-gray-500">Área:</span>{' '}
-              <span className="font-medium">{nota.area_coordenacao?.descricao || nota.problema?.descricao || 'Não informada'}</span>
-            </div>
-            
-            <div>
-              <span className="text-gray-500">Data:</span>{' '}
-              <span className="font-medium">{formatDate(nota.criado_em)}</span>
-            </div>
+        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-gray-500 my-2">
+          <div className="flex items-center">
+            <User className="w-4 h-4 mr-1" />
+            <span>{autorNome}</span>
           </div>
-          
-          <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-            <div className="prose max-w-none">
-              <div className="whitespace-pre-line">{nota.conteudo || nota.texto}</div>
-            </div>
+          <div className="flex items-center">
+            <Building className="w-4 h-4 mr-1" />
+            <span>{areaNome}</span>
           </div>
-          
-          {isPendente && (
-            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 text-amber-800">
-              <p className="text-sm">
-                Esta nota está pendente de aprovação. Utilize os botões abaixo para aprovar ou recusar esta nota.
-              </p>
+          <div className="flex items-center">
+            <Calendar className="w-4 h-4 mr-1" />
+            <span>{formatDate(dataCriacao)}</span>
+          </div>
+          {nota.atualizado_em && nota.atualizado_em !== nota.criado_em && (
+            <div className="flex items-center">
+              <Clock className="w-4 h-4 mr-1" />
+              <span>Atualizado em: {formatDate(dataAtualizacao)}</span>
             </div>
           )}
         </div>
         
-        <DialogFooter className="gap-2 sm:gap-0">
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-            >
-              Fechar
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={handleEdit}
-              className="text-amber-600 border-amber-300 hover:bg-amber-50"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
-            
-            {isPendente && onApprove && (
-              <Button
-                onClick={handleApprove}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Aprovar
-              </Button>
-            )}
-            
-            {isPendente && onReject && (
-              <Button
-                variant="destructive"
-                onClick={handleReject}
-              >
-                <X className="h-4 w-4 mr-2" />
-                Recusar
-              </Button>
-            )}
+        <div className="relative border border-gray-200 rounded-md p-4 bg-white">
+          <div className="absolute top-2 right-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+            {formatStatus(nota.status)}
           </div>
+          
+          <div className="prose max-w-none mt-4" dangerouslySetInnerHTML={{ __html: nota.texto.replace(/\n/g, '<br />') }} />
+        </div>
+        
+        {nota.historico_edicoes && nota.historico_edicoes.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-medium mb-2">Histórico de Edições</h3>
+            <div className="space-y-4">
+              {nota.historico_edicoes.map((edicao) => (
+                <div key={edicao.id} className="border border-gray-200 rounded-md p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-medium">
+                      {edicao.editor?.nome_completo || "Editor desconhecido"}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatDate(edicao.criado_em)}
+                    </span>
+                  </div>
+                  <div className="text-sm">
+                    <p className="mb-1"><span className="font-medium">Título anterior:</span> {edicao.titulo_anterior}</p>
+                    <p><span className="font-medium">Título novo:</span> {edicao.titulo_novo}</p>
+                  </div>
+                  {edicao.texto_anterior !== edicao.texto_novo && (
+                    <div className="text-sm mt-2">
+                      <p className="text-xs text-gray-500">Texto também foi modificado</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <DialogFooter className="mt-6">
+          <Button 
+            variant="outline" 
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="flex items-center"
+          >
+            <FileDown className="w-4 h-4 mr-1" />
+            {exporting ? 'Exportando...' : 'Exportar PDF'}
+          </Button>
+          <Button onClick={onClose}>Fechar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

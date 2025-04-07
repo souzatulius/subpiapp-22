@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
@@ -7,11 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { ResponseQA, Demand } from '@/types/demand';
+import { ResponseQA, Demand } from './types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 
 interface NotaFormProps {
   titulo: string;
@@ -129,96 +126,52 @@ const NotaForm: React.FC<NotaFormProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Título da Nota */}
-      <div className="space-y-2">
-        <Label htmlFor="titulo" className="text-base font-medium">Título da Nota</Label>
-        <Input
-          id="titulo"
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          placeholder="Digite o título da nota..."
-          className="w-full"
-        />
-      </div>
-      
-      {/* Conteúdo da Nota */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <Label htmlFor="texto" className="text-base font-medium">Conteúdo da Nota</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleGenerateSuggestion}
-            disabled={isGeneratingSuggestion}
-            className="flex items-center gap-2"
-          >
-            <Sparkles className="h-4 w-4" />
-            {isGeneratingSuggestion ? 'Gerando...' : 'Gerar Sugestão'}
-          </Button>
+    <>      
+      <div className="flex justify-between items-center mt-6">
+        <div className="flex-1">
+          <Label htmlFor="titulo">Título da Nota Oficial</Label>
         </div>
-        <Textarea
-          id="texto"
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          placeholder="Digite o conteúdo da nota..."
-          className="min-h-[300px]"
+        <Button
+          variant="outline"
+          onClick={handleGenerateSuggestion}
+          disabled={isGeneratingSuggestion || !selectedDemanda}
+          className="ml-4 text-[#003570] border-[#003570] hover:bg-[#EEF2F8]"
+        >
+          <Sparkles className="h-4 w-4 mr-2" />
+          {isGeneratingSuggestion ? "Gerando..." : "Gerar sugestão"}
+        </Button>
+      </div>
+      
+      <div className="mt-2">
+        <Input 
+          id="titulo" 
+          value={titulo} 
+          onChange={(e) => setTitulo(e.target.value)} 
+          className="rounded-lg"
         />
       </div>
       
-      {/* Exibir respostas */}
-      {formattedResponses.length > 0 && (
-        <Card className="border border-gray-200">
-          <CardContent className="p-4">
-            <h3 className="text-base font-medium mb-4">Respostas da Demanda</h3>
-            <div className="space-y-4">
-              {formattedResponses.map((qa, index) => (
-                <div key={index} className="space-y-2">
-                  <p className="font-medium text-gray-700">{qa.question}</p>
-                  <p className="text-gray-600 bg-gray-50 p-3 rounded-md border border-gray-100">{qa.answer}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <div className="mt-4">
+        <Label htmlFor="texto">Texto da Nota Oficial</Label>
+        <Textarea 
+          id="texto" 
+          value={texto} 
+          onChange={(e) => setTexto(e.target.value)} 
+          rows={10}
+          className="rounded-lg"
+        />
+      </div>
       
-      {/* Exibir comentários da demanda (se existirem) */}
-      {selectedDemanda?.resposta?.comentarios && (
-        <Card className="border border-gray-200">
-          <CardContent className="p-4">
-            <h3 className="text-base font-medium mb-4">Comentários Internos</h3>
-            <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-              <p className="text-gray-600 whitespace-pre-line">
-                {selectedDemanda.resposta.comentarios}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      <Separator />
-      
-      {/* Botões de Ação */}
-      <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => window.history.back()}
-        >
-          Cancelar
-        </Button>
-        <Button
-          type="button"
+      <div className="flex justify-end pt-4 mt-4">
+        <Button 
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="bg-subpi-blue hover:bg-subpi-blue-dark"
+          className="bg-[#003570] hover:bg-[#002855] rounded-lg"
         >
-          {isSubmitting ? 'Salvando...' : 'Salvar Nota'}
+          {isSubmitting ? "Enviando..." : "Enviar para Aprovação"}
         </Button>
       </div>
-    </div>
+    </>
   );
 };
 

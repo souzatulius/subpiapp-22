@@ -1,116 +1,204 @@
 
-import React, { useState, useEffect } from 'react';
-import ConsultarDemandasTable from '@/components/dashboard/ConsultarDemandasTable';
-import DemandasFilter from './DemandasFilter';
-import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
-import DemandDetail from '@/components/demandas/DemandDetail';
-import DeleteDemandDialog from './DeleteDemandDialog';
-import { DateRange } from 'react-day-picker';
-import { useAuth } from '@/hooks/useSupabaseAuth';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
+import DemandasTable from './DemandasTable';
+import DemandasSearchBar from './DemandasSearchBar';
+import { LoadingState } from './LoadingState';
+import DeleteDemandDialog from './DeleteDemandDialog';
+import { useDemandasData } from '@/hooks/consultar-demandas/useDemandasData';
+import { usePermissions } from '@/hooks/permissions';
+import DemandDetail from '@/components/demandas/DemandDetail';
+import { Demand } from '@/hooks/consultar-demandas/types';
+import DemandaCards from './DemandaCards';
+import FilterBar from './FilterBar';
+import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
 const ConsultarDemandasContent = () => {
-  const {
-    searchTerm,
-    setSearchTerm,
-    selectedDemand,
-    setSelectedDemand,
-    isDetailOpen,
-    setIsDetailOpen,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    deleteLoading,
-    filteredDemandas,
-    isLoading,
-    error,
-    handleDeleteConfirm,
-    applyFilters
-  } = useDemandasData();
-  
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const { isAdmin } = usePermissions();
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+  const [showFilters, setShowFilters] = useState(false);
   
-  // Filter state variables
-  const [coordination, setCoordination] = useState<string>('todos');
+  // Add filter states
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [coordenacao, setCoordenacao] = useState<string>('todos');
   const [tema, setTema] = useState<string>('todos');
   const [status, setStatus] = useState<string>('todos');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  
-  // Apply filters effect
+
+  const {
+    filteredDemandas: demandas,
+    isLoading,
+    error,
+    refetch,
+    setSearchTerm: updateSearchTerm,
+    handleDeleteConfirm,
+    selectedDemand: hookSelectedDemand,
+    setSelectedDemand: hookSetSelectedDemand,
+    applyFilters,
+  } = useDemandasData();
+
+  // Add pagination state directly in this component
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const totalCount = demandas ? demandas.length : 0;
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
   useEffect(() => {
     applyFilters({
       searchTerm,
       dateRange,
-      coordenacao: coordination !== 'todos' ? coordination : undefined,
-      tema: tema !== 'todos' ? tema : undefined,
-      status: status !== 'todos' ? status : undefined
+      coordenacao,
+      tema,
+      status
     });
-  }, [searchTerm, dateRange, coordination, tema, status]);
-  
-  const handleNewDemandClick = () => {
-    navigate('/dashboard/comunicacao/cadastrar');
+  }, [searchTerm, dateRange, coordenacao, tema, status, applyFilters]);
+
+  const handleSearch = (term: string) => {
+    updateSearchTerm(term);
+    setPage(1);
   };
-  
-  if (error) {
-    toast({
-      title: "Erro ao carregar demandas",
-      description: "Não foi possível carregar a lista de demandas.",
-      variant: "destructive"
-    });
+
+  const handleViewDemand = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedDemand(null);
+  };
+
+  const handleEdit = (id: string) => {
+    navigate(`/dashboard/comunicacao/responder?id=${id}`);
+  };
+
+  const handleDelete = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (selectedDemand) {
+      await handleDeleteConfirm();
+      setIsDeleteModalOpen(false);
+      setSelectedDemand(null);
+      refetch();
+    }
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedDemand(null);
+  };
+
+  const resetFilters = () => {
+    setDateRange(undefined);
+    setCoordenacao('todos');
+    setTema('todos');
+    setStatus('todos');
+    setSearchTerm('');
+    updateSearchTerm('');
+  };
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  if (isLoading) {
+    return <LoadingState />;
   }
-  
+
+  if (error) {
+    return <div className="text-red-500">Error: {error.message}</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">Consultar Demandas</h1>
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+        <DemandasSearchBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSearch={handleSearch}
+        />
         
-        <Button
-          onClick={handleNewDemandClick}
-          className="bg-subpi-blue hover:bg-subpi-blue-dark"
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-1.5"
+          onClick={toggleFilters}
         >
-          <Plus className="h-4 w-4 mr-2" /> Nova Demanda
+          <Filter className="h-4 w-4" />
+          Filtros
+          {showFilters ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
         </Button>
       </div>
       
-      <Card className="border border-gray-200">
-        <CardContent className="p-6">
-          <DemandasFilter
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            coordination={coordination}
-            setCoordination={setCoordination}
-            tema={tema}
-            setTema={setTema}
-            status={status}
-            setStatus={setStatus}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-          />
-        </CardContent>
-      </Card>
+      {showFilters && (
+        <FilterBar
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          coordenacao={coordenacao}
+          onCoordenacaoChange={setCoordenacao}
+          tema={tema}
+          onTemaChange={setTema}
+          status={status}
+          onStatusChange={setStatus}
+          onResetFilters={resetFilters}
+        />
+      )}
       
-      <ConsultarDemandasTable />
+      {viewMode === 'cards' ? (
+        <DemandaCards
+          demandas={demandas as any}
+          isLoading={isLoading}
+          onSelectDemand={handleViewDemand as any}
+        />
+      ) : (
+        <DemandasTable
+          demandas={demandas as any}
+          onViewDemand={handleViewDemand as any}
+          onDelete={handleDelete as any}
+          totalCount={totalCount}
+          page={page}
+          pageSize={pageSize}
+          setPage={setPage}
+          setPageSize={setPageSize}
+          isAdmin={isAdmin}
+        />
+      )}
       
-      {/* Demand Details Modal */}
-      <DemandDetail
-        demand={selectedDemand}
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-      />
+      {/* Detail Dialog */}
+      {selectedDemand && (
+        <DemandDetail 
+          demand={selectedDemand as any} 
+          isOpen={isDetailOpen} 
+          onClose={handleCloseDetail}
+        />
+      )}
       
-      {/* Delete Confirmation Dialog */}
-      <DeleteDemandDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        isLoading={deleteLoading}
-      />
+      {/* Delete Dialog */}
+      {selectedDemand && (
+        <DeleteDemandDialog
+          isOpen={isDeleteModalOpen}
+          demandId={selectedDemand.id}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
     </div>
   );
 };

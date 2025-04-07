@@ -1,148 +1,111 @@
 
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Eye, Edit, Trash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { NotaOficial } from '@/types/nota';
-import { Eye, Edit, Check, X, Trash, FileText } from 'lucide-react';
-import { NotaStatusBadge } from '@/components/ui/status-badge';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 
-interface NotasTableProps {
+export interface NotasTableProps {
   notas: NotaOficial[];
-  loading?: boolean;
-  formatDate?: (date: string) => string;
-  onViewNota?: (nota: NotaOficial) => void;
-  onEditNota?: (nota: NotaOficial) => void;
-  onDeleteNota?: (nota: NotaOficial) => void;
-  onApproveNota?: (nota: NotaOficial) => void;
-  onRejectNota?: (nota: NotaOficial) => void;
+  loading: boolean;
+  formatDate: (dateString: string) => string;
+  onViewNota: (nota: NotaOficial) => void;
+  onEditNota: (nota: NotaOficial) => void;
+  onDeleteNota: (nota: NotaOficial) => void;
 }
 
-const NotasTable: React.FC<NotasTableProps> = ({
-  notas,
-  loading = false,
-  formatDate = (date) => date,
+const NotasTable: React.FC<NotasTableProps> = ({ 
+  notas, 
+  loading, 
+  formatDate,
   onViewNota,
   onEditNota,
-  onDeleteNota,
-  onApproveNota,
-  onRejectNota
+  onDeleteNota
 }) => {
-  const { user } = useAuth();
-  
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-        <p className="mt-2 text-gray-500">Carregando notas...</p>
+      <div className="bg-white rounded-md shadow">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Data de Criação</TableHead>
+              <TableHead>Área</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell><Skeleton className="h-4 w-3/4" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end space-x-2">
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
 
-  if (!notas || notas.length === 0) {
+  if (notas.length === 0) {
     return (
-      <div className="text-center py-8 border border-dashed rounded-lg">
-        <FileText className="mx-auto h-10 w-10 text-gray-400" />
-        <p className="mt-2 text-gray-500">Nenhuma nota encontrada</p>
+      <div className="bg-white rounded-md shadow p-6 text-center">
+        <p className="text-gray-500">Nenhuma nota encontrada.</p>
       </div>
     );
   }
 
   return (
-    <div className="border rounded-lg overflow-x-auto">
+    <div className="bg-white rounded-md shadow overflow-hidden">
       <Table>
-        <TableHeader className="bg-gray-50">
+        <TableHeader>
           <TableRow>
             <TableHead>Título</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Autor</TableHead>
+            <TableHead>Data de Criação</TableHead>
             <TableHead>Área</TableHead>
-            <TableHead>Data</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {notas.map((nota) => (
-            <TableRow key={nota.id} className="hover:bg-gray-50">
+            <TableRow key={nota.id}>
               <TableCell className="font-medium">{nota.titulo}</TableCell>
               <TableCell>
-                <NotaStatusBadge status={nota.status} />
+                <Badge className={`
+                  ${nota.status === 'rascunho' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : 
+                    nota.status === 'aprovada' ? 'bg-green-100 text-green-800 hover:bg-green-200' : 
+                    nota.status === 'pendente' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 
+                    'bg-gray-100 text-gray-800 hover:bg-gray-200'}
+                `}>
+                  {nota.status.charAt(0).toUpperCase() + nota.status.slice(1)}
+                </Badge>
               </TableCell>
-              <TableCell>
-                {nota.autor ? nota.autor.nome_completo : 'Não informado'}
-              </TableCell>
-              <TableCell>
-                {nota.area_coordenacao?.descricao || nota.problema?.descricao || 'Não informada'}
-              </TableCell>
-              <TableCell>{formatDate(nota.criado_em)}</TableCell>
-              <TableCell>
-                <div className="flex justify-end items-center space-x-2">
-                  {onViewNota && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onViewNota(nota)}
-                      title="Visualizar"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  {onEditNota && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onEditNota(nota)}
-                      title="Editar"
-                      className="text-amber-600"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  {onApproveNota && nota.status === 'pendente' && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onApproveNota(nota)}
-                      title="Aprovar"
-                      className="text-green-600"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  {onRejectNota && nota.status === 'pendente' && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onRejectNota(nota)}
-                      title="Recusar"
-                      className="text-red-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  {onDeleteNota && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onDeleteNota(nota)}
-                      title="Excluir"
-                      className="text-red-600"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  )}
+              <TableCell>{formatDate(nota.criado_em || '')}</TableCell>
+              <TableCell>{nota.area_coordenacao?.descricao || 'Não definida'}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => onViewNota(nota)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => onEditNota(nota)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => onDeleteNota(nota)}>
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>

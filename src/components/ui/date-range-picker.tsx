@@ -1,4 +1,6 @@
 
+"use client";
+
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -15,15 +17,17 @@ import {
 } from "@/components/ui/popover";
 
 interface DatePickerWithRangeProps {
+  dateRange: DateRange;
+  onRangeChange: (range: DateRange) => void;
+  align?: "start" | "center" | "end";
   className?: string;
-  date: DateRange | undefined;
-  setDate: (date: DateRange | undefined) => void;
 }
 
 export function DatePickerWithRange({
+  dateRange,
+  onRangeChange,
+  align = "start",
   className,
-  date,
-  setDate,
 }: DatePickerWithRangeProps) {
   return (
     <div className={cn("grid gap-2", className)}>
@@ -33,32 +37,32 @@ export function DatePickerWithRange({
             id="date"
             variant={"outline"}
             className={cn(
-              "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              "w-[300px] justify-start text-left font-normal",
+              !dateRange && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
+            {dateRange?.from ? (
+              dateRange.to ? (
                 <>
-                  {format(date.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-                  {format(date.to, "dd/MM/yyyy", { locale: ptBR })}
+                  {format(dateRange.from, "d MMM/yy", { locale: ptBR })} -{" "}
+                  {format(dateRange.to, "d MMM/yy", { locale: ptBR })}
                 </>
               ) : (
-                format(date.from, "dd/MM/yyyy", { locale: ptBR })
+                format(dateRange.from, "d MMM/yy", { locale: ptBR })
               )
             ) : (
-              <span>Selecione um período</span>
+              <span>Escolha um período</span>
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0" align={align}>
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={setDate}
+            defaultMonth={dateRange?.from}
+            selected={dateRange}
+            onSelect={onRangeChange}
             numberOfMonths={2}
             locale={ptBR}
           />
@@ -67,3 +71,6 @@ export function DatePickerWithRange({
     </div>
   );
 }
+
+// Export DateRangePicker as an alias of DatePickerWithRange for backward compatibility
+export const DateRangePicker = DatePickerWithRange;

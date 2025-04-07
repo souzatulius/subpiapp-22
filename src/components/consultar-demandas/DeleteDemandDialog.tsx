@@ -9,43 +9,43 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Loader2 } from 'lucide-react';
+} from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 
 export interface DeleteDemandDialogProps {
   isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => Promise<void>;
-  isLoading: boolean;
+  demandId: string;
+  onConfirm: () => Promise<void> | void;
+  onCancel: () => void; // Added missing prop
+  isDeleting?: boolean;
 }
 
 const DeleteDemandDialog: React.FC<DeleteDemandDialogProps> = ({
   isOpen,
-  onClose,
+  demandId,
   onConfirm,
-  isLoading
+  onCancel,
+  isDeleting = false
 }) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Excluir demanda</AlertDialogTitle>
+          <AlertDialogTitle>Excluir Demanda</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta ação não pode ser desfeita. Isso excluirá permanentemente esta demanda
-            e todos os seus dados relacionados.
+            Tem certeza que deseja excluir esta demanda? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              onConfirm();
-            }}
-            disabled={isLoading}
+          <AlertDialogCancel onClick={onCancel} disabled={isDeleting}>
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirm} 
+            disabled={isDeleting}
             className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {isLoading ? (
+            {isDeleting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Excluindo...

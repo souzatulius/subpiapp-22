@@ -1,189 +1,186 @@
 
 import React from 'react';
-import {
+import { 
   Table, 
   TableBody, 
   TableCell, 
   TableHead, 
   TableHeader, 
-  TableRow
+  TableRow 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit, FileText, Trash2, Plus } from 'lucide-react';
-import { Demand } from '@/hooks/consultar-demandas/types';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { NotaOficial } from '@/types/nota';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Eye, Trash, FileText } from 'lucide-react';
+import { DemandaStatusBadge } from '@/components/ui/status-badge';
+import { Demand } from '@/hooks/consultar-demandas';
+import { LoadingState } from './LoadingState';
+import { getPriorityColor } from '@/utils/priorityUtils';
+import { Badge } from '@/components/ui/badge';
 
 interface DemandasTableProps {
   demandas: Demand[];
-  isLoading: boolean;
-  onViewDemand: (demand: Demand) => void;
-  onCreateNote: (demand: Demand) => void;
-  onViewNote: (nota: NotaOficial) => void;
-  onEditNote: (nota: NotaOficial) => void;
+  onViewDemand?: (demand: Demand) => void;
+  onRespondDemand?: (demand: Demand) => void;
+  onDeleteClick?: (demand: Demand) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (demand: Demand) => void;
+  totalCount?: number;
+  page?: number;
+  pageSize?: number;
+  setPage?: React.Dispatch<React.SetStateAction<number>>;
+  setPageSize?: React.Dispatch<React.SetStateAction<number>>;
+  isAdmin?: boolean;
+  showDeleteOption?: boolean;
+  isLoading?: boolean;
 }
 
 const DemandasTable: React.FC<DemandasTableProps> = ({
   demandas,
-  isLoading,
   onViewDemand,
-  onCreateNote,
-  onViewNote,
-  onEditNote
+  onRespondDemand,
+  onDeleteClick,
+  onEdit,
+  onDelete,
+  totalCount,
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
+  isAdmin,
+  showDeleteOption = false,
+  isLoading = false
 }) => {
-  const formatDate = (dateString: string) => {
-    try {
-      if (!dateString) return 'Não informado';
-      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
-    } catch (e) {
-      return 'Data inválida';
+  const handleViewOrEdit = (demand: Demand) => {
+    if (onViewDemand) {
+      onViewDemand(demand);
+    } else if (onEdit) {
+      onEdit(demand.id);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pendente':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Pendente</Badge>;
-      case 'em_andamento':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Em andamento</Badge>;
-      case 'respondida':
-        return <Badge variant="outline" className="bg-green-100 text-green-800">Respondida</Badge>;
-      case 'aguardando_aprovacao':
-        return <Badge variant="outline" className="bg-purple-100 text-purple-800">Aguardando aprovação</Badge>;
-      case 'concluida':
-        return <Badge variant="outline" className="bg-green-700 text-white">Concluída</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
+  const handleDelete = (demand: Demand) => {
+    if (onDeleteClick) {
+      onDeleteClick(demand);
+    } else if (onDelete) {
+      onDelete(demand);
     }
   };
 
   if (isLoading) {
-    return (
-      <Card className="overflow-hidden border border-gray-200">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Área</TableHead>
-                <TableHead>Data de Publicação</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Array(5).fill(0).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell><Skeleton className="h-6 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-28" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-36" /></TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
-    );
+    return <LoadingState />;
   }
 
   if (demandas.length === 0) {
     return (
-      <Card className="p-6 text-center border border-gray-200">
+      <div className="text-center py-8 border rounded-md border-dashed">
         <p className="text-gray-500">Nenhuma demanda encontrada.</p>
-      </Card>
+      </div>
     );
   }
 
+  const formatPriority = (priority: string) => {
+    const priorityMap: Record<string, { label: string, class: string }> = {
+      'alta': { label: 'Alta', class: 'bg-red-100 text-red-800 border-red-200' },
+      'media': { label: 'Média', class: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+      'baixa': { label: 'Baixa', class: 'bg-green-100 text-green-800 border-green-200' },
+    };
+
+    return priorityMap[priority] || { label: priority, class: 'bg-gray-100 text-gray-800' };
+  };
+
+  const getCoordination = (demand: Demand) => {
+    // Get coordination information from the problem-related data
+    if (demand.problema?.coordenacao?.descricao) {
+      return demand.problema.coordenacao.descricao;
+    }
+    
+    // Try to get the coordination from area_coordenacao
+    if (demand.area_coordenacao?.descricao) {
+      return demand.area_coordenacao.descricao;
+    }
+    
+    return 'Não informada';
+  };
+
   return (
-    <Card className="overflow-hidden border border-gray-200">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Área</TableHead>
-              <TableHead>Data de Publicação</TableHead>
-              <TableHead>Nota</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {demandas.map((demanda) => (
-              <TableRow key={demanda.id}>
-                <TableCell className="font-medium max-w-xs truncate">
-                  {demanda.titulo}
-                </TableCell>
-                <TableCell>{getStatusBadge(demanda.status)}</TableCell>
-                <TableCell>{demanda.area_coordenacao?.descricao || 'Não informada'}</TableCell>
-                <TableCell>{formatDate(demanda.horario_publicacao)}</TableCell>
+    <div className="border rounded-lg overflow-hidden shadow-sm">
+      <Table>
+        <TableHeader className="bg-gray-50">
+          <TableRow>
+            <TableHead>Título</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Prioridade</TableHead>
+            <TableHead>Coordenação</TableHead>
+            <TableHead>Prazo</TableHead>
+            <TableHead>Nota</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {demandas.map((demand) => {
+            const priorityInfo = formatPriority(demand.prioridade);
+            const coordination = getCoordination(demand);
+            const hasNota = demand.notas && demand.notas.length > 0;
+
+            return (
+              <TableRow key={demand.id} className="hover:bg-gray-50">
+                <TableCell className="font-medium">{demand.titulo}</TableCell>
                 <TableCell>
-                  {/* Show note status or create button */}
-                  {demanda.notas && demanda.notas.length > 0 ? (
-                    <Badge className="bg-blue-100 text-blue-800">Nota criada</Badge>
-                  ) : demanda.resposta ? (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => onCreateNote(demanda)}
-                      className="flex items-center gap-1"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      <span>Criar Nota</span>
-                    </Button>
-                  ) : (
-                    <Badge variant="outline" className="bg-gray-100 text-gray-600">Sem resposta</Badge>
-                  )}
+                  <DemandaStatusBadge status={demand.status} size="sm" />
                 </TableCell>
                 <TableCell>
-                  <div className="flex space-x-2">
+                  <Badge 
+                    variant="outline" 
+                    className={`${priorityInfo.class} rounded-full`}
+                  >
+                    {priorityInfo.label}
+                  </Badge>
+                </TableCell>
+                <TableCell>{coordination}</TableCell>
+                <TableCell>
+                  {demand.prazo_resposta ? 
+                    format(new Date(demand.prazo_resposta), 'dd/MM/yyyy', { locale: ptBR }) : 
+                    'N/A'
+                  }
+                </TableCell>
+                <TableCell>
+                  {hasNota ? (
+                    <Badge variant="outline" className="bg-green-100 text-green-800">
+                      <FileText className="h-3 w-3 mr-1" /> Sim
+                    </Badge>
+                  ) : 'Não'}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
-                      size="sm"
-                      onClick={() => onViewDemand(demanda)}
-                      className="h-8 w-8 p-0"
-                      title="Ver detalhes"
+                      size="icon"
+                      onClick={() => handleViewOrEdit(demand)}
+                      title="Visualizar"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
                     
-                    {/* Note actions if available */}
-                    {demanda.notas && demanda.notas.length > 0 && demanda.notas.map((nota) => (
-                      <React.Fragment key={nota.id}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onViewNote({ ...nota, texto: '', conteudo: '' } as NotaOficial)}
-                          className="h-8 w-8 p-0"
-                          title="Ver nota"
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onEditNote({ ...nota, texto: '', conteudo: '' } as NotaOficial)}
-                          className="h-8 w-8 p-0"
-                          title="Editar nota"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </React.Fragment>
-                    ))}
+                    {(showDeleteOption || isAdmin) && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDelete(demand)}
+                        className="text-red-600 hover:text-red-700"
+                        title="Excluir"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </Card>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

@@ -6,7 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import DemandasTable from '@/components/consultar-demandas/DemandasTable';
 import { Demand } from '@/hooks/consultar-demandas/types';
 import { toast } from '@/components/ui/use-toast';
-import { NotaOficial } from '@/types/nota';
 
 const ConsultarDemandasTable = () => {
   const navigate = useNavigate();
@@ -39,9 +38,7 @@ const ConsultarDemandasTable = () => {
             autor_id,
             autor:autor_id(id, nome_completo),
             bairro_id,
-            bairro:bairro_id(id, nome),
-            respostas:respostas_demandas(id, texto, comentarios),
-            notas:notas_oficiais(id, titulo)
+            bairro:bairro_id(id, nome)
           `)
           .order('created_at', { ascending: false });
         
@@ -86,6 +83,7 @@ const ConsultarDemandasTable = () => {
         id: '', // We're not using this field anymore
         descricao: ''
       },
+      // Add required fallback properties to match the Demand type
       origem: d?.origem || { id: '', descricao: '' },
       tipo_midia: d?.tipo_midia || { id: '', descricao: '' },
       bairro: d?.bairro || { nome: '' },
@@ -99,42 +97,18 @@ const ConsultarDemandasTable = () => {
       perguntas: null,
       servico: { id: '', descricao: '' },
       arquivo_url: null,
-      anexos: null,
-      resposta: d?.respostas && d.respostas.length > 0 ? {
-        id: d.respostas[0].id,
-        demanda_id: d.id,
-        texto: d.respostas[0].texto,
-        usuario_id: '', // Add the required fields
-        criado_em: '',
-        comentarios: d.respostas[0].comentarios
-      } : null,
-      notas: d?.notas || []
+      anexos: null
     };
   });
 
   const handleViewDemand = (demand: Demand) => {
     navigate(`/dashboard/comunicacao/responder?id=${demand.id}`);
   };
-  
-  const handleViewNote = (nota: NotaOficial) => {
-    navigate(`/dashboard/comunicacao/notas/detalhe?id=${nota.id}`);
-  };
-  
-  const handleEditNote = (nota: NotaOficial) => {
-    navigate(`/dashboard/comunicacao/notas/editar?id=${nota.id}`);
-  };
-  
-  const handleCreateNote = (demand: Demand) => {
-    navigate(`/dashboard/comunicacao/criar-nota?demandaId=${demand.id}`);
-  };
 
   return (
     <DemandasTable 
-      demandas={demandas}
-      onViewDemand={handleViewDemand}
-      onCreateNote={handleCreateNote}
-      onViewNote={handleViewNote}
-      onEditNote={handleEditNote}
+      demandas={demandas as any}
+      onViewDemand={handleViewDemand as any}
       isLoading={isLoading}
     />
   );
