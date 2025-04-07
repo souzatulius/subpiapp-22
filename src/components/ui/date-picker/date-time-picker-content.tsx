@@ -6,6 +6,7 @@ import { PopoverContent } from "@/components/ui/popover";
 import { TimeInput } from "../time-picker/time-input";
 import { TimeDropdown } from "../time-picker/time-dropdown";
 import { Clock } from "lucide-react";
+import { ptBR } from "date-fns/locale";
 
 interface DateTimePickerContentProps {
   date?: Date;
@@ -63,6 +64,7 @@ export function DateTimePickerContent({
         onSelect={onSelect}
         initialFocus
         disabled={(day) => day < today}
+        locale={ptBR}
       />
       {showTimeSelect && (
         <div className="p-3 border-t">

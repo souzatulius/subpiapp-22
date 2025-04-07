@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, FilterIcon, XIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
+import { ptBR } from 'date-fns/locale';
 
 interface FiltersSectionProps {
   dateRange: DateRange;
@@ -56,6 +57,7 @@ export const FiltersSection: React.FC<FiltersSectionProps> = ({
             dateRange={dateRange} 
             onRangeChange={onDateRangeChange} 
             align="start"
+            locale={ptBR}
           />
         </div>
         
