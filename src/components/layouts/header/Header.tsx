@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { UserProfileMenu } from './index';
 import { useUserProfile } from './useUserProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Menu } from 'lucide-react';
 
 interface HeaderProps {
   showControls?: boolean;
@@ -23,9 +24,19 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="w-full flex h-16 items-center justify-between">
-        {/* Left side - Removido o botão de menu */}
+        {/* Left side - Toggle button */}
         <div className="w-1/4 flex items-center gap-4 relative">
-          {/* Espaço vazio onde estava o botão de menu */}
+          {toggleSidebar && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={toggleSidebar}
+              className="ml-4"
+              aria-label={isMobile ? "Abrir menu" : "Alternar visibilidade do menu"}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
         </div>
         
         {/* Center - Logo */}

@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, FileText, BarChart2, Settings, MessageSquare, CircleHelp } from 'lucide-react';
+import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/cn';
-import { BarChart } from 'lucide-react';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -23,10 +22,10 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
       to={to}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-[#002855]",
+          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-[#f57737]",
           isActive
-            ? "bg-[#EEF2F8] text-[#002855] font-medium"
-            : "hover:bg-gray-100",
+            ? "bg-[#003570] text-[#f57737] font-medium"
+            : "text-gray-300 hover:bg-[#0035701a]",
           isCollapsed ? "justify-center" : ""
         )
       }
@@ -44,48 +43,24 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   const sidebarWidth = isOpen ? "w-64" : "w-16";
   const sidebarPadding = isOpen ? "px-4" : "px-2";
   
+  // Get navigation items from centralized config
+  const navigationItems = getNavigationSections();
+  
   return (
     <aside
-      className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-gray-200 bg-white h-full transition-all duration-300 ease-in-out`}
+      className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full transition-all duration-300 ease-in-out`}
     >
       <nav className="space-y-2 flex flex-col h-full">
         <div className="space-y-1">
-          <SidebarItem
-            to="/dashboard"
-            icon={<Home className="h-5 w-5" />}
-            label="Página Inicial"
-            isCollapsed={!isOpen}
-          />
-          <SidebarItem
-            to="/dashboard/comunicacao/consultar"
-            icon={<FileText className="h-5 w-5" />}
-            label="Demandas"
-            isCollapsed={!isOpen}
-          />
-          <SidebarItem
-            to="/dashboard/comunicacao/notas"
-            icon={<MessageSquare className="h-5 w-5" />}
-            label="Notas Oficiais"
-            isCollapsed={!isOpen}
-          />
-          <SidebarItem
-            to="/dashboard/esic"
-            icon={<CircleHelp className="h-5 w-5" />}
-            label="e-SIC"
-            isCollapsed={!isOpen}
-          />
-          <SidebarItem
-            to="/dashboard/relatorios"
-            icon={<BarChart className="h-5 w-5" />}
-            label="Relatórios"
-            isCollapsed={!isOpen}
-          />
-          <SidebarItem
-            to="/dashboard/settings"
-            icon={<Settings className="h-5 w-5" />}
-            label="Configurações"
-            isCollapsed={!isOpen}
-          />
+          {navigationItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              to={item.path}
+              icon={item.icon}
+              label={item.label}
+              isCollapsed={!isOpen}
+            />
+          ))}
         </div>
       </nav>
     </aside>

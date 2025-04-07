@@ -51,10 +51,10 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
             className={() => {
               const active = isNavItemActive(item.path);
               return `flex flex-col items-center justify-center w-full h-full py-2 
-                ${active ? 'bg-white text-gray-600' : 'text-gray-400'}`
+                ${active ? 'bg-white text-[#051b2c]' : 'text-gray-400'}`
             }}
           >
-            <div className="text-[#f57737]">
+            <div className={active ? 'text-[#f57737]' : 'text-[#f57737]'}>
               {item.icon}
             </div>
             <span className="text-xs mt-1 truncate">{item.label}</span>

@@ -44,30 +44,28 @@ const DashboardLayout: React.FC = () => {
         style={isMobile ? scrollFadeStyles : undefined}
         className={`${isMobile ? 'transition-all duration-300' : ''}`}
       >
-        <Header showControls={true} toggleSidebar={isMobile ? toggleSidebar : undefined} />
+        <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
       
       <div className="flex flex-1 overflow-hidden">
         {/* Only show sidebar on desktop */}
+        {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+        
+        {/* Collapse button (desktop only) */}
         {!isMobile && (
-          <>
-            <DashboardSidebar isOpen={sidebarOpen} />
-            
-            {/* Collapse button (desktop only) */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="absolute left-0 top-24 bg-white shadow-md hover:bg-gray-100 z-30 rounded-r-md rounded-l-none border border-l-0"
-              aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
-            >
-              {sidebarOpen ? (
-                <ChevronLeft className="h-5 w-5" />
-              ) : (
-                <ChevronRight className="h-5 w-5" />
-              )}
-            </Button>
-          </>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="absolute left-0 top-24 bg-white shadow-md hover:bg-gray-100 z-30 rounded-r-md rounded-l-none border border-l-0"
+            aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
+          >
+            {sidebarOpen ? (
+              <ChevronLeft className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </Button>
         )}
         
         <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
@@ -82,8 +80,8 @@ const DashboardLayout: React.FC = () => {
         </main>
       </div>
       
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
+      {/* Mobile Bottom Navigation - only show on mobile */}
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 };
