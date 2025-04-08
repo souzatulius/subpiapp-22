@@ -16,7 +16,19 @@ interface Processo {
   prazo: string;
 }
 
-const ProcessoList: React.FC = () => {
+interface ProcessoListProps {
+  viewMode?: 'list' | 'cards';
+  searchTerm?: string;
+  filterOpen?: boolean;
+  setFilterOpen?: (open: boolean) => void;
+}
+
+const ProcessoList: React.FC<ProcessoListProps> = ({
+  viewMode = 'list',
+  searchTerm = '',
+  filterOpen,
+  setFilterOpen
+}) => {
   const navigate = useNavigate();
 
   const { data: processos, isLoading } = useQuery({
@@ -99,7 +111,16 @@ const ProcessoList: React.FC = () => {
               {processos && processos.length > 0 ? (
                 processos
                   .filter(
-                    (processo) => tabValue === 'todos' || processo.status === tabValue
+                    (processo) => {
+                      // Apply status filter
+                      const statusMatch = tabValue === 'todos' || processo.status === tabValue;
+                      
+                      // Apply search filter if searchTerm exists
+                      const searchMatch = !searchTerm || 
+                        processo.titulo.toLowerCase().includes(searchTerm.toLowerCase());
+                      
+                      return statusMatch && searchMatch;
+                    }
                   )
                   .map((processo) => (
                     <div

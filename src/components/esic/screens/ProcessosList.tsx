@@ -22,7 +22,7 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
   onEditProcesso,
   onDeleteProcesso
 }) => {
-  // Mock for viewMode, searchTerm, filterOpen and setFilterOpen that ProcessoList needs
+  // States for viewMode, searchTerm, filterOpen and setFilterOpen that ProcessoList needs
   const [viewMode, setViewMode] = React.useState<'list' | 'cards'>('list');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterOpen, setFilterOpen] = React.useState(false);
@@ -49,7 +49,7 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         </Button>
       </div>
       
-      {/* Passing the required props to ProcessoList */}
+      {/* ProcessoList component with required props */}
       <ProcessoList
         viewMode={viewMode}
         searchTerm={searchTerm}

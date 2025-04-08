@@ -243,11 +243,11 @@ export function UnifiedActionCard({
       );
     }
     
-    if (type === 'origin_selection' && specialCardsData?.originOptions) {
+    if (type === 'origin_selection') {
       return (
         <OriginSelectionCard 
-          title="De onde vem a demanda?"
-          options={specialCardsData.originOptions || []}
+          title={title || "Cadastro de Demandas"}
+          options={specialCardsData?.originOptions}
         />
       );
     }
