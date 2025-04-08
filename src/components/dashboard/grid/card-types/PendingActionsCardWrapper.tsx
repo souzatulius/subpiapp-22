@@ -1,306 +1,203 @@
 
-import React, { useEffect, useState } from 'react';
-import { ActionCardItem } from '@/types/dashboard';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ListTodo, Clock, BellRing, CalendarX, MessageSquare } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
+import { formatDistance } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Task } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import { format, isBefore } from 'date-fns';
-
-interface Task {
-  id: string;
-  title: string;
-  dueDate: Date | null;
-  status: 'overdue' | 'warning' | 'ok';
-  type: 'demand' | 'note';
-  url: string;
-}
+import { ClipboardList, AlertTriangle, Clock } from 'lucide-react';
 
 interface PendingActionsCardWrapperProps {
-  card: ActionCardItem;
-  notesToApprove: number;
-  responsesToDo: number;
-  isComunicacao: boolean;
-  userDepartmentId: string;
+  className?: string;
 }
 
-const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({
-  card,
-  notesToApprove,
-  responsesToDo,
-  isComunicacao,
-  userDepartmentId
-}) => {
+const PendingActionsCardWrapper: React.FC<PendingActionsCardWrapperProps> = ({ className }) => {
+  const [activeTab, setActiveTab] = useState('all');
+  const [overdueCount, setOverdueCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pendingTasks, setPendingTasks] = useState<Task[]>([]);
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isGabinete, setIsGabinete] = useState(false);
-
+  
   useEffect(() => {
-    // Check if the user is from Gabinete
-    const checkGabinete = async () => {
-      if (!userDepartmentId) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('coordenacoes')
-          .select('descricao')
-          .eq('id', userDepartmentId)
-          .single();
-
-        if (!error && data?.descricao) {
-          setIsGabinete(data.descricao.toLowerCase().includes('gabinete'));
-        }
-      } catch (error) {
-        console.error('Error checking department:', error);
-      }
-    };
-
-    checkGabinete();
-  }, [userDepartmentId]);
-
-  useEffect(() => {
-    if (!userDepartmentId) return;
-
     const fetchPendingTasks = async () => {
-      setLoading(true);
+      setIsLoading(true);
       try {
-        let allTasks: Task[] = [];
+        // Fetch pending demands
+        const { data: demands, error: demandsError } = await supabase
+          .from('demandas')
+          .select('id, titulo, prazo_resposta, status')
+          .in('status', ['pendente', 'em_andamento', 'aguardando_resposta'])
+          .order('prazo_resposta', { ascending: true });
+          
+        if (demandsError) throw demandsError;
         
-        // Different queries based on user department
-        if (isComunicacao) {
-          // For Comunicacao, show demands that were answered but need notes
-          const { data: demandsData, error: demandsError } = await supabase
-            .from('demandas')
-            .select('id, titulo, prazo_resposta')
-            .eq('status', 'respondida')
-            .is('nota_oficial_id', null)
-            .order('prazo_resposta', { ascending: true })
-            .limit(5);
-            
-          if (!demandsError && demandsData) {
-            const demandTasks = demandsData.map(demand => ({
-              id: demand.id,
-              title: demand.titulo,
-              dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
-              type: 'demand' as const,
-              url: `/dashboard/comunicacao/demandas/${demand.id}`
-            }));
-            allTasks = [...allTasks, ...demandTasks];
-          }
-        } else if (isGabinete) {
-          // For Gabinete, show all types of pending tasks
+        // Fetch pending notes
+        const { data: notes, error: notesError } = await supabase
+          .from('notas')
+          .select('id, titulo, prazo, status')
+          .in('status', ['pendente', 'em_revisao', 'aprovacao_pendente'])
+          .order('prazo', { ascending: true });
           
-          // 1. Demands needing response from any department
-          const { data: demandsData, error: demandsError } = await supabase
-            .from('demandas')
-            .select('id, titulo, prazo_resposta, coordenacao_id, coordenacoes:coordenacao_id(descricao)')
-            .eq('status', 'em_analise')
-            .order('prazo_resposta', { ascending: true })
-            .limit(3);
-            
-          if (!demandsError && demandsData) {
-            const demandTasks = demandsData.map(demand => ({
-              id: demand.id,
-              title: `${demand.titulo} (${(demand.coordenacoes as any)?.descricao || 'Sem coordenação'})`,
-              dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
-              type: 'demand' as const,
-              url: `/dashboard/comunicacao/demandas/${demand.id}`
-            }));
-            allTasks = [...allTasks, ...demandTasks];
-          }
-          
-          // 2. Notes needing approval
-          const { data: pendingNotesData, error: pendingNotesError } = await supabase
-            .from('notas_oficiais')
-            .select('id, titulo, criado_em')
-            .eq('status', 'pendente')
-            .order('criado_em', { ascending: false })
-            .limit(2);
-            
-          if (!pendingNotesError && pendingNotesData) {
-            const pendingNotesTasks = pendingNotesData.map(note => ({
-              id: `note-${note.id}`,
-              title: `Nota: ${note.titulo}`,
-              dueDate: note.criado_em ? new Date(note.criado_em) : null,
-              status: 'ok' as const,
-              type: 'note' as const,
-              url: `/dashboard/comunicacao/notas/${note.id}`
-            }));
-            allTasks = [...allTasks, ...pendingNotesTasks];
-          }
-        } else {
-          // For other departments, show demands assigned to their department
-          const { data: demandsData, error: demandsError } = await supabase
-            .from('demandas')
-            .select('id, titulo, prazo_resposta')
-            .eq('coordenacao_id', userDepartmentId)
-            .eq('status', 'em_analise')
-            .order('prazo_resposta', { ascending: true })
-            .limit(3);
-            
-          if (!demandsError && demandsData) {
-            const demandTasks = demandsData.map(demand => ({
-              id: demand.id,
-              title: demand.titulo,
-              dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
-              type: 'demand' as const,
-              url: `/dashboard/comunicacao/responder-demanda/${demand.id}`
-            }));
-            allTasks = [...allTasks, ...demandTasks];
-          }
-          
-          // Also show notes that need approval from this department
-          const { data: notesData, error: notesError } = await supabase
-            .from('notas_oficiais')
-            .select('id, titulo, criado_em')
-            .eq('coordenacao_id', userDepartmentId)
-            .eq('status', 'pendente')
-            .order('criado_em', { ascending: false })
-            .limit(2);
-            
-          if (!notesError && notesData) {
-            const noteTasks = notesData.map(note => ({
-              id: `note-${note.id}`,
-              title: `Nota: ${note.titulo}`,
-              dueDate: note.criado_em ? new Date(note.criado_em) : null,
-              status: 'ok' as const,
-              type: 'note' as const,
-              url: `/dashboard/comunicacao/notas/${note.id}`
-            }));
-            allTasks = [...allTasks, ...noteTasks];
-          }
-        }
+        if (notesError) throw notesError;
         
-        // Sort tasks by due date (overdue first)
-        allTasks.sort((a, b) => {
-          // First by status (overdue > warning > ok)
-          const statusOrder = { overdue: 0, warning: 1, ok: 2 };
-          if (statusOrder[a.status] !== statusOrder[b.status]) {
-            return statusOrder[a.status] - statusOrder[b.status];
+        // Process demands data
+        const demandTasks: Task[] = demands?.map((demand) => {
+          const dueDate = new Date(demand.prazo_resposta);
+          const today = new Date();
+          const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          
+          let status: "overdue" | "warning" | "ok" = "ok";
+          if (diffDays < 0) {
+            status = "overdue";
+          } else if (diffDays <= 2) {
+            status = "warning";
           }
           
-          // Then by due date (oldest first)
-          if (a.dueDate && b.dueDate) {
-            return a.dueDate.getTime() - b.dueDate.getTime();
-          }
-          
-          // If one has due date and the other doesn't
-          if (a.dueDate && !b.dueDate) return -1;
-          if (!a.dueDate && b.dueDate) return 1;
-          
-          return 0;
-        });
+          return {
+            id: demand.id,
+            title: demand.titulo,
+            dueDate: dueDate,
+            status: status,
+            type: "demand",
+            url: `/dashboard/comunicacao/responder-demanda?id=${demand.id}`
+          };
+        }) || [];
         
-        // Limit to 3 tasks for display in the smaller card
-        setTasks(allTasks.slice(0, 3));
+        // Process notes data
+        const noteTasks: Task[] = notes?.map((note) => {
+          const dueDate = new Date(note.prazo);
+          const today = new Date();
+          const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          
+          let status: "overdue" | "warning" | "ok" = "ok";
+          if (diffDays < 0) {
+            status = "overdue";
+          } else if (diffDays <= 2) {
+            status = "warning";
+          }
+          
+          return {
+            id: note.id,
+            title: note.titulo,
+            dueDate: dueDate,
+            status: status,
+            type: "note",
+            url: `/dashboard/comunicacao/notas/detalhe?id=${note.id}`
+          };
+        }) || [];
+        
+        // Combine and sort by due date
+        const allTasks = [...demandTasks, ...noteTasks].sort((a, b) => 
+          a.dueDate.getTime() - b.dueDate.getTime()
+        );
+        
+        setPendingTasks(allTasks);
+        setOverdueCount(allTasks.filter(task => task.status === "overdue").length);
       } catch (error) {
         console.error('Error fetching pending tasks:', error);
+        setPendingTasks([]);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     
     fetchPendingTasks();
-  }, [userDepartmentId, isComunicacao, isGabinete]);
-
-  const getBadgeVariant = (status: string) => {
+  }, []);
+  
+  const getTaskStatusIcon = (status: "overdue" | "warning" | "ok") => {
     switch (status) {
-      case 'overdue':
-        return 'destructive';
-      case 'warning':
-        return 'warning';
+      case "overdue":
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case "warning":
+        return <Clock className="h-4 w-4 text-orange-500" />;
       default:
-        return 'secondary';
+        return <ClipboardList className="h-4 w-4 text-blue-500" />;
     }
   };
+  
+  const formatDueDate = (date: Date) => {
+    const today = new Date();
+    return formatDistance(date, today, { addSuffix: true, locale: ptBR });
+  };
+  
+  const filteredTasks = activeTab === 'all' 
+    ? pendingTasks 
+    : activeTab === 'overdue'
+      ? pendingTasks.filter(task => task.status === "overdue")
+      : pendingTasks.filter(task => task.type === activeTab);
   
   const handleTaskClick = (url: string) => {
     navigate(url);
   };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'overdue':
-        return <CalendarX className="h-3 w-3 text-red-500" />;
-      case 'warning':
-        return <Clock className="h-3 w-3 text-yellow-500" />;
-      default:
-        return <BellRing className="h-3 w-3 text-blue-500" />;
-    }
-  };
   
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'note':
-        return <MessageSquare className="h-3 w-3" />;
-      default:
-        return <ListTodo className="h-3 w-3" />;
-    }
-  };
-
   return (
-    <Card className="h-full border-t-4 border-t-blue-600">
-      <CardHeader className="p-4 pb-2">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <ListTodo className="h-5 w-5 text-blue-600" />
-          <span>Pendências</span>
+    <Card className={`h-full shadow-md border border-gray-200 ${className}`}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center justify-between">
+          <span>Pendências e Prazos</span>
+          {overdueCount > 0 && (
+            <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
+              {overdueCount} atrasadas
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
-      
-      <CardContent className="p-4 pt-2">
-        {loading ? (
-          <div className="h-20 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          </div>
-        ) : tasks.length === 0 ? (
-          <div className="text-center text-gray-500 py-4">
-            <span>Nenhuma pendência encontrada</span>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="p-2 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                onClick={() => handleTaskClick(task.url)}
-              >
-                <div className="flex items-start justify-between gap-1">
-                  <div className="flex gap-1.5 items-start">
-                    <span className="mt-0.5">{getTypeIcon(task.type)}</span>
-                    <span className="font-medium text-xs line-clamp-1">{task.title}</span>
-                  </div>
-                  <Badge variant={getBadgeVariant(task.status)} className="ml-1 scale-90 whitespace-nowrap flex gap-1 items-center">
-                    {getStatusIcon(task.status)}
-                    <span className="text-[10px]">
-                      {task.status === 'overdue' ? 'Atrasado' : 
-                       task.status === 'warning' ? 'Pendente' : 'Novo'}
-                    </span>
-                  </Badge>
-                </div>
-                
-                {task.dueDate && (
-                  <div className="text-[10px] text-gray-500 mt-1 ml-5">
-                    Prazo: {format(task.dueDate, 'dd/MM/yyyy')}
+      <CardContent className="pb-2">
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="h-full">
+          <TabsList className="grid grid-cols-3 mb-2">
+            <TabsTrigger value="all">Todas</TabsTrigger>
+            <TabsTrigger value="demand">Demandas</TabsTrigger>
+            <TabsTrigger value="note">Notas</TabsTrigger>
+          </TabsList>
+          <TabsContent value={activeTab} className="mt-0">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-36">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[225px] overflow-y-auto pr-1">
+                {filteredTasks.length > 0 ? (
+                  filteredTasks.map((task) => (
+                    <div 
+                      key={`${task.type}-${task.id}`}
+                      onClick={() => handleTaskClick(task.url)}
+                      className="p-2 rounded-md hover:bg-gray-50 cursor-pointer border border-gray-100 transition-colors"
+                    >
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {getTaskStatusIcon(task.status)}
+                        </div>
+                        <div className="ml-2 flex-1">
+                          <p className="text-sm font-medium text-gray-900 line-clamp-2">{task.title}</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className={`text-xs ${
+                              task.status === "overdue" 
+                                ? "text-red-600" 
+                                : task.status === "warning" 
+                                ? "text-orange-600" 
+                                : "text-gray-500"
+                            }`}>
+                              {formatDueDate(task.dueDate)}
+                            </span>
+                            <span className="text-xs text-gray-500 capitalize">
+                              {task.type === "demand" ? "Demanda" : "Nota"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500">Nenhuma pendência encontrada</p>
                   </div>
                 )}
               </div>
-            ))}
-            
-            <div 
-              className="text-center pt-2 text-xs text-blue-600 hover:text-blue-800 cursor-pointer"
-              onClick={() => navigate('/dashboard/comunicacao/demandas')}
-            >
-              Ver todas as pendências
-            </div>
-          </div>
-        )}
+            )}
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

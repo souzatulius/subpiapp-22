@@ -55,3 +55,13 @@ export interface Department {
   sigla?: string;
   descricao?: string;
 }
+
+// Define Task interface for use in PendingTasksCard
+export interface Task {
+  id: string;
+  title: string;
+  dueDate: Date;
+  status: "overdue" | "warning" | "ok";
+  type: string;
+  url: string;
+}

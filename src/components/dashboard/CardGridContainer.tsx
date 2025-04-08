@@ -3,6 +3,7 @@ import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import UnifiedCardGrid from './UnifiedCardGrid';
 import { useSpecialCardsData } from '@/hooks/dashboard/useSpecialCardsData';
+import { useDepartmentData } from './grid/hooks/useDepartmentData';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
@@ -24,20 +25,43 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   // Custom hook to fetch data for special cards like overdue demands, etc.
   const specialCardsData = useSpecialCardsData();
   
-  // Unified approach: don't separate special cards, let the grid system handle positioning
+  // Get user department info to determine if origin selection card should be shown
+  const { isComunicacao } = useDepartmentData();
+  
+  // Add the origin selection card for comunicacao users
+  let displayCards = [...cards];
+  
+  // If user is from comunicacao department, add origin selection card if not already present
+  if (isComunicacao && !displayCards.some(card => card.type === 'origin_selection')) {
+    const hasOriginCard = displayCards.some(card => card.id === 'origin-selection');
+    
+    if (!hasOriginCard) {
+      displayCards.push({
+        id: 'origin-selection',
+        title: 'Cadastro de Demandas',
+        subtitle: 'Selecione a origem da demanda',
+        iconId: 'file-plus',
+        path: '',
+        color: 'blue-vivid',
+        width: '50',
+        height: '2',
+        type: 'origin_selection',
+        displayMobile: true,
+      });
+    }
+  }
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className={isMobileView ? 'col-span-2' : 'col-span-4'}>
-        <UnifiedCardGrid
-          cards={cards}
-          onCardsChange={onCardsChange}
-          onEditCard={onEditCard}
-          onHideCard={onHideCard}
-          isMobileView={isMobileView}
-          isEditMode={isEditMode}
-          specialCardsData={specialCardsData}
-        />
-      </div>
+    <div className="w-full">
+      <UnifiedCardGrid
+        cards={displayCards}
+        onCardsChange={onCardsChange}
+        onEditCard={onEditCard}
+        onHideCard={onHideCard}
+        isMobileView={isMobileView}
+        isEditMode={isEditMode}
+        specialCardsData={specialCardsData}
+      />
     </div>
   );
 };

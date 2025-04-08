@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { 
   ClipboardList, MessageSquareReply, FileCheck, 
   BarChart2, PlusCircle, Search, Clock, 
   AlertTriangle, CheckCircle, FileText, ListFilter,
-  ListTodo
+  ListTodo, FilePlus
 } from 'lucide-react';
 
 // Helper function to get the Icon component from ID
@@ -22,6 +23,7 @@ export const getIconComponentFromId = (iconId: string) => {
     'file-text': FileText,
     'list-filter': ListFilter,
     'list-todo': ListTodo,
+    'file-plus': FilePlus,
   };
   
   return iconMap[iconId] || ClipboardList;
@@ -137,6 +139,19 @@ export const getDefaultCards = (): ActionCardItem[] => {
       isOverdueDemands: true,
       displayMobile: true,
       mobileOrder: 7,
+    },
+    {
+      id: 'origin-selection',
+      title: 'Cadastro de Demandas',
+      subtitle: 'De onde vem a solicitação?',
+      iconId: 'file-plus',
+      path: '',
+      color: 'blue-vivid',
+      width: '50',
+      height: '2',
+      type: 'origin_selection',
+      displayMobile: true,
+      mobileOrder: 8,
     }
   ];
 };
