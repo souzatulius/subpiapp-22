@@ -7,8 +7,6 @@ import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useScrollFade } from '@/hooks/useScrollFade';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 const DashboardLayout: React.FC = () => {
@@ -52,23 +50,7 @@ const DashboardLayout: React.FC = () => {
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        {/* Collapse button (desktop only) */}
-        {!isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="absolute left-0 top-24 bg-white shadow-md hover:bg-gray-100 z-30 rounded-r-md rounded-l-none border border-l-0"
-            aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
-            title={sidebarOpen ? "Recolher menu" : "Expandir menu"}
-          >
-            {sidebarOpen ? (
-              <ChevronLeft className="h-6 w-6" />
-            ) : (
-              <ChevronRight className="h-6 w-6" />
-            )}
-          </Button>
-        )}
+        {/* Removed the collapse button that was here */}
         
         <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
           {/* Desktop breadcrumb */}
