@@ -36,17 +36,10 @@ export const useComunicacaoDashboard = (
   useEffect(() => {
     if (isPreview || !user) {
       // For preview, use the default config
-      setCards(defaultConfig.config.map(card => ({
-        ...card,
-        height: '2' // Set all cards to double height
-      })));
+      setCards(defaultConfig.config);
     } else {
       // For logged-in users, use their saved config or the default if empty
-      const configToUse = dashboardConfig.config.length > 0 ? dashboardConfig.config : defaultConfig.config;
-      setCards(configToUse.map(card => ({
-        ...card,
-        height: '2' // Set all cards to double height
-      })));
+      setCards(dashboardConfig.config.length > 0 ? dashboardConfig.config : defaultConfig.config);
     }
   }, [isPreview, user, defaultConfig.config, dashboardConfig.config]);
 
@@ -64,7 +57,7 @@ export const useComunicacaoDashboard = (
   // Handle saving card edit
   const handleSaveCardEdit = (updatedCard: ActionCardItem) => {
     const updatedCards = cards.map(card => 
-      card.id === updatedCard.id ? {...updatedCard, height: '2'} : card
+      card.id === updatedCard.id ? updatedCard : card
     );
     
     setCards(updatedCards);
@@ -92,32 +85,21 @@ export const useComunicacaoDashboard = (
 
   // Handle cards reorder
   const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
-    // Ensure all cards have height of 2
-    const heightAdjustedCards = updatedCards.map(card => ({
-      ...card,
-      height: '2'
-    }));
-    
-    setCards(heightAdjustedCards);
+    setCards(updatedCards);
     
     // Save changes if not in preview mode
     if (!isPreview && user) {
-      dashboardConfig.saveConfig(heightAdjustedCards);
+      dashboardConfig.saveConfig(updatedCards);
     }
   };
 
   // Reset dashboard to default configuration
   const resetDashboard = () => {
-    const resetCards = defaultConfig.config.map(card => ({
-      ...card,
-      height: '2'
-    }));
-    
-    setCards(resetCards);
+    setCards(defaultConfig.config);
     
     // Save changes if not in preview mode
     if (!isPreview && user) {
-      dashboardConfig.saveConfig(resetCards);
+      dashboardConfig.saveConfig(defaultConfig.config);
     }
   };
 

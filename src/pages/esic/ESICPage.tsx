@@ -9,7 +9,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import MobileBottomNav from '@/components/layouts/MobileBottomNav';
 import BreadcrumbBar from '@/components/layouts/BreadcrumbBar';
 import ESICSearchHeader from '@/components/esic/ESICSearchHeader';
-import { useAuth } from '@/hooks/useSupabaseAuth';
 
 const ESICPage = () => {
   const navigate = useNavigate();
@@ -17,9 +16,7 @@ const ESICPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('todos');
   const isMobile = useIsMobile();
-  const { user } = useAuth();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -69,10 +66,8 @@ const ESICPage = () => {
                 
                 <div className="mt-4">
                   <ProcessoList 
-                    user={user}
                     viewMode={viewMode}
                     searchTerm={searchTerm}
-                    filterStatus={filterStatus}
                     filterOpen={filterOpen}
                     setFilterOpen={setFilterOpen}
                   />

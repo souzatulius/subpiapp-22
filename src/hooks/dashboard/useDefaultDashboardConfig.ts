@@ -24,23 +24,7 @@ export const useDefaultDashboardConfig = (
       if (department === 'comunicacao') {
         setConfig(getCommunicationActionCards());
       } else {
-        // Add an empty Pending Actions card as default
-        const defaultPendingCard: ActionCardItem = {
-          id: 'pending-actions',
-          title: 'Pendências',
-          subtitle: 'Ações que precisam da sua atenção',
-          iconId: 'alert-triangle',
-          path: '/dashboard',
-          color: 'orange-dark',
-          width: '50',  // Double width
-          height: '2',  // Double height
-          type: 'special',
-          isPendingActions: true,
-          displayMobile: true,
-          mobileOrder: 1
-        };
-        
-        setConfig([defaultPendingCard]);
+        setConfig([]);
       }
       setIsLoading(false);
     }, 300);

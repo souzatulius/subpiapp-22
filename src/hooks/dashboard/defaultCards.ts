@@ -32,19 +32,6 @@ export const getIconComponentFromId = (iconId: string): React.ElementType => {
 export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
     {
-      id: 'cadastro-demandas',
-      title: "De onde vem a solicitação?",
-      path: "/dashboard/comunicacao/cadastrar",
-      iconId: "plus-circle",
-      color: 'blue-vivid',
-      width: '50',
-      height: '2',
-      type: 'origin_selection',
-      isOriginSelection: true,
-      displayMobile: true,
-      mobileOrder: 1
-    },
-    {
       id: 'nova-solicitacao',
       title: "Nova Solicitação",
       path: "/dashboard/comunicacao/cadastrar",
@@ -54,7 +41,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 2
+      mobileOrder: 1
     },
     {
       id: 'responder-demandas',
@@ -67,7 +54,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'standard',
       hasBadge: false,
       displayMobile: true,
-      mobileOrder: 3
+      mobileOrder: 2
     },
     {
       id: 'consultar-demandas',
@@ -79,7 +66,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 4
+      mobileOrder: 3
     },
     {
       id: 'criar-nota',
@@ -93,7 +80,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       hasBadge: true,
       badgeValue: "0",
       displayMobile: true,
-      mobileOrder: 5
+      mobileOrder: 4
     },
     {
       id: 'aprovar-notas',
@@ -106,7 +93,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       type: 'standard',
       hasBadge: false,
       displayMobile: true,
-      mobileOrder: 6
+      mobileOrder: 5
     },
     {
       id: 'consultar-notas',
@@ -118,7 +105,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 7
+      mobileOrder: 6
     },
     {
       id: 'relatorios-comunicacao',
@@ -130,7 +117,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 8
+      mobileOrder: 7
     },
     {
       id: 'gerar-noticia',
@@ -142,7 +129,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 9
+      mobileOrder: 8
     },
     {
       id: 'ver-releases',
@@ -154,7 +141,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 10
+      mobileOrder: 9
     },
     {
       id: 'esic',
@@ -166,7 +153,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       height: '2',
       type: 'standard',
       displayMobile: true,
-      mobileOrder: 11,
+      mobileOrder: 10,
       allowedDepartments: ['comunicacao', 'gabinete']
     }
   ];
