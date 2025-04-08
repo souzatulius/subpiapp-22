@@ -44,7 +44,7 @@ export interface Demand {
   arquivo_url: string | null;
   anexos: string[] | null;
   servico_id?: string;
-  problema?: {
+  problema: {
     descricao: string | null;
   } | null;
   protocolo?: string | null;

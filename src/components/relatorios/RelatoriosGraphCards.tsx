@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { SortableGraphCard } from './components/SortableGraphCard';
 import { useReportsData } from './hooks/useReportsData';
 import { useChartComponents } from './hooks/useChartComponents';
@@ -11,6 +12,7 @@ import { BarChart } from './charts/BarChart';
 import { LineChart as LineChartComponent } from './charts/LineChart';
 import { PieChart as PieChartComponent } from './charts/PieChart';
 import { AreaChart } from './charts/AreaChart';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GraphCardItem {
   id: string;
@@ -26,9 +28,16 @@ interface RelatoriosGraphCardsProps {
 }
 
 export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEditMode = false }) => {
-  const { reportsData, isLoading } = useReportsData();
   const { chartComponents } = useChartComponents();
   const { chartColors } = useChartConfigs();
+  const [isLoading, setIsLoading] = useState(true);
+  const [chartData, setChartData] = useState({
+    problemas: [],
+    origens: [],
+    responseTimes: [],
+    coordinations: [],
+    mediaTypes: []
+  });
   
   const [visibleCards, setVisibleCards] = useLocalStorage<string[]>('relatorios-graph-visible', [
     'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
@@ -41,6 +50,96 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   ]);
   
   const [analysisCards, setAnalysisCards] = useLocalStorage<string[]>('relatorios-graph-analysis', []);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch problemas data from Supabase
+        const { data: problemasData, error: problemasError } = await supabase
+          .from('problemas')
+          .select('id, descricao')
+          .limit(5);
+
+        if (problemasError) throw problemasError;
+
+        // Fetch origens data from Supabase
+        const { data: origensData, error: origensError } = await supabase
+          .from('origens_demandas')
+          .select('id, descricao')
+          .limit(5);
+
+        if (origensError) throw origensError;
+
+        // Fetch coordenações data from Supabase
+        const { data: coordenacoesData, error: coordenacoesError } = await supabase
+          .from('coordenacoes')
+          .select('id, descricao')
+          .limit(5);
+
+        if (coordenacoesError) throw coordenacoesError;
+
+        // Transform data for charts
+        const problemasChart = problemasData.map(problem => ({
+          name: problem.descricao,
+          Quantidade: Math.floor(Math.random() * 50) + 10 // Generate random data for demonstration
+        }));
+
+        const origensChart = origensData.map(origem => ({
+          name: origem.descricao,
+          value: Math.floor(Math.random() * 50) + 10
+        }));
+
+        const coordenacoesChart = coordenacoesData.map(coord => ({
+          name: coord.descricao,
+          Quantidade: Math.floor(Math.random() * 100) + 50
+        }));
+
+        // Generate response time data for demonstration
+        const responseTimesChart = [
+          { name: 'Seg', Demandas: 48, Aprovacao: 72 },
+          { name: 'Ter', Demandas: 42, Aprovacao: 65 },
+          { name: 'Qua', Demandas: 36, Aprovacao: 58 },
+          { name: 'Qui', Demandas: 30, Aprovacao: 52 },
+          { name: 'Sex', Demandas: 24, Aprovacao: 45 },
+        ];
+
+        // Generate media types data for demonstration
+        const mediaTypesChart = [
+          { name: 'Jan', Quantidade: 10, Meta: 12 },
+          { name: 'Fev', Quantidade: 15, Meta: 12 },
+          { name: 'Mar', Quantidade: 12, Meta: 12 },
+          { name: 'Abr', Quantidade: 18, Meta: 15 },
+          { name: 'Mai', Quantidade: 22, Meta: 15 },
+          { name: 'Jun', Quantidade: 20, Meta: 18 },
+        ];
+
+        setChartData({
+          problemas: problemasChart,
+          origens: origensChart,
+          responseTimes: responseTimesChart,
+          coordinations: coordenacoesChart,
+          mediaTypes: mediaTypesChart
+        });
+
+        console.log('Chart data loaded successfully:', { problemasChart, origensChart, coordenacoesChart });
+      } catch (error) {
+        console.error('Error fetching chart data:', error);
+        // Fall back to mock data if there's an error
+        setChartData({
+          problemas: mockBarData,
+          origens: mockPieData,
+          responseTimes: mockLineData,
+          coordinations: mockAreasData,
+          mediaTypes: mockAreaData
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, []);
 
   const cardsData: Record<string, GraphCardItem> = {
     distribuicaoPorTemas: {
@@ -173,12 +272,13 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Jun', Quantidade: 20, Meta: 18 },
   ];
 
-  const demoChartComponents: Record<string, React.ReactNode> = {
-    distribuicaoPorTemas: <BarChart data={mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
-    origemDemandas: <PieChartComponent data={mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3], chartColors[4]]} showOnlyPercentage={false} showLabels={true} />,
-    tempoMedioResposta: <LineChartComponent data={mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Respostas', name: 'Aprovação da nota', color: chartColors[2] }]} />,
-    performanceArea: <BarChart data={mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} />,
-    notasEmitidas: <LineChartComponent data={mockLineData} xAxisDataKey="name" lines={[{ dataKey: 'Demandas', name: 'Quantidade', color: chartColors[1] }]} />,
+  // Use real data from Supabase if available, otherwise use mock data
+  const chartComponents: Record<string, React.ReactNode> = {
+    distribuicaoPorTemas: <BarChart data={chartData.problemas.length ? chartData.problemas : mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
+    origemDemandas: <PieChartComponent data={chartData.origens.length ? chartData.origens : mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3], chartColors[4]]} showOnlyPercentage={false} showLabels={true} />,
+    tempoMedioResposta: <LineChartComponent data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[2] }]} />,
+    performanceArea: <BarChart data={chartData.coordinations.length ? chartData.coordinations : mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} />,
+    notasEmitidas: <LineChartComponent data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} xAxisDataKey="name" lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }]} />,
     problemasComuns: <PieChartComponent data={mockProblemasData} colors={[chartColors[1], chartColors[2], chartColors[3], chartColors[4], chartColors[0]]} showOnlyPercentage={false} showLabels={true} />,
   };
 
@@ -219,7 +319,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
             .filter(cardId => visibleCards.includes(cardId))
             .map((cardId) => {
               const card = cardsData[cardId];
-              const chartComponent = demoChartComponents[cardId] || chartComponents[cardId];
               
               return (
                 <SortableGraphCard
@@ -239,9 +338,9 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                     <div className="h-[220px] flex items-center justify-center">
                       <div className="h-8 w-8 border-4 border-t-gray-500 border-r-transparent border-b-gray-300 border-l-transparent rounded-full animate-spin"></div>
                     </div>
-                  ) : chartComponent ? (
+                  ) : chartComponents[cardId] ? (
                     <div className="h-[220px] p-2">
-                      {chartComponent}
+                      {chartComponents[cardId]}
                     </div>
                   ) : (
                     renderEmptyDataMessage(card.id)

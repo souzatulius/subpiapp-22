@@ -16,6 +16,7 @@ import '@/components/ranking/charts/ChartRegistration';
 const RelatoriosPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
