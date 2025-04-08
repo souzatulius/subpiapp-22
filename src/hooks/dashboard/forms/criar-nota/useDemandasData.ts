@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/types/demand';
+import { Demand } from './types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -29,7 +29,28 @@ export const useDemandasData = () => {
             coordenacao_id,
             servico_id,
             arquivo_url,
-            anexos
+            anexos,
+            prazo_resposta,
+            prioridade,
+            nome_solicitante,
+            telefone_solicitante,
+            email_solicitante,
+            veiculo_imprensa,
+            endereco,
+            bairro_id,
+            tipo_midia_id,
+            origem_id,
+            protocolo,
+            bairros:bairro_id(
+              id, 
+              nome,
+              distrito_id,
+              distritos:distrito_id(id, nome)
+            ),
+            origens_demandas:origem_id(id, descricao),
+            tipos_midia:tipo_midia_id(id, descricao),
+            servicos:servico_id(id, descricao),
+            problemas:problema_id(id, descricao)
           `)
           .in('status', ['respondida', 'aguardando_nota'])
           .order('horario_publicacao', { ascending: false });
@@ -53,63 +74,25 @@ export const useDemandasData = () => {
         console.log('Demandas com notas:', demandasComNotas.size);
         console.log('Demandas disponíveis para criar nota:', demandasSemNotas.length);
         
-        // Buscar informações do problema para cada demanda
-        const demandasProcessadas = await Promise.all(
-          demandasSemNotas.map(async (demanda) => {
-            if (demanda.problema_id) {
-              const { data: problemaData } = await supabase
-                .from('problemas')
-                .select('id, descricao, coordenacao_id')
-                .eq('id', demanda.problema_id)
-                .single();
-              
-              // Criar objeto completo da demanda com todas as propriedades necessárias
-              return {
-                ...demanda,
-                supervisao_tecnica: null, // Mantemos esse campo para compatibilidade, mas como null
-                area_coordenacao: problemaData ? { descricao: problemaData.descricao } : null,
-                prioridade: "",
-                horario_publicacao: "",
-                prazo_resposta: "",
-                endereco: null,
-                nome_solicitante: null,
-                email_solicitante: null,
-                telefone_solicitante: null,
-                veiculo_imprensa: null,
-                origem: null,
-                tipo_midia: null,
-                bairro: null,
-                autor: null,
-                servico: null,
-                // Garantir que esses campos existam
-                arquivo_url: demanda.arquivo_url || null,
-                anexos: demanda.anexos || []
-              } as Demand;
-            }
-            
-            // Se não tiver problema, criar objeto com valores padrão
-            return {
-              ...demanda,
-              supervisao_tecnica: null,
-              area_coordenacao: null,
-              prioridade: "",
-              horario_publicacao: "",
-              prazo_resposta: "",
-              endereco: null,
-              nome_solicitante: null,
-              email_solicitante: null,
-              telefone_solicitante: null,
-              veiculo_imprensa: null,
-              origem: null,
-              tipo_midia: null,
-              bairro: null,
-              autor: null,
-              servico: null,
-              arquivo_url: demanda.arquivo_url || null,
-              anexos: demanda.anexos || []
-            } as Demand;
-          })
-        );
+        // Processar as demandas para o formato correto
+        const demandasProcessadas = demandasSemNotas.map(demanda => {
+          return {
+            ...demanda,
+            supervisao_tecnica: null,
+            area_coordenacao: demanda.problemas 
+              ? { descricao: demanda.problemas.descricao } 
+              : null,
+            origem: demanda.origens_demandas,
+            tipo_midia: demanda.tipos_midia,
+            bairro: demanda.bairros,
+            autor: null,
+            servico: demanda.servicos,
+            problema: demanda.problemas,
+            horario_publicacao: demanda.horario_publicacao || "",
+            arquivo_url: demanda.arquivo_url || null,
+            anexos: demanda.anexos || []
+          } as Demand;
+        });
         
         setDemandas(demandasProcessadas);
         setFilteredDemandas(demandasProcessadas);
@@ -138,7 +121,9 @@ export const useDemandasData = () => {
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = demandas.filter(demanda => 
       demanda.titulo?.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
+      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.origem?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
+      demanda.problema?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
     );
     
     setFilteredDemandas(filtered);
