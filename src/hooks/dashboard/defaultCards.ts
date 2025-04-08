@@ -128,12 +128,14 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Relatórios da Comunicação',
+      subtitle: 'Estatísticas e análises',
       iconId: 'PieChart', // Updated icon: gráfico pizza
       path: '/relatorios',
       color: 'orange-light', // Updated color: Bg laranja claro
       width: '50',
       height: '1',
       type: 'standard',
+      chartId: 'origemDemandas', // Add the chart ID
       displayMobile: true,
       mobileOrder: 7
     },

@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ActionCardItem } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
+import ChartPreview from '@/components/dashboard/charts/ChartPreview';
 
 interface StandardCardProps {
   card: ActionCardItem;
@@ -34,6 +35,18 @@ const StandardCard: React.FC<StandardCardProps> = ({ card, isMobileView }) => {
       </div>
     );
   };
+  
+  // If this card has a chartId, render the chart instead of the standard content
+  if (card.chartId) {
+    return (
+      <div 
+        className="w-full h-full flex flex-col items-center justify-center cursor-pointer py-4 px-4"
+        onClick={handleCardClick}
+      >
+        <ChartPreview chartId={card.chartId} />
+      </div>
+    );
+  }
 
   return (
     <div 

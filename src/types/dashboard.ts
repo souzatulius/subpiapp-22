@@ -1,78 +1,45 @@
-// Add this to the types file if it doesn't exist
+export type CardWidth = '25' | '50' | '75' | '100';
+export type CardHeight = '1' | '2' | '3' | '4';
 export type CardColor = 
+  | 'bg-white' 
   | 'bg-blue-500' 
-  | 'bg-green-500' 
-  | 'bg-red-500' 
-  | 'bg-purple-500' 
-  | 'bg-pink-500' 
-  | 'bg-indigo-500' 
-  | 'bg-yellow-500'  
-  | 'bg-gray-500'   
-  | 'blue-vivid'
-  | 'blue-light'
-  | 'blue-dark'
-  | 'green-neon'
-  | 'green-dark'
+  | 'bg-orange-500' 
+  | 'bg-gray-500' 
+  | 'bg-yellow-500' 
+  | 'bg-teal-500'
+  | 'bg-green-500'
+  | 'bg-red-500'
+  | 'bg-purple-500'
+  | 'deep-blue'
   | 'gray-light'
   | 'gray-medium'
-  | 'orange-dark'
   | 'orange-light'
-  | 'deep-blue'
-  | 'neutral-800'
-  | 'orange-700'
-  | 'bg-white'   // Added white background 
-  | string;  // Added string to make it more flexible with user input
+  | 'blue-light';
+export type CardType = 'standard' | 'data_dynamic' | 'in_progress_demands' | 'recent_notes' | 'origin_selection' | 'smart_search';
 
-// Additional type definitions needed
 export interface ActionCardItem {
   id: string;
   title: string;
-  subtitle?: string;
   iconId: string;
   path: string;
   color: CardColor;
-  width: CardWidth;
-  height: CardHeight;
-  type: CardType;
+  width?: CardWidth;
+  height?: CardHeight;
+  type?: CardType;
+  isHidden?: boolean;
+  isCustom?: boolean;
+  dataSourceKey?: string;
   displayMobile?: boolean;
   mobileOrder?: number;
-  hasBadge?: boolean;
-  badgeValue?: string;
-  isHidden?: boolean;
-  isSearch?: boolean;
   isQuickDemand?: boolean;
-  isCustom?: boolean;
-  allowedDepartments?: string[];
-  dataSourceKey?: DataSourceKey;
+  isSearch?: boolean;
   isOverdueDemands?: boolean;
   isPendingActions?: boolean;
   isNewCardButton?: boolean;
   isStandard?: boolean;
+  allowedDepartments?: string[];
+  hasBadge?: boolean;
+  badgeValue?: number;
+  subtitle?: string;
+  chartId?: string; // Add this new property
 }
-
-export type CardWidth = '25' | '50' | '75' | '100';
-export type CardHeight = '1' | '2' | '3' | '4';
-export type CardType = 
-  | 'standard' 
-  | 'special' 
-  | 'dynamic' 
-  | 'grid'
-  | 'data_dynamic'
-  | 'in_progress_demands'
-  | 'recent_notes'
-  | 'origin_selection'
-  | 'smart_search'  // Added smart_search type
-  | string; // Added string to make it more flexible with user input
-
-export type DataSourceKey = 
-  | 'pendingDemands' 
-  | 'pendingNotes' 
-  | 'overdueDemands' 
-  | 'approvedNotes'
-  | 'pendencias_por_coordenacao'
-  | 'notas_aguardando_aprovacao'
-  | 'respostas_atrasadas'
-  | 'demandas_aguardando_nota'
-  | 'ultimas_acoes_coordenacao'
-  | 'comunicados_por_cargo'
-  | string; // Added string to make it more flexible with user input

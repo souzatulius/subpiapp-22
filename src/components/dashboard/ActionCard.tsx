@@ -6,6 +6,7 @@ import CardControls from './card-parts/CardControls';
 import { MoveIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
+import ChartPreview from './charts/ChartPreview';
 
 export interface ActionCardProps {
   id: string;
@@ -28,6 +29,8 @@ export interface ActionCardProps {
   iconSize?: 'sm' | 'md' | 'lg' | 'xl';
   isMobileView?: boolean;
   showControls?: boolean;
+  subtitle?: string;
+  chartId?: string; // Add chartId prop
 }
 
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
@@ -43,6 +46,7 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
 const ActionCard = ({
   id,
   title,
+  subtitle,
   iconId,
   path,
   color,
@@ -54,7 +58,8 @@ const ActionCard = ({
   iconSize = 'md',
   isMobileView = false,
   children,
-  showControls = true
+  showControls = true,
+  chartId
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const colorClasses = getColorClasses(color);
@@ -102,6 +107,10 @@ const ActionCard = ({
       <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
         {children ? (
           <>{children}</>
+        ) : chartId ? (
+          <div className="w-full h-full flex flex-col">
+            <ChartPreview chartId={chartId} />
+          </div>
         ) : (
           <>
             <div className={`mb-2.5 ${textColorClass}`}>
@@ -111,6 +120,11 @@ const ActionCard = ({
               <h3 className={`font-semibold ${textColorClass} text-lg leading-tight break-words text-balance`}>
                 {title}
               </h3>
+              {subtitle && (
+                <p className={`text-sm ${textColorClass} opacity-80 mt-1 line-clamp-2`}>
+                  {subtitle}
+                </p>
+              )}
             </div>
           </>
         )}
