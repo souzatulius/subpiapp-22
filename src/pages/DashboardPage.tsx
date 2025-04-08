@@ -39,7 +39,7 @@ const DashboardPage: React.FC = () => {
     handleCardHide,
     handleCardsReorder,
     resetDashboard
-  } = useDashboardCards(userCoordenaticaoId);
+  } = useDashboardCards();
 
   const scrollFadeStyles = useScrollFade();
 
