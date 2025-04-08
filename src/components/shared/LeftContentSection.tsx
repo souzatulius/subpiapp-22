@@ -14,14 +14,15 @@ const LeftContentSection: React.FC = () => {
   const location = useLocation();
   const titleLine1Ref = useRef<HTMLDivElement>(null);
   const titleLine2Ref = useRef<HTMLDivElement>(null);
+  const titleLine3Ref = useRef<HTMLDivElement>(null);
 
   // Check if the current page is login or register
   const isLoginPage = location.pathname === '/login';
   const isRegisterPage = location.pathname === '/register';
   
   useEffect(() => {
-    // Initialize fitty on both title lines
-    if (titleLine1Ref.current && titleLine2Ref.current) {
+    // Initialize fitty on all three title lines
+    if (titleLine1Ref.current && titleLine2Ref.current && titleLine3Ref.current) {
       const fittyInstance1 = fitty(titleLine1Ref.current, {
         minSize: 24,
         maxSize: 90,
@@ -34,10 +35,17 @@ const LeftContentSection: React.FC = () => {
         multiLine: false
       });
       
+      const fittyInstance3 = fitty(titleLine3Ref.current, {
+        minSize: 24,
+        maxSize: 90,
+        multiLine: false
+      });
+      
       // Clean up on unmount
       return () => {
         fittyInstance1.unsubscribe();
         fittyInstance2.unsubscribe();
+        fittyInstance3.unsubscribe();
       };
     }
   }, []);
@@ -45,8 +53,9 @@ const LeftContentSection: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto md:mx-0">
       <h1 className="font-bold mb-6 overflow-hidden">
-        <div ref={titleLine1Ref} className="text-[#002855] bg-transparent whitespace-nowrap w-full">Demandas com mais</div>
-        <div ref={titleLine2Ref} className="text-[#f57c35] whitespace-nowrap w-full">eficiência</div>
+        <div ref={titleLine1Ref} className="text-[#002855] bg-transparent whitespace-nowrap w-full">Demandas</div>
+        <div ref={titleLine2Ref} className="text-[#002855] bg-transparent whitespace-nowrap w-full">com mais</div>
+        <div ref={titleLine3Ref} className="text-[#f57c35] whitespace-nowrap w-full">eficiência</div>
       </h1>
       
       <p className="text-gray-600 text-lg mb-8 max-w-xl">
