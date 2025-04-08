@@ -51,14 +51,16 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     if (!card.iconId) return null;
     
     // Try direct match first
-    if (LucideIcons[card.iconId as keyof typeof LucideIcons]) {
-      return LucideIcons[card.iconId as keyof typeof LucideIcons];
+    const directMatch = LucideIcons[card.iconId as keyof typeof LucideIcons];
+    if (directMatch) {
+      return directMatch;
     }
     
     // Try capitalized format
     const formattedIconId = card.iconId.charAt(0).toUpperCase() + card.iconId.slice(1);
-    if (LucideIcons[formattedIconId as keyof typeof LucideIcons]) {
-      return LucideIcons[formattedIconId as keyof typeof LucideIcons];
+    const capitalizedMatch = LucideIcons[formattedIconId as keyof typeof LucideIcons];
+    if (capitalizedMatch) {
+      return capitalizedMatch;
     }
     
     // Return default icon as fallback
@@ -79,7 +81,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       return (
         <DynamicDataCard 
           title={card.title}
-          icon={IconComponent && <IconComponent className="h-8 w-8" />}
+          icon={IconComponent ? React.createElement(IconComponent, { className: "h-8 w-8" }) : null}
           color={card.color}
           dataSourceKey={card.dataSourceKey}
           coordenacaoId={userDepartment || 'default'}

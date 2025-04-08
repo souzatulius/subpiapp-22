@@ -77,8 +77,12 @@ const ActionCard = ({
     }
     
     // Fallback to our custom icon loader
-    const FallbackIcon = getIconComponentFromId(iconId);
-    return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
+    const IconComponent = getIconComponentFromId(iconId);
+    if (IconComponent) {
+      return React.createElement(IconComponent, { className: getIconSize(iconSize) });
+    }
+    
+    return null;
   };
 
   return (

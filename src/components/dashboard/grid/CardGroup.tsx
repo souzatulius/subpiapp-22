@@ -43,7 +43,9 @@ const CardGroup: React.FC<CardGroupProps> = ({
         <DynamicDataCard
           key={card.id}
           title={card.title}
-          icon={IconComponent ? <IconComponent className={isMobileView ? "w-12 h-12" : "w-16 h-16"} /> : null}
+          icon={IconComponent ? React.createElement(IconComponent, { 
+            className: isMobileView ? "w-12 h-12" : "w-16 h-16" 
+          }) : null}
           color={card.color}
           dataSourceKey={card.dataSourceKey as any}
           coordenacaoId={specialCardsData?.coordenacaoId || ''}

@@ -1,18 +1,23 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
 import * as LucideIcons from 'lucide-react';
 
 // Function to get a Lucide icon component by its ID string
-export const getIconComponentFromId = (iconId: string) => {
+export const getIconComponentFromId = (iconId: string | undefined) => {
+  if (!iconId) {
+    return LucideIcons.FileText;
+  }
+  
   // First try to access the icon directly from LucideIcons
-  if (iconId && LucideIcons[iconId as keyof typeof LucideIcons]) {
+  if (LucideIcons[iconId as keyof typeof LucideIcons]) {
     return LucideIcons[iconId as keyof typeof LucideIcons];
   }
   
   // If not found, use a standardized format to match our naming convention
-  const formattedIconId = iconId?.charAt(0).toUpperCase() + iconId?.slice(1);
-  if (formattedIconId && LucideIcons[formattedIconId as keyof typeof LucideIcons]) {
+  const formattedIconId = iconId.charAt(0).toUpperCase() + iconId.slice(1);
+  if (LucideIcons[formattedIconId as keyof typeof LucideIcons]) {
     return LucideIcons[formattedIconId as keyof typeof LucideIcons];
   }
   
