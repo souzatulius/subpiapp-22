@@ -16,10 +16,8 @@ const Index = () => {
       {/* Main content */}
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Content */}
-        <div className="w-full md:w-1/2 sticky top-0 h-screen px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
-          <div className="max-w-2xl mx-auto md:mx-0">
-            <LeftContentSection />
-          </div>
+        <div className="w-full md:w-1/2 px-4 sm:px-6 md:px-16 lg:px-20 py-12 flex flex-col justify-center">
+          <LeftContentSection />
         </div>
         
         {/* Right side with blue background and background image (only on desktop) */}
