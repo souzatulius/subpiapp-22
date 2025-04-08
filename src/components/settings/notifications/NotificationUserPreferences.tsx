@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
-import { ToggleLeft } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import {
@@ -14,10 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
 
 interface NotificationPreferences {
   app: boolean;
   email: boolean;
+  whatsapp: boolean;
   resumo_diario: boolean;
   frequencia?: string;
 }
@@ -27,11 +28,18 @@ interface FrequencyState {
   label: string;
 }
 
-const NotificationUserPreferences = () => {
+interface NotificationUserPreferencesProps {
+  channelType?: 'app' | 'email' | 'whatsapp';
+}
+
+const NotificationUserPreferences: React.FC<NotificationUserPreferencesProps> = ({ 
+  channelType = 'app' 
+}) => {
   const { user } = useAuth();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     app: true,
     email: true,
+    whatsapp: false,
     resumo_diario: true,
   });
   const [frequency, setFrequency] = useState<FrequencyState>({
@@ -63,6 +71,7 @@ const NotificationUserPreferences = () => {
         setPreferences({
           app: configData.app !== undefined ? Boolean(configData.app) : true,
           email: configData.email !== undefined ? Boolean(configData.email) : true,
+          whatsapp: configData.whatsapp !== undefined ? Boolean(configData.whatsapp) : false,
           resumo_diario: configData.resumo_diario !== undefined ? Boolean(configData.resumo_diario) : true,
           frequencia: typeof configData.frequencia === 'string' ? configData.frequencia : 'diario',
         });
@@ -85,10 +94,10 @@ const NotificationUserPreferences = () => {
     switch (value) {
       case 'imediata':
         return 'Imediata';
+      case 'seis_horas':
+        return 'A cada 6 horas';
       case 'diario':
         return 'Diário';
-      case 'semanal':
-        return 'Semanal';
       default:
         return 'Diário';
     }
@@ -128,6 +137,7 @@ const NotificationUserPreferences = () => {
       setFrequency({ value, label });
 
       const newPreferences = { ...preferences, frequencia: value };
+      setPreferences(newPreferences);
       
       const { error } = await supabase
         .from('usuarios')
@@ -153,75 +163,85 @@ const NotificationUserPreferences = () => {
   };
 
   if (loading) {
-    return <div>Carregando preferências...</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <span className="ml-2 text-gray-500">Carregando preferências...</span>
+      </div>
+    );
+  }
+
+  const getChannelTitle = () => {
+    switch(channelType) {
+      case 'app': return 'Notificações no Aplicativo';
+      case 'email': return 'Notificações por Email';
+      case 'whatsapp': return 'Notificações por WhatsApp';
+      default: return 'Preferências de Notificação';
+    }
+  }
+
+  const getChannelDescription = () => {
+    switch(channelType) {
+      case 'app': return 'Receba notificações diretamente na plataforma';
+      case 'email': return 'Receba notificações importantes por email';
+      case 'whatsapp': return 'Receba notificações via WhatsApp';
+      default: return 'Gerencie como deseja receber suas notificações';
+    }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Preferências de Notificação</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <Card className="border-0 shadow-none">
+      <CardContent className="space-y-6 p-0">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="app-notifications" className="text-base">Notificações no Aplicativo</Label>
+              <Label htmlFor={`${channelType}-notifications`} className="text-base">
+                {getChannelTitle()}
+              </Label>
               <p className="text-sm text-muted-foreground">
-                Receba notificações diretamente na plataforma
+                {getChannelDescription()}
               </p>
             </div>
             <Switch
-              id="app-notifications"
-              checked={preferences.app}
-              onCheckedChange={(value) => updatePreference('app', value)}
+              id={`${channelType}-notifications`}
+              checked={preferences[channelType]}
+              onCheckedChange={(value) => updatePreference(channelType as keyof NotificationPreferences, value)}
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="email-notifications" className="text-base">Notificações por Email</Label>
-              <p className="text-sm text-muted-foreground">
-                Receba notificações importantes por email
-              </p>
+          {preferences[channelType] && (
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor={`${channelType}-daily-summary`} className="text-base">Resumo de Atividades</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receba um resumo das atividades e notificações
+                </p>
+              </div>
+              <Switch
+                id={`${channelType}-daily-summary`}
+                checked={preferences.resumo_diario}
+                onCheckedChange={(value) => updatePreference('resumo_diario', value)}
+              />
             </div>
-            <Switch
-              id="email-notifications"
-              checked={preferences.email}
-              onCheckedChange={(value) => updatePreference('email', value)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="daily-summary" className="text-base">Resumo de Atividades</Label>
-              <p className="text-sm text-muted-foreground">
-                Receba um resumo das atividades e notificações
-              </p>
-            </div>
-            <Switch
-              id="daily-summary"
-              checked={preferences.resumo_diario}
-              onCheckedChange={(value) => updatePreference('resumo_diario', value)}
-            />
-          </div>
+          )}
         </div>
 
-        {preferences.resumo_diario && (
+        {preferences[channelType] && preferences.resumo_diario && (
           <div>
-            <Label htmlFor="frequency-select" className="text-base mb-2 block">
+            <Label htmlFor={`${channelType}-frequency-select`} className="text-base mb-2 block">
               Frequência do Resumo
             </Label>
             <Select
               value={frequency.value}
               onValueChange={updateFrequency}
             >
-              <SelectTrigger id="frequency-select">
+              <SelectTrigger id={`${channelType}-frequency-select`} className="w-full">
                 <SelectValue placeholder={frequency.label} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="imediata">Imediata</SelectItem>
+                <SelectItem value="seis_horas">A cada 6 horas</SelectItem>
                 <SelectItem value="diario">Diário</SelectItem>
-                <SelectItem value="semanal">Semanal</SelectItem>
               </SelectContent>
             </Select>
           </div>
