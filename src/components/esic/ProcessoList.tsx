@@ -94,22 +94,20 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       
       // Transform the data to match our Processo interface
       if (data) {
-        // Map the database records to match the Processo interface
-        const processedData = data.map((item: ProcessoData) => {
-          return {
-            id: item.id,
-            numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
-            titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
-            categoria: item.situacao === 'em_tramitacao' ? 'Em tramitação' : 
-                      item.situacao === 'prazo_prorrogado' ? 'Prazo prorrogado' : 'Concluído',
-            status: item.status === 'novo_processo' ? 'Em análise' : 
-                   item.status === 'aguardando_justificativa' ? 'Aguardando complemento' : 
-                   item.status === 'aguardando_aprovacao' ? 'Em análise' : 'Concluído',
-            created_at: item.criado_em,
-            prazo: new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
-            solicitante: 'Solicitante', // Default value as we don't have this in our data
-          };
-        });
+        // Map the database records to the Processo interface
+        const processedData: Processo[] = data.map((item: ProcessoData) => ({
+          id: item.id,
+          numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
+          titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
+          categoria: item.situacao === 'em_tramitacao' ? 'Em tramitação' : 
+                    item.situacao === 'prazo_prorrogado' ? 'Prazo prorrogado' : 'Concluído',
+          status: item.status === 'novo_processo' ? 'Em análise' : 
+                 item.status === 'aguardando_justificativa' ? 'Aguardando complemento' : 
+                 item.status === 'aguardando_aprovacao' ? 'Em análise' : 'Concluído',
+          created_at: item.criado_em,
+          prazo: new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+          solicitante: 'Solicitante', // Default value as we don't have this in our data
+        }));
         
         setProcessos(processedData);
       }

@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
+import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -45,6 +46,9 @@ const DashboardPage: React.FC = () => {
     resetDashboard
   } = useDashboardCards();
 
+  // Add a reference to the card storage
+  const { saveCardConfig } = useCardStorage(user, userCoordenaticaoId);
+
   const scrollFadeStyles = useScrollFade();
 
   const toggleSidebar = () => {
@@ -68,6 +72,23 @@ const DashboardPage: React.FC = () => {
       description: "As alterações foram salvas com sucesso.",
       variant: "default"
     });
+  };
+
+  const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
+    // First update the local state
+    handleCardsReorder(updatedCards);
+    
+    // Then save to database using the useCardStorage hook
+    if (user) {
+      const saved = await saveCardConfig(updatedCards);
+      if (!saved) {
+        toast({
+          title: "Erro ao salvar",
+          description: "Não foi possível salvar a posição dos cards.",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   const handleResetDashboard = () => {
@@ -146,7 +167,7 @@ const DashboardPage: React.FC = () => {
                   <div className="px-2 py-2">
                     <CardGridContainer 
                       cards={cards.filter(card => !card.isHidden)} 
-                      onCardsChange={handleCardsReorder}
+                      onCardsChange={handleCardsChange}
                       onEditCard={handleCardEdit}
                       onHideCard={handleCardHide}
                       isMobileView={isMobile}
