@@ -51,13 +51,6 @@ const Settings = () => {
   return (
     <AdminProtectedRoute>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        {/* Fixed breadcrumb for mobile */}
-        {isMobile && (
-          <div className="fixed top-0 left-0 right-0 z-40 bg-white">
-            <BreadcrumbBar onSettingsClick={handleBackClick} />
-          </div>
-        )}
-        
         {/* Header with fade effect on mobile */}
         <div 
           style={isMobile ? scrollFadeStyles : undefined}
@@ -71,7 +64,7 @@ const Settings = () => {
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
           <main className={`flex-1 overflow-hidden flex flex-col ${isMobile ? 'pt-10' : ''}`}>
-            {/* Desktop breadcrumb */}
+            {/* Desktop breadcrumb - only show on desktop before content */}
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
             
             <div className="max-w-full mx-auto flex-1">
@@ -82,6 +75,9 @@ const Settings = () => {
                     className={`${isMobile ? 'transition-all duration-300' : ''}`}
                   >
                     <SettingsDashboard searchQuery={searchQuery} />
+                    
+                    {/* Mobile breadcrumb - placed after WelcomeCard for mobile */}
+                    {isMobile && <div className="mt-4"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                   </div>
                 ) : (
                   <div>
@@ -91,6 +87,10 @@ const Settings = () => {
                     >
                       {getSectionTitle(activeSection)}
                     </h1>
+                    
+                    {/* Mobile breadcrumb for non-dashboard sections */}
+                    {isMobile && <div className="mb-4"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
+                    
                     <SettingsContent activeSection={activeSection} />
                   </div>
                 )}
