@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DndContext,
@@ -27,7 +26,7 @@ export interface UnifiedCardGridProps {
   showSpecialFeatures?: boolean;
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
-  onQuickDemandSubmit?: () => void;
+  onQuickDemandSubmit?: (query: string) => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
 }
@@ -88,28 +87,32 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   // Apply specific dimensions for certain cards
   const processedCards = displayedCards.map(card => {
     if (isMobileView) {
-      // Apply special dimensions for specific cards on mobile
-      if (card.title === "Relatórios da Comunicação" || card.title === "Ações Pendentes") {
-        const mobileSpecific = getMobileSpecificDimensions(card.title);
-        return {
-          ...card,
-          width: mobileSpecific.width,
-          height: mobileSpecific.height
-        };
-      }
+      // Aplicar dimensões específicas para cards no modo mobile
+      const mobileSpecific = getMobileSpecificDimensions(card.title);
+      return {
+        ...card,
+        width: mobileSpecific.width,
+        height: mobileSpecific.height
+      };
     } else {
-      // Desktop-specific adjustments
-      if (card.title === "Relatórios da Comunicação") {
+      // Ajustes específicos para desktop
+      if (card.title === "Busca Rápida") {
         return {
           ...card,
-          width: '50' as CardWidth, // 2 columns - explicit type cast to CardWidth
-          height: '1' as CardHeight  // 1 row - explicit type cast to CardHeight
+          width: '100' as CardWidth, // 4 columns
+          height: '0.5' as CardHeight  // Half row height
         };
-      } else if (card.title === "Ações Pendentes") {
+      } else if (card.title === "Demandas") {
         return {
           ...card,
-          width: '25' as CardWidth, // 1 column - explicit type cast to CardWidth
-          height: '2' as CardHeight  // 2 rows - explicit type cast to CardHeight
+          width: '25' as CardWidth, // 1 column
+          height: '1' as CardHeight  // 1 row
+        };
+      } else if (card.title === "Origem das Demandas") {
+        return {
+          ...card,
+          width: '50' as CardWidth, // 2 columns
+          height: '2' as CardHeight  // 2 rows
         };
       }
     }

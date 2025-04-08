@@ -55,7 +55,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '',
       color: 'bg-white',
       width: '100', // Full width
-      height: '1', // Half height
+      height: '0.5', // Half height
       type: 'smart_search',
       isSearch: true,
       displayMobile: true,
@@ -67,11 +67,24 @@ export const getDefaultCards = (): ActionCardItem[] => {
       iconId: 'FileText',
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue',
-      width: '25',
-      height: '2',
+      width: '25', // 1 column on desktop
+      height: '1', // 1 row
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
+    },
+    {
+      id: uuidv4(),
+      title: 'Origem das Demandas',
+      iconId: 'PieChart',
+      path: '/dashboard/comunicacao/relatorios',
+      color: 'orange-light',
+      width: '50', // 2 columns on desktop
+      height: '2',  // 2 rows on desktop
+      type: 'standard',
+      chartId: 'origemDemandas',
+      displayMobile: true,
+      mobileOrder: 7
     },
     {
       id: uuidv4(),
@@ -165,7 +178,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       path: '',
       color: 'bg-white',
       width: '100', // Full width
-      height: '1', // Half height
+      height: '0.5', // Half height
       type: 'smart_search',
       isSearch: true,
       displayMobile: true,
