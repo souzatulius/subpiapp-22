@@ -1,3 +1,4 @@
+
 import React from 'react';
 import SortableActionCard from '../SortableActionCard';
 import { ActionCardItem } from '@/types/dashboard';
@@ -42,7 +43,9 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   specialCardsData
 }) => {
   const { userDepartment, isComunicacao } = useDepartmentData();
-  
+  const IconComponent = card.iconId ? getIconComponentFromId(card.iconId) : null;
+
+  // Get icon component from ID
   function getIconComponentFromId(iconId: string) {
     const IconMap = {
       'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
@@ -70,9 +73,9 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     );
   }
 
-  const IconComponent = card.iconId ? getIconComponentFromId(card.iconId) : null;
-  
+  // Render the appropriate card content based on the card type
   const renderCardContent = () => {
+    // Check if it's a dynamic data card
     if (card.type === 'data_dynamic' && card.dataSourceKey) {
       return (
         <DynamicDataCard 
@@ -98,7 +101,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       );
     }
     
-    if (card.isSearch || card.type === 'smart_search') {
+    if (card.isSearch) {
       return (
         <SearchCard
           card={card}
@@ -122,6 +125,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     if (card.isPendingActions) {
       return (
         <PendingActionsCardWrapper
+          card={card}
           notesToApprove={specialCardsData.notesToApprove}
           responsesToDo={specialCardsData.responsesToDo}
           isComunicacao={isComunicacao}
@@ -139,6 +143,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       );
     }
     
+    // Default to standard card
     return (
       <StandardCard 
         card={card}
@@ -150,7 +155,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' ? {
+      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' ? {
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 

@@ -12,9 +12,7 @@ export const getWidthClass = (width?: string, isMobileView: boolean = false): st
       case '25':
         return 'col-span-1';
       case '50':
-        return 'col-span-2';
       case '75':
-        return 'col-span-2';
       case '100':
         return 'col-span-2';
       default:
@@ -42,10 +40,10 @@ export const getWidthClass = (width?: string, isMobileView: boolean = false): st
 export const getHeightClass = (height?: string): string => {
   switch (height) {
     case '1':
-      return 'row-span-1 h-32'; // Fixed height for consistency
+      return 'h-20'; // 5rem or 80px
     case '2':
-      return 'row-span-2 h-64'; // Fixed height for consistency
+      return 'h-40'; // 10rem or 160px
     default:
-      return 'row-span-1 h-32'; // Default fixed height
+      return 'h-20'; // Default height
   }
 };

@@ -8,10 +8,8 @@ import KPICard from '@/components/settings/dashboard-management/KPICard';
 import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
-import SearchCard from './grid/card-types/SearchCard';
 import CardControls from './card-parts/CardControls';
 import { useNavigate } from 'react-router-dom';
-import { getColorClasses, getHoverColorClasses, getTextColorClass } from './utils/cardColorUtils';
 
 export interface Controls {
   cardId: string;
@@ -80,7 +78,6 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   specialCardsData?: any;
   hasSubtitle?: boolean;
   isMobileView?: boolean;
-  children?: React.ReactNode;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -89,7 +86,6 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     isDraggable = false,
     isEditing = false,
     disableWiggleEffect = true,
-    children,
     ...rest
   } = props;
 
@@ -123,7 +119,6 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
         sortableProps={isDraggable ? { attributes, listeners } : undefined} 
         isEditing={isEditing}
         disableWiggleEffect={disableWiggleEffect}
-        children={children}
         {...rest} 
       />
     </div>
@@ -165,7 +160,6 @@ export function UnifiedActionCard({
   hasBadge,
   badgeValue,
   hasSubtitle,
-  children,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
@@ -176,20 +170,6 @@ export function UnifiedActionCard({
   };
   
   const renderCardContent = () => {
-    if (children) {
-      return children;
-    }
-    
-    if (isSearch || type === 'smart_search') {
-      return (
-        <SearchCard 
-          card={{ id, title, iconId, path, color, type, isSearch }}
-          onSearchSubmit={onSearchSubmit}
-          isEditMode={isEditing}
-        />
-      );
-    }
-    
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
@@ -255,11 +235,20 @@ export function UnifiedActionCard({
       );
     }
     
-    if (type === 'origin_selection') {
+    if (type === 'origin_selection' && specialCardsData?.originOptions) {
       return (
         <OriginSelectionCard 
-          title={title || "Cadastro de Demandas"}
-          options={specialCardsData?.originOptions}
+          title="De onde vem a demanda?"
+          options={specialCardsData.originOptions || []}
+        />
+      );
+    }
+    
+    if (type === 'smart_search') {
+      return (
+        <SmartSearchCard 
+          placeholder="O que vamos fazer?" 
+          onSearch={onSearchSubmit}
         />
       );
     }

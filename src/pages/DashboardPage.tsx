@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -100,17 +100,14 @@ const DashboardPage: React.FC = () => {
     });
   };
 
-  const handleSearchSubmit = (query: string) => {
-    console.log('Search submitted:', query);
-    // This will be handled by the SmartSearchCard component
-  };
-
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Remove the fixed positioned breadcrumb for mobile */}
+      
       <div className={`${isMobile ? 'transition-all duration-300' : ''}`}>
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
@@ -147,16 +144,7 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
               
-              <div className="flex items-center justify-between">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={toggleEditMode}
-                  className={`${isEditMode ? 'bg-blue-100 text-blue-800' : 'text-blue-600'} border-blue-300 hover:bg-blue-50`}
-                >
-                  {isEditMode ? 'Finalizar Edição' : 'Editar Cards'}
-                </Button>
-                
+              <div className="flex justify-end">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -184,7 +172,6 @@ const DashboardPage: React.FC = () => {
                       onHideCard={handleCardHide}
                       isMobileView={isMobile}
                       isEditMode={isEditMode}
-                      onSearchSubmit={handleSearchSubmit}
                     />
                   </div>
                 ) : (

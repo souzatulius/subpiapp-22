@@ -31,13 +31,7 @@ export interface ActionCardProps {
 }
 
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
-  switch (size) {
-    case 'sm': return 'w-6 h-6';
-    case 'md': return 'w-8 h-8';
-    case 'lg': return 'w-10 h-10';
-    case 'xl': return 'w-12 h-12';
-    default: return 'w-10 h-10';
-  }
+  return 'w-10 h-10';
 };
 
 const ActionCard = ({

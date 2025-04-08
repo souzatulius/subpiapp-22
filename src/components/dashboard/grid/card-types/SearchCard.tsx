@@ -6,15 +6,13 @@ import SmartSearchCard from '../../SmartSearchCard';
 interface SearchCardProps {
   card: ActionCardItem;
   onSearchSubmit: (query: string) => void;
-  isEditMode?: boolean;
 }
 
-const SearchCard: React.FC<SearchCardProps> = ({ card, onSearchSubmit, isEditMode = false }) => {
+const SearchCard: React.FC<SearchCardProps> = ({ card, onSearchSubmit }) => {
   return (
     <SmartSearchCard
-      placeholder={card.title || "O que vamos fazer?"}
+      placeholder={card.title}
       onSearch={onSearchSubmit}
-      isEditMode={isEditMode}
     />
   );
 };

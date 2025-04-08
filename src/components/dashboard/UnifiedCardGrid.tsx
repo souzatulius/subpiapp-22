@@ -11,11 +11,9 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard } from './UnifiedActionCard';
-import { getWidthClass, getHeightClass } from './grid/GridUtilities';
+import { getWidthClass, getHeightClass } from './CardGrid';
 import { ActionCardItem } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
-import PendingTasksCardView from './unified-cards/PendingTasksCardView';
-import OriginSelectionCard from './cards/OriginSelectionCard';
 
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
@@ -81,14 +79,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   const visibleCards = cards.filter(card => !card.isHidden);
 
   // Sort cards by mobileOrder when in mobile view
-  const sortedCards = isMobileView
+  const displayedCards = isMobileView
     ? visibleCards
         .filter((card) => card.displayMobile !== false)
         .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
     : visibleCards;
 
   const { occupiedSlots } = useGridOccupancy(
-    sortedCards.map(card => ({
+    displayedCards.map(card => ({
       id: card.id,
       width: card.width || '25',
       height: card.height || '1',
@@ -97,7 +95,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     isMobileView
   );
 
-  if (!visibleCards || visibleCards.length === 0) {
+  if (!displayedCards || displayedCards.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500">
         Nenhum card disponível para exibir.
@@ -111,9 +109,9 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className={`w-full grid grid-cols-4 gap-3`}>
-        <SortableContext items={sortedCards.map(card => card.id)}>
-          {sortedCards.map(card => (
+      <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+        <SortableContext items={displayedCards.map(card => card.id)}>
+          {displayedCards.map(card => (
             <div
               key={card.id}
               className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
@@ -127,7 +125,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 color={card.color}
                 width={card.width}
                 height={card.height}
-                isDraggable={isEditMode}
+                isDraggable={true}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {
                   const cardToEdit = cards.find(c => c.id === id);
@@ -151,17 +149,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 badgeValue={card.badgeValue}
                 hasSubtitle={!!card.subtitle}
                 isMobileView={isMobileView}
-              >
-                {card.id === 'pending-tasks' && (
-                  <PendingTasksCardView className="h-full" />
-                )}
-                {card.type === 'origin_selection' && (
-                  <OriginSelectionCard 
-                    title={card.title} 
-                    options={specialCardsData?.originOptions}
-                  />
-                )}
-              </SortableUnifiedActionCard>
+              />
             </div>
           ))}
         </SortableContext>
