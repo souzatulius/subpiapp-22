@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '@/components/layouts/header';
@@ -12,9 +11,12 @@ import { motion } from 'framer-motion';
 const DashboardLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
-  const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
+  const scrollFadeStyles = useScrollFade({ 
+    threshold: 10, 
+    fadeDistance: 80,
+    disableTransformOnMobile: true 
+  });
 
-  // Load sidebar state from localStorage
   useEffect(() => {
     const savedState = localStorage.getItem('sidebarOpen');
     if (savedState !== null) {
@@ -25,17 +27,14 @@ const DashboardLayout: React.FC = () => {
   const toggleSidebar = () => {
     const newState = !sidebarOpen;
     setSidebarOpen(newState);
-    // Save to localStorage
     localStorage.setItem('sidebarOpen', String(newState));
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header - fixed height */}
       <div className="transition-all duration-300">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
-        {/* Mobile breadcrumb directly below header */}
         {isMobile && (
           <div className="bg-white">
             <BreadcrumbBar />
@@ -44,11 +43,9 @@ const DashboardLayout: React.FC = () => {
       </div>
       
       <div className="flex flex-1 relative min-h-0">
-        {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className={`flex-1 w-full transition-all duration-300 flex flex-col min-h-0`}>
-          {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto w-full flex-1">
@@ -64,7 +61,6 @@ const DashboardLayout: React.FC = () => {
         </main>
       </div>
       
-      {/* Mobile Bottom Navigation - only show on mobile */}
       {isMobile && <MobileBottomNav />}
     </div>
   );

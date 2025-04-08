@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
@@ -15,7 +14,6 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Fetch user department
   useEffect(() => {
     const fetchUserDepartment = async () => {
       if (!user) {
@@ -45,13 +43,10 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
     fetchUserDepartment();
   }, [user]);
   
-  // Get all navigation items
   const allNavItems = getNavigationSections();
   
-  // Filter for only the specified navigation items: Dashboard, Comunicação, Relatórios, Zeladoria (Ranking)
   const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking'];
   
-  // Filter by department and allowed pages, then map for mobile
   const navItems = allNavItems
     .filter(item => allowedPages.includes(item.id))
     .filter(item => {
@@ -61,7 +56,6 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
       return true;
     })
     .map(item => {
-      // Rename "Top Zeladoria" to "Zeladoria" for mobile
       if (item.id === 'ranking') {
         return { ...item, label: 'Zeladoria' };
       }
@@ -70,26 +64,21 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   
   const location = useLocation();
 
-  // Function to determine if a nav item should be active
   const isNavItemActive = (itemPath: string) => {
-    // For Dashboard, only highlight if it's exactly the dashboard path
     if (itemPath === '/dashboard') {
       return location.pathname === '/dashboard';
     }
     
-    // Special case for "Comunicação" - only active on exact match or non-relatorios paths
     if (itemPath === '/dashboard/comunicacao') {
       return location.pathname === '/dashboard/comunicacao' || 
              (location.pathname.startsWith('/dashboard/comunicacao/') && 
               !location.pathname.includes('/relatorios'));
     }
     
-    // Special case for "Relatórios"
     if (itemPath === '/dashboard/comunicacao/relatorios') {
       return location.pathname.includes('/relatorios');
     }
     
-    // For other items, standard behavior
     return location.pathname === itemPath || location.pathname.startsWith(itemPath + '/');
   };
 
@@ -97,7 +86,6 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
     <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] shadow-lg z-50 ${className}`}>
       <div className="flex justify-between items-stretch h-20">
         {isLoading ? (
-          // Show loading skeletons while data is loading
           <>
             {[...Array(4)].map((_, index) => (
               <div 
@@ -110,7 +98,6 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
             ))}
           </>
         ) : (
-          // Show actual navigation items once loaded
           navItems.map((item) => {
             const isActive = isNavItemActive(item.path);
             return (
