@@ -62,6 +62,15 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const newCards = arrayMove([...cards], oldIndex, newIndex);
+        
+        // If in mobile view, update mobileOrder for all cards
+        if (isMobileView) {
+          newCards.forEach((card, index) => {
+            card.mobileOrder = index;
+          });
+        }
+        
+        // Call onCardsChange with updated cards to persist changes
         onCardsChange(newCards);
       }
     }

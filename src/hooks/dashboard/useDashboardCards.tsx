@@ -56,7 +56,7 @@ export const useDashboardCards = () => {
     fetchUserCards();
   }, [user]);
 
-  // Handle card reordering
+  // Handle card reordering - now properly saves mobile order too
   const handleCardsReorder = async (updatedCards: ActionCardItem[]) => {
     setCards(updatedCards);
     
@@ -87,6 +87,11 @@ export const useDashboardCards = () => {
             })
             .eq('user_id', user.id);
         }
+        
+        console.log('Dashboard cards saved successfully', {
+          cardsCount: updatedCards.length,
+          hasMobileOrders: updatedCards.some(card => card.mobileOrder !== undefined)
+        });
       } catch (error) {
         console.error('Error saving card order:', error);
       }
