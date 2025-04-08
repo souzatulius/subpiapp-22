@@ -1,21 +1,31 @@
 
 import React from 'react';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Eye, Trash2, MessageSquare } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Demand } from '@/hooks/consultar-demandas/types';
 import { format } from 'date-fns';
-import { Eye, Trash2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { ptBR } from 'date-fns/locale';
 
-export interface DemandasTableProps {
+interface DemandasTableProps {
   demandas: Demand[];
   onViewDemand: (demand: Demand) => void;
   onDelete?: (demand: Demand) => void;
+  onRespond?: (demand: Demand) => void;
+  isAdmin?: boolean;
   totalCount: number;
   page: number;
   pageSize: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
-  setPageSize: React.Dispatch<React.SetStateAction<number>>;
-  isAdmin?: boolean;
+  setPage: (page: number) => void;
+  setPageSize: (pageSize: number) => void;
   isLoading?: boolean;
 }
 
@@ -23,121 +33,151 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   demandas,
   onViewDemand,
   onDelete,
+  onRespond,
+  isAdmin = false,
   totalCount,
   page,
   pageSize,
   setPage,
   setPageSize,
-  isAdmin = false,
-  isLoading = false,
+  isLoading = false
 }) => {
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-';
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+    } catch (e) {
+      return dateString;
+    }
   };
 
-  const handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSize = parseInt(event.target.value, 10);
-    setPageSize(newSize);
-    setPage(1); // Reset to the first page when changing page size
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pendente':
+      case 'pendente_resposta':
+        return <Badge className="bg-yellow-400 hover:bg-yellow-500">Pendente</Badge>;
+      case 'em_andamento':
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Em andamento</Badge>;
+      case 'concluido':
+        return <Badge className="bg-green-500 hover:bg-green-600">Concluído</Badge>;
+      case 'cancelado':
+        return <Badge className="bg-red-500 hover:bg-red-600">Cancelado</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
   };
-
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentDemandas = demandas.slice(startIndex, endIndex);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-4">
+    <div className="rounded-md border overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Título
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Data de Criação
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ações
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {currentDemandas.map((demanda) => (
-              <tr key={demanda.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {demanda.titulo}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {demanda.horario_publicacao ? 
-                    format(new Date(demanda.horario_publicacao), 'dd/MM/yyyy') : 
-                    'Data não disponível'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <Badge>{demanda.status}</Badge>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <Button variant="ghost" size="icon" onClick={() => onViewDemand(demanda)}>
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  {isAdmin && onDelete && (
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(demanda)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="font-medium">Título</TableHead>
+              <TableHead className="font-medium">Status</TableHead>
+              <TableHead className="font-medium">Prioridade</TableHead>
+              <TableHead className="font-medium">Data</TableHead>
+              <TableHead className="font-medium">Prazo</TableHead>
+              <TableHead className="font-medium text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  Carregando...
+                </TableCell>
+              </TableRow>
+            ) : demandas.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  Nenhuma demanda encontrada.
+                </TableCell>
+              </TableRow>
+            ) : (
+              demandas.map((demanda) => (
+                <TableRow key={demanda.id}>
+                  <TableCell className="font-medium truncate max-w-[200px]">
+                    {demanda.titulo}
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(demanda.status)}
+                  </TableCell>
+                  <TableCell className="capitalize">
+                    <Badge variant="outline" className={`
+                      ${demanda.prioridade === 'alta' ? 'border-red-500 text-red-700' : ''}
+                      ${demanda.prioridade === 'media' ? 'border-yellow-500 text-yellow-700' : ''}
+                      ${demanda.prioridade === 'baixa' ? 'border-green-500 text-green-700' : ''}
+                    `}>
+                      {demanda.prioridade}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(demanda.horario_publicacao)}</TableCell>
+                  <TableCell>{formatDate(demanda.prazo_resposta)}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onViewDemand(demanda)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      
+                      {onRespond && demanda.status === 'pendente_resposta' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onRespond(demanda)}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
+                      {isAdmin && onDelete && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onDelete(demanda)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
-
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <label htmlFor="pageSize" className="text-sm font-medium text-gray-700">
-            Itens por página:
-          </label>
-          <select
-            id="pageSize"
-            className="block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            value={pageSize}
-            onChange={handlePageSizeChange}
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-          </select>
+      
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-4 py-2 border-t">
+        <div className="text-sm text-gray-500">
+          Mostrando {Math.min(totalCount, (page - 1) * pageSize + 1)}-{Math.min(page * pageSize, totalCount)} de {totalCount} resultados
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            onClick={() => handlePageChange(page - 1)}
+            size="sm"
+            onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
           >
-            Anterior
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium text-gray-700">
-            Página {page} de {Math.ceil(totalCount / pageSize)}
+          <span className="text-sm">
+            Página {page} de {Math.max(1, totalPages)}
           </span>
           <Button
             variant="outline"
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page * pageSize >= totalCount}
+            size="sm"
+            onClick={() => setPage(Math.min(totalPages, page + 1))}
+            disabled={page === totalPages || totalPages === 0}
           >
-            Próximo
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>

@@ -1,48 +1,50 @@
 
-// Utility functions for handling question formats and validations
-
 /**
- * Normalizes different question structures into a consistent array format
+ * Normalizes questions data to a standard array format regardless of input format
+ * @param perguntas Questions in various possible formats (array, object, null)
+ * @returns Normalized array of question strings
  */
-export const normalizeQuestions = (perguntas: any): string[] => {
+export const normalizeQuestions = (perguntas: string[] | Record<string, string> | null | any): string[] => {
   if (!perguntas) return [];
   
-  if (Array.isArray(perguntas)) {
-    return perguntas;
-  }
-  
-  if (typeof perguntas === 'object') {
-    return Object.values(perguntas);
+  try {
+    // Handle array format
+    if (Array.isArray(perguntas)) {
+      return perguntas.filter(p => p && p.trim() !== '');
+    }
+    
+    // Handle object format (with numeric keys)
+    if (typeof perguntas === 'object') {
+      // If it's a Record<string, string> with numeric keys (usually from JSON)
+      const entries = Object.entries(perguntas);
+      if (entries.length > 0) {
+        // Check if keys are numeric strings like "0", "1", "2"
+        if (entries.every(([key]) => !isNaN(Number(key)))) {
+          return entries
+            .sort(([keyA], [keyB]) => Number(keyA) - Number(keyB))
+            .map(([_, value]) => value)
+            .filter(v => v && v.trim() !== '');
+        }
+        
+        // If not numeric keys, just take all values
+        return Object.values(perguntas)
+          .filter(v => v && v.trim() !== '');
+      }
+    }
+    
+    // Handle string (possibly JSON)
+    if (typeof perguntas === 'string') {
+      try {
+        const parsed = JSON.parse(perguntas);
+        return normalizeQuestions(parsed);
+      } catch (e) {
+        // Not valid JSON, treat as single question
+        return [perguntas];
+      }
+    }
+  } catch (error) {
+    console.error('Error normalizing questions:', error);
   }
   
   return [];
-};
-
-/**
- * Formats questions array into an object with indexed keys
- */
-export const formatQuestionsToObject = (questions: string[]): Record<string, string> => {
-  if (!questions || !Array.isArray(questions)) return {};
-  
-  return questions.reduce((acc, question, index) => {
-    acc[index.toString()] = question;
-    return acc;
-  }, {} as Record<string, string>);
-};
-
-/**
- * Validates if a string is a valid public URL
- */
-export const isValidPublicUrl = (url: string): boolean => {
-  if (!url) return false;
-  
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.protocol === 'http:' || 
-           parsedUrl.protocol === 'https:' || 
-           url.startsWith('https://') || 
-           url.startsWith('http://');
-  } catch (e) {
-    return false;
-  }
 };

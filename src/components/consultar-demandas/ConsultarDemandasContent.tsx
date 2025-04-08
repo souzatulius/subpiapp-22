@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DemandasTable from './DemandasTable';
@@ -12,7 +13,9 @@ import DemandaCards from './DemandaCards';
 import FilterBar from './FilterBar';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, MessageSquare } from 'lucide-react';
+import RespostaForm from '@/components/dashboard/forms/responder-demanda/components/RespostaForm';
+import { useDemandas } from '@/hooks/demandas';
 
 const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
@@ -20,6 +23,7 @@ const ConsultarDemandasContent = () => {
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isRespondMode, setIsRespondMode] = useState(false);
   const { isAdmin } = usePermissions();
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [showFilters, setShowFilters] = useState(false);
@@ -40,6 +44,17 @@ const ConsultarDemandasContent = () => {
     setSelectedDemand: hookSetSelectedDemand,
     applyFilters,
   } = useDemandasData();
+
+  // Get useRespostaForm from useDemandas hook for responding to demands
+  const { useRespostaDemanda } = useDemandas();
+  const { 
+    resposta, 
+    comentarios, 
+    isLoading: isRespostaLoading, 
+    handleRespostaChange,
+    setComentarios,
+    handleSubmitResposta 
+  } = useRespostaDemanda(selectedDemand);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -67,10 +82,22 @@ const ConsultarDemandasContent = () => {
   const handleViewDemand = (demand: Demand) => {
     setSelectedDemand(demand);
     setIsDetailOpen(true);
+    setIsRespondMode(false);
+  };
+
+  const handleRespondDemand = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setIsDetailOpen(false);
+    setIsRespondMode(true);
   };
 
   const handleCloseDetail = () => {
     setIsDetailOpen(false);
+    setSelectedDemand(null);
+  };
+
+  const handleCloseRespondMode = () => {
+    setIsRespondMode(false);
     setSelectedDemand(null);
   };
 
@@ -120,79 +147,108 @@ const ConsultarDemandasContent = () => {
 
   return (
     <div className="container mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-        <DemandasSearchBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSearch={handleSearch}
-        />
-        
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-1.5"
-          onClick={toggleFilters}
-        >
-          <Filter className="h-4 w-4" />
-          Filtros
-          {showFilters ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
-      
-      {showFilters && (
-        <FilterBar
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          coordenacao={coordenacao}
-          onCoordenacaoChange={setCoordenacao}
-          tema={tema}
-          onTemaChange={setTema}
-          status={status}
-          onStatusChange={setStatus}
-          onResetFilters={resetFilters}
-        />
-      )}
-      
-      {viewMode === 'cards' ? (
-        <DemandaCards
-          demandas={demandas as any}
-          isLoading={isLoading}
-          onSelectDemand={handleViewDemand as any}
-        />
+      {isRespondMode && selectedDemand ? (
+        <>
+          <div className="mb-4">
+            <Button variant="outline" onClick={handleCloseRespondMode} className="mb-4">
+              &larr; Voltar para Lista
+            </Button>
+            <h2 className="text-xl font-bold mb-4">Responder Demanda: {selectedDemand.titulo}</h2>
+          </div>
+          
+          <RespostaForm 
+            selectedDemanda={selectedDemand as any}
+            resposta={resposta}
+            comentarios={comentarios}
+            setResposta={() => {}} // This is handled by handleRespostaChange
+            setComentarios={setComentarios}
+            onBack={handleCloseRespondMode}
+            isLoading={isRespostaLoading}
+            onSubmit={handleSubmitResposta}
+            handleRespostaChange={handleRespostaChange}
+            hideBackButton={true}
+          />
+        </>
       ) : (
-        <DemandasTable
-          demandas={demandas as any}
-          onViewDemand={handleViewDemand as any}
-          onDelete={handleDelete as any}
-          totalCount={totalCount}
-          page={page}
-          pageSize={pageSize}
-          setPage={setPage}
-          setPageSize={setPageSize}
-          isAdmin={isAdmin}
-        />
-      )}
-      
-      {selectedDemand && (
-        <DemandDetail 
-          demand={selectedDemand as any} 
-          isOpen={isDetailOpen} 
-          onClose={handleCloseDetail}
-        />
-      )}
-      
-      {selectedDemand && (
-        <DeleteDemandDialog
-          isOpen={isDeleteModalOpen}
-          demandId={selectedDemand.id}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
+        <>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+            <DemandasSearchBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              onSearch={handleSearch}
+            />
+            
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-1.5"
+              onClick={toggleFilters}
+            >
+              <Filter className="h-4 w-4" />
+              Filtros
+              {showFilters ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          
+          {showFilters && (
+            <FilterBar
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              coordenacao={coordenacao}
+              onCoordenacaoChange={setCoordenacao}
+              tema={tema}
+              onTemaChange={setTema}
+              status={status}
+              onStatusChange={setStatus}
+              onResetFilters={resetFilters}
+            />
+          )}
+          
+          {viewMode === 'cards' ? (
+            <DemandaCards
+              demandas={demandas as any}
+              isLoading={isLoading}
+              onSelectDemand={handleViewDemand as any}
+              onRespondDemand={handleRespondDemand as any}
+            />
+          ) : (
+            <DemandasTable
+              demandas={demandas as any}
+              onViewDemand={handleViewDemand as any}
+              onDelete={handleDelete as any}
+              onRespond={handleRespondDemand as any}
+              totalCount={totalCount}
+              page={page}
+              pageSize={pageSize}
+              setPage={setPage}
+              setPageSize={setPageSize}
+              isAdmin={isAdmin}
+            />
+          )}
+          
+          {selectedDemand && (
+            <DemandDetail 
+              demand={selectedDemand as any} 
+              isOpen={isDetailOpen} 
+              onClose={handleCloseDetail}
+              onRespond={() => handleRespondDemand(selectedDemand)}
+            />
+          )}
+          
+          {selectedDemand && (
+            <DeleteDemandDialog
+              isOpen={isDeleteModalOpen}
+              demandId={selectedDemand.id}
+              onConfirm={confirmDelete}
+              onCancel={cancelDelete}
+            />
+          )}
+        </>
       )}
     </div>
   );
