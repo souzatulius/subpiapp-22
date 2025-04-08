@@ -24,6 +24,7 @@ export const createRelatorioItems = ({
     return {
       id: key,
       title: chartData?.[key]?.title || key,
+      subtitle: chartData?.[key]?.subtitle, // Now this property exists in the type
       component: chartComponents[key],
       isVisible: !hiddenItems.includes(key),
       isAnalysisExpanded: expandedAnalyses.includes(key),
@@ -31,7 +32,8 @@ export const createRelatorioItems = ({
       analysis: chartData?.[key]?.analysis || undefined,
       value: chartData?.[key]?.value || '',
       description: chartData?.[key]?.description || undefined,
-      badge: chartData?.[key]?.badge || undefined
+      badge: chartData?.[key]?.badge || undefined,
+      order: chartData?.[key]?.order || 0 // Now this property exists in the type
     };
   });
 };
