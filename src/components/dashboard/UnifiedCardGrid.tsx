@@ -27,7 +27,7 @@ export interface UnifiedCardGridProps {
   showSpecialFeatures?: boolean;
   quickDemandTitle?: string;
   onQuickDemandTitleChange?: (value: string) => void;
-  onQuickDemandSubmit?: (query: string) => void;
+  onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
 }
@@ -200,7 +200,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 showSpecialFeatures={showSpecialFeatures}
                 quickDemandTitle={quickDemandTitle}
                 onQuickDemandTitleChange={onQuickDemandTitleChange}
-                onQuickDemandSubmit={onQuickDemandSubmit ? (query) => onQuickDemandSubmit(query) : undefined}
+                onQuickDemandSubmit={onQuickDemandSubmit}
                 onSearchSubmit={onSearchSubmit ? (query) => onSearchSubmit(query) : undefined}
                 specialCardsData={specialCardsData}
                 isCustom={card.isCustom}
