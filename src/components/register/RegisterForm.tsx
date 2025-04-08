@@ -60,7 +60,7 @@ const RegisterForm = ({
             <RegisterButton isLoading={isLoading} />
           </div>
           
-          <p className="mt-6 text-center text-sm text-[#6B7280]">
+          <p className="mt-6 text-center text-base text-[#6B7280]">
             Já tem uma conta? <Link to="/login" className="text-[#f57c35] font-semibold hover:underline">Entrar</Link>
           </p>
         </form>}

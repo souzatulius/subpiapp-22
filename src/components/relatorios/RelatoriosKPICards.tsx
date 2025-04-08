@@ -60,29 +60,33 @@ export const RelatoriosKPICards: React.FC<RelatoriosKPICardsProps> = ({ isEditMo
 
   // Format cards data
   const getCardData = () => {
+    const yesterdayDemandas = Math.round(cardStats.totalDemandas - (cardStats.totalDemandas * cardStats.demandasVariacao / 100));
+    
     return {
       demandas: {
         title: 'Demandas',
         value: formatNumber(cardStats.totalDemandas),
-        comment: `Hoje foram ${cardStats.totalDemandas} demandas. Ontem foram ${cardStats.totalDemandas - (cardStats.totalDemandas * cardStats.demandasVariacao / 100)}.`,
+        comment: `${cardStats.totalDemandas} hoje (ontem foram ${yesterdayDemandas})`,
         icon: getTrendIcon(cardStats.demandasVariacao)
       },
       notas: {
         title: 'Notas',
         value: formatNumber(cardStats.totalNotas),
-        comment: `Para a imprensa. ${Math.abs(cardStats.notasVariacao)}% ${cardStats.notasVariacao >= 0 ? 'maior' : 'menor'} que março.`,
+        comment: `+ ${Math.abs(cardStats.notasVariacao)}% que ontem`,
         icon: getTrendIcon(cardStats.notasVariacao)
       },
       tempo: {
         title: 'Resposta',
-        value: `${formatNumber(cardStats.tempoMedioResposta)} horas`,
-        comment: `Média de tempo. ${Math.abs(cardStats.tempoRespostaVariacao)}% ${cardStats.tempoRespostaVariacao <= 0 ? 'mais rápido' : 'mais lento'} que o período anterior.`,
+        value: cardStats.tempoMedioResposta < 1 ? 
+          `${Math.round(cardStats.tempoMedioResposta * 60)} minutos` : 
+          `${formatNumber(cardStats.tempoMedioResposta)} horas`,
+        comment: `${Math.abs(cardStats.tempoRespostaVariacao)}% + rápido nesta semana`,
         icon: getTrendIcon(-cardStats.tempoRespostaVariacao)
       },
       aprovacao: {
         title: 'Aprovação',
         value: `${formatNumber(cardStats.taxaAprovacao)}%`,
-        comment: `${cardStats.notasAprovadas || 0} Notas aprovadas. Editadas: ${cardStats.notasEditadas || 0}%.`,
+        comment: `${cardStats.notasEditadas || 0} notas foram editadas`,
         icon: getTrendIcon(cardStats.taxaAprovacao - 80) // Comparing to a baseline of 80%
       },
       noticias: {

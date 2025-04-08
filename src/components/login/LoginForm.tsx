@@ -53,8 +53,8 @@ const LoginForm = () => {
       </form>
 
       <div className="mt-6 text-center space-y-2">
-        {/* Nova mensagem para cadastro */}
-        <p className="text-sm text-[#6B7280]">
+        {/* Nova mensagem para cadastro com fonte maior */}
+        <p className="text-base text-[#6B7280]">
           Não tem login?{' '}
           <Link to="/register" className="text-[#003570] font-semibold hover:underline">
             Faça o seu cadastro
