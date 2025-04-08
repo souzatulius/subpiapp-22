@@ -57,7 +57,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       
       // Apply search filter
       if (searchTerm) {
-        query = query.or(`titulo.ilike.%${searchTerm}%,numero_processo.ilike.%${searchTerm}%`);
+        query = query.or(`texto.ilike.%${searchTerm}%,id.ilike.%${searchTerm}%`);
       }
       
       // Apply status filter
@@ -78,7 +78,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         query = query.lte('created_at', filters.dateRange.to.toISOString());
       }
       
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data, error } = await query.order('criado_em', { ascending: false });
       
       if (error) throw error;
       
@@ -87,7 +87,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         // Map the database records to match the Processo interface
         const processedData: Processo[] = data.map(item => ({
           id: item.id,
-          numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).slice(0, 4)}`,
+          numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
           titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
           categoria: item.situacao === 'em_tramitacao' ? 'Em tramitação' : 
                     item.situacao === 'prazo_prorrogado' ? 'Prazo prorrogado' : 'Concluído',
