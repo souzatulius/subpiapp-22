@@ -1,142 +1,127 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/types/demand';
+import { Demand } from './types';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
-  const [filteredDemandas, setFilteredDemandas] = useState<Demand[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch demandas
   useEffect(() => {
     const fetchDemandas = async () => {
       try {
-        setIsLoading(true);
-        
-        // Buscar demandas que estão respondidas ou aguardando nota
-        const { data: allDemandas, error: demandasError } = await supabase
+        setLoading(true);
+        const { data, error } = await supabase
           .from('demandas')
           .select(`
             id,
             titulo,
             status,
+            prioridade,
+            horario_publicacao,
+            prazo_resposta,
+            coordenacao_id,
+            problema_id,
+            problema:problemas (
+              descricao
+            ),
+            supervisao_tecnica_id,
+            origem_id,
+            origem:origens_demandas (
+              descricao
+            ),
+            tipo_midia_id,
+            tipo_midia:tipos_midia (
+              descricao
+            ),
+            bairro_id,
+            bairro:bairros (
+              nome,
+              distritos (
+                nome
+              )
+            ),
+            autor:usuarios (
+              nome_completo
+            ),
+            endereco,
+            nome_solicitante,
+            email_solicitante,
+            telefone_solicitante,
+            veiculo_imprensa,
             detalhes_solicitacao,
             perguntas,
-            problema_id,
-            coordenacao_id,
             servico_id,
+            servico:servicos (
+              descricao
+            ),
             arquivo_url,
             anexos,
-            prazo_resposta,
-            prioridade,
-            nome_solicitante,
-            telefone_solicitante,
-            email_solicitante,
-            veiculo_imprensa,
-            endereco,
-            bairro_id,
-            tipo_midia_id,
-            origem_id,
-            protocolo,
-            bairros:bairro_id(
-              id, 
-              nome,
-              distrito_id,
-              distritos:distrito_id(id, nome)
-            ),
-            origens_demandas:origem_id(id, descricao),
-            tipos_midia:tipo_midia_id(id, descricao),
-            servicos:servico_id(id, descricao),
-            problemas:problema_id(id, descricao)
+            protocolo
           `)
-          .in('status', ['respondida', 'aguardando_nota'])
-          .order('created_at', { ascending: false });
-        
-        if (demandasError) throw demandasError;
-        
-        // Buscar todas as notas oficiais para verificar quais demandas já possuem notas
-        const { data: notasData, error: notasError } = await supabase
-          .from('notas_oficiais')
-          .select('demanda_id');
-        
-        if (notasError) throw notasError;
-        
-        // Criar um conjunto de IDs de demandas que já possuem notas
-        const demandasComNotas = new Set(notasData?.map(nota => nota.demanda_id).filter(Boolean) || []);
-        
-        // Filtrar para incluir apenas demandas que não possuem notas associadas
-        const demandasSemNotas = allDemandas.filter(demanda => !demandasComNotas.has(demanda.id));
-        
-        console.log('Total de demandas respondidas:', allDemandas.length);
-        console.log('Demandas com notas:', demandasComNotas.size);
-        console.log('Demandas disponíveis para criar nota:', demandasSemNotas.length);
-        
-        // Processar as demandas para o formato correto
-        const demandasProcessadas = demandasSemNotas.map(demanda => {
-          return {
-            ...demanda,
-            supervisao_tecnica: null,
-            area_coordenacao: demanda.problemas 
-              ? { descricao: demanda.problemas.descricao } 
-              : null,
-            origem: demanda.origens_demandas,
-            tipo_midia: demanda.tipos_midia,
-            bairro: demanda.bairros,
-            autor: null,
-            servico: demanda.servicos,
-            problema: {
-              descricao: demanda.problemas?.descricao || null
-            },
-            horario_publicacao: "", // Add default value
-            arquivo_url: demanda.arquivo_url || null,
-            anexos: demanda.anexos || [],
-            protocolo: demanda.protocolo || null
-          } as Demand;
-        });
-        
-        setDemandas(demandasProcessadas);
-        setFilteredDemandas(demandasProcessadas);
-      } catch (error) {
-        console.error('Erro ao carregar demandas:', error);
-        toast({
-          title: "Erro ao carregar demandas",
-          description: "Não foi possível carregar as demandas disponíveis.",
-          variant: "destructive"
-        });
+          .order('horario_publicacao', { ascending: false })
+          .limit(50);
+
+        if (error) {
+          throw error;
+        }
+
+        // Fetch notas for each demanda
+        const demandasWithNotas = await Promise.all(
+          data.map(async (demanda) => {
+            const { data: notas, error: notasError } = await supabase
+              .from('notas_oficiais')
+              .select('id, demanda_id, titulo, autor_id')
+              .eq('demanda_id', demanda.id);
+
+            if (notasError) {
+              console.error('Error fetching notas for demanda:', notasError);
+              return {
+                ...demanda,
+                horario_publicacao: demanda.horario_publicacao || '',
+                notas: []
+              };
+            }
+
+            return {
+              ...demanda,
+              horario_publicacao: demanda.horario_publicacao || '',
+              notas: notas || []
+            };
+          })
+        );
+
+        setDemandas(demandasWithNotas);
+      } catch (err) {
+        console.error('Error fetching demandas:', err);
+        setError('Erro ao buscar demandas');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
     fetchDemandas();
   }, []);
 
-  // Filtrar demandas baseado no termo de busca
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredDemandas(demandas);
-      return;
-    }
-    
-    const lowercaseSearchTerm = searchTerm.toLowerCase();
-    const filtered = demandas.filter(demanda => 
-      demanda.titulo?.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.area_coordenacao?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.origem?.descricao?.toLowerCase().includes(lowercaseSearchTerm) ||
-      demanda.problema?.descricao?.toLowerCase().includes(lowercaseSearchTerm)
+  const getPendingDemandas = () => {
+    return demandas.filter(
+      (demanda) =>
+        demanda.status === 'pendente' || demanda.status === 'em_andamento'
     );
-    
-    setFilteredDemandas(filtered);
-  }, [searchTerm, demandas]);
+  };
+
+  const getDemandaById = (id: string) => {
+    return demandas.find((demanda) => demanda.id === id);
+  };
 
   return {
     demandas,
-    filteredDemandas,
-    searchTerm,
-    setSearchTerm,
-    isLoading
+    loading,
+    error,
+    getPendingDemandas,
+    getDemandaById
   };
 };
+
+export default useDemandasData;

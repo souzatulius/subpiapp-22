@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { SortableGraphCard } from './components/SortableGraphCard';
 import { useReportsData } from './hooks/useReportsData';
-import { useChartComponents } from './hooks/useChartComponents';
 import { useChartConfigs } from './hooks/charts/useChartConfigs';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
@@ -28,7 +27,8 @@ interface RelatoriosGraphCardsProps {
 }
 
 export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEditMode = false }) => {
-  const { chartComponents } = useChartComponents();
+  // Remove this line since we're not using the imported hook anymore
+  // const { chartComponents } = useChartComponents();
   const { chartColors } = useChartConfigs();
   const [isLoading, setIsLoading] = useState(true);
   const [chartData, setChartData] = useState({
@@ -272,8 +272,8 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Jun', Quantidade: 20, Meta: 18 },
   ];
 
-  // Use real data from Supabase if available, otherwise use mock data
-  const chartComponents: Record<string, React.ReactNode> = {
+  // Rename this variable to localChartComponents to avoid conflict
+  const localChartComponents: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart data={chartData.problemas.length ? chartData.problemas : mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
     origemDemandas: <PieChartComponent data={chartData.origens.length ? chartData.origens : mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3], chartColors[4]]} showOnlyPercentage={false} showLabels={true} />,
     tempoMedioResposta: <LineChartComponent data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[2] }]} />,
@@ -338,9 +338,9 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                     <div className="h-[220px] flex items-center justify-center">
                       <div className="h-8 w-8 border-4 border-t-gray-500 border-r-transparent border-b-gray-300 border-l-transparent rounded-full animate-spin"></div>
                     </div>
-                  ) : chartComponents[cardId] ? (
+                  ) : localChartComponents[cardId] ? (
                     <div className="h-[220px] p-2">
-                      {chartComponents[cardId]}
+                      {localChartComponents[cardId]}
                     </div>
                   ) : (
                     renderEmptyDataMessage(card.id)

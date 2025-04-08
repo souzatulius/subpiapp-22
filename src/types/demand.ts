@@ -44,9 +44,9 @@ export interface Demand {
   prioridade: string;
   horario_publicacao: string;
   prazo_resposta: string;
-  coordenacao_id?: string; // Added
-  problema_id?: string; // Added
-  supervisao_tecnica_id?: string; // Keep for backward compatibility
+  coordenacao_id?: string;
+  problema_id?: string;
+  supervisao_tecnica_id?: string;
   supervisao_tecnica?: {
     id?: string;
     descricao: string;
@@ -62,6 +62,9 @@ export interface Demand {
   } | null;
   bairro: {
     nome: string;
+    distritos?: {
+      nome: string;
+    }
   } | null;
   autor: {
     nome_completo: string;
@@ -79,7 +82,11 @@ export interface Demand {
   arquivo_url: string | null;
   anexos: string[] | null;
   servico_id?: string;
-  notas?: Note[] | null; // Added to fix build error
+  problema: {
+    descricao: string | null;
+  } | null;
+  protocolo?: string | null;
+  notas?: Note[] | null;
 }
 
 export interface DemandResponse {
