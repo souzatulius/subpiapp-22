@@ -60,7 +60,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         height: "1",
         type: "standard",
         hasBadge: true,
-        badgeValue: getBadgeValue('responder-demandas'),
+        badgeValue: Number(getBadgeValue('responder-demandas')),
         displayMobile: true,
         mobileOrder: 4
       },
@@ -74,7 +74,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         height: "1",
         type: "standard",
         hasBadge: true,
-        badgeValue: getBadgeValue('criar-nota'),
+        badgeValue: Number(getBadgeValue('criar-nota')),
         displayMobile: true,
         mobileOrder: 5,
         allowedDepartments: ['comunicacao']
@@ -101,7 +101,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         height: "1",
         type: "standard",
         hasBadge: true,
-        badgeValue: getBadgeValue('aprovar-notas'),
+        badgeValue: Number(getBadgeValue('aprovar-notas')),
         displayMobile: true,
         mobileOrder: 7
       },
