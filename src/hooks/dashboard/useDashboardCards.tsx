@@ -56,8 +56,18 @@ export const useDashboardCards = () => {
     fetchUserCards();
   }, [user]);
 
-  // Handle card reordering - now properly saves mobile order too
+  // Handle card reordering - now properly saving mobile order too
   const handleCardsReorder = async (updatedCards: ActionCardItem[]) => {
+    // Determine if we are in mobile view by checking the window width
+    const isMobileView = window.innerWidth < 768;
+    
+    // If in mobile view, update mobileOrder for all cards
+    if (isMobileView) {
+      updatedCards.forEach((card, index) => {
+        card.mobileOrder = index;
+      });
+    }
+    
     setCards(updatedCards);
     
     if (user) {

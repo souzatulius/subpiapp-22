@@ -14,12 +14,12 @@ const SettingsDashboard: React.FC<SettingsDashboardProps> = ({ searchQuery }) =>
   const { coordenacoes } = useAccessControlData();
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-4">
       <WelcomeCard 
         color="bg-gradient-to-r from-blue-800 to-blue-950"
       />
       
-      <div className="space-y-8">
+      <div className="space-y-6">
         <UserServiceStats stats={stats} loading={loading} />
       </div>
     </div>

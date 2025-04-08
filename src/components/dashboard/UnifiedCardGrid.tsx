@@ -40,7 +40,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onHideCard,
   isMobileView = false,
   isEditMode = false,
-  disableWiggleEffect = true, // Changed default to true to disable wiggle effect
+  disableWiggleEffect = true,
   showSpecialFeatures = true,
   quickDemandTitle,
   onQuickDemandTitleChange,
@@ -78,6 +78,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
 
   const visibleCards = cards.filter(card => !card.isHidden);
 
+  // Sort cards by mobileOrder when in mobile view
   const displayedCards = isMobileView
     ? visibleCards
         .filter((card) => card.displayMobile !== false)

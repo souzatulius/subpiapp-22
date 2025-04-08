@@ -32,7 +32,7 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gray-50">
+    <div className="flex flex-col bg-gray-50 min-h-screen">
       <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
@@ -51,7 +51,7 @@ const DashboardLayout: React.FC = () => {
           
           <div className="max-w-7xl mx-auto w-full flex-1">
             <motion.div 
-              className={`p-2 sm:p-4 ${isMobile ? 'pb-20' : 'pb-8'} h-full`}
+              className={`p-2 sm:p-4 ${isMobile ? 'pb-16' : 'pb-6'} h-full`}
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}

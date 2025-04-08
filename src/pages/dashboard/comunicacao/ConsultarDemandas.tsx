@@ -9,7 +9,7 @@ const ConsultarDemandas = () => {
   const navigate = useNavigate();
   
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6">
       <WelcomeCard
         title="Consultar Demandas"
         description="Visualize o histórico completo de demandas de comunicação"
