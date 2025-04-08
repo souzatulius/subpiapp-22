@@ -50,7 +50,9 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
       distribuicaoPorTemas: true,
       tempoMedioResposta: true,
       performanceArea: true,
-      notasEmitidas: true
+      notasEmitidas: true,
+      noticiasVsReleases: true,
+      problemasComuns: true
     }
   );
 
@@ -100,7 +102,9 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
       distribuicaoPorTemas: true,
       tempoMedioResposta: true,
       performanceArea: true,
-      notasEmitidas: true
+      notasEmitidas: true,
+      noticiasVsReleases: true,
+      problemasComuns: true
     };
     
     setVisibilitySettings(defaultVisibility);
@@ -125,6 +129,17 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
     { value: 'atendimento', label: 'Atendimento ao Cidadão' },
     { value: 'planejamento', label: 'Planejamento' },
     { value: 'gabinete', label: 'Gabinete' }
+  ];
+
+  // List of all available charts with their display names
+  const availableCharts = [
+    { id: 'distribuicaoPorTemas', label: 'Problemas mais frequentes' },
+    { id: 'origemDemandas', label: 'Origem das Demandas' },
+    { id: 'tempoMedioResposta', label: 'Tempo Médio de Resposta' },
+    { id: 'performanceArea', label: 'Áreas mais acionadas' },
+    { id: 'notasEmitidas', label: 'Notas de Imprensa' },
+    { id: 'noticiasVsReleases', label: 'Notícias vs. Releases' },
+    { id: 'problemasComuns', label: 'Problemas mais comuns' }
   ];
 
   return (
@@ -192,50 +207,16 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-gray-800">Visualização dos Gráficos</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="origem-demandas" className="cursor-pointer">Origem das Demandas</Label>
-                  <Checkbox
-                    id="origem-demandas"
-                    checked={visibilitySettings.origemDemandas}
-                    onCheckedChange={() => handleToggleChart('origemDemandas')}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="distribuicao-temas" className="cursor-pointer">Problemas mais frequentes</Label>
-                  <Checkbox
-                    id="distribuicao-temas"
-                    checked={visibilitySettings.distribuicaoPorTemas}
-                    onCheckedChange={() => handleToggleChart('distribuicaoPorTemas')}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="tempo-resposta" className="cursor-pointer">Tempo Médio de Resposta</Label>
-                  <Checkbox
-                    id="tempo-resposta"
-                    checked={visibilitySettings.tempoMedioResposta}
-                    onCheckedChange={() => handleToggleChart('tempoMedioResposta')}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="performance-area" className="cursor-pointer">Áreas mais acionadas</Label>
-                  <Checkbox
-                    id="performance-area"
-                    checked={visibilitySettings.performanceArea}
-                    onCheckedChange={() => handleToggleChart('performanceArea')}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="notas-emitidas" className="cursor-pointer">Notas de Imprensa</Label>
-                  <Checkbox
-                    id="notas-emitidas"
-                    checked={visibilitySettings.notasEmitidas}
-                    onCheckedChange={() => handleToggleChart('notasEmitidas')}
-                  />
-                </div>
+                {availableCharts.map((chart) => (
+                  <div key={chart.id} className="flex items-center justify-between">
+                    <Label htmlFor={`chart-${chart.id}`} className="cursor-pointer">{chart.label}</Label>
+                    <Checkbox
+                      id={`chart-${chart.id}`}
+                      checked={visibilitySettings[chart.id] || false}
+                      onCheckedChange={() => handleToggleChart(chart.id)}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>

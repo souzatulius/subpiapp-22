@@ -9,6 +9,7 @@ import { RelatoriosGraphCards } from '@/components/relatorios/RelatoriosGraphCar
 import FilterDialog from '@/components/relatorios/filters/FilterDialog';
 import { exportToPDF, printWithStyles } from '@/utils/pdfExport';
 import { motion } from 'framer-motion';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 // Import Chart registration to ensure scales are registered
 import '@/components/ranking/charts/ChartRegistration';
@@ -17,6 +18,17 @@ const RelatoriosPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Store chart visibility state in local storage
+  const [chartVisibility, setChartVisibility] = useLocalStorage<Record<string, boolean>>('relatorios-chart-visibility', {
+    origemDemandas: true,
+    distribuicaoPorTemas: true,
+    tempoMedioResposta: true,
+    performanceArea: true,
+    notasEmitidas: true,
+    noticiasVsReleases: true,
+    problemasComuns: true
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -30,6 +42,13 @@ const RelatoriosPage = () => {
 
   const handleExportPDF = () => {
     exportToPDF('Relatórios de Comunicação');
+  };
+  
+  const handleChartVisibilityChange = (chartId: string, visible: boolean) => {
+    setChartVisibility(prev => ({
+      ...prev,
+      [chartId]: visible
+    }));
   };
 
   return (
@@ -82,7 +101,9 @@ const RelatoriosPage = () => {
         {/* Filter dialog */}
         <FilterDialog 
           open={isFilterOpen} 
-          onOpenChange={setIsFilterOpen} 
+          onOpenChange={setIsFilterOpen}
+          chartVisibility={chartVisibility}
+          onChartVisibilityChange={handleChartVisibilityChange}
         />
       </div>
 
@@ -96,7 +117,7 @@ const RelatoriosPage = () => {
         >
           <div className="space-y-4">
             <RelatoriosKPICards />
-            <RelatoriosGraphCards />
+            <RelatoriosGraphCards chartVisibility={chartVisibility} />
           </div>
           
           <DragOverlay>

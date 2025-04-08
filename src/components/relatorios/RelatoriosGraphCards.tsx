@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -23,9 +22,13 @@ interface GraphCardItem {
 
 interface RelatoriosGraphCardsProps {
   isEditMode?: boolean;
+  chartVisibility?: Record<string, boolean>;
 }
 
-export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEditMode = false }) => {
+export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ 
+  isEditMode = false,
+  chartVisibility
+}) => {
   const { chartColors } = useChartConfigs();
   const [isLoading, setIsLoading] = useState(true);
   const [chartData, setChartData] = useState({
@@ -50,10 +53,16 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   const [analysisCards, setAnalysisCards] = useLocalStorage<string[]>('relatorios-graph-analysis', []);
 
   useEffect(() => {
+    if (chartVisibility) {
+      const newVisibleCards = cardsOrder.filter(cardId => chartVisibility[cardId]);
+      setVisibleCards(newVisibleCards);
+    }
+  }, [chartVisibility, cardsOrder, setVisibleCards]);
+
+  useEffect(() => {
     const fetchChartData = async () => {
       setIsLoading(true);
       try {
-        // Fetch problemas data from Supabase
         const { data: problemasData, error: problemasError } = await supabase
           .from('problemas')
           .select('id, descricao')
@@ -61,7 +70,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
 
         if (problemasError) throw problemasError;
 
-        // Fetch origens data from Supabase
         const { data: origensData, error: origensError } = await supabase
           .from('origens_demandas')
           .select('id, descricao')
@@ -69,7 +77,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
 
         if (origensError) throw origensError;
 
-        // Fetch coordenações data from Supabase
         const { data: coordenacoesData, error: coordenacoesError } = await supabase
           .from('coordenacoes')
           .select('id, descricao, sigla')
@@ -77,10 +84,9 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
 
         if (coordenacoesError) throw coordenacoesError;
 
-        // Transform data for charts
         const problemasChart = problemasData.map(problem => ({
           name: problem.descricao,
-          Quantidade: Math.floor(Math.random() * 50) + 10 // Generate random data for demonstration
+          Quantidade: Math.floor(Math.random() * 50) + 10
         }));
 
         const origensChart = origensData.map(origem => ({
@@ -88,14 +94,12 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
           value: Math.floor(Math.random() * 50) + 10
         }));
 
-        // Use siglas for coordenacoes when available
         const coordenacoesChart = coordenacoesData.map(coord => ({
           name: coord.sigla || coord.descricao.substring(0, 3).toUpperCase(),
           fullName: coord.descricao,
           Quantidade: Math.floor(Math.random() * 100) + 50
         }));
 
-        // Generate response time data for demonstration
         const responseTimesChart = [
           { name: 'Seg', Demandas: 48, Aprovacao: 72 },
           { name: 'Ter', Demandas: 42, Aprovacao: 65 },
@@ -104,7 +108,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
           { name: 'Sex', Demandas: 24, Aprovacao: 45 },
         ];
 
-        // Generate media types data for demonstration
         const mediaTypesChart = [
           { name: 'Jan', Quantidade: 10, Meta: 12 },
           { name: 'Fev', Quantidade: 15, Meta: 12 },
@@ -114,7 +117,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
           { name: 'Jun', Quantidade: 20, Meta: 18 },
         ];
 
-        // Generate notícias vs. releases comparison data
         const noticiasVsReleasesChart = [
           { name: 'Jan', Noticias: 34, Releases: 18 },
           { name: 'Fev', Noticias: 42, Releases: 22 },
@@ -136,7 +138,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
         console.log('Chart data loaded successfully:', { problemasChart, origensChart, coordenacoesChart });
       } catch (error) {
         console.error('Error fetching chart data:', error);
-        // Fall back to mock data if there's an error
         setChartData({
           problemas: mockBarData,
           origens: mockPieData,
@@ -158,7 +159,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       id: 'distribuicaoPorTemas',
       title: 'Problemas mais frequentes',
       description: 'Temas das solicitações no mês atual',
-      visible: true,
+      visible: chartVisibility?.distribuicaoPorTemas !== false,
       showAnalysis: analysisCards.includes('distribuicaoPorTemas'),
       analysis: 'Os temas com maior volume de demandas são Serviços Urbanos e Meio Ambiente. Houve um aumento de 15% nas demandas de Serviços Urbanos em comparação com o mês anterior.'
     },
@@ -166,7 +167,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       id: 'origemDemandas',
       title: 'Origem das Demandas',
       description: 'De onde vêm as solicitações',
-      visible: true,
+      visible: chartVisibility?.origemDemandas !== false,
       showAnalysis: analysisCards.includes('origemDemandas'),
       analysis: 'A maioria das demandas vem diretamente das coordenações (45%), seguidas de imprensa (35%) e redes sociais (12%). As origens internas representam 8% do total de demandas recebidas.'
     },
@@ -174,7 +175,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       id: 'tempoMedioResposta',
       title: 'Tempo Médio de Resposta',
       description: 'Evolução de agilidade de retorno para a imprensa',
-      visible: true,
+      visible: chartVisibility?.tempoMedioResposta !== false,
       showAnalysis: analysisCards.includes('tempoMedioResposta'),
       analysis: 'O tempo médio de resposta tem diminuído nos últimos meses, indicando melhoria na eficiência dos processos internos. O pico às terças-feiras deve-se ao volume maior de demandas recebidas às segundas.'
     },
@@ -182,7 +183,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       id: 'performanceArea',
       title: 'Áreas mais acionadas',
       description: 'Coordenações mais envolvidas nas solicitações',
-      visible: true,
+      visible: chartVisibility?.performanceArea !== false,
       showAnalysis: analysisCards.includes('performanceArea'),
       analysis: 'As áreas de Comunicação e Planejamento têm os melhores índices de resposta. A CPO recebe o maior volume de demandas, seguida pela CPDU, refletindo o foco atual em projetos de infraestrutura.'
     },
@@ -190,7 +191,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       id: 'notasEmitidas',
       title: 'Notas de Imprensa',
       description: 'Evolução de posicionamentos no mês',
-      visible: true,
+      visible: chartVisibility?.notasEmitidas !== false,
       showAnalysis: analysisCards.includes('notasEmitidas'),
       analysis: 'Houve um aumento de 15% na emissão de notas oficiais no último trimestre, com picos nos meses de abril e maio devido a eventos especiais e campanhas sazonais.'
     },
@@ -198,7 +199,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       id: 'problemasComuns',
       title: 'Problemas mais comuns',
       description: 'Categorias de problemas na última semana',
-      visible: true,
+      visible: chartVisibility?.problemasComuns !== false,
       showAnalysis: analysisCards.includes('problemasComuns'),
       analysis: 'As categorias "Limpeza Urbana" e "Iluminação Pública" representam mais de 50% dos problemas reportados. Problemas com áreas verdes aumentaram 12% no último mês, possivelmente devido à estação de chuvas.'
     },
@@ -206,7 +207,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       id: 'noticiasVsReleases',
       title: 'Notícias vs. Releases',
       description: 'Comparação entre notícias e releases oficiais',
-      visible: true,
+      visible: chartVisibility?.noticiasVsReleases !== false,
       showAnalysis: analysisCards.includes('noticiasVsReleases'),
       analysis: 'Observa-se uma correlação direta entre o número de releases emitidos e o aumento de notícias sobre os temas, com uma taxa de conversão média de 1:1.7 (cada release gera aproximadamente 1.7 notícias relacionadas).'
     }
@@ -275,7 +276,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Outros', value: 10 },
   ];
 
-  // Using siglas for coordenacoes in mock data
   const mockAreasData = [
     { name: 'CPO', fullName: 'Coordenadoria de Planejamento e Obras', Quantidade: 92 },
     { name: 'CPDU', fullName: 'Coordenadoria de Projetos e Desenvolvimento Urbano', Quantidade: 87 },
@@ -302,7 +302,6 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Jun', Noticias: 48, Releases: 28 },
   ];
 
-  // Chart components with updated colors
   const localChartComponents: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart data={chartData.problemas.length ? chartData.problemas : mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
     origemDemandas: <PieChartComponent data={chartData.origens.length ? chartData.origens : mockPieData} colorSet="default" showOnlyPercentage={false} showLabels={true} legendPosition="bottom" />,
@@ -355,7 +354,10 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {cardsOrder
-            .filter(cardId => visibleCards.includes(cardId))
+            .filter(cardId => {
+              return visibleCards.includes(cardId) && 
+                    (chartVisibility ? chartVisibility[cardId] !== false : true);
+            })
             .map((cardId) => {
               const card = cardsData[cardId];
               
