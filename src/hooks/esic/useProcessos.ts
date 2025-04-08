@@ -41,11 +41,12 @@ export const useProcessos = () => {
       
       console.log(`Processos encontrados: ${data.length}`);
       
-      // Cast the data to the expected type, ensuring we convert string situacao to the expected union type
+      // Cast the data to the expected type, ensuring we convert both situacao and status to the expected union types
       const typedData = data.map(item => ({
         ...item,
-        situacao: item.situacao as ESICProcesso['situacao'] // Type assertion
-      }));
+        situacao: item.situacao as ESICProcesso['situacao'], // Type assertion for situacao
+        status: item.status as ESICProcesso['status'] // Type assertion for status
+      })) as ESICProcesso[];
       
       setProcessos(typedData);
     } catch (error) {
@@ -76,7 +77,7 @@ export const useProcessos = () => {
         data_processo: values.data_processo.toISOString(),
         texto: values.texto,
         situacao: values.situacao,
-        status: 'novo_processo',
+        status: 'novo_processo' as ESICProcesso['status'],
         autor_id: user.id // Use autor_id instead of usuario_id
       };
       
@@ -91,8 +92,9 @@ export const useProcessos = () => {
       // Atualizar a lista de processos
       const typedData = {
         ...data,
-        situacao: data.situacao as ESICProcesso['situacao'] // Type assertion
-      };
+        situacao: data.situacao as ESICProcesso['situacao'], // Type assertion for situacao
+        status: data.status as ESICProcesso['status'] // Type assertion for status
+      } as ESICProcesso;
       
       setProcessos(prev => [typedData, ...prev]);
       options?.onSuccess?.();
@@ -126,8 +128,9 @@ export const useProcessos = () => {
       // Atualizar a lista de processos
       const typedData = {
         ...data,
-        situacao: data.situacao as ESICProcesso['situacao'] // Type assertion
-      };
+        situacao: data.situacao as ESICProcesso['situacao'], // Type assertion for situacao
+        status: data.status as ESICProcesso['status'] // Type assertion for status
+      } as ESICProcesso;
       
       setProcessos(prev => prev.map(p => p.id === params.id ? typedData : p));
       
