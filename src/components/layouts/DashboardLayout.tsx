@@ -60,6 +60,7 @@ const DashboardLayout: React.FC = () => {
             onClick={toggleSidebar}
             className="absolute left-0 top-24 bg-white shadow-md hover:bg-gray-100 z-30 rounded-r-md rounded-l-none border border-l-0"
             aria-label={sidebarOpen ? "Recolher menu" : "Expandir menu"}
+            title={sidebarOpen ? "Recolher menu" : "Expandir menu"}
           >
             {sidebarOpen ? (
               <ChevronLeft className="h-7 w-7" />

@@ -24,15 +24,16 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed 
       to={to}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-[#f57737]",
+          "flex items-center gap-4 rounded-lg px-3 py-3 transition-all hover:text-[#f57737]",
           isActive
             ? "bg-[#003570] text-[#f57737] font-medium"
             : "text-gray-300 hover:bg-[#0035701a]",
           isCollapsed ? "justify-center" : ""
         )
       }
+      title={isCollapsed ? label : undefined}
     >
-      <div className="flex-shrink-0 w-5 h-5">{icon}</div>
+      <div className="flex-shrink-0 w-7 h-7">{icon}</div>
       {!isCollapsed && <span className="text-lg">{label}</span>}
     </NavLink>
   );
@@ -44,8 +45,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   const [userDepartment, setUserDepartment] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Base sidebar width calculation
-  const sidebarWidth = isOpen ? "w-64" : "w-16";
+  // Base sidebar width calculation - increased width for collapsed state
+  const sidebarWidth = isOpen ? "w-64" : "w-20";
   const sidebarPadding = isOpen ? "px-4" : "px-2";
   
   // Fetch user department
@@ -95,10 +96,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   
   return (
     <aside
-      className={`${sidebarWidth} ${sidebarPadding} py-4 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-screen sticky top-0 transition-all duration-300 ease-in-out`}
+      className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-screen sticky top-0 transition-all duration-300 ease-in-out`}
     >
-      <nav className="space-y-4 flex flex-col h-full">
-        <div className="space-y-4">
+      <nav className="space-y-6 flex flex-col h-full">
+        <div className="space-y-6">
           {navigationItems.map((item) => (
             <SidebarItem
               key={item.id}
