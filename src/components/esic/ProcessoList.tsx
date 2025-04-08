@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ProcessoItem from './ProcessoItem';
 import ProcessoCard from './ProcessoCard';
@@ -16,7 +15,6 @@ interface ProcessoListProps {
   setFilterOpen: (open: boolean) => void;
 }
 
-// Define the Processo type explicitly to avoid excessive deep type instantiation
 interface Processo {
   id: string;
   numero_processo: string;
@@ -29,7 +27,6 @@ interface Processo {
   coordenacao_id?: string;
 }
 
-// Define ProcessoData interface separately to avoid infinite type instantiation
 interface ProcessoData {
   id: string;
   texto: string;
@@ -41,6 +38,9 @@ interface ProcessoData {
   autor_id: string;
   coordenacao_id?: string;
   prazo_resposta?: string;
+  autor?: {
+    nome_completo: string;
+  };
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
@@ -71,22 +71,18 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         .from('esic_processos')
         .select('*');
       
-      // Apply search filter
       if (searchTerm) {
         query = query.or(`texto.ilike.%${searchTerm}%,id.ilike.%${searchTerm}%`);
       }
       
-      // Apply status filter
       if (filters.status && filters.status.length > 0) {
         query = query.in('status', filters.status);
       }
       
-      // Apply category filter
       if (filters.category && filters.category.length > 0) {
         query = query.in('categoria', filters.category);
       }
       
-      // Apply date filter
       if (filters.dateRange.from) {
         query = query.gte('criado_em', filters.dateRange.from.toISOString());
       }
@@ -98,9 +94,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       
       if (error) throw error;
       
-      // Transform the data to match our Processo interface
       if (data) {
-        // Map the database records to the Processo interface
         const processedData: Processo[] = data.map((item: ProcessoData) => ({
           id: item.id,
           numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
@@ -112,7 +106,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
                  item.status === 'aguardando_aprovacao' ? 'Em análise' : 'Concluído',
           created_at: item.criado_em,
           prazo: item.prazo_resposta || new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
-          solicitante: 'Solicitante', // Default value as we don't have this in our data
+          solicitante: 'Solicitante',
           coordenacao_id: item.coordenacao_id,
         }));
         
@@ -120,7 +114,6 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       }
     } catch (error) {
       console.error('Error fetching processos:', error);
-      // Fallback to mock data
       setProcessos([
         {
           id: "1",

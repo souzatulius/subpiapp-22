@@ -121,7 +121,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'gerar-noticia',
-      title: 'Notícias',
+      title: 'Cadastrar Release',
       path: '/dashboard/comunicacao/cadastrar-release',
       iconId: 'document-plus',
       color: 'orange-dark',
@@ -133,7 +133,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     },
     {
       id: 'ver-releases',
-      title: 'Notícias',
+      title: 'Ver Releases e Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
       color: 'gray-medium',
@@ -255,7 +255,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       },
       {
         id: 'gerar-noticia',
-        title: 'Notícias',
+        title: 'Cadastrar Release',
         path: '/dashboard/comunicacao/cadastrar-release',
         iconId: 'document-plus',
         color: 'orange-dark',
@@ -267,7 +267,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
       },
       {
         id: 'ver-releases',
-        title: 'Notícias',
+        title: 'Ver Releases e Notícias',
         path: '/dashboard/comunicacao/releases',
         iconId: 'file-text',
         color: 'gray-medium',
@@ -386,7 +386,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     },
     {
       id: 'gerar-noticia',
-      title: 'Notícias',
+      title: 'Cadastrar Release',
       path: '/dashboard/comunicacao/cadastrar-release',
       iconId: 'document-plus',
       color: 'orange-dark',
@@ -398,7 +398,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     },
     {
       id: 'ver-releases',
-      title: 'Notícias',
+      title: 'Ver Releases e Notícias',
       path: '/dashboard/comunicacao/releases',
       iconId: 'file-text',
       color: 'gray-medium',

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { getBgColor } from './useCardColors';
@@ -116,6 +115,31 @@ export const useInitialCards = (userDepartment: string | null) => {
         type: "standard",
         displayMobile: true,
         mobileOrder: 8
+      },
+      {
+        id: 'gerar-noticia',
+        title: 'Cadastrar Release',
+        path: '/dashboard/comunicacao/cadastrar-release',
+        iconId: 'document-plus',
+        color: getBgColor('orange-dark'),
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 9,
+        allowedDepartments: ['comunicacao', 'gabinete']
+      },
+      {
+        id: 'ver-releases',
+        title: 'Ver Releases e Notícias',
+        path: '/dashboard/comunicacao/releases',
+        iconId: 'file-text',
+        color: getBgColor('gray-medium'),
+        width: '25',
+        height: '2',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 10
       },
       {
         id: 'relatorios-comunicacao',
