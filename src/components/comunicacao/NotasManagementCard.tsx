@@ -106,11 +106,12 @@ const NotasManagementCard: React.FC<NotasManagementCardProps> = ({
   }, [coordenacaoId, isComunicacao]);
 
   const handleCardClick = () => {
-    navigate(`${baseUrl ? `/${baseUrl}` : ''}/consultar-notas`);
+    // Updated to navigate to "Consultar Notas Oficiais"
+    navigate(`/dashboard/comunicacao/consultar-notas`);
   };
   
   const handleNotaClick = (id: string) => {
-    navigate(`${baseUrl ? `/${baseUrl}` : ''}/consultar-notas/${id}`);
+    navigate(`/dashboard/comunicacao/notas/detalhe?id=${id}`);
   };
   
   const formatDate = (dateString: string) => {

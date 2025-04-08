@@ -31,6 +31,15 @@ const Notas = () => {
       return count || 0;
     },
   });
+
+  // Navigate to view or edit a note
+  const handleViewNote = (id: string) => {
+    navigate(`/dashboard/comunicacao/notas/detalhe?id=${id}`);
+  };
+  
+  const handleEditNote = (id: string) => {
+    navigate(`/dashboard/comunicacao/notas/editar?id=${id}`);
+  };
   
   return (
     <div className="max-w-7xl mx-auto">
@@ -42,7 +51,10 @@ const Notas = () => {
       />
       
       <div className="mt-6">
-        <NotaForm />
+        <NotaForm 
+          onViewNote={handleViewNote}
+          onEditNote={handleEditNote}
+        />
       </div>
     </div>
   );

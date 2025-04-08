@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ESICProcesso, ESICProcessoFormValues } from '@/types/esic';
@@ -31,7 +30,7 @@ export const useProcessos = () => {
       setIsLoading(true);
       console.log('Buscando processos e-SIC...');
       
-      // Remova qualquer filtro de usuário para ver todos os processos
+      // Removed all filters to show all processes
       const { data, error } = await supabase
         .from('esic_processos')
         .select('*')
@@ -39,13 +38,13 @@ export const useProcessos = () => {
       
       if (error) throw error;
       
-      console.log(`Processos encontrados: ${data.length}`);
+      console.log(`Processos encontrados: ${data?.length || 0}`);
       
-      // Cast the data to the expected type, ensuring we convert both situacao and status to the expected union types
-      const typedData = data.map(item => ({
+      // Cast the data to the expected type
+      const typedData = (data || []).map(item => ({
         ...item,
-        situacao: item.situacao as ESICProcesso['situacao'], // Type assertion for situacao
-        status: item.status as ESICProcesso['status'] // Type assertion for status
+        situacao: item.situacao as ESICProcesso['situacao'],
+        status: item.status as ESICProcesso['status']
       })) as ESICProcesso[];
       
       setProcessos(typedData);
@@ -92,8 +91,8 @@ export const useProcessos = () => {
       // Atualizar a lista de processos
       const typedData = {
         ...data,
-        situacao: data.situacao as ESICProcesso['situacao'], // Type assertion for situacao
-        status: data.status as ESICProcesso['status'] // Type assertion for status
+        situacao: data.situacao as ESICProcesso['situacao'],
+        status: data.status as ESICProcesso['status']
       } as ESICProcesso;
       
       setProcessos(prev => [typedData, ...prev]);
@@ -128,8 +127,8 @@ export const useProcessos = () => {
       // Atualizar a lista de processos
       const typedData = {
         ...data,
-        situacao: data.situacao as ESICProcesso['situacao'], // Type assertion for situacao
-        status: data.status as ESICProcesso['status'] // Type assertion for status
+        situacao: data.situacao as ESICProcesso['situacao'],
+        status: data.status as ESICProcesso['status']
       } as ESICProcesso;
       
       setProcessos(prev => prev.map(p => p.id === params.id ? typedData : p));

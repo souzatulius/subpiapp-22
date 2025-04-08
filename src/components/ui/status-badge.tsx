@@ -21,9 +21,9 @@ export function StatusBadge({
   const Icon = statusIcons[config.iconName];
   
   const sizeClasses = {
-    sm: 'text-xs py-0.5 px-2',
-    md: 'text-sm py-1 px-2.5',
-    lg: 'text-sm py-1.5 px-3',
+    sm: 'text-xs py-0.5 px-2 h-5',
+    md: 'text-sm py-1 px-2.5 h-6',
+    lg: 'text-sm py-1.5 px-3 h-7',
   };
 
   const iconSizes = {
@@ -62,6 +62,11 @@ export function DemandaStatusBadge({
 }) {
   const config = getDemandaStatusConfig(status);
   
+  // Special override for "Em análise" to ensure consistent height
+  if (status.toLowerCase() === 'em_analise' || status.toLowerCase() === 'em análise') {
+    config.label = "Em análise";
+  }
+  
   return (
     <StatusBadge
       status={status}
@@ -85,6 +90,13 @@ export function NotaStatusBadge({
   size?: 'sm' | 'md' | 'lg';
 }) {
   const config = getNotaStatusConfig(status);
+  
+  // Override rejeitada to use orange-500 background
+  if (status.toLowerCase() === 'rejeitada') {
+    config.bg = 'bg-orange-500';
+    config.text = 'text-white';
+    config.borderColor = 'border-orange-600';
+  }
   
   return (
     <StatusBadge

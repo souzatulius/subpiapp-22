@@ -12,7 +12,7 @@ import DemandaCards from './DemandaCards';
 import FilterBar from './FilterBar';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, FileText, MessageSquare, Eye } from 'lucide-react';
 
 const ConsultarDemandasContent = () => {
   const navigate = useNavigate();
@@ -110,6 +110,10 @@ const ConsultarDemandasContent = () => {
     setShowFilters(!showFilters);
   };
 
+  const handleViewNota = (demandId: string) => {
+    navigate(`/dashboard/comunicacao/notas/editar?demanda_id=${demandId}`);
+  };
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -159,11 +163,39 @@ const ConsultarDemandasContent = () => {
       )}
       
       {viewMode === 'cards' ? (
-        <DemandaCards
-          demandas={demandas as any}
-          isLoading={isLoading}
-          onSelectDemand={handleViewDemand as any}
-        />
+        <>
+          <div className="flex gap-2 mb-4">
+            <Button 
+              className="bg-orange-300 hover:bg-orange-400 text-white rounded-full"
+              onClick={() => console.log("Detalhes action")}
+            >
+              <Eye className="h-4 w-4 mr-1.5" />
+              Detalhes
+            </Button>
+            
+            <Button 
+              className="bg-orange-300 hover:bg-orange-400 text-white rounded-full"
+              onClick={() => console.log("Respostas action")}
+            >
+              <MessageSquare className="h-4 w-4 mr-1.5" />
+              Respostas
+            </Button>
+            
+            <Button 
+              className="bg-orange-300 hover:bg-orange-400 text-white rounded-full"
+              onClick={() => handleViewNota(selectedDemand?.id || "")}
+            >
+              <FileText className="h-4 w-4 mr-1.5" />
+              Nota Oficial
+            </Button>
+          </div>
+          
+          <DemandaCards
+            demandas={demandas as any}
+            isLoading={isLoading}
+            onSelectDemand={handleViewDemand as any}
+          />
+        </>
       ) : (
         <DemandasTable
           demandas={demandas as any}
@@ -175,6 +207,7 @@ const ConsultarDemandasContent = () => {
           setPage={setPage}
           setPageSize={setPageSize}
           isAdmin={isAdmin}
+          onViewNota={handleViewNota}
         />
       )}
       
