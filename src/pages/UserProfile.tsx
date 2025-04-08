@@ -73,7 +73,7 @@ const UserProfile: React.FC = () => {
           <main 
             className="flex-1"
             style={{
-              backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
+              backgroundImage: 'url("/lovable-uploads/c20c039e-c465-4258-90c1-fdcf2625b808.png")',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
