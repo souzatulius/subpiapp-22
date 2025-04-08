@@ -119,7 +119,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   const allNavigationItems = getNavigationSections();
   
   // Filter for only the specified navigation items: Início, Comunicação, Relatórios, Zeladoria (Ranking)
-  const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking', 'esic'];
+  const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking'];
   
   const navigationItems = allNavigationItems
     .filter(item => allowedPages.includes(item.id))
@@ -138,7 +138,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
         <div className="space-y-4 flex-1">
           {isLoading ? (
             // Show loading skeletons while fetching data
-            Array.from({ length: 5 }).map((_, index) => (
+            Array.from({ length: 4 }).map((_, index) => (
               <SidebarItemSkeleton key={index} isCollapsed={!isOpen} />
             ))
           ) : (

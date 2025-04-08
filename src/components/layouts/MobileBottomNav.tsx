@@ -49,7 +49,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
   const allNavItems = getNavigationSections();
   
   // Filter for only the specified navigation items: Dashboard, Comunicação, Relatórios, Zeladoria (Ranking)
-  const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking', 'esic'];
+  const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking'];
   
   // Filter by department and allowed pages, then map for mobile
   const navItems = allNavItems
@@ -99,7 +99,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
         {isLoading ? (
           // Show loading skeletons while data is loading
           <>
-            {[...Array(5)].map((_, index) => (
+            {[...Array(4)].map((_, index) => (
               <div 
                 key={`skeleton-${index}`} 
                 className="flex flex-col items-center justify-center flex-1 py-2 px-1"

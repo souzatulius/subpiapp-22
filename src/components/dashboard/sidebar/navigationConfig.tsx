@@ -42,12 +42,5 @@ export const getNavigationSections = (): NavigationItem[] => {
       path: '/dashboard/zeladoria/ranking-subs',
       icon: <Trophy className="w-8 h-8" />,
     },
-    {
-      id: 'esic',
-      label: 'e-SIC',
-      path: '/dashboard/esic',
-      icon: <FileText className="w-8 h-8" />,
-      allowedDepartments: ['comunicacao', 'gabinete'],
-    },
   ];
 };
