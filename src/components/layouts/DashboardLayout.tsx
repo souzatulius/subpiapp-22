@@ -31,7 +31,7 @@ const DashboardLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header - removed any top spacing */}
+      {/* Header - fixed height */}
       <div className="transition-all duration-300">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         

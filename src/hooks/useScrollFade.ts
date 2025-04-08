@@ -1,13 +1,20 @@
 
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ScrollFadeOptions {
   threshold?: number;
   fadeDistance?: number;
+  disableTransformOnMobile?: boolean;
 }
 
-export const useScrollFade = ({ threshold = 0, fadeDistance = 100 }: ScrollFadeOptions = {}) => {
+export const useScrollFade = ({ 
+  threshold = 0, 
+  fadeDistance = 100,
+  disableTransformOnMobile = true
+}: ScrollFadeOptions = {}) => {
   const [scrollY, setScrollY] = useState(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,10 +30,12 @@ export const useScrollFade = ({ threshold = 0, fadeDistance = 100 }: ScrollFadeO
     ? 1 
     : Math.max(0, 1 - (scrollY - threshold) / fadeDistance);
   
-  // Return style object with minimal transform to avoid unwanted spacing
+  // Return style object with transform disabled on mobile if specified
   return {
     opacity,
-    transform: scrollY <= threshold ? 'none' : `translateY(${Math.min((scrollY - threshold) / 2, fadeDistance/2)}px)`
+    transform: (scrollY <= threshold || (isMobile && disableTransformOnMobile)) 
+      ? 'none' 
+      : `translateY(${Math.min((scrollY - threshold) / 2, fadeDistance/2)}px)`
   };
 };
 

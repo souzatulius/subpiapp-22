@@ -118,14 +118,14 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ className }) => {
                 key={item.id}
                 to={item.path}
                 className={() => {
-                  return `flex flex-col items-center justify-center flex-1 py-2 px-1 min-w-[72px]
+                  return `flex flex-col items-center justify-center flex-1 min-w-fit py-1 px-2
                     ${isActive ? 'bg-white text-[#051b2c]' : 'text-gray-400'}`
                 }}
               >
                 <div className="text-[#f57737] w-6 h-6 flex items-center justify-center">
                   {item.icon}
                 </div>
-                <span className="text-xs mt-1 truncate font-medium w-16 text-center">{item.label}</span>
+                <span className="text-xs mt-1 text-center truncate max-w-full">{item.label}</span>
               </NavLink>
             );
           })

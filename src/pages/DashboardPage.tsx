@@ -19,8 +19,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
-// Removing the WelcomeMessage import
-// import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -106,6 +104,13 @@ const DashboardPage: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="space-y-6">
+              {/* Mobile breadcrumb now placed BEFORE WelcomeCard */}
+              {isMobile && (
+                <div className="w-full bg-white rounded-md shadow-sm">
+                  <BreadcrumbBar />
+                </div>
+              )}
+              
               <div className="w-full">
                 {/* WelcomeCard component */}
                 <WelcomeCard 
@@ -116,16 +121,7 @@ const DashboardPage: React.FC = () => {
                   userName={firstName || ''}
                   greeting={true}
                 />
-                
-                {/* Removed WelcomeMessage component */}
               </div>
-              
-              {/* Mobile breadcrumb now placed after WelcomeCard */}
-              {isMobile && (
-                <div className="w-full bg-white rounded-md shadow-sm">
-                  <BreadcrumbBar />
-                </div>
-              )}
               
               <div className="flex justify-end">
                 <Button 
