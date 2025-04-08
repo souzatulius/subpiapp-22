@@ -3,7 +3,8 @@ import React, { useMemo } from 'react';
 import { BarChart } from '../../charts/BarChart';
 import { LineChart } from '../../charts/LineChart';
 
-import { useChartData as useRankingChartData } from '../../../ranking/hooks/useChartData';
+// Update the import path to point to the correct location
+import { useChartData as useRankingChartData } from '@/hooks/ranking/useChartData';
 import { useChartConfigs } from './useChartConfigs';
 import { ChartComponentsCollection } from './types';
 
