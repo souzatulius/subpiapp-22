@@ -86,11 +86,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {isMobile && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-white">
-          <BreadcrumbBar />
-        </div>
-      )}
+      {/* Remove the fixed positioned breadcrumb for mobile */}
       
       <div 
         style={isMobile ? scrollFadeStyles : undefined}
@@ -102,7 +98,7 @@ const DashboardPage: React.FC = () => {
       <div className="flex flex-1 overflow-hidden">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className={`flex-1 overflow-auto ${isMobile ? 'pt-10' : ''}`}>
+        <main className={`flex-1 overflow-auto`}>
           {!isMobile && <BreadcrumbBar />}
           
           <motion.div 
@@ -116,7 +112,7 @@ const DashboardPage: React.FC = () => {
                 className="w-full"
                 style={isMobile ? scrollFadeStyles : undefined}
               >
-                {/* Ensuring firstName is passed correctly and setting greeting to true */}
+                {/* WelcomeCard component */}
                 <WelcomeCard 
                   title="Dashboard" 
                   description="Arraste e edite os cards para personalizar a sua tela" 
@@ -129,6 +125,13 @@ const DashboardPage: React.FC = () => {
                 {/* Add welcome message component for first-time users */}
                 <WelcomeMessage />
               </div>
+              
+              {/* Mobile breadcrumb now placed after WelcomeCard */}
+              {isMobile && (
+                <div className="w-full bg-white rounded-md shadow-sm">
+                  <BreadcrumbBar />
+                </div>
+              )}
               
               <div style={isMobile ? scrollFadeStyles : undefined} className="flex justify-end">
                 <Button 
