@@ -5,7 +5,7 @@ import ProcessoForm from '@/components/esic/ProcessoForm';
 
 interface ProcessoEditProps {
   processo: ESICProcesso;
-  onSubmit: (values: ESICProcessoFormValues) => void;
+  onSubmit: (values: ESICProcessoFormValues) => Promise<void>;
   isLoading: boolean;
   onCancel: () => void;
 }

@@ -59,18 +59,18 @@ const formSchema = z.object({
 });
 
 interface ProcessoFormProps {
-  processo?: ESICProcesso;
+  initialValues?: ESICProcesso;
   onSubmit: (values: ESICProcessoFormValues) => Promise<void>;
-  isSubmitting: boolean;
+  isLoading: boolean;
   onCancel: () => void;
   mode?: 'create' | 'edit';
   coordenacoes?: { id: string; nome: string }[];
 }
 
 const ProcessoForm: React.FC<ProcessoFormProps> = ({
-  processo,
+  initialValues,
   onSubmit,
-  isSubmitting,
+  isLoading,
   onCancel,
   mode = 'create',
   coordenacoes = []
@@ -94,18 +94,18 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
 
   // Update form with processo data if provided (edit mode)
   useEffect(() => {
-    if (processo && mode === 'edit') {
+    if (initialValues && mode === 'edit') {
       form.reset({
-        data_processo: processo.data_processo ? new Date(processo.data_processo) : new Date(),
-        texto: processo.texto || '',
-        situacao: processo.situacao || 'em_tramitacao',
-        assunto: processo.assunto || '',
-        solicitante: processo.solicitante || '',
-        coordenacao_id: processo.coordenacao_id || '',
-        prazo_resposta: processo.prazo_resposta ? new Date(processo.prazo_resposta) : undefined,
+        data_processo: initialValues.data_processo ? new Date(initialValues.data_processo) : new Date(),
+        texto: initialValues.texto || '',
+        situacao: initialValues.situacao || 'em_tramitacao',
+        assunto: initialValues.assunto || '',
+        solicitante: initialValues.solicitante || '',
+        coordenacao_id: initialValues.coordenacao_id || '',
+        prazo_resposta: initialValues.prazo_resposta ? new Date(initialValues.prazo_resposta) : undefined,
       });
     }
-  }, [processo, form, mode]);
+  }, [initialValues, form, mode]);
 
   // Handle form submission
   const handleSubmit = async (values: ESICProcessoFormValues) => {
@@ -352,7 +352,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                              format(new Date(field.value), "dd/MM/yyyy", { locale: ptBR })
                             ) : (
                               <span>Selecione a data</span>
                             )}
@@ -363,7 +363,7 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={field.value ? new Date(field.value) : undefined}
                           onSelect={field.onChange}
                           initialFocus
                           locale={ptBR}
@@ -399,14 +399,14 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
       </CardContent>
       
       <CardFooter className="px-0 flex justify-end space-x-2">
-        <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+        <Button variant="outline" onClick={onCancel} disabled={isLoading}>
           Cancelar
         </Button>
         <Button 
           onClick={form.handleSubmit(handleSubmit)}
-          disabled={isSubmitting}
+          disabled={isLoading}
         >
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {mode === 'create' ? 'Criar Processo' : 'Salvar Alterações'}
         </Button>
       </CardFooter>

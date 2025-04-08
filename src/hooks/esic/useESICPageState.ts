@@ -41,40 +41,56 @@ export const useESICPageState = () => {
     isGenerating,
   } = useJustificativas(selectedProcesso?.id);
   
-  const handleCreateProcesso = (values: ESICProcessoFormValues) => {
-    createProcesso(values, {
-      onSuccess: () => {
-        setScreen('list');
-        toast({
-          title: 'Processo criado com sucesso',
-          description: 'O novo processo foi adicionado ao sistema.',
-        });
-      },
+  const handleCreateProcesso = async (values: ESICProcessoFormValues): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      createProcesso(values, {
+        onSuccess: () => {
+          setScreen('list');
+          toast({
+            title: 'Processo criado com sucesso',
+            description: 'O novo processo foi adicionado ao sistema.',
+          });
+          resolve();
+        },
+        onError: (error) => {
+          reject(error);
+        }
+      });
     });
   };
   
-  const handleUpdateProcesso = (values: ESICProcessoFormValues) => {
-    if (!selectedProcesso) return;
+  const handleUpdateProcesso = async (values: ESICProcessoFormValues): Promise<void> => {
+    if (!selectedProcesso) return Promise.reject(new Error('Nenhum processo selecionado'));
     
-    updateProcesso(
-      { 
-        id: selectedProcesso.id, 
-        data: {
-          data_processo: values.data_processo.toISOString(),
-          situacao: values.situacao,
-          texto: values.texto,
-        } 
-      },
-      {
-        onSuccess: () => {
-          setScreen('view');
-          toast({
-            title: 'Processo atualizado com sucesso',
-            description: 'As alterações foram salvas no sistema.',
-          });
+    return new Promise((resolve, reject) => {
+      updateProcesso(
+        { 
+          id: selectedProcesso.id, 
+          data: {
+            data_processo: values.data_processo.toISOString(),
+            situacao: values.situacao,
+            texto: values.texto,
+            assunto: values.assunto,
+            solicitante: values.solicitante,
+            coordenacao_id: values.coordenacao_id,
+            prazo_resposta: values.prazo_resposta ? new Date(values.prazo_resposta).toISOString() : undefined
+          } 
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            setScreen('view');
+            toast({
+              title: 'Processo atualizado com sucesso',
+              description: 'As alterações foram salvas no sistema.',
+            });
+            resolve();
+          },
+          onError: (error) => {
+            reject(error);
+          }
+        }
+      );
+    });
   };
   
   const handleDeleteProcesso = (id: string) => {
@@ -117,44 +133,56 @@ export const useESICPageState = () => {
     }
   };
   
-  const handleCreateJustificativa = (values: ESICJustificativaFormValues) => {
-    if (!selectedProcesso) return;
+  const handleCreateJustificativa = async (values: ESICJustificativaFormValues): Promise<void> => {
+    if (!selectedProcesso) return Promise.reject(new Error('Nenhum processo selecionado'));
     
-    createJustificativa(
-      {
-        values,
-        processoId: selectedProcesso.id
-      },
-      {
-        onSuccess: () => {
-          setScreen('view');
-          toast({
-            title: 'Justificativa adicionada com sucesso',
-            description: 'A justificativa foi registrada para este processo.',
-          });
+    return new Promise((resolve, reject) => {
+      createJustificativa(
+        {
+          values,
+          processoId: selectedProcesso.id
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            setScreen('view');
+            toast({
+              title: 'Justificativa adicionada com sucesso',
+              description: 'A justificativa foi registrada para este processo.',
+            });
+            resolve();
+          },
+          onError: (error) => {
+            reject(error);
+          }
+        }
+      );
+    });
   };
   
-  const handleGenerateJustificativa = () => {
-    if (!selectedProcesso) return;
+  const handleGenerateJustificativa = async (): Promise<void> => {
+    if (!selectedProcesso) return Promise.reject(new Error('Nenhum processo selecionado'));
     
-    generateJustificativa(
-      {
-        processoId: selectedProcesso.id,
-        processoTexto: selectedProcesso.texto
-      },
-      {
-        onSuccess: () => {
-          setScreen('view');
-          toast({
-            title: 'Justificativa gerada com sucesso',
-            description: 'A IA gerou uma justificativa para este processo.',
-          });
+    return new Promise((resolve, reject) => {
+      generateJustificativa(
+        {
+          processoId: selectedProcesso.id,
+          processoTexto: selectedProcesso.texto
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            setScreen('view');
+            toast({
+              title: 'Justificativa gerada com sucesso',
+              description: 'A IA gerou uma justificativa para este processo.',
+            });
+            resolve();
+          },
+          onError: (error) => {
+            reject(error);
+          }
+        }
+      );
+    });
   };
   
   const handleUpdateStatus = (status: 'novo_processo' | 'aguardando_justificativa' | 'aguardando_aprovacao' | 'concluido') => {
