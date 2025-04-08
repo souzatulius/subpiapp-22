@@ -23,10 +23,10 @@ export const PieChart: React.FC<PieChartProps> = ({
 }) => {
   // Define color sets for consistent styling
   const colorSets = {
-    default: ['#0066FF', '#F97316', '#64748B', '#94A3B8', '#CBD5E1'],
+    default: ['#F97316', '#EA580C', '#0066FF', '#1E40AF', '#64748B', '#334155'],
     blue: ['#0c4a6e', '#0369a1', '#0284c7', '#0ea5e9', '#38bdf8'],
-    orange: ['#9a3412', '#c2410c', '#ea580c', '#f97316', '#fb923c'],
-    mixed: ['#64748B', '#334155', '#F97316', '#C2410C', '#0066FF', '#0C4A6E']
+    orange: ['#F97316', '#EA580C', '#c2410c', '#9a3412', '#fb923c'],
+    mixed: ['#F97316', '#EA580C', '#0066FF', '#1E40AF', '#64748B', '#334155']
   };
 
   // Choose colors from predefined sets or use provided colors
@@ -61,32 +61,6 @@ export const PieChart: React.FC<PieChartProps> = ({
     return null;
   };
 
-  // Custom label renderer for displaying labels on the chart
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
-    if (!showLabels) return null;
-    
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    
-    return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="white" 
-        textAnchor={x > cx ? 'start' : 'end'} 
-        dominantBaseline="central"
-        fontSize={10}
-        fontWeight="bold"
-      >
-        {showOnlyPercentage 
-          ? `${(percent * 100).toFixed(0)}%` 
-          : `${data[index].name}: ${(percent * 100).toFixed(0)}%`}
-      </text>
-    );
-  };
-
   // Calculate layout based on legend position
   const getLayout = () => {
     if (legendPosition === 'left' || legendPosition === 'right') {
@@ -117,26 +91,22 @@ export const PieChart: React.FC<PieChartProps> = ({
 
   const { pieRadius, legendVertical, legendAlign, legendLayout, showLegend = true } = getLayout();
 
-  // External labels for large percentage display
-  const renderExternalPercentages = () => {
-    if (!largePercentage) return null;
-    
+  // Create external percentage labels
+  const renderPercentageLabels = () => {
     return (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          {data.map((entry, index) => {
-            const percentage = ((entry.value / total) * 100).toFixed(0);
-            return (
-              <div key={`label-${index}`} className="flex items-center mb-2">
-                <div 
-                  className="w-3 h-3 mr-2 rounded-sm" 
-                  style={{ backgroundColor: chartColors[index % chartColors.length] }}
-                />
-                <span className="text-2xl font-bold text-blue-600">{percentage}%</span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="absolute top-0 right-4 bottom-0 flex flex-col justify-center">
+        {data.map((entry, index) => {
+          const percentage = ((entry.value / total) * 100).toFixed(0);
+          return (
+            <div key={`label-${index}`} className="flex items-center mb-3">
+              <div 
+                className="w-3 h-3 mr-2 rounded-sm" 
+                style={{ backgroundColor: chartColors[index % chartColors.length] }}
+              />
+              <span className="text-sm font-medium">{entry.name}: <span className="font-bold">{percentage}%</span></span>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -144,14 +114,14 @@ export const PieChart: React.FC<PieChartProps> = ({
   return (
     <div className="relative w-full h-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsPieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+        <RechartsPieChart margin={{ top: 0, right: largePercentage ? 80 : 0, bottom: 0, left: 0 }}>
           <Tooltip content={customTooltip} />
           <Pie
             data={data}
-            cx="50%"
+            cx="40%"
             cy={legendPosition === 'bottom' ? "40%" : "50%"}
             labelLine={false}
-            label={renderCustomizedLabel}
+            label={false}
             outerRadius={pieRadius}
             fill="#8884d8"
             dataKey="value"
@@ -160,7 +130,7 @@ export const PieChart: React.FC<PieChartProps> = ({
               <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
             ))}
           </Pie>
-          {showLegend && (
+          {showLegend && !largePercentage && (
             <Legend 
               layout={legendLayout}
               verticalAlign={legendPosition === 'top' ? 'top' : legendPosition === 'bottom' ? 'bottom' : 'middle'}
@@ -178,7 +148,7 @@ export const PieChart: React.FC<PieChartProps> = ({
           )}
         </RechartsPieChart>
       </ResponsiveContainer>
-      {largePercentage && renderExternalPercentages()}
+      {largePercentage && renderPercentageLabels()}
     </div>
   );
 };
