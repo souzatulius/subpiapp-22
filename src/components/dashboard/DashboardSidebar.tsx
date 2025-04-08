@@ -116,8 +116,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   
   return (
     <aside
-      className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-full sticky top-0 left-0 transition-all duration-300 ease-in-out overflow-y-auto`}
-      style={{ height: 'calc(100vh - 4rem)' }}
+      className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-screen sticky top-0 transition-all duration-300 ease-in-out`}
     >
       <nav className="space-y-6 flex flex-col h-full">
         <div className="space-y-4">

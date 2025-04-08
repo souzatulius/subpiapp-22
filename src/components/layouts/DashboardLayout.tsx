@@ -46,9 +46,11 @@ const DashboardLayout: React.FC = () => {
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
       
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-4rem)]">
+      <div className="flex flex-1 overflow-hidden">
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
+        
+        {/* Removed the collapse button that was here */}
         
         <main className={`flex-1 overflow-auto w-full ${isMobile ? 'pt-10' : ''} transition-all duration-300`}>
           {/* Desktop breadcrumb */}
