@@ -31,6 +31,9 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   userName,
   greeting = false
 }) => {
+  // Ensure userName is treated as a string even if it's undefined
+  const displayName = userName || '';
+  
   return (
     <Card className={`${color} text-white shadow-lg overflow-hidden`}>
       <CardContent className="p-4">
@@ -38,7 +41,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
           <div>
             <h2 className="text-2xl font-bold mb-3 flex items-center">
               {icon}
-              {greeting && userName ? `Olá, ${userName}!` : title}
+              {greeting && displayName ? `Olá, ${displayName}!` : title}
             </h2>
             <p className="text-blue-100">
               {description}

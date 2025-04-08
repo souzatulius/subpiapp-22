@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
+import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,10 +30,13 @@ const DashboardPage: React.FC = () => {
   const {
     user
   } = useAuth();
+  
   const {
     firstName,
-    userCoordenaticaoId
-  } = useUserData();
+    userCoordenaticaoId,
+    isLoadingUser
+  } = useUserData(user?.id);
+  
   const {
     cards,
     isLoading,
@@ -112,14 +116,18 @@ const DashboardPage: React.FC = () => {
                 className="w-full"
                 style={isMobile ? scrollFadeStyles : undefined}
               >
+                {/* Ensuring firstName is passed correctly and setting greeting to true */}
                 <WelcomeCard 
                   title="Dashboard" 
                   description="Arraste e edite os cards para personalizar a sua tela" 
                   icon={<Home className="h-6 w-6 mr-2" />} 
                   color="bg-gradient-to-r from-blue-800 to-blue-950"
-                  userName={firstName}
+                  userName={firstName || ''}
                   greeting={true}
                 />
+                
+                {/* Add welcome message component for first-time users */}
+                <WelcomeMessage />
               </div>
               
               <div style={isMobile ? scrollFadeStyles : undefined} className="flex justify-end">

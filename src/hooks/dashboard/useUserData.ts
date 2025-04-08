@@ -23,6 +23,7 @@ export const useUserData = (userId?: string): UserDataResult => {
       
       setIsLoadingUser(true);
       try {
+        console.log('Fetching user data for ID:', userId);
         // Fetch from the correct 'usuarios' table
         const { data, error } = await supabase
           .from('usuarios')
@@ -41,10 +42,17 @@ export const useUserData = (userId?: string): UserDataResult => {
         }
         
         if (data) {
-          // Extract first name
-          const firstName = data.nome_completo.split(' ')[0];
-          setFirstName(firstName);
+          console.log('User data fetched:', data);
+          // Extract first name from full name
+          if (data.nome_completo) {
+            const firstName = data.nome_completo.split(' ')[0];
+            console.log('Setting firstName to:', firstName);
+            setFirstName(firstName);
+          }
+          
           setUserCoordenaticaoId(data.coordenacao_id);
+        } else {
+          console.log('No user data found');
         }
       } catch (err) {
         console.error('Failed to fetch user info:', err);
