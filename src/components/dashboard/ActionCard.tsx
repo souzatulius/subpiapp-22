@@ -1,12 +1,14 @@
 
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
-import { MoveIcon } from 'lucide-react';
+import { MoveIcon, FileText } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 import ChartPreview from './charts/ChartPreview';
+import { LucideIcon } from 'lucide-react';
 
 export interface ActionCardProps {
   id: string;
@@ -71,15 +73,16 @@ const ActionCard = ({
     if (!iconId) return null;
     
     // Direct check for Lucide icon by name
-    const LucideIcon = (LucideIcons as any)[iconId];
+    const LucideIcon = (LucideIcons as any)[iconId] as LucideIcon | undefined;
     if (LucideIcon) {
-      return <LucideIcon className={getIconSize(iconSize)} />;
+      const IconComponent = LucideIcon;
+      return <IconComponent className={getIconSize(iconSize)} />;
     }
     
     // Fallback to our custom icon loader
     const IconComponent = getIconComponentFromId(iconId);
     if (IconComponent) {
-      return React.createElement(IconComponent, { className: getIconSize(iconSize) });
+      return <IconComponent className={getIconSize(iconSize)} />;
     }
     
     return null;

@@ -12,6 +12,8 @@ import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 import DynamicDataCard from '../DynamicDataCard';
 import DashboardSearchCard from '../DashboardSearchCard';
 import * as LucideIcons from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -47,24 +49,24 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   const { userDepartment, isComunicacao } = useDepartmentData();
   
   // Get the Lucide icon component
-  const getIconComponent = () => {
-    if (!card.iconId) return null;
+  const getIconComponent = (): LucideIcon => {
+    if (!card.iconId) return FileText;
     
     // Try direct match first
-    const directMatch = LucideIcons[card.iconId as keyof typeof LucideIcons];
+    const directMatch = LucideIcons[card.iconId as keyof typeof LucideIcons] as LucideIcon | undefined;
     if (directMatch) {
       return directMatch;
     }
     
     // Try capitalized format
     const formattedIconId = card.iconId.charAt(0).toUpperCase() + card.iconId.slice(1);
-    const capitalizedMatch = LucideIcons[formattedIconId as keyof typeof LucideIcons];
+    const capitalizedMatch = LucideIcons[formattedIconId as keyof typeof LucideIcons] as LucideIcon | undefined;
     if (capitalizedMatch) {
       return capitalizedMatch;
     }
     
     // Return default icon as fallback
-    return LucideIcons.FileText;
+    return FileText;
   };
   
   const IconComponent = getIconComponent();
@@ -81,7 +83,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       return (
         <DynamicDataCard 
           title={card.title}
-          icon={IconComponent ? React.createElement(IconComponent, { className: "h-8 w-8" }) : null}
+          icon={<IconComponent className="h-8 w-8" />}
           color={card.color}
           dataSourceKey={card.dataSourceKey}
           coordenacaoId={userDepartment || 'default'}

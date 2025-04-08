@@ -1,28 +1,31 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
-import React from 'react';
 import * as LucideIcons from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 // Function to get a Lucide icon component by its ID string
-export const getIconComponentFromId = (iconId: string | undefined) => {
+export const getIconComponentFromId = (iconId: string | undefined): LucideIcon => {
   if (!iconId) {
-    return LucideIcons.FileText;
+    return FileText;
   }
   
   // First try to access the icon directly from LucideIcons
-  if (LucideIcons[iconId as keyof typeof LucideIcons]) {
-    return LucideIcons[iconId as keyof typeof LucideIcons];
+  const directIcon = LucideIcons[iconId as keyof typeof LucideIcons] as LucideIcon | undefined;
+  if (directIcon) {
+    return directIcon;
   }
   
-  // If not found, use a standardized format to match our naming convention
+  // If not found, try capitalized format
   const formattedIconId = iconId.charAt(0).toUpperCase() + iconId.slice(1);
-  if (LucideIcons[formattedIconId as keyof typeof LucideIcons]) {
-    return LucideIcons[formattedIconId as keyof typeof LucideIcons];
+  const capitalizedIcon = LucideIcons[formattedIconId as keyof typeof LucideIcons] as LucideIcon | undefined;
+  if (capitalizedIcon) {
+    return capitalizedIcon;
   }
   
   // Return a default icon as fallback
-  return LucideIcons.FileText;
+  return FileText;
 };
 
 // Get default cards

@@ -5,6 +5,7 @@ import { getWidthClass, getHeightClass } from './GridUtilities';
 import CardsContainer from './CardsContainer';
 import DynamicDataCard from '../DynamicDataCard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
+import { LucideIcon } from 'lucide-react';
 
 interface CardGroupProps {
   card: ActionCardItem;
@@ -43,9 +44,7 @@ const CardGroup: React.FC<CardGroupProps> = ({
         <DynamicDataCard
           key={card.id}
           title={card.title}
-          icon={IconComponent ? React.createElement(IconComponent, { 
-            className: isMobileView ? "w-12 h-12" : "w-16 h-16" 
-          }) : null}
+          icon={<IconComponent className={isMobileView ? "w-12 h-12" : "w-16 h-16"} />}
           color={card.color}
           dataSourceKey={card.dataSourceKey as any}
           coordenacaoId={specialCardsData?.coordenacaoId || ''}
