@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Cell, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Cell, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 interface PieChartProps {
   data: any[];
@@ -8,6 +8,7 @@ interface PieChartProps {
   colorSet?: 'default' | 'blue' | 'orange';
   showLabels?: boolean;
   showOnlyPercentage?: boolean;
+  legendPosition?: 'top' | 'right' | 'bottom' | 'left';
 }
 
 export const PieChart: React.FC<PieChartProps> = ({ 
@@ -15,11 +16,12 @@ export const PieChart: React.FC<PieChartProps> = ({
   colors,
   colorSet = 'default',
   showLabels = false,
-  showOnlyPercentage = false
+  showOnlyPercentage = false,
+  legendPosition = 'right'
 }) => {
   // Define color sets for consistent styling
   const colorSets = {
-    default: ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'],
+    default: ['#0066FF', '#F97316', '#64748B', '#94A3B8', '#CBD5E1'],
     blue: ['#0c4a6e', '#0369a1', '#0284c7', '#0ea5e9', '#38bdf8'],
     orange: ['#9a3412', '#c2410c', '#ea580c', '#f97316', '#fb923c']
   };
@@ -82,6 +84,27 @@ export const PieChart: React.FC<PieChartProps> = ({
     );
   };
 
+  // Calculate layout based on legend position
+  const getLayout = () => {
+    if (legendPosition === 'left' || legendPosition === 'right') {
+      return { 
+        pieRadius: 70, 
+        legendVertical: true,
+        legendAlign: legendPosition === 'left' ? 'left' : 'right',
+        legendLayout: 'vertical'
+      };
+    } else {
+      return { 
+        pieRadius: 80, 
+        legendVertical: false,
+        legendAlign: 'center',
+        legendLayout: 'horizontal'
+      };
+    }
+  };
+
+  const { pieRadius, legendVertical, legendAlign, legendLayout } = getLayout();
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <RechartsPieChart>
@@ -89,10 +112,10 @@ export const PieChart: React.FC<PieChartProps> = ({
         <Pie
           data={data}
           cx="50%"
-          cy="50%"
+          cy={legendPosition === 'bottom' ? "40%" : "50%"}
           labelLine={false}
           label={renderCustomizedLabel}
-          outerRadius={80}
+          outerRadius={pieRadius}
           fill="#8884d8"
           dataKey="value"
         >
@@ -100,6 +123,20 @@ export const PieChart: React.FC<PieChartProps> = ({
             <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
           ))}
         </Pie>
+        <Legend 
+          layout={legendLayout}
+          verticalAlign={legendPosition === 'top' ? 'top' : legendPosition === 'bottom' ? 'bottom' : 'middle'}
+          align={legendAlign}
+          iconType="circle"
+          iconSize={10}
+          wrapperStyle={
+            legendPosition === 'bottom' ? 
+            { paddingTop: '20px' } : 
+            legendPosition === 'top' ? 
+            { paddingBottom: '20px' } : 
+            {}
+          }
+        />
       </RechartsPieChart>
     </ResponsiveContainer>
   );

@@ -2,48 +2,39 @@
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BarChart3, Info, MoreVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Eye, EyeOff, Search, GripVertical } from 'lucide-react';
 
 interface SortableGraphCardProps {
   id: string;
   title: string;
   description?: string;
-  children: React.ReactNode;
   isVisible: boolean;
   showAnalysis: boolean;
   analysis?: string;
-  isLoading: boolean;
-  onToggleVisibility: () => void;
-  onToggleAnalysis: () => void;
-  className?: string;
+  isLoading?: boolean;
+  onToggleVisibility?: () => void;
+  onToggleAnalysis?: () => void;
+  onExport?: () => void;
   hideMenuIcon?: boolean;
+  children: React.ReactNode;
 }
 
-export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
+const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
   id,
   title,
   description,
-  children,
   isVisible,
   showAnalysis,
-  analysis,
-  isLoading,
+  analysis = "Análise de dados não disponível para este gráfico.",
+  isLoading = false,
   onToggleVisibility,
   onToggleAnalysis,
-  className,
-  hideMenuIcon = false
+  onExport,
+  hideMenuIcon = false,
+  children
 }) => {
-  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   
   const {
     attributes,
@@ -52,60 +43,77 @@ export const SortableGraphCard: React.FC<SortableGraphCardProps> = ({
     transform,
     transition,
   } = useSortable({ id });
-
+  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-
+  
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none">
-      <Card className={cn("w-full border border-blue-200 hover:shadow-md transition-all", className)}>
-        <CardHeader className="p-3 pb-1 space-y-1">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-md font-semibold text-gray-800 flex items-center">
-              <BarChart3 className="h-4 w-4 mr-2 text-gray-500" />
-              {title}
-            </CardTitle>
-            {!hideMenuIcon && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onToggleVisibility}>
-                    {isVisible ? 'Ocultar gráfico' : 'Exibir gráfico'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onToggleAnalysis}>
-                    {showAnalysis ? 'Ocultar análise' : 'Mostrar análise'}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Exportar dados</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+    <Card 
+      ref={setNodeRef} 
+      style={style} 
+      className="relative shadow-md rounded-xl overflow-hidden bg-white"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Drag handle - remains visible always */}
+      {!hideMenuIcon && (
+        <div 
+          {...attributes} 
+          {...listeners}
+          className="absolute top-3 left-3 cursor-grab active:cursor-grabbing p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
+        >
+          <GripVertical size={16} />
+        </div>
+      )}
+      
+      {/* Hover controls - only visible on hover */}
+      <div 
+        className={`absolute top-3 right-3 flex space-x-2 transition-opacity duration-200 ${
+          isHovering ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        {onToggleAnalysis && (
+          <button
+            onClick={onToggleAnalysis}
+            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+            title={showAnalysis ? "Mostrar gráfico" : "Mostrar análise"}
+          >
+            <Search size={16} />
+          </button>
+        )}
+        
+        {onToggleVisibility && (
+          <button
+            onClick={onToggleVisibility}
+            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+            title={isVisible ? "Ocultar card" : "Mostrar card"}
+          >
+            {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        )}
+      </div>
+      
+      <CardHeader className="pb-2 pt-3 px-4">
+        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+        {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
+      </CardHeader>
+      
+      <CardContent className="p-3">
+        {showAnalysis ? (
+          <div className="bg-gray-50 rounded-lg p-4 h-[220px] overflow-auto">
+            <h4 className="font-medium text-gray-700 mb-2">Análise de dados</h4>
+            <p className="text-gray-600 text-sm">{analysis}</p>
           </div>
-          {description && <CardDescription className="text-xs text-gray-500">{description}</CardDescription>}
-        </CardHeader>
-        <CardContent className="p-3 pt-1">
-          <div className="relative h-full">
+        ) : (
+          <div className="h-[220px]">
             {children}
           </div>
-          
-          {showAnalysis && analysis && (
-            <div className="mt-2 bg-blue-50 rounded-md p-2 border border-blue-100">
-              <div className="flex items-start gap-2">
-                <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-                <div className="text-xs text-blue-700">
-                  {analysis}
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
+
+export default SortableGraphCard;

@@ -26,7 +26,7 @@ export const useChartComponents = () => {
       return {
         distribuicaoPorTemas: (
           <div className="h-full w-full flex items-center justify-center">
-            <div className="h-8 w-8 border-4 border-t-orange-500 border-r-transparent border-b-orange-200 border-l-transparent rounded-full animate-spin"></div>
+            <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-200 border-l-transparent rounded-full animate-spin"></div>
           </div>
         ),
         origemDemandas: (
@@ -41,7 +41,7 @@ export const useChartComponents = () => {
         ),
         performanceArea: (
           <div className="h-full w-full flex items-center justify-center">
-            <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-200 border-l-transparent rounded-full animate-spin"></div>
+            <div className="h-8 w-8 border-4 border-t-orange-500 border-r-transparent border-b-orange-200 border-l-transparent rounded-full animate-spin"></div>
           </div>
         ),
         notasEmitidas: (
@@ -56,7 +56,7 @@ export const useChartComponents = () => {
       distribuicaoPorTemas: (
         <PieChart 
           data={problemas && problemas.length > 0 ? problemas : [{ name: 'Sem dados', value: 1 }]}
-          colorSet="orange"
+          colorSet="default"
           showLabels={true}
           showOnlyPercentage={true}
         />
@@ -66,7 +66,7 @@ export const useChartComponents = () => {
           data={origens && origens.length > 0 ? origens : [{ name: 'Sem dados', value: 0 }]}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'value', name: 'Solicitações', color: '#f97316' }
+            { dataKey: 'value', name: 'Solicitações', color: chartColors[1] }
           ]}
         />
       ),
@@ -74,10 +74,10 @@ export const useChartComponents = () => {
         <LineChart 
           data={responseTimes && responseTimes.length > 0 ? responseTimes : [{ name: 'Sem dados', Demandas: 0, Aprovacao: 0 }]}
           xAxisDataKey="name"
-          yAxisTicks={[10, 20, 50, 60, 90]} // Setting y-axis ticks as requested
+          yAxisTicks={[10, 20, 50, 60, 90]} 
           lines={[
-            { dataKey: 'Demandas', name: 'Respostas da coordenação', color: '#f97316' },
-            { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: '#0ea5e9' }
+            { dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] },
+            { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[1] }
           ]}
         />
       ),
@@ -86,7 +86,7 @@ export const useChartComponents = () => {
           data={coordinations && coordinations.length > 0 ? coordinations : [{ name: 'Sem dados', Demandas: 0 }]}
           xAxisDataKey="name"
           bars={[
-            { dataKey: 'Demandas', name: 'Demandas no mês', color: '#0ea5e9' }
+            { dataKey: 'Demandas', name: 'Demandas no mês', color: chartColors[1] }
           ]}
           horizontal={true}
         />
@@ -96,7 +96,7 @@ export const useChartComponents = () => {
           data={mediaTypes && mediaTypes.length > 0 ? mediaTypes : [{ name: 'Sem dados', Quantidade: 0 }]}
           xAxisDataKey="name"
           areas={[
-            { dataKey: 'Quantidade', name: 'Quantidade', color: '#0ea5e9', fillOpacity: 0.6 }
+            { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0], fillOpacity: 0.6 }
           ]}
         />
       )

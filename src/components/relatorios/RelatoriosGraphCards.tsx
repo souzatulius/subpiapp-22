@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { SortableGraphCard } from './components/SortableGraphCard';
-import { useReportsData } from './hooks/useReportsData';
-import { useChartConfigs } from './hooks/charts/useChartConfigs';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { AlertCircle, BarChart3, PieChart, LineChart, TrendingUp, Clock, Users, MessageSquare, ThumbsUp } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { supabase } from '@/integrations/supabase/client';
 import { BarChart } from './charts/BarChart';
 import { LineChart as LineChartComponent } from './charts/LineChart';
 import { PieChart as PieChartComponent } from './charts/PieChart';
 import { AreaChart } from './charts/AreaChart';
-import { supabase } from '@/integrations/supabase/client';
+import { useChartConfigs } from './hooks/charts/useChartConfigs';
+import SortableGraphCard from './components/SortableGraphCard';
 
 interface GraphCardItem {
   id: string;
@@ -27,8 +26,6 @@ interface RelatoriosGraphCardsProps {
 }
 
 export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEditMode = false }) => {
-  // Remove this line since we're not using the imported hook anymore
-  // const { chartComponents } = useChartComponents();
   const { chartColors } = useChartConfigs();
   const [isLoading, setIsLoading] = useState(true);
   const [chartData, setChartData] = useState({
@@ -36,17 +33,18 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     origens: [],
     responseTimes: [],
     coordinations: [],
-    mediaTypes: []
+    mediaTypes: [],
+    noticiasVsReleases: []
   });
   
   const [visibleCards, setVisibleCards] = useLocalStorage<string[]>('relatorios-graph-visible', [
     'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas', 'problemasComuns'
+    'notasEmitidas', 'noticiasVsReleases', 'problemasComuns'
   ]);
   
   const [cardsOrder, setCardsOrder] = useLocalStorage<string[]>('relatorios-graph-order', [
     'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas', 'problemasComuns'
+    'notasEmitidas', 'noticiasVsReleases', 'problemasComuns'
   ]);
   
   const [analysisCards, setAnalysisCards] = useLocalStorage<string[]>('relatorios-graph-analysis', []);
@@ -114,12 +112,23 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
           { name: 'Jun', Quantidade: 20, Meta: 18 },
         ];
 
+        // Generate notícias vs. releases comparison data
+        const noticiasVsReleasesChart = [
+          { name: 'Jan', Noticias: 34, Releases: 18 },
+          { name: 'Fev', Noticias: 42, Releases: 22 },
+          { name: 'Mar', Noticias: 38, Releases: 24 },
+          { name: 'Abr', Noticias: 45, Releases: 26 },
+          { name: 'Mai', Noticias: 52, Releases: 30 },
+          { name: 'Jun', Noticias: 48, Releases: 28 },
+        ];
+
         setChartData({
           problemas: problemasChart,
           origens: origensChart,
           responseTimes: responseTimesChart,
           coordinations: coordenacoesChart,
-          mediaTypes: mediaTypesChart
+          mediaTypes: mediaTypesChart,
+          noticiasVsReleases: noticiasVsReleasesChart
         });
 
         console.log('Chart data loaded successfully:', { problemasChart, origensChart, coordenacoesChart });
@@ -131,7 +140,8 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
           origens: mockPieData,
           responseTimes: mockLineData,
           coordinations: mockAreasData,
-          mediaTypes: mockAreaData
+          mediaTypes: mockAreaData,
+          noticiasVsReleases: mockNoticiasVsReleasesData
         });
       } finally {
         setIsLoading(false);
@@ -148,7 +158,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       description: 'Temas das solicitações no mês atual',
       visible: true,
       showAnalysis: analysisCards.includes('distribuicaoPorTemas'),
-      analysis: 'Os temas com maior volume de demandas são Serviços Urbanos e Meio Ambiente.'
+      analysis: 'Os temas com maior volume de demandas são Serviços Urbanos e Meio Ambiente. Houve um aumento de 15% nas demandas de Serviços Urbanos em comparação com o mês anterior.'
     },
     origemDemandas: {
       id: 'origemDemandas',
@@ -156,7 +166,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       description: 'De onde vêm as solicitações',
       visible: true,
       showAnalysis: analysisCards.includes('origemDemandas'),
-      analysis: 'A maioria das demandas vem diretamente das coordenações, seguidas de imprensa e redes sociais.'
+      analysis: 'A maioria das demandas vem diretamente das coordenações (45%), seguidas de imprensa (35%) e redes sociais (12%). As origens internas representam 8% do total de demandas recebidas.'
     },
     tempoMedioResposta: {
       id: 'tempoMedioResposta',
@@ -164,7 +174,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       description: 'Evolução de agilidade de retorno para a imprensa',
       visible: true,
       showAnalysis: analysisCards.includes('tempoMedioResposta'),
-      analysis: 'O tempo médio de resposta tem diminuído nos últimos meses, indicando melhoria na eficiência.'
+      analysis: 'O tempo médio de resposta tem diminuído nos últimos meses, indicando melhoria na eficiência dos processos internos. O pico às terças-feiras deve-se ao volume maior de demandas recebidas às segundas.'
     },
     performanceArea: {
       id: 'performanceArea',
@@ -172,7 +182,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       description: 'Coordenações mais envolvidas nas solicitações',
       visible: true,
       showAnalysis: analysisCards.includes('performanceArea'),
-      analysis: 'As áreas de Comunicação e Planejamento têm os melhores índices de resposta.'
+      analysis: 'As áreas de Comunicação e Planejamento têm os melhores índices de resposta. A CPO recebe o maior volume de demandas, seguida pela CPDU, refletindo o foco atual em projetos de infraestrutura.'
     },
     notasEmitidas: {
       id: 'notasEmitidas',
@@ -180,7 +190,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       description: 'Evolução de posicionamentos no mês',
       visible: true,
       showAnalysis: analysisCards.includes('notasEmitidas'),
-      analysis: 'Houve um aumento de 15% na emissão de notas oficiais no último trimestre.'
+      analysis: 'Houve um aumento de 15% na emissão de notas oficiais no último trimestre, com picos nos meses de abril e maio devido a eventos especiais e campanhas sazonais.'
     },
     problemasComuns: {
       id: 'problemasComuns',
@@ -188,7 +198,15 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       description: 'Categorias de problemas na última semana',
       visible: true,
       showAnalysis: analysisCards.includes('problemasComuns'),
-      analysis: 'As categorias "Limpeza Urbana" e "Iluminação Pública" representam mais de 50% dos problemas reportados.'
+      analysis: 'As categorias "Limpeza Urbana" e "Iluminação Pública" representam mais de 50% dos problemas reportados. Problemas com áreas verdes aumentaram 12% no último mês, possivelmente devido à estação de chuvas.'
+    },
+    noticiasVsReleases: {
+      id: 'noticiasVsReleases',
+      title: 'Notícias vs. Releases',
+      description: 'Comparação entre notícias e releases oficiais',
+      visible: true,
+      showAnalysis: analysisCards.includes('noticiasVsReleases'),
+      analysis: 'Observa-se uma correlação direta entre o número de releases emitidos e o aumento de notícias sobre os temas, com uma taxa de conversão média de 1:1.7 (cada release gera aproximadamente 1.7 notícias relacionadas).'
     }
   };
 
@@ -272,14 +290,31 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Jun', Quantidade: 20, Meta: 18 },
   ];
 
-  // Rename this variable to localChartComponents to avoid conflict
+  const mockNoticiasVsReleasesData = [
+    { name: 'Jan', Noticias: 34, Releases: 18 },
+    { name: 'Fev', Noticias: 42, Releases: 22 },
+    { name: 'Mar', Noticias: 38, Releases: 24 },
+    { name: 'Abr', Noticias: 45, Releases: 26 },
+    { name: 'Mai', Noticias: 52, Releases: 30 },
+    { name: 'Jun', Noticias: 48, Releases: 28 },
+  ];
+
+  // Chart components with updated colors
   const localChartComponents: Record<string, React.ReactNode> = {
     distribuicaoPorTemas: <BarChart data={chartData.problemas.length ? chartData.problemas : mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
-    origemDemandas: <PieChartComponent data={chartData.origens.length ? chartData.origens : mockPieData} colors={[chartColors[0], chartColors[1], chartColors[3], chartColors[4]]} showOnlyPercentage={false} showLabels={true} />,
-    tempoMedioResposta: <LineChartComponent data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[2] }]} />,
+    origemDemandas: <PieChartComponent data={chartData.origens.length ? chartData.origens : mockPieData} colorSet="default" showOnlyPercentage={false} showLabels={true} legendPosition="bottom" />,
+    tempoMedioResposta: <LineChartComponent data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[1] }]} />,
     performanceArea: <BarChart data={chartData.coordinations.length ? chartData.coordinations : mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} />,
-    notasEmitidas: <LineChartComponent data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} xAxisDataKey="name" lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }]} />,
-    problemasComuns: <PieChartComponent data={mockProblemasData} colors={[chartColors[1], chartColors[2], chartColors[3], chartColors[4], chartColors[0]]} showOnlyPercentage={false} showLabels={true} />,
+    notasEmitidas: <LineChartComponent data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} xAxisDataKey="name" lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
+    problemasComuns: <PieChartComponent data={mockProblemasData} colorSet="orange" showOnlyPercentage={false} showLabels={true} />,
+    noticiasVsReleases: <BarChart 
+      data={chartData.noticiasVsReleases.length ? chartData.noticiasVsReleases : mockNoticiasVsReleasesData} 
+      xAxisDataKey="name" 
+      bars={[
+        { dataKey: 'Noticias', name: 'Notícias', color: chartColors[0] },
+        { dataKey: 'Releases', name: 'Releases', color: chartColors[1] }
+      ]} 
+    />,
   };
 
   const cardIcons: Record<string, React.ReactNode> = {
@@ -292,6 +327,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     evolucaoMensal: <TrendingUp className="h-5 w-5 text-gray-500" />,
     indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-gray-500" />,
     problemasComuns: <PieChart className="h-5 w-5 text-gray-500" />,
+    noticiasVsReleases: <BarChart3 className="h-5 w-5 text-gray-500" />,
   };
 
   const renderEmptyDataMessage = (cardId: string) => (
@@ -332,7 +368,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
                   isLoading={isLoading}
                   onToggleVisibility={() => handleToggleVisibility(card.id)}
                   onToggleAnalysis={() => handleToggleAnalysis(card.id)}
-                  hideMenuIcon={true}
+                  hideMenuIcon={!isEditMode}
                 >
                   {isLoading ? (
                     <div className="h-[220px] flex items-center justify-center">
