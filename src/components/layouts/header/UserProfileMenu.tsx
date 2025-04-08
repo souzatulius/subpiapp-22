@@ -70,7 +70,7 @@ const UserProfileMenu: React.FC = () => {
   // Handle profile navigation - now correctly going to /settings
   const handleProfileClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate('/settings');
+    navigate('/profile');
   };
 
   // Handle notifications navigation
@@ -109,6 +109,20 @@ const UserProfileMenu: React.FC = () => {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 absolute right-0">
+            {/* User info section - only on mobile */}
+            {isMobile && userProfile && (
+              <>
+                <div className="p-3 border-b">
+                  <p className="font-semibold text-blue-900">{getFirstTwoNames()}</p>
+                  <p className="text-gray-500 text-xs">{userProfile.email}</p>
+                  {userProfile.coordenacao_id && (
+                    <p className="text-gray-500 text-xs mt-1">
+                      {userProfile.coordenacao ? userProfile.coordenacao.descricao : 'Coordenação não atribuída'}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleProfileClick}>
               <User className="mr-2 h-4 w-4" />

@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserProfile } from '@/types/common';
 
-interface ExtendedUserProfile extends UserProfile {
+interface ExtendedUserProfile extends Omit<UserProfile, 'cargo' | 'coordenacao'> {
   cargo_descricao?: string;
   coordenacao_descricao?: string;
   supervisao_tecnica_descricao?: string;
@@ -108,23 +108,23 @@ const UserProfileView: React.FC = () => {
       <Card className="mb-8">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center pb-2 gap-4">
           <Avatar className="h-20 w-20">
-            {profile.foto_perfil_url ? (
+            {profile?.foto_perfil_url ? (
               <AvatarImage src={profile.foto_perfil_url} alt={profile.nome_completo} />
             ) : (
               <AvatarFallback className="text-xl">{getInitials()}</AvatarFallback>
             )}
           </Avatar>
           <div>
-            <CardTitle className="text-2xl">{profile.nome_completo}</CardTitle>
+            <CardTitle className="text-2xl">{profile?.nome_completo}</CardTitle>
             <div className="flex items-center mt-1 text-muted-foreground">
               <Mail className="h-4 w-4 mr-2" />
-              <span>{profile.email}</span>
+              <span>{profile?.email}</span>
             </div>
           </div>
         </CardHeader>
         <CardContent className="grid gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {profile.cargo_descricao && (
+            {profile?.cargo_descricao && (
               <div className="flex items-start">
                 <Briefcase className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
                 <div>
@@ -134,7 +134,7 @@ const UserProfileView: React.FC = () => {
               </div>
             )}
             
-            {profile.coordenacao_descricao && (
+            {profile?.coordenacao_descricao && (
               <div className="flex items-start">
                 <Building2 className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
                 <div>
@@ -144,7 +144,7 @@ const UserProfileView: React.FC = () => {
               </div>
             )}
             
-            {profile.supervisao_tecnica_descricao && (
+            {profile?.supervisao_tecnica_descricao && (
               <div className="flex items-start">
                 <Building className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
                 <div>
@@ -154,7 +154,7 @@ const UserProfileView: React.FC = () => {
               </div>
             )}
             
-            {profile.aniversario && (
+            {profile?.aniversario && (
               <div className="flex items-start">
                 <CalendarDays className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
                 <div>

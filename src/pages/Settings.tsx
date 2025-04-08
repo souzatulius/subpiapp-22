@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/layouts/Header';
@@ -73,8 +74,8 @@ const Settings = () => {
                     style={isMobile ? scrollFadeStyles : undefined}
                     className={`${isMobile ? 'transition-all duration-300' : ''}`}
                   >
-                    {/* Mobile breadcrumb - placed before WelcomeCard for mobile */}
-                    {isMobile && <div className="mb-4"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
+                    {/* Mobile breadcrumb - directly above WelcomeCard with no margin  */}
+                    {isMobile && <div className="mb-0"><BreadcrumbBar onSettingsClick={handleBackClick} /></div>}
                     
                     <SettingsDashboard searchQuery={searchQuery} />
                   </div>

@@ -36,28 +36,26 @@ const DashboardLayout: React.FC = () => {
       <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
-        {/* Breadcrumb fica junto ao header no mobile para economizar espaço */}
-        {isMobile && (
-          <div className="bg-white sticky top-0 z-10">
-            <BreadcrumbBar />
-          </div>
-        )}
+        {/* Moved breadcrumb to be part of the main content on mobile */}
       </div>
       
       <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
         <main className="flex-1 w-full transition-all duration-300">
-          {/* Breadcrumb apenas no desktop permanece aqui */}
+          {/* Breadcrumb on desktop goes here, but we'll render breadcrumb directly in main dashboard content for mobile */}
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto w-full flex-1">
             <motion.div 
-              className={`p-2 sm:p-4 ${isMobile ? 'pb-16' : 'pb-6'} h-full`}
+              className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'} h-full`}
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
             >
+              {/* Only on mobile, render BreadcrumbBar right BEFORE the main content */}
+              {isMobile && <BreadcrumbBar className="mb-0" />}
+              
               <Outlet />
             </motion.div>
           </div>
