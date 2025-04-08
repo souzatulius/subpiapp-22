@@ -27,14 +27,13 @@ interface Processo {
 }
 
 interface ProcessoData {
-  atualizado_em: string;
-  autor_id: string;
-  criado_em: string;
-  data_processo: string;
   id: string;
-  situacao: string;
-  status: string;
+  criado_em: string;
   texto: string;
+  status: string;
+  situacao: string;
+  data_processo: string;
+  autor_id: string;
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
@@ -65,22 +64,18 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         .from('esic_processos')
         .select('*');
       
-      // Apply search filter
       if (searchTerm) {
         query = query.or(`texto.ilike.%${searchTerm}%,id.ilike.%${searchTerm}%`);
       }
       
-      // Apply status filter
       if (filters.status && filters.status.length > 0) {
         query = query.in('status', filters.status);
       }
       
-      // Apply category filter
       if (filters.category && filters.category.length > 0) {
         query = query.in('categoria', filters.category);
       }
       
-      // Apply date filter
       if (filters.dateRange.from) {
         query = query.gte('criado_em', filters.dateRange.from.toISOString());
       }
@@ -92,9 +87,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       
       if (error) throw error;
       
-      // Transform the data to match our Processo interface
       if (data) {
-        // Fix: Use explicit type cast to avoid TypeScript infinite instantiation error
         const processedData: Processo[] = data.map((item: any) => ({
           id: item.id,
           numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
@@ -106,14 +99,13 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
                  item.status === 'aguardando_aprovacao' ? 'Em análise' : 'Concluído',
           created_at: item.criado_em,
           prazo: new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
-          solicitante: 'Solicitante', // Default value as we don't have this in our data
+          solicitante: 'Solicitante',
         }));
         
         setProcessos(processedData);
       }
     } catch (error) {
       console.error('Error fetching processos:', error);
-      // Fallback to mock data
       setProcessos([
         {
           id: "1",
