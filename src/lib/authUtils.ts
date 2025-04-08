@@ -75,6 +75,11 @@ export const createAdminNotification = async (
   try {
     console.log('Criando notificação para administradores sobre novo usuário:', { userId, userName, email });
     
+    if (!userId || !userName || !email) {
+      console.error('Dados incompletos para criar notificação:', { userId, userName, email });
+      throw new Error('Dados incompletos para criar notificação');
+    }
+    
     // Create a notification in the notifications table
     const { error } = await supabase.from('notificacoes').insert({
       mensagem: `${userName} (${email}) solicitou acesso ao sistema.`,
@@ -108,10 +113,26 @@ export const updateUserProfile = async (userId: string, userData: any): Promise<
     // Clean data before update
     const cleanData = { ...userData };
     Object.keys(cleanData).forEach(key => {
-      if (cleanData[key] === undefined) {
+      if (cleanData[key] === undefined || cleanData[key] === null || cleanData[key] === '') {
         delete cleanData[key];
       }
     });
+    
+    // Ensure IDs are valid UUIDs or null
+    if (cleanData.cargo_id && typeof cleanData.cargo_id === 'string' && !cleanData.cargo_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      console.error('Invalid cargo_id format:', cleanData.cargo_id);
+      return { error: new Error('ID de cargo inválido') };
+    }
+    
+    if (cleanData.supervisao_tecnica_id && typeof cleanData.supervisao_tecnica_id === 'string' && !cleanData.supervisao_tecnica_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      console.error('Invalid supervisao_tecnica_id format:', cleanData.supervisao_tecnica_id);
+      return { error: new Error('ID de supervisão técnica inválido') };
+    }
+    
+    if (cleanData.coordenacao_id && typeof cleanData.coordenacao_id === 'string' && !cleanData.coordenacao_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      console.error('Invalid coordenacao_id format:', cleanData.coordenacao_id);
+      return { error: new Error('ID de coordenação inválido') };
+    }
     
     // Update user profile in the usuarios table
     const { error } = await supabase

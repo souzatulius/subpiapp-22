@@ -91,28 +91,42 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signUp = async (email: string, password: string, userData: any) => {
     console.log('Iniciando processo de registro para:', email);
-    const result = await authService.signUp(email, password, userData);
-    
-    if (!result.error) {
-      if (result.data?.user) {
-        console.log('Atualizando perfil para usuário recém-registrado:', result.data.user.id);
-        await handleUpdateUserProfile(
-          result.data.user.id,
-          userData
-        );
-        
-        console.log('Criando notificação para administradores');
-        await createAdminNotification(
-          result.data.user.id, 
-          userData.nome_completo,
-          email
-        );
+    try {
+      const result = await authService.signUp(email, password, userData);
+      
+      if (!result.error) {
+        if (result.data?.user) {
+          console.log('Atualizando perfil para usuário recém-registrado:', result.data.user.id);
+          const profileResult = await handleUpdateUserProfile(
+            result.data.user.id,
+            userData
+          );
+          
+          if (profileResult.error) {
+            console.error('Erro ao atualizar perfil do usuário:', profileResult.error);
+          }
+          
+          try {
+            console.log('Criando notificação para administradores com ID do usuário:', result.data.user.id);
+            await createAdminNotification(
+              result.data.user.id, 
+              userData.nome_completo,
+              email
+            );
+          } catch (notificationError) {
+            console.error('Erro ao criar notificação, mas usuário foi registrado:', notificationError);
+            // Continue despite notification error
+          }
+        }
+      } else {
+        console.error('Erro durante o registro:', result.error);
       }
-    } else {
-      console.error('Erro durante o registro:', result.error);
+      
+      return result;
+    } catch (error) {
+      console.error('Erro não tratado durante o registro:', error);
+      return { error };
     }
-    
-    return result;
   };
 
   const signIn = async (email: string, password: string) => {
