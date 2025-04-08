@@ -78,6 +78,7 @@ export interface UnifiedActionCardProps extends ActionCardItem {
   specialCardsData?: any;
   hasSubtitle?: boolean;
   isMobileView?: boolean;
+  children?: React.ReactNode;
 }
 
 export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
@@ -86,6 +87,7 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
     isDraggable = false,
     isEditing = false,
     disableWiggleEffect = true,
+    children,
     ...rest
   } = props;
 
@@ -119,6 +121,7 @@ export function SortableUnifiedActionCard(props: UnifiedActionCardProps) {
         sortableProps={isDraggable ? { attributes, listeners } : undefined} 
         isEditing={isEditing}
         disableWiggleEffect={disableWiggleEffect}
+        children={children}
         {...rest} 
       />
     </div>
@@ -160,6 +163,7 @@ export function UnifiedActionCard({
   hasBadge,
   badgeValue,
   hasSubtitle,
+  children,
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
@@ -170,6 +174,10 @@ export function UnifiedActionCard({
   };
   
   const renderCardContent = () => {
+    if (children) {
+      return children;
+    }
+    
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import ProcessoItem from './ProcessoItem';
 import ProcessoCard from './ProcessoCard';
@@ -36,6 +37,16 @@ interface ProcessoData {
   autor_id: string;
 }
 
+// Define explicit types for the filters to avoid deep type instantiation
+interface ProcessFilters {
+  status: string[];
+  category: string[];
+  dateRange: {
+    from: Date | undefined;
+    to: Date | undefined;
+  };
+}
+
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
   viewMode,
   searchTerm,
@@ -47,10 +58,10 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [processoToDelete, setProcessoToDelete] = useState<Processo | null>(null);
-  const [filters, setFilters] = useState({
-    status: [] as string[],
-    category: [] as string[],
-    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined }
+  const [filters, setFilters] = useState<ProcessFilters>({
+    status: [],
+    category: [],
+    dateRange: { from: undefined, to: undefined }
   });
 
   useEffect(() => {
