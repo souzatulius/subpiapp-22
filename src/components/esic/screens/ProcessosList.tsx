@@ -24,17 +24,6 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
 }) => {
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Processos e-SIC</h1>
-        <Button 
-          onClick={onCreateProcesso}
-          variant="action"
-          className="flex md:hidden"
-        >
-          <FilePlus className="h-5 w-5" />
-        </Button>
-      </div>
-      
       <div className="flex justify-end mb-6">
         <Button 
           onClick={onCreateProcesso}
@@ -43,6 +32,14 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         >
           <FilePlus className="h-5 w-5 mr-2" />
           Novo Processo
+        </Button>
+        
+        <Button 
+          onClick={onCreateProcesso}
+          variant="action"
+          className="flex md:hidden"
+        >
+          <FilePlus className="h-5 w-5" />
         </Button>
       </div>
       

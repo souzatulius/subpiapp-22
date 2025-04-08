@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, FileText } from 'lucide-react';
+import { Search, Filter, FileText, LayoutGrid, LayoutList } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ESICProcesso, statusLabels, situacaoLabels } from '@/types/esic';
 import ProcessoItem from './ProcessoItem';
+import ProcessoCard from './ProcessoCard';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface ProcessoListProps {
   processos: ESICProcesso[] | undefined;
@@ -26,6 +28,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
   const [situacaoFilter, setSituacaoFilter] = useState('todos');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   
   // Filter and search logic
   const filteredProcessos = processos?.filter(processo => {
@@ -54,7 +57,16 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           />
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'list' | 'grid')}>
+            <ToggleGroupItem value="list" aria-label="Visualizar em lista">
+              <LayoutList className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="grid" aria-label="Visualizar em cards">
+              <LayoutGrid className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+          
           <Select 
             value={statusFilter} 
             onValueChange={setStatusFilter}
@@ -109,17 +121,31 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
         </div>
       ) : filteredProcessos && filteredProcessos.length > 0 ? (
-        <div className="space-y-4">
-          {filteredProcessos.map((processo) => (
-            <ProcessoItem
-              key={processo.id}
-              processo={processo}
-              onSelect={onSelectProcesso}
-              onEdit={onEditProcesso}
-              onDelete={onDeleteProcesso}
-            />
-          ))}
-        </div>
+        viewMode === 'list' ? (
+          <div className="space-y-4">
+            {filteredProcessos.map((processo) => (
+              <ProcessoItem
+                key={processo.id}
+                processo={processo}
+                onSelect={onSelectProcesso}
+                onEdit={onEditProcesso}
+                onDelete={onDeleteProcesso}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredProcessos.map((processo) => (
+              <ProcessoCard
+                key={processo.id}
+                processo={processo}
+                onSelect={onSelectProcesso}
+                onEdit={onEditProcesso}
+                onDelete={onDeleteProcesso}
+              />
+            ))}
+          </div>
+        )
       ) : (
         <Card className="p-12 text-center bg-gray-50">
           <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProcessos } from '@/hooks/esic/useProcessos';
 import { useJustificativas } from '@/hooks/esic/useJustificativas';
@@ -49,7 +48,6 @@ const ESICPage: React.FC = () => {
     isGenerating,
   } = useJustificativas(selectedProcesso?.id);
   
-  // Handler functions
   const handleCreateProcesso = (values: ESICProcessoFormValues) => {
     createProcesso(values, {
       onSuccess: () => {
@@ -207,7 +205,7 @@ const ESICPage: React.FC = () => {
   };
   
   return (
-    <div className="container py-6 space-y-6">
+    <div className="py-6 space-y-6 px-4 md:container md:px-6">
       <WelcomeCard 
         title="Sistema e-SIC"
         description="Gerencie processos e justificativas para as solicitações recebidas via Sistema Eletrônico do Serviço de Informação ao Cidadão."
