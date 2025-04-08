@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,7 @@ interface SmartSearchCardProps {
 }
 
 const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
-  placeholder = "O que vamos fazer?",
+  placeholder = "O que deseja fazer?",
   onSearch
 }) => {
   const [query, setQuery] = useState('');
@@ -55,17 +56,17 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-10 w-10 text-gray-500" />
         <Input
           ref={inputRef}
           type="text" 
-          className="pl-14 pr-4 py-8 rounded-xl border border-gray-300 w-full bg-white text-2xl text-gray-800 placeholder:text-gray-600"
+          className="pl-4 pr-14 py-6 rounded-xl border border-gray-300 w-full h-[80%] bg-white text-2xl text-gray-800 placeholder:text-gray-600"
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         />
+        <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 h-8 w-8 text-gray-500" />
       </div>
       
       <AnimatePresence>

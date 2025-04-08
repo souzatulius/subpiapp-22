@@ -13,6 +13,7 @@ import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboa
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -55,6 +56,28 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         return card;
       });
       
+      // Check if search card exists, otherwise add it
+      const hasSearchCard = updatedCards.some(card => card.id === 'comunicacao-search-card');
+      
+      if (!hasSearchCard) {
+        const searchCard = {
+          id: 'comunicacao-search-card',
+          title: 'Busca Rápida',
+          iconId: 'search',
+          path: '',
+          color: 'bg-white',
+          width: '100', // Full width
+          height: '0.5', // Half height
+          type: 'smart_search',
+          isCustom: true,
+          displayMobile: true,
+          mobileOrder: 0
+        };
+        
+        // Insert after the reset button (as second item)
+        updatedCards.splice(1, 0, searchCard);
+      }
+      
       if (JSON.stringify(updatedCards) !== JSON.stringify(cards)) {
         handleCardsReorder(updatedCards);
       }
@@ -73,6 +96,20 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   if (!isPreview && !user) {
     return <LoadingIndicator />;
   }
+
+  // Helper to render specific card content based on type
+  const renderCardContent = (cardId: string) => {
+    if (cardId === 'comunicacao-search-card') {
+      return (
+        <div className="w-full h-full flex items-center justify-center px-4">
+          <div className="w-[80%]">
+            <SmartSearchCard placeholder="O que deseja fazer?" />
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-6 bg-[#FFFAFA]">
@@ -114,6 +151,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               onHideCard={handleCardHide}
               isMobileView={isMobile}
               isEditMode={isEditMode}
+              renderSpecialCardContent={renderCardContent}
             />
           </div>
         ) : (

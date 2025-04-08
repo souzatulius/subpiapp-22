@@ -1,49 +1,37 @@
 
-/**
- * Utility functions for the grid layout
- */
+import { CardWidth, CardHeight } from '@/types/dashboard';
 
-/**
- * Returns the appropriate width class based on the card width and mobile view status
- */
-export const getWidthClass = (width?: string, isMobileView: boolean = false): string => {
+export const getWidthClass = (width?: CardWidth, isMobileView: boolean = false): string => {
   if (isMobileView) {
-    switch (width) {
-      case '25':
-        return 'col-span-1';
-      case '50':
-      case '75':
-      case '100':
-        return 'col-span-2';
-      default:
-        return 'col-span-1';
-    }
-  } else {
-    switch (width) {
-      case '25':
-        return 'col-span-1';
-      case '50':
-        return 'col-span-2';
-      case '75':
-        return 'col-span-3';
-      case '100':
-        return 'col-span-4';
-      default:
-        return 'col-span-1';
-    }
+    return 'col-span-1'; // Mobile always uses full width
+  }
+  
+  switch (width) {
+    case '25':
+      return 'col-span-1';
+    case '50':
+      return 'col-span-2';
+    case '75':
+      return 'col-span-3';
+    case '100':
+      return 'col-span-4';
+    default:
+      return 'col-span-1';
   }
 };
 
-/**
- * Returns the appropriate height class based on the card height
- */
-export const getHeightClass = (height?: string): string => {
+export const getHeightClass = (height?: CardHeight): string => {
   switch (height) {
-    case '1':
-      return 'h-20'; // 5rem or 80px
+    case '0.5':
+      return 'h-20'; // Half height
     case '2':
-      return 'h-40'; // 10rem or 160px - doubled height for cards
+      return 'h-80';
+    case '3':
+      return 'h-96';
+    case '4':
+      return 'h-120';
+    case '1':
     default:
-      return 'h-20'; // Default height
+      return 'h-40';
   }
 };
