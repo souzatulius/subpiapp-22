@@ -3,7 +3,7 @@ import React from 'react';
 import {
   BarChart2,
   FileText,
-  MessageSquareReply,
+  MessageSquare,
   Trophy,
   Home
 } from 'lucide-react';
@@ -28,7 +28,7 @@ export const getNavigationSections = (): NavigationItem[] => {
       id: 'comunicacao',
       label: 'Comunicação',
       path: '/dashboard/comunicacao',
-      icon: <MessageSquareReply className="w-8 h-8" />,
+      icon: <MessageSquare className="w-8 h-8" />,
     },
     {
       id: 'relatorios',

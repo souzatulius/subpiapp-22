@@ -14,7 +14,7 @@ const ConsultarNotas = () => {
         title="Consultar Notas Oficiais"
         description="Visualize o histórico de notas oficiais emitidas pela secretaria"
         icon={<FileText className="h-6 w-6 mr-2" />}
-        color="bg-gradient-to-r from-indigo-600 to-indigo-800"
+        color="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
       />
       
       <div className="mt-6">

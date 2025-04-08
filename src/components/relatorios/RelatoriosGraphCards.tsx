@@ -32,12 +32,12 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
   
   const [visibleCards, setVisibleCards] = useLocalStorage<string[]>('relatorios-graph-visible', [
     'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas'
+    'notasEmitidas', 'problemasComuns'
   ]);
   
   const [cardsOrder, setCardsOrder] = useLocalStorage<string[]>('relatorios-graph-order', [
     'distribuicaoPorTemas', 'origemDemandas', 'tempoMedioResposta', 'performanceArea',
-    'notasEmitidas'
+    'notasEmitidas', 'problemasComuns'
   ]);
   
   const [analysisCards, setAnalysisCards] = useLocalStorage<string[]>('relatorios-graph-analysis', []);
@@ -82,6 +82,14 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
       visible: true,
       showAnalysis: analysisCards.includes('notasEmitidas'),
       analysis: 'Houve um aumento de 15% na emissão de notas oficiais no último trimestre.'
+    },
+    problemasComuns: {
+      id: 'problemasComuns',
+      title: 'Problemas mais comuns',
+      description: 'Categorias de problemas na última semana',
+      visible: true,
+      showAnalysis: analysisCards.includes('problemasComuns'),
+      analysis: 'As categorias "Limpeza Urbana" e "Iluminação Pública" representam mais de 50% dos problemas reportados.'
     }
   };
 
@@ -140,6 +148,14 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Internas', value: 8 },
   ];
 
+  const mockProblemasData = [
+    { name: 'Limpeza Urbana', value: 42 },
+    { name: 'Iluminação Pública', value: 28 },
+    { name: 'Vias Públicas', value: 18 },
+    { name: 'Áreas Verdes', value: 12 },
+    { name: 'Outros', value: 10 },
+  ];
+
   const mockAreasData = [
     { name: 'CPO', Quantidade: 92 },
     { name: 'CPDU', Quantidade: 87 },
@@ -163,6 +179,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     tempoMedioResposta: <LineChartComponent data={mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Respostas', name: 'Aprovação da nota', color: chartColors[2] }]} />,
     performanceArea: <BarChart data={mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} />,
     notasEmitidas: <LineChartComponent data={mockLineData} xAxisDataKey="name" lines={[{ dataKey: 'Demandas', name: 'Quantidade', color: chartColors[1] }]} />,
+    problemasComuns: <PieChartComponent data={mockProblemasData} colors={[chartColors[1], chartColors[2], chartColors[3], chartColors[4], chartColors[0]]} showOnlyPercentage={false} showLabels={true} />,
   };
 
   const cardIcons: Record<string, React.ReactNode> = {
@@ -174,6 +191,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     notasPorTema: <MessageSquare className="h-5 w-5 text-gray-500" />,
     evolucaoMensal: <TrendingUp className="h-5 w-5 text-gray-500" />,
     indiceSatisfacao: <ThumbsUp className="h-5 w-5 text-gray-500" />,
+    problemasComuns: <PieChart className="h-5 w-5 text-gray-500" />,
   };
 
   const renderEmptyDataMessage = (cardId: string) => (

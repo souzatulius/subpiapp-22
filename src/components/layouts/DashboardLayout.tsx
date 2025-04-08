@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '@/components/layouts/header';
@@ -31,8 +32,8 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="transition-all duration-300">
+    <div className="flex flex-col bg-gray-50">
+      <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
         {isMobile && (
@@ -42,15 +43,15 @@ const DashboardLayout: React.FC = () => {
         )}
       </div>
       
-      <div className="flex flex-1 relative min-h-0">
+      <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className={`flex-1 w-full transition-all duration-300 flex flex-col min-h-0`}>
+        <main className={`flex-1 w-full transition-all duration-300 flex flex-col overflow-y-auto`}>
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto w-full flex-1">
             <motion.div 
-              className={`p-4 ${isMobile ? 'pb-32' : 'pb-20'} h-full`}
+              className={`p-4 ${isMobile ? 'pb-28' : 'pb-20'} h-full`}
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
