@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionCardItem } from '@/types/dashboard';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 export const useCardStorage = (user: any | null, userDepartment: string | null) => {
   const [isSaving, setIsSaving] = useState(false);
@@ -12,6 +12,7 @@ export const useCardStorage = (user: any | null, userDepartment: string | null) 
     
     try {
       setIsSaving(true);
+      console.log('Saving card configuration for user:', user.id);
       
       const { data, error } = await supabase
         .from('user_dashboard')
@@ -22,6 +23,7 @@ export const useCardStorage = (user: any | null, userDepartment: string | null) 
       if (error && error.code !== 'PGRST116') throw error;
       
       if (data) {
+        console.log('Updating existing card configuration');
         const { error: updateError } = await supabase
           .from('user_dashboard')
           .update({ 
@@ -32,6 +34,7 @@ export const useCardStorage = (user: any | null, userDepartment: string | null) 
           
         if (updateError) throw updateError;
       } else {
+        console.log('Creating new card configuration');
         const { error: insertError } = await supabase
           .from('user_dashboard')
           .insert({ 
@@ -43,6 +46,7 @@ export const useCardStorage = (user: any | null, userDepartment: string | null) 
         if (insertError) throw insertError;
       }
       
+      console.log('Card configuration saved successfully');
       return true;
     } catch (error) {
       console.error('Error in saveCardConfig:', error);

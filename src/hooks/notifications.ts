@@ -80,7 +80,12 @@ export const useNotifications = () => {
           await supabase
             .from('usuarios')
             .update({
-              notificacoes_navegador_ativas: true
+              configuracoes_notificacao: {
+                navegador_ativo: true,
+                email_ativo: false,
+                whatsapp_ativo: false,
+                frequencia: 'imediato'
+              }
             })
             .eq('id', user.id);
         }

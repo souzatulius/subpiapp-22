@@ -63,11 +63,14 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
         
         console.log('ESIC processos fetched:', data);
         
-        // Map to handle autor relationship properly
-        const formattedProcessos = data.map(processo => ({
-          ...processo,
-          autor_nome: processo.autor?.nome_completo || 'Usuário'
-        })) as ESICProcesso[];
+        // Cast the data to the correct type, handling the autor relationship
+        const formattedProcessos = data.map(processo => {
+          const autorNome = processo.autor?.nome_completo || 'Usuário';
+          return {
+            ...processo,
+            autor_nome: autorNome
+          } as unknown as ESICProcesso;
+        });
         
         setProcessos(formattedProcessos);
       } catch (error) {

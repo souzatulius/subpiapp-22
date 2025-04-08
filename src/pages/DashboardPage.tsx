@@ -27,9 +27,7 @@ const DashboardPage: React.FC = () => {
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
   const isMobile = useIsMobile();
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   
   const {
     firstName,
@@ -46,8 +44,8 @@ const DashboardPage: React.FC = () => {
     resetDashboard
   } = useDashboardCards();
 
-  // Add a reference to the card storage
-  const { saveCardConfig } = useCardStorage(user, userCoordenaticaoId);
+  // Use the card storage hook
+  const { saveCardConfig, isSaving } = useCardStorage(user, userCoordenaticaoId);
 
   const scrollFadeStyles = useScrollFade();
 
@@ -64,14 +62,33 @@ const DashboardPage: React.FC = () => {
     setIsEditCardModalOpen(true);
   };
 
-  const handleSaveCard = (updatedCard: Partial<ActionCardItem>) => {
+  const handleSaveCard = async (updatedCard: Partial<ActionCardItem>) => {
+    // First update local state
     saveCardEdit(updatedCard as ActionCardItem);
     setIsEditCardModalOpen(false);
-    toast({
-      title: "Card atualizado",
-      description: "As alterações foram salvas com sucesso.",
-      variant: "default"
-    });
+    
+    // Then save to database
+    if (user && cards) {
+      const updatedCards = cards.map(card => 
+        card.id === updatedCard.id ? { ...card, ...updatedCard } : card
+      );
+      
+      const success = await saveCardConfig(updatedCards);
+      
+      if (success) {
+        toast({
+          title: "Card atualizado",
+          description: "As alterações foram salvas com sucesso.",
+          variant: "default"
+        });
+      }
+    } else {
+      toast({
+        title: "Card atualizado",
+        description: "As alterações foram salvas localmente.",
+        variant: "default"
+      });
+    }
   };
 
   const handleCardsChange = async (updatedCards: ActionCardItem[]) => {
@@ -91,13 +108,57 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleResetDashboard = () => {
+  const handleHideCard = async (cardId: string) => {
+    // First update local state
+    handleCardHide(cardId);
+    
+    // Then save to database
+    if (user && cards) {
+      const updatedCards = cards.map(card => 
+        card.id === cardId ? { ...card, isHidden: true } : card
+      );
+      
+      const success = await saveCardConfig(updatedCards);
+      
+      if (success) {
+        toast({
+          title: "Card ocultado",
+          description: "O card foi ocultado com sucesso.",
+          variant: "default"
+        });
+      }
+    } else {
+      toast({
+        title: "Card ocultado",
+        description: "O card foi ocultado localmente.",
+        variant: "default"
+      });
+    }
+  };
+
+  const handleResetDashboard = async () => {
+    // First update local state
     resetDashboard();
-    toast({
-      title: "Dashboard resetado",
-      description: "O seu dashboard foi restaurado para a configuração padrão.",
-      variant: "default"
-    });
+    
+    // Then save to database if user is logged in
+    if (user) {
+      const defaultCards = resetDashboard();
+      const success = await saveCardConfig(defaultCards);
+      
+      if (success) {
+        toast({
+          title: "Dashboard resetado",
+          description: "O seu dashboard foi restaurado para a configuração padrão.",
+          variant: "default"
+        });
+      }
+    } else {
+      toast({
+        title: "Dashboard resetado",
+        description: "O seu dashboard foi restaurado para a configuração padrão.",
+        variant: "default"
+      });
+    }
   };
 
   if (!user) {
@@ -150,6 +211,7 @@ const DashboardPage: React.FC = () => {
                   size="sm" 
                   onClick={handleResetDashboard}
                   className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                  disabled={isSaving}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Resetar
@@ -169,7 +231,7 @@ const DashboardPage: React.FC = () => {
                       cards={cards.filter(card => !card.isHidden)} 
                       onCardsChange={handleCardsChange}
                       onEditCard={handleCardEdit}
-                      onHideCard={handleCardHide}
+                      onHideCard={handleHideCard}
                       isMobileView={isMobile}
                       isEditMode={isEditMode}
                     />

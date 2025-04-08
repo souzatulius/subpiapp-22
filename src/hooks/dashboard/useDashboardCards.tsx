@@ -70,36 +70,34 @@ export const useDashboardCards = () => {
     }
     
     setCards(updatedCards);
+    return updatedCards;
   };
 
   // Handle card edit - receives a card with updated properties
-  const handleCardEdit = async (updatedCard: ActionCardItem) => {
+  const handleCardEdit = (updatedCard: ActionCardItem) => {
     const updatedCards = cards.map(card => 
       card.id === updatedCard.id ? { ...card, ...updatedCard } : card
     );
     
     setCards(updatedCards);
-    
-    // Save to database is now handled in the parent component
+    return updatedCard;
   };
 
   // Handle card hide - marks a card as hidden
-  const handleCardHide = async (cardId: string) => {
+  const handleCardHide = (cardId: string) => {
     const updatedCards = cards.map(card => 
       card.id === cardId ? { ...card, isHidden: true } : card
     );
     
     setCards(updatedCards);
-    
-    // Save to database is now handled in the parent component
+    return updatedCards;
   };
 
   // Reset dashboard to default configuration
-  const resetDashboard = async () => {
+  const resetDashboard = () => {
     const defaultCards = getDefaultCards();
     setCards(defaultCards);
-    
-    // Save to database is now handled in the parent component
+    return defaultCards;
   };
 
   return {
