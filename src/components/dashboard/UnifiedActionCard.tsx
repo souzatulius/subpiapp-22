@@ -8,6 +8,7 @@ import KPICard from '@/components/settings/dashboard-management/KPICard';
 import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
+import SearchCard from './grid/card-types/SearchCard';
 import CardControls from './card-parts/CardControls';
 import { useNavigate } from 'react-router-dom';
 
@@ -178,6 +179,16 @@ export function UnifiedActionCard({
       return children;
     }
     
+    if (isSearch) {
+      return (
+        <SearchCard 
+          card={{ id, title, iconId, path, color, type, isSearch }}
+          onSearchSubmit={onSearchSubmit}
+          isEditMode={isEditing}
+        />
+      );
+    }
+    
     if (type === 'data_dynamic' && specialCardsData?.kpis) {
       const kpis = specialCardsData.kpis;
       
@@ -255,8 +266,9 @@ export function UnifiedActionCard({
     if (type === 'smart_search') {
       return (
         <SmartSearchCard 
-          placeholder="O que vamos fazer?" 
+          placeholder={title || "O que vamos fazer?"} 
           onSearch={onSearchSubmit}
+          isEditMode={isEditing}
         />
       );
     }

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import SortableActionCard from '../SortableActionCard';
 import { ActionCardItem } from '@/types/dashboard';
@@ -43,9 +42,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   specialCardsData
 }) => {
   const { userDepartment, isComunicacao } = useDepartmentData();
-  const IconComponent = card.iconId ? getIconComponentFromId(card.iconId) : null;
-
-  // Get icon component from ID
+  
   function getIconComponentFromId(iconId: string) {
     const IconMap = {
       'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
@@ -73,9 +70,9 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     );
   }
 
-  // Render the appropriate card content based on the card type
+  const IconComponent = card.iconId ? getIconComponentFromId(card.iconId) : null;
+  
   const renderCardContent = () => {
-    // Check if it's a dynamic data card
     if (card.type === 'data_dynamic' && card.dataSourceKey) {
       return (
         <DynamicDataCard 
@@ -101,7 +98,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       );
     }
     
-    if (card.isSearch) {
+    if (card.isSearch || card.type === 'smart_search') {
       return (
         <SearchCard
           card={card}
@@ -142,7 +139,6 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
       );
     }
     
-    // Default to standard card
     return (
       <StandardCard 
         card={card}
@@ -154,7 +150,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' ? {
+      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' ? {
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 

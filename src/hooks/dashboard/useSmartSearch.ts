@@ -14,8 +14,8 @@ export interface SearchAction {
 const searchActions: SearchAction[] = [
   {
     label: "Nova Demanda de Comunicação",
-    route: "/dashboard/comunicacao/cadastrar",
-    keywords: ["nova", "demanda", "cadastrar", "criar", "comunicação", "registrar"]
+    route: "/dashboard/comunicacao/cadastrar-demanda",
+    keywords: ["nova", "demanda", "cadastrar", "criar", "comunicação", "solicitação", "processo"]
   },
   {
     label: "Aprovar Nota Oficial",
@@ -35,17 +35,17 @@ const searchActions: SearchAction[] = [
   {
     label: "Criar Nota Oficial",
     route: "/dashboard/comunicacao/criar-nota",
-    keywords: ["criar", "nova", "nota", "oficial", "elaborar", "redigir"]
+    keywords: ["criar", "nova", "nota", "oficial", "elaborar", "redigir", "release", "notícia"]
   },
   {
     label: "Consultar Notas Oficiais",
     route: "/dashboard/comunicacao/consultar-notas",
-    keywords: ["consultar", "buscar", "notas", "oficial", "listar", "visualizar"]
+    keywords: ["consultar", "buscar", "notas", "oficial", "listar", "visualizar", "release", "notícia"]
   },
   {
     label: "Ver Relatórios",
     route: "/dashboard/comunicacao/relatorios",
-    keywords: ["relatório", "estatística", "número", "métrica", "dashboard", "indicador"]
+    keywords: ["relatório", "estatística", "número", "métrica", "dashboard", "indicador", "ranking"]
   },
   {
     label: "Configurações da Conta",
@@ -88,10 +88,6 @@ export const useSmartSearch = () => {
       // Split the query into individual words for better matching
       const queryWords = searchQuery.toLowerCase().split(/\s+/);
       
-      // Log the search query for debugging
-      console.log('Searching for:', searchQuery);
-      console.log('Query words:', queryWords);
-      
       // Perform a direct search with the full query
       let results = fuse.search(searchQuery);
       
@@ -122,8 +118,6 @@ export const useSmartSearch = () => {
         .map(result => result.item)
         .slice(0, 5); // Limit to 5 suggestions
       
-      console.log('Suggestions:', filteredSuggestions);
-      
       setSuggestions(filteredSuggestions);
       setShowSuggestions(true);
       setIsLoading(false);
@@ -134,7 +128,6 @@ export const useSmartSearch = () => {
 
   // Navigate to the selected action's route
   const handleSelectSuggestion = (action: SearchAction) => {
-    console.log('Selected suggestion:', action);
     setQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
@@ -143,7 +136,6 @@ export const useSmartSearch = () => {
 
   // Handle direct search submission
   const handleSearch = (searchQuery: string) => {
-    console.log('Search submitted:', searchQuery);
     if (searchQuery.trim() && suggestions.length > 0) {
       // Navigate to the first suggestion
       handleSelectSuggestion(suggestions[0]);

@@ -12,6 +12,7 @@ interface CardGridContainerProps {
   onHideCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
+  onSearchSubmit?: (query: string) => void;
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
@@ -20,7 +21,8 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   onEditCard,
   onHideCard,
   isMobileView = false,
-  isEditMode = false
+  isEditMode = false,
+  onSearchSubmit
 }) => {
   // Custom hook to fetch data for special cards like overdue demands, etc.
   const specialCardsData = useSpecialCardsData();
@@ -61,6 +63,7 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
         isMobileView={isMobileView}
         isEditMode={isEditMode}
         specialCardsData={specialCardsData}
+        onSearchSubmit={onSearchSubmit}
       />
     </div>
   );

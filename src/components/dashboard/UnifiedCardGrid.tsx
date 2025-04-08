@@ -127,7 +127,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 color={card.color}
                 width={card.width}
                 height={card.height}
-                isDraggable={true}
+                isDraggable={isEditMode}
                 isEditing={isEditMode}
                 onEdit={onEditCard ? (id) => {
                   const cardToEdit = cards.find(c => c.id === id);
@@ -156,7 +156,10 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                   <PendingTasksCardView className="h-full" />
                 )}
                 {card.type === 'origin_selection' && (
-                  <OriginSelectionCard />
+                  <OriginSelectionCard 
+                    title={card.title} 
+                    options={specialCardsData?.originOptions}
+                  />
                 )}
               </SortableUnifiedActionCard>
             </div>
