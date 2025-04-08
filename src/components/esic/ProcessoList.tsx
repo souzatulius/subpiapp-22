@@ -94,8 +94,8 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
       
       // Transform the data to match our Processo interface
       if (data) {
-        // Fix: Use explicit type cast to avoid TypeScript infinite instantiation error
-        const processedData: Processo[] = data.map((item: any) => ({
+        // Map the database records to the Processo interface
+        const processedData: Processo[] = data.map((item: ProcessoData) => ({
           id: item.id,
           numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
           titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
