@@ -31,10 +31,8 @@ const DashboardLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <div 
-        className="transition-all duration-300"
-      >
+      {/* Header - removed any top spacing */}
+      <div className="transition-all duration-300">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
         {/* Mobile breadcrumb directly below header */}

@@ -89,10 +89,7 @@ const DashboardPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Remove the fixed positioned breadcrumb for mobile */}
       
-      <div 
-        style={isMobile ? scrollFadeStyles : undefined}
-        className={`${isMobile ? 'transition-all duration-300' : ''}`}
-      >
+      <div className={`${isMobile ? 'transition-all duration-300' : ''}`}>
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
       
@@ -109,10 +106,7 @@ const DashboardPage: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="space-y-6">
-              <div 
-                className="w-full"
-                style={isMobile ? scrollFadeStyles : undefined}
-              >
+              <div className="w-full">
                 {/* WelcomeCard component */}
                 <WelcomeCard 
                   title="Dashboard" 
@@ -133,7 +127,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
               
-              <div style={isMobile ? scrollFadeStyles : undefined} className="flex justify-end">
+              <div className="flex justify-end">
                 <Button 
                   variant="outline" 
                   size="sm" 
