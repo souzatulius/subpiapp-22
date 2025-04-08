@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -113,11 +112,11 @@ const DashboardPage: React.FC = () => {
         const searchCard: ActionCardItem = {
           id: 'dashboard-search-card',
           title: 'Busca Rápida',
-          iconId: 'search',
+          iconId: 'Search',
           path: '',
           color: 'bg-white',
           width: '100',
-          height: '1',
+          height: '0.5',
           type: 'smart_search',
           isSearch: true,
           displayMobile: true,

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   DndContext,
@@ -114,6 +115,30 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
           width: '50' as CardWidth, // 2 columns
           height: '2' as CardHeight  // 2 rows
         };
+      } else if (card.title === "Ações Pendentes") {
+        return {
+          ...card,
+          width: '25' as CardWidth, // 1 column
+          height: '3' as CardHeight  // 3 rows
+        };
+      } else if (card.title === "Avisos") {
+        return {
+          ...card,
+          width: '25' as CardWidth, // 1 column
+          height: '2' as CardHeight  // 2 rows
+        };
+      } else if (card.title === "Processos e-SIC") {
+        return {
+          ...card,
+          width: '50' as CardWidth, // 2 columns
+          height: '1' as CardHeight  // 1 row
+        };
+      } else if (card.title === "Notificações") {
+        return {
+          ...card,
+          width: '25' as CardWidth, // 1 column
+          height: '1' as CardHeight  // 1 row
+        };
       }
     }
     return card;
@@ -175,8 +200,8 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 showSpecialFeatures={showSpecialFeatures}
                 quickDemandTitle={quickDemandTitle}
                 onQuickDemandTitleChange={onQuickDemandTitleChange}
-                onQuickDemandSubmit={onQuickDemandSubmit}
-                onSearchSubmit={onSearchSubmit}
+                onQuickDemandSubmit={onQuickDemandSubmit ? (query) => onQuickDemandSubmit(query) : undefined}
+                onSearchSubmit={onSearchSubmit ? (query) => onSearchSubmit(query) : undefined}
                 specialCardsData={specialCardsData}
                 isCustom={card.isCustom}
                 hasBadge={card.hasBadge}

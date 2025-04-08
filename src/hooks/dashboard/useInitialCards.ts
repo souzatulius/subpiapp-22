@@ -118,6 +118,44 @@ export const useInitialCards = (userDepartment: string | null) => {
         mobileOrder: 8
       },
       {
+        id: 'acoes-pendentes',
+        title: "Ações Pendentes",
+        path: "/dashboard/comunicacao/responder",
+        iconId: "AlertTriangle",
+        color: getBgColor('bg-orange-500'),
+        width: "25",
+        height: "3",
+        type: "in_progress_demands",
+        isPendingActions: true,
+        displayMobile: true,
+        mobileOrder: 8
+      },
+      {
+        id: 'esic',
+        title: 'Processos e-SIC',
+        path: '/dashboard/esic',
+        iconId: 'FileSearch',
+        color: getBgColor('blue-light'),
+        width: '50',
+        height: '1',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 10,
+        allowedDepartments: ['comunicacao', 'gabinete']
+      },
+      {
+        id: 'notificacoes',
+        title: 'Notificações',
+        path: '/dashboard/notificacoes',
+        iconId: 'Bell',
+        color: getBgColor('deep-blue'),
+        width: '25',
+        height: '1',
+        type: 'standard',
+        displayMobile: true,
+        mobileOrder: 11
+      },
+      {
         id: 'gerar-noticia',
         title: 'Cadastrar Release',
         path: '/dashboard/comunicacao/cadastrar-release',
@@ -153,19 +191,6 @@ export const useInitialCards = (userDepartment: string | null) => {
         type: "standard",
         displayMobile: true,
         mobileOrder: 9,
-        allowedDepartments: ['comunicacao', 'gabinete']
-      },
-      {
-        id: 'esic',
-        title: 'e-SIC',
-        path: '/dashboard/esic',
-        iconId: 'FileText',
-        color: getBgColor('deep-blue'),
-        width: '25',
-        height: '1',
-        type: 'standard',
-        displayMobile: true,
-        mobileOrder: 10,
         allowedDepartments: ['comunicacao', 'gabinete']
       }
     ];

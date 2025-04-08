@@ -71,9 +71,18 @@ export const getMobileSpecificDimensions = (cardTitle: string): { width: CardWid
     case "Busca Rápida":
       return { width: '100' as CardWidth, height: '0.5' as CardHeight }; // 2 columns, half height on mobile
     case "Demandas":
+    case "Avisos":
+    case "Responder Demandas":
+    case "Ranking da Zeladoria":
+    case "Nova Solicitação":
+    case "Processos e-SIC":
       return { width: '50' as CardWidth, height: '1' as CardHeight }; // 1 column, 1 row on mobile
     case "Origem das Demandas":
       return { width: '100' as CardWidth, height: '2' as CardHeight }; // 2 columns, 2 rows on mobile
+    case "Ações Pendentes":
+      return { width: '50' as CardWidth, height: '2' as CardHeight }; // 1 column, 2 rows on mobile
+    case "Notificações":
+      return { width: '50' as CardWidth, height: '0.5' as CardHeight }; // 1 column, half row on mobile
     default:
       return { width: '25' as CardWidth, height: '1' as CardHeight }; // Default size
   }

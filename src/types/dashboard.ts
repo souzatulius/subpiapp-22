@@ -1,4 +1,3 @@
-
 export type CardWidth = '25' | '50' | '75' | '100';
 export type CardHeight = '0.5' | '1' | '2' | '3' | '4';
 export type CardColor = 
@@ -23,6 +22,7 @@ export type CardColor =
   | 'orange-dark'
   | 'neutral-800'
   | 'orange-700';
+
 export type CardType = 'standard' | 'data_dynamic' | 'in_progress_demands' | 'recent_notes' | 'origin_selection' | 'smart_search';
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 

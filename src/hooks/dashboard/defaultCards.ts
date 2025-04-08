@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
@@ -107,20 +108,20 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/responder',
       color: 'gray-medium',
       width: '25',
-      height: '2',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
     },
     {
       id: uuidv4(),
-      title: 'Ranking',
+      title: 'Ranking da Zeladoria',
       subtitle: 'Produtividade das Subsecretarias',
       iconId: 'TrendingUp',
       path: '/dashboard/zeladoria/ranking-subs',
       color: 'bg-orange-500',
       width: '25',
-      height: '2',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
@@ -132,7 +133,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/cadastrar',
       color: 'gray-medium',
       width: '25',
-      height: '2',
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 6
@@ -158,11 +159,36 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/responder',
       color: 'bg-orange-500',
       width: '25', // 1 column on desktop
-      height: '2',  // 2 rows on desktop
+      height: '3',  // 3 rows on desktop, updated as requested
       type: 'in_progress_demands',
       isPendingActions: true,
       displayMobile: true,
       mobileOrder: 8
+    },
+    {
+      id: uuidv4(),
+      title: 'Processos e-SIC',
+      subtitle: 'Acessos à informação',
+      iconId: 'FileSearch',
+      path: '/dashboard/esic',
+      color: 'blue-light',
+      width: '50', // 2 columns on desktop
+      height: '1',  // 1 row on desktop
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 9
+    },
+    {
+      id: uuidv4(),
+      title: 'Notificações',
+      iconId: 'Bell',
+      path: '/dashboard/notificacoes',
+      color: 'deep-blue',
+      width: '25', // 1 column on desktop
+      height: '1',  // 1 row on desktop
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 10
     }
   ];
 };
