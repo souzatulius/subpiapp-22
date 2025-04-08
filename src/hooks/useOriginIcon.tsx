@@ -26,7 +26,7 @@ interface OriginWithIcon {
   icone?: string | null;
 }
 
-export const useOriginIcon = (origin: OriginWithIcon | { icone?: string | null }, size?: string) => {
+export const useOriginIcon = (origin: any, size?: string) => {
   // Extract icone from origin object
   const icone = origin?.icone;
   

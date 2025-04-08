@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
@@ -46,6 +45,29 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   }
 };
 
+const getMinHeight = (type?: CardType, height?: CardHeight): string => {
+  if (height) {
+    switch (height) {
+      case '0.5': return 'min-h-[4rem]';
+      case '1': return 'min-h-[10rem]';
+      case '2': return 'min-h-[20rem]';
+      case '3': return 'min-h-[24rem]';
+      case '4': return 'min-h-[32rem]';
+      default: return 'min-h-[10rem]';
+    }
+  }
+  
+  if (type === 'data_dynamic' || type === 'in_progress_demands') {
+    return 'min-h-[20rem]';
+  }
+
+  if (type === 'smart_search') {
+    return 'min-h-[4rem]';
+  }
+  
+  return 'min-h-[10rem]';
+};
+
 const ActionCard = ({
   id,
   title,
@@ -63,6 +85,8 @@ const ActionCard = ({
   children,
   showControls = true,
   chartId,
+  type,
+  height,
   specialContent
 }: ActionCardProps) => {
   const navigate = useNavigate();
@@ -72,14 +96,12 @@ const ActionCard = ({
   const renderIcon = () => {
     if (!iconId) return null;
     
-    // Direct check for Lucide icon by name
     const LucideIcon = (LucideIcons as any)[iconId] as LucideIcon | undefined;
     if (LucideIcon) {
       const IconComponent = LucideIcon;
       return <IconComponent className={getIconSize(iconSize)} />;
     }
     
-    // Fallback to our custom icon loader
     const IconComponent = getIconComponentFromId(iconId);
     if (IconComponent) {
       return <IconComponent className={getIconSize(iconSize)} />;
@@ -93,7 +115,8 @@ const ActionCard = ({
       className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${colorClasses} group relative`}
+        active:scale-95 ${colorClasses} group relative
+        ${getMinHeight(type, height)}`}
     >
       {isDraggable && (
         <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
@@ -113,7 +136,7 @@ const ActionCard = ({
         </div>
       )}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-4 px-3">
         {specialContent ? (
           <>{specialContent}</>
         ) : children ? (

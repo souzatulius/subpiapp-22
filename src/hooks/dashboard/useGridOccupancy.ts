@@ -34,9 +34,12 @@ const widthToSlots = (width: string, isMobileView: boolean): number => {
 // Convert height string to number of slots
 const heightToSlots = (height: string): number => {
   switch (height) {
-    case '1': return 1;
-    case '2': return 2;
-    default: return 1;
+    case '0.5': return 1;  // Half height row
+    case '1': return 2;    // Standard row (doubled from 1)
+    case '2': return 4;    // Double height row (doubled from 2)
+    case '3': return 6;    // Triple height row
+    case '4': return 8;    // Quadruple height row
+    default: return 2;     // Default to standard row
   }
 };
 
@@ -62,8 +65,13 @@ export const getMinimumWidth = (type?: string, isMobileView: boolean = false): s
 // Get minimum height for a card based on its type
 export const getMinimumHeight = (type?: string): string => {
   if (type === 'data_dynamic' || type === 'in_progress_demands') {
-    return '2'; // Dynamic cards need 2 rows
+    return '2'; // Dynamic cards need 2 rows (taller)
   }
+  
+  if (type === 'smart_search') {
+    return '0.5'; // Search cards are shorter
+  }
+  
   return '1'; // Default height (1 row)
 };
 
