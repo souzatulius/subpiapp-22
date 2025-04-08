@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -14,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+import { CardColor } from '@/types/dashboard';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -43,7 +43,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     resetDashboard
   } = useComunicacaoDashboard(user, isPreview, department);
 
-  // Update card titles for the yellow and gray news cards
   React.useEffect(() => {
     if (cards.length > 0) {
       const updatedCards = cards.map(card => {
@@ -56,7 +55,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         return card;
       });
       
-      // Check if search card exists, otherwise add it
       const hasSearchCard = updatedCards.some(card => card.id === 'comunicacao-search-card');
       
       if (!hasSearchCard) {
@@ -65,16 +63,15 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           title: 'Busca Rápida',
           iconId: 'search',
           path: '',
-          color: 'bg-white',
-          width: '100', // Full width
-          height: '0.5', // Half height
+          color: 'bg-white' as CardColor,
+          width: '100',
+          height: '0.5',
           type: 'smart_search',
           isCustom: true,
           displayMobile: true,
           mobileOrder: 0
         };
         
-        // Insert after the reset button (as second item)
         updatedCards.splice(1, 0, searchCard);
       }
       
@@ -97,7 +94,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     return <LoadingIndicator />;
   }
 
-  // Helper to render specific card content based on type
   const renderCardContent = (cardId: string) => {
     if (cardId === 'comunicacao-search-card') {
       return (
@@ -122,7 +118,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
 
-      {/* Reset dashboard button with updated text */}
       <div className="flex justify-end">
         <Button 
           variant="outline" 

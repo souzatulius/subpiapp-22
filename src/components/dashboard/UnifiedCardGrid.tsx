@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard } from './UnifiedActionCard';
-import { getWidthClass, getHeightClass } from './CardGrid';
+import { getWidthClass, getHeightClass } from './grid/GridUtilities';
 import { ActionCardItem } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
