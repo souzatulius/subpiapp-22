@@ -97,7 +97,7 @@ const NotaDetailDialog: React.FC<NotaDetailDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex justify-between items-start">
             <DialogTitle className="text-xl font-semibold">{nota.titulo}</DialogTitle>

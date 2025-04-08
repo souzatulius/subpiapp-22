@@ -5,11 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { getDefaultCards } from './defaultCards';
 import { toast } from '@/hooks/use-toast';
+import { useCardStorage } from './useCardStorage';
 
 export const useDashboardCards = () => {
   const [cards, setCards] = useState<ActionCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
+  const { saveCardConfig, isSaving } = useCardStorage(user, null);
 
   // Load cards from database or default configuration
   useEffect(() => {
@@ -57,7 +59,7 @@ export const useDashboardCards = () => {
     fetchUserCards();
   }, [user]);
 
-  // Handle card reordering
+  // Handle card reordering with auto-save
   const handleCardsReorder = (updatedCards: ActionCardItem[]) => {
     // Determine if we are in mobile view by checking the window width
     const isMobileView = window.innerWidth < 768;
@@ -70,26 +72,44 @@ export const useDashboardCards = () => {
     }
     
     setCards(updatedCards);
+    
+    // Auto-save configuration to database
+    if (user) {
+      saveCardConfig(updatedCards);
+    }
+    
     return updatedCards;
   };
 
-  // Handle card edit - receives a card with updated properties
+  // Handle card edit with auto-save
   const handleCardEdit = (updatedCard: ActionCardItem) => {
     const updatedCards = cards.map(card => 
       card.id === updatedCard.id ? { ...card, ...updatedCard } : card
     );
     
     setCards(updatedCards);
+    
+    // Auto-save configuration to database
+    if (user) {
+      saveCardConfig(updatedCards);
+    }
+    
     return updatedCard;
   };
 
-  // Handle card hide - marks a card as hidden
+  // Handle card hide with auto-save
   const handleCardHide = (cardId: string) => {
     const updatedCards = cards.map(card => 
       card.id === cardId ? { ...card, isHidden: true } : card
     );
     
     setCards(updatedCards);
+    
+    // Auto-save configuration to database
+    if (user) {
+      saveCardConfig(updatedCards);
+    }
+    
     return updatedCards;
   };
 
@@ -97,12 +117,19 @@ export const useDashboardCards = () => {
   const resetDashboard = () => {
     const defaultCards = getDefaultCards();
     setCards(defaultCards);
+    
+    // Auto-save configuration to database
+    if (user) {
+      saveCardConfig(defaultCards);
+    }
+    
     return defaultCards;
   };
 
   return {
     cards,
     isLoading,
+    isSaving,
     handleCardEdit,
     handleCardHide,
     handleCardsReorder,

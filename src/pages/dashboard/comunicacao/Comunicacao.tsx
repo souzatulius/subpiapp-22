@@ -42,6 +42,25 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     resetDashboard
   } = useComunicacaoDashboard(user, isPreview, department);
 
+  // Update card titles for the yellow and gray news cards
+  React.useEffect(() => {
+    if (cards.length > 0) {
+      const updatedCards = cards.map(card => {
+        if (card.title === 'Notícias' && card.color === 'bg-yellow-500') {
+          return { ...card, title: 'Cadastrar Release' };
+        }
+        if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
+          return { ...card, title: 'Ver Releases e Notícias' };
+        }
+        return card;
+      });
+      
+      if (JSON.stringify(updatedCards) !== JSON.stringify(cards)) {
+        handleCardsReorder(updatedCards);
+      }
+    }
+  }, [cards]);
+
   const handleResetDashboard = () => {
     resetDashboard();
     toast({

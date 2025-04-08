@@ -8,6 +8,7 @@ import { useChartComponents } from './hooks/useChartComponents';
 import TemasTecnicos from './sections/TemasTecnicos';
 import TempoDesempenho from './sections/TempoDesempenho';
 import NotasOficiais from './sections/NotasOficiais';
+import ESIC from './sections/ESIC';
 import { useReportsData, ReportFilters } from './hooks/useReportsData';
 import StatsCards from './components/StatsCards';
 import { DateRange } from "react-day-picker";
@@ -84,6 +85,7 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
   const temasTecnicosItems = items.filter(item => ['distribuicaoPorTemas', 'origemDemandas'].includes(item.id));
   const tempoDesempenhoItems = items.filter(item => ['tempoMedioResposta', 'performanceArea'].includes(item.id));
   const notasOficiaisItems = items.filter(item => ['notasEmitidas'].includes(item.id));
+  const esicItems = items.filter(item => ['temasESIC', 'resolucaoESIC'].includes(item.id));
 
   const loading = isLoading || dataLoading;
 
@@ -119,6 +121,14 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
         
         <NotasOficiais
           items={notasOficiaisItems}
+          isLoading={loading}
+          handleToggleVisibility={handleToggleVisibility}
+          handleToggleAnalysis={handleToggleAnalysis}
+          handleToggleView={handleToggleView}
+        />
+        
+        <ESIC
+          items={esicItems}
           isLoading={loading}
           handleToggleVisibility={handleToggleVisibility}
           handleToggleAnalysis={handleToggleAnalysis}
