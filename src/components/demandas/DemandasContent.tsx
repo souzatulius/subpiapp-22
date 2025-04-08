@@ -6,7 +6,7 @@ import DemandCards from './DemandCards';
 import DemandList from './DemandList';
 import DemandDetail from './DemandDetail';
 import { useDemandas } from '@/hooks/demandas/useDemandas';
-import { Demand as AppDemand } from '@/types/demand';
+import { Demand } from '@/types/demand';
 
 const DemandasContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');

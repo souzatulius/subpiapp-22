@@ -25,7 +25,7 @@ const QuestionsAnswersSection: React.FC<QuestionsAnswersSectionProps> = ({
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Só na primeira renderização
+  }, [normalizedQuestions]); // Run when normalized questions change
 
   if (!perguntas || normalizedQuestions.length === 0) {
     return (
