@@ -32,7 +32,7 @@ export const useUserEdit = (fetchData: () => Promise<void>) => {
         cleanData.whatsapp = null;
       }
       
-      // Process birthday - ensure it's in ISO format for database storage
+      // Process birthday - ensure proper date format (YYYY-MM-DD)
       if (data.aniversario) {
         if (typeof data.aniversario === 'string') {
           // Try to parse the string date
