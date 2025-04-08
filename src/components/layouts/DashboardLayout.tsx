@@ -46,7 +46,7 @@ const DashboardLayout: React.FC = () => {
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden h-[calc(100vh-4rem)]">
         {/* Only show sidebar on desktop */}
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
