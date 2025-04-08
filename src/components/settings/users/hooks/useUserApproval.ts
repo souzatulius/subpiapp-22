@@ -2,69 +2,72 @@
 import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '../types';
 
-export const useUserApproval = (fetchData: () => Promise<void>) => {
+export const useUserApproval = (refreshUsers: () => Promise<void>) => {
   const [approving, setApproving] = useState(false);
 
-  const approveUser = async (userId: string, userName: string, userEmail: string, roleName: string = 'leitor', contextData?: { coordenacao_id?: string, supervisao_tecnica_id?: string }) => {
-    if (!userId) return;
-    
+  const approveUser = async (userId: string, userName: string, userEmail: string, roleName?: string) => {
     setApproving(true);
+    
     try {
-      // 1. Get the role ID based on the role name
-      const { data: roleData, error: roleError } = await supabase
-        .from('roles')
-        .select('id')
-        .eq('role_nome', roleName)
-        .single();
+      console.log(`Aprovando usuário: ${userName}, ID: ${userId}`);
       
-      if (roleError) throw roleError;
-      
-      if (!roleData) {
-        throw new Error(`Role "${roleName}" not found.`);
-      }
-      
-      // 2. Associate the user with the role
-      const { error: assignError } = await supabase
-        .from('usuario_roles')
-        .insert({
-          usuario_id: userId,
-          role_id: roleData.id,
-          coordenacao_id: contextData?.coordenacao_id || null,
-          supervisao_tecnica_id: contextData?.supervisao_tecnica_id || null
-        });
-      
-      if (assignError) throw assignError;
-      
-      // 3. Update user status to 'ativo'
+      // Update user status in the 'usuarios' table (not 'users')
       const { error: updateError } = await supabase
         .from('usuarios')
         .update({ status: 'ativo' })
         .eq('id', userId);
-        
+      
       if (updateError) throw updateError;
       
+      // Add default permission if role name is not provided
+      if (!roleName) {
+        roleName = 'padrão';
+      }
+      
+      // Get the permission ID for the given role name
+      const { data: permissionData, error: permissionError } = await supabase
+        .from('permissoes')
+        .select('id')
+        .eq('descricao', roleName)
+        .single();
+      
+      if (permissionError) throw permissionError;
+      
+      if (!permissionData?.id) {
+        throw new Error(`Permissão para papel '${roleName}' não encontrada`);
+      }
+      
+      // Create a user permission with the selected role
+      const { error: permissionAssignError } = await supabase
+        .from('usuario_permissoes')
+        .insert({
+          usuario_id: userId,
+          permissao_id: permissionData.id
+        });
+      
+      if (permissionAssignError) throw permissionAssignError;
+      
+      // Successfully updated user status and assigned permission
       toast({
-        title: 'Acesso aprovado',
-        description: `O usuário ${userName} agora tem acesso como "${roleName}".`,
+        title: "Usuário aprovado",
+        description: `${userName} (${userEmail}) agora tem acesso ao sistema.`
       });
       
-      // Refresh users data
-      await fetchData();
-    } catch (error: any) {
+      // Refresh the users list
+      await refreshUsers();
+    } catch (error) {
       console.error('Erro ao aprovar usuário:', error);
       toast({
-        title: 'Erro',
-        description: error.message || 'Não foi possível aprovar o acesso do usuário. Por favor, tente novamente.',
-        variant: 'destructive',
+        title: "Erro ao aprovar usuário",
+        description: error.message || "Não foi possível aprovar o usuário. Tente novamente.",
+        variant: "destructive"
       });
     } finally {
       setApproving(false);
     }
   };
 
-  return {
-    approving,
-    approveUser
-  };
+  return { approveUser, approving };
 };

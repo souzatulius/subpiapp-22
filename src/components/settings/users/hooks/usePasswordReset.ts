@@ -5,15 +5,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '../types';
 
 export const usePasswordReset = () => {
-  const [resetting, setResetting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const handleSendPasswordReset = async (user: User) => {
-    if (!user || !user.email) return;
+    if (!user.email) {
+      toast({
+        title: "Erro",
+        description: "Email do usuário não encontrado.",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    setResetting(true);
+    setIsResetting(true);
     
     try {
-      // Send password reset email
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -21,23 +27,23 @@ export const usePasswordReset = () => {
       if (error) throw error;
       
       toast({
-        title: 'Email de redefinição enviado',
-        description: `Um email de redefinição de senha foi enviado para ${user.email}`,
+        title: "Email enviado",
+        description: `Um email de redefinição de senha foi enviado para ${user.email}.`
       });
-    } catch (error: any) {
-      console.error('Erro ao enviar email de redefinição:', error);
+    } catch (error) {
+      console.error('Erro ao enviar email de redefinição de senha:', error);
       toast({
-        title: 'Erro',
-        description: error.message || 'Não foi possível enviar o email de redefinição.',
-        variant: 'destructive',
+        title: "Erro",
+        description: error.message || "Não foi possível enviar o email de redefinição. Tente novamente.",
+        variant: "destructive"
       });
     } finally {
-      setResetting(false);
+      setIsResetting(false);
     }
   };
 
   return {
-    resetting,
-    handleSendPasswordReset,
+    isResetting,
+    handleSendPasswordReset
   };
 };

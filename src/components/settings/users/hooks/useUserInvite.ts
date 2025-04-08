@@ -4,81 +4,62 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { completeEmailWithDomain } from '@/lib/authUtils';
 
-interface InviteUserData {
-  email: string;
-  nome_completo: string;
-  cargo_id?: string;
-  coordenacao_id?: string;
-  supervisao_tecnica_id?: string;
-}
-
-export const useUserInvite = (fetchData: () => Promise<void>) => {
+export const useUserInvite = (refreshUsers: () => Promise<void>) => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInviteUser = async (data: InviteUserData) => {
+  const handleInviteUser = async (data: any) => {
+    setIsSubmitting(true);
+    
     try {
-      setIsSubmitting(true);
+      const completeEmail = completeEmailWithDomain(data.email);
       
-      // Prepare email with domain if needed
-      const email = completeEmailWithDomain(data.email);
-      
-      // Clean up the data for submission
-      const cleanData: any = {
+      // Format data for the invitation
+      const userData = {
         nome_completo: data.nome_completo,
-        email: email,
+        cargo_id: data.cargo_id,
+        supervisao_tecnica_id: data.area || null,
+        coordenacao_id: data.coordenacao,
+        status: 'aguardando_email'
       };
       
-      // Only include fields that are valid (not placeholder values)
-      if (data.cargo_id && data.cargo_id !== 'select-cargo') {
-        cleanData.cargo_id = data.cargo_id;
-      }
+      console.log('Convidando usuário com os dados:', userData);
       
-      if (data.coordenacao_id && data.coordenacao_id !== 'select-coordenacao') {
-        cleanData.coordenacao_id = data.coordenacao_id;
-      }
-      
-      if (data.supervisao_tecnica_id && data.supervisao_tecnica_id !== 'select-supervisao') {
-        cleanData.supervisao_tecnica_id = data.supervisao_tecnica_id;
-      }
-      
-      console.log('Inviting user with data:', cleanData);
-      
-      // First, create the Supabase auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: Math.random().toString(36).slice(-10) + Math.random().toString(36).toUpperCase().slice(-2) + '!',
-        options: {
-          data: {
-            name: data.nome_completo,
-            role_id: cleanData.cargo_id || null,
-            coordenacao_id: cleanData.coordenacao_id || null,
-            supervision_id: cleanData.supervisao_tecnica_id || null,
-          }
+      // Create invitation record
+      const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
+        completeEmail,
+        {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          data: userData
         }
-      });
+      );
       
-      if (authError) throw authError;
-      
-      // The user will be created in usuarios table automatically via trigger
+      if (inviteError) throw inviteError;
       
       toast({
-        title: 'Usuário convidado',
-        description: `Um convite foi enviado para ${email}`,
+        title: "Convite enviado",
+        description: `Um email de convite foi enviado para ${completeEmail}.`
       });
       
-      // Refresh users data
-      await fetchData();
-      
-      // Close dialog
+      // Close dialog and refresh users list
       setIsInviteDialogOpen(false);
-    } catch (error: any) {
+      await refreshUsers();
+    } catch (error) {
       console.error('Erro ao convidar usuário:', error);
-      toast({
-        title: 'Erro',
-        description: error.message || 'Não foi possível enviar o convite. Por favor, tente novamente.',
-        variant: 'destructive',
-      });
+      
+      if (error.message?.includes('duplicate key')) {
+        toast({
+          title: "Erro",
+          description: "Este email já está registrado no sistema.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: error.message || "Não foi possível enviar o convite. Tente novamente.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -87,7 +68,7 @@ export const useUserInvite = (fetchData: () => Promise<void>) => {
   return {
     isInviteDialogOpen,
     setIsInviteDialogOpen,
-    handleInviteUser,
-    isSubmitting
+    isSubmitting,
+    handleInviteUser
   };
 };
