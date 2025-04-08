@@ -11,6 +11,25 @@ export const completeEmailWithDomain = (email: string): string => {
   return `${email}@smsub.prefeitura.sp.gov.br`;
 };
 
+// Format date from DD/MM/YYYY to YYYY-MM-DD for database storage
+export const formatDateForDatabase = (dateString: string): string | null => {
+  if (!dateString) return null;
+  
+  // Check if the date is already in YYYY-MM-DD format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  
+  // If it's in DD/MM/YYYY format, convert it
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+    const [day, month, year] = dateString.split('/');
+    return `${year}-${month}-${day}`;
+  }
+  
+  console.error('Invalid date format:', dateString);
+  return null;
+};
+
 // Show an error message from auth operations
 export const showAuthError = (error: any) => {
   let errorMessage = 'Erro ao processar a solicitação';
@@ -26,7 +45,7 @@ export const showAuthError = (error: any) => {
     } else if (error.message.includes('Rate limit')) {
       errorMessage = 'Muitas tentativas. Por favor, aguarde alguns minutos antes de tentar novamente.';
     } else if (error.message.includes('Database error')) {
-      errorMessage = 'Erro de banco de dados. Por favor, tente novamente ou contate o suporte.';
+      errorMessage = 'Erro de banco de dados. Por favor, verifique os dados informados ou contate o suporte.';
     } else if (error.message.includes('User already registered')) {
       errorMessage = 'Email já registrado. Utilize outro email ou recupere sua senha.';
     } else {

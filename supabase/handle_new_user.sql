@@ -13,7 +13,13 @@ BEGIN
     SET 
       nome_completo = COALESCE(new.raw_user_meta_data->>'nome_completo', new.raw_user_meta_data->>'name', 'Usuário'),
       email = COALESCE(new.email, new.raw_user_meta_data->>'email'),
-      aniversario = NULLIF(new.raw_user_meta_data->>'aniversario', NULLIF(new.raw_user_meta_data->>'birthday', ''))::date,
+      aniversario = CASE 
+        -- Handle ISO format (YYYY-MM-DD)
+        WHEN new.raw_user_meta_data->>'aniversario' ~ '^\d{4}-\d{2}-\d{2}$' THEN 
+          (new.raw_user_meta_data->>'aniversario')::date
+        -- Handle properly formatted dates or return null
+        ELSE NULL
+      END,
       whatsapp = NULLIF(new.raw_user_meta_data->>'whatsapp', ''),
       cargo_id = (new.raw_user_meta_data->>'cargo_id')::uuid,
       supervisao_tecnica_id = (new.raw_user_meta_data->>'supervisao_tecnica_id')::uuid,
@@ -37,7 +43,13 @@ BEGIN
       new.id,
       COALESCE(new.raw_user_meta_data->>'nome_completo', new.raw_user_meta_data->>'name', 'Usuário'),
       COALESCE(new.email, new.raw_user_meta_data->>'email'),
-      NULLIF(new.raw_user_meta_data->>'aniversario', NULLIF(new.raw_user_meta_data->>'birthday', ''))::date,
+      CASE 
+        -- Handle ISO format (YYYY-MM-DD)
+        WHEN new.raw_user_meta_data->>'aniversario' ~ '^\d{4}-\d{2}-\d{2}$' THEN 
+          (new.raw_user_meta_data->>'aniversario')::date
+        -- Handle properly formatted dates or return null
+        ELSE NULL
+      END,
       NULLIF(new.raw_user_meta_data->>'whatsapp', ''),
       (new.raw_user_meta_data->>'cargo_id')::uuid,
       (new.raw_user_meta_data->>'supervisao_tecnica_id')::uuid,

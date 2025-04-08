@@ -19,9 +19,15 @@ export const updateProfile = async (userData: ProfileData, userId: string) => {
       updatedData.whatsapp = null;
     }
     
-    // Handle birthday field
+    // Handle birthday field - ensure proper date format (YYYY-MM-DD)
     if (userData.aniversario) {
-      updatedData.aniversario = userData.aniversario;
+      // Convert DD/MM/YYYY to YYYY-MM-DD
+      if (userData.aniversario.includes('/')) {
+        const [day, month, year] = userData.aniversario.split('/');
+        updatedData.aniversario = `${year}-${month}-${day}`;
+      } else {
+        updatedData.aniversario = userData.aniversario;
+      }
     } else {
       updatedData.aniversario = null;
     }
@@ -76,8 +82,21 @@ export const signUp = async (email: string, password: string, userData: any) => 
       return { error: new Error('Email e senha são obrigatórios') };
     }
     
-    // Ensure userData is well-formed
+    // Format date properly for Postgres (from DD/MM/YYYY to YYYY-MM-DD)
     const cleanMetadata = { ...userData };
+    
+    // Process date field - ensure proper format for Postgres
+    if (cleanMetadata.aniversario && cleanMetadata.aniversario.includes('/')) {
+      const parts = cleanMetadata.aniversario.split('/');
+      if (parts.length === 3) {
+        // Convert from DD/MM/YYYY to YYYY-MM-DD
+        cleanMetadata.aniversario = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        console.log('Data de aniversário formatada para:', cleanMetadata.aniversario);
+      } else {
+        console.warn('Formato de data inválido, removendo campo aniversario:', cleanMetadata.aniversario);
+        delete cleanMetadata.aniversario;
+      }
+    }
     
     // Ensure all IDs are valid UUIDs or null
     if (cleanMetadata.cargo_id) {
@@ -102,6 +121,9 @@ export const signUp = async (email: string, password: string, userData: any) => 
         return { error: new Error('ID de supervisão técnica inválido') };
       }
       console.log('Using supervisao_tecnica_id as UUID:', cleanMetadata.supervisao_tecnica_id);
+    } else {
+      // Ensure supervisao_tecnica_id is explicitly null and not an empty string
+      cleanMetadata.supervisao_tecnica_id = null;
     }
     
     // Clean up any undefined or null values that might cause database errors

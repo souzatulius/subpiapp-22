@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePasswordValidation } from '@/hooks/usePasswordValidation';
 import { validatePasswordsMatch, formatPhone, formatDate } from '@/lib/formValidation';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { showAuthError, completeEmailWithDomain, createAdminNotification } from '@/lib/authUtils';
+import { showAuthError, completeEmailWithDomain, createAdminNotification, formatDateForDatabase } from '@/lib/authUtils';
 import { toast } from 'sonner';
 import { FormData } from '../types';
 
@@ -109,10 +109,13 @@ export const useRegisterForm = () => {
     try {
       const completeEmail = completeEmailWithDomain(formData.email);
       
+      // Format birthday from DD/MM/YYYY to YYYY-MM-DD for database storage
+      const formattedBirthday = formatDateForDatabase(formData.birthday);
+      
       // Improved: Ensure that the user data is correctly structured
       const userData = {
         nome_completo: formData.name,
-        aniversario: formData.birthday,
+        aniversario: formattedBirthday,
         whatsapp: formData.whatsapp,
         cargo_id: formData.role, // This should be a valid UUID
         supervisao_tecnica_id: formData.area || null, // This should be a valid UUID or null
