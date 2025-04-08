@@ -180,6 +180,7 @@ export function UnifiedActionCard({
       return children;
     }
     
+    // Fix for the type error: Check both isSearch and type for smart_search
     if (isSearch || type === 'smart_search') {
       return (
         <SearchCard 
