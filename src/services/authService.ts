@@ -52,3 +52,108 @@ export const registerUser = async (userData: RegisterUserData) => {
     throw new Error(error.message || 'Falha ao registrar usuário');
   }
 }
+
+/**
+ * Updates a user profile in the system
+ * @param userId The ID of the user to update
+ * @param profileData The profile data to update
+ */
+export const updateProfile = async (userId: string, profileData: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .update(profileData)
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error in updateProfile:', error);
+    throw new Error(error.message || 'Falha ao atualizar perfil');
+  }
+}
+
+/**
+ * Sign in with email and password
+ */
+export const signIn = async (email: string, password: string) => {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error in signIn:', error);
+    throw new Error(error.message || 'Falha ao realizar login');
+  }
+}
+
+/**
+ * Sign in with Google OAuth
+ */
+export const signInWithGoogle = async () => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google'
+    });
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error in signInWithGoogle:', error);
+    throw new Error(error.message || 'Falha ao realizar login com Google');
+  }
+}
+
+/**
+ * Sign up with email and password
+ */
+export const signUp = async (email: string, password: string) => {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password
+    });
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error in signUp:', error);
+    throw new Error(error.message || 'Falha ao criar conta');
+  }
+}
+
+/**
+ * Sign out the current user
+ */
+export const signOut = async () => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) throw error;
+    
+    return true;
+  } catch (error: any) {
+    console.error('Error in signOut:', error);
+    throw new Error(error.message || 'Falha ao realizar logout');
+  }
+}
+
+/**
+ * Setup an auth state listener for the application
+ * @param callback Function to call when auth state changes
+ */
+export const setupAuthListener = (callback: (session: any) => void) => {
+  return supabase.auth.onAuthStateChange((event, session) => {
+    callback(session);
+  });
+};

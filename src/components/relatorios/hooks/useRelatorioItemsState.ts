@@ -1,5 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { DragEndEvent } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 export interface RelatorioItem {
@@ -8,103 +10,78 @@ export interface RelatorioItem {
   subtitle?: string; // Add subtitle property
   component: React.ReactNode;
   isVisible: boolean;
-  isAnalysisExpanded: boolean;
-  showAnalysisOnly: boolean;
+  isAnalysisExpanded?: boolean;
+  showAnalysisOnly?: boolean;
   analysis?: string;
-  value?: string;
+  value?: string | number;
   description?: string;
-  badge?: {
-    text: string;
-    type: 'success' | 'warning' | 'danger' | 'info';
-  };
+  badge?: string;
+  props?: Record<string, any>;
+  highlight?: string;
   order?: number; // Add order property
 }
 
-// Hook to manage relatorio items state
-export const useRelatorioItemsState = (defaultItems: RelatorioItem[], sectionId: string) => {
-  // Local storage key for hidden items and expanded analyses
-  const hiddenKey = `relatorio-hidden-${sectionId}`;
-  const expandedKey = `relatorio-expanded-${sectionId}`;
-  const analysisOnlyKey = `relatorio-analysis-only-${sectionId}`;
-  const orderKey = `relatorio-order-${sectionId}`;
-  
-  // Load state from local storage
-  const [hiddenItems, setHiddenItems] = useLocalStorage<string[]>(hiddenKey, []);
-  const [expandedAnalyses, setExpandedAnalyses] = useLocalStorage<string[]>(expandedKey, []);
-  const [analysisOnlyItems, setAnalysisOnlyItems] = useLocalStorage<string[]>(analysisOnlyKey, []);
-  const [itemsOrder, setItemsOrder] = useLocalStorage<Record<string, number>>(orderKey, {});
-  
-  // Compute items with all state applied
-  const [items, setItems] = useState<RelatorioItem[]>([]);
-  
-  // Apply stored states to items
-  useEffect(() => {
-    const processedItems = defaultItems.map(item => ({
-      ...item,
-      isVisible: !hiddenItems.includes(item.id),
-      isAnalysisExpanded: expandedAnalyses.includes(item.id),
-      showAnalysisOnly: analysisOnlyItems.includes(item.id),
-      order: itemsOrder[item.id] || 0,
-    }));
+export const useRelatorioItemsState = (initialItems: RelatorioItem[]) => {
+  const [items, setItems] = useState<RelatorioItem[]>(initialItems);
+  const [hiddenItems, setHiddenItems] = useLocalStorage<string[]>('relatorio-hidden-items', []);
+  const [expandedAnalyses, setExpandedAnalyses] = useLocalStorage<string[]>('relatorio-expanded-analyses', []);
+  const [analysisOnlyItems, setAnalysisOnlyItems] = useLocalStorage<string[]>('relatorio-analysis-only', []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
     
-    // Sort by order if available
-    const sortedItems = [...processedItems].sort((a, b) => {
-      return (a.order || 0) - (b.order || 0);
-    });
-    
-    setItems(sortedItems);
-  }, [defaultItems, hiddenItems, expandedAnalyses, analysisOnlyItems, itemsOrder]);
-  
-  // Toggle visibility of an item
-  const toggleItemVisibility = (itemId: string) => {
-    setHiddenItems(prev => {
-      if (prev.includes(itemId)) {
-        return prev.filter(id => id !== itemId);
+    if (over && active.id !== over.id) {
+      setItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  }, []);
+
+  const toggleItemVisibility = useCallback((itemId: string) => {
+    setHiddenItems((prevHiddenItems) => {
+      if (prevHiddenItems.includes(itemId)) {
+        return prevHiddenItems.filter((id) => id !== itemId);
       } else {
-        return [...prev, itemId];
+        return [...prevHiddenItems, itemId];
       }
     });
-  };
-  
-  // Toggle analysis expansion
-  const toggleItemAnalysis = (itemId: string) => {
-    setExpandedAnalyses(prev => {
-      if (prev.includes(itemId)) {
-        return prev.filter(id => id !== itemId);
+  }, [setHiddenItems]);
+
+  const toggleItemAnalysis = useCallback((itemId: string) => {
+    setExpandedAnalyses((prevExpandedAnalyses) => {
+      if (prevExpandedAnalyses.includes(itemId)) {
+        return prevExpandedAnalyses.filter((id) => id !== itemId);
       } else {
-        return [...prev, itemId];
+        return [...prevExpandedAnalyses, itemId];
       }
     });
-  };
-  
-  // Toggle between chart view and analysis-only view
-  const toggleItemView = (itemId: string) => {
-    setAnalysisOnlyItems(prev => {
-      if (prev.includes(itemId)) {
-        return prev.filter(id => id !== itemId);
+  }, [setExpandedAnalyses]);
+
+  const toggleItemView = useCallback((itemId: string) => {
+    setAnalysisOnlyItems((prevAnalysisOnlyItems) => {
+      if (prevAnalysisOnlyItems.includes(itemId)) {
+        return prevAnalysisOnlyItems.filter((id) => id !== itemId);
       } else {
-        return [...prev, itemId];
+        return [...prevAnalysisOnlyItems, itemId];
       }
     });
-  };
-  
-  // Update item order
-  const updateItemsOrder = (reorderedItems: RelatorioItem[]) => {
-    const newOrder: Record<string, number> = {};
-    reorderedItems.forEach((item, index) => {
-      newOrder[item.id] = index;
-    });
-    setItemsOrder(newOrder);
-  };
-  
+  }, [setAnalysisOnlyItems]);
+
+  const updateItemsOrder = useCallback((reorderedItems: RelatorioItem[]) => {
+    setItems(reorderedItems);
+  }, []);
+
   return {
     items,
+    hiddenItems,
+    expandedAnalyses,
+    analysisOnlyItems,
     toggleItemVisibility,
     toggleItemAnalysis,
     toggleItemView,
     updateItemsOrder,
-    hiddenItems,
-    expandedAnalyses,
-    analysisOnlyItems
+    handleDragEnd
   };
 };
