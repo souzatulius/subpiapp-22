@@ -15,7 +15,14 @@ export type CardColor =
   | 'gray-light'
   | 'gray-medium'
   | 'orange-light'
-  | 'blue-light';
+  | 'blue-light'
+  | 'blue-vivid'
+  | 'blue-dark'
+  | 'green-neon'
+  | 'green-dark'
+  | 'orange-dark'
+  | 'neutral-800'
+  | 'orange-700';
 export type CardType = 'standard' | 'data_dynamic' | 'in_progress_demands' | 'recent_notes' | 'origin_selection' | 'smart_search';
 export type DataSourceKey = 
   | 'pendencias_por_coordenacao' 
@@ -23,7 +30,8 @@ export type DataSourceKey =
   | 'respostas_atrasadas' 
   | 'demandas_aguardando_nota' 
   | 'ultimas_acoes_coordenacao'
-  | 'comunicados_por_cargo';
+  | 'comunicados_por_cargo'
+  | string; // Adicionando string como tipo válido para DataSourceKey
 
 export interface ActionCardItem {
   id: string;
