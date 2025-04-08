@@ -41,7 +41,7 @@ const ESICPage: React.FC = () => {
   } = useESICPageState();
   
   return (
-    <div className="py-6 space-y-6 px-4 md:container md:px-6">
+    <div className="container mx-auto py-6 px-4 md:px-6 space-y-6">
       <WelcomeCard 
         title="Sistema e-SIC"
         description="Gerencie processos e justificativas para as solicitações recebidas via Sistema Eletrônico do Serviço de Informação ao Cidadão."

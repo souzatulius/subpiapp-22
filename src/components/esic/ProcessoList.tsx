@@ -46,7 +46,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
           <Input
@@ -57,7 +57,7 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
           />
         </div>
         
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'list' | 'grid')}>
             <ToggleGroupItem value="list" aria-label="Visualizar em lista">
               <LayoutList className="h-4 w-4" />
@@ -71,8 +71,8 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
             value={statusFilter} 
             onValueChange={setStatusFilter}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por status" />
+            <SelectTrigger className="w-[180px] min-w-[120px]">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos os status</SelectItem>
@@ -88,8 +88,8 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
             value={situacaoFilter} 
             onValueChange={setSituacaoFilter}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por situação" />
+            <SelectTrigger className="w-[180px] min-w-[120px]">
+              <SelectValue placeholder="Situação" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todas as situações</SelectItem>

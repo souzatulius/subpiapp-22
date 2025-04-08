@@ -42,7 +42,7 @@ const ProcessoCard: React.FC<ProcessoCardProps> = ({
 
   // Format date
   const formattedDate = processo.data_processo
-    ? format(new Date(processo.data_processo), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+    ? format(new Date(processo.data_processo), "dd/MM/yyyy", { locale: ptBR })
     : 'Data não informada';
 
   return (
@@ -62,7 +62,7 @@ const ProcessoCard: React.FC<ProcessoCardProps> = ({
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="min-w-[150px] bg-white">
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 onEdit(processo);

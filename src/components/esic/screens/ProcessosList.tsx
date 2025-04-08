@@ -23,12 +23,12 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
   onDeleteProcesso
 }) => {
   return (
-    <>
-      <div className="flex justify-end mb-6">
+    <div className="space-y-4">
+      <div className="flex justify-end mb-4">
         <Button 
           onClick={onCreateProcesso}
           variant="action"
-          className="hidden md:flex items-center"
+          className="hidden sm:flex items-center"
         >
           <FilePlus className="h-5 w-5 mr-2" />
           Novo Processo
@@ -37,7 +37,8 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         <Button 
           onClick={onCreateProcesso}
           variant="action"
-          className="flex md:hidden"
+          className="flex sm:hidden items-center w-10 h-10 p-0 justify-center"
+          aria-label="Novo Processo"
         >
           <FilePlus className="h-5 w-5" />
         </Button>
@@ -50,7 +51,7 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
         onEditProcesso={onEditProcesso}
         onDeleteProcesso={onDeleteProcesso}
       />
-    </>
+    </div>
   );
 };
 

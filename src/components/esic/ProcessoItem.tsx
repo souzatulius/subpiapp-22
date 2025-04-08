@@ -59,17 +59,17 @@ const ProcessoItem: React.FC<ProcessoItemProps> = ({
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
           <div>
             <CardTitle className="text-lg">
-              Processo de {format(new Date(processo.data_processo), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              Processo de {format(new Date(processo.data_processo), "dd/MM/yyyy", { locale: ptBR })}
             </CardTitle>
             <CardDescription>
               Criado por: {processo.autor?.nome_completo || 'Usuário'} em {' '}
-              {format(new Date(processo.criado_em), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+              {format(new Date(processo.criado_em), "dd/MM/yyyy", { locale: ptBR })}
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Badge className={getStatusColor(processo.status)}>
               {statusLabels[processo.status]}
             </Badge>
@@ -82,7 +82,7 @@ const ProcessoItem: React.FC<ProcessoItemProps> = ({
       <CardContent>
         <p className="text-gray-700 line-clamp-3">{processo.texto}</p>
       </CardContent>
-      <CardFooter className="pt-0 flex justify-end gap-2">
+      <CardFooter className="pt-0 flex flex-wrap justify-end gap-2">
         <Button 
           variant="outline" 
           size="sm" 
