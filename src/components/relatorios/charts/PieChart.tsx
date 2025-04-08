@@ -90,15 +90,15 @@ export const PieChart: React.FC<PieChartProps> = ({
       return { 
         pieRadius: 70, 
         legendVertical: true,
-        legendAlign: legendPosition === 'left' ? 'left' : 'right',
-        legendLayout: 'vertical'
+        legendAlign: legendPosition,
+        legendLayout: 'vertical' as const
       };
     } else {
       return { 
         pieRadius: 80, 
         legendVertical: false,
-        legendAlign: 'center',
-        legendLayout: 'horizontal'
+        legendAlign: 'center' as const,
+        legendLayout: 'horizontal' as const
       };
     }
   };
@@ -126,7 +126,7 @@ export const PieChart: React.FC<PieChartProps> = ({
         <Legend 
           layout={legendLayout}
           verticalAlign={legendPosition === 'top' ? 'top' : legendPosition === 'bottom' ? 'bottom' : 'middle'}
-          align={legendAlign}
+          align={legendPosition === 'right' ? 'right' : legendPosition === 'left' ? 'left' : 'center'}
           iconType="circle"
           iconSize={10}
           wrapperStyle={
