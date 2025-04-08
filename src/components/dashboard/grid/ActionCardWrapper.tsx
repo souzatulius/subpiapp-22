@@ -172,7 +172,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 
-      onEdit={onEdit}
+      onEdit={() => onEdit(card)} // Fixed: Pass the full card instead of just an ID
       onDelete={onDelete}
       isMobileView={isMobileView}
     >

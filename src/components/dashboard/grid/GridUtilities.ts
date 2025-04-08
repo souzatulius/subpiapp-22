@@ -58,11 +58,10 @@ export const getHeightClass = (height?: CardHeight, isMobileView: boolean = fals
 export const getMobileSpecificDimensions = (cardTitle: string): { width: CardWidth, height: CardHeight } => {
   switch (cardTitle) {
     case "Relatórios da Comunicação":
-      return { width: '50', height: '2' }; // 2 columns, 2 rows on mobile
+      return { width: '50' as CardWidth, height: '2' as CardHeight }; // 2 columns, 2 rows on mobile
     case "Ações Pendentes":
-      return { width: '25', height: '2' }; // 1 column, 2 rows on mobile (same as desktop)
+      return { width: '25' as CardWidth, height: '2' as CardHeight }; // 1 column, 2 rows on mobile (same as desktop)
     default:
-      return { width: '25', height: '1' }; // Default size
+      return { width: '25' as CardWidth, height: '1' as CardHeight }; // Default size
   }
 };
-

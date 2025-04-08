@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+import { ActionCardItem, CardColor } from '@/types/dashboard';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -60,12 +61,12 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
       const hasSearchCard = updatedCards.some(card => card.id === 'comunicacao-search-card');
       
       if (!hasSearchCard) {
-        const searchCard = {
+        const searchCard: ActionCardItem = {
           id: 'comunicacao-search-card',
           title: 'Busca Rápida',
           iconId: 'search',
           path: '',
-          color: 'bg-white',
+          color: 'bg-white' as CardColor, // Type assertion to CardColor
           width: '100', // Full width
           height: '0.5', // Half height
           type: 'smart_search',

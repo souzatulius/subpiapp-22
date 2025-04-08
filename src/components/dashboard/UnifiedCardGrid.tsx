@@ -12,7 +12,7 @@ import {
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard } from './UnifiedActionCard';
 import { getWidthClass, getHeightClass, getMobileSpecificDimensions } from './grid/GridUtilities';
-import { ActionCardItem } from '@/types/dashboard';
+import { ActionCardItem, CardWidth, CardHeight } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
 export interface UnifiedCardGridProps {
@@ -102,14 +102,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       if (card.title === "Relatórios da Comunicação") {
         return {
           ...card,
-          width: '50', // 2 columns
-          height: '1'  // 1 row
+          width: '50' as CardWidth, // 2 columns - explicit type cast to CardWidth
+          height: '1' as CardHeight  // 1 row - explicit type cast to CardHeight
         };
       } else if (card.title === "Ações Pendentes") {
         return {
           ...card,
-          width: '25', // 1 column
-          height: '2'  // 2 rows
+          width: '25' as CardWidth, // 1 column - explicit type cast to CardWidth
+          height: '2' as CardHeight  // 2 rows - explicit type cast to CardHeight
         };
       }
     }
