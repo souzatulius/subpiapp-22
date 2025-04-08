@@ -53,7 +53,7 @@ export const useDemandasData = () => {
             problemas:problema_id(id, descricao)
           `)
           .in('status', ['respondida', 'aguardando_nota'])
-          .order('horario_publicacao', { ascending: false });
+          .order('created_at', { ascending: false });
         
         if (demandasError) throw demandasError;
         
@@ -88,7 +88,7 @@ export const useDemandasData = () => {
             autor: null,
             servico: demanda.servicos,
             problema: demanda.problemas,
-            horario_publicacao: demanda.horario_publicacao || "",
+            horario_publicacao: "",
             arquivo_url: demanda.arquivo_url || null,
             anexos: demanda.anexos || []
           } as Demand;
