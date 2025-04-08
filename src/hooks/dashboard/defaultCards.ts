@@ -1,5 +1,35 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
+import React from 'react';
+
+// Function to get a Lucide icon component by its ID string
+export const getIconComponentFromId = (iconId: string) => {
+  const IconMap = {
+    'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
+    'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
+    'file-check': () => import('lucide-react').then(mod => mod.FileCheck),
+    'bar-chart-2': () => import('lucide-react').then(mod => mod.BarChart2),
+    'plus-circle': () => import('lucide-react').then(mod => mod.PlusCircle),
+    'search': () => import('lucide-react').then(mod => mod.Search),
+    'file-text': () => import('lucide-react').then(mod => mod.FileText),
+    'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
+    'clock': () => import('lucide-react').then(mod => mod.Clock),
+    'alert-triangle': () => import('lucide-react').then(mod => mod.AlertTriangle),
+    'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
+    // Add more icons as needed
+  };
+  
+  const LoadedIcon = React.lazy(() => 
+    IconMap[iconId]?.() || import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
+  );
+  
+  return (props: any) => (
+    <React.Suspense fallback={<div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full" />}>
+      <LoadedIcon {...props} />
+    </React.Suspense>
+  );
+};
 
 // Get default cards
 export const getDefaultCards = (): ActionCardItem[] => {
@@ -105,6 +135,74 @@ export const getDefaultCards = (): ActionCardItem[] => {
       dataSourceKey: 'pendencias_por_coordenacao',
       displayMobile: true,
       mobileOrder: 8
+    }
+  ];
+};
+
+// Get communication action cards 
+export const getCommunicationActionCards = (): ActionCardItem[] => {
+  return [
+    // Add the search card as the first item
+    {
+      id: 'dashboard-search-card',
+      title: 'Busca Rápida',
+      iconId: 'search',
+      path: '',
+      color: 'bg-white',
+      width: '100', // Full width
+      height: '1', // Half height
+      type: 'smart_search',
+      isSearch: true,
+      displayMobile: true,
+      mobileOrder: 1
+    },
+    {
+      id: uuidv4(),
+      title: 'Nova Demanda',
+      iconId: 'plus-circle',
+      path: '/dashboard/comunicacao/nova-demanda',
+      color: 'bg-blue-500',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 2
+    },
+    {
+      id: uuidv4(),
+      title: 'Demandas em Andamento',
+      iconId: 'clipboard-list',
+      path: '/dashboard/comunicacao/demandas',
+      color: 'bg-green-500',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 3
+    },
+    {
+      id: uuidv4(),
+      title: 'Aprovar Notas',
+      iconId: 'file-check',
+      path: '/dashboard/comunicacao/aprovar',
+      color: 'bg-red-500',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 4
+    },
+    {
+      id: uuidv4(),
+      title: 'Criar Nota',
+      iconId: 'file-text',
+      path: '/dashboard/comunicacao/criar-nota',
+      color: 'bg-purple-500',
+      width: '25',
+      height: '1',
+      type: 'standard',
+      displayMobile: true,
+      mobileOrder: 5
     }
   ];
 };
