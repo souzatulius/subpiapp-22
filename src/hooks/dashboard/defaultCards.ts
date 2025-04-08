@@ -20,15 +20,24 @@ export const getIconComponentFromId = (iconId: string) => {
     // Add more icons as needed
   };
   
+  // Create a lazy-loaded component without using JSX directly
   const LoadedIcon = React.lazy(() => 
     IconMap[iconId] ? IconMap[iconId]() : import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
   );
   
-  return (props: any) => (
-    <React.Suspense fallback={<div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full" />}>
-      <LoadedIcon {...props} />
-    </React.Suspense>
-  );
+  // Return a function that creates the component
+  return function IconComponent(props: any) {
+    // This function will be used in a React component where JSX is available
+    return React.createElement(
+      React.Suspense,
+      { 
+        fallback: React.createElement('div', { 
+          className: "w-6 h-6 bg-gray-200 animate-pulse rounded-full" 
+        })
+      },
+      React.createElement(LoadedIcon, props)
+    );
+  };
 };
 
 // Get default cards
