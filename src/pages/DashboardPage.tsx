@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -117,15 +116,31 @@ const DashboardPage: React.FC = () => {
           path: '',
           color: 'bg-white',
           width: '100',
-          height: '1',
+          height: '0.5', // Changed to half height
           type: 'smart_search',
           isSearch: true,
           displayMobile: true,
           mobileOrder: 1
         };
         
-        const updatedCards = [searchCard, ...cards];
-        handleCardsChange(updatedCards);
+        // Adjust heights for specific cards
+        const updatedCards = cards.map(card => {
+          // Check if card is one of the specific cards that need height adjustment
+          if (
+            (card.title === 'Demandas' ||
+             card.title === 'Avisos' ||
+             card.title === 'Responder Demandas' ||
+             card.title === 'Nova Solicitação' ||
+             card.title === 'Ranking') &&
+            card.height === '2'
+          ) {
+            return { ...card, height: '1' }; // Change height from 2 to 1
+          }
+          return card;
+        });
+        
+        const finalCards = [searchCard, ...updatedCards];
+        handleCardsChange(finalCards);
         setSearchCardAdded(true);
       }
     }
@@ -171,15 +186,12 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
               
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <DashboardSearchCard />
-                </div>
+              <div className="flex justify-end">
                 <Button 
                   variant="outline" 
                   size="lg" 
                   onClick={handleResetDashboard}
-                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-8 whitespace-nowrap"
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
                   disabled={isSaving}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
@@ -194,7 +206,7 @@ const DashboardPage: React.FC = () => {
                       <Skeleton key={index} className="h-32 w-full rounded-lg" />
                     ))}
                   </div>
-                ) : cards && cards.length > 0 ? (
+                ) : cards && cards.length > 0 && (
                   <div className="px-2 py-2">
                     <CardGridContainer 
                       cards={cards.filter(card => !card.isHidden)} 
@@ -204,10 +216,6 @@ const DashboardPage: React.FC = () => {
                       isMobileView={isMobile}
                       isEditMode={isEditMode}
                     />
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    Nenhum card disponível.
                   </div>
                 )}
               </div>

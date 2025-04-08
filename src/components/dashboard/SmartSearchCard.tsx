@@ -54,50 +54,54 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      <div className="relative">
-        <Input
-          ref={inputRef}
-          type="text" 
-          className="pl-4 pr-14 py-6 rounded-xl border border-gray-300 w-full h-[80%] bg-white text-2xl text-gray-800 placeholder:text-gray-600"
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-        />
-        <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 h-8 w-8 text-gray-500" />
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-[80%] h-[80%]">
+        <form onSubmit={handleSubmit} className="relative h-full">
+          <div className="relative h-full flex items-center">
+            <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-8 w-8 text-gray-500" />
+            <Input
+              ref={inputRef}
+              type="text" 
+              className="pl-16 pr-6 py-3 rounded-2xl border border-gray-300 w-full h-full bg-white text-2xl font-medium text-gray-800 placeholder:text-2xl placeholder:text-gray-600"
+              placeholder={placeholder}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            />
+          </div>
+          
+          <AnimatePresence>
+            {showSuggestions && suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-10"
+              >
+                <ul className="py-1">
+                  {suggestions.map((suggestion, i) => (
+                    <li
+                      key={i}
+                      className="px-5 py-3 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
+                      onMouseDown={() => handleSelectSuggestion(suggestion)}
+                    >
+                      <div className="flex-grow">
+                        <div className="font-medium text-gray-700">{suggestion.title}</div>
+                      </div>
+                      <div className="text-gray-400">
+                        <Search className="h-5 w-5" />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </form>
       </div>
-      
-      <AnimatePresence>
-        {showSuggestions && suggestions.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-10"
-          >
-            <ul className="py-1">
-              {suggestions.map((suggestion, i) => (
-                <li
-                  key={i}
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
-                  onMouseDown={() => handleSelectSuggestion(suggestion)}
-                >
-                  <div className="flex-grow">
-                    <div className="font-medium text-gray-700">{suggestion.title}</div>
-                  </div>
-                  <div className="text-gray-400">
-                    <Search className="h-6 w-6" />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </form>
+    </div>
   );
 };
 

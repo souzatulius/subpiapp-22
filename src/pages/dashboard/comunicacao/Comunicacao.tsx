@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -97,13 +96,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
 
   const renderCardContent = (cardId: string) => {
     if (cardId === 'comunicacao-search-card') {
-      return (
-        <div className="w-full h-full flex items-center justify-center px-4">
-          <div className="w-[80%]">
-            <SmartSearchCard placeholder="O que deseja fazer?" />
-          </div>
-        </div>
-      );
+      return <SmartSearchCard placeholder="O que deseja fazer?" />;
     }
     return null;
   };

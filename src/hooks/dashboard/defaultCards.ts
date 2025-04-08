@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
@@ -17,7 +16,7 @@ export const getIconComponentFromId = (iconId: string | undefined): LucideIcon =
     return directIcon;
   }
   
-  // If not found, try capitalized format
+  // Try capitalized format
   const formattedIconId = iconId.charAt(0).toUpperCase() + iconId.slice(1);
   const capitalizedIcon = LucideIcons[formattedIconId as keyof typeof LucideIcons] as LucideIcon | undefined;
   if (capitalizedIcon) {
@@ -39,7 +38,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '',
       color: 'bg-white',
       width: '100', // Full width
-      height: '1', // Half height
+      height: '0.5', // Half height (changed from 1)
       type: 'smart_search',
       isSearch: true,
       displayMobile: true,
@@ -52,7 +51,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue',
       width: '25',
-      height: '2',
+      height: '1', // Changed from 2 to 1
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -65,7 +64,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao',
       color: 'deep-blue',
       width: '25',
-      height: '2',
+      height: '1', // Changed from 2 to 1
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
@@ -78,7 +77,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/responder',
       color: 'gray-medium',
       width: '25',
-      height: '2',
+      height: '1', // Changed from 2 to 1
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
@@ -91,7 +90,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/zeladoria/ranking-subs',
       color: 'bg-orange-500',
       width: '25',
-      height: '2',
+      height: '1', // Changed from 2 to 1
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
