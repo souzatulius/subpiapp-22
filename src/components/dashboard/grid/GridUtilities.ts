@@ -49,4 +49,3 @@ export const getHeightClass = (height?: string): string => {
       return 'row-span-1 h-32'; // Default fixed height
   }
 };
-

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -181,7 +180,6 @@ export function UnifiedActionCard({
       return children;
     }
     
-    // Check both isSearch and type for smart_search to handle both cases
     if (isSearch || type === 'smart_search') {
       return (
         <SearchCard 
