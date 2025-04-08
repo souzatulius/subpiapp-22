@@ -25,19 +25,19 @@ const LeftContentSection: React.FC = () => {
     if (titleLine1Ref.current && titleLine2Ref.current && titleLine3Ref.current) {
       const fittyInstance1 = fitty(titleLine1Ref.current, {
         minSize: 24,
-        maxSize: 90,
+        maxSize: 100, // Increased max size to allow for larger text
         multiLine: false
       });
       
       const fittyInstance2 = fitty(titleLine2Ref.current, {
         minSize: 24,
-        maxSize: 90,
+        maxSize: 100, // Increased max size to allow for larger text
         multiLine: false
       });
       
       const fittyInstance3 = fitty(titleLine3Ref.current, {
         minSize: 24,
-        maxSize: 90,
+        maxSize: 100, // Increased max size to allow for larger text
         multiLine: false
       });
       
