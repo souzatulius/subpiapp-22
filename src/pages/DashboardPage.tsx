@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -12,7 +13,6 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
