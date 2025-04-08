@@ -1,18 +1,38 @@
 
-import { getDefaultCards } from './defaultCards';
+import { useState, useEffect } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
+import { getCommunicationActionCards } from './defaultCards';
 
-// Get the default dashboard card configuration
-export const getDefaultDashboardConfig = (): ActionCardItem[] => {
-  return getDefaultCards();
-};
+export interface UseDefaultDashboardConfigResult {
+  config: ActionCardItem[];
+  isLoading: boolean;
+  setConfig: (cards: ActionCardItem[]) => void;
+}
 
-// Check if a card is a default card by its ID
-export const isDefaultCard = (cardId: string): boolean => {
-  return getDefaultCards().some(card => card.id === cardId);
-};
+export const useDefaultDashboardConfig = (
+  department: string = 'default'
+): UseDefaultDashboardConfigResult => {
+  const [config, setConfig] = useState<ActionCardItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-// Get a specific card by its ID from the defaults
-export const getCardById = (cardId: string): ActionCardItem | undefined => {
-  return getDefaultCards().find(card => card.id === cardId);
+  useEffect(() => {
+    // Simulate loading state
+    setIsLoading(true);
+    
+    // Use predefined cards based on department type
+    setTimeout(() => {
+      if (department === 'comunicacao') {
+        setConfig(getCommunicationActionCards());
+      } else {
+        setConfig([]);
+      }
+      setIsLoading(false);
+    }, 300);
+  }, [department]);
+
+  return {
+    config,
+    isLoading,
+    setConfig
+  };
 };

@@ -85,9 +85,7 @@ const PendingTasksCard: React.FC = () => {
               id: demand.id,
               title: demand.titulo,
               dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) 
-                ? 'overdue' as const 
-                : 'warning' as const,
+              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
               type: 'demand' as const,
               url: `/dashboard/comunicacao/demandas/${demand.id}`
             }));
@@ -108,9 +106,7 @@ const PendingTasksCard: React.FC = () => {
               id: demand.id,
               title: `${demand.titulo} (${(demand.coordenacoes as any)?.descricao || 'Sem coordenação'})`,
               dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) 
-                ? 'overdue' as const 
-                : 'warning' as const,
+              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
               type: 'demand' as const,
               url: `/dashboard/comunicacao/demandas/${demand.id}`
             }));
@@ -169,9 +165,7 @@ const PendingTasksCard: React.FC = () => {
               id: demand.id,
               title: demand.titulo,
               dueDate: demand.prazo_resposta ? new Date(demand.prazo_resposta) : null,
-              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) 
-                ? 'overdue' as const 
-                : 'warning' as const,
+              status: demand.prazo_resposta && isBefore(new Date(demand.prazo_resposta), new Date()) ? 'overdue' : 'warning',
               type: 'demand' as const,
               url: `/dashboard/comunicacao/responder-demanda/${demand.id}`
             }));
@@ -275,7 +269,7 @@ const PendingTasksCard: React.FC = () => {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="overflow-auto max-h-[360px]">
+      <CardContent className="overflow-auto max-h-[300px]">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
