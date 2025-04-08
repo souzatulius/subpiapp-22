@@ -14,6 +14,7 @@ import { useUserProfile } from './useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import AccountSettingsModal from '@/components/profile/AccountSettingsModal';
+import NotificationPreferencesModal from '@/components/profile/NotificationPreferencesModal';
 import { ProfileData } from '@/components/profile/types';
 import ChangePhotoModal from '@/components/profile/photo/ChangePhotoModal';
 
@@ -23,6 +24,7 @@ const ProfileMenu: React.FC = () => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isAccountSettingsModalOpen, setIsAccountSettingsModalOpen] = useState(false);
+  const [isNotificationPreferencesOpen, setIsNotificationPreferencesOpen] = useState(false);
   const [isChangePhotoModalOpen, setIsChangePhotoModalOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -100,7 +102,7 @@ const ProfileMenu: React.FC = () => {
           <DropdownMenuItem 
             onClick={(e) => {
               e.preventDefault();
-              setIsAccountSettingsModalOpen(true);
+              setIsNotificationPreferencesOpen(true);
             }} 
             className="cursor-pointer py-2"
           >
@@ -139,6 +141,11 @@ const ProfileMenu: React.FC = () => {
       <AccountSettingsModal
         isOpen={isAccountSettingsModalOpen}
         onClose={() => setIsAccountSettingsModalOpen(false)}
+      />
+
+      <NotificationPreferencesModal
+        isOpen={isNotificationPreferencesOpen}
+        onClose={() => setIsNotificationPreferencesOpen(false)}
       />
 
       <ChangePhotoModal

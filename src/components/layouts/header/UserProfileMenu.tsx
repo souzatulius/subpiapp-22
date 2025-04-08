@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -15,12 +15,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useNotifications } from './useNotifications';
 import { useIsMobile } from '@/hooks/use-mobile';
+import NotificationPreferencesModal from '@/components/profile/NotificationPreferencesModal';
 
 const UserProfileMenu: React.FC = () => {
   const { userProfile, isLoading } = useUserProfile();
   const { unreadCount, fetchNotifications } = useNotifications();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [isNotificationPreferencesOpen, setIsNotificationPreferencesOpen] = useState(false);
 
   // Fetch notifications when component mounts
   React.useEffect(() => {
@@ -74,7 +76,7 @@ const UserProfileMenu: React.FC = () => {
   // Handle notifications navigation
   const handleNotificationsClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate('/settings/notifications');
+    setIsNotificationPreferencesOpen(true);
   };
 
   // Handle settings navigation
@@ -139,6 +141,11 @@ const UserProfileMenu: React.FC = () => {
           </span>
         )}
       </div>
+
+      <NotificationPreferencesModal 
+        isOpen={isNotificationPreferencesOpen}
+        onClose={() => setIsNotificationPreferencesOpen(false)}
+      />
     </div>
   );
 };

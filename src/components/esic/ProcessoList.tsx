@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -33,6 +34,8 @@ const ProcessoList = () => {
   const fetchProcessos = async () => {
     try {
       setIsLoading(true);
+      console.log('Buscando processos e-SIC...');
+      
       const { data, error } = await supabase
         .from('esic_processos')
         .select(`
@@ -42,6 +45,9 @@ const ProcessoList = () => {
         .order('data_processo', { ascending: false });
 
       if (error) throw error;
+      
+      console.log(`Processos encontrados: ${data?.length || 0}`);
+      console.log('Processos data:', data);
 
       // Safely cast the data to the appropriate type
       const typedData = (data || []).map(item => ({
