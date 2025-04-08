@@ -79,15 +79,19 @@ export const useDemandasData = () => {
               return {
                 ...demanda,
                 horario_publicacao: demanda.horario_publicacao || '',
+                area_coordenacao: null, // Add the required property with a default value
+                supervisao_tecnica: null, // Add other required properties
                 notas: []
-              };
+              } as Demand;
             }
 
             return {
               ...demanda,
               horario_publicacao: demanda.horario_publicacao || '',
+              area_coordenacao: null, // Add the required property with a default value
+              supervisao_tecnica: null, // Add other required properties
               notas: notas || []
-            };
+            } as Demand;
           })
         );
 
