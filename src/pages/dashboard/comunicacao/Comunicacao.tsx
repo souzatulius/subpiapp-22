@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -14,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+import OriginSelectionCard from '@/components/comunicacao/OriginSelectionCard';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 
 interface ComunicacaoDashboardProps {
@@ -47,24 +47,15 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   React.useEffect(() => {
     if (cards.length > 0) {
       const updatedCards = cards.map(card => {
-        // Adjust heights for specific cards
-        if (card.title === 'Notícias' && card.color === 'bg-yellow-500') {
-          return { ...card, title: 'Cadastrar Release', height: '0.5' as CardHeight };
-        }
-        if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
-          return { ...card, title: 'Ver Releases e Notícias', height: '0.5' as CardHeight };
-        }
-        if (card.title === 'Relatórios' || card.title.includes('Relatório')) {
-          return { ...card, height: '2' as CardHeight };
-        }
-        if (card.title === 'Nova Solicitação' || card.title === 'Nova Demanda') {
+        // Keep all cards at normal height except the search card
+        if (card.id === 'comunicacao-search-card') {
           return { ...card, height: '0.5' as CardHeight };
         }
-        // Reduce height of all cards in comunicacao page to half
-        return { ...card, height: '0.5' as CardHeight };
+        return { ...card };
       });
       
       const hasSearchCard = updatedCards.some(card => card.id === 'comunicacao-search-card');
+      const hasOriginCard = updatedCards.some(card => card.title === 'Cadastrar Demanda');
       
       if (!hasSearchCard) {
         const searchCard = {
@@ -82,6 +73,25 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         };
         
         updatedCards.splice(1, 0, searchCard);
+      }
+      
+      if (!hasOriginCard) {
+        const originCard = {
+          id: 'comunicacao-origin-card',
+          title: 'Cadastrar Demanda',
+          subtitle: 'De onde vem a solicitação?',
+          iconId: 'MessageSquare',
+          path: '',
+          color: 'bg-blue-500' as CardColor,
+          width: '50' as CardWidth,
+          height: '1' as CardHeight,
+          type: 'origin_selection' as CardType,
+          isCustom: true,
+          displayMobile: true,
+          mobileOrder: 2
+        };
+        
+        updatedCards.splice(2, 0, originCard);
       }
       
       if (JSON.stringify(updatedCards) !== JSON.stringify(cards)) {
@@ -103,9 +113,12 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     return <LoadingIndicator />;
   }
 
-  const renderCardContent = (cardId: string) => {
+  const renderCardContent = (cardId: string, cardType?: string) => {
     if (cardId === 'comunicacao-search-card') {
       return <SmartSearchCard placeholder="O que deseja fazer?" />;
+    }
+    if (cardType === 'origin_selection' || cardId === 'comunicacao-origin-card') {
+      return <OriginSelectionCard />;
     }
     return null;
   };
@@ -149,7 +162,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               onHideCard={handleCardHide}
               isMobileView={isMobile}
               isEditMode={isEditMode}
-              renderSpecialCardContent={renderCardContent}
+              renderSpecialCardContent={(cardId, card) => renderCardContent(cardId, card?.type)}
             />
           </div>
         ) : (

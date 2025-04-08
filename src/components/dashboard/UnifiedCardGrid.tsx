@@ -103,6 +103,14 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     );
   }
 
+  // Function to render special content if available
+  const renderCardContent = (cardId: string, card: ActionCardItem) => {
+    if (specialCardsData?.renderSpecialCardContent) {
+      return specialCardsData.renderSpecialCardContent(cardId, card);
+    }
+    return null;
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -149,6 +157,7 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
                 badgeValue={card.badgeValue}
                 hasSubtitle={!!card.subtitle}
                 isMobileView={isMobileView}
+                specialContent={renderCardContent(card.id, card)}
               />
             </div>
           ))}

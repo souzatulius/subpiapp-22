@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import * as LucideIcons from 'lucide-react';
@@ -38,7 +39,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '',
       color: 'bg-white',
       width: '100', // Full width
-      height: '0.5', // Half height (changed from 1)
+      height: '0.5', // Half height
       type: 'smart_search',
       isSearch: true,
       displayMobile: true,
@@ -51,7 +52,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue',
       width: '25',
-      height: '1', // Changed from 2 to 1
+      height: '0.5', // Changed to half height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -64,7 +65,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao',
       color: 'deep-blue',
       width: '25',
-      height: '1', // Changed from 2 to 1
+      height: '0.5', // Changed to half height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
@@ -77,7 +78,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/responder',
       color: 'gray-medium',
       width: '25',
-      height: '1', // Changed from 2 to 1
+      height: '0.5', // Changed to half height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
@@ -90,7 +91,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/zeladoria/ranking-subs',
       color: 'bg-orange-500',
       width: '25',
-      height: '1', // Changed from 2 to 1
+      height: '0.5', // Changed to half height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
@@ -102,7 +103,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/cadastrar',
       color: 'gray-medium',
       width: '25',
-      height: '2',
+      height: '0.5', // Changed to half height
       type: 'standard',
       displayMobile: true,
       mobileOrder: 6
@@ -115,7 +116,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/relatorios',
       color: 'orange-light',
       width: '50',
-      height: '1',
+      height: '2', // Double height
       type: 'standard',
       chartId: 'origemDemandas',
       displayMobile: true,
@@ -129,7 +130,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       color: 'bg-orange-500',
       width: '50',
       height: '1',
-      type: 'in_progress_demands',
+      type: 'in_progress_demands', // Ensure this card uses the correct type
       isPendingActions: true,
       displayMobile: true,
       mobileOrder: 8

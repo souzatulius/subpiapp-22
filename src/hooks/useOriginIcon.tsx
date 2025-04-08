@@ -1,35 +1,57 @@
 
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
-import { MessageCircle } from 'lucide-react'; // Default icon
+import { 
+  BadgePlus, 
+  Phone, 
+  Mail, 
+  Globe, 
+  Github, 
+  Twitter, 
+  Facebook, 
+  Instagram, 
+  PenTool,
+  Building,
+  Award,
+  Radio,
+  Tv,
+  Newspaper,
+  Flag,
+  Users,
+  UserCheck,
+  MessageCircle,
+  FilePlus
+} from 'lucide-react';
 
-export const useOriginIcon = (origin: { icone?: string }, className = 'h-5 w-5'): React.ReactNode => {
-  if (!origin || !origin.icone) {
-    // Default icon if none is specified
-    return <MessageCircle className={className} />;
+interface UseOriginIconProps {
+  icone?: string | null;
+}
+
+export const useOriginIcon = ({ icone }: UseOriginIconProps) => {
+  // Map icon names to components
+  const iconMap: Record<string, React.ReactNode> = {
+    'phone': <Phone className="h-6 w-6" />,
+    'mail': <Mail className="h-6 w-6" />,
+    'web': <Globe className="h-6 w-6" />,
+    'github': <Github className="h-6 w-6" />,
+    'twitter': <Twitter className="h-6 w-6" />,
+    'facebook': <Facebook className="h-6 w-6" />,
+    'instagram': <Instagram className="h-6 w-6" />,
+    'pen': <PenTool className="h-6 w-6" />,
+    'building': <Building className="h-6 w-6" />,
+    'award': <Award className="h-6 w-6" />,
+    'radio': <Radio className="h-6 w-6" />,
+    'tv': <Tv className="h-6 w-6" />,
+    'news': <Newspaper className="h-6 w-6" />,
+    'flag': <Flag className="h-6 w-6" />,
+    'users': <Users className="h-6 w-6" />,
+    'user': <UserCheck className="h-6 w-6" />,
+    'message': <MessageCircle className="h-6 w-6" />,
+    'file': <FilePlus className="h-6 w-6" />
+  };
+
+  if (!icone || !(icone in iconMap)) {
+    return <BadgePlus className="h-6 w-6" />;
   }
-  
-  // First check if it's a Lucide icon
-  const IconComponent = (LucideIcons as any)[origin.icone];
-  if (IconComponent) {
-    return <IconComponent className={className} />;
-  }
-  
-  // Then check if it might be a custom SVG icon
-  try {
-    return (
-      <img
-        src={`/icons/${origin.icone}.svg`}
-        alt={origin.icone}
-        className={className}
-        onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-          console.error(`Icon not found: ${origin.icone}`);
-          (e.target as HTMLImageElement).style.display = 'none';
-        }}
-      />
-    );
-  } catch (err) {
-    console.error(`Error loading icon: ${origin.icone}`, err);
-    return <MessageCircle className={className} />;
-  }
+
+  return iconMap[icone];
 };

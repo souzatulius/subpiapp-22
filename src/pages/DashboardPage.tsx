@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -110,7 +109,6 @@ const DashboardPage: React.FC = () => {
       const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
       
       if (!searchCardExists) {
-        // Create a proper search card with the correct type
         const searchCard: ActionCardItem = {
           id: 'dashboard-search-card',
           title: 'Busca Rápida',
@@ -118,26 +116,22 @@ const DashboardPage: React.FC = () => {
           path: '',
           color: 'bg-white',
           width: '100',
-          height: '0.5', // Changed to half height
+          height: '0.5',
           type: 'smart_search',
           isSearch: true,
           displayMobile: true,
           mobileOrder: 1
         };
         
-        // Adjust heights for specific cards
         const updatedCards = cards.map(card => {
-          // Relatórios card should be double height
           if (card.title === 'Relatórios' || card.title.includes('Relatório')) {
             return { ...card, height: '2' as CardHeight };
           }
           
-          // Nova Solicitação should be half height
           if (card.title === 'Nova Solicitação') {
             return { ...card, height: '0.5' as CardHeight };
           }
           
-          // Check if card is one of the specific cards that need height adjustment
           if (
             (card.title === 'Demandas' ||
              card.title === 'Avisos' ||
@@ -145,7 +139,7 @@ const DashboardPage: React.FC = () => {
              card.title === 'Ranking') &&
             card.height === '2'
           ) {
-            return { ...card, height: '1' as CardHeight }; // Change height from 2 to 1
+            return { ...card, height: '1' as CardHeight };
           }
           
           return card;
@@ -201,7 +195,7 @@ const DashboardPage: React.FC = () => {
               <div className="flex justify-end">
                 <Button 
                   variant="outline" 
-                  size="lg" 
+                  size="sm" 
                   onClick={handleResetDashboard}
                   className="text-blue-600 border-blue-300 hover:bg-blue-50"
                   disabled={isSaving}

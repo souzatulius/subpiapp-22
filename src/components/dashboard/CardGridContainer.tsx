@@ -1,91 +1,88 @@
 
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import CardGrid from './CardGrid';
-import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+import UnifiedCardGrid from './UnifiedCardGrid';
+import { useSpecialCardsData } from '@/hooks/dashboard/useSpecialCardsData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
   onCardsChange: (cards: ActionCardItem[]) => void;
-  onEditCard: (card: ActionCardItem) => void;
-  onHideCard: (cardId: string) => void;
+  onEditCard?: (card: ActionCardItem) => void;
+  onHideCard?: (id: string) => void;
+  onAddNewCard?: () => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
-  renderSpecialCardContent?: (cardId: string) => React.ReactNode | null;
+  disableWiggleEffect?: boolean;
+  showSpecialFeatures?: boolean;
+  quickDemandTitle?: string;
+  onQuickDemandTitleChange?: (value: string) => void;
+  onQuickDemandSubmit?: () => void;
+  onSearchSubmit?: (query: string) => void;
+  renderSpecialCardContent?: (cardId: string, card?: ActionCardItem) => React.ReactNode;
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
-  cards,
+  cards = [],
   onCardsChange,
   onEditCard,
   onHideCard,
+  onAddNewCard,
   isMobileView = false,
   isEditMode = false,
+  disableWiggleEffect = true,
+  showSpecialFeatures = true,
+  quickDemandTitle,
+  onQuickDemandTitleChange,
+  onQuickDemandSubmit,
+  onSearchSubmit,
   renderSpecialCardContent
 }) => {
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const {
+    overdueCount,
+    overdueItems,
+    notesToApprove,
+    responsesToDo,
+    isLoading: isLoadingSpecialData,
+    isComunicacao,
+    userCoordenaticaoId
+  } = useSpecialCardsData();
 
-  // Handle the end of a drag event - reorder cards
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      const oldIndex = cards.findIndex((card) => card.id === active.id);
-      const newIndex = cards.findIndex((card) => card.id === over.id);
-      
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newCards = arrayMove(cards, oldIndex, newIndex);
-        onCardsChange(newCards);
-      }
-    }
+  const specialCardsData = {
+    overdueCount,
+    overdueItems,
+    notesToApprove,
+    responsesToDo,
+    isLoading: isLoadingSpecialData,
+    coordenacaoId: userCoordenaticaoId || '',
+    usuarioId: '',
+    isComunicacao,
+    renderSpecialCardContent
   };
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-      modifiers={[restrictToWindowEdges]}
-    >
-      <SortableContext
-        items={cards.map(card => card.id)}
-        strategy={verticalListSortingStrategy}
-      >
-        <CardGrid 
-          cards={cards}
-          onEditCard={onEditCard}
-          onHideCard={onHideCard}
-          isMobileView={isMobileView}
-          isEditMode={isEditMode}
-          renderSpecialCardContent={renderSpecialCardContent}
-        />
-      </SortableContext>
-    </DndContext>
+  return isLoadingSpecialData ? (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <Skeleton key={index} className="h-32 w-full rounded-lg" />
+      ))}
+    </div>
+  ) : (
+    <UnifiedCardGrid
+      cards={cards}
+      onCardsChange={onCardsChange}
+      onEditCard={onEditCard}
+      onDeleteCard={onHideCard}
+      onHideCard={onHideCard}
+      isMobileView={isMobileView}
+      isEditMode={isEditMode}
+      disableWiggleEffect={disableWiggleEffect}
+      showSpecialFeatures={showSpecialFeatures}
+      quickDemandTitle={quickDemandTitle}
+      onQuickDemandTitleChange={onQuickDemandTitleChange}
+      onQuickDemandSubmit={onQuickDemandSubmit}
+      onSearchSubmit={onSearchSubmit}
+      specialCardsData={specialCardsData}
+    />
   );
 };
 
