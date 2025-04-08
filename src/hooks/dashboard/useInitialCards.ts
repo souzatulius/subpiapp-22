@@ -27,7 +27,7 @@ export const useInitialCards = (userDepartment: string | null) => {
       },
       {
         id: 'nova-solicitacao',
-        title: "Nova Solicitação",
+        title: "Nova Solicitação", // Updated from "Nova Solicitação" to "Nova Solicitação"
         path: "/dashboard/comunicacao/cadastrar",
         iconId: "plus-circle",
         color: getBgColor('orange-400'),

@@ -19,7 +19,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
-import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
+// Removing the WelcomeMessage import
+// import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -122,8 +123,7 @@ const DashboardPage: React.FC = () => {
                   greeting={true}
                 />
                 
-                {/* Add welcome message component for first-time users */}
-                <WelcomeMessage />
+                {/* Removed WelcomeMessage component */}
               </div>
               
               {/* Mobile breadcrumb now placed after WelcomeCard */}

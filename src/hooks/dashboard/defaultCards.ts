@@ -33,7 +33,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
   return [
     {
       id: 'nova-solicitacao',
-      title: "Nova",
+      title: "Nova Solicitação",
       path: "/dashboard/comunicacao/cadastrar",
       iconId: "plus-circle",
       color: 'blue-vivid',
@@ -165,7 +165,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
     return [
       {
         id: 'nova-solicitacao',
-        title: 'Nova',
+        title: 'Nova Solicitação',
         iconId: 'plus-circle',
         path: '/dashboard/comunicacao/cadastrar',
         color: 'blue-vivid',
@@ -296,7 +296,7 @@ export const getInitialDashboardCards = (coordenacaoId?: string): ActionCardItem
   return [
     {
       id: 'nova-solicitacao',
-      title: 'Nova',
+      title: 'Nova Solicitação',
       iconId: 'plus-circle',
       path: '/dashboard/comunicacao/cadastrar',
       color: 'blue-vivid',
