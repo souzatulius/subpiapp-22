@@ -23,8 +23,10 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Left side - Fixed content - Mostrar apenas no desktop */}
         {!isMobile && (
-          <div className="hidden md:flex md:w-1/2 bg-white px-6 md:px-16 py-12 flex-col justify-center lg:px-[20px]">
-            <LeftContentSection />
+          <div className="hidden md:flex md:w-1/2 sticky top-0 h-screen bg-white px-6 md:px-16 lg:px-20 py-12 flex-col justify-center">
+            <div className="max-w-2xl mx-auto md:mx-0">
+              <LeftContentSection />
+            </div>
           </div>
         )}
 
