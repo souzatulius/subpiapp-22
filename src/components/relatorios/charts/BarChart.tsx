@@ -25,6 +25,8 @@ interface BarChartProps {
   showLegend?: boolean;
   multiColorBars?: boolean;
   barColors?: string[];
+  horizontal?: boolean;
+  tooltipFormatter?: (value: any, name: any, item: any) => any[];
 }
 
 export const BarChart: React.FC<BarChartProps> = ({
@@ -33,7 +35,9 @@ export const BarChart: React.FC<BarChartProps> = ({
   bars,
   showLegend = true,
   multiColorBars = false,
-  barColors = ['#0066FF', '#0C4A6E', '#64748B', '#F97316']
+  barColors = ['#0066FF', '#0C4A6E', '#64748B', '#F97316'],
+  horizontal = false,
+  tooltipFormatter
 }) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -45,15 +49,19 @@ export const BarChart: React.FC<BarChartProps> = ({
           left: 20,
           bottom: 30
         }}
+        layout={horizontal ? 'vertical' : 'horizontal'}
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis 
-          dataKey={xAxisDataKey} 
+          dataKey={horizontal ? undefined : xAxisDataKey} 
+          type={horizontal ? 'number' : 'category'}
           tick={{ fontSize: 12 }}
           axisLine={{ stroke: '#E2E8F0' }}
           tickLine={false}
         />
         <YAxis 
+          dataKey={horizontal ? xAxisDataKey : undefined}
+          type={horizontal ? 'category' : 'number'}
           tick={{ fontSize: 12 }}
           axisLine={{ stroke: '#E2E8F0' }}
           tickLine={false}
@@ -66,6 +74,7 @@ export const BarChart: React.FC<BarChartProps> = ({
             padding: '10px'
           }}
           labelStyle={{ fontWeight: 'bold' }}
+          formatter={tooltipFormatter}
         />
         {showLegend && <Legend />}
         

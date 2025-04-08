@@ -95,7 +95,7 @@ const ESICPage: React.FC = () => {
           <JustificativaCreate 
             processoTexto={selectedProcesso.texto}
             onSubmit={handleCreateJustificativa}
-            onGenerateAI={handleGenerateJustificativa}
+            onGenerate={handleGenerateJustificativa}
             isLoading={isJustificativaCreating}
             isGenerating={isGenerating}
             onBack={() => setScreen('view')}

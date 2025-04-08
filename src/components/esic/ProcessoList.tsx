@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -10,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ConfirmDialog from '@/components/ui/confirm-dialog';
-import NovoProcessoButton from './NovoProcessoButton';
+import NovoProcessoButton from '@/components/esic/NovoProcessoButton';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ESICProcesso } from '@/types/esic';
@@ -99,7 +98,7 @@ const ProcessoList = () => {
     }
   };
 
-  const getStatusBadge = (status: ESICProcesso['status']) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case 'novo_processo':
         return <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-600">Novo Processo</Badge>;
