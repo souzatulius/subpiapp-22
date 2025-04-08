@@ -12,8 +12,6 @@ import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 import DynamicDataCard from '../DynamicDataCard';
 import DashboardSearchCard from '../DashboardSearchCard';
 import * as LucideIcons from 'lucide-react';
-import { FileText } from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -48,28 +46,39 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
 }) => {
   const { userDepartment, isComunicacao } = useDepartmentData();
   
-  // Get the Lucide icon component
-  const getIconComponent = (): LucideIcon => {
-    if (!card.iconId) return FileText;
-    
-    // Try direct match first
-    const directMatch = LucideIcons[card.iconId as keyof typeof LucideIcons] as LucideIcon | undefined;
-    if (directMatch) {
-      return directMatch;
-    }
-    
-    // Try capitalized format
-    const formattedIconId = card.iconId.charAt(0).toUpperCase() + card.iconId.slice(1);
-    const capitalizedMatch = LucideIcons[formattedIconId as keyof typeof LucideIcons] as LucideIcon | undefined;
-    if (capitalizedMatch) {
-      return capitalizedMatch;
-    }
-    
-    // Return default icon as fallback
-    return FileText;
-  };
+  // Check for direct Lucide icon first
+  const LucideIcon = card.iconId ? (LucideIcons as any)[card.iconId] : null;
   
-  const IconComponent = getIconComponent();
+  // If not a direct Lucide icon, try fallback method
+  const FallbackIcon = !LucideIcon && card.iconId ? getIconComponentFromId(card.iconId) : null;
+
+  // Get icon component from ID
+  function getIconComponentFromId(iconId: string) {
+    const IconMap = {
+      'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
+      'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
+      'file-check': () => import('lucide-react').then(mod => mod.FileCheck),
+      'bar-chart-2': () => import('lucide-react').then(mod => mod.BarChart2),
+      'plus-circle': () => import('lucide-react').then(mod => mod.PlusCircle),
+      'search': () => import('lucide-react').then(mod => mod.Search),
+      'clock': () => import('lucide-react').then(mod => mod.Clock),
+      'alert-triangle': () => import('lucide-react').then(mod => mod.AlertTriangle),
+      'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
+      'file-text': () => import('lucide-react').then(mod => mod.FileText),
+      'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
+      // Add more icons as needed
+    };
+    
+    const LoadedIcon = React.lazy(() => 
+      IconMap[iconId]?.() || import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
+    );
+    
+    return (props: any) => (
+      <React.Suspense fallback={<div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full" />}>
+        <LoadedIcon {...props} />
+      </React.Suspense>
+    );
+  }
 
   // Render the appropriate card content based on the card type
   const renderCardContent = () => {
@@ -80,10 +89,11 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
     
     // Check if it's a dynamic data card
     if (card.type === 'data_dynamic' && card.dataSourceKey) {
+      const IconComp = LucideIcon || FallbackIcon;
       return (
         <DynamicDataCard 
           title={card.title}
-          icon={<IconComponent className="h-8 w-8" />}
+          icon={IconComp && <IconComp className="h-8 w-8" />}
           color={card.color}
           dataSourceKey={card.dataSourceKey}
           coordenacaoId={userDepartment || 'default'}
@@ -162,7 +172,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 
-      onEdit={() => onEdit(card)}
+      onEdit={onEdit}
       onDelete={onDelete}
       isMobileView={isMobileView}
     >

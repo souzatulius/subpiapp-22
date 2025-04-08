@@ -13,17 +13,14 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
-import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
-import PendingActionsCard from '@/components/dashboard/cards/PendingActionsCard';
-import { ActionCardItem, CardHeight } from '@/types/dashboard';
+import DashboardSearchCard from '@/components/dashboard/DashboardSearchCard';
+import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
-import { useSpecialCardsData } from '@/hooks/dashboard/useSpecialCardsData';
-import { v4 as uuidv4 } from 'uuid';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -50,7 +47,6 @@ const DashboardPage: React.FC = () => {
   } = useDashboardCards();
 
   const { saveCardConfig, isSaving } = useCardStorage(user, userCoordenaticaoId);
-  const specialCardsData = useSpecialCardsData();
 
   const scrollFadeStyles = useScrollFade();
 
@@ -109,151 +105,31 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleSearchSubmit = (query: string) => {
-    toast({
-      title: "Pesquisa realizada",
-      description: `Você pesquisou: ${query}`,
-      variant: "default"
-    });
-  };
-
-  const renderSpecialCardContent = (cardId: string, card?: ActionCardItem) => {
-    if (card?.type === 'smart_search' || cardId === 'dashboard-search-card') {
-      return <SmartSearchCard onSearch={handleSearchSubmit} />;
-    }
-    
-    if (card?.isPendingActions || card?.type === 'in_progress_demands' || cardId === 'pending-actions-card') {
-      return (
-        <PendingActionsCard
-          id={cardId}
-          notesToApprove={specialCardsData.notesToApprove}
-          responsesToDo={specialCardsData.responsesToDo}
-          isComunicacao={specialCardsData.isComunicacao}
-          userDepartmentId={specialCardsData.userCoordenaticaoId || ''}
-        />
-      );
-    }
-    
-    return null;
-  };
-
   useEffect(() => {
     if (cards && cards.length > 0 && !searchCardAdded) {
-      // Define our standard dashboard cards
-      const desiredCards: ActionCardItem[] = [
-        // Search card (2 columns x 1 row)
-        {
+      const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
+      
+      if (!searchCardExists) {
+        const searchCard: ActionCardItem = {
           id: 'dashboard-search-card',
-          title: 'O que deseja fazer?',
-          iconId: 'Search',
+          title: 'Busca Rápida',
+          iconId: 'search',
           path: '',
           color: 'bg-white',
-          width: '50',
+          width: '100',
           height: '1',
           type: 'smart_search',
           isSearch: true,
           displayMobile: true,
-          mobileOrder: 0
-        },
-        // Pending Actions card (2 columns x 2 rows)
-        {
-          id: 'pending-actions-card',
-          title: 'Ações Pendentes',
-          iconId: 'AlertTriangle',
-          path: '',
-          color: 'bg-orange-500',
-          width: '50',
-          height: '2',
-          type: 'in_progress_demands',
-          isPendingActions: true,
-          displayMobile: true,
           mobileOrder: 1
-        },
-        // Nueva Demanda
-        {
-          id: uuidv4(),
-          title: 'Nova Demanda',
-          iconId: 'PenLine',
-          path: '/dashboard/comunicacao/cadastrar',
-          color: 'deep-blue',
-          width: '25',
-          height: '1',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: 2
-        },
-        // Notas de Imprensa
-        {
-          id: uuidv4(),
-          title: 'Notas de Imprensa',
-          iconId: 'FileText',
-          path: '/dashboard/comunicacao/notas',
-          color: 'blue-light',
-          width: '25',
-          height: '1',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: 3
-        },
-        // Notícias e Releases
-        {
-          id: uuidv4(),
-          title: 'Notícias e Releases',
-          iconId: 'Newspaper',
-          path: '/dashboard/comunicacao/releases',
-          color: 'orange-light',
-          width: '25',
-          height: '1',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: 4
-        },
-        // Relatórios da Comunicação
-        {
-          id: uuidv4(),
-          title: 'Relatórios da Comunicação',
-          iconId: 'PieChart',
-          path: '/dashboard/comunicacao/relatorios',
-          color: 'blue-vivid',
-          width: '25',
-          height: '1',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: 5
-        },
-        // Ranking da Zeladoria
-        {
-          id: uuidv4(),
-          title: 'Ranking da Zeladoria',
-          iconId: 'TrendingUp',
-          path: '/dashboard/zeladoria/ranking-subs',
-          color: 'green-neon',
-          width: '25',
-          height: '1',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: 6
-        },
-        // Ajustes do Perfil
-        {
-          id: uuidv4(),
-          title: 'Ajustes do Perfil',
-          iconId: 'UserCog',
-          path: '/profile',
-          color: 'gray-medium',
-          width: '25',
-          height: '1',
-          type: 'standard',
-          displayMobile: true,
-          mobileOrder: 7
-        }
-      ];
-      
-      // Replace existing cards with our desired layout
-      handleCardsChange(desiredCards);
-      setSearchCardAdded(true);
+        };
+        
+        const updatedCards = [searchCard, ...cards];
+        handleCardsChange(updatedCards);
+        setSearchCardAdded(true);
+      }
     }
-  }, [cards, searchCardAdded, handleCardsChange]);
+  }, [cards, searchCardAdded]);
 
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
@@ -295,12 +171,15 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
               
-              <div className="flex justify-end">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <DashboardSearchCard />
+                </div>
                 <Button 
                   variant="outline" 
-                  size="sm" 
+                  size="lg" 
                   onClick={handleResetDashboard}
-                  className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-8 whitespace-nowrap"
                   disabled={isSaving}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
@@ -315,7 +194,7 @@ const DashboardPage: React.FC = () => {
                       <Skeleton key={index} className="h-32 w-full rounded-lg" />
                     ))}
                   </div>
-                ) : cards && cards.length > 0 && (
+                ) : cards && cards.length > 0 ? (
                   <div className="px-2 py-2">
                     <CardGridContainer 
                       cards={cards.filter(card => !card.isHidden)} 
@@ -324,10 +203,11 @@ const DashboardPage: React.FC = () => {
                       onHideCard={handleHideCard}
                       isMobileView={isMobile}
                       isEditMode={isEditMode}
-                      onSearchSubmit={handleSearchSubmit}
-                      specialCardsData={specialCardsData}
-                      renderSpecialCardContent={renderSpecialCardContent}
                     />
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    Nenhum card disponível.
                   </div>
                 )}
               </div>

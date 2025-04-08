@@ -1,14 +1,12 @@
 
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
-import { MoveIcon, FileText } from 'lucide-react';
+import { MoveIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 import ChartPreview from './charts/ChartPreview';
-import { LucideIcon } from 'lucide-react';
 
 export interface ActionCardProps {
   id: string;
@@ -32,8 +30,7 @@ export interface ActionCardProps {
   isMobileView?: boolean;
   showControls?: boolean;
   subtitle?: string;
-  chartId?: string;
-  specialContent?: React.ReactNode;
+  chartId?: string; // Add chartId prop
 }
 
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
@@ -44,29 +41,6 @@ const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
     case 'md':
     default: return 'w-10 h-10';
   }
-};
-
-const getMinHeight = (type?: CardType, height?: CardHeight): string => {
-  if (height) {
-    switch (height) {
-      case '0.5': return 'min-h-[5rem]';
-      case '1': return 'min-h-[10rem]';
-      case '2': return 'min-h-[16rem]';
-      case '3': return 'min-h-[24rem]';
-      case '4': return 'min-h-[32rem]';
-      default: return 'min-h-[10rem]';
-    }
-  }
-  
-  if (type === 'data_dynamic' || type === 'in_progress_demands') {
-    return 'min-h-[16rem]';
-  }
-
-  if (type === 'smart_search') {
-    return 'min-h-[5rem]';
-  }
-  
-  return 'min-h-[10rem]';
 };
 
 const ActionCard = ({
@@ -85,10 +59,7 @@ const ActionCard = ({
   isMobileView = false,
   children,
   showControls = true,
-  chartId,
-  type,
-  height,
-  specialContent
+  chartId
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const colorClasses = getColorClasses(color);
@@ -97,18 +68,15 @@ const ActionCard = ({
   const renderIcon = () => {
     if (!iconId) return null;
     
-    const LucideIcon = (LucideIcons as any)[iconId] as LucideIcon | undefined;
+    // Direct check for Lucide icon by name
+    const LucideIcon = (LucideIcons as any)[iconId];
     if (LucideIcon) {
-      const IconComponent = LucideIcon;
-      return <IconComponent className={getIconSize(iconSize)} />;
+      return <LucideIcon className={getIconSize(iconSize)} />;
     }
     
-    const IconComponent = getIconComponentFromId(iconId);
-    if (IconComponent) {
-      return <IconComponent className={getIconSize(iconSize)} />;
-    }
-    
-    return null;
+    // Fallback to our custom icon loader
+    const FallbackIcon = getIconComponentFromId(iconId);
+    return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
 
   return (
@@ -116,8 +84,7 @@ const ActionCard = ({
       className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${colorClasses} group relative
-        ${getMinHeight(type, height)}`}
+        active:scale-95 ${colorClasses} group relative`}
     >
       {isDraggable && (
         <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
@@ -137,18 +104,16 @@ const ActionCard = ({
         </div>
       )}
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center py-6 px-4">
-        {specialContent ? (
-          <div className="w-full h-full">{specialContent}</div>
-        ) : children ? (
-          <div className="w-full h-full">{children}</div>
+      <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
+        {children ? (
+          <>{children}</>
         ) : chartId ? (
           <div className="w-full h-full flex flex-col">
             <ChartPreview chartId={chartId} />
           </div>
         ) : (
           <>
-            <div className={`mb-3 ${textColorClass}`}>
+            <div className={`mb-2.5 ${textColorClass}`}>
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
@@ -156,7 +121,7 @@ const ActionCard = ({
                 {title}
               </h3>
               {subtitle && (
-                <p className={`text-sm ${textColorClass} opacity-80 mt-2 line-clamp-2`}>
+                <p className={`text-sm ${textColorClass} opacity-80 mt-1 line-clamp-2`}>
                   {subtitle}
                 </p>
               )}

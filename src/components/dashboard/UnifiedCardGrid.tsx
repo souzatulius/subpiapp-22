@@ -1,9 +1,17 @@
 
 import React from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard } from './UnifiedActionCard';
-import { getWidthClass, getHeightClass } from './grid/GridUtilities';
+import { getWidthClass, getHeightClass } from './CardGrid';
 import { ActionCardItem } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
 
@@ -22,7 +30,6 @@ export interface UnifiedCardGridProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
-  renderSpecialCardContent?: (cardId: string, card?: ActionCardItem) => React.ReactNode;
 }
 
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
@@ -39,99 +46,114 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
   onSearchSubmit,
-  specialCardsData,
-  renderSpecialCardContent
+  specialCardsData
 }) => {
-  const sensors = useSensors(useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 5
-    }
-  }), useSensor(KeyboardSensor));
-  
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor)
+  );
+
   const handleDragEnd = (event: DragEndEvent) => {
-    const {
-      active,
-      over
-    } = event;
+    const { active, over } = event;
+
     if (over && active.id !== over.id) {
-      const oldIndex = cards.findIndex(item => item.id === active.id);
-      const newIndex = cards.findIndex(item => item.id === over.id);
+      const oldIndex = cards.findIndex((item) => item.id === active.id);
+      const newIndex = cards.findIndex((item) => item.id === over.id);
+
       if (oldIndex !== -1 && newIndex !== -1) {
         const newCards = arrayMove([...cards], oldIndex, newIndex);
-
+        
         // If in mobile view, update mobileOrder for all cards
         if (isMobileView) {
           newCards.forEach((card, index) => {
             card.mobileOrder = index;
           });
         }
-
+        
         // Call onCardsChange with updated cards to persist changes
         onCardsChange(newCards);
       }
     }
   };
-  
+
   const visibleCards = cards.filter(card => !card.isHidden);
 
   // Sort cards by mobileOrder when in mobile view
-  const displayedCards = isMobileView ? visibleCards.filter(card => card.displayMobile !== false).sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999)) : visibleCards;
-  
-  const {
-    occupiedSlots
-  } = useGridOccupancy(displayedCards.map(card => ({
-    id: card.id,
-    width: card.width || '25',
-    height: card.height || '1',
-    type: card.type
-  })), isMobileView);
+  const displayedCards = isMobileView
+    ? visibleCards
+        .filter((card) => card.displayMobile !== false)
+        .sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999))
+    : visibleCards;
+
+  const { occupiedSlots } = useGridOccupancy(
+    displayedCards.map(card => ({
+      id: card.id,
+      width: card.width || '25',
+      height: card.height || '1',
+      type: card.type
+    })),
+    isMobileView
+  );
 
   if (!displayedCards || displayedCards.length === 0) {
-    return <div className="p-4 text-center text-gray-500">
+    return (
+      <div className="p-4 text-center text-gray-500">
         Nenhum card disponível para exibir.
-      </div>;
+      </div>
+    );
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={displayedCards.map(card => card.id)}>
-        <div className={`w-full grid auto-rows-[80px] gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+        <SortableContext items={displayedCards.map(card => card.id)}>
           {displayedCards.map(card => (
-            <SortableUnifiedActionCard
+            <div
               key={card.id}
-              id={card.id}
-              title={card.title}
-              subtitle={card.subtitle}
-              iconId={card.iconId}
-              path={card.path}
-              color={card.color}
-              isDraggable={!isEditMode}
-              isEditing={isEditMode}
-              width={card.width}
-              height={card.height}
-              type={card.type}
-              onEdit={onEditCard ? () => onEditCard(card) : undefined}
-              onDelete={onDeleteCard ? () => onDeleteCard(card.id) : undefined}
-              onHide={onHideCard ? () => onHideCard(card.id) : undefined}
-              disableWiggleEffect={disableWiggleEffect}
-              isQuickDemand={card.isQuickDemand}
-              isSearch={card.isSearch || card.type === 'smart_search'}
-              isPendingActions={card.isPendingActions}
-              showSpecialFeatures={showSpecialFeatures}
-              quickDemandTitle={quickDemandTitle}
-              onQuickDemandTitleChange={onQuickDemandTitleChange}
-              onQuickDemandSubmit={onQuickDemandSubmit}
-              onSearchSubmit={onSearchSubmit}
-              specialCardsData={specialCardsData}
-              isCustom={card.isCustom}
-              hasBadge={card.hasBadge}
-              badgeValue={card.badgeValue}
-              isMobileView={isMobileView}
-              specialContent={renderSpecialCardContent && renderSpecialCardContent(card.id, card)}
-            />
+              className={`${getWidthClass(card.width, isMobileView)} ${getHeightClass(card.height)}`}
+            >
+              <SortableUnifiedActionCard
+                id={card.id}
+                title={card.title}
+                subtitle={card.subtitle}
+                iconId={card.iconId}
+                path={card.path}
+                color={card.color}
+                width={card.width}
+                height={card.height}
+                isDraggable={true}
+                isEditing={isEditMode}
+                onEdit={onEditCard ? (id) => {
+                  const cardToEdit = cards.find(c => c.id === id);
+                  if (cardToEdit) onEditCard(cardToEdit);
+                } : undefined}
+                onDelete={onDeleteCard}
+                onHide={onHideCard}
+                iconSize={isMobileView ? 'lg' : 'xl'}
+                disableWiggleEffect={disableWiggleEffect}
+                type={card.type}
+                isQuickDemand={card.isQuickDemand}
+                isSearch={card.isSearch}
+                showSpecialFeatures={showSpecialFeatures}
+                quickDemandTitle={quickDemandTitle}
+                onQuickDemandTitleChange={onQuickDemandTitleChange}
+                onQuickDemandSubmit={onQuickDemandSubmit}
+                onSearchSubmit={onSearchSubmit}
+                specialCardsData={specialCardsData}
+                isCustom={card.isCustom}
+                hasBadge={card.hasBadge}
+                badgeValue={card.badgeValue}
+                hasSubtitle={!!card.subtitle}
+                isMobileView={isMobileView}
+              />
+            </div>
           ))}
-        </div>
-      </SortableContext>
+        </SortableContext>
+      </div>
     </DndContext>
   );
 };

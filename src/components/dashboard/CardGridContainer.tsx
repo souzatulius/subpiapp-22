@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { ActionCardItem } from '@/types/dashboard';
 import UnifiedCardGrid from './UnifiedCardGrid';
+import { ActionCardItem } from '@/types/dashboard';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
@@ -11,14 +11,7 @@ interface CardGridContainerProps {
   onDeleteCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
-  disableWiggleEffect?: boolean;
-  showSpecialFeatures?: boolean;
-  quickDemandTitle?: string;
-  onQuickDemandTitleChange?: (value: string) => void;
-  onQuickDemandSubmit?: () => void;
-  onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
-  renderSpecialCardContent?: (cardId: string, card?: ActionCardItem) => React.ReactNode;
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
@@ -29,35 +22,21 @@ const CardGridContainer: React.FC<CardGridContainerProps> = ({
   onDeleteCard,
   isMobileView = false,
   isEditMode = false,
-  disableWiggleEffect = false,
-  showSpecialFeatures = true,
-  quickDemandTitle,
-  onQuickDemandTitleChange,
-  onQuickDemandSubmit,
-  onSearchSubmit,
-  specialCardsData,
-  renderSpecialCardContent
+  specialCardsData = {}
 }) => {
   return (
-    <div>
-      <UnifiedCardGrid
-        cards={cards}
-        onCardsChange={onCardsChange}
-        onEditCard={onEditCard}
-        onHideCard={onHideCard}
-        onDeleteCard={onDeleteCard}
-        isMobileView={isMobileView}
-        isEditMode={isEditMode}
-        disableWiggleEffect={disableWiggleEffect}
-        showSpecialFeatures={showSpecialFeatures}
-        quickDemandTitle={quickDemandTitle}
-        onQuickDemandTitleChange={onQuickDemandTitleChange}
-        onQuickDemandSubmit={onQuickDemandSubmit}
-        onSearchSubmit={onSearchSubmit}
-        specialCardsData={specialCardsData}
-        renderSpecialCardContent={renderSpecialCardContent}
-      />
-    </div>
+    <UnifiedCardGrid
+      cards={cards}
+      onCardsChange={onCardsChange}
+      onEditCard={onEditCard}
+      onHideCard={onHideCard}
+      onDeleteCard={onDeleteCard}
+      isMobileView={isMobileView}
+      isEditMode={isEditMode}
+      disableWiggleEffect={true}
+      specialCardsData={specialCardsData}
+      showSpecialFeatures={true}
+    />
   );
 };
 

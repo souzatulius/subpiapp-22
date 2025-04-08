@@ -1,31 +1,48 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
-import * as LucideIcons from 'lucide-react';
-import { FileText } from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import React from 'react';
 
 // Function to get a Lucide icon component by its ID string
-export const getIconComponentFromId = (iconId: string | undefined): LucideIcon => {
-  if (!iconId) {
-    return FileText;
-  }
+export const getIconComponentFromId = (iconId: string) => {
+  const IconMap: Record<string, () => Promise<any>> = {
+    'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
+    'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
+    'file-check': () => import('lucide-react').then(mod => mod.FileCheck),
+    'bar-chart-2': () => import('lucide-react').then(mod => mod.BarChart2),
+    'plus-circle': () => import('lucide-react').then(mod => mod.PlusCircle),
+    'search': () => import('lucide-react').then(mod => mod.Search),
+    'file-text': () => import('lucide-react').then(mod => mod.FileText),
+    'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
+    'clock': () => import('lucide-react').then(mod => mod.Clock),
+    'alert-triangle': () => import('lucide-react').then(mod => mod.AlertTriangle),
+    'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
+    'bell': () => import('lucide-react').then(mod => mod.Bell),
+    'trending-up': () => import('lucide-react').then(mod => mod.TrendingUp),
+    'pencil': () => import('lucide-react').then(mod => mod.Pencil),
+    'pie-chart': () => import('lucide-react').then(mod => mod.PieChart),
+    'message-square': () => import('lucide-react').then(mod => mod.MessageSquare),
+    // Add more icons as needed
+  };
   
-  // First try to access the icon directly from LucideIcons
-  const directIcon = LucideIcons[iconId as keyof typeof LucideIcons] as LucideIcon | undefined;
-  if (directIcon) {
-    return directIcon;
-  }
+  // Create a lazy-loaded component without using JSX directly
+  const LoadedIcon = React.lazy(() => 
+    IconMap[iconId] ? IconMap[iconId]() : import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
+  );
   
-  // Try capitalized format
-  const formattedIconId = iconId.charAt(0).toUpperCase() + iconId.slice(1);
-  const capitalizedIcon = LucideIcons[formattedIconId as keyof typeof LucideIcons] as LucideIcon | undefined;
-  if (capitalizedIcon) {
-    return capitalizedIcon;
-  }
-  
-  // Return a default icon as fallback
-  return FileText;
+  // Return a function that creates the component
+  return function IconComponent(props: any) {
+    // This function will be used in a React component where JSX is available
+    return React.createElement(
+      React.Suspense,
+      { 
+        fallback: React.createElement('div', { 
+          className: "w-6 h-6 bg-gray-200 animate-pulse rounded-full" 
+        })
+      },
+      React.createElement(LoadedIcon, props)
+    );
+  };
 };
 
 // Get default cards
@@ -39,7 +56,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '',
       color: 'bg-white',
       width: '100', // Full width
-      height: '0.5', // Half height
+      height: '1', // Half height
       type: 'smart_search',
       isSearch: true,
       displayMobile: true,
@@ -52,7 +69,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/demandas',
       color: 'deep-blue',
       width: '25',
-      height: '0.5', // Changed to half height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -65,7 +82,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao',
       color: 'deep-blue',
       width: '25',
-      height: '0.5', // Changed to half height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
@@ -78,7 +95,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/responder',
       color: 'gray-medium',
       width: '25',
-      height: '0.5', // Changed to half height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
@@ -91,7 +108,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/zeladoria/ranking-subs',
       color: 'bg-orange-500',
       width: '25',
-      height: '0.5', // Changed to half height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
@@ -103,7 +120,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/cadastrar',
       color: 'gray-medium',
       width: '25',
-      height: '0.5', // Changed to half height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 6
@@ -116,7 +133,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       path: '/dashboard/comunicacao/relatorios',
       color: 'orange-light',
       width: '50',
-      height: '2', // Double height
+      height: '1',
       type: 'standard',
       chartId: 'origemDemandas',
       displayMobile: true,
@@ -130,7 +147,7 @@ export const getDefaultCards = (): ActionCardItem[] => {
       color: 'bg-orange-500',
       width: '50',
       height: '1',
-      type: 'in_progress_demands', // Ensure this card uses the correct type
+      type: 'in_progress_demands',
       isPendingActions: true,
       displayMobile: true,
       mobileOrder: 8

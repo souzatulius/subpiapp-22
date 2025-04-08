@@ -1,11 +1,12 @@
+
 import { useState, useEffect } from 'react';
 import { CardType } from '@/types/dashboard';
 
 // Type for card dimensions
 export interface CardDimensions {
   width: string; // '25', '50', '75', '100'
-  height: string; // '0.5', '1', '2', '3', '4'
-  type?: string; // Any CardType values
+  height: string; // '1', '2'
+  type?: string; // Changed from 'standard' | 'data_dynamic' to string to accept all CardType values
   id: string;
 }
 
@@ -30,15 +31,12 @@ const widthToSlots = (width: string, isMobileView: boolean): number => {
   }
 };
 
-// Convert height string to number of rows
+// Convert height string to number of slots
 const heightToSlots = (height: string): number => {
   switch (height) {
-    case '0.5': return 1;  // Half height still takes 1 row in grid
-    case '1': return 1;    // Standard row (1 row unit)
-    case '2': return 2;    // Double height (2 row units)
-    case '3': return 3;    // Triple height (3 row units)
-    case '4': return 4;    // Quadruple height (4 row units)
-    default: return 1;     // Default to standard row
+    case '1': return 1;
+    case '2': return 2;
+    default: return 1;
   }
 };
 
@@ -49,8 +47,13 @@ export const getMinimumWidth = (type?: string, isMobileView: boolean = false): s
   }
   
   // For desktop
-  if (type === 'data_dynamic' || type === 'smart_search' || type === 'in_progress_demands') {
+  if (type === 'data_dynamic') {
     return '50'; // Dynamic cards need at least 2 columns
+  }
+  
+  // Card "Demandas em Andamento" should be larger
+  if (type === 'in_progress_demands') {
+    return '50'; // 2 columns
   }
   
   return '25'; // Default minimum width (1 column)
@@ -59,19 +62,13 @@ export const getMinimumWidth = (type?: string, isMobileView: boolean = false): s
 // Get minimum height for a card based on its type
 export const getMinimumHeight = (type?: string): string => {
   if (type === 'data_dynamic' || type === 'in_progress_demands') {
-    return '2'; // Dynamic cards need 2 rows (taller)
+    return '2'; // Dynamic cards need 2 rows
   }
-  
-  if (type === 'smart_search') {
-    return '0.5'; // Search cards are shorter
-  }
-  
   return '1'; // Default height (1 row)
 };
 
-// Custom hook for grid occupancy
 export const useGridOccupancy = (cards: CardDimensions[], isMobileView: boolean) => {
-  // Initialize state with empty array
+  // Initialize state with empty array - this will always be called
   const [occupiedSlots, setOccupiedSlots] = useState<boolean[][]>([]);
   
   // Total columns for the grid

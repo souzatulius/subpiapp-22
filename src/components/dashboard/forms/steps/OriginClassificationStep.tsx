@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,7 +71,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
               } hover:bg-[#002855] hover:text-white`} 
               onClick={() => handleSelectChange('origem_id', origem.id)}
             >
-              {useOriginIcon(origem)}
+              {useOriginIcon(origem, "h-8 w-8")}
               <span className="text-sm font-semibold">{origem.descricao}</span>
             </Button>
           ))}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DataTable from './data-table/DataTable';
 import DemandOriginForm from './demand-origins/DemandOriginForm';
@@ -65,7 +66,7 @@ const DemandOrigins = () => {
       header: 'Ícone',
       render: (row: DemandOrigin) => (
         <div className="flex justify-center">
-          {useOriginIcon(row)}
+          {useOriginIcon(row, "h-6 w-6")}
         </div>
       ),
     },

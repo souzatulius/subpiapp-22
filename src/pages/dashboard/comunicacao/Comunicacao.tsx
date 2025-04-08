@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -12,9 +13,6 @@ import { useComunicacaoDashboard } from '@/hooks/dashboard/useComunicacaoDashboa
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
-import OriginSelectionCard from '@/components/comunicacao/OriginSelectionCard';
-import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -44,55 +42,18 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     resetDashboard
   } = useComunicacaoDashboard(user, isPreview, department);
 
+  // Update card titles for the yellow and gray news cards
   React.useEffect(() => {
     if (cards.length > 0) {
       const updatedCards = cards.map(card => {
-        // Keep all cards at normal height except the search card
-        if (card.id === 'comunicacao-search-card') {
-          return { ...card, height: '0.5' as CardHeight };
+        if (card.title === 'Notícias' && card.color === 'bg-yellow-500') {
+          return { ...card, title: 'Cadastrar Release' };
         }
-        return { ...card };
+        if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
+          return { ...card, title: 'Ver Releases e Notícias' };
+        }
+        return card;
       });
-      
-      const hasSearchCard = updatedCards.some(card => card.id === 'comunicacao-search-card');
-      const hasOriginCard = updatedCards.some(card => card.title === 'Cadastrar Demanda');
-      
-      if (!hasSearchCard) {
-        const searchCard = {
-          id: 'comunicacao-search-card',
-          title: 'Busca Rápida',
-          iconId: 'search',
-          path: '',
-          color: 'bg-white' as CardColor,
-          width: '100' as CardWidth,
-          height: '0.5' as CardHeight,
-          type: 'smart_search' as CardType,
-          isCustom: true,
-          displayMobile: true,
-          mobileOrder: 0
-        };
-        
-        updatedCards.splice(1, 0, searchCard);
-      }
-      
-      if (!hasOriginCard) {
-        const originCard = {
-          id: 'comunicacao-origin-card',
-          title: 'Cadastrar Demanda',
-          subtitle: 'De onde vem a solicitação?',
-          iconId: 'MessageSquare',
-          path: '',
-          color: 'bg-blue-500' as CardColor,
-          width: '50' as CardWidth,
-          height: '1' as CardHeight,
-          type: 'origin_selection' as CardType,
-          isCustom: true,
-          displayMobile: true,
-          mobileOrder: 2
-        };
-        
-        updatedCards.splice(2, 0, originCard);
-      }
       
       if (JSON.stringify(updatedCards) !== JSON.stringify(cards)) {
         handleCardsReorder(updatedCards);
@@ -113,16 +74,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
     return <LoadingIndicator />;
   }
 
-  const renderCardContent = (cardId: string, cardType?: string) => {
-    if (cardId === 'comunicacao-search-card') {
-      return <SmartSearchCard placeholder="O que deseja fazer?" />;
-    }
-    if (cardType === 'origin_selection' || cardId === 'comunicacao-origin-card') {
-      return <OriginSelectionCard />;
-    }
-    return null;
-  };
-
   return (
     <div className="space-y-6 bg-[#FFFAFA]">
       <div className="w-full mb-2">
@@ -134,6 +85,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
         />
       </div>
 
+      {/* Reset dashboard button with updated text */}
       <div className="flex justify-end">
         <Button 
           variant="outline" 
@@ -162,7 +114,6 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
               onHideCard={handleCardHide}
               isMobileView={isMobile}
               isEditMode={isEditMode}
-              renderSpecialCardContent={(cardId, card) => renderCardContent(cardId, card?.type)}
             />
           </div>
         ) : (

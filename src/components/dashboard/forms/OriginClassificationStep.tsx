@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
     return error ? error.message : '';
   };
   
+  // Verifica se a origem está entre as que devem mostrar tipo de mídia
   const selectedOrigin = origens.find(origem => origem.id === formData.origem_id);
   const showMediaFields = selectedOrigin?.descricao === "Imprensa" || 
                          selectedOrigin?.descricao === "SMSUB" ||
@@ -40,6 +42,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
                          
   const showVeiculoImprensa = showMediaFields && formData.tipo_midia_id;
   
+  // Resetar tipo_midia_id quando a origem não exige este campo
   useEffect(() => {
     if (!showMediaFields && formData.tipo_midia_id) {
       handleSelectChange('tipo_midia_id', '');
@@ -68,7 +71,7 @@ const OriginClassificationStep: React.FC<OriginClassificationStepProps> = ({
               }`} 
               onClick={() => handleSelectChange('origem_id', origem.id)}
             >
-              {useOriginIcon(origem)}
+              {useOriginIcon(origem, "h-8 w-8")}
               <span className="text-sm font-semibold">{origem.descricao}</span>
             </Button>
           ))}
