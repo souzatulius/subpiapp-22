@@ -1,92 +1,91 @@
 
-import { useState } from 'react';
-import { Demand } from '@/hooks/consultar-demandas/types';
-import { useRespostaSubmission } from '@/components/dashboard/forms/responder-demanda/hooks/useRespostaSubmission';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { normalizeQuestions } from '@/utils/questionFormatUtils';
+import { Demand } from '@/types/demand';
 
-export const useDemandas = () => {
-  // Hook to handle responding to demands in the ConsultarDemandas page
-  const useRespostaDemanda = (selectedDemand: Demand | null) => {
-    const [resposta, setResposta] = useState<Record<string, string>>({});
-    const [comentarios, setComentarios] = useState<string>('');
-    
-    const { isSubmitting, submitResposta } = useRespostaSubmission({
-      onSuccess: () => {
-        toast({
-          title: "Resposta enviada com sucesso",
-          description: "A demanda foi respondida e está em processamento.",
-        });
-        setResposta({});
-        setComentarios('');
-      },
-      onError: (error) => {
-        console.error("Erro ao enviar resposta:", error);
-        toast({
-          title: "Erro ao enviar resposta",
-          description: "Ocorreu um erro ao enviar a resposta. Por favor, tente novamente.",
-          variant: "destructive"
-        });
-      }
-    });
+export const useDemandas = (filterStatus: string = 'pendente') => {
+  const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-    const handleRespostaChange = (key: string, value: string) => {
-      setResposta(prev => ({
-        ...prev,
-        [key]: value,
-      }));
-    };
+  const { data: demandas, isLoading, error, refetch } = useQuery({
+    queryKey: ['demandas', filterStatus],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from('demandas')
+          .select(`
+            *,
+            problema:problema_id (
+              id, 
+              descricao,
+              coordenacao_id,
+              coordenacao:coordenacao_id (id, descricao)
+            ),
+            supervisao_tecnica:supervisao_tecnica_id (id, descricao),
+            coordenacao:coordenacao_id (id, descricao),
+            origem:origem_id (id, descricao),
+            tipo_midia:tipo_midia_id (id, descricao),
+            bairro:bairro_id (id, nome),
+            autor:autor_id (id, nome_completo),
+            servico:servico_id (id, descricao)
+          `)
+          .eq('status', filterStatus)
+          .order('created_at', { ascending: false });
 
-    const handleSubmitResposta = async (): Promise<void> => {
-      if (!selectedDemand) {
-        toast({
-          title: "Erro",
-          description: "Nenhuma demanda selecionada para resposta.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (Object.keys(resposta).length === 0) {
-        toast({
-          title: "Erro",
-          description: "Por favor, forneça respostas para todas as perguntas.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Verificar se todas as perguntas foram respondidas
-      const normalizedQuestions = normalizeQuestions(selectedDemand.perguntas || {});
-      const hasEmptyAnswers = normalizedQuestions.some((_, index) => {
-        const respostaAtual = resposta[index.toString()];
-        return !respostaAtual || respostaAtual.trim() === '';
-      });
-      
-      if (hasEmptyAnswers) {
-        toast({
-          title: "Validação",
-          description: "Por favor, responda a todas as perguntas antes de enviar.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      await submitResposta(selectedDemand as any, resposta, comentarios);
-    };
+        if (error) {
+          console.error('Error fetching demandas:', error);
+          toast({
+            title: 'Erro ao carregar demandas',
+            description: error.message,
+            variant: 'destructive',
+          });
+          return [];
+        }
 
-    return {
-      resposta,
-      setResposta,
-      comentarios,
-      setComentarios,
-      isLoading: isSubmitting,
-      handleSubmitResposta,
-      handleRespostaChange
-    };
+        // Transform data to match the expected Demand type
+        return (data || []).map(item => {
+          return {
+            ...item,
+            area_coordenacao: {
+              descricao: item.coordenacao?.descricao || ''
+            },
+            supervisao_tecnica: item.supervisao_tecnica || { id: undefined, descricao: '' },
+            servico: item.servico || { descricao: '' }
+          } as Demand;
+        });
+      } catch (error: any) {
+        console.error('Exception fetching demandas:', error);
+        toast({
+          title: 'Erro ao carregar demandas',
+          description: error.message || 'Erro desconhecido',
+          variant: 'destructive',
+        });
+        return [];
+      }
+    },
+  });
+
+  const handleSelectDemand = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedDemand(null);
   };
 
   return {
-    useRespostaDemanda
+    demandas,
+    isLoading,
+    error,
+    refetch,
+    selectedDemand,
+    isDetailOpen,
+    handleSelectDemand,
+    handleCloseDetail,
+    setSelectedDemand,
   };
 };

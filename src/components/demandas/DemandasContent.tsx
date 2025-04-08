@@ -5,54 +5,21 @@ import DemandFilter from './DemandFilter';
 import DemandCards from './DemandCards';
 import DemandList from './DemandList';
 import DemandDetail from './DemandDetail';
-import { useDemandas } from '@/hooks/demandas';
+import { useDemandas } from '@/hooks/demandas/useDemandas';
 import { Demand as AppDemand } from '@/types/demand';
 
 const DemandasContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   const [filterStatus, setFilterStatus] = useState<string>('pendente');
   
-  // Local state for demand management
-  const [fetchedDemandas, setFetchedDemandas] = useState<AppDemand[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedDemand, setSelectedDemand] = useState<AppDemand | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-
-  const { useRespostaDemanda } = useDemandas();
-
-  // Handlers
-  const handleSelectDemand = (demand: AppDemand) => {
-    setSelectedDemand(demand);
-    setIsDetailOpen(true);
-  };
-
-  const handleCloseDetail = () => {
-    setIsDetailOpen(false);
-    setSelectedDemand(null);
-  };
-
-  // Simulate fetching demands - replace with your actual data fetching logic
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Replace with actual API call
-        setIsLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Mock data - replace with actual API response
-        const mockData: AppDemand[] = [
-          // Add mock data if needed
-        ];
-        setFetchedDemandas(mockData);
-      } catch (error) {
-        console.error("Error fetching demands:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [filterStatus]);
+  const {
+    demandas: fetchedDemandas,
+    isLoading,
+    selectedDemand,
+    isDetailOpen,
+    handleSelectDemand,
+    handleCloseDetail
+  } = useDemandas(filterStatus);
 
   useEffect(() => {
     console.log("Demandas atualizadas:", fetchedDemandas);

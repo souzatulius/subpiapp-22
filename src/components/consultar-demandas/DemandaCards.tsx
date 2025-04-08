@@ -1,63 +1,38 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Eye, MessageSquare } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Demand } from '@/hooks/consultar-demandas/types';
+import { DemandaStatusBadge } from '@/components/ui/status-badge';
+import { Badge } from '@/components/ui/badge';
+import { formatPriority, getPriorityColor } from '@/utils/priorityUtils';
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { FileText } from 'lucide-react';
 
 interface DemandaCardsProps {
   demandas: Demand[];
   isLoading: boolean;
   onSelectDemand: (demand: Demand) => void;
-  onRespondDemand?: (demand: Demand) => void;
 }
 
-const DemandaCards: React.FC<DemandaCardsProps> = ({
-  demandas,
-  isLoading,
-  onSelectDemand,
-  onRespondDemand
-}) => {
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pendente':
-      case 'pendente_resposta':
-        return <Badge className="bg-yellow-400 hover:bg-yellow-500">Pendente</Badge>;
-      case 'em_andamento':
-        return <Badge className="bg-blue-500 hover:bg-blue-600">Em andamento</Badge>;
-      case 'concluido':
-        return <Badge className="bg-green-500 hover:bg-green-600">Concluído</Badge>;
-      case 'cancelado':
-        return <Badge className="bg-red-500 hover:bg-red-600">Cancelado</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
-    try {
-      return format(new Date(dateString), 'dd/MM/yyyy');
-    } catch (e) {
-      return dateString;
-    }
-  };
-
+const DemandaCards: React.FC<DemandaCardsProps> = ({ demandas, isLoading, onSelectDemand }) => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(6)].map((_, index) => (
-          <Card key={index} className="animate-pulse">
-            <CardHeader>
-              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Card key={i} className="bg-white border shadow-sm animate-pulse">
+            <CardContent className="p-6">
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-4"></div>
+              <div className="flex gap-2 mb-4">
+                <div className="h-6 bg-gray-200 rounded w-16"></div>
+                <div className="h-6 bg-gray-200 rounded w-20"></div>
+              </div>
             </CardContent>
+            <CardFooter className="bg-gray-50 px-6 py-3 border-t">
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+            </CardFooter>
           </Card>
         ))}
       </div>
@@ -66,72 +41,76 @@ const DemandaCards: React.FC<DemandaCardsProps> = ({
 
   if (demandas.length === 0) {
     return (
-      <div className="text-center py-8">
-        Nenhuma demanda encontrada.
+      <div className="text-center p-12 border border-dashed rounded-lg">
+        <h3 className="text-lg font-medium mb-2">Nenhuma demanda encontrada</h3>
+        <p className="text-gray-500">Não há demandas com os filtros selecionados.</p>
       </div>
     );
   }
 
+  const getPriorityBadgeClasses = (prioridade: string) => {
+    const colors = getPriorityColor(prioridade);
+    return `${colors.bg} ${colors.text} border ${colors.border}`;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {demandas.map((demanda) => (
-        <Card key={demanda.id} className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-start">
-              <CardTitle className="text-lg font-medium truncate">
-                {demanda.titulo}
-              </CardTitle>
-              {getStatusBadge(demanda.status)}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-gray-500">Prioridade</p>
-                  <p className="font-medium capitalize">{demanda.prioridade}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Data</p>
-                  <p className="font-medium">{formatDate(demanda.horario_publicacao)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Prazo</p>
-                  <p className="font-medium">{formatDate(demanda.prazo_resposta)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Área</p>
-                  <p className="font-medium truncate">
-                    {demanda.area_coordenacao?.descricao || 'Não informada'}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex justify-end gap-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onSelectDemand(demanda)}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Visualizar
-                </Button>
-                
-                {onRespondDemand && demanda.status === 'pendente_resposta' && (
-                  <Button 
-                    variant="default" 
-                    size="sm"
-                    onClick={() => onRespondDemand(demanda)}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    Responder
-                  </Button>
+      {demandas.map((demanda) => {
+        const hasNota = demanda.notas && demanda.notas.length > 0;
+        const coordenacaoDescricao = demanda.problema?.coordenacao?.descricao || 
+                                    demanda.area_coordenacao?.descricao || 
+                                    'Não informada';
+        
+        return (
+          <Card 
+            key={demanda.id} 
+            className="bg-white border shadow-sm hover:shadow-md transition-all cursor-pointer"
+            onClick={() => onSelectDemand(demanda)}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="font-semibold text-lg line-clamp-2">{demanda.titulo}</h3>
+                {hasNota && (
+                  <Badge variant="outline" className="bg-green-100 text-green-800 ml-2">
+                    <FileText className="h-3 w-3 mr-1" /> 
+                    Nota
+                  </Badge>
                 )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              
+              <div className="text-sm text-gray-600 mb-2">
+                {coordenacaoDescricao}
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mb-3">
+                <Badge variant="outline" className={getPriorityBadgeClasses(demanda.prioridade)}>
+                  {formatPriority(demanda.prioridade)}
+                </Badge>
+                
+                <DemandaStatusBadge status={demanda.status} size="sm" />
+              </div>
+              
+              <div className="text-xs text-gray-500 flex flex-col gap-1">
+                <div>
+                  <span className="font-medium">Origem:</span> {demanda.origem?.descricao || 'Não especificado'}
+                </div>
+                <div>
+                  <span className="font-medium">Prazo:</span> {demanda.prazo_resposta ? 
+                    format(new Date(demanda.prazo_resposta), 'dd/MM/yyyy', { locale: ptBR }) : 
+                    'Sem prazo definido'
+                  }
+                </div>
+              </div>
+            </CardContent>
+            
+            <CardFooter className="bg-gray-50 px-6 py-3 border-t">
+              <div className="text-xs text-gray-500 w-full">
+                <span className="font-medium">Responsável:</span> {demanda.autor?.nome_completo || 'Não atribuído'}
+              </div>
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 };
