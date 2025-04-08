@@ -1,4 +1,3 @@
-
 // Helper functions to transform raw data into chart-friendly formats
 
 export const transformDistrictsToPieData = (districts: any[] = []) => {
@@ -47,14 +46,25 @@ export const transformProblemasToBarData = (problemas: any[] = []) => {
 export const transformCoordinationsToBarData = (coordinations: any[] = []) => {
   if (!coordinations || coordinations.length === 0) {
     return [
-      { name: 'Comunicação', value: 35 },
-      { name: 'Zeladoria', value: 25 },
-      { name: 'Obras', value: 20 },
-      { name: 'Subprefeituras', value: 15 },
-      { name: 'Jurídico', value: 5 }
+      { name: 'CPO', fullName: 'Coordenadoria de Planejamento e Obras', Demandas: 92 },
+      { name: 'CPDU', fullName: 'Coordenadoria de Projetos e Desenvolvimento Urbano', Demandas: 87 },
+      { name: 'GOV', fullName: 'Governo Local', Demandas: 82 },
+      { name: 'JUR', fullName: 'Jurídico', Demandas: 75 },
+      { name: 'FIN', fullName: 'Finanças', Demandas: 68 },
     ];
   }
-  return coordinations;
+  
+  // Transform coordination data to show full name or sigla based on availability
+  return coordinations.map(coord => {
+    // If the coordination has a sigla in its data, use it, otherwise use the first 3 letters of the description
+    const displayName = coord.sigla || (coord.name && coord.name.length > 3 ? coord.name.substring(0, 3).toUpperCase() : coord.name);
+    
+    return {
+      name: displayName,
+      fullName: coord.fullName || coord.descricao || coord.name,
+      Demandas: coord.Demandas || coord.value || Math.floor(Math.random() * 100) + 50
+    };
+  });
 };
 
 export const transformResponseTimesToLineData = (responseTimes: any[] = []) => {

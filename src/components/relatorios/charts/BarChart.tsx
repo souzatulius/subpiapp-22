@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Bar, BarChart as RechartsBarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -13,6 +14,9 @@ export interface BarChartProps {
   yAxisTicks?: number[];
   horizontal?: boolean;
   tooltipFormatter?: (value: any, name: any, item: any) => any[];
+  showLegend?: boolean;
+  multiColorBars?: boolean;
+  barColors?: string[];
 }
 
 export const BarChart: React.FC<BarChartProps> = ({ 
@@ -21,7 +25,10 @@ export const BarChart: React.FC<BarChartProps> = ({
   bars,
   yAxisTicks,
   horizontal = false,
-  tooltipFormatter
+  tooltipFormatter,
+  showLegend = true,
+  multiColorBars = false,
+  barColors = ['#0066FF', '#0C4A6E', '#64748B', '#F97316', '#C2410C']
 }) => {
   // Format the number with dot as thousand separator and comma for decimal
   const formatNumber = (value: number) => {
@@ -65,18 +72,32 @@ export const BarChart: React.FC<BarChartProps> = ({
           formatter={tooltipFormatter || ((value) => [formatNumber(value as number), ''])}
         />
         
-        <Legend />
+        {showLegend && <Legend />}
         
-        {bars.map((bar, index) => (
+        {multiColorBars ? (
+          // Render a single bar series with each bar having its own color
           <Bar
-            key={index}
-            dataKey={bar.dataKey}
-            name={bar.name}
-            fill={bar.color}
-            stackId={bar.stackId}
+            dataKey={bars[0].dataKey}
+            name={bars[0].name}
             radius={[4, 4, 0, 0]}
-          />
-        ))}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+            ))}
+          </Bar>
+        ) : (
+          // Render multiple bar series as defined in props
+          bars.map((bar, index) => (
+            <Bar
+              key={index}
+              dataKey={bar.dataKey}
+              name={bar.name}
+              fill={bar.color}
+              stackId={bar.stackId}
+              radius={[4, 4, 0, 0]}
+            />
+          ))
+        )}
       </RechartsBarChart>
     </ResponsiveContainer>
   );

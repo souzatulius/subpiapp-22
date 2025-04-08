@@ -1,278 +1,209 @@
+
 import React, { useState, useEffect } from 'react';
-import ProcessoItem from './ProcessoItem';
-import ProcessoCard from './ProcessoCard';
 import { supabase } from '@/integrations/supabase/client';
-import { Card } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
-import DeleteProcessoDialog from './dialogs/DeleteProcessoDialog';
-import { useAuth } from '@/hooks/useSupabaseAuth';
-import FilterDialog from '@/components/shared/FilterDialog';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { PlusCircle, FileText, ChevronRight, Trash2, Edit } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ESICProcesso } from '@/types/esic';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
+import NovoProcessoButton from './NovoProcessoButton';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface ProcessoListProps {
-  viewMode: 'list' | 'cards';
-  searchTerm: string;
-  filterOpen: boolean;
-  setFilterOpen: (open: boolean) => void;
-}
-
-interface Processo {
-  id: string;
-  numero_processo: string;
-  titulo: string;
-  categoria?: string;
-  status: string;
-  created_at: string;
-  prazo?: string;
-  solicitante: string;
-  coordenacao_id?: string;
-}
-
-interface ProcessoData {
-  id: string;
-  texto: string;
-  status: string;
-  situacao: string;
-  criado_em: string;
-  data_processo: string;
-  atualizado_em: string;
-  autor_id: string;
-  coordenacao_id?: string;
-  prazo_resposta?: string;
-  autor?: {
-    nome_completo: string;
-  };
-}
-
-const ProcessoList: React.FC<ProcessoListProps> = ({ 
-  viewMode,
-  searchTerm,
-  filterOpen,
-  setFilterOpen
-}) => {
-  const { user } = useAuth();
-  const [processos, setProcessos] = useState<Processo[]>([]);
+const ProcessoList: React.FC = () => {
+  const [processos, setProcessos] = useState<ESICProcesso[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [processoToDelete, setProcessoToDelete] = useState<Processo | null>(null);
-  const [filters, setFilters] = useState({
-    status: [] as string[],
-    category: [] as string[],
-    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined }
-  });
+  const [selectedProcessoId, setSelectedProcessoId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchProcessos();
-  }, [searchTerm, filters]);
+  }, []);
 
   const fetchProcessos = async () => {
-    setIsLoading(true);
     try {
-      let query = supabase
+      setIsLoading(true);
+      const { data, error } = await supabase
         .from('esic_processos')
-        .select('*');
-      
-      if (searchTerm) {
-        query = query.or(`texto.ilike.%${searchTerm}%,id.ilike.%${searchTerm}%`);
-      }
-      
-      if (filters.status && filters.status.length > 0) {
-        query = query.in('status', filters.status);
-      }
-      
-      if (filters.category && filters.category.length > 0) {
-        query = query.in('categoria', filters.category);
-      }
-      
-      if (filters.dateRange.from) {
-        query = query.gte('criado_em', filters.dateRange.from.toISOString());
-      }
-      if (filters.dateRange.to) {
-        query = query.lte('criado_em', filters.dateRange.to.toISOString());
-      }
-      
-      const { data, error } = await query.order('criado_em', { ascending: false });
-      
+        .select(`
+          *,
+          autor:autor_id(nome_completo)
+        `)
+        .order('data_processo', { ascending: false });
+
       if (error) throw error;
-      
-      if (data) {
-        const processedData: Processo[] = data.map((item: ProcessoData) => ({
-          id: item.id,
-          numero_processo: `ESIC-${new Date(item.criado_em).getFullYear()}-${String(item.id).substring(0, 4)}`,
-          titulo: item.texto.substring(0, 50) + (item.texto.length > 50 ? '...' : ''),
-          categoria: item.situacao === 'em_tramitacao' ? 'Em tramitação' : 
-                    item.situacao === 'prazo_prorrogado' ? 'Prazo prorrogado' : 'Concluído',
-          status: item.status === 'novo_processo' ? 'Em análise' : 
-                 item.status === 'aguardando_justificativa' ? 'Aguardando complemento' : 
-                 item.status === 'aguardando_aprovacao' ? 'Em análise' : 'Concluído',
-          created_at: item.criado_em,
-          prazo: item.prazo_resposta || new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
-          solicitante: 'Solicitante',
-          coordenacao_id: item.coordenacao_id,
-        }));
-        
-        setProcessos(processedData);
-      }
+
+      setProcessos(data || []);
     } catch (error) {
-      console.error('Error fetching processos:', error);
-      setProcessos([
-        {
-          id: "1",
-          numero_processo: 'ESIC-2023-001',
-          titulo: 'Solicitação de informações sobre licitações',
-          categoria: 'Financeiro',
-          status: 'Em análise',
-          created_at: '2023-10-15T14:30:00',
-          prazo: '2023-10-30T23:59:59',
-          solicitante: 'João Silva',
-        },
-        {
-          id: "2",
-          numero_processo: 'ESIC-2023-002',
-          titulo: 'Dados sobre obras públicas',
-          categoria: 'Obras',
-          status: 'Concluído',
-          created_at: '2023-10-10T09:15:00',
-          prazo: '2023-10-25T23:59:59',
-          solicitante: 'Maria Souza',
-        },
-      ]);
+      console.error('Erro ao buscar processos:', error);
+      toast({
+        title: 'Erro ao carregar processos',
+        description: 'Não foi possível carregar a lista de processos. Tente novamente mais tarde.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDeleteClick = (processo: Processo) => {
-    setProcessoToDelete(processo);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleFiltersChange = (newFilters: any) => {
-    setFilters(newFilters);
+  const handleDeleteClick = (id: string) => {
+    setSelectedProcessoId(id);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!processoToDelete) return;
-    
+    if (!selectedProcessoId) return;
+
     try {
       const { error } = await supabase
         .from('esic_processos')
         .delete()
-        .eq('id', processoToDelete.id);
-        
+        .eq('id', selectedProcessoId);
+
       if (error) throw error;
-      
-      setProcessos(processos.filter(p => p.id !== processoToDelete.id));
+
+      setProcessos(processos.filter(p => p.id !== selectedProcessoId));
+      toast({
+        title: 'Processo excluído',
+        description: 'O processo foi excluído com sucesso.',
+      });
     } catch (error) {
-      console.error('Error deleting processo:', error);
+      console.error('Erro ao excluir processo:', error);
+      toast({
+        title: 'Erro ao excluir processo',
+        description: 'Não foi possível excluir o processo. Tente novamente mais tarde.',
+        variant: 'destructive',
+      });
     } finally {
-      setDeleteDialogOpen(false);
-      setProcessoToDelete(null);
+      setIsDeleteDialogOpen(false);
+      setSelectedProcessoId(null);
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card className="p-8 mt-4">
-        <div className="flex justify-center items-center">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          <span className="ml-2 text-blue-600">Carregando processos...</span>
-        </div>
-      </Card>
-    );
-  }
-
-  if (processos.length === 0) {
-    return (
-      <Card className="p-8 mt-4">
-        <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-800">Nenhum processo encontrado</h3>
-          <p className="text-gray-500 mt-1">
-            {searchTerm 
-              ? `Não foram encontrados processos com o termo "${searchTerm}"`
-              : 'Não há processos cadastrados ou que correspondam aos filtros aplicados'}
-          </p>
-        </div>
-      </Card>
-    );
-  }
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pendente':
+        return <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-600">Pendente</Badge>;
+      case 'em_andamento':
+        return <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-600">Em andamento</Badge>;
+      case 'respondido':
+        return <Badge variant="outline" className="bg-green-50 border-green-200 text-green-600">Respondido</Badge>;
+      case 'arquivado':
+        return <Badge variant="outline" className="bg-gray-50 border-gray-200 text-gray-600">Arquivado</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
 
   return (
-    <>
-      {viewMode === 'list' ? (
-        <Card className="overflow-hidden mt-4">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Processo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Solicitante
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Prazo
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {processos.map((processo) => (
-                  <ProcessoItem 
-                    key={processo.id} 
-                    processo={processo} 
-                    onDeleteClick={() => handleDeleteClick(processo)}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-          {processos.map((processo) => (
-            <ProcessoCard 
-              key={processo.id} 
-              processo={processo} 
-              onDeleteClick={() => handleDeleteClick(processo)}
-            />
-          ))}
+    <div className="w-full">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Processos e-SIC
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Gerencie processos e pedidos de acesso à informação
+          </p>
         </div>
+        <NovoProcessoButton onSuccess={fetchProcessos} />
+      </div>
+
+      <Separator className="my-4" />
+
+      {isLoading ? (
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      ) : processos.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-700">Nenhum processo cadastrado</h3>
+          <p className="text-sm text-gray-500 mb-6">
+            Comece cadastrando um novo processo e-SIC
+          </p>
+          <NovoProcessoButton buttonText="Cadastrar primeiro processo" variant="default" onSuccess={fetchProcessos} />
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Data</TableHead>
+              <TableHead>Processo</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Justificativas</TableHead>
+              <TableHead>Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {processos.map((processo) => (
+              <TableRow key={processo.id}>
+                <TableCell className="font-medium">
+                  {processo.data_processo ? format(new Date(processo.data_processo), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+                </TableCell>
+                <TableCell>
+                  <div className="max-w-md">
+                    <div className="font-medium line-clamp-1">{processo.texto?.substring(0, 100)}</div>
+                    <div className="text-sm text-gray-500">{processo.autor?.nome_completo || 'Usuário'}</div>
+                  </div>
+                </TableCell>
+                <TableCell>{getStatusBadge(processo.status)}</TableCell>
+                <TableCell>
+                  {processo.justificativas_count ? (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600">
+                      {processo.justificativas_count} justificativa(s)
+                    </Badge>
+                  ) : (
+                    <span className="text-gray-400 text-sm">Nenhuma</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Link to={`/esic/processos/${processo.id}`}>
+                      <Button variant="outline" size="sm" className="h-8">
+                        <ChevronRight className="h-4 w-4 mr-1" />
+                        Detalhes
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteClick(processo.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
-      
-      <DeleteProcessoDialog 
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Excluir processo"
+        description="Tem certeza que deseja excluir este processo? Esta ação não pode ser desfeita."
         onConfirm={handleDeleteConfirm}
       />
-      
-      <FilterDialog
-        open={filterOpen}
-        onOpenChange={setFilterOpen}
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        options={{
-          status: [
-            { value: 'Em análise', label: 'Em análise' },
-            { value: 'Concluído', label: 'Concluído' },
-            { value: 'Aguardando complemento', label: 'Aguardando complemento' },
-            { value: 'Negado', label: 'Negado' },
-          ],
-          category: [
-            { value: 'Financeiro', label: 'Financeiro' },
-            { value: 'Obras', label: 'Obras' },
-            { value: 'Administrativo', label: 'Administrativo' },
-            { value: 'Outros', label: 'Outros' },
-          ]
-        }}
-        showDateFilter
-      />
-    </>
+    </div>
   );
 };
 

@@ -303,20 +303,75 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({
   ];
 
   const localChartComponents: Record<string, React.ReactNode> = {
-    distribuicaoPorTemas: <BarChart data={chartData.problemas.length ? chartData.problemas : mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
-    origemDemandas: <PieChartComponent data={chartData.origens.length ? chartData.origens : mockPieData} colorSet="default" showOnlyPercentage={false} showLabels={true} legendPosition="bottom" />,
-    tempoMedioResposta: <LineChartComponent data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[1] }]} />,
-    performanceArea: <BarChart data={chartData.coordinations.length ? chartData.coordinations : mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} tooltipFormatter={(value, name, item) => [value, item.payload.fullName || name]} />,
-    notasEmitidas: <LineChartComponent data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} xAxisDataKey="name" lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
-    problemasComuns: <PieChartComponent data={mockProblemasData} colorSet="orange" showOnlyPercentage={false} showLabels={true} legendPosition="bottom" />,
-    noticiasVsReleases: <BarChart 
-      data={chartData.noticiasVsReleases.length ? chartData.noticiasVsReleases : mockNoticiasVsReleasesData} 
-      xAxisDataKey="name" 
-      bars={[
-        { dataKey: 'Noticias', name: 'Notícias', color: chartColors[0] },
-        { dataKey: 'Releases', name: 'Releases', color: chartColors[1] }
-      ]} 
-    />,
+    distribuicaoPorTemas: (
+      <BarChart 
+        data={chartData.problemas.length ? chartData.problemas : mockBarData} 
+        xAxisDataKey="name" 
+        bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} 
+        showLegend={false}
+        multiColorBars={true}
+        barColors={[chartColors[0], chartColors[3], chartColors[2], chartColors[1]]}
+      />
+    ),
+    origemDemandas: (
+      <PieChart 
+        data={chartData.origens.length ? chartData.origens : mockPieData} 
+        colorSet="orange" 
+        showOnlyPercentage={true} 
+        showLabels={false} 
+        legendPosition="none"
+        largePercentage={true}
+      />
+    ),
+    tempoMedioResposta: (
+      <LineChart 
+        data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} 
+        xAxisDataKey="name" 
+        yAxisTicks={[10, 20, 50, 60, 90]} 
+        lines={[
+          { dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, 
+          { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[1] }
+        ]} 
+      />
+    ),
+    performanceArea: (
+      <BarChart 
+        data={chartData.coordinations.length ? chartData.coordinations : mockAreasData} 
+        xAxisDataKey="name" 
+        bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} 
+        tooltipFormatter={(value, name, item) => [value, item.payload.fullName || name]}
+        multiColorBars={true}
+        barColors={[chartColors[0], chartColors[3], chartColors[2], chartColors[1], chartColors[4]]}
+      />
+    ),
+    notasEmitidas: (
+      <LineChart 
+        data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} 
+        xAxisDataKey="name" 
+        lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]}
+        showLegend={false} 
+      />
+    ),
+    problemasComuns: (
+      <PieChart 
+        data={mockProblemasData} 
+        colorSet="mixed" 
+        showOnlyPercentage={true} 
+        showLabels={false}
+        legendPosition="none"
+        largePercentage={true}
+      />
+    ),
+    noticiasVsReleases: (
+      <BarChart 
+        data={chartData.noticiasVsReleases.length ? chartData.noticiasVsReleases : mockNoticiasVsReleasesData} 
+        xAxisDataKey="name" 
+        bars={[
+          { dataKey: 'Noticias', name: 'Notícias', color: chartColors[0] },
+          { dataKey: 'Releases', name: 'Releases', color: chartColors[1] }
+        ]} 
+      />
+    ),
   };
 
   const cardIcons: Record<string, React.ReactNode> = {

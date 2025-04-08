@@ -36,15 +36,18 @@ export const useMainChartComponents = () => {
             bars={[
               { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
             ]}
+            showLegend={false}
+            multiColorBars={true}
           />
         ),
         'origemDemandas': (
-          <BarChart 
+          <PieChart 
             data={[]}
-            xAxisDataKey="name"
-            bars={[
-              { dataKey: 'Solicitações', name: 'Solicitações', color: chartColors[0] }
-            ]}
+            colorSet="orange"
+            showLabels={false}
+            showOnlyPercentage={true}
+            legendPosition="none"
+            largePercentage={true}
           />
         ),
         'tempoMedioResposta': (
@@ -64,6 +67,7 @@ export const useMainChartComponents = () => {
             bars={[
               { dataKey: 'Demandas', name: 'Demandas no mês', color: chartColors[1] }
             ]}
+            multiColorBars={true}
           />
         ),
         'notasEmitidas': (
@@ -73,6 +77,7 @@ export const useMainChartComponents = () => {
             bars={[
               { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
             ]}
+            showLegend={false}
           />
         )
       };
@@ -99,6 +104,9 @@ export const useMainChartComponents = () => {
           bars={[
             { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }
           ]}
+          showLegend={false}
+          multiColorBars={true}
+          barColors={[chartColors[0], chartColors[3], chartColors[2], chartColors[1]]}
         />
       ),
       'origemDemandas': (
@@ -107,6 +115,8 @@ export const useMainChartComponents = () => {
           colorSet="orange"
           showLabels={false}
           showOnlyPercentage={true}
+          legendPosition="none"
+          largePercentage={true}
         />
       ),
       'tempoMedioResposta': (
@@ -127,6 +137,9 @@ export const useMainChartComponents = () => {
           bars={[
             { dataKey: 'Demandas', name: 'Demandas no mês', color: chartColors[1] }
           ]}
+          multiColorBars={true}
+          barColors={[chartColors[0], chartColors[3], chartColors[2], chartColors[1], chartColors[4]]}
+          tooltipFormatter={(value, name, item) => [value, item.payload.fullName || name]}
         />
       ),
       'notasEmitidas': (
@@ -136,6 +149,7 @@ export const useMainChartComponents = () => {
           bars={[
             { dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[1] }
           ]}
+          showLegend={false}
         />
       )
     };

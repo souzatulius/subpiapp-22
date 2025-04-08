@@ -5,10 +5,11 @@ import { Cell, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, 
 interface PieChartProps {
   data: any[];
   colors?: string[];
-  colorSet?: 'default' | 'blue' | 'orange';
+  colorSet?: 'default' | 'blue' | 'orange' | 'mixed';
   showLabels?: boolean;
   showOnlyPercentage?: boolean;
-  legendPosition?: 'top' | 'right' | 'bottom' | 'left';
+  legendPosition?: 'top' | 'right' | 'bottom' | 'left' | 'none';
+  largePercentage?: boolean;
 }
 
 export const PieChart: React.FC<PieChartProps> = ({ 
@@ -17,13 +18,15 @@ export const PieChart: React.FC<PieChartProps> = ({
   colorSet = 'default',
   showLabels = false,
   showOnlyPercentage = false,
-  legendPosition = 'right'
+  legendPosition = 'right',
+  largePercentage = false
 }) => {
   // Define color sets for consistent styling
   const colorSets = {
     default: ['#0066FF', '#F97316', '#64748B', '#94A3B8', '#CBD5E1'],
     blue: ['#0c4a6e', '#0369a1', '#0284c7', '#0ea5e9', '#38bdf8'],
-    orange: ['#9a3412', '#c2410c', '#ea580c', '#f97316', '#fb923c']
+    orange: ['#9a3412', '#c2410c', '#ea580c', '#f97316', '#fb923c'],
+    mixed: ['#64748B', '#334155', '#F97316', '#C2410C', '#0066FF', '#0C4A6E']
   };
 
   // Choose colors from predefined sets or use provided colors
@@ -93,51 +96,89 @@ export const PieChart: React.FC<PieChartProps> = ({
         legendAlign: legendPosition,
         legendLayout: 'vertical' as const
       };
+    } else if (legendPosition === 'none') {
+      return {
+        pieRadius: 90,
+        legendVertical: false,
+        legendAlign: 'center' as const,
+        legendLayout: 'horizontal' as const,
+        showLegend: false
+      };
     } else {
       return { 
         pieRadius: 80, 
         legendVertical: false,
         legendAlign: 'center' as const,
-        legendLayout: 'horizontal' as const
+        legendLayout: 'horizontal' as const,
+        showLegend: true
       };
     }
   };
 
-  const { pieRadius, legendVertical, legendAlign, legendLayout } = getLayout();
+  const { pieRadius, legendVertical, legendAlign, legendLayout, showLegend = true } = getLayout();
+
+  // External labels for large percentage display
+  const renderExternalPercentages = () => {
+    if (!largePercentage) return null;
+    
+    return (
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          {data.map((entry, index) => {
+            const percentage = ((entry.value / total) * 100).toFixed(0);
+            return (
+              <div key={`label-${index}`} className="flex items-center mb-2">
+                <div 
+                  className="w-3 h-3 mr-2 rounded-sm" 
+                  style={{ backgroundColor: chartColors[index % chartColors.length] }}
+                />
+                <span className="text-2xl font-bold text-blue-600">{percentage}%</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <RechartsPieChart>
-        <Tooltip content={customTooltip} />
-        <Pie
-          data={data}
-          cx="50%"
-          cy={legendPosition === 'bottom' ? "40%" : "50%"}
-          labelLine={false}
-          label={renderCustomizedLabel}
-          outerRadius={pieRadius}
-          fill="#8884d8"
-          dataKey="value"
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-          ))}
-        </Pie>
-        <Legend 
-          layout={legendLayout}
-          verticalAlign={legendPosition === 'top' ? 'top' : legendPosition === 'bottom' ? 'bottom' : 'middle'}
-          align={legendPosition === 'right' ? 'right' : legendPosition === 'left' ? 'left' : 'center'}
-          iconType="circle"
-          iconSize={10}
-          wrapperStyle={
-            legendPosition === 'bottom' ? 
-            { paddingTop: '20px' } : 
-            legendPosition === 'top' ? 
-            { paddingBottom: '20px' } : 
-            {}
-          }
-        />
-      </RechartsPieChart>
-    </ResponsiveContainer>
+    <div className="relative w-full h-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsPieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+          <Tooltip content={customTooltip} />
+          <Pie
+            data={data}
+            cx="50%"
+            cy={legendPosition === 'bottom' ? "40%" : "50%"}
+            labelLine={false}
+            label={renderCustomizedLabel}
+            outerRadius={pieRadius}
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+            ))}
+          </Pie>
+          {showLegend && (
+            <Legend 
+              layout={legendLayout}
+              verticalAlign={legendPosition === 'top' ? 'top' : legendPosition === 'bottom' ? 'bottom' : 'middle'}
+              align={legendPosition === 'right' ? 'right' : legendPosition === 'left' ? 'left' : 'center'}
+              iconType="circle"
+              iconSize={10}
+              wrapperStyle={
+                legendPosition === 'bottom' ? 
+                { paddingTop: '20px' } : 
+                legendPosition === 'top' ? 
+                { paddingBottom: '20px' } : 
+                {}
+              }
+            />
+          )}
+        </RechartsPieChart>
+      </ResponsiveContainer>
+      {largePercentage && renderExternalPercentages()}
+    </div>
   );
 };
