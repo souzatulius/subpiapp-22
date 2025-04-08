@@ -92,7 +92,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signUp = async (email: string, password: string, userData: any) => {
     console.log('Iniciando processo de registro para:', email);
     try {
-      const result = await authService.signUp(email, password, userData);
+      // Combine email, password, and other user data for registration
+      const registerData = {
+        email,
+        password,
+        ...userData
+      };
+      
+      const result = await authService.signUp(registerData);
       
       if (!result.error) {
         if (result.data?.user) {

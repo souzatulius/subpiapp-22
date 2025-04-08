@@ -4,21 +4,26 @@ import { ProfileData } from '@/components/profile/types';
 
 export interface RegisterUserData {
   email: string;
-  password: string;
+  password?: string;
   nome_completo: string;
-  cargo_id: string;
-  coordenacao_id: string;
+  cargo_id?: string;
+  coordenacao_id?: string;
   area_id?: string;
   whatsapp?: string;
+  cargo?: string;
+  RF?: string;
+  coordenacao?: string;
 }
 
 export const registerUser = async (userData: RegisterUserData) => {
   try {
-    // Register the user with Supabase auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password
-    });
+    // For the simplified registration flow without password (admin approval)
+    const { data: authData, error: authError } = !userData.password 
+      ? { data: { user: { id: 'pending' } }, error: null }
+      : await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password
+        });
 
     if (authError) throw authError;
 

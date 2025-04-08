@@ -1,8 +1,5 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { DragEndEvent } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useState, useCallback } from 'react';
 
 export interface RelatorioItem {
   id: string;
@@ -10,87 +7,83 @@ export interface RelatorioItem {
   subtitle?: string;
   component: React.ReactNode;
   isVisible: boolean;
-  isHidden?: boolean;
-  isAnalysisExpanded?: boolean;
-  showAnalysisOnly?: boolean;
+  isAnalysisExpanded: boolean;
+  showAnalysisOnly: boolean;
   analysis?: string;
-  value?: string | number;
+  value?: string;
   description?: string;
   badge?: string;
-  props?: Record<string, any>;
-  highlight?: string;
-  order?: number;
+  order: number;
 }
 
-export const useRelatorioItemsState = (initialItems: RelatorioItem[]) => {
+export const useRelatorioItemsState = (initialItems: RelatorioItem[] = []) => {
   const [items, setItems] = useState<RelatorioItem[]>(initialItems);
-  const [hiddenItems, setHiddenItems] = useLocalStorage<string[]>('relatorio-hidden-items', []);
-  const [expandedAnalyses, setExpandedAnalyses] = useLocalStorage<string[]>('relatorio-expanded-analyses', []);
-  const [analysisOnlyItems, setAnalysisOnlyItems] = useLocalStorage<string[]>('relatorio-analysis-only', []);
+  const [hiddenItems, setHiddenItems] = useState<string[]>([]);
+  const [expandedAnalyses, setExpandedAnalyses] = useState<string[]>([]);
+  const [analysisOnlyItems, setAnalysisOnlyItems] = useState<string[]>([]);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
+  const toggleItemVisibility = useCallback((id: string) => {
+    setItems(prevItems => 
+      prevItems.map(item => 
+        item.id === id 
+          ? { ...item, isVisible: !item.isVisible } 
+          : item
+      )
+    );
     
-    if (over && active.id !== over.id) {
-      setItems((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
+    setHiddenItems(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(itemId => itemId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
   }, []);
 
-  const toggleItemVisibility = useCallback((itemId: string) => {
-    setHiddenItems((prevHiddenItems) => {
-      if (prevHiddenItems.includes(itemId)) {
-        return prevHiddenItems.filter((id) => id !== itemId);
+  const toggleAnalysisExpanded = useCallback((id: string) => {
+    setItems(prevItems => 
+      prevItems.map(item => 
+        item.id === id 
+          ? { ...item, isAnalysisExpanded: !item.isAnalysisExpanded } 
+          : item
+      )
+    );
+    
+    setExpandedAnalyses(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(itemId => itemId !== id);
       } else {
-        return [...prevHiddenItems, itemId];
+        return [...prev, id];
       }
     });
-  }, [setHiddenItems]);
-
-  const toggleItemAnalysis = useCallback((itemId: string) => {
-    setExpandedAnalyses((prevExpandedAnalyses) => {
-      if (prevExpandedAnalyses.includes(itemId)) {
-        return prevExpandedAnalyses.filter((id) => id !== itemId);
-      } else {
-        return [...prevExpandedAnalyses, itemId];
-      }
-    });
-  }, [setExpandedAnalyses]);
-
-  const toggleItemView = useCallback((itemId: string) => {
-    setAnalysisOnlyItems((prevAnalysisOnlyItems) => {
-      if (prevAnalysisOnlyItems.includes(itemId)) {
-        return prevAnalysisOnlyItems.filter((id) => id !== itemId);
-      } else {
-        return [...prevAnalysisOnlyItems, itemId];
-      }
-    });
-  }, [setAnalysisOnlyItems]);
-
-  const updateItemsOrder = useCallback((reorderedItems: RelatorioItem[]) => {
-    setItems(reorderedItems);
   }, []);
 
-  // Aliases for RelatoriosContent component
-  const handleToggleVisibility = toggleItemVisibility;
-  const handleToggleAnalysis = toggleItemAnalysis;
-  const handleToggleView = toggleItemView;
+  const toggleAnalysisOnly = useCallback((id: string) => {
+    setItems(prevItems => 
+      prevItems.map(item => 
+        item.id === id 
+          ? { ...item, showAnalysisOnly: !item.showAnalysisOnly } 
+          : item
+      )
+    );
+    
+    setAnalysisOnlyItems(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(itemId => itemId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  }, []);
 
   return {
     items,
+    setItems,
     hiddenItems,
     expandedAnalyses,
     analysisOnlyItems,
     toggleItemVisibility,
-    toggleItemAnalysis,
-    toggleItemView,
-    updateItemsOrder,
-    handleDragEnd,
-    handleToggleVisibility,
-    handleToggleAnalysis,
-    handleToggleView
+    toggleAnalysisExpanded,
+    toggleAnalysisOnly,
   };
 };
