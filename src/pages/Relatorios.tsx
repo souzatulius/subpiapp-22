@@ -72,6 +72,13 @@ const Relatorios = () => {
                   />
                 </div>
                
+                {/* Fix the mobile breadcrumb placement to be after WelcomeCard */}
+                {isMobile && (
+                  <div className="bg-white rounded-md shadow-sm mt-4">
+                    <BreadcrumbBar />
+                  </div>
+                )}
+               
                 <div className="mt-6">
                   <RelatoriosContent 
                     filterDialogOpen={filterDialogOpen} 
