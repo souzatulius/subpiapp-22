@@ -5,7 +5,7 @@ import {
   FileText,
   MessageSquareReply,
   Trophy,
-  LayoutDashboard
+  Home
 } from 'lucide-react';
 
 export type NavigationItem = {
@@ -20,9 +20,9 @@ export const getNavigationSections = (): NavigationItem[] => {
   return [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Início',
       path: '/dashboard',
-      icon: <LayoutDashboard className="w-8 h-8" />,
+      icon: <Home className="w-8 h-8" />,
     },
     {
       id: 'comunicacao',

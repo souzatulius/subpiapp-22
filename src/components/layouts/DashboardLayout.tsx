@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 const DashboardLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Alterado para false
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
   const scrollFadeStyles = useScrollFade({ threshold: 10, fadeDistance: 80 });
 
@@ -63,9 +63,9 @@ const DashboardLayout: React.FC = () => {
             title={sidebarOpen ? "Recolher menu" : "Expandir menu"}
           >
             {sidebarOpen ? (
-              <ChevronLeft className="h-7 w-7" />
+              <ChevronLeft className="h-6 w-6" />
             ) : (
-              <ChevronRight className="h-7 w-7" />
+              <ChevronRight className="h-6 w-6" />
             )}
           </Button>
         )}

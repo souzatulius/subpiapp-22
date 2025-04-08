@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { getNavigationSections } from '@/components/dashboard/sidebar/navigationConfig';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/cn';
@@ -19,18 +19,38 @@ interface SidebarItemProps {
 }
 
 const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed }) => {
+  const location = useLocation();
+  
+  // Custom isActive logic
+  const isActive = (() => {
+    // For Dashboard/Início, only active on exact match
+    if (to === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    
+    // For Relatórios, only active on exact match or under relatorios paths
+    if (to === '/dashboard/comunicacao/relatorios') {
+      return location.pathname.includes('/relatorios');
+    }
+    
+    // For other items, check if path starts with the link
+    return location.pathname.startsWith(to) && 
+           // But exclude relatorios paths from making Comunicacao active
+           !(to === '/dashboard/comunicacao' && location.pathname.includes('/relatorios'));
+  })();
+
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        cn(
-          "flex items-center gap-4 rounded-lg px-3 py-3 transition-all hover:text-[#f57737]",
-          isActive
-            ? "bg-[#003570] text-[#f57737] font-medium"
-            : "text-gray-300 hover:bg-[#0035701a]",
-          isCollapsed ? "justify-center" : ""
-        )
-      }
+      className={cn(
+        "flex rounded-xl px-3 py-4 transition-all hover:bg-[#0035701a]",
+        isActive
+          ? "bg-[#003570] text-[#f57737] font-medium"
+          : "text-gray-300",
+        isCollapsed 
+          ? "justify-center items-center" 
+          : "items-center justify-start gap-4"
+      )}
       title={isCollapsed ? label : undefined}
     >
       <div className="flex-shrink-0 w-7 h-7">{icon}</div>
@@ -46,8 +66,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   // Base sidebar width calculation - increased width for collapsed state
-  const sidebarWidth = isOpen ? "w-64" : "w-20";
-  const sidebarPadding = isOpen ? "px-4" : "px-2";
+  const sidebarWidth = isOpen ? "w-64" : "w-24";
+  const sidebarPadding = isOpen ? "px-4" : "px-3";
   
   // Fetch user department
   useEffect(() => {
@@ -82,7 +102,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
   // Get navigation items from centralized config
   const allNavigationItems = getNavigationSections();
   
-  // Filter for only the specified navigation items: Dashboard, Comunicação, Relatórios, Zeladoria (Ranking)
+  // Filter for only the specified navigation items: Início, Comunicação, Relatórios, Zeladoria (Ranking)
   const allowedPages = ['dashboard', 'comunicacao', 'relatorios', 'ranking', 'esic'];
   
   const navigationItems = allNavigationItems
@@ -99,7 +119,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen }) => {
       className={`${sidebarWidth} ${sidebarPadding} py-6 flex-shrink-0 border-r border-[#00357033] bg-[#051b2c] h-screen sticky top-0 transition-all duration-300 ease-in-out`}
     >
       <nav className="space-y-6 flex flex-col h-full">
-        <div className="space-y-6">
+        <div className="space-y-4">
           {navigationItems.map((item) => (
             <SidebarItem
               key={item.id}
