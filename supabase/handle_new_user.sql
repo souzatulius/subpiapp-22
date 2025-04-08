@@ -15,9 +15,9 @@ BEGIN
       email = COALESCE(new.email, new.raw_user_meta_data->>'email'),
       aniversario = NULLIF(new.raw_user_meta_data->>'aniversario', NULLIF(new.raw_user_meta_data->>'birthday', ''))::date,
       whatsapp = NULLIF(new.raw_user_meta_data->>'whatsapp', ''),
-      cargo_id = NULLIF(new.raw_user_meta_data->>'cargo_id', NULLIF(new.raw_user_meta_data->>'role_id', '')),
-      supervisao_tecnica_id = NULLIF(new.raw_user_meta_data->>'supervisao_tecnica_id', NULLIF(new.raw_user_meta_data->>'area_id', '')),
-      coordenacao_id = NULLIF(new.raw_user_meta_data->>'coordenacao_id', ''),
+      cargo_id = (new.raw_user_meta_data->>'cargo_id')::uuid,
+      supervisao_tecnica_id = (new.raw_user_meta_data->>'supervisao_tecnica_id')::uuid,
+      coordenacao_id = (new.raw_user_meta_data->>'coordenacao_id')::uuid,
       status = COALESCE(new.raw_user_meta_data->>'status', 'pendente')
     WHERE id = new.id;
   ELSE
@@ -39,9 +39,9 @@ BEGIN
       COALESCE(new.email, new.raw_user_meta_data->>'email'),
       NULLIF(new.raw_user_meta_data->>'aniversario', NULLIF(new.raw_user_meta_data->>'birthday', ''))::date,
       NULLIF(new.raw_user_meta_data->>'whatsapp', ''),
-      NULLIF(new.raw_user_meta_data->>'cargo_id', NULLIF(new.raw_user_meta_data->>'role_id', '')),
-      NULLIF(new.raw_user_meta_data->>'supervisao_tecnica_id', NULLIF(new.raw_user_meta_data->>'area_id', '')),
-      NULLIF(new.raw_user_meta_data->>'coordenacao_id', ''),
+      (new.raw_user_meta_data->>'cargo_id')::uuid,
+      (new.raw_user_meta_data->>'supervisao_tecnica_id')::uuid,
+      (new.raw_user_meta_data->>'coordenacao_id')::uuid,
       COALESCE(new.raw_user_meta_data->>'status', 'pendente')
     );
   END IF;

@@ -114,9 +114,9 @@ export const useRegisterForm = () => {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
-        cargo_id: formData.role,
-        supervisao_tecnica_id: formData.area || null,
-        coordenacao_id: formData.coordenacao,
+        cargo_id: formData.role, // This should be a valid UUID
+        supervisao_tecnica_id: formData.area || null, // This should be a valid UUID or null
+        coordenacao_id: formData.coordenacao, // This should be a valid UUID
         status: 'pendente'
       };
       

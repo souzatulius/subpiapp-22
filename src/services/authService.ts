@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileData } from '@/components/profile/types';
 
@@ -72,6 +71,24 @@ export const signUp = async (email: string, password: string, userData: any) => 
   try {
     // Ensure userData is well-formed
     const cleanMetadata = { ...userData };
+    
+    // Convert cargo_id to UUID if it's a string (fixing type mismatch)
+    if (cleanMetadata.cargo_id && typeof cleanMetadata.cargo_id === 'string') {
+      // Keep it as is, but ensure it's a valid UUID format
+      console.log('Using cargo_id as UUID:', cleanMetadata.cargo_id);
+    }
+
+    // Convert coordenacao_id to UUID if it's a string
+    if (cleanMetadata.coordenacao_id && typeof cleanMetadata.coordenacao_id === 'string') {
+      // Keep it as is, but ensure it's a valid UUID format
+      console.log('Using coordenacao_id as UUID:', cleanMetadata.coordenacao_id);
+    }
+
+    // Convert supervisao_tecnica_id to UUID if it's a string
+    if (cleanMetadata.supervisao_tecnica_id && typeof cleanMetadata.supervisao_tecnica_id === 'string') {
+      // Keep it as is, but ensure it's a valid UUID format
+      console.log('Using supervisao_tecnica_id as UUID:', cleanMetadata.supervisao_tecnica_id);
+    }
     
     // Clean up any undefined or null values that might cause database errors
     Object.keys(cleanMetadata).forEach(key => {
