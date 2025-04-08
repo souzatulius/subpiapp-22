@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
-import { CardColor, CardWidth, CardHeight } from '@/types/dashboard';
+import { CardColor, CardWidth, CardHeight, CardType } from '@/types/dashboard';
 
 interface ComunicacaoDashboardProps {
   isPreview?: boolean;
@@ -67,7 +67,7 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
           color: 'bg-white' as CardColor,
           width: '100' as CardWidth,
           height: '0.5' as CardHeight,
-          type: 'smart_search',
+          type: 'smart_search' as CardType,
           isCustom: true,
           displayMobile: true,
           mobileOrder: 0
