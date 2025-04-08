@@ -26,6 +26,7 @@ interface Processo {
   created_at: string;
   prazo?: string;
   solicitante: string;
+  coordenacao_id?: string;
 }
 
 // Define ProcessoData interface separately to avoid infinite type instantiation
@@ -38,6 +39,8 @@ interface ProcessoData {
   data_processo: string;
   atualizado_em: string;
   autor_id: string;
+  coordenacao_id?: string;
+  prazo_resposta?: string;
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
@@ -108,8 +111,9 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
                  item.status === 'aguardando_justificativa' ? 'Aguardando complemento' : 
                  item.status === 'aguardando_aprovacao' ? 'Em análise' : 'Concluído',
           created_at: item.criado_em,
-          prazo: new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+          prazo: item.prazo_resposta || new Date(new Date(item.data_processo).getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
           solicitante: 'Solicitante', // Default value as we don't have this in our data
+          coordenacao_id: item.coordenacao_id,
         }));
         
         setProcessos(processedData);

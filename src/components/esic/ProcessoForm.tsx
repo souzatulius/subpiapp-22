@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -29,6 +29,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ESICProcesso, ESICProcessoFormValues, situacaoLabels } from '@/types/esic';
 import { cn } from '@/utils/cn';
+import { useCoordenacoes } from '@/hooks/useCoordenacoes';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const processoSchema = z.object({
   data_processo: z.date({
@@ -38,6 +40,8 @@ const processoSchema = z.object({
     required_error: "Situação é obrigatória",
   }),
   texto: z.string().min(10, "O texto deve ter no mínimo 10 caracteres"),
+  coordenacao_id: z.string().optional(),
+  prazo_resposta: z.date().optional(),
 });
 
 interface ProcessoFormProps {
@@ -55,6 +59,8 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
   mode = 'create',
   onCancel
 }) => {
+  const { coordenacoes, isLoading: isLoadingCoordenacoes } = useCoordenacoes();
+  
   const form = useForm<ESICProcessoFormValues>({
     resolver: zodResolver(processoSchema),
     defaultValues: initialValues 
@@ -62,11 +68,15 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
           data_processo: new Date(initialValues.data_processo),
           situacao: initialValues.situacao,
           texto: initialValues.texto,
+          coordenacao_id: initialValues.coordenacao_id,
+          prazo_resposta: initialValues.prazo_resposta ? new Date(initialValues.prazo_resposta) : undefined,
         }
       : {
           data_processo: new Date(),
           situacao: 'em_tramitacao',
           texto: '',
+          coordenacao_id: undefined,
+          prazo_resposta: undefined,
         },
   });
 
@@ -125,6 +135,34 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
 
             <FormField
               control={form.control}
+              name="coordenacao_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Coordenação</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma coordenação" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {coordenacoes.map((coordenacao) => (
+                        <SelectItem key={coordenacao.id} value={coordenacao.id}>
+                          {coordenacao.sigla ? `${coordenacao.sigla} - ${coordenacao.descricao}` : coordenacao.descricao}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="situacao"
               render={({ field }) => (
                 <FormItem>
@@ -146,6 +184,26 @@ const ProcessoForm: React.FC<ProcessoFormProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="prazo_resposta"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prazo para Resposta</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      date={field.value}
+                      onSelect={field.onChange}
+                      showTimeSelect={true}
+                      useDropdownTimeSelect={false}
+                      placeholder="Selecione o prazo para resposta"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

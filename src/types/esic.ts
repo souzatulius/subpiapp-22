@@ -8,6 +8,8 @@ export interface ESICProcesso {
   autor_id: string;
   criado_em: string;
   atualizado_em: string;
+  coordenacao_id?: string;
+  prazo_resposta?: string;
   autor?: {
     nome_completo: string;
   };
@@ -30,6 +32,8 @@ export type ESICProcessoFormValues = {
   data_processo: Date;
   situacao: 'em_tramitacao' | 'prazo_prorrogado' | 'concluido';
   texto: string;
+  coordenacao_id?: string;
+  prazo_resposta?: Date;
 };
 
 export type ESICJustificativaFormValues = {
