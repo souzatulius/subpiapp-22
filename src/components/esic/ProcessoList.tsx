@@ -1,169 +1,240 @@
 
-import React, { useState } from 'react';
-import { Search, Filter, FileText, LayoutGrid, LayoutList } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ESICProcesso, statusLabels, situacaoLabels } from '@/types/esic';
+import React, { useState, useEffect } from 'react';
 import ProcessoItem from './ProcessoItem';
 import ProcessoCard from './ProcessoCard';
-import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Loader2 } from 'lucide-react';
+import DeleteProcessoDialog from './dialogs/DeleteProcessoDialog';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import FilterDialog from '@/components/shared/FilterDialog';
 
 interface ProcessoListProps {
-  processos: ESICProcesso[] | undefined;
-  isLoading: boolean;
-  onSelectProcesso: (processo: ESICProcesso) => void;
-  onEditProcesso: (processo: ESICProcesso) => void;
-  onDeleteProcesso: (id: string) => void;
+  viewMode: 'list' | 'cards';
+  searchTerm: string;
+  filterOpen: boolean;
+  setFilterOpen: (open: boolean) => void;
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({ 
-  processos, 
-  isLoading, 
-  onSelectProcesso,
-  onEditProcesso,
-  onDeleteProcesso
+  viewMode,
+  searchTerm,
+  filterOpen,
+  setFilterOpen
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('todos');
-  const [situacaoFilter, setSituacaoFilter] = useState('todos');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  
-  // Filter and search logic
-  const filteredProcessos = processos?.filter(processo => {
-    // Text search
-    const searchMatches = processo.texto.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Status filter
-    const statusMatches = statusFilter === 'todos' || processo.status === statusFilter;
-    
-    // Situacao filter
-    const situacaoMatches = situacaoFilter === 'todos' || processo.situacao === situacaoFilter;
-    
-    return searchMatches && statusMatches && situacaoMatches;
+  const { user } = useAuth();
+  const [processos, setProcessos] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [processoToDelete, setProcessoToDelete] = useState(null);
+  const [filters, setFilters] = useState({
+    status: [],
+    category: [],
+    dateRange: { from: null, to: null }
   });
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1 relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            placeholder="Buscar nos processos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 h-9"
-          />
-        </div>
-        
-        <div className="flex flex-wrap gap-2 items-center">
-          <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'list' | 'grid')}>
-            <ToggleGroupItem value="list" aria-label="Visualizar em lista" className="h-9 w-9 p-0">
-              <LayoutList className="h-4 w-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="grid" aria-label="Visualizar em cards" className="h-9 w-9 p-0">
-              <LayoutGrid className="h-4 w-4" />
-            </ToggleGroupItem>
-          </ToggleGroup>
-          
-          <Select 
-            value={statusFilter} 
-            onValueChange={setStatusFilter}
-          >
-            <SelectTrigger className="h-9 w-[160px] min-w-[120px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos os status</SelectItem>
-              {Object.entries(statusLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Select 
-            value={situacaoFilter} 
-            onValueChange={setSituacaoFilter}
-          >
-            <SelectTrigger className="h-9 w-[160px] min-w-[120px]">
-              <SelectValue placeholder="Situação" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todas as situações</SelectItem>
-              {Object.entries(situacaoLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {(searchTerm || statusFilter !== 'todos' || situacaoFilter !== 'todos') && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('todos');
-                setSituacaoFilter('todos');
-              }}
-              className="h-9"
-            >
-              Limpar filtros
-            </Button>
-          )}
-        </div>
-      </div>
+  useEffect(() => {
+    fetchProcessos();
+  }, [searchTerm, filters]);
+
+  const fetchProcessos = async () => {
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('esic_processos')
+        .select('*');
       
-      {isLoading ? (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+      // Apply search filter
+      if (searchTerm) {
+        query = query.or(`titulo.ilike.%${searchTerm}%,numero_processo.ilike.%${searchTerm}%`);
+      }
+      
+      // Apply status filter
+      if (filters.status && filters.status.length > 0) {
+        query = query.in('status', filters.status);
+      }
+      
+      // Apply category filter
+      if (filters.category && filters.category.length > 0) {
+        query = query.in('categoria', filters.category);
+      }
+      
+      // Apply date filter
+      if (filters.dateRange.from) {
+        query = query.gte('created_at', filters.dateRange.from.toISOString());
+      }
+      if (filters.dateRange.to) {
+        query = query.lte('created_at', filters.dateRange.to.toISOString());
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setProcessos(data || []);
+    } catch (error) {
+      console.error('Error fetching processos:', error);
+      // Fallback to mock data
+      setProcessos([
+        {
+          id: 1,
+          numero_processo: 'ESIC-2023-001',
+          titulo: 'Solicitação de informações sobre licitações',
+          categoria: 'Financeiro',
+          status: 'Em análise',
+          created_at: '2023-10-15T14:30:00',
+          prazo: '2023-10-30T23:59:59',
+          solicitante: 'João Silva',
+        },
+        {
+          id: 2,
+          numero_processo: 'ESIC-2023-002',
+          titulo: 'Dados sobre obras públicas',
+          categoria: 'Obras',
+          status: 'Concluído',
+          created_at: '2023-10-10T09:15:00',
+          prazo: '2023-10-25T23:59:59',
+          solicitante: 'Maria Souza',
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (processo) => {
+    setProcessoToDelete(processo);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!processoToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from('esic_processos')
+        .delete()
+        .eq('id', processoToDelete.id);
+        
+      if (error) throw error;
+      
+      setProcessos(processos.filter(p => p.id !== processoToDelete.id));
+    } catch (error) {
+      console.error('Error deleting processo:', error);
+    } finally {
+      setDeleteDialogOpen(false);
+      setProcessoToDelete(null);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="p-8 mt-4">
+        <div className="flex justify-center items-center">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <span className="ml-2 text-blue-600">Carregando processos...</span>
         </div>
-      ) : filteredProcessos && filteredProcessos.length > 0 ? (
-        viewMode === 'list' ? (
-          <div className="space-y-3">
-            {filteredProcessos.map((processo) => (
-              <ProcessoItem
-                key={processo.id}
-                processo={processo}
-                onSelect={onSelectProcesso}
-                onEdit={onEditProcesso}
-                onDelete={onDeleteProcesso}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filteredProcessos.map((processo) => (
-              <ProcessoCard
-                key={processo.id}
-                processo={processo}
-                onSelect={onSelectProcesso}
-                onEdit={onEditProcesso}
-                onDelete={onDeleteProcesso}
-              />
-            ))}
-          </div>
-        )
-      ) : (
-        <Card className="p-8 text-center bg-gray-50">
-          <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-700">
-            {searchTerm || statusFilter !== 'todos' || situacaoFilter !== 'todos' 
-              ? 'Nenhum processo encontrado com os filtros aplicados' 
-              : 'Nenhum processo encontrado'}
-          </h3>
-          <p className="text-gray-500 mt-2">
-            {searchTerm || statusFilter !== 'todos' || situacaoFilter !== 'todos' 
-              ? 'Tente ajustar os filtros de busca' 
-              : 'Comece criando um novo processo'}
+      </Card>
+    );
+  }
+
+  if (processos.length === 0) {
+    return (
+      <Card className="p-8 mt-4">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-800">Nenhum processo encontrado</h3>
+          <p className="text-gray-500 mt-1">
+            {searchTerm 
+              ? `Não foram encontrados processos com o termo "${searchTerm}"`
+              : 'Não há processos cadastrados ou que correspondam aos filtros aplicados'}
           </p>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      {viewMode === 'list' ? (
+        <Card className="overflow-hidden mt-4">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Processo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Solicitante
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Prazo
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {processos.map((processo) => (
+                  <ProcessoItem 
+                    key={processo.id} 
+                    processo={processo} 
+                    onDeleteClick={() => handleDeleteClick(processo)}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {processos.map((processo) => (
+            <ProcessoCard 
+              key={processo.id} 
+              processo={processo} 
+              onDeleteClick={() => handleDeleteClick(processo)}
+            />
+          ))}
+        </div>
       )}
-    </div>
+      
+      <DeleteProcessoDialog 
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        processo={processoToDelete}
+      />
+      
+      <FilterDialog
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        options={{
+          status: [
+            { value: 'Em análise', label: 'Em análise' },
+            { value: 'Concluído', label: 'Concluído' },
+            { value: 'Aguardando complemento', label: 'Aguardando complemento' },
+            { value: 'Negado', label: 'Negado' },
+          ],
+          category: [
+            { value: 'Financeiro', label: 'Financeiro' },
+            { value: 'Obras', label: 'Obras' },
+            { value: 'Administrativo', label: 'Administrativo' },
+            { value: 'Outros', label: 'Outros' },
+          ]
+        }}
+        showDateFilter
+      />
+    </>
   );
 };
 

@@ -72,7 +72,7 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
         // Fetch coordenações data from Supabase
         const { data: coordenacoesData, error: coordenacoesError } = await supabase
           .from('coordenacoes')
-          .select('id, descricao')
+          .select('id, descricao, sigla')
           .limit(5);
 
         if (coordenacoesError) throw coordenacoesError;
@@ -88,8 +88,10 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
           value: Math.floor(Math.random() * 50) + 10
         }));
 
+        // Use siglas for coordenacoes when available
         const coordenacoesChart = coordenacoesData.map(coord => ({
-          name: coord.descricao,
+          name: coord.sigla || coord.descricao.substring(0, 3).toUpperCase(),
+          fullName: coord.descricao,
           Quantidade: Math.floor(Math.random() * 100) + 50
         }));
 
@@ -273,12 +275,13 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     { name: 'Outros', value: 10 },
   ];
 
+  // Using siglas for coordenacoes in mock data
   const mockAreasData = [
-    { name: 'CPO', Quantidade: 92 },
-    { name: 'CPDU', Quantidade: 87 },
-    { name: 'Governo Local', Quantidade: 82 },
-    { name: 'Jurídico', Quantidade: 75 },
-    { name: 'Finanças', Quantidade: 68 },
+    { name: 'CPO', fullName: 'Coordenadoria de Planejamento e Obras', Quantidade: 92 },
+    { name: 'CPDU', fullName: 'Coordenadoria de Projetos e Desenvolvimento Urbano', Quantidade: 87 },
+    { name: 'GOV', fullName: 'Governo Local', Quantidade: 82 },
+    { name: 'JUR', fullName: 'Assessoria Jurídica', Quantidade: 75 },
+    { name: 'FIN', fullName: 'Finanças', Quantidade: 68 },
   ];
 
   const mockAreaData = [
@@ -304,9 +307,9 @@ export const RelatoriosGraphCards: React.FC<RelatoriosGraphCardsProps> = ({ isEd
     distribuicaoPorTemas: <BarChart data={chartData.problemas.length ? chartData.problemas : mockBarData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
     origemDemandas: <PieChartComponent data={chartData.origens.length ? chartData.origens : mockPieData} colorSet="default" showOnlyPercentage={false} showLabels={true} legendPosition="bottom" />,
     tempoMedioResposta: <LineChartComponent data={chartData.responseTimes.length ? chartData.responseTimes : mockLineData} xAxisDataKey="name" yAxisTicks={[10, 20, 50, 60, 90]} lines={[{ dataKey: 'Demandas', name: 'Respostas da coordenação', color: chartColors[0] }, { dataKey: 'Aprovacao', name: 'Aprovação da nota', color: chartColors[1] }]} />,
-    performanceArea: <BarChart data={chartData.coordinations.length ? chartData.coordinations : mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} />,
+    performanceArea: <BarChart data={chartData.coordinations.length ? chartData.coordinations : mockAreasData} xAxisDataKey="name" bars={[{ dataKey: 'Quantidade', name: 'Demandas no mês', color: chartColors[1] }]} tooltipFormatter={(value, name, item) => [value, item.payload.fullName || name]} />,
     notasEmitidas: <LineChartComponent data={chartData.mediaTypes.length ? chartData.mediaTypes : mockAreaData} xAxisDataKey="name" lines={[{ dataKey: 'Quantidade', name: 'Quantidade', color: chartColors[0] }]} />,
-    problemasComuns: <PieChartComponent data={mockProblemasData} colorSet="orange" showOnlyPercentage={false} showLabels={true} />,
+    problemasComuns: <PieChartComponent data={mockProblemasData} colorSet="orange" showOnlyPercentage={false} showLabels={true} legendPosition="bottom" />,
     noticiasVsReleases: <BarChart 
       data={chartData.noticiasVsReleases.length ? chartData.noticiasVsReleases : mockNoticiasVsReleasesData} 
       xAxisDataKey="name" 
