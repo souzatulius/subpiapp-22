@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -121,7 +122,7 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
               
-              <div style={isMobile ? scrollFadeStyles : undefined}>
+              <div style={isMobile ? scrollFadeStyles : undefined} className="flex justify-end">
                 <Button 
                   variant="outline" 
                   size="sm" 
