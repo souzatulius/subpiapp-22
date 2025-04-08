@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Demand } from '@/components/dashboard/forms/criar-nota/types';
+import { Demand } from '@/types/demand';
 
 export const useDemandasData = () => {
   const [demandas, setDemandas] = useState<Demand[]>([]);
@@ -88,7 +88,8 @@ export const useDemandasData = () => {
             autor: null,
             servico: demanda.servicos,
             problema: demanda.problemas,
-            horario_publicacao: "",
+            // Add horario_publicacao with a default value since it's not coming from the database query
+            horario_publicacao: "", 
             arquivo_url: demanda.arquivo_url || null,
             anexos: demanda.anexos || []
           } as Demand;
