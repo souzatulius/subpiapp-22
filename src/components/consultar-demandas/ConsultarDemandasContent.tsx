@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DemandasTable from './DemandasTable';
@@ -183,7 +184,7 @@ const ConsultarDemandasContent = () => {
             
             <Button 
               className="bg-orange-300 hover:bg-orange-400 text-white rounded-full"
-              onClick={() => handleViewNota(selectedDemand?.id || "")}
+              onClick={() => selectedDemand && handleViewNota(selectedDemand.id)}
             >
               <FileText className="h-4 w-4 mr-1.5" />
               Nota Oficial
@@ -201,13 +202,13 @@ const ConsultarDemandasContent = () => {
           demandas={demandas as any}
           onViewDemand={handleViewDemand as any}
           onDelete={handleDelete as any}
+          onViewNota={handleViewNota}
           totalCount={totalCount}
           page={page}
           pageSize={pageSize}
           setPage={setPage}
           setPageSize={setPageSize}
           isAdmin={isAdmin}
-          onViewNota={handleViewNota}
         />
       )}
       

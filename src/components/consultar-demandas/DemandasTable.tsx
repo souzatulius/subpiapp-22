@@ -3,13 +3,14 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Demand } from '@/hooks/consultar-demandas/types';
 import { format } from 'date-fns';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export interface DemandasTableProps {
   demandas: Demand[];
   onViewDemand: (demand: Demand) => void;
   onDelete?: (demand: Demand) => void;
+  onViewNota?: (demandId: string) => void;
   totalCount: number;
   page: number;
   pageSize: number;
@@ -23,6 +24,7 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
   demandas,
   onViewDemand,
   onDelete,
+  onViewNota,
   totalCount,
   page,
   pageSize,
@@ -94,6 +96,11 @@ const DemandasTable: React.FC<DemandasTableProps> = ({
                   {isAdmin && onDelete && (
                     <Button variant="ghost" size="icon" onClick={() => onDelete(demanda)}>
                       <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {onViewNota && (
+                    <Button variant="ghost" size="icon" onClick={() => onViewNota(demanda.id)}>
+                      <FileText className="h-4 w-4" />
                     </Button>
                   )}
                 </td>

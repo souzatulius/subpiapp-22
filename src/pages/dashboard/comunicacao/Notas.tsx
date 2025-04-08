@@ -51,10 +51,7 @@ const Notas = () => {
       />
       
       <div className="mt-6">
-        <NotaForm 
-          onViewNote={handleViewNote}
-          onEditNote={handleEditNote}
-        />
+        <NotaForm />
       </div>
     </div>
   );

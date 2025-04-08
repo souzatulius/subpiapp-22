@@ -15,6 +15,9 @@ interface ProcessoListProps {
   onViewClick?: (processo: ESICProcesso) => void;
   onEditClick?: (processo: ESICProcesso) => void;
   onDeleteClick?: (processo: ESICProcesso) => void;
+  showEmptyState?: boolean;
+  processos?: ESICProcesso[];
+  isLoading?: boolean;
 }
 
 const ProcessoList: React.FC<ProcessoListProps> = ({
@@ -22,7 +25,10 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   onAddJustificativa,
   onViewClick,
   onEditClick,
-  onDeleteClick
+  onDeleteClick,
+  showEmptyState = false,
+  processos: externalProcessos,
+  isLoading: externalLoading,
 }) => {
   const { user } = useAuth();
   const [processos, setProcessos] = useState<ESICProcesso[]>([]);
@@ -30,6 +36,12 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If processos are provided externally, use those instead of fetching
+    if (externalProcessos) {
+      setProcessos(externalProcessos);
+      return;
+    }
+    
     const fetchProcessos = async () => {
       try {
         setLoading(true);
@@ -76,12 +88,12 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     };
 
     fetchProcessos();
-  }, []);
+  }, [externalProcessos]);
 
   // Filter processos based on search term
   const filteredProcessos = processos.filter(processo => {
-    return processo.assunto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           processo.protocolo.toString().includes(searchTerm.toLowerCase()) ||
+    return processo.assunto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           processo.protocolo?.toString().includes(searchTerm.toLowerCase()) ||
            (processo.solicitante?.toLowerCase() || '').includes(searchTerm.toLowerCase());
   });
 
@@ -91,16 +103,18 @@ const ProcessoList: React.FC<ProcessoListProps> = ({
     }
   };
 
-  if (loading) {
+  const isLoadingState = externalLoading !== undefined ? externalLoading : loading;
+
+  if (isLoadingState) {
     return <ProcessoListSkeleton />;
   }
 
-  if (filteredProcessos.length === 0) {
+  if ((filteredProcessos.length === 0 && !showEmptyState) || (showEmptyState && processos.length === 0)) {
     return <ProcessoListEmpty searchTerm={searchTerm} />;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 py-0">
       {filteredProcessos.map((processo) => (
         <ProcessoItem
           key={processo.id}

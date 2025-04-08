@@ -12,7 +12,7 @@ export interface ESICProcesso {
   autor_nome?: string;
   texto: string;
   situacao: string;
-  status: "aberto" | "em_andamento" | "concluido" | "cancelado";
+  status: "aberto" | "em_andamento" | "concluido" | "cancelado" | "respondido";
   autor?: {
     nome_completo: string;
   };

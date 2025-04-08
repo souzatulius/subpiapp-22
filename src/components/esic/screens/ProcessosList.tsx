@@ -63,12 +63,10 @@ const ProcessosList: React.FC<ProcessosListProps> = ({
       </div>
       
       <ProcessoList 
-        processos={filteredProcessos}
-        isLoading={isLoading}
-        onViewProcesso={onViewProcesso}
-        onEditProcesso={onEditProcesso}
-        onDeleteProcesso={onDeleteProcesso}
-        showEmptyState={processos?.length === 0}
+        searchTerm={filterTerm}
+        onViewClick={onViewProcesso}
+        onEditClick={onEditProcesso}
+        onDeleteClick={onDeleteProcesso}
       />
     </div>
   );

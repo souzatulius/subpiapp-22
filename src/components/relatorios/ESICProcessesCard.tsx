@@ -31,8 +31,8 @@ const ESICProcessesCard: React.FC<ESICProcessesCardProps> = ({ loading }) => {
         // Calculate response time average (example calculation)
         const { data: responseTimeData, error: timeError } = await supabase
           .from('esic_processos')
-          .select('criado_em, data_resposta')
-          .not('data_resposta', 'is', null)
+          .select('criado_em, atualizado_em')
+          .not('atualizado_em', 'is', null)
           .order('criado_em', { ascending: false })
           .limit(10);
 
@@ -45,10 +45,10 @@ const ESICProcessesCard: React.FC<ESICProcessesCardProps> = ({ loading }) => {
         
         if (responseTimeData && responseTimeData.length > 0) {
           responseTimeData.forEach(process => {
-            if (process.criado_em && process.data_resposta) {
+            if (process && process.criado_em && process.atualizado_em) {
               const createdDate = new Date(process.criado_em);
-              const respondedDate = new Date(process.data_resposta);
-              const diffTime = Math.abs(respondedDate.getTime() - createdDate.getTime());
+              const updatedDate = new Date(process.atualizado_em);
+              const diffTime = Math.abs(updatedDate.getTime() - createdDate.getTime());
               const diffMinutes = Math.ceil(diffTime / (1000 * 60));
               
               responseTimeTotal += diffMinutes;
@@ -98,8 +98,7 @@ const ESICProcessesCard: React.FC<ESICProcessesCardProps> = ({ loading }) => {
       title="Processos no e-SIC"
       value={esicStats?.responded || 0}
       comparison={`respondidos do total de ${esicStats?.total || 0}`}
-      footer={`${esicStats?.avgResponseTime || 0} min`}
-      footerDetail={comparisonText}
+      description={`${esicStats?.avgResponseTime || 0} min ${comparisonText}`}
       isLoading={isDataLoading}
     />
   );
