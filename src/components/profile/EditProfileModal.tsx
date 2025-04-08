@@ -206,6 +206,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setIsPhotoModalOpen(true);
   };
 
+  // Use safe typing when accessing userProfile data
+  const userCargo = userData && 'cargo_id' in userData ? userData.cargo : undefined;
+  const userCoordenacao = userData && 'coordenacao_id' in userData ? userData.coordenacao : undefined;
+  const userSupervisao = userData && 'supervisao_tecnica' in userData ? userData.supervisao_tecnica : undefined;
+  const userEmail = userData && 'email' in userData ? userData.email : '';
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -256,7 +262,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="email"
                 name="email"
-                value={(userData as UserProfile)?.email || ''}
+                value={userEmail}
                 disabled
                 className="bg-gray-100"
               />
@@ -270,7 +276,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="cargo"
                 name="cargo"
-                value={(userData as UserProfile)?.cargo || ''}
+                value={typeof userCargo === 'string' ? userCargo : userCargo?.descricao || ''}
                 disabled
                 className="bg-gray-100"
               />
@@ -284,7 +290,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="coordenacao"
                 name="coordenacao"
-                value={(userData as UserProfile)?.coordenacao || ''}
+                value={typeof userCoordenacao === 'string' ? userCoordenacao : userCoordenacao?.descricao || ''}
                 disabled
                 className="bg-gray-100"
               />
@@ -298,7 +304,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Input
                 id="supervisao_tecnica"
                 name="supervisao_tecnica"
-                value={(userData as UserProfile)?.supervisao_tecnica || ''}
+                value={userSupervisao || ''}
                 disabled
                 className="bg-gray-100"
               />

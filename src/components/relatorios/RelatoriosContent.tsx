@@ -67,10 +67,9 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
     hiddenItems,
     expandedAnalyses,
     analysisOnlyItems,
-    handleDragEnd,
-    handleToggleVisibility,
-    handleToggleAnalysis,
-    handleToggleView
+    toggleItemVisibility,
+    toggleAnalysisExpanded,
+    toggleAnalysisOnly
   } = useRelatorioItemsState(initialItems);
 
   useEffect(() => {
@@ -88,6 +87,24 @@ export const RelatoriosContent: React.FC<RelatoriosContentProps> = ({
   const esicItems = items.filter(item => ['temasESIC', 'resolucaoESIC'].includes(item.id));
 
   const loading = isLoading || dataLoading;
+
+  // Use the correct function names
+  const handleDragEnd = () => {
+    // Implementation for drag and drop functionality
+    console.log("Drag ended");
+  };
+  
+  const handleToggleVisibility = (id: string) => {
+    toggleItemVisibility(id);
+  };
+  
+  const handleToggleAnalysis = (id: string) => {
+    toggleAnalysisExpanded(id);
+  };
+  
+  const handleToggleView = (id: string) => {
+    toggleAnalysisOnly(id);
+  };
 
   return (
     <DndContext 

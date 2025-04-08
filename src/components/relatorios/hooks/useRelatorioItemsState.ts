@@ -14,6 +14,8 @@ export interface RelatorioItem {
   description?: string;
   badge?: string;
   order: number;
+  highlight?: string;  // Added to match usage in relatorioItemsFactory.ts
+  props?: any;  // Added to support props passed to components
 }
 
 export const useRelatorioItemsState = (initialItems: RelatorioItem[] = []) => {
@@ -75,6 +77,23 @@ export const useRelatorioItemsState = (initialItems: RelatorioItem[] = []) => {
       }
     });
   }, []);
+  
+  // Adding these to match usage in RelatoriosContent.tsx
+  const handleDragEnd = useCallback(() => {
+    // Implementation would go here for drag and drop functionality
+  }, []);
+  
+  const handleToggleVisibility = useCallback((id: string) => {
+    toggleItemVisibility(id);
+  }, [toggleItemVisibility]);
+  
+  const handleToggleAnalysis = useCallback((id: string) => {
+    toggleAnalysisExpanded(id);
+  }, [toggleAnalysisExpanded]);
+  
+  const handleToggleView = useCallback((id: string) => {
+    toggleAnalysisOnly(id);
+  }, [toggleAnalysisOnly]);
 
   return {
     items,
@@ -85,5 +104,9 @@ export const useRelatorioItemsState = (initialItems: RelatorioItem[] = []) => {
     toggleItemVisibility,
     toggleAnalysisExpanded,
     toggleAnalysisOnly,
+    handleDragEnd,
+    handleToggleVisibility,
+    handleToggleAnalysis, 
+    handleToggleView
   };
 };

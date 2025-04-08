@@ -1,6 +1,5 @@
 
 import { RelatorioItem } from '../hooks/useRelatorioItemsState';
-import { nanoid } from 'nanoid';
 
 interface CreateRelatorioItemsOptions {
   chartData: any;

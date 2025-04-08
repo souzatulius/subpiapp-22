@@ -136,7 +136,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               <PopoverContent className="w-auto p-0">
                 <Calendar
                   mode="single"
-                  selected={formData.aniversario as Date}
+                  selected={formData.aniversario as Date | undefined}
                   onSelect={(date) => setFormData({ ...formData, aniversario: date })}
                   initialFocus
                   captionLayout="dropdown"

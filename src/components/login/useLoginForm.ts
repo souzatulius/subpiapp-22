@@ -17,6 +17,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add isSubmitting state
 
   const handleEmailChange = (newEmail: string) => {
     setEmail(newEmail);
@@ -48,6 +49,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
     if (hasError) return;
 
     setLoading(true);
+    setIsSubmitting(true); // Set isSubmitting to true during login
 
     try {
       const completeEmail = completeEmailWithDomain(email);
@@ -72,12 +74,14 @@ export const useLoginForm = (navigate: NavigateFunction) => {
       });
     } finally {
       setLoading(false);
+      setIsSubmitting(false); // Reset isSubmitting when done
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
+      setIsSubmitting(true); // Set isSubmitting to true during Google login
       await signInWithGoogle();
     } catch (error) {
       toast({
@@ -87,6 +91,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
       });
     } finally {
       setLoading(false);
+      setIsSubmitting(false); // Reset isSubmitting when done
     }
   };
 
@@ -97,6 +102,7 @@ export const useLoginForm = (navigate: NavigateFunction) => {
     authLoading,
     emailError,
     passwordError,
+    isSubmitting, // Include isSubmitting in the return value
     handleEmailChange,
     handlePasswordChange,
     handleLogin,
