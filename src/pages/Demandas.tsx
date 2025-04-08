@@ -19,7 +19,7 @@ const Demandas = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
+    <div className="min-h-screen flex flex-col bg-[#FFFAFA]">
       {/* Header */}
       <div className="transition-all duration-300">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
@@ -37,22 +37,13 @@ const Demandas = () => {
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
 
         {/* Main content */}
-        <div 
-          className="flex-1 w-full"
-          style={{
-            backgroundImage: 'url("/lovable-uploads/1acadb74-1581-4ff3-9b91-3b74acef114f.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: '0.8'
-          }}
-        >
+        <div className="flex-1 w-full bg-[#FFFAFA]">
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           
           <div className="max-w-7xl mx-auto">
             <Layout>
-              <div className={`${isMobile ? 'pb-32' : 'pb-20'}`}>
+              <div className={`${isMobile ? 'pb-32' : ''}`}>
                 <DemandasContent />
               </div>
             </Layout>

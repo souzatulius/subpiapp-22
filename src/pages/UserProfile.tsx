@@ -64,22 +64,13 @@ const UserProfile: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen bg-[#FFFAFA]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         
         <div className="flex flex-1">
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main 
-            className="flex-1"
-            style={{
-              backgroundImage: 'url("/lovable-uploads/1acadb74-1581-4ff3-9b91-3b74acef114f.png")',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              opacity: '0.8'
-            }}
-          >
+          <main className="flex-1 bg-[#FFFAFA]">
             {!isMobile && <BreadcrumbBar />}
             
             <div className="container max-w-7xl mx-auto">

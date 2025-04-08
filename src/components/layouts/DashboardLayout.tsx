@@ -32,7 +32,7 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gray-50 min-h-screen">
+    <div className="flex flex-col bg-[#FFFAFA] min-h-screen">
       <div className="transition-all duration-300 min-h-[64px]">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
         {/* Desktop breadcrumb - now attached directly to header */}
@@ -42,19 +42,11 @@ const DashboardLayout: React.FC = () => {
       <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main className="flex-1 w-full transition-all duration-300" 
-          style={{
-            backgroundImage: 'url("/lovable-uploads/1acadb74-1581-4ff3-9b91-3b74acef114f.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: '0.8'
-          }}
-        >
+        <main className="flex-1 w-full transition-all duration-300 bg-[#FFFAFA]">
           <div className="max-w-7xl mx-auto w-full flex-1">
             <motion.div 
               className={`p-2 sm:p-4 ${isMobile ? 'pb-16 pt-0' : 'pb-6'} h-full`}
-              initial={{ opacity: 0, y: 20 }} 
+              initial={{ opacity: 1, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.5 }}
             >

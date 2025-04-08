@@ -161,7 +161,7 @@ const NotasOficiais = () => {
 
   return (
     <AdminProtectedRoute>
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-[#FFFAFA]">
         <div className="transition-all duration-300">
           <Header showControls={true} toggleSidebar={toggleSidebar} />
           
@@ -175,15 +175,7 @@ const NotasOficiais = () => {
         <div className="flex flex-1 relative">
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <div 
-            className="flex-1 w-full"
-            style={{
-              backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
-          >
+          <div className="flex-1 w-full bg-[#FFFAFA]">
             {!isMobile && <BreadcrumbBar />}
             
             <Layout>

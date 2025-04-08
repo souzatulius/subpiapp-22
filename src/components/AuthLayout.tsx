@@ -15,7 +15,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen flex flex-col bg-white md:bg-transparent">
+    <div className="min-h-screen flex flex-col bg-white md:bg-[#FFFAFA]">
       {/* Header - explicitly pass hideUserMenu={true} for auth pages */}
       <Header showControls={false} hideUserMenu={true} />
 
@@ -28,16 +28,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           </div>
         )}
 
-        {/* Right side - Dynamic content with background image apenas no desktop */}
+        {/* Right side - Dynamic content */}
         <div 
-          className="w-full min-h-[calc(100vh-80px)] md:min-h-0 md:w-1/2 flex flex-col items-center justify-center p-4 md:p-8 md:pl-[50px] relative bg-subpi-blue md:bg-subpi-blue" 
-          style={!isMobile ? {
-            backgroundImage: 'url("/lovable-uploads/1acadb74-1581-4ff3-9b91-3b74acef114f.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'left center',
-            backgroundRepeat: 'no-repeat',
-            opacity: '0.8'
-          } : undefined}
+          className="w-full min-h-[calc(100vh-80px)] md:min-h-0 md:w-1/2 flex flex-col items-center justify-center p-4 md:p-8 md:pl-[50px] relative bg-subpi-blue md:bg-[#FFFAFA]"
         >
           <div className="w-full flex justify-center items-center animate-fade-right">
             {children}

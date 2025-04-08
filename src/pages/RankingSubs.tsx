@@ -22,7 +22,7 @@ const RankingSubs = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-[#FFFAFA]">
       {/* Header */}
       <div className="transition-all duration-300">
         <Header showControls={true} toggleSidebar={toggleSidebar} />
@@ -38,16 +38,7 @@ const RankingSubs = () => {
       <div className="flex flex-1 relative">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main 
-          className="flex-1 w-full"
-          style={{
-            backgroundImage: 'url("/lovable-uploads/1acadb74-1581-4ff3-9b91-3b74acef114f.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: '0.8'
-          }}
-        >
+        <main className="flex-1 w-full bg-[#FFFAFA]">
           {/* Desktop breadcrumb */}
           {!isMobile && <BreadcrumbBar />}
           

@@ -50,7 +50,7 @@ const Settings = () => {
   
   return (
     <AdminProtectedRoute>
-      <div className="flex flex-col bg-gray-50">
+      <div className="flex flex-col bg-[#FFFAFA]">
         {/* Header */}
         <div 
           style={isMobile ? scrollFadeStyles : undefined}
@@ -63,15 +63,7 @@ const Settings = () => {
           {/* Only show sidebar on desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main 
-            className={`flex-1 ${isMobile ? 'pt-0' : ''}`}
-            style={{
-              backgroundImage: 'url("/lovable-uploads/1acadb74-1581-4ff3-9b91-3b74acef114f.png")',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
-          >
+          <main className={`flex-1 ${isMobile ? 'pt-0' : ''} bg-[#FFFAFA]`}>
             {/* Desktop breadcrumb - only show on desktop before content */}
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
             

@@ -136,7 +136,7 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-[#FFFAFA]">
       <div className={`${isMobile ? 'transition-all duration-300' : ''}`}>
         <Header showControls={true} toggleSidebar={toggleSidebar} />
       </div>
@@ -144,15 +144,7 @@ const DashboardPage: React.FC = () => {
       <div className="flex flex-1 overflow-hidden">
         {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
         
-        <main 
-          className={`flex-1 overflow-auto`}
-          style={{
-            backgroundImage: 'url("/lovable-uploads/d623f576-9d17-4166-83a8-824bc438a8bf.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        >
+        <main className="flex-1 overflow-auto bg-[#FFFAFA]">
           {!isMobile && <BreadcrumbBar />}
           
           <motion.div 
