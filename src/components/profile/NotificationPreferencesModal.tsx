@@ -81,14 +81,16 @@ const NotificationPreferencesModal: React.FC<NotificationPreferencesModalProps> 
       if (error) throw error;
       
       if (data?.configuracoes_notificacao) {
+        const notifConfig = data.configuracoes_notificacao as any;
+        
         setPreferences({
-          app: data.configuracoes_notificacao.app ?? true,
-          email: data.configuracoes_notificacao.email ?? true,
-          whatsapp: data.configuracoes_notificacao.whatsapp ?? false,
+          app: notifConfig.app ?? true,
+          email: notifConfig.email ?? true,
+          whatsapp: notifConfig.whatsapp ?? false,
           frequency: {
-            app: data.configuracoes_notificacao.frequency?.app || 'imediata',
-            email: data.configuracoes_notificacao.frequency?.email || 'diaria',
-            whatsapp: data.configuracoes_notificacao.frequency?.whatsapp || 'periodica'
+            app: notifConfig.frequency?.app || 'imediata',
+            email: notifConfig.frequency?.email || 'diaria',
+            whatsapp: notifConfig.frequency?.whatsapp || 'periodica'
           }
         });
       }
@@ -113,7 +115,7 @@ const NotificationPreferencesModal: React.FC<NotificationPreferencesModalProps> 
       const { error } = await supabase
         .from('usuarios')
         .update({
-          configuracoes_notificacao: preferences
+          configuracoes_notificacao: preferences as any
         })
         .eq('id', user.id);
       
