@@ -1,10 +1,12 @@
+
 import React from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { SortableUnifiedActionCard } from './UnifiedActionCard';
-import { getWidthClass, getHeightClass } from './CardGrid';
+import { getWidthClass, getHeightClass } from './grid/GridUtilities';
 import { ActionCardItem } from '@/types/dashboard';
 import { useGridOccupancy } from '@/hooks/dashboard/useGridOccupancy';
+
 export interface UnifiedCardGridProps {
   cards: ActionCardItem[];
   onCardsChange: (cards: ActionCardItem[]) => void;
@@ -20,7 +22,9 @@ export interface UnifiedCardGridProps {
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
   specialCardsData?: any;
+  renderSpecialCardContent?: (cardId: string, card?: ActionCardItem) => React.ReactNode;
 }
+
 const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   cards = [],
   onCardsChange,
@@ -35,13 +39,15 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
   onSearchSubmit,
-  specialCardsData
+  specialCardsData,
+  renderSpecialCardContent
 }) => {
   const sensors = useSensors(useSensor(PointerSensor, {
     activationConstraint: {
       distance: 5
     }
   }), useSensor(KeyboardSensor));
+  
   const handleDragEnd = (event: DragEndEvent) => {
     const {
       active,
@@ -65,10 +71,12 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
       }
     }
   };
+  
   const visibleCards = cards.filter(card => !card.isHidden);
 
   // Sort cards by mobileOrder when in mobile view
   const displayedCards = isMobileView ? visibleCards.filter(card => card.displayMobile !== false).sort((a, b) => (a.mobileOrder ?? 999) - (b.mobileOrder ?? 999)) : visibleCards;
+  
   const {
     occupiedSlots
   } = useGridOccupancy(displayedCards.map(card => ({
@@ -77,15 +85,55 @@ const UnifiedCardGrid: React.FC<UnifiedCardGridProps> = ({
     height: card.height || '1',
     type: card.type
   })), isMobileView);
+
   if (!displayedCards || displayedCards.length === 0) {
     return <div className="p-4 text-center text-gray-500">
         Nenhum card disponível para exibir.
       </div>;
   }
-  return <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className={`w-full grid gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
-        
-      </div>
-    </DndContext>;
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={displayedCards.map(card => card.id)}>
+        <div className={`w-full grid auto-rows-[80px] gap-y-3 gap-x-3 ${isMobileView ? 'grid-cols-2' : 'grid-cols-4'}`}>
+          {displayedCards.map(card => (
+            <SortableUnifiedActionCard
+              key={card.id}
+              id={card.id}
+              title={card.title}
+              subtitle={card.subtitle}
+              iconId={card.iconId}
+              path={card.path}
+              color={card.color}
+              isDraggable={!isEditMode}
+              isEditing={isEditMode}
+              width={card.width}
+              height={card.height}
+              type={card.type}
+              onEdit={onEditCard ? () => onEditCard(card) : undefined}
+              onDelete={onDeleteCard ? () => onDeleteCard(card.id) : undefined}
+              onHide={onHideCard ? () => onHideCard(card.id) : undefined}
+              disableWiggleEffect={disableWiggleEffect}
+              isQuickDemand={card.isQuickDemand}
+              isSearch={card.isSearch || card.type === 'smart_search'}
+              isPendingActions={card.isPendingActions}
+              showSpecialFeatures={showSpecialFeatures}
+              quickDemandTitle={quickDemandTitle}
+              onQuickDemandTitleChange={onQuickDemandTitleChange}
+              onQuickDemandSubmit={onQuickDemandSubmit}
+              onSearchSubmit={onSearchSubmit}
+              specialCardsData={specialCardsData}
+              isCustom={card.isCustom}
+              hasBadge={card.hasBadge}
+              badgeValue={card.badgeValue}
+              isMobileView={isMobileView}
+              specialContent={renderSpecialCardContent && renderSpecialCardContent(card.id, card)}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
 };
+
 export default UnifiedCardGrid;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -12,7 +13,8 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
-import DashboardSearchCard from '@/components/dashboard/DashboardSearchCard';
+import SmartSearchCard from '@/components/dashboard/SmartSearchCard';
+import PendingActionsCard from '@/components/dashboard/cards/PendingActionsCard';
 import { ActionCardItem, CardHeight } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,6 +22,8 @@ import { Button } from '@/components/ui/button';
 import { useScrollFade } from '@/hooks/useScrollFade';
 import { motion } from 'framer-motion';
 import { useCardStorage } from '@/hooks/dashboard/useCardStorage';
+import { useSpecialCardsData } from '@/hooks/dashboard/useSpecialCardsData';
+import { v4 as uuidv4 } from 'uuid';
 
 const DashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,6 +50,7 @@ const DashboardPage: React.FC = () => {
   } = useDashboardCards();
 
   const { saveCardConfig, isSaving } = useCardStorage(user, userCoordenaticaoId);
+  const specialCardsData = useSpecialCardsData();
 
   const scrollFadeStyles = useScrollFade();
 
@@ -104,53 +109,151 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  const handleSearchSubmit = (query: string) => {
+    toast({
+      title: "Pesquisa realizada",
+      description: `Você pesquisou: ${query}`,
+      variant: "default"
+    });
+  };
+
+  const renderSpecialCardContent = (cardId: string, card?: ActionCardItem) => {
+    if (card?.type === 'smart_search' || cardId === 'dashboard-search-card') {
+      return <SmartSearchCard onSearch={handleSearchSubmit} />;
+    }
+    
+    if (card?.isPendingActions || card?.type === 'in_progress_demands' || cardId === 'pending-actions-card') {
+      return (
+        <PendingActionsCard
+          id={cardId}
+          notesToApprove={specialCardsData.notesToApprove}
+          responsesToDo={specialCardsData.responsesToDo}
+          isComunicacao={specialCardsData.isComunicacao}
+          userDepartmentId={specialCardsData.userCoordenaticaoId || ''}
+        />
+      );
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
     if (cards && cards.length > 0 && !searchCardAdded) {
-      const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
-      
-      if (!searchCardExists) {
-        const searchCard: ActionCardItem = {
+      // Define our standard dashboard cards
+      const desiredCards: ActionCardItem[] = [
+        // Search card (2 columns x 1 row)
+        {
           id: 'dashboard-search-card',
-          title: 'Busca Rápida',
-          iconId: 'search',
+          title: 'O que deseja fazer?',
+          iconId: 'Search',
           path: '',
           color: 'bg-white',
-          width: '100',
-          height: '0.5',
+          width: '50',
+          height: '1',
           type: 'smart_search',
           isSearch: true,
           displayMobile: true,
+          mobileOrder: 0
+        },
+        // Pending Actions card (2 columns x 2 rows)
+        {
+          id: 'pending-actions-card',
+          title: 'Ações Pendentes',
+          iconId: 'AlertTriangle',
+          path: '',
+          color: 'bg-orange-500',
+          width: '50',
+          height: '2',
+          type: 'in_progress_demands',
+          isPendingActions: true,
+          displayMobile: true,
           mobileOrder: 1
-        };
-        
-        const updatedCards = cards.map(card => {
-          if (card.title === 'Relatórios' || card.title.includes('Relatório')) {
-            return { ...card, height: '2' as CardHeight };
-          }
-          
-          if (card.title === 'Nova Solicitação') {
-            return { ...card, height: '0.5' as CardHeight };
-          }
-          
-          if (
-            (card.title === 'Demandas' ||
-             card.title === 'Avisos' ||
-             card.title === 'Responder Demandas' ||
-             card.title === 'Ranking') &&
-            card.height === '2'
-          ) {
-            return { ...card, height: '1' as CardHeight };
-          }
-          
-          return card;
-        });
-        
-        const finalCards: ActionCardItem[] = [searchCard, ...updatedCards];
-        handleCardsChange(finalCards);
-        setSearchCardAdded(true);
-      }
+        },
+        // Nueva Demanda
+        {
+          id: uuidv4(),
+          title: 'Nova Demanda',
+          iconId: 'PenLine',
+          path: '/dashboard/comunicacao/cadastrar',
+          color: 'deep-blue',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 2
+        },
+        // Notas de Imprensa
+        {
+          id: uuidv4(),
+          title: 'Notas de Imprensa',
+          iconId: 'FileText',
+          path: '/dashboard/comunicacao/notas',
+          color: 'blue-light',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 3
+        },
+        // Notícias e Releases
+        {
+          id: uuidv4(),
+          title: 'Notícias e Releases',
+          iconId: 'Newspaper',
+          path: '/dashboard/comunicacao/releases',
+          color: 'orange-light',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 4
+        },
+        // Relatórios da Comunicação
+        {
+          id: uuidv4(),
+          title: 'Relatórios da Comunicação',
+          iconId: 'PieChart',
+          path: '/dashboard/comunicacao/relatorios',
+          color: 'blue-vivid',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 5
+        },
+        // Ranking da Zeladoria
+        {
+          id: uuidv4(),
+          title: 'Ranking da Zeladoria',
+          iconId: 'TrendingUp',
+          path: '/dashboard/zeladoria/ranking-subs',
+          color: 'green-neon',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 6
+        },
+        // Ajustes do Perfil
+        {
+          id: uuidv4(),
+          title: 'Ajustes do Perfil',
+          iconId: 'UserCog',
+          path: '/profile',
+          color: 'gray-medium',
+          width: '25',
+          height: '1',
+          type: 'standard',
+          displayMobile: true,
+          mobileOrder: 7
+        }
+      ];
+      
+      // Replace existing cards with our desired layout
+      handleCardsChange(desiredCards);
+      setSearchCardAdded(true);
     }
-  }, [cards, searchCardAdded]);
+  }, [cards, searchCardAdded, handleCardsChange]);
 
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;
@@ -221,6 +324,9 @@ const DashboardPage: React.FC = () => {
                       onHideCard={handleHideCard}
                       isMobileView={isMobile}
                       isEditMode={isEditMode}
+                      onSearchSubmit={handleSearchSubmit}
+                      specialCardsData={specialCardsData}
+                      renderSpecialCardContent={renderSpecialCardContent}
                     />
                   </div>
                 )}

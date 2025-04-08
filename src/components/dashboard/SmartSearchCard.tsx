@@ -35,7 +35,8 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
     { keywords: ['recusar', 'reprovar', 'nota'], title: 'Recusar Nota', route: '/dashboard/comunicacao/aprovar-nota' },
     { keywords: ['avisos', 'notificação'], title: 'Avisos', route: '/notifications' },
     { keywords: ['coordenação', 'áreas'], title: 'Coordenação', route: '/settings/coordination-areas' },
-    { keywords: ['notificação', 'aviso'], title: 'Notificações', route: '/notifications' }
+    { keywords: ['notificação', 'aviso'], title: 'Notificações', route: '/notifications' },
+    { keywords: ['editar'], title: 'Editar Perfil', route: '/profile/edit' }
   ];
 
   // Filter suggestions based on query

@@ -2,15 +2,13 @@
 import React from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import UnifiedCardGrid from './UnifiedCardGrid';
-import { useSpecialCardsData } from '@/hooks/dashboard/useSpecialCardsData';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface CardGridContainerProps {
   cards: ActionCardItem[];
   onCardsChange: (cards: ActionCardItem[]) => void;
   onEditCard?: (card: ActionCardItem) => void;
   onHideCard?: (id: string) => void;
-  onAddNewCard?: () => void;
+  onDeleteCard?: (id: string) => void;
   isMobileView?: boolean;
   isEditMode?: boolean;
   disableWiggleEffect?: boolean;
@@ -19,70 +17,47 @@ interface CardGridContainerProps {
   onQuickDemandTitleChange?: (value: string) => void;
   onQuickDemandSubmit?: () => void;
   onSearchSubmit?: (query: string) => void;
+  specialCardsData?: any;
   renderSpecialCardContent?: (cardId: string, card?: ActionCardItem) => React.ReactNode;
 }
 
 const CardGridContainer: React.FC<CardGridContainerProps> = ({
-  cards = [],
+  cards,
   onCardsChange,
   onEditCard,
   onHideCard,
-  onAddNewCard,
+  onDeleteCard,
   isMobileView = false,
   isEditMode = false,
-  disableWiggleEffect = true,
+  disableWiggleEffect = false,
   showSpecialFeatures = true,
   quickDemandTitle,
   onQuickDemandTitleChange,
   onQuickDemandSubmit,
   onSearchSubmit,
+  specialCardsData,
   renderSpecialCardContent
 }) => {
-  const {
-    overdueCount,
-    overdueItems,
-    notesToApprove,
-    responsesToDo,
-    isLoading: isLoadingSpecialData,
-    isComunicacao,
-    userCoordenaticaoId
-  } = useSpecialCardsData();
-
-  const specialCardsData = {
-    overdueCount,
-    overdueItems,
-    notesToApprove,
-    responsesToDo,
-    isLoading: isLoadingSpecialData,
-    coordenacaoId: userCoordenaticaoId || '',
-    usuarioId: '',
-    isComunicacao,
-    renderSpecialCardContent
-  };
-
-  return isLoadingSpecialData ? (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <Skeleton key={index} className="h-32 w-full rounded-lg" />
-      ))}
+  return (
+    <div>
+      <UnifiedCardGrid
+        cards={cards}
+        onCardsChange={onCardsChange}
+        onEditCard={onEditCard}
+        onHideCard={onHideCard}
+        onDeleteCard={onDeleteCard}
+        isMobileView={isMobileView}
+        isEditMode={isEditMode}
+        disableWiggleEffect={disableWiggleEffect}
+        showSpecialFeatures={showSpecialFeatures}
+        quickDemandTitle={quickDemandTitle}
+        onQuickDemandTitleChange={onQuickDemandTitleChange}
+        onQuickDemandSubmit={onQuickDemandSubmit}
+        onSearchSubmit={onSearchSubmit}
+        specialCardsData={specialCardsData}
+        renderSpecialCardContent={renderSpecialCardContent}
+      />
     </div>
-  ) : (
-    <UnifiedCardGrid
-      cards={cards}
-      onCardsChange={onCardsChange}
-      onEditCard={onEditCard}
-      onDeleteCard={onHideCard}
-      onHideCard={onHideCard}
-      isMobileView={isMobileView}
-      isEditMode={isEditMode}
-      disableWiggleEffect={disableWiggleEffect}
-      showSpecialFeatures={showSpecialFeatures}
-      quickDemandTitle={quickDemandTitle}
-      onQuickDemandTitleChange={onQuickDemandTitleChange}
-      onQuickDemandSubmit={onQuickDemandSubmit}
-      onSearchSubmit={onSearchSubmit}
-      specialCardsData={specialCardsData}
-    />
   );
 };
 

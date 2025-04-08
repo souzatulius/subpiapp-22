@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { CardType } from '@/types/dashboard';
 
@@ -34,7 +33,7 @@ const widthToSlots = (width: string, isMobileView: boolean): number => {
 // Convert height string to number of rows
 const heightToSlots = (height: string): number => {
   switch (height) {
-    case '0.5': return 1;  // Half height row
+    case '0.5': return 1;  // Half height still takes 1 row in grid
     case '1': return 1;    // Standard row (1 row unit)
     case '2': return 2;    // Double height (2 row units)
     case '3': return 3;    // Triple height (3 row units)
@@ -50,13 +49,8 @@ export const getMinimumWidth = (type?: string, isMobileView: boolean = false): s
   }
   
   // For desktop
-  if (type === 'data_dynamic') {
+  if (type === 'data_dynamic' || type === 'smart_search' || type === 'in_progress_demands') {
     return '50'; // Dynamic cards need at least 2 columns
-  }
-  
-  // Card "Demandas em Andamento" should be larger
-  if (type === 'in_progress_demands') {
-    return '50'; // 2 columns
   }
   
   return '25'; // Default minimum width (1 column)

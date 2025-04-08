@@ -24,16 +24,16 @@ export const getWidthClass = (width: CardWidth = '25', isMobileView: boolean = f
 export const getHeightClass = (height: CardHeight = '1'): string => {
   switch (height) {
     case '4':
-      return 'h-[32rem] row-span-4'; // 512px
+      return 'h-full row-span-4'; // 4 rows
     case '3':
-      return 'h-[24rem] row-span-3'; // 384px
+      return 'h-full row-span-3'; // 3 rows
     case '2':
-      return 'h-[16rem] row-span-2'; // 256px (adjusted from 20rem)
+      return 'h-full row-span-2'; // 2 rows
     case '1':
-      return 'h-[10rem] row-span-1'; // 160px
+      return 'h-full row-span-1'; // 1 row
     case '0.5':
-      return 'h-[5rem] row-span-1';  // 80px (adjusted from 4rem)
+      return 'h-full row-span-1';  // half row (still takes 1 grid row)
     default:
-      return 'h-[10rem] row-span-1'; // 160px default
+      return 'h-full row-span-1';
   }
 };
