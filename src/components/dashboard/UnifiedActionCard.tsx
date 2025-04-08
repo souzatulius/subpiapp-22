@@ -1,15 +1,17 @@
+
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ActionCardItem, CardWidth, CardHeight, CardColor, CardType } from '@/types/dashboard';
 import ActionCard from './ActionCard';
-import { PencilLine, Trash2, EyeOff } from 'lucide-react';
+import { PencilLine, Trash2, EyeOff, FileText } from 'lucide-react';
 import KPICard from '@/components/settings/dashboard-management/KPICard';
 import DynamicListCard from '@/components/settings/dashboard-management/DynamicListCard';
 import OriginSelectionCard from './cards/OriginSelectionCard';
 import SmartSearchCard from './SmartSearchCard';
 import CardControls from './card-parts/CardControls';
 import { useNavigate } from 'react-router-dom';
+import * as LucideIcons from 'lucide-react';
 
 export interface Controls {
   cardId: string;
@@ -163,6 +165,26 @@ export function UnifiedActionCard({
 }: UnifiedActionCardProps & { sortableProps?: SortableProps }) {
   const navigate = useNavigate();
   
+  const getIconComponent = () => {
+    if (!iconId) return null;
+    
+    // Try direct match first
+    if (LucideIcons[iconId as keyof typeof LucideIcons]) {
+      return LucideIcons[iconId as keyof typeof LucideIcons];
+    }
+    
+    // Try capitalized format
+    const formattedIconId = iconId.charAt(0).toUpperCase() + iconId.slice(1);
+    if (LucideIcons[formattedIconId as keyof typeof LucideIcons]) {
+      return LucideIcons[formattedIconId as keyof typeof LucideIcons];
+    }
+    
+    // Return default icon as fallback
+    return FileText;
+  };
+  
+  const IconComponent = getIconComponent();
+  
   const handleCardClick = () => {
     if (path && !isEditing) {
       navigate(path);
@@ -289,6 +311,6 @@ export function UnifiedActionCard({
       )}
     </div>
   );
-}
+};
 
 export default UnifiedActionCard;

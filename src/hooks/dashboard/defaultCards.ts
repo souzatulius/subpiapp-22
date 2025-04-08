@@ -1,48 +1,23 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCardItem } from '@/types/dashboard';
 import React from 'react';
+import * as LucideIcons from 'lucide-react';
 
 // Function to get a Lucide icon component by its ID string
 export const getIconComponentFromId = (iconId: string) => {
-  const IconMap: Record<string, () => Promise<any>> = {
-    'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
-    'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
-    'file-check': () => import('lucide-react').then(mod => mod.FileCheck),
-    'bar-chart-2': () => import('lucide-react').then(mod => mod.BarChart2),
-    'plus-circle': () => import('lucide-react').then(mod => mod.PlusCircle),
-    'search': () => import('lucide-react').then(mod => mod.Search),
-    'file-text': () => import('lucide-react').then(mod => mod.FileText),
-    'list-filter': () => import('lucide-react').then(mod => mod.ListFilter),
-    'clock': () => import('lucide-react').then(mod => mod.Clock),
-    'alert-triangle': () => import('lucide-react').then(mod => mod.AlertTriangle),
-    'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
-    'bell': () => import('lucide-react').then(mod => mod.Bell),
-    'trending-up': () => import('lucide-react').then(mod => mod.TrendingUp),
-    'pencil': () => import('lucide-react').then(mod => mod.Pencil),
-    'pie-chart': () => import('lucide-react').then(mod => mod.PieChart),
-    'message-square': () => import('lucide-react').then(mod => mod.MessageSquare),
-    // Add more icons as needed
-  };
+  // First try to access the icon directly from LucideIcons
+  if (iconId && LucideIcons[iconId as keyof typeof LucideIcons]) {
+    return LucideIcons[iconId as keyof typeof LucideIcons];
+  }
   
-  // Create a lazy-loaded component without using JSX directly
-  const LoadedIcon = React.lazy(() => 
-    IconMap[iconId] ? IconMap[iconId]() : import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
-  );
+  // If not found, use a standardized format to match our naming convention
+  const formattedIconId = iconId?.charAt(0).toUpperCase() + iconId?.slice(1);
+  if (formattedIconId && LucideIcons[formattedIconId as keyof typeof LucideIcons]) {
+    return LucideIcons[formattedIconId as keyof typeof LucideIcons];
+  }
   
-  // Return a function that creates the component
-  return function IconComponent(props: any) {
-    // This function will be used in a React component where JSX is available
-    return React.createElement(
-      React.Suspense,
-      { 
-        fallback: React.createElement('div', { 
-          className: "w-6 h-6 bg-gray-200 animate-pulse rounded-full" 
-        })
-      },
-      React.createElement(LoadedIcon, props)
-    );
-  };
+  // Return a default icon as fallback
+  return LucideIcons.FileText;
 };
 
 // Get default cards
