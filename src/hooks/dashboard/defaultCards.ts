@@ -5,7 +5,7 @@ import React from 'react';
 
 // Function to get a Lucide icon component by its ID string
 export const getIconComponentFromId = (iconId: string) => {
-  const IconMap = {
+  const IconMap: Record<string, () => Promise<any>> = {
     'clipboard-list': () => import('lucide-react').then(mod => mod.ClipboardList),
     'message-square-reply': () => import('lucide-react').then(mod => mod.MessageSquareReply),
     'file-check': () => import('lucide-react').then(mod => mod.FileCheck),
@@ -21,7 +21,7 @@ export const getIconComponentFromId = (iconId: string) => {
   };
   
   const LoadedIcon = React.lazy(() => 
-    IconMap[iconId]?.() || import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
+    IconMap[iconId] ? IconMap[iconId]() : import('lucide-react').then(mod => ({ default: mod.ClipboardList }))
   );
   
   return (props: any) => (
