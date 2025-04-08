@@ -119,8 +119,8 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
           return `flex items-center px-4 py-3 rounded-xl mb-1 ${active ? 'bg-[#174ba9] text-white' : 'text-gray-300 hover:bg-[#0c2d45]'} transition-colors`;
         }}
       >
-        <div className="flex-shrink-0 w-10 h-10 text-[#f57737]">{icon}</div>
-        <span className={`ml-3 text-lg font-bold ${isOpen ? 'block' : 'hidden'}`}>{label}</span>
+        <div className="flex-shrink-0 w-5 h-5 text-[#f57737]">{icon}</div>
+        <span className={`ml-3 text-lg ${isOpen ? 'block' : 'hidden'}`}>{label}</span>
       </NavLink>
     );
   }
@@ -132,9 +132,9 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
         className="flex items-center px-4 py-3 text-gray-200 hover:bg-[#0c2d45] transition-colors font-medium rounded-xl mb-1 w-full"
         title={!isOpen ? label : undefined}
       >
-        <div className="flex-shrink-0 w-10 h-10 text-[#f57737]">{icon}</div>
+        <div className="flex-shrink-0 w-5 h-5 text-[#f57737]">{icon}</div>
         {isOpen && (
-          <span className="ml-3 text-lg font-bold">{label}</span>
+          <span className="ml-3 text-lg">{label}</span>
         )}
       </button>
       
@@ -144,7 +144,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
             <div key={subSection.id} className="ml-3 mt-1 mb-2">
               <button 
                 onClick={() => toggleSection(subSection.id)}
-                className="flex items-center px-3 py-2 text-gray-300 hover:bg-[#0c2d45] transition-colors w-full text-left text-lg font-bold rounded-xl"
+                className="flex items-center px-3 py-2 text-gray-300 hover:bg-[#0c2d45] transition-colors w-full text-left text-lg rounded-xl"
               >
                 <span>{subSection.label}</span>
               </button>
@@ -158,10 +158,10 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                         className={({isActive}) => {
                           // Override isActive with our custom logic
                           const active = isLinkActive(item.path);
-                          return `flex items-center py-2 px-3 ${active ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-lg font-bold`;
+                          return `flex items-center py-2 px-3 ${active ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-lg`;
                         }}
                       >
-                        <div className="flex-shrink-0 w-10 h-10 mr-2 text-[#f57737]">{item.icon}</div>
+                        <div className="flex-shrink-0 w-5 h-5 mr-2 text-[#f57737]">{item.icon}</div>
                         <span>{item.label}</span>
                       </NavLink>
                     </li>
@@ -182,10 +182,10 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
                 className={({isActive}) => {
                   // Override isActive with our custom logic
                   const active = isLinkActive(item.path);
-                  return `flex items-center py-2 px-3 ${active ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-lg font-bold`;
+                  return `flex items-center py-2 px-3 ${active ? 'text-[#f57737] bg-[#0c2d45]' : 'text-gray-300 hover:bg-[#0c2d45]'} rounded-xl transition-colors text-lg`;
                 }}
               >
-                <div className="flex-shrink-0 w-10 h-10 mr-2 text-[#f57737]">{item.icon}</div>
+                <div className="flex-shrink-0 w-5 h-5 mr-2 text-[#f57737]">{item.icon}</div>
                 <span>{item.label}</span>
               </NavLink>
             </li>
