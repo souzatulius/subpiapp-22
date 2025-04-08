@@ -171,7 +171,7 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
               
-              <div className="flex items-center space-x-4 justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <DashboardSearchCard />
                 </div>
@@ -179,7 +179,7 @@ const DashboardPage: React.FC = () => {
                   variant="outline" 
                   size="lg" 
                   onClick={handleResetDashboard}
-                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-8"
+                  className="text-blue-600 border-blue-300 hover:bg-blue-50 py-8 whitespace-nowrap"
                   disabled={isSaving}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />

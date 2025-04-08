@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -130,14 +131,19 @@ const DashboardSearchCard: React.FC<DashboardSearchCardProps> = ({
       e.stopPropagation();
     }
   };
-  return <div className="w-full h-full bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center">
-      <form onSubmit={handleSubmit} className="w-full h-full flex items-center" onMouseDown={handleMouseDown}>
-        <div className="relative w-full h-full flex items-center">
-          
-          
-          <button type="submit" className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2" onMouseDown={handleMouseDown}>
-            
-          </button>
+  return <div className="relative w-full">
+      <form onSubmit={handleSubmit} className="w-full" onMouseDown={handleMouseDown}>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+          <input
+            type="text"
+            className="pl-10 pr-4 py-8 rounded-xl border border-gray-300 w-full bg-white text-lg text-gray-800 placeholder:text-gray-400 placeholder:font-normal"
+            placeholder="O que você procura?"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={handleBlur}
+          />
         </div>
         
         {/* Suggestions dropdown */}
