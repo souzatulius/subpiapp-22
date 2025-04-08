@@ -19,6 +19,12 @@ interface PendingDemand {
   prazo: string;
 }
 
+interface PendingNote {
+  id: string;
+  titulo: string;
+  data: string;
+}
+
 const PendingActionsCard: React.FC<PendingActionsProps> = ({ 
   id, 
   notesToApprove, 
@@ -29,25 +35,27 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
   const navigate = useNavigate();
   const [demandsNeedingNota, setDemandsNeedingNota] = useState<number>(0);
   const [pendingDemands, setPendingDemands] = useState<PendingDemand[]>([]);
+  const [pendingNotes, setPendingNotes] = useState<PendingNote[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
   useEffect(() => {
     const fetchPendingActions = async () => {
       setIsLoading(true);
       try {
+        // Different queries based on user role
         if (isComunicacao) {
           // For communication team: find all demands that need attention
-          const { data, error } = await supabase
+          const { data: demandData, error: demandError } = await supabase
             .from('demandas')
             .select('id, titulo, prazo_resposta')
             .in('status', ['em_analise', 'aberta'])
             .order('prazo_resposta', { ascending: true })
             .limit(5);
           
-          if (error) throw error;
+          if (demandError) throw demandError;
           
           // Format demands with readable dates
-          const formattedDemands = (data || []).map(demand => ({
+          const formattedDemands = (demandData || []).map(demand => ({
             id: demand.id,
             titulo: demand.titulo,
             prazo: new Date(demand.prazo_resposta).toLocaleDateString('pt-BR')
@@ -64,26 +72,63 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
           
           if (notaError) throw notaError;
           setDemandsNeedingNota(notaData?.length || 0);
+          
+          // Fetch all pending notes as well
+          const { data: notesData, error: notesError } = await supabase
+            .from('notas_oficiais')
+            .select('id, titulo, criado_em')
+            .eq('status', 'pendente')
+            .order('criado_em', { ascending: false })
+            .limit(3);
+            
+          if (notesError) throw notesError;
+          
+          const formattedNotes = (notesData || []).map(note => ({
+            id: note.id,
+            titulo: note.titulo,
+            data: new Date(note.criado_em).toLocaleDateString('pt-BR')
+          }));
+          
+          setPendingNotes(formattedNotes);
         } else if (userDepartmentId) {
           // For other departments: find demands assigned to this department
-          const { data, error } = await supabase
+          const { data: demandData, error: demandError } = await supabase
             .from('demandas')
             .select('id, titulo, prazo_resposta')
             .eq('coordenacao_id', userDepartmentId)
             .eq('status', 'em_analise')
             .order('prazo_resposta', { ascending: true })
-            .limit(5);
+            .limit(3);
           
-          if (error) throw error;
+          if (demandError) throw demandError;
           
           // Format demands with readable dates
-          const formattedDemands = (data || []).map(demand => ({
+          const formattedDemands = (demandData || []).map(demand => ({
             id: demand.id,
             titulo: demand.titulo,
             prazo: new Date(demand.prazo_resposta).toLocaleDateString('pt-BR')
           }));
           
           setPendingDemands(formattedDemands);
+          
+          // Fetch notes waiting for approval by this department
+          const { data: notesData, error: notesError } = await supabase
+            .from('notas_oficiais')
+            .select('id, titulo, criado_em')
+            .eq('status', 'pendente')
+            .eq('coordenacao_id', userDepartmentId)
+            .order('criado_em', { ascending: false })
+            .limit(3);
+            
+          if (notesError) throw notesError;
+          
+          const formattedNotes = (notesData || []).map(note => ({
+            id: note.id,
+            titulo: note.titulo,
+            data: new Date(note.criado_em).toLocaleDateString('pt-BR')
+          }));
+          
+          setPendingNotes(formattedNotes);
         }
       } catch (err) {
         console.error("Error fetching pending actions:", err);
@@ -96,30 +141,25 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
   }, [isComunicacao, userDepartmentId]);
   
   // Calculate pending items based on user role
-  const totalPending = isComunicacao 
-    ? pendingDemands.length + demandsNeedingNota
-    : pendingDemands.length + notesToApprove;
-    
+  const totalPending = pendingDemands.length + pendingNotes.length + demandsNeedingNota;
   const hasPendingItems = totalPending > 0;
   
   const handleViewAll = () => {
-    if (isComunicacao) {
-      if (pendingDemands.length > 0) {
-        navigate('/dashboard/comunicacao/responder');
-      } else if (demandsNeedingNota > 0) {
-        navigate('/dashboard/comunicacao/criar-nota');
-      }
-    } else {
-      if (pendingDemands.length > 0) {
-        navigate('/dashboard/comunicacao/responder');
-      } else if (notesToApprove > 0) {
-        navigate('/dashboard/comunicacao/aprovar-nota');
-      }
+    if (pendingDemands.length > 0) {
+      navigate('/dashboard/comunicacao/responder');
+    } else if (pendingNotes.length > 0) {
+      navigate('/dashboard/comunicacao/aprovar-nota');
+    } else if (demandsNeedingNota > 0) {
+      navigate('/dashboard/comunicacao/criar-nota');
     }
   };
 
-  const handleItemClick = (id: string) => {
+  const handleDemandClick = (id: string) => {
     navigate(`/dashboard/comunicacao/responder/${id}`);
+  };
+
+  const handleNoteClick = (id: string) => {
+    navigate(`/dashboard/comunicacao/aprovar-nota/${id}`);
   };
 
   return (
@@ -145,68 +185,55 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
             <p className="text-sm italic">Carregando...</p>
           ) : hasPendingItems ? (
             <div className="space-y-2">
-              {isComunicacao ? (
-                <>
-                  {pendingDemands.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">Demandas pendentes:</p>
-                      <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
-                        {pendingDemands.slice(0, 3).map(demand => (
-                          <li 
-                            key={demand.id} 
-                            className="p-1 hover:bg-yellow-100 rounded cursor-pointer flex justify-between"
-                            onClick={() => handleItemClick(demand.id)}
-                          >
-                            <span className="truncate flex-1">{demand.titulo}</span>
-                            <span className="whitespace-nowrap text-yellow-600 ml-2">{demand.prazo}</span>
-                          </li>
-                        ))}
-                        {pendingDemands.length > 3 && (
-                          <li className="text-xs italic">
-                            + {pendingDemands.length - 3} outras demandas
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {demandsNeedingNota > 0 && (
-                    <p className="text-sm mt-2">
-                      {`${demandsNeedingNota} demanda${demandsNeedingNota !== 1 ? 's' : ''} aguardando criação de nota oficial`}
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  {pendingDemands.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">Demandas pendentes de resposta:</p>
-                      <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
-                        {pendingDemands.slice(0, 3).map(demand => (
-                          <li 
-                            key={demand.id} 
-                            className="p-1 hover:bg-yellow-100 rounded cursor-pointer flex justify-between"
-                            onClick={() => handleItemClick(demand.id)}
-                          >
-                            <span className="truncate flex-1">{demand.titulo}</span>
-                            <span className="whitespace-nowrap text-yellow-600 ml-2">{demand.prazo}</span>
-                          </li>
-                        ))}
-                        {pendingDemands.length > 3 && (
-                          <li className="text-xs italic">
-                            + {pendingDemands.length - 3} outras demandas
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {notesToApprove > 0 && (
-                    <p className="text-sm mt-2">
-                      {`${notesToApprove} nota${notesToApprove !== 1 ? 's' : ''} aguardando sua aprovação`}
-                    </p>
-                  )}
-                </>
+              {pendingDemands.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Demandas pendentes:</p>
+                  <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
+                    {pendingDemands.map(demand => (
+                      <li 
+                        key={demand.id} 
+                        className="p-1 hover:bg-yellow-100 rounded cursor-pointer flex justify-between"
+                        onClick={() => handleDemandClick(demand.id)}
+                      >
+                        <span className="truncate flex-1">{demand.titulo}</span>
+                        <span className="whitespace-nowrap text-yellow-600 ml-2">{demand.prazo}</span>
+                      </li>
+                    ))}
+                    {pendingDemands.length > 3 && (
+                      <li className="text-xs italic">
+                        + {pendingDemands.length - 3} outras demandas
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+              
+              {pendingNotes.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Notas para aprovar:</p>
+                  <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
+                    {pendingNotes.map(note => (
+                      <li 
+                        key={note.id} 
+                        className="p-1 hover:bg-yellow-100 rounded cursor-pointer flex justify-between"
+                        onClick={() => handleNoteClick(note.id)}
+                      >
+                        <span className="truncate flex-1">{note.titulo}</span>
+                        <span className="whitespace-nowrap text-yellow-600 ml-2">{note.data}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {demandsNeedingNota > 0 && isComunicacao && (
+                <p className="text-sm mt-2">
+                  {`${demandsNeedingNota} demanda${demandsNeedingNota !== 1 ? 's' : ''} aguardando criação de nota oficial`}
+                </p>
+              )}
+              
+              {totalPending === 0 && (
+                <p className="text-sm">Você não tem nenhuma ação pendente no momento.</p>
               )}
             </div>
           ) : (
@@ -219,7 +246,7 @@ const PendingActionsCard: React.FC<PendingActionsProps> = ({
             onClick={handleViewAll}
             className="text-xs self-end mt-2 px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded transition-colors flex items-center"
           >
-            Ver todas <ArrowRight className="h-3 w-3 ml-1" />
+            Ver todas <ArrowRight className="ml-1 h-3 w-3" />
           </button>
         )}
       </CardContent>

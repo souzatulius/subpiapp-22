@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -13,7 +14,7 @@ import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
 import DashboardSearchCard from '@/components/dashboard/DashboardSearchCard';
-import { ActionCardItem } from '@/types/dashboard';
+import { ActionCardItem, CardHeight } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -109,6 +110,7 @@ const DashboardPage: React.FC = () => {
       const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
       
       if (!searchCardExists) {
+        // Create a proper search card with the correct type
         const searchCard: ActionCardItem = {
           id: 'dashboard-search-card',
           title: 'Busca Rápida',
@@ -125,21 +127,31 @@ const DashboardPage: React.FC = () => {
         
         // Adjust heights for specific cards
         const updatedCards = cards.map(card => {
+          // Relatórios card should be double height
+          if (card.title === 'Relatórios' || card.title.includes('Relatório')) {
+            return { ...card, height: '2' as CardHeight };
+          }
+          
+          // Nova Solicitação should be half height
+          if (card.title === 'Nova Solicitação') {
+            return { ...card, height: '0.5' as CardHeight };
+          }
+          
           // Check if card is one of the specific cards that need height adjustment
           if (
             (card.title === 'Demandas' ||
              card.title === 'Avisos' ||
              card.title === 'Responder Demandas' ||
-             card.title === 'Nova Solicitação' ||
              card.title === 'Ranking') &&
             card.height === '2'
           ) {
-            return { ...card, height: '1' }; // Change height from 2 to 1
+            return { ...card, height: '1' as CardHeight }; // Change height from 2 to 1
           }
+          
           return card;
         });
         
-        const finalCards = [searchCard, ...updatedCards];
+        const finalCards: ActionCardItem[] = [searchCard, ...updatedCards];
         handleCardsChange(finalCards);
         setSearchCardAdded(true);
       }

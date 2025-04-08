@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { MessageSquareReply, RotateCcw } from 'lucide-react';
@@ -46,13 +47,21 @@ const ComunicacaoDashboard: React.FC<ComunicacaoDashboardProps> = ({
   React.useEffect(() => {
     if (cards.length > 0) {
       const updatedCards = cards.map(card => {
+        // Adjust heights for specific cards
         if (card.title === 'Notícias' && card.color === 'bg-yellow-500') {
-          return { ...card, title: 'Cadastrar Release' };
+          return { ...card, title: 'Cadastrar Release', height: '0.5' as CardHeight };
         }
         if (card.title === 'Notícias' && card.color === 'bg-gray-500') {
-          return { ...card, title: 'Ver Releases e Notícias' };
+          return { ...card, title: 'Ver Releases e Notícias', height: '0.5' as CardHeight };
         }
-        return card;
+        if (card.title === 'Relatórios' || card.title.includes('Relatório')) {
+          return { ...card, height: '2' as CardHeight };
+        }
+        if (card.title === 'Nova Solicitação' || card.title === 'Nova Demanda') {
+          return { ...card, height: '0.5' as CardHeight };
+        }
+        // Reduce height of all cards in comunicacao page to half
+        return { ...card, height: '0.5' as CardHeight };
       });
       
       const hasSearchCard = updatedCards.some(card => card.id === 'comunicacao-search-card');

@@ -19,20 +19,42 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  // Mock suggestions for now - these would be dynamically loaded in a real implementation
-  const suggestions = query ? [
-    { title: 'Nova demanda', route: '/dashboard/comunicacao/cadastrar' },
-    { title: 'Ver demandas', route: '/dashboard/comunicacao/demandas' },
-    { title: 'Aprovar notas', route: '/dashboard/comunicacao/aprovar-nota' }
-  ] : [];
+  // Keywords and suggestions mapping
+  const suggestions = [
+    { keywords: ['nota', 'notas', 'oficial'], title: 'Notas Oficiais', route: '/dashboard/comunicacao/consultar-notas' },
+    { keywords: ['demanda', 'demandas', 'solicitações', 'consultar'], title: 'Demandas', route: '/dashboard/comunicacao/consultar-demandas' },
+    { keywords: ['nova', 'cadastrar', 'criar', 'demanda'], title: 'Nova Demanda', route: '/dashboard/comunicacao/cadastrar' },
+    { keywords: ['aprovar', 'nota', 'oficial'], title: 'Aprovar Nota', route: '/dashboard/comunicacao/aprovar-nota' },
+    { keywords: ['release', 'notícia', 'cadastrar'], title: 'Release', route: '/dashboard/comunicacao/cadastrar-release' },
+    { keywords: ['esic', 'informação', 'acesso'], title: 'ESIC', route: '/dashboard/esic' },
+    { keywords: ['ranking', 'zeladoria', 'subs'], title: 'Ranking', route: '/dashboard/zeladoria/ranking-subs' },
+    { keywords: ['relatório', 'estatística', 'número'], title: 'Relatórios', route: '/dashboard/comunicacao/relatorios' },
+    { keywords: ['ajuste', 'perfil', 'conta'], title: 'Perfil', route: '/profile' },
+    { keywords: ['responder', 'demanda', 'pendente'], title: 'Responder Demandas', route: '/dashboard/comunicacao/responder' },
+    { keywords: ['zeladoria', 'subs'], title: 'Zeladoria', route: '/dashboard/zeladoria' },
+    { keywords: ['recusar', 'reprovar', 'nota'], title: 'Recusar Nota', route: '/dashboard/comunicacao/aprovar-nota' },
+    { keywords: ['avisos', 'notificação'], title: 'Avisos', route: '/notifications' },
+    { keywords: ['coordenação', 'áreas'], title: 'Coordenação', route: '/settings/coordination-areas' },
+    { keywords: ['notificação', 'aviso'], title: 'Notificações', route: '/notifications' }
+  ];
+
+  // Filter suggestions based on query
+  const filteredSuggestions = query.length > 0
+    ? suggestions.filter(suggestion => 
+        suggestion.keywords.some(keyword => 
+          keyword.toLowerCase().includes(query.toLowerCase()) ||
+          suggestion.title.toLowerCase().includes(query.toLowerCase())
+        )
+      ).slice(0, 5)
+    : [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query) return;
     
     // If we have suggestions, navigate to the first one
-    if (suggestions.length > 0) {
-      navigate(suggestions[0].route);
+    if (filteredSuggestions.length > 0) {
+      navigate(filteredSuggestions[0].route);
       setQuery('');
       return;
     }
@@ -72,7 +94,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
           </div>
           
           <AnimatePresence>
-            {showSuggestions && suggestions.length > 0 && (
+            {showSuggestions && filteredSuggestions.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -81,7 +103,7 @@ const SmartSearchCard: React.FC<SmartSearchCardProps> = ({
                 className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 shadow-md rounded-xl z-10"
               >
                 <ul className="py-1">
-                  {suggestions.map((suggestion, i) => (
+                  {filteredSuggestions.map((suggestion, i) => (
                     <li
                       key={i}
                       className="px-5 py-3 hover:bg-gray-100 cursor-pointer flex items-center text-xl font-medium"
