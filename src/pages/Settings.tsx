@@ -30,8 +30,17 @@ const Settings = () => {
     }
   }, [location.search]);
   
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebarOpen');
+    if (savedState !== null) {
+      setSidebarOpen(savedState === 'true');
+    }
+  }, []);
+  
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    const newState = !sidebarOpen;
+    setSidebarOpen(newState);
+    localStorage.setItem('sidebarOpen', String(newState));
   };
 
   const handleBackClick = () => {
@@ -57,16 +66,16 @@ const Settings = () => {
           <Header showControls={true} toggleSidebar={toggleSidebar} />
         </div>
         
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden min-h-0">
           {/* Somente mostrar sidebar no desktop */}
           {!isMobile && <DashboardSidebar isOpen={sidebarOpen} />}
           
-          <main className={`flex-1 overflow-hidden ${isMobile ? 'pt-10' : ''}`}>
+          <main className={`flex-1 overflow-hidden flex flex-col ${isMobile ? 'pt-10' : ''}`}>
             {/* Desktop breadcrumb */}
             {!isMobile && <BreadcrumbBar onSettingsClick={handleBackClick} />}
             
-            <div className="max-w-full mx-auto">
-              <div className={`overflow-y-auto p-4 ${isMobile ? 'pb-32' : 'pb-4'}`}>
+            <div className="max-w-full mx-auto flex-1">
+              <div className={`overflow-y-auto p-4 h-full ${isMobile ? 'pb-32' : 'pb-4'}`}>
                 {activeSection === 'dashboard' ? (
                   <div
                     style={isMobile ? scrollFadeStyles : undefined}

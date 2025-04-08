@@ -101,7 +101,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full min-h-full overflow-y-auto">
       {categories.map(category => (
         <div key={category.id} className="space-y-1">
           {/* Main category */}
