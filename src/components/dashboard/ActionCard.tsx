@@ -5,6 +5,7 @@ import { getIconComponentFromId } from '@/hooks/dashboard/defaultCards';
 import CardControls from './card-parts/CardControls';
 import { MoveIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 
 export interface ActionCardProps {
   id: string;
@@ -29,35 +30,6 @@ export interface ActionCardProps {
   showControls?: boolean;
 }
 
-const getBackgroundColor = (color: CardColor): string => {
-  switch (color) {
-    case 'blue-vivid':
-      return 'bg-[#0066FF]'; // Azul Vivo
-    case 'blue-light':
-      return 'bg-[#66B2FF]'; // Azul Claro
-    case 'blue-dark':
-      return 'bg-[#1D4ED8]'; // Azul Escuro
-    case 'green-neon':
-      return 'bg-[#66FF66]'; // Verde Neon
-    case 'green-dark':
-      return 'bg-[#00CC00]'; // Verde Escuro
-    case 'gray-light':
-      return 'bg-[#F5F5F5]'; // Cinza Claro
-    case 'gray-medium':
-      return 'bg-[#D4D4D4]'; // Cinza Médio
-    case 'orange-dark':
-      return 'bg-[#F25C05]'; // Laranja Escuro
-    case 'orange-light':
-      return 'bg-[#F89E66]'; // Laranja Claro
-    case 'deep-blue':
-      return 'bg-[#051A2C]'; // Azul Profundo
-    case 'neutral-800':
-      return 'bg-neutral-800'; // Cinza Escuro
-    default:
-      return 'bg-[#0066FF]'; // Default to Azul Vivo
-  }
-};
-
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
   return 'w-10 h-10';
 };
@@ -79,7 +51,8 @@ const ActionCard = ({
   showControls = true
 }: ActionCardProps) => {
   const navigate = useNavigate();
-  const bgColor = getBackgroundColor(color);
+  const colorClasses = getColorClasses(color);
+  const textColorClass = getTextColorClass(color, id);
   
   const renderIcon = () => {
     if (!iconId) return null;
@@ -92,33 +65,13 @@ const ActionCard = ({
     const FallbackIcon = getIconComponentFromId(iconId);
     return FallbackIcon ? <FallbackIcon className={getIconSize(iconSize)} /> : null;
   };
-  
-  const getTextColor = (bgColor: string): string => {
-    // Force white text on green-neon and green-dark backgrounds
-    if (color === 'green-neon' || color === 'green-dark') {
-      return 'text-gray-900'; // Dark text for better contrast on bright green
-    }
-    
-    // For light backgrounds (gray tones)
-    if (color === 'gray-light' || color === 'gray-medium') {
-      // Special case for Ranking Zeladoria card - always gray-950 text
-      if (id === 'ranking-zeladoria') {
-        return 'text-gray-950';
-      }
-      return 'text-gray-800'; // Dark text for light backgrounds
-    }
-    
-    return 'text-white'; // White text for all other dark backgrounds
-  };
-  
-  const textColor = getTextColor(bgColor);
 
   return (
     <div 
       className={`w-full h-full rounded-xl shadow-md overflow-hidden 
         ${!isDraggable ? 'cursor-pointer' : 'cursor-grab'} 
         transition-all duration-300 hover:shadow-lg hover:-translate-y-1 
-        active:scale-95 ${bgColor} group relative`}
+        active:scale-95 ${colorClasses} group relative`}
     >
       {isDraggable && (
         <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-80 transition-opacity duration-200">
@@ -143,11 +96,11 @@ const ActionCard = ({
           <>{children}</>
         ) : (
           <>
-            <div className={`mb-2.5 ${textColor}`}>
+            <div className={`mb-2.5 ${textColorClass}`}>
               {renderIcon()}
             </div>
             <div className="line-clamp-2 max-w-[90%]">
-              <h3 className={`font-semibold ${textColor} text-lg leading-tight break-words text-balance`}>
+              <h3 className={`font-semibold ${textColorClass} text-lg leading-tight break-words text-balance`}>
                 {title}
               </h3>
             </div>

@@ -22,7 +22,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   title,
   description,
   icon = <Settings className="h-6 w-6 mr-2" />,
-  color = "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800",
+  color = "bg-gradient-to-r from-blue-100 via-orange-100 to-gray-100", // Updated default gradient
   showButton = false,
   buttonText = "Filtros e Configurações",
   buttonIcon,
@@ -34,8 +34,18 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
   // Ensure userName is treated as a string even if it's undefined
   const displayName = userName || '';
   
+  // Determine text color based on background - for light gradients use dark text
+  const textColorClass = color.includes('blue-100') || color.includes('orange-100') || color.includes('gray-100') 
+    ? 'text-gray-800' 
+    : 'text-white';
+  
+  // Determine description text color
+  const descriptionColorClass = color.includes('blue-100') || color.includes('orange-100') || color.includes('gray-100')
+    ? 'text-gray-600'
+    : 'text-blue-100';
+  
   return (
-    <Card className={`${color} text-white shadow-lg overflow-hidden`}>
+    <Card className={`${color} ${textColorClass} shadow-lg overflow-hidden`}>
       <CardContent className="p-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
@@ -43,7 +53,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               {icon}
               {greeting && displayName ? `Olá, ${displayName}!` : title}
             </h2>
-            <p className="text-blue-100">
+            <p className={descriptionColorClass}>
               {description}
             </p>
           </div>
@@ -53,7 +63,7 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({
               <Button
                 variant={buttonVariant}
                 onClick={onButtonClick}
-                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                className="bg-white/10 border-white/20 hover:bg-white/20"
               >
                 {buttonIcon && <span className="mr-2">{buttonIcon}</span>}
                 {buttonText}

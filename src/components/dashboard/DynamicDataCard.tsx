@@ -3,6 +3,7 @@ import React from 'react';
 import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CardColor, DataSourceKey } from '@/types/dashboard';
+import { getColorClasses, getTextColorClass } from './utils/cardColorUtils';
 
 interface DynamicDataCardProps {
   title: string;
@@ -34,45 +35,15 @@ const DynamicDataCard: React.FC<DynamicDataCardProps> = ({
   const borderClass = highlight ? 'border-2 border-orange-500' : 'border border-gray-200';
   const shadowClass = highlight ? 'shadow-lg' : 'shadow-md';
 
-  // Get the background color based on the color prop
-  const getBgColor = (): string => {
-    switch (color) {
-      case 'blue-vivid': return 'bg-[#0066FF]'; // Azul Vivo
-      case 'blue-light': return 'bg-[#66B2FF]'; // Azul Claro
-      case 'blue-dark': return 'bg-[#1D4ED8]'; // Azul Escuro
-      case 'green-neon': return 'bg-[#66FF66]'; // Verde Neon
-      case 'green-dark': return 'bg-[#00CC00]'; // Verde Escuro
-      case 'gray-light': return 'bg-[#F5F5F5]'; // Cinza Claro
-      case 'gray-medium': return 'bg-[#D4D4D4]'; // Cinza Médio
-      case 'orange-dark': return 'bg-[#F25C05]'; // Laranja Escuro
-      case 'orange-light': return 'bg-[#F89E66]'; // Laranja Claro
-      case 'deep-blue': return 'bg-[#051A2C]'; // Azul Profundo
-      case 'neutral-800': return 'bg-neutral-800'; // Cinza Escuro
-      default: return 'bg-[#0066FF]'; // Default to Azul Vivo
-    }
-  };
-
-  // Get text color based on background color
-  const getTextColor = (): string => {
-    switch (color) {
-      case 'gray-light':
-      case 'gray-medium':
-      case 'green-neon':
-      case 'green-dark':
-        return 'text-gray-800'; // Dark text for light backgrounds
-      default:
-        return 'text-white'; // White text for dark backgrounds
-    }
-  };
-
-  const bgColorClass = getBgColor();
-  const textColorClass = getTextColor();
+  // Use utility function to get color classes
+  const colorClasses = getColorClasses(color);
+  const textColorClass = getTextColorClass(color);
 
   console.log(`DynamicDataCard: ${title} - dataSourceKey: ${dataSourceKey}, loading: ${loading}, data:`, data);
 
   return (
     <div 
-      className={`w-full h-full rounded-md ${shadowClass} transition-all hover:shadow-lg ${borderClass} flex flex-col ${bgColorClass}`}
+      className={`w-full h-full rounded-md ${shadowClass} transition-all hover:shadow-lg ${borderClass} flex flex-col ${colorClasses}`}
     >
       <div className="flex items-center gap-2 p-4 pb-2">
         <div className={textColorClass}>{icon}</div>

@@ -4,7 +4,7 @@ import { CardColor } from '@/types/dashboard';
 export const getColorClasses = (color: CardColor): string => {
   switch (color) {
     case 'blue-vivid': return 'bg-[#0066FF] text-white'; // Azul Vivo
-    case 'blue-light': return 'bg-[#66B2FF] text-white'; // Azul Claro
+    case 'blue-light': return 'bg-[#66B2FF] text-gray-800'; // Azul Claro - changed to dark text
     case 'blue-dark': return 'bg-[#1D4ED8] text-white'; // Azul Escuro
     case 'green-neon': return 'bg-[#66FF66] text-gray-800'; // Verde Neon - dark text
     case 'green-dark': return 'bg-[#00CC00] text-gray-800'; // Verde Escuro - dark text
@@ -46,6 +46,7 @@ export const getTextColorClass = (color: CardColor, cardId?: string): string => 
     case 'gray-medium':
     case 'green-neon':
     case 'green-dark':
+    case 'blue-light': // Added blue-light to get dark text
       return 'text-gray-800'; // Dark text on light backgrounds
     default:
       return 'text-white'; // White text on dark backgrounds
