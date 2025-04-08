@@ -43,11 +43,11 @@ const COLOR_OPTIONS: ColorOption[] = [
   { value: "green-neon", label: "Verde Neon", class: "bg-[#66FF66]" },
   { value: "green-dark", label: "Verde Escuro", class: "bg-[#00CC00]" },
   { value: "gray-light", label: "Cinza Claro", class: "bg-[#F5F5F5]" },
-  { value: "gray-lighter", label: "Cinza Mais Claro", class: "bg-[#FAFAFA]" },
   { value: "gray-medium", label: "Cinza Médio", class: "bg-[#D4D4D4]" },
   { value: "orange-dark", label: "Laranja Escuro", class: "bg-[#F25C05]" },
   { value: "orange-light", label: "Laranja Claro", class: "bg-[#F89E66]" },
   { value: "deep-blue", label: "Azul Profundo", class: "bg-[#051A2C]" },
+  { value: "neutral-800", label: "Cinza Escuro", class: "bg-neutral-800" },
 ];
 
 const EditCardModal: React.FC<EditCardModalProps> = ({

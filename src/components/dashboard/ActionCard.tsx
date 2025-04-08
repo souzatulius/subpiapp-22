@@ -43,8 +43,6 @@ const getBackgroundColor = (color: CardColor): string => {
       return 'bg-[#00CC00]'; // Verde Escuro
     case 'gray-light':
       return 'bg-[#F5F5F5]'; // Cinza Claro
-    case 'gray-lighter':
-      return 'bg-[#FAFAFA]'; // Cinza Mais Claro
     case 'gray-medium':
       return 'bg-[#D4D4D4]'; // Cinza Médio
     case 'orange-dark':
@@ -53,6 +51,8 @@ const getBackgroundColor = (color: CardColor): string => {
       return 'bg-[#F89E66]'; // Laranja Claro
     case 'deep-blue':
       return 'bg-[#051A2C]'; // Azul Profundo
+    case 'neutral-800':
+      return 'bg-neutral-800'; // Cinza Escuro
     default:
       return 'bg-[#0066FF]'; // Default to Azul Vivo
   }
@@ -100,7 +100,7 @@ const ActionCard = ({
     }
     
     // For light backgrounds (gray tones)
-    if (color === 'gray-light' || color === 'gray-lighter' || color === 'gray-medium') {
+    if (color === 'gray-light' || color === 'gray-medium') {
       // Special case for Ranking Zeladoria card - always gray-950 text
       if (id === 'ranking-zeladoria') {
         return 'text-gray-950';
