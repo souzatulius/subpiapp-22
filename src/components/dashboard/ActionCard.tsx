@@ -30,7 +30,8 @@ export interface ActionCardProps {
   isMobileView?: boolean;
   showControls?: boolean;
   subtitle?: string;
-  chartId?: string; // Add chartId prop
+  chartId?: string;
+  specialContent?: React.ReactNode;
 }
 
 const getIconSize = (size?: 'sm' | 'md' | 'lg' | 'xl'): string => {
@@ -59,7 +60,8 @@ const ActionCard = ({
   isMobileView = false,
   children,
   showControls = true,
-  chartId
+  chartId,
+  specialContent
 }: ActionCardProps) => {
   const navigate = useNavigate();
   const colorClasses = getColorClasses(color);
@@ -105,7 +107,9 @@ const ActionCard = ({
       )}
 
       <div className="relative h-full flex flex-col items-center justify-center text-center py-2.5 px-2">
-        {children ? (
+        {specialContent ? (
+          <>{specialContent}</>
+        ) : children ? (
           <>{children}</>
         ) : chartId ? (
           <div className="w-full h-full flex flex-col">
