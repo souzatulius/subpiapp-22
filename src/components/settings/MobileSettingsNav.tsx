@@ -51,7 +51,7 @@ const MobileSettingsNav = () => {
   
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#051b2c] shadow-lg z-50">
-      <div className="flex justify-around">
+      <div className="flex justify-between">
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -60,10 +60,10 @@ const MobileSettingsNav = () => {
               isLinkActive(item.path) ? 'bg-white text-gray-600' : 'text-gray-400'
             }`}
           >
-            <div className="text-[#f57737]">
+            <div className="text-[#f57737] w-6 h-6 flex items-center justify-center">
               {item.icon}
             </div>
-            <span className="text-xs mt-1 truncate">{item.label}</span>
+            <span className="text-xs mt-1 truncate max-w-[90%] text-center">{item.label}</span>
           </button>
         ))}
       </div>

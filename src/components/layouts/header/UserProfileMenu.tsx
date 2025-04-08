@@ -65,18 +65,21 @@ const UserProfileMenu: React.FC = () => {
     return `${nameParts[0]} ${nameParts[1]}`;
   };
 
-  // Handle profile navigation without preventing default event
-  const handleProfileClick = () => {
-    navigate('/profile');
+  // Handle profile navigation - now correctly going to /settings
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/settings');
   };
 
-  // Handle notifications navigation without preventing default event
-  const handleNotificationsClick = () => {
+  // Handle notifications navigation
+  const handleNotificationsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     navigate('/settings/notifications');
   };
 
-  // Handle settings navigation without preventing default event
-  const handleSettingsClick = () => {
+  // Handle settings navigation
+  const handleSettingsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     navigate('/settings');
   };
 
