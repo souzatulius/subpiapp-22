@@ -108,11 +108,13 @@ export const useRegisterForm = () => {
 
     try {
       const completeEmail = completeEmailWithDomain(formData.email);
+      
+      // Ensure we're passing UUIDs, not strings for ID fields
       const { error, data } = await signUp(completeEmail, password, {
         nome_completo: formData.name,
         aniversario: formData.birthday,
         whatsapp: formData.whatsapp,
-        cargo_id: formData.role,
+        cargo_id: formData.role, // The handle_new_user function will properly cast this
         supervisao_tecnica_id: formData.area || null,
         coordenacao_id: formData.coordenacao,
         status: 'pendente' // Explicitly set status as 'pendente'
