@@ -42,6 +42,7 @@ export interface ActionCardItem {
   isNewCardButton?: boolean;
   isOverdueDemands?: boolean;
   isPendingActions?: boolean;
+  isOriginSelection?: boolean;
   isStandard?: boolean;
   hasSubmenu?: boolean;
   hasBadge?: boolean;

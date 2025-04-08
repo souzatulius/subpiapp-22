@@ -10,6 +10,7 @@ import SearchCard from './card-types/SearchCard';
 import QuickDemandCardWrapper from './card-types/QuickDemandCardWrapper';
 import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 import DynamicDataCard from '../DynamicDataCard';
+import OriginSelectionCardWrapper from './card-types/OriginSelectionCardWrapper';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -131,6 +132,12 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
           isComunicacao={isComunicacao}
           userDepartmentId={userDepartment || ''}
         />
+      );
+    }
+    
+    if (card.isOriginSelection || card.type === 'origin_selection') {
+      return (
+        <OriginSelectionCardWrapper card={card} />
       );
     }
     
