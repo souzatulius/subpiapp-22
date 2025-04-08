@@ -17,6 +17,11 @@ export const getIconComponentFromId = (iconId: string) => {
     'clock': () => import('lucide-react').then(mod => mod.Clock),
     'alert-triangle': () => import('lucide-react').then(mod => mod.AlertTriangle),
     'check-circle': () => import('lucide-react').then(mod => mod.CheckCircle),
+    'bell': () => import('lucide-react').then(mod => mod.Bell),
+    'trending-up': () => import('lucide-react').then(mod => mod.TrendingUp),
+    'pencil': () => import('lucide-react').then(mod => mod.Pencil),
+    'pie-chart': () => import('lucide-react').then(mod => mod.PieChart),
+    'message-square': () => import('lucide-react').then(mod => mod.MessageSquare),
     // Add more icons as needed
   };
   
@@ -60,11 +65,11 @@ export const getDefaultCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Demandas',
-      iconId: 'clipboard-list',
+      iconId: 'file-text', // Updated icon: paper/document
       path: '/demandas',
-      color: 'bg-blue-500',
+      color: 'deep-blue', // Updated color: bg azul escuro
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 2
@@ -73,24 +78,24 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Avisos',
       subtitle: 'Notas da coordenação',
-      iconId: 'message-square-reply',
+      iconId: 'bell', // Updated icon: sino/bell
       path: '/dashboard/comunicacao',
-      color: 'bg-green-500',
+      color: 'deep-blue', // Updated color: Bg Azul profundo
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 3
     },
     {
       id: uuidv4(),
-      title: 'Aprovações',
-      subtitle: 'Notas e documentos',
-      iconId: 'file-check',
-      path: '/aprovar',
-      color: 'bg-red-500',
+      title: 'Responder Demandas',
+      subtitle: 'Pendências',
+      iconId: 'message-square', // Updated icon: balão de diálogo
+      path: '/dashboard/comunicacao/responder', // Updated path: comunicacao/responder
+      color: 'gray-medium', // Updated color: Bg cinza médio
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 4
@@ -99,47 +104,47 @@ export const getDefaultCards = (): ActionCardItem[] => {
       id: uuidv4(),
       title: 'Ranking',
       subtitle: 'Produtividade das Subsecretarias',
-      iconId: 'bar-chart-2',
+      iconId: 'trending-up', // Updated icon: gráfico subindo
       path: '/ranking-subs',
-      color: 'bg-purple-500',
+      color: 'bg-orange-500', // Updated color: Bg orange-500
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 5
     },
     {
       id: uuidv4(),
-      title: 'Cadastrar Demanda',
-      iconId: 'plus-circle',
-      path: '/cadastrar-demanda',
-      color: 'bg-pink-500',
+      title: 'Nova Solicitação',
+      iconId: 'pencil', // Updated icon: lápis
+      path: '/dashboard/comunicacao/cadastrar', // Updated path: /comunicação/cadastrar
+      color: 'gray-medium', // Updated color: Bg cinza Médio
       width: '25',
-      height: '2', // Changed from '1' to '2' to double the height
+      height: '2',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 6
     },
     {
       id: uuidv4(),
-      title: 'Relatórios',
-      iconId: 'file-text',
+      title: 'Relatórios da Comunicação',
+      iconId: 'pie-chart', // Updated icon: gráfico pizza
       path: '/relatorios',
-      color: 'bg-indigo-500',
+      color: 'orange-light', // Updated color: Bg laranja claro
       width: '50',
-      height: '1', // Keep this one at height '1'
+      height: '1',
       type: 'standard',
       displayMobile: true,
       mobileOrder: 7
     },
     {
       id: uuidv4(),
-      title: 'Pendências por Coordenação',
-      iconId: 'list-filter',
+      title: 'Ações Pendentes',
+      iconId: 'alert-triangle', // Updated icon: ícone Alerta
       path: '/demandas',
-      color: 'orange-700',
+      color: 'bg-orange-500', // Updated color: Bg Orange-500
       width: '50',
-      height: '1', // Keep this one at height '1'
+      height: '1',
       type: 'data_dynamic',
       dataSourceKey: 'pendencias_por_coordenacao',
       displayMobile: true,
@@ -168,9 +173,9 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Nova Demanda',
-      iconId: 'plus-circle',
+      iconId: 'pencil', // Updated to match the new icon scheme
       path: '/dashboard/comunicacao/nova-demanda',
-      color: 'bg-blue-500',
+      color: 'gray-medium', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',
@@ -180,9 +185,9 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Demandas em Andamento',
-      iconId: 'clipboard-list',
+      iconId: 'file-text', // Updated to match the new icon scheme
       path: '/dashboard/comunicacao/demandas',
-      color: 'bg-green-500',
+      color: 'deep-blue', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',
@@ -192,9 +197,9 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
     {
       id: uuidv4(),
       title: 'Aprovar Notas',
-      iconId: 'file-check',
+      iconId: 'check-circle',
       path: '/dashboard/comunicacao/aprovar',
-      color: 'bg-red-500',
+      color: 'bg-orange-500', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',
@@ -206,7 +211,7 @@ export const getCommunicationActionCards = (): ActionCardItem[] => {
       title: 'Criar Nota',
       iconId: 'file-text',
       path: '/dashboard/comunicacao/criar-nota',
-      color: 'bg-purple-500',
+      color: 'orange-light', // Updated to match the new color scheme
       width: '25',
       height: '1',
       type: 'standard',

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ClipboardList, FileCheck, MessageSquareReply, BarChart2 } from 'lucide-react';
+import { ClipboardList, FileText, MessageSquare, BarChart2, Bell, TrendingUp, PieChart, Pencil, AlertTriangle } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 interface IconRendererProps {
@@ -25,18 +25,26 @@ const IconRenderer: React.FC<IconRendererProps> = ({ icon, title, iconId, size =
   }
   
   // Fallback based on title for standard cards
-  if (title === 'Nova Demanda') {
+  if (title === 'Nova Demanda' || title === 'Nova Solicitação') {
+    return <Pencil className={`h-${size} w-${size}`} />;
+  } else if (title === 'Aprovar Nota' || title === 'Aprovar Notas') {
     return <ClipboardList className={`h-${size} w-${size}`} />;
-  } else if (title === 'Aprovar Nota') {
-    return <FileCheck className={`h-${size} w-${size}`} />;
   } else if (title === 'Responder Demandas') {
-    return <MessageSquareReply className={`h-${size} w-${size}`} />;
-  } else if (title === 'Números da Comunicação') {
-    return <BarChart2 className={`h-${size} w-${size}`} />;
+    return <MessageSquare className={`h-${size} w-${size}`} />;
+  } else if (title === 'Relatórios da Comunicação' || title === 'Números da Comunicação') {
+    return <PieChart className={`h-${size} w-${size}`} />;
+  } else if (title === 'Ações Pendentes') {
+    return <AlertTriangle className={`h-${size} w-${size}`} />;
+  } else if (title === 'Avisos') {
+    return <Bell className={`h-${size} w-${size}`} />;
+  } else if (title === 'Demandas') {
+    return <FileText className={`h-${size} w-${size}`} />;
+  } else if (title === 'Ranking' || title === 'Ranking da Zeladoria') {
+    return <TrendingUp className={`h-${size} w-${size}`} />;
   }
   
   // Fallback for empty or invalid icon
-  return <ClipboardList className={`h-${size} w-${size}`} />;
+  return <FileText className={`h-${size} w-${size}`} />;
 };
 
 export default IconRenderer;

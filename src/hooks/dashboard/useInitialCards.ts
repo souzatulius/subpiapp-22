@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { ActionCardItem } from '@/types/dashboard';
 import { getBgColor } from './useCardColors';
@@ -16,8 +17,8 @@ export const useInitialCards = (userDepartment: string | null) => {
         id: 'comunicacao',
         title: "Comunicação",
         path: "/dashboard/comunicacao",
-        iconId: "message-square-reply",
-        color: getBgColor('blue-700'),
+        iconId: "bell", // Updated to Bell icon
+        color: getBgColor('deep-blue'), // Updated to deep-blue
         width: "25", // 1 coluna
         height: "1",
         type: "standard",
@@ -26,10 +27,10 @@ export const useInitialCards = (userDepartment: string | null) => {
       },
       {
         id: 'nova-solicitacao',
-        title: "Nova Solicitação", // Updated from "Nova Solicitação" to "Nova Solicitação"
-        path: "/dashboard/comunicacao/cadastrar",
-        iconId: "plus-circle",
-        color: getBgColor('orange-400'),
+        title: "Nova Solicitação",
+        path: "/dashboard/comunicacao/cadastrar", // Updated path
+        iconId: "pencil", // Updated to pencil icon
+        color: getBgColor('gray-medium'), // Updated to gray-medium
         width: "25",
         height: "1",
         type: "standard",
@@ -41,8 +42,8 @@ export const useInitialCards = (userDepartment: string | null) => {
         id: 'consultar-demandas',
         title: "Consultar Demandas",
         path: "/dashboard/comunicacao/demandas",
-        iconId: "list-filter",
-        color: getBgColor('gray-950'), // Changed from grey-800 to gray-950
+        iconId: "file-text", // Updated to file-text icon
+        color: getBgColor('deep-blue'), // Updated to deep-blue
         width: "25",
         height: "1",
         type: "standard",
@@ -52,9 +53,9 @@ export const useInitialCards = (userDepartment: string | null) => {
       {
         id: 'responder-demandas',
         title: "Responder Demandas",
-        path: "/dashboard/comunicacao/responder",
-        iconId: "message-circle",
-        color: getBgColor('orange-500'),
+        path: "/dashboard/comunicacao/responder", // Updated path
+        iconId: "message-square", // Updated to message-square icon
+        color: getBgColor('gray-medium'), // Updated to gray-medium
         width: "25",
         height: "1",
         type: "standard",
@@ -68,7 +69,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Criar Nota",
         path: "/dashboard/comunicacao/criar-nota",
         iconId: "file-text",
-        color: getBgColor('blue-960'),
+        color: getBgColor('orange-light'), // Updated to orange-light
         width: "25",
         height: "1",
         type: "standard",
@@ -83,7 +84,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Consultar Notas",
         path: "/dashboard/comunicacao/notas",
         iconId: "file-text",
-        color: getBgColor('neutral-200'),
+        color: getBgColor('gray-medium'), // Updated to gray-medium
         width: "25",
         height: "1",
         type: "standard",
@@ -95,7 +96,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: "Aprovar Notas",
         path: "/dashboard/comunicacao/aprovar-nota",
         iconId: "check-circle",
-        color: getBgColor('grey-950'),
+        color: getBgColor('bg-orange-500'), // Updated to orange-500
         width: "25",
         height: "1",
         type: "standard",
@@ -108,8 +109,8 @@ export const useInitialCards = (userDepartment: string | null) => {
         id: 'ranking-zeladoria',
         title: "Ranking da Zeladoria",
         path: "/dashboard/zeladoria/ranking-subs",
-        iconId: "trophy",
-        color: getBgColor('lime-500'),
+        iconId: "trending-up", // Updated to trending-up icon
+        color: getBgColor('bg-orange-500'), // Updated to orange-500
         width: "25",
         height: "1",
         type: "standard",
@@ -120,8 +121,8 @@ export const useInitialCards = (userDepartment: string | null) => {
         id: 'gerar-noticia',
         title: 'Cadastrar Release',
         path: '/dashboard/comunicacao/cadastrar-release',
-        iconId: 'document-plus',
-        color: getBgColor('orange-dark'),
+        iconId: 'pencil', // Updated to pencil
+        color: getBgColor('gray-medium'), // Updated to gray-medium
         width: '25',
         height: '2',
         type: 'standard',
@@ -134,7 +135,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: 'Ver Releases e Notícias',
         path: '/dashboard/comunicacao/releases',
         iconId: 'file-text',
-        color: getBgColor('gray-medium'),
+        color: getBgColor('deep-blue'), // Updated to deep-blue
         width: '25',
         height: '2',
         type: 'standard',
@@ -145,8 +146,8 @@ export const useInitialCards = (userDepartment: string | null) => {
         id: 'relatorios-comunicacao',
         title: "Relatórios da Comunicação",
         path: "/dashboard/comunicacao/relatorios",
-        iconId: "bar-chart-2",
-        color: getBgColor('grey-400'),
+        iconId: "pie-chart", // Updated to pie-chart icon
+        color: getBgColor('orange-light'), // Updated to orange-light
         width: "25",
         height: "1",
         type: "standard",
@@ -159,7 +160,7 @@ export const useInitialCards = (userDepartment: string | null) => {
         title: 'e-SIC',
         path: '/dashboard/esic',
         iconId: 'file-text',
-        color: getBgColor('blue-light'),
+        color: getBgColor('deep-blue'), // Updated to deep-blue
         width: '25',
         height: '1',
         type: 'standard',
