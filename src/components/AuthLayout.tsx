@@ -32,7 +32,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
         <div 
           className="w-full min-h-[calc(100vh-80px)] md:min-h-0 md:w-1/2 flex flex-col items-center justify-center p-4 md:p-8 md:pl-[50px] relative bg-subpi-blue md:bg-subpi-blue" 
           style={!isMobile ? {
-            backgroundImage: 'url("/lovable-uploads/48164a02-35dc-47df-94a6-e5d6cfb0a7da.png")',
+            backgroundImage: 'url("/lovable-uploads/b1705741-1fad-4b79-94f1-2f26c66f0152.png")',
             backgroundSize: 'cover',
             backgroundPosition: 'left center',
             backgroundRepeat: 'no-repeat'
