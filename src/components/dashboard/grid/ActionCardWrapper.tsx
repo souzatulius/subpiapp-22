@@ -10,6 +10,7 @@ import SearchCard from './card-types/SearchCard';
 import QuickDemandCardWrapper from './card-types/QuickDemandCardWrapper';
 import NewCardButtonWrapper from './card-types/NewCardButtonWrapper';
 import DynamicDataCard from '../DynamicDataCard';
+import DashboardSearchCard from '../DashboardSearchCard';
 
 interface ActionCardWrapperProps {
   card: ActionCardItem;
@@ -75,6 +76,11 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
 
   // Render the appropriate card content based on the card type
   const renderCardContent = () => {
+    // Check if it's a smart search card
+    if (card.type === 'smart_search') {
+      return <DashboardSearchCard isEditMode={true} />;
+    }
+    
     // Check if it's a dynamic data card
     if (card.type === 'data_dynamic' && card.dataSourceKey) {
       return (
@@ -155,7 +161,7 @@ const ActionCardWrapper: React.FC<ActionCardWrapperProps> = ({
   return (
     <SortableActionCard 
       key={card.id} 
-      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' ? {
+      card={card.isSearch || card.isStandard || card.type === 'data_dynamic' || card.type === 'smart_search' ? {
         ...card,
         path: '' // Remove path to prevent default click behavior for special cards
       } : card} 

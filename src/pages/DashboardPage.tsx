@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -13,6 +12,7 @@ import WelcomeCard from '@/components/shared/WelcomeCard';
 import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import CardGridContainer from '@/components/dashboard/CardGridContainer';
 import EditCardModal from '@/components/dashboard/card-customization/EditCardModal';
+import DashboardSearchCard from '@/components/dashboard/DashboardSearchCard';
 import { ActionCardItem } from '@/types/dashboard';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,6 +26,7 @@ const DashboardPage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditCardModalOpen, setIsEditCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<ActionCardItem | null>(null);
+  const [searchCardAdded, setSearchCardAdded] = useState(false);
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
@@ -70,7 +71,6 @@ const DashboardPage: React.FC = () => {
         card.id === updatedCard.id ? { ...card, ...updatedCard } : card
       );
       
-      // Auto-save user configuration when a card is edited
       await saveCardConfig(updatedCards);
     }
   };
@@ -79,7 +79,6 @@ const DashboardPage: React.FC = () => {
     handleCardsReorder(updatedCards);
     
     if (user) {
-      // Auto-save user configuration when cards order changes
       await saveCardConfig(updatedCards);
     }
   };
@@ -92,7 +91,6 @@ const DashboardPage: React.FC = () => {
         card.id === cardId ? { ...card, isHidden: true } : card
       );
       
-      // Auto-save user configuration when a card is hidden
       await saveCardConfig(updatedCards);
     }
   };
@@ -105,6 +103,32 @@ const DashboardPage: React.FC = () => {
       await saveCardConfig(defaultCards);
     }
   };
+
+  useEffect(() => {
+    if (cards && cards.length > 0 && !searchCardAdded) {
+      const searchCardExists = cards.some(card => card.id === 'dashboard-search-card');
+      
+      if (!searchCardExists) {
+        const searchCard: ActionCardItem = {
+          id: 'dashboard-search-card',
+          title: 'Busca Rápida',
+          iconId: 'search',
+          path: '',
+          color: 'bg-white',
+          width: '100',
+          height: '1',
+          type: 'smart_search',
+          isSearch: true,
+          displayMobile: true,
+          mobileOrder: 1
+        };
+        
+        const updatedCards = [searchCard, ...cards];
+        handleCardsChange(updatedCards);
+        setSearchCardAdded(true);
+      }
+    }
+  }, [cards, searchCardAdded]);
 
   if (!user) {
     return <LoadingIndicator message="Carregando..." />;

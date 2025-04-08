@@ -1,4 +1,3 @@
-
 // Add this to the types file if it doesn't exist
 export type CardColor = 
   | 'bg-blue-500' 
@@ -21,6 +20,7 @@ export type CardColor =
   | 'deep-blue'
   | 'neutral-800'
   | 'orange-700'
+  | 'bg-white'   // Added white background 
   | string;  // Added string to make it more flexible with user input
 
 // Additional type definitions needed
@@ -61,7 +61,7 @@ export type CardType =
   | 'in_progress_demands'
   | 'recent_notes'
   | 'origin_selection'
-  | 'smart_search'
+  | 'smart_search'  // Added smart_search type
   | string; // Added string to make it more flexible with user input
 
 export type DataSourceKey = 
