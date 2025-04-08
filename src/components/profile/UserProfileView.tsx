@@ -13,6 +13,18 @@ interface ExtendedUserProfile extends UserProfile {
   cargo_descricao?: string;
   coordenacao_descricao?: string;
   supervisao_tecnica_descricao?: string;
+  cargo?: {
+    id: string;
+    descricao: string;
+  };
+  coordenacao?: {
+    id: string;
+    descricao: string;
+  };
+  supervisao_tecnica?: {
+    id: string;
+    descricao: string;
+  };
 }
 
 const UserProfileView: React.FC = () => {
@@ -45,12 +57,14 @@ const UserProfileView: React.FC = () => {
 
         if (error) throw error;
         
-        setProfile({
+        const profileData: ExtendedUserProfile = {
           ...data,
           cargo_descricao: data.cargo?.descricao,
           coordenacao_descricao: data.coordenacao?.descricao,
           supervisao_tecnica_descricao: data.supervisao_tecnica?.descricao
-        });
+        };
+        
+        setProfile(profileData);
       } catch (error) {
         console.error('Erro ao buscar perfil:', error);
       } finally {

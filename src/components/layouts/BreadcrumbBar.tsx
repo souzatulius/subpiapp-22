@@ -14,9 +14,10 @@ import useBreadcrumbPaths from '@/hooks/useBreadcrumbPaths';
 
 interface BreadcrumbBarProps {
   onSettingsClick?: () => void;
+  className?: string;
 }
 
-const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
+const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick, className = '' }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { breadcrumbItems } = useBreadcrumbPaths();
@@ -32,7 +33,7 @@ const BreadcrumbBar: React.FC<BreadcrumbBarProps> = ({ onSettingsClick }) => {
   };
   
   return (
-    <div className={`px-4 py-1.5 text-xs text-gray-500 ${isMobile ? 'bg-white shadow-sm' : ''}`}>
+    <div className={`px-4 py-1.5 text-xs text-gray-500 ${isMobile ? 'bg-white shadow-sm' : ''} ${className}`}>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
