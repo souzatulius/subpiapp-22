@@ -50,7 +50,8 @@ const CadastrarReleaseForm: React.FC<CadastrarReleaseFormProps> = ({ onClose }) 
     setIsSubmitting(true);
     try {
       await cadastrarRelease({
-        ...values,
+        titulo: values.titulo,
+        texto: values.texto,
         tags: values.tags ? values.tags.split(',').map(tag => tag.trim()) : [],
       });
       
@@ -73,8 +74,8 @@ const CadastrarReleaseForm: React.FC<CadastrarReleaseFormProps> = ({ onClose }) 
   };
 
   return (
-    <div className="space-y-6 w-full max-w-full">
-      <div className="flex items-center justify-between">
+    <div className="w-full max-w-full">
+      <div className="flex items-center justify-between mb-4">
         <Button
           variant="outline"
           size="sm"

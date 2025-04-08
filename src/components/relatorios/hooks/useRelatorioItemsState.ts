@@ -10,6 +10,7 @@ export interface RelatorioItem {
   subtitle?: string; // Add subtitle property
   component: React.ReactNode;
   isVisible: boolean;
+  isHidden?: boolean;
   isAnalysisExpanded?: boolean;
   showAnalysisOnly?: boolean;
   analysis?: string;
@@ -73,6 +74,11 @@ export const useRelatorioItemsState = (initialItems: RelatorioItem[]) => {
     setItems(reorderedItems);
   }, []);
 
+  // Aliases for RelatoriosContent component
+  const handleToggleVisibility = toggleItemVisibility;
+  const handleToggleAnalysis = toggleItemAnalysis;
+  const handleToggleView = toggleItemView;
+
   return {
     items,
     hiddenItems,
@@ -82,6 +88,9 @@ export const useRelatorioItemsState = (initialItems: RelatorioItem[]) => {
     toggleItemAnalysis,
     toggleItemView,
     updateItemsOrder,
-    handleDragEnd
+    handleDragEnd,
+    handleToggleVisibility,
+    handleToggleAnalysis,
+    handleToggleView
   };
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, RotateCcw } from 'lucide-react';
 import { useDashboardCards } from '@/hooks/dashboard/useDashboardCards';
@@ -69,21 +70,8 @@ const DashboardPage: React.FC = () => {
         card.id === updatedCard.id ? { ...card, ...updatedCard } : card
       );
       
-      const success = await saveCardConfig(updatedCards);
-      
-      if (success) {
-        toast({
-          title: "Card atualizado",
-          description: "As alterações foram salvas com sucesso.",
-          variant: "default"
-        });
-      }
-    } else {
-      toast({
-        title: "Card atualizado",
-        description: "As alterações foram salvas localmente.",
-        variant: "default"
-      });
+      // Auto-save user configuration when a card is edited
+      await saveCardConfig(updatedCards);
     }
   };
 
@@ -91,14 +79,8 @@ const DashboardPage: React.FC = () => {
     handleCardsReorder(updatedCards);
     
     if (user) {
-      const saved = await saveCardConfig(updatedCards);
-      if (!saved) {
-        toast({
-          title: "Erro ao salvar",
-          description: "Não foi possível salvar a posição dos cards.",
-          variant: "destructive"
-        });
-      }
+      // Auto-save user configuration when cards order changes
+      await saveCardConfig(updatedCards);
     }
   };
 
@@ -110,21 +92,8 @@ const DashboardPage: React.FC = () => {
         card.id === cardId ? { ...card, isHidden: true } : card
       );
       
-      const success = await saveCardConfig(updatedCards);
-      
-      if (success) {
-        toast({
-          title: "Card ocultado",
-          description: "O card foi ocultado com sucesso.",
-          variant: "default"
-        });
-      }
-    } else {
-      toast({
-        title: "Card ocultado",
-        description: "O card foi ocultado localmente.",
-        variant: "default"
-      });
+      // Auto-save user configuration when a card is hidden
+      await saveCardConfig(updatedCards);
     }
   };
 
@@ -133,21 +102,7 @@ const DashboardPage: React.FC = () => {
     
     if (user) {
       const defaultCards = resetDashboard();
-      const success = await saveCardConfig(defaultCards);
-      
-      if (success) {
-        toast({
-          title: "Dashboard resetado",
-          description: "O seu dashboard foi restaurado para a configuração padrão.",
-          variant: "default"
-        });
-      }
-    } else {
-      toast({
-        title: "Dashboard resetado",
-        description: "O seu dashboard foi restaurado para a configuração padrão.",
-        variant: "default"
-      });
+      await saveCardConfig(defaultCards);
     }
   };
 

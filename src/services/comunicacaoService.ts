@@ -1,51 +1,85 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
-interface ReleaseData {
+export interface ReleaseData {
   titulo: string;
   texto: string;
   tags?: string[];
 }
 
-/**
- * Cadastra um novo release no sistema
- * @param releaseData Dados do release
- * @returns O objeto do release cadastrado
- */
-export const cadastrarRelease = async (releaseData: ReleaseData) => {
+export const cadastrarRelease = async (data: ReleaseData) => {
   try {
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
     
-    if (!user) {
-      throw new Error('Usuário não autenticado');
-    }
+    const userId = userData.user.id;
     
-    // Process tags
-    const tagsString = Array.isArray(releaseData.tags) ? 
-      releaseData.tags.join(',') : 
-      '';
-    
-    // Insert the release
-    const { data, error } = await supabase
+    // Insert into releases table
+    const { data: insertData, error: insertError } = await supabase
       .from('releases')
       .insert({
-        titulo: releaseData.titulo,
-        conteudo: releaseData.texto,
-        tags: tagsString,
-        autor_id: user.id,
+        titulo: data.titulo,
+        conteudo: data.texto,
+        tags: data.tags || [],
+        autor_id: userId,
         tipo: 'release',
-        status: 'rascunho'
-      })
-      .select()
-      .single();
+        status: 'pendente'
+      });
     
-    if (error) throw error;
+    if (insertError) throw insertError;
     
-    return data;
-  } catch (error: any) {
-    console.error('Error in cadastrarRelease:', error);
-    throw new Error(error.message || 'Falha ao cadastrar release');
+    return { success: true, data: insertData };
+  } catch (error) {
+    console.error('Error creating release:', error);
+    throw error;
   }
-}
+};
+
+export const getRelease = async (releaseId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('releases')
+      .select('*')
+      .eq('id', releaseId)
+      .single();
+      
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching release:', error);
+    throw error;
+  }
+};
+
+export const getAllReleases = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('releases')
+      .select('*')
+      .eq('tipo', 'release')
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching releases:', error);
+    throw error;
+  }
+};
+
+export const getNotesByStatus = async (status: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('notas_oficiais')
+      .select('*')
+      .eq('status', status)
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    throw error;
+  }
+};

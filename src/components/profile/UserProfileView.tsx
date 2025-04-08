@@ -1,185 +1,189 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useSupabaseAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffect, useState } from 'react';
-import { Loader2, Mail, Briefcase, Building2, CalendarDays, Building } from 'lucide-react';
+import { Shield, User, Mail, Calendar, Phone, Edit, Building, Users } from 'lucide-react';
+import LoadingIndicator from '@/components/shared/LoadingIndicator';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-interface Cargo {
-  id: string;
-  descricao: string;
-}
-
-interface Coordenacao {
-  id: string;
-  descricao: string;
-}
-
-interface SupervisaoTecnica {
-  id: string;
-  descricao: string;
-}
-
-interface ExtendedUserProfile {
-  id: string;
-  nome_completo: string;
-  email: string;
-  whatsapp?: string;
-  aniversario?: string;
-  foto_perfil_url?: string;
-  cargo_descricao?: string;
-  coordenacao_descricao?: string;
-  supervisao_tecnica_descricao?: string;
-  cargo?: Cargo;
-  coordenacao?: Coordenacao;
-  supervisao_tecnica?: SupervisaoTecnica;
-}
+import { ptBR } from 'date-fns/locale';
+import { toast } from '@/components/ui/use-toast';
+import EditProfileModal from './EditProfileModal';
+import { ProfileData, UserProfile } from './types';
+import AvatarDisplay from './photo/AvatarDisplay';
 
 const UserProfileView: React.FC = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<ExtendedUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+
+  // Fetch user data
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    
+    try {
+      const { data: supabaseData, error } = await fetch(`/api/users/${user.id}`).then(res => res.json());
+      
+      if (error) throw error;
+      
+      if (supabaseData) {
+        setUserData(supabaseData);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar seus dados. Tente novamente mais tarde.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Refresh user data
+  const refreshUserData = async () => {
+    await fetchUserProfile();
+  };
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user) return;
-
-      try {
-        setLoading(true);
-        
-        const { data, error } = await supabase
-          .from('usuarios')
-          .select(`
-            id,
-            nome_completo,
-            email,
-            whatsapp,
-            aniversario,
-            foto_perfil_url,
-            cargo:cargos(id, descricao),
-            coordenacao:coordenacoes(id, descricao),
-            supervisao_tecnica:supervisoes_tecnicas(id, descricao)
-          `)
-          .eq('id', user.id)
-          .single();
-
-        if (error) throw error;
-        
-        const profileData: ExtendedUserProfile = {
-          ...data,
-          cargo_descricao: data.cargo?.descricao,
-          coordenacao_descricao: data.coordenacao?.descricao,
-          supervisao_tecnica_descricao: data.supervisao_tecnica?.descricao,
-          cargo: data.cargo,
-          coordenacao: data.coordenacao,
-          supervisao_tecnica: data.supervisao_tecnica
-        };
-        
-        setProfile(profileData);
-      } catch (error) {
-        console.error('Erro ao buscar perfil:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserProfile();
+    if (user) {
+      fetchUserProfile();
+    }
   }, [user]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="w-full h-64 flex items-center justify-center">
+        <LoadingIndicator />
       </div>
     );
   }
 
-  if (!profile) {
+  if (!userData) {
     return (
-      <div className="text-center p-8">
-        <h3 className="text-lg font-medium">Perfil não encontrado</h3>
-        <p className="text-muted-foreground">Não foi possível carregar suas informações de perfil.</p>
+      <div className="text-center py-8">
+        <p className="text-gray-500">Nenhum dado de usuário encontrado.</p>
+        <Button 
+          onClick={fetchUserProfile} 
+          variant="outline" 
+          className="mt-4"
+        >
+          Tentar novamente
+        </Button>
       </div>
     );
   }
 
-  const getInitials = () => {
-    if (!profile.nome_completo) return 'U';
-    
-    const nameParts = profile.nome_completo.split(' ');
-    if (nameParts.length === 1) return nameParts[0].charAt(0);
-    
-    return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`;
-  };
+  const formattedAniversario = userData.aniversario
+    ? format(new Date(userData.aniversario), 'dd/MM', { locale: ptBR })
+    : 'Não informado';
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
-      
-      <Card className="mb-8">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center pb-2 gap-4">
-          <Avatar className="h-20 w-20">
-            {profile?.foto_perfil_url ? (
-              <AvatarImage src={profile.foto_perfil_url} alt={profile.nome_completo} />
-            ) : (
-              <AvatarFallback className="text-xl">{getInitials()}</AvatarFallback>
-            )}
-          </Avatar>
-          <div>
-            <CardTitle className="text-2xl">{profile?.nome_completo}</CardTitle>
-            <div className="flex items-center mt-1 text-muted-foreground">
-              <Mail className="h-4 w-4 mr-2" />
-              <span>{profile?.email}</span>
+    <div className="max-w-3xl mx-auto">
+      <Card className="shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl font-bold">Perfil do Usuário</CardTitle>
+          <CardDescription>Visualize e edite suas informações de perfil</CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* Profile header with photo and edit button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <AvatarDisplay 
+                nome={userData.nome_completo || ''}
+                imageSrc={userData.foto_perfil_url}
+                size="xl"
+              />
+              <div>
+                <h2 className="text-xl font-semibold">{userData.nome_completo}</h2>
+                <p className="text-gray-500">{userData.cargo}</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setIsModalOpen(true)} 
+              className="flex items-center space-x-1"
+              variant="outline"
+            >
+              <Edit className="w-4 h-4 mr-1" />
+              <span>Editar Perfil</span>
+            </Button>
+          </div>
+
+          {/* User information */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Personal Info */}
+            <div className="space-y-3">
+              <h3 className="font-medium text-gray-900 border-b pb-1">Informações Pessoais</h3>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-sm">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">Nome completo:</span>
+                  <span className="font-medium">{userData.nome_completo || '-'}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">Email:</span>
+                  <span className="font-medium">{userData.email || '-'}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">Aniversário:</span>
+                  <span className="font-medium">{formattedAniversario}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">WhatsApp:</span>
+                  <span className="font-medium">{userData.whatsapp || '-'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Professional Info */}
+            <div className="space-y-3">
+              <h3 className="font-medium text-gray-900 border-b pb-1">Informações Profissionais</h3>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-sm">
+                  <Shield className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">Cargo:</span>
+                  <span className="font-medium">{userData.cargo || '-'}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Building className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">Coordenação:</span>
+                  <span className="font-medium">{userData.coordenacao || '-'}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Users className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-700">Supervisão Técnica:</span>
+                  <span className="font-medium">{userData.supervisao_tecnica || '-'}</span>
+                </div>
+              </div>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {profile?.cargo_descricao && (
-              <div className="flex items-start">
-                <Briefcase className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Cargo</h3>
-                  <p className="mt-1">{profile.cargo_descricao}</p>
-                </div>
-              </div>
-            )}
-            
-            {profile?.coordenacao_descricao && (
-              <div className="flex items-start">
-                <Building2 className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Coordenação</h3>
-                  <p className="mt-1">{profile.coordenacao_descricao}</p>
-                </div>
-              </div>
-            )}
-            
-            {profile?.supervisao_tecnica_descricao && (
-              <div className="flex items-start">
-                <Building className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Supervisão Técnica</h3>
-                  <p className="mt-1">{profile.supervisao_tecnica_descricao}</p>
-                </div>
-              </div>
-            )}
-            
-            {profile?.aniversario && (
-              <div className="flex items-start">
-                <CalendarDays className="h-5 w-5 mr-3 text-muted-foreground mt-0.5" />
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Data de Nascimento</h3>
-                  <p className="mt-1">{format(new Date(profile.aniversario), 'dd/MM/yyyy')}</p>
-                </div>
-              </div>
-            )}
-          </div>
         </CardContent>
+
+        <CardFooter className="text-xs text-gray-500 border-t pt-4">
+          <p>ID de usuário: {userData.id}</p>
+        </CardFooter>
       </Card>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        userData={{
+          nome_completo: userData.nome_completo,
+          whatsapp: userData.whatsapp,
+          aniversario: userData.aniversario,
+          foto_perfil_url: userData.foto_perfil_url
+        }}
+        refreshUserData={refreshUserData}
+      />
     </div>
   );
 };
